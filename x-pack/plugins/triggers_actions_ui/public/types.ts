@@ -518,13 +518,15 @@ export interface BulkActionsConfig {
   ) => void;
 }
 
+export interface RenderCustomActionsRowArgs {
+  alert: EcsFieldsResponse;
+  setFlyoutAlert: (data: unknown) => void;
+  id?: string;
+  setIsActionLoading?: (isLoading: boolean) => void;
+}
+
 export type UseActionsColumnRegistry = () => {
-  renderCustomActionsRow: (
-    alert: EcsFieldsResponse,
-    setFlyoutAlert: (data: unknown) => void,
-    id?: string,
-    setIsActionLoading?: (isLoading: boolean) => void
-  ) => JSX.Element;
+  renderCustomActionsRow: (args: RenderCustomActionsRowArgs) => JSX.Element;
   width?: number;
 };
 

@@ -14,15 +14,20 @@ import type {
   GetCaseConnectorsResponse,
   CaseConnector,
   CaseUserActionInjectedAttributesWithoutActionId,
+  CaseExternalServiceBasic,
 } from '../../../common/api';
 import { GetCaseConnectorsResponseRt } from '../../../common/api';
-import { isConnectorUserAction, isCreateCaseUserAction } from '../../../common/utils/user_actions';
+import {
+  isConnectorUserAction,
+  isCreateCaseUserAction,
+  isPushedUserAction,
+} from '../../../common/utils/user_actions';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import type { Authorization, OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { GetConnectorsRequest } from './types';
-import type { CaseConnectorActivity, PushInfo } from '../../services/user_actions/types';
+import type { CaseConnectorActivity } from '../../services/user_actions/types';
 import type { CaseUserActionService } from '../../services';
 
 export const getConnectors = async (
@@ -82,10 +87,18 @@ const checkConnectorsAuthorization = async ({
     });
 
     if (connector.push) {
-      entities.push({
-        owner: connector.push.attributes.owner,
-        id: connector.connectorId,
-      });
+      entities.push(
+        ...[
+          {
+            owner: connector.push.mostRecent.attributes.owner,
+            id: connector.connectorId,
+          },
+          {
+            owner: connector.push.oldest.attributes.owner,
+            id: connector.connectorId,
+          },
+        ]
+      );
     }
   }
 
@@ -96,7 +109,9 @@ const checkConnectorsAuthorization = async ({
 };
 
 interface EnrichedPushInfo {
-  pushDate: Date;
+  latestPushDate: Date;
+  oldestPushDate: Date;
+  externalService: CaseExternalServiceBasic;
   connectorFieldsUsedInPush: CaseConnector;
 }
 
@@ -116,14 +131,21 @@ const getConnectorsInfo = async ({
   const connectorIds = connectors.map((connector) => connector.connectorId);
 
   const [pushInfo, actionConnectors] = await Promise.all([
-    getPushInfo({ caseId, activity: connectors, userActionService }),
+    getEnrichedPushInfo({ caseId, activity: connectors, userActionService }),
     actionsClient.getBulk(connectorIds),
   ]);
 
   return createConnectorInfoResult({ actionConnectors, connectors, pushInfo, latestUserAction });
 };
 
-const getPushInfo = async ({
+interface PushDetails {
+  connectorId: string;
+  externalService: CaseExternalServiceBasic;
+  mostRecentPush: Date;
+  oldestPush: Date;
+}
+
+const getEnrichedPushInfo = async ({
   caseId,
   activity,
   userActionService,
@@ -132,35 +154,63 @@ const getPushInfo = async ({
   activity: CaseConnectorActivity[];
   userActionService: CaseUserActionService;
 }): Promise<Map<string, EnrichedPushInfo>> => {
-  const pushRequest: PushInfo[] = [];
-
-  for (const connectorInfo of activity) {
-    const pushCreatedAt = getDate(connectorInfo.push?.attributes.created_at);
-
-    if (connectorInfo.push != null && pushCreatedAt != null) {
-      pushRequest.push({ connectorId: connectorInfo.connectorId, date: pushCreatedAt });
-    }
-  }
+  const pushDetails = getPushDetails(activity);
 
   const connectorFieldsForPushes = await userActionService.getConnectorFieldsBeforeLatestPush(
     caseId,
-    pushRequest
+    pushDetails.map((push) => ({ connectorId: push.connectorId, date: push.mostRecentPush }))
   );
 
   const enrichedPushInfo = new Map<string, EnrichedPushInfo>();
-  for (const request of pushRequest) {
-    const connectorFieldsSO = connectorFieldsForPushes.get(request.connectorId);
+  for (const pushInfo of pushDetails) {
+    const connectorFieldsSO = connectorFieldsForPushes.get(pushInfo.connectorId);
     const connectorFields = getConnectorInfoFromSavedObject(connectorFieldsSO);
 
     if (connectorFields != null) {
-      enrichedPushInfo.set(request.connectorId, {
-        pushDate: request.date,
+      enrichedPushInfo.set(pushInfo.connectorId, {
+        latestPushDate: pushInfo.mostRecentPush,
+        oldestPushDate: pushInfo.oldestPush,
+        externalService: pushInfo.externalService,
         connectorFieldsUsedInPush: connectorFields,
       });
     }
   }
 
   return enrichedPushInfo;
+};
+
+const getPushDetails = (activity: CaseConnectorActivity[]) => {
+  const pushDetails: PushDetails[] = [];
+
+  for (const connectorInfo of activity) {
+    const externalService = getExternalServiceFromSavedObject(connectorInfo.push?.mostRecent);
+    const mostRecentPushCreatedAt = getDate(connectorInfo.push?.mostRecent.attributes.created_at);
+    const oldestPushCreatedAt = getDate(connectorInfo.push?.oldest.attributes.created_at);
+
+    if (
+      connectorInfo.push != null &&
+      externalService != null &&
+      mostRecentPushCreatedAt != null &&
+      oldestPushCreatedAt != null
+    ) {
+      pushDetails.push({
+        connectorId: connectorInfo.connectorId,
+        externalService,
+        mostRecentPush: mostRecentPushCreatedAt,
+        oldestPush: oldestPushCreatedAt,
+      });
+    }
+  }
+
+  return pushDetails;
+};
+
+const getExternalServiceFromSavedObject = (
+  savedObject: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined
+): CaseExternalServiceBasic | undefined => {
+  if (savedObject != null && isPushedUserAction(savedObject.attributes)) {
+    return savedObject.attributes.payload.externalService;
+  }
 };
 
 const getDate = (timestamp: string | undefined): Date | undefined => {
@@ -222,9 +272,13 @@ const createConnectorInfoResult = ({
       results[connector.id] = {
         ...connector,
         name: connectorDetails.name,
-        needsToBePushed,
-        latestPushDate: enrichedPushInfo?.pushDate.toISOString(),
-        hasBeenPushed: hasBeenPushed(enrichedPushInfo),
+        push: {
+          needsToBePushed,
+          hasBeenPushed: hasBeenPushed(enrichedPushInfo),
+          externalService: enrichedPushInfo?.externalService,
+          latestUserActionPushDate: enrichedPushInfo?.latestPushDate.toISOString(),
+          oldestUserActionPushDate: enrichedPushInfo?.oldestPushDate.toISOString(),
+        },
       };
     }
   }
@@ -256,7 +310,9 @@ const hasDataToPush = ({
      * push fields will be undefined which will not equal the latest connector fields anyway.
      */
     !isEqual(connector, pushInfo?.connectorFieldsUsedInPush) ||
-    (pushInfo != null && latestUserActionDate != null && latestUserActionDate > pushInfo.pushDate)
+    (pushInfo != null &&
+      latestUserActionDate != null &&
+      latestUserActionDate > pushInfo.latestPushDate)
   );
 };
 

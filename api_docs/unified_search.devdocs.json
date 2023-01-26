@@ -375,7 +375,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; refreshInterval?: number | undefined; placeholder?: string | undefined; iconType?: ",
+              "[] | undefined; placeholder?: string | undefined; refreshInterval?: number | undefined; iconType?: ",
               "IconType",
               " | undefined; indexPatterns?: ",
               {
