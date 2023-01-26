@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { PropsOf } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { Aggregators, Comparator } from '../../../../../common/alerting/metrics';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
-import { CustomEquationEditor } from '.';
+import { CustomEquationEditor, CustomEquationEditorProps } from '.';
 import { aggregationType } from '../expression_row';
 
 export default {
@@ -28,9 +27,7 @@ export default {
   },
 } as Meta;
 
-type CustomEquationProps = PropsOf<typeof CustomEquationEditor>;
-
-const CustomEquationEditorTemplate: Story<CustomEquationProps> = (args) => (
+const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) => (
   <CustomEquationEditor {...args} />
 );
 
