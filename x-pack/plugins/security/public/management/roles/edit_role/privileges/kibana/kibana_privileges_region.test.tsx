@@ -16,6 +16,7 @@ import type { Role } from '../../../../../../common/model';
 import { KibanaPrivileges } from '../../../model';
 import { RoleValidator } from '../../validate_role';
 import { KibanaPrivilegesRegion } from './kibana_privileges_region';
+import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
 
@@ -77,13 +78,20 @@ const buildProps = () => {
 
 describe('<KibanaPrivileges>', () => {
   it('renders without crashing', () => {
-    expect(shallow(<KibanaPrivilegesRegion {...buildProps()} />)).toMatchSnapshot();
+    const props = buildProps();
+    expect(shallow(<KibanaPrivilegesRegion {...props} />)).toMatchSnapshot();
   });
 
   it('renders the space-aware privilege form', () => {
     const props = buildProps();
     const wrapper = shallow(<KibanaPrivilegesRegion {...props} />);
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
+  });
+
+  it('renders simple privilege form when spaces is disabled', () => {
+    const props = buildProps();
+    const wrapper = shallow(<KibanaPrivilegesRegion {...props} spacesEnabled={false} />);
+    expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
   });
 
   it('renders the transform error section when the role has a transform error', () => {

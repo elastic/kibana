@@ -25,6 +25,7 @@ import { userAPIClientMock } from '../../users/index.mock';
 import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
 import { EditRolePage } from './edit_role_page';
+import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
 import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 
@@ -138,10 +139,12 @@ function getProps({
   action,
   role,
   canManageSpaces = true,
+  spacesEnabled = true,
 }: {
   action: 'edit' | 'clone';
   role?: Role;
   canManageSpaces?: boolean;
+  spacesEnabled?: boolean;
 }) {
   const rolesAPIClient = rolesAPIClientMock.create();
   rolesAPIClient.getRole.mockResolvedValue(role);
@@ -168,6 +171,9 @@ function getProps({
   const { fatalErrors } = coreMock.createSetup();
   const { http, docLinks, notifications } = coreMock.createStart();
   http.get.mockImplementation(async (path: any) => {
+    if (!spacesEnabled) {
+      throw { response: { status: 404 } }; // eslint-disable-line no-throw-literal
+    }
     if (path === '/api/spaces/space') {
       return buildSpaces();
     }
@@ -398,6 +404,194 @@ describe('<EditRolePage />', () => {
           <EditRolePage
             {...getProps({
               action: 'edit',
+              canManageSpaces: false,
+              role: {
+                name: 'my custom role',
+                metadata: {},
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [],
+                _transform_error: ['kibana'],
+              },
+            })}
+          />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
+      expectReadOnlyFormButtons(wrapper);
+    });
+  });
+
+  describe('with spaces disabled', () => {
+    it('can render readonly view when not enough privileges', async () => {
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        roles: {
+          save: false,
+        },
+      };
+
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              spacesEnabled: false,
+              role: {
+                name: 'my custom role',
+                metadata: {},
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+              },
+            })}
+          />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expectReadOnlyFormButtons(wrapper);
+    });
+
+    it('can render a reserved role', async () => {
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              spacesEnabled: false,
+              role: {
+                name: 'superuser',
+                metadata: { _reserved: true },
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+              },
+            })}
+          />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
+      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expectReadOnlyFormButtons(wrapper);
+    });
+
+    it('can render a user defined role', async () => {
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              spacesEnabled: false,
+              role: {
+                name: 'my custom role',
+                metadata: {},
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+              },
+            })}
+          />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
+      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expectSaveFormButtons(wrapper);
+    });
+
+    it('can render when creating a new role', async () => {
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...getProps({ action: 'edit', spacesEnabled: false })} />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
+        false
+      );
+      expectSaveFormButtons(wrapper);
+    });
+
+    it('redirects back to roles when creating a new role without privileges', async () => {
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        roles: {
+          save: false,
+        },
+      };
+
+      const props = getProps({ action: 'edit', spacesEnabled: false });
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...props} />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(props.history.push).toHaveBeenCalledWith('/');
+    });
+
+    it('can render when cloning an existing role', async () => {
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              spacesEnabled: false,
+              role: {
+                name: '',
+                metadata: { _reserved: false },
+                elasticsearch: {
+                  cluster: ['all', 'manage'],
+                  indices: [
+                    {
+                      names: ['foo*'],
+                      privileges: ['all'],
+                      field_security: { except: ['f'], grant: ['b*'] },
+                    },
+                  ],
+                  run_as: ['elastic'],
+                },
+                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+              },
+            })}
+          />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
+        false
+      );
+      expectSaveFormButtons(wrapper);
+    });
+
+    it('renders a partial read-only view when there is a transform error', async () => {
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              spacesEnabled: false,
               canManageSpaces: false,
               role: {
                 name: 'my custom role',
