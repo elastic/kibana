@@ -63,7 +63,7 @@ function createTestRules(): void {
 }
 
 function visitWithState(urlTableState: Record<string, unknown>): void {
-  visit(`${SECURITY_DETECTIONS_RULES_MANAGEMENT_URL}?rulesTable=${encode(urlTableState)}`);
+  visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL, { qs: { rulesTable: encode(urlTableState) } });
 }
 
 function setStorageState(storageTableState: Record<string, unknown>): void {
@@ -485,7 +485,7 @@ describe('Persistent rules table state', () => {
       });
 
       it('persists after corrupting the url param data', () => {
-        visit(`${SECURITY_DETECTIONS_RULES_MANAGEMENT_URL}?rulesTable=(!invalid)`);
+        visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL, { qs: { rulesTable: '(!invalid)' } });
 
         expectRulesManagementTab();
         expectRulesTableState();
@@ -494,8 +494,11 @@ describe('Persistent rules table state', () => {
       });
 
       it('DOES NOT persist after corrupting the session storage and url param data', () => {
-        visit(`${SECURITY_DETECTIONS_RULES_MANAGEMENT_URL}?rulesTable=!invalid`, (win) => {
-          win.sessionStorage.setItem('securitySolution.rulesTable', '!invalid');
+        visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL, {
+          qs: { rulesTable: '(!invalid)' },
+          onBeforeLoad: (win) => {
+            win.sessionStorage.setItem('securitySolution.rulesTable', '!invalid');
+          },
         });
 
         expectRulesManagementTab();
@@ -533,7 +536,7 @@ describe('Persistent rules table state', () => {
       });
 
       it('persists after corrupting the url param data', () => {
-        visit(`${SECURITY_DETECTIONS_RULES_MONITORING_URL}?rulesTable=(!invalid)`);
+        visit(SECURITY_DETECTIONS_RULES_MONITORING_URL, { qs: { rulesTable: '(!invalid)' } });
 
         expectRulesMonitoringTab();
         expectRulesTableState();
@@ -542,8 +545,11 @@ describe('Persistent rules table state', () => {
       });
 
       it('DOES NOT persist after corrupting the session storage and url param data', () => {
-        visit(`${SECURITY_DETECTIONS_RULES_MONITORING_URL}?rulesTable=!invalid`, (win) => {
-          win.sessionStorage.setItem('securitySolution.rulesTable', '!invalid');
+        visit(SECURITY_DETECTIONS_RULES_MONITORING_URL, {
+          qs: { rulesTable: '(!invalid)' },
+          onBeforeLoad: (win) => {
+            win.sessionStorage.setItem('securitySolution.rulesTable', '!invalid');
+          },
         });
 
         expectRulesMonitoringTab();
@@ -570,8 +576,10 @@ describe('Persistent rules table state', () => {
     });
 
     it('has a fresh state', () => {
-      visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL, (win) => {
-        win.sessionStorage.clear();
+      visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL, {
+        onBeforeLoad: (win) => {
+          win.sessionStorage.clear();
+        },
       });
 
       expectRulesManagementTab();

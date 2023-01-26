@@ -323,16 +323,16 @@ export const waitForPage = (url: string) => {
   );
 };
 
-export const visit = (url: string, onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void) => {
-  const timerangeFilter =
-    "timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))";
-  const urlToVisit = url.includes('?') ? `${url}&${timerangeFilter}` : `${url}?${timerangeFilter}`;
-
-  cy.visit(urlToVisit, {
-    onBeforeLoad(win) {
-      if (onBeforeLoadCallback) {
-        onBeforeLoadCallback(win);
-      }
+export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}) => {
+  return cy.visit(url, {
+    ...options,
+    qs: {
+      ...options.qs,
+      timerange:
+        "(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))",
+    },
+    onBeforeLoad: (win) => {
+      options.onBeforeLoad?.(win);
 
       disableNewFeaturesTours(win);
     },
