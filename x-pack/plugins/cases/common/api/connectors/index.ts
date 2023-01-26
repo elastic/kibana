@@ -120,7 +120,7 @@ export const GetCaseConnectorsResponseRt = rt.record(
   rt.string,
   rt.intersection([
     rt.type({ needsToBePushed: rt.boolean, hasBeenPushed: rt.boolean }),
-    rt.partial(rt.type({ latestPushDate: rt.string }).props),
+    rt.partial(rt.type({ latestPushDate: rt.string, oldestPushDate: rt.string }).props),
     CaseConnectorRt,
   ])
 );
