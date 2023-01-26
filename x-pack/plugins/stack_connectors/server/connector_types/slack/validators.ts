@@ -25,7 +25,7 @@ export const validateCommonSecrets = (
   } catch (err) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.slack.configurationErrorNoHostname', {
-        defaultMessage: 'Error configuring slack action: unable to parse host name from webhookUrl',
+        defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
       })
     );
   }
@@ -34,7 +34,7 @@ export const validateCommonSecrets = (
   } catch (allowListError) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.slack.configurationError', {
-        defaultMessage: 'Error configuring slack action: {message}',
+        defaultMessage: 'error configuring slack action: {message}',
         values: {
           message: allowListError.message,
         },

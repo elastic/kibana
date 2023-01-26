@@ -27,6 +27,7 @@ import type {
   WebhookParams,
   SlackExecutorOptions,
   SlackConnectorType,
+  WebApiParams,
 } from '../../../common/slack/types';
 import { SlackSecretsSchema, SlackParamsSchema } from '../../../common/slack/schema';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
@@ -66,14 +67,15 @@ export function getConnectorType(): SlackConnectorType {
   };
 }
 
-function renderParameterTemplates(
-  params: WebhookParams,
+const renderParameterTemplates = (
+  params: WebhookParams | WebApiParams,
   variables: Record<string, unknown>
-): WebhookParams {
-  return {
-    message: renderMustacheString(params.message, variables, 'slack'),
-  };
-}
+) => {
+  if ('message' in params)
+    return { message: renderMustacheString(params.message, variables, 'slack') };
+  if (params.subAction === 'postMessage')
+    return { message: renderMustacheString(params.subActionParams.text, variables, 'slack') };
+};
 
 const slackWebhookExecutor = async (
   execOptions: SlackWebhookExecutorOptions
@@ -102,6 +104,7 @@ const slackWebhookExecutor = async (
     const webhook = new IncomingWebhook(webhookUrl, {
       agent,
     });
+
     result = await webhook.send(message);
   } catch (err) {
     if (err.original == null || err.original.response == null) {

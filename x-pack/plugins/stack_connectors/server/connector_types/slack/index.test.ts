@@ -6,10 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import {
-  Services,
-  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
-} from '@kbn/actions-plugin/server/types';
+import { Services } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { getConnectorType } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -20,13 +17,8 @@ import type { SlackConnectorType } from '../../../common/slack/types';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
 
-jest.mock('@slack/webhook', () => {
-  return {
-    IncomingWebhook: jest.fn().mockImplementation(() => {
-      return { send: (message: string) => {} };
-    }),
-  };
-});
+jest.mock('@slack/webhook');
+const { IncomingWebhook } = jest.requireMock('@slack/webhook');
 
 const services: Services = actionsMock.createServices();
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
@@ -46,71 +38,115 @@ describe('connector registration', () => {
   });
 });
 
-describe('validateParams()', () => {
-  test('should validate and pass when params is valid for webhhok type', () => {
-    expect(
-      validateParams(connectorType, { message: 'a message' }, { configurationUtilities })
-    ).toEqual({
-      message: 'a message',
-    });
-  });
-
-  test.only('should validate and pass when params is valid for web_api type', () => {
-    expect(
-      validateParams(
-        connectorType,
-        { channels: ['general'], text: 'a text' },
-        { configurationUtilities }
-      )
-    ).toEqual({
-      message: 'a text',
-    });
-  });
-
-  test('should validate and throw error when params is invalid', () => {
+describe('validate params', () => {
+  test('should validate and throw error when params are invalid', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
+      `"error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."`
     );
 
-    //   expect(() => {
-    //     validateParams(connectorType, { message: 1 }, { configurationUtilities });
-    //   }).toThrowErrorMatchingInlineSnapshot(
-    //     `"error validating action params: [message]: expected value of type [string] but got [number]"`
-    //   );
+    expect(() => {
+      validateParams(connectorType, { message: 1 }, { configurationUtilities });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."`
+    );
+  });
+
+  describe('Webhook', () => {
+    test('should validate and pass when params are valid', () => {
+      expect(
+        validateParams(connectorType, { message: 'a message' }, { configurationUtilities })
+      ).toEqual({ message: 'a message' });
+    });
+  });
+
+  describe('Web API', () => {
+    test('should validate and pass when params are valid for post message', () => {
+      expect(
+        validateParams(
+          connectorType,
+          { subAction: 'postMessage', subActionParams: { channels: ['general'], text: 'a text' } },
+          { configurationUtilities }
+        )
+      ).toEqual({
+        subAction: 'postMessage',
+        subActionParams: { channels: ['general'], text: 'a text' },
+      });
+    });
+
+    test('should validate and pass when params are valid for get channels', () => {
+      expect(
+        validateParams(
+          connectorType,
+          { subAction: 'getChannels', subActionParams: {} },
+          { configurationUtilities }
+        )
+      ).toEqual({
+        subAction: 'getChannels',
+        subActionParams: {},
+      });
+    });
   });
 });
 
-describe('validateConnectorTypeSecrets()', () => {
-  test('should validate and pass when config is valid', () => {
-    validateSecrets(
-      connectorType,
-      {
-        webhookUrl: 'https://example.com',
-      },
-      { configurationUtilities }
-    );
-  });
-
+describe('validateConnectorTypeSecrets', () => {
   test('should validate and throw error when config is invalid', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type secrets: types that failed validation:
+      - [0.webhookUrl]: expected value of type [string] but got [undefined]
+      - [1.token]: expected value of type [string] but got [undefined]"
+    `);
+  });
 
-    expect(() => {
-      validateSecrets(connectorType, { webhookUrl: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [number]"`
-    );
+  describe('Webhook', () => {
+    test('should validate and pass when config is valid', () => {
+      validateSecrets(
+        connectorType,
+        { webhookUrl: 'https://example.com' },
+        { configurationUtilities }
+      );
+    });
 
-    expect(() => {
-      validateSecrets(connectorType, { webhookUrl: 'fee-fi-fo-fum' }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl"`
-    );
+    test('should validate and throw error when config is invalid', () => {
+      expect(() => {
+        validateSecrets(connectorType, { webhookUrl: 1 }, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "error validating action type secrets: types that failed validation:
+        - [0.webhookUrl]: expected value of type [string] but got [number]
+        - [1.token]: expected value of type [string] but got [undefined]"
+      `);
+
+      expect(() => {
+        validateSecrets(connectorType, { webhookUrl: 'fee-fi-fo-fum' }, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl"`
+      );
+    });
+  });
+
+  describe('Web API', () => {
+    test('should validate and pass when config is valid 2', () => {
+      validateSecrets(
+        connectorType,
+        {
+          token: 'token',
+        },
+        { configurationUtilities }
+      );
+    });
+
+    test('should validate and throw error when config is invalid', () => {
+      expect(() => {
+        validateSecrets(connectorType, { token: 1 }, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "error validating action type secrets: types that failed validation:
+        - [0.webhookUrl]: expected value of type [string] but got [undefined]
+        - [1.token]: expected value of type [string] but got [number]"
+      `);
+    });
   });
 
   test('should validate and pass when the slack webhookUrl is added to allowedHosts', () => {
@@ -120,7 +156,7 @@ describe('validateConnectorTypeSecrets()', () => {
         expect(url).toEqual('https://api.slack.com/');
       },
     };
-
+    actionsConfigMock.create();
     expect(
       validateSecrets(
         connectorType,
@@ -152,33 +188,22 @@ describe('validateConnectorTypeSecrets()', () => {
   });
 });
 
-describe('execute()', () => {
+describe('execute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    async function mockSlackExecutor(options: SlackConnectorTypeExecutorOptions) {
-      const { params } = options;
-      const { message } = params;
-      if (message == null) throw new Error('message property required in parameter');
-
-      const failureMatch = message.match(/^failure: (.*)$/);
-      if (failureMatch != null) {
-        const failMessage = failureMatch[1];
-        throw new Error(`slack mockExecutor failure: ${failMessage}`);
-      }
-
-      return {
-        text: `slack mockExecutor success: ${message}`,
-        actionId: '',
-        status: 'ok',
-      } as ConnectorTypeExecutorResult<void>;
-    }
-
-    connectorType = getConnectorType({
-      executor: mockSlackExecutor,
-    });
+    connectorType = getConnectorType();
   });
 
-  test('calls the mock executor with success', async () => {
+  test('should execute with success', async () => {
+    jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
+      getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
+    }));
+    configurationUtilities = actionsConfigMock.create();
+    IncomingWebhook.mockImplementation(() => ({
+      send: () => ({
+        text: 'ok',
+      }),
+    }));
     const response = await connectorType.executor({
       actionId: 'some-id',
       services,
@@ -188,18 +213,80 @@ describe('execute()', () => {
       configurationUtilities,
       logger: mockedLogger,
     });
-    expect(response).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "",
-        "status": "ok",
-        "text": "slack mockExecutor success: this invocation should succeed",
-      }
-    `);
+
+    expect(response).toEqual({
+      actionId: 'some-id',
+      data: { text: 'ok' },
+      status: 'ok',
+    });
   });
 
-  test('calls the mock executor with failure', async () => {
-    await expect(
-      connectorType.executor({
+  test('should return an error if test in response is not ok', async () => {
+    jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
+      getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
+    }));
+    configurationUtilities = actionsConfigMock.create();
+    IncomingWebhook.mockImplementation(() => ({
+      send: () => ({
+        text: 'not ok',
+      }),
+    }));
+    const response = await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
+      params: { message: 'this invocation should succeed' },
+      configurationUtilities,
+      logger: mockedLogger,
+    });
+
+    expect(response).toEqual({
+      actionId: 'some-id',
+      message: 'error posting slack message',
+      serviceMessage: 'not ok',
+      status: 'error',
+    });
+  });
+
+  test('should return a null response from slack', async () => {
+    jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
+      getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
+    }));
+    configurationUtilities = actionsConfigMock.create();
+    IncomingWebhook.mockImplementation(() => ({
+      send: jest.fn(),
+    }));
+    const response = await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
+      params: { message: 'this invocation should succeed' },
+      configurationUtilities,
+      logger: mockedLogger,
+    });
+
+    expect(response).toEqual({
+      actionId: 'some-id',
+      message: 'unexpected null response from slack',
+      status: 'error',
+    });
+  });
+
+  test('should return that sending a message fails', async () => {
+    jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
+      getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
+    }));
+    configurationUtilities = actionsConfigMock.create();
+    IncomingWebhook.mockImplementation(() => ({
+      send: () => {
+        throw new Error('sending a message fails');
+      },
+    }));
+
+    expect(
+      await connectorType.executor({
         actionId: 'some-id',
         services,
         config: {},
@@ -208,9 +295,12 @@ describe('execute()', () => {
         configurationUtilities,
         logger: mockedLogger,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"slack mockExecutor failure: this invocation should fail"`
-    );
+    ).toEqual({
+      actionId: 'some-id',
+      message: 'error posting slack message',
+      serviceMessage: 'sending a message fails',
+      status: 'error',
+    });
   });
 
   test('calls the mock executor with success proxy', async () => {
@@ -223,7 +313,7 @@ describe('execute()', () => {
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
     });
-    const connectorTypeProxy = getConnectorType({});
+    const connectorTypeProxy = getConnectorType();
     await connectorTypeProxy.executor({
       actionId: 'some-id',
       services,
@@ -249,7 +339,7 @@ describe('execute()', () => {
       proxyBypassHosts: new Set(['example.com']),
       proxyOnlyHosts: undefined,
     });
-    const connectorTypeProxy = getConnectorType({});
+    const connectorTypeProxy = getConnectorType();
     await connectorTypeProxy.executor({
       actionId: 'some-id',
       services,
@@ -275,7 +365,7 @@ describe('execute()', () => {
       proxyBypassHosts: new Set(['not-example.com']),
       proxyOnlyHosts: undefined,
     });
-    const connectorTypeProxy = getConnectorType({});
+    const connectorTypeProxy = getConnectorType();
     await connectorTypeProxy.executor({
       actionId: 'some-id',
       services,
@@ -301,7 +391,7 @@ describe('execute()', () => {
       proxyBypassHosts: undefined,
       proxyOnlyHosts: new Set(['example.com']),
     });
-    const connectorTypeProxy = getConnectorType({});
+    const connectorTypeProxy = getConnectorType();
     await connectorTypeProxy.executor({
       actionId: 'some-id',
       services,
@@ -327,7 +417,7 @@ describe('execute()', () => {
       proxyBypassHosts: undefined,
       proxyOnlyHosts: new Set(['not-example.com']),
     });
-    const connectorTypeProxy = getConnectorType({});
+    const connectorTypeProxy = getConnectorType();
     await connectorTypeProxy.executor({
       actionId: 'some-id',
       services,

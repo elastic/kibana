@@ -9,29 +9,20 @@ import axios from 'axios';
 import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { request, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
-import type {
-  SlackService,
-  SlackServiceCredentials,
-  PostMessageResponse,
-  PostMessageResponseList,
-} from './types';
+import type { SlackService, PostMessageResponse, PostMessageResponseList } from './types';
 import { SLACK_CONNECTOR_NAME } from './translations';
-import type {
-  SlackWebApiSecrets,
-  GetChannelsResponse,
-  PostMessageParams,
-} from '../../../common/slack/types';
+import type { GetChannelsResponse, PostMessageParams } from '../../../common/slack/types';
 import { SLACK_URL } from '../../../common/slack/constants';
 
 export const createExternalService = (
-  { secrets }: SlackServiceCredentials,
+  { secrets }: { secrets: { token: string } },
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): SlackService => {
-  const { token } = secrets as SlackWebApiSecrets;
+  const { token } = secrets;
 
   if (!token) {
-    throw Error(`[Action]${SLACK_CONNECTOR_NAME}: Wrong configuration.`);
+    throw Error(`[Action][${SLACK_CONNECTOR_NAME}]: Wrong configuration.`);
   }
 
   const axiosInstance = axios.create({
@@ -57,7 +48,7 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           SLACK_CONNECTOR_NAME,
-          `Unable to get Channels. Error: ${error.message}.` // Maybe reuse createErrorMessage?
+          `Unable to get slack channels. Error: ${error.message}.`
         )
       );
     }
@@ -85,7 +76,7 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           SLACK_CONNECTOR_NAME,
-          `Unable to create comment at incident with id. Error: ${error.message}.` // Maybe reuse createErrorMessage?
+          `Unable to post a message in the Slack. Error: ${error.message}.`
         )
       );
     }

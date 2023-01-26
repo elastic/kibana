@@ -9,7 +9,7 @@ import type { SlackServiceApi, SlackService } from './types';
 import type { PostMessageParams } from '../../../common/slack/types';
 
 const getChannelsHandler = async ({ externalService }: { externalService: SlackService }) => {
-  const res = await externalService.getChannels({});
+  const res = await externalService.getChannels();
   return res;
 };
 

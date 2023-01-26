@@ -50,7 +50,7 @@ export interface SlackServiceApi {
 }
 
 export interface SlackService {
-  getChannels: ({}) => Promise<GetChannelsResponse>;
+  getChannels: () => Promise<GetChannelsResponse>;
   postMessage: ({ channels, text }: PostMessageParams) => Promise<PostMessageResponseList>;
 }
 
