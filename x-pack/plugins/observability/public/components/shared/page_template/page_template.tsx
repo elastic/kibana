@@ -23,7 +23,6 @@ import type {
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { NavNameWithTechnicalPreview } from './nav_name_with_technical_preview';
 import { ObservabilityAppServices } from '../../../application/types';
 import type { NavigationSection } from '../../../services/navigation_registry';
 import { ObservabilityTour } from '../tour';
@@ -108,7 +107,11 @@ export function ObservabilityPageTemplate({
             ) : entry.isNewFeature ? (
               <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
             ) : entry.isTechnicalPreview ? (
-              <NavNameWithTechnicalPreview label={entry.label} iconType="beaker" />
+              <NavNameWithBetaBadge
+                label={entry.label}
+                iconType="beaker"
+                isTechnicalPreview={true}
+              />
             ) : (
               entry.label
             ),

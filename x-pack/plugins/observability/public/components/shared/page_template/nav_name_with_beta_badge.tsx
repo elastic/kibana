@@ -6,13 +6,15 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 
 interface Props {
   label?: string;
+  isTechnicalPreview?: boolean;
+  iconType?: IconType;
 }
 
-export function NavNameWithBetaBadge({ label }: Props) {
+export function NavNameWithBetaBadge({ label, iconType, isTechnicalPreview }: Props) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -21,13 +23,24 @@ export function NavNameWithBetaBadge({ label }: Props) {
         </span>
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ height: 20 }}>
-        <EuiBetaBadge
-          color="subdued"
-          size="s"
-          label={i18n.translate('xpack.observability.navigation.betaBadge', {
-            defaultMessage: 'Beta',
-          })}
-        />
+        {isTechnicalPreview ? (
+          <EuiBetaBadge
+            color={'hollow'}
+            size="s"
+            label={i18n.translate('xpack.observability.navigation.experimentalBadgeLabel', {
+              defaultMessage: 'Technical preview',
+            })}
+            iconType={iconType}
+          />
+        ) : (
+          <EuiBetaBadge
+            color="subdued"
+            size="s"
+            label={i18n.translate('xpack.observability.navigation.betaBadge', {
+              defaultMessage: 'Beta',
+            })}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
