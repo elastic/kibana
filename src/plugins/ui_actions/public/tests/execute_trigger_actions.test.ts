@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ActionDefinition } from '@kbn/ui-actions-browser';
-import { openContextMenu } from '../context_menu';
+import { ActionDefinition, Trigger, openContextMenu } from '@kbn/ui-actions-browser';
 import { uiActionsPluginMock } from '../mocks';
-import { Trigger } from '../triggers';
 import { waitFor } from '@testing-library/dom';
 
 jest.mock('../context_menu');
