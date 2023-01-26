@@ -800,7 +800,7 @@ export class Authenticator {
       await this.invalidateSessionValue({
         request,
         sessionValue: existingSessionValue,
-        skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fullly authenticated session
+        skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
       });
       existingSessionValue = null;
     } else if (usernameHasChanged) {

@@ -1206,7 +1206,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -1377,7 +1379,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -2160,7 +2164,9 @@ describe('create()', () => {
       },
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -2612,7 +2618,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -2678,7 +2686,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -2702,12 +2712,17 @@ describe('create()', () => {
     ruleTypeRegistry.get.mockImplementation(() => ({
       id: '123',
       name: 'Test',
-      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'group2', name: 'Action Group 2' },
+      ],
       recoveryActionGroup: RecoveredActionGroup,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -2731,7 +2746,7 @@ describe('create()', () => {
           },
         },
         {
-          group: 'default',
+          group: 'group2',
           id: '2',
           params: {
             foo: true,
@@ -2745,7 +2760,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, default"`
+      `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2766,7 +2781,7 @@ describe('create()', () => {
           },
         },
         {
-          group: 'default',
+          group: 'group2',
           id: '2',
           params: {
             foo: true,
@@ -2794,7 +2809,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -2821,6 +2838,7 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
+
   test('throws error when some actions are missing frequency params', async () => {
     rulesClient = new RulesClient({
       ...rulesClientParams,
@@ -2829,12 +2847,17 @@ describe('create()', () => {
     ruleTypeRegistry.get.mockImplementation(() => ({
       id: '123',
       name: 'Test',
-      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'group2', name: 'Action Group 2' },
+      ],
       recoveryActionGroup: RecoveredActionGroup,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -2859,7 +2882,7 @@ describe('create()', () => {
           },
         },
         {
-          group: 'default',
+          group: 'group2',
           id: '2',
           params: {
             foo: true,
@@ -2868,7 +2891,84 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Actions missing frequency parameters: default"`
+      `"Actions missing frequency parameters: group2"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when some actions have throttle intervals shorter than the check interval', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'group2', name: 'Action Group 2' },
+        { id: 'group3', name: 'Action Group 3' },
+      ],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      schedule: { interval: '3h' },
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1h',
+          },
+        },
+        {
+          group: 'group2',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '3m',
+          },
+        },
+        {
+          group: 'group3',
+          id: '3',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '240m',
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Action throttle cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();

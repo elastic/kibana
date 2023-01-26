@@ -89,6 +89,7 @@ export const mockFindingsHit: CspFinding = {
       'Kubernetes provides a `default` service account which is used by cluster workloads where no specific service account is assigned to the pod. Where access to the Kubernetes API from a pod is required, a specific service account should be created for that pod, and rights granted to that service account. The default service account should be configured such that it does not provide a service account token and does not have any explicit rights assignments.\n',
     version: '1.0',
     benchmark: {
+      rule_number: '1.1.1',
       name: 'CIS Kubernetes V1.23',
       id: 'cis_k8s',
       version: 'v1.0.0',

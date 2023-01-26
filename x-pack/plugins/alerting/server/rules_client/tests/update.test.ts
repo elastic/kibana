@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -151,7 +151,9 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
   });
@@ -704,7 +706,9 @@ describe('update()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -1201,7 +1205,9 @@ describe('update()', () => {
           param1: schema.string(),
         }),
       },
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
     await expect(
@@ -1570,12 +1576,17 @@ describe('update()', () => {
       ruleTypeRegistry.get.mockReturnValueOnce({
         id: '123',
         name: 'Test',
-        actionGroups: [{ id: 'default', name: 'Default' }],
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'group2', name: 'Action Group 2' },
+        ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
         isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
-        async executor() {},
+        async executor() {
+          return { state: {} };
+        },
         producer: 'alerts',
       });
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -1641,8 +1652,8 @@ describe('update()', () => {
     }
 
     test('updating the alert schedule should call taskManager.bulkUpdateSchedules', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '1m' });
 
@@ -1676,8 +1687,8 @@ describe('update()', () => {
     });
 
     test('updating the alert without changing the schedule should not call taskManager.bulkUpdateSchedules', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
 
@@ -1711,8 +1722,8 @@ describe('update()', () => {
     });
 
     test('throws error when mixing and matching global and per-action frequency values', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
       await expect(
@@ -1741,7 +1752,7 @@ describe('update()', () => {
                 },
               },
               {
-                group: 'default',
+                group: 'group2',
                 id: '2',
                 params: {
                   foo: true,
@@ -1756,7 +1767,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, default"`
+        `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1804,8 +1815,8 @@ describe('update()', () => {
     });
 
     test('throws error when neither global frequency nor action frequency are defined', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
 
@@ -1840,8 +1851,8 @@ describe('update()', () => {
     });
 
     test('throws error when when some actions are missing frequency params', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
 
@@ -1888,8 +1899,8 @@ describe('update()', () => {
     });
 
     test('logs when update of schedule of an alerts underlying task fails', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '30s' });
 
