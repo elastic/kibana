@@ -453,7 +453,10 @@ describe('usePushToService', () => {
               ...caseConnectors,
               [mockConnector.id]: {
                 ...caseConnectors[mockConnector.id],
-                needsToBePushed: true,
+                push: {
+                  ...caseConnectors[mockConnector.id].push,
+                  needsToBePushed: true,
+                },
               },
             },
           }),
@@ -495,7 +498,10 @@ describe('usePushToService', () => {
               ...caseConnectors,
               [mockConnector.id]: {
                 ...caseConnectors[mockConnector.id],
-                hasBeenPushed: false,
+                push: {
+                  ...caseConnectors[mockConnector.id].push,
+                  hasBeenPushed: false,
+                },
               },
             },
           }),

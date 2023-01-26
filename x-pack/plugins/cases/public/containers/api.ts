@@ -8,6 +8,7 @@
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import type {
+  CaseConnectors,
   Cases,
   CaseUpdateRequest,
   FetchCasesProps,
@@ -376,9 +377,24 @@ export const getFeatureIds = async (
 export const getCaseConnectors = async (
   caseId: string,
   signal: AbortSignal
-): Promise<GetCaseConnectorsResponse> => {
-  return KibanaServices.get().http.fetch<GetCaseConnectorsResponse>(getCaseConnectorsUrl(caseId), {
-    method: 'GET',
-    signal,
-  });
+): Promise<CaseConnectors> => {
+  const res = await KibanaServices.get().http.fetch<GetCaseConnectorsResponse>(
+    getCaseConnectorsUrl(caseId),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+  return Object.keys(res).reduce(
+    (acc, connectorId) => ({
+      ...acc,
+      [connectorId]: {
+        ...convertToCamelCase<GetCaseConnectorsResponse[string], CaseConnectors[string]>(
+          res[connectorId]
+        ),
+      },
+    }),
+    {}
+  );
 };

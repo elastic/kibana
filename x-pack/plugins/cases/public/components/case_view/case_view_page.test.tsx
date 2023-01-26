@@ -262,7 +262,10 @@ describe('CaseViewPage', () => {
       isLoading: false,
       data: {
         ...caseConnectors,
-        'resilient-2': { ...caseConnectors['resilient-2'], needsToBePushed: true },
+        'resilient-2': {
+          ...caseConnectors['resilient-2'],
+          push: { ...caseConnectors['resilient-2'].push, needsToBePushed: true },
+        },
       },
     }));
 

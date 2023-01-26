@@ -77,10 +77,13 @@ const getFooters = ({
   connectorInfo: CaseConnectors[string];
 }): EuiCommentProps[] => {
   const footers: EuiCommentProps[] = [];
-  const latestPush = isLatestPush(userAction.createdAt, connectorInfo.latestPushDate);
-  const showTopFooter = userAction.action === Actions.push_to_service && latestPush;
+  const latestPush = isLatestPush(
+    userAction.createdAt,
+    connectorInfo.push.latestUserActionPushDate
+  );
 
-  const showBottomFooter = showTopFooter && connectorInfo.needsToBePushed;
+  const showTopFooter = userAction.action === Actions.push_to_service && latestPush;
+  const showBottomFooter = showTopFooter && connectorInfo.push.needsToBePushed;
 
   if (showTopFooter) {
     footers.push({
@@ -118,7 +121,10 @@ export const createPushedUserActionBuilder: UserActionBuilder = ({
       return [];
     }
 
-    const firstPush = isFirstPush(userAction.createdAt, connectorInfo.oldestPushDate);
+    const firstPush = isFirstPush(
+      userAction.createdAt,
+      connectorInfo.push.oldestUserActionPushDate
+    );
     const footers = getFooters({ userAction: pushedUserAction, connectorInfo });
     const label = getLabelTitle(pushedUserAction, firstPush);
 

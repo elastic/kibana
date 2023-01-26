@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiButtonEmpty,
@@ -28,6 +28,7 @@ import { getStatusDate, getStatusTitle } from './helpers';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -54,9 +55,14 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
 }) => {
   const { permissions } = useCasesContext();
   const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
-  const date = useMemo(() => getStatusDate(caseData), [caseData]);
-  const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
+
+  const { data: caseConnectors } = useGetCaseConnectors(caseData.id);
+
+  const date = getStatusDate(caseData);
+  const title = getStatusTitle(caseData.status);
+
   const refreshCaseViewPage = useRefreshCaseViewPage();
+
   const onStatusChanged = useCallback(
     (status: CaseStatuses) =>
       onUpdateField({
@@ -66,7 +72,8 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     [onUpdateField]
   );
 
-  const currentExternalIncident = caseData.externalService ?? null;
+  const currentExternalIncident =
+    caseConnectors?.[caseData.connector.id]?.push.externalService ?? null;
 
   const onSyncAlertsChanged = useCallback(
     (syncAlerts: boolean) =>

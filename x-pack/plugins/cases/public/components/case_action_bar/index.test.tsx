@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { basicCase, caseUserActions, getAlertUserAction } from '../../containers/mock';
+import { basicCase } from '../../containers/mock';
 import type { CaseActionBarProps } from '.';
 import { CaseActionBar } from '.';
 import {
@@ -19,40 +19,31 @@ import {
   noUpdateCasesPermissions,
   TestProviders,
 } from '../../common/mock';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
-jest.mock('../../containers/use_get_case_user_actions');
+jest.mock('../../containers/use_get_case_connectors');
 jest.mock('../case_view/use_on_refresh_case_view_page');
 
-const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
-const defaultUseGetCaseUserActions = {
-  data: {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    participants: [basicCase.createdBy],
-  },
-  isLoading: false,
-  isError: false,
-};
+const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 
 describe('CaseActionBar', () => {
+  const caseConnectors = getCaseConnectorsMockResponse();
+
   const onUpdateField = jest.fn();
-  const defaultProps = {
-    allCasesNavigation: {
-      href: 'all-cases-href',
-      onClick: () => {},
-    },
+  const defaultProps: CaseActionBarProps = {
     caseData: basicCase,
-    disableAlerting: false,
     isLoading: false,
     onUpdateField,
-    currentExternalIncident: null,
-    metricsFeatures: [],
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
+    useGetCaseConnectorsMock.mockReturnValue({
+      isLoading: false,
+      data: caseConnectors,
+    });
   });
 
   it('renders', () => {
@@ -231,5 +222,39 @@ describe('CaseActionBar', () => {
 
     userEvent.click(screen.getByTestId('property-actions-ellipses'));
     expect(queryByText('Delete case')).toBeInTheDocument();
+  });
+
+  it('shows the external incident action', async () => {
+    const connector = caseConnectors['servicenow-1'];
+    const { push, ...connectorWithoutPush } = connector;
+
+    const props = {
+      ...defaultProps,
+      caseData: { ...defaultProps.caseData, connector: connectorWithoutPush },
+    };
+
+    render(
+      <TestProviders>
+        <CaseActionBar {...props} />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('property-actions-ellipses'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('property-actions-popout')).toBeInTheDocument();
+    });
+  });
+
+  it('does not show the external incident action', async () => {
+    render(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('property-actions-ellipses'));
+
+    expect(screen.queryByTestId('property-actions-popout')).not.toBeInTheDocument();
   });
 });

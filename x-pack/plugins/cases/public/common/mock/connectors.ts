@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type {
-  ActionConnector,
-  ActionTypeConnector,
-  GetCaseConnectorsResponse,
-} from '../../../common/api';
+import type { ActionConnector, ActionTypeConnector } from '../../../common/api';
+import { basicPush } from '../../containers/mock';
+import type { CaseConnectors } from '../../containers/types';
 
 export const connectorsMock: ActionConnector[] = [
   {
@@ -124,8 +122,8 @@ export const actionTypesMock: ActionTypeConnector[] = [
 ];
 
 export const getCaseConnectorsMockResponse = (
-  overrides: Record<string, Partial<GetCaseConnectorsResponse[string]>> = {}
-): GetCaseConnectorsResponse => {
+  overrides: Partial<CaseConnectors[string]['push']> = {}
+): CaseConnectors => {
   return connectorsMock.reduce(
     (acc, connector) => ({
       ...acc,
@@ -134,11 +132,18 @@ export const getCaseConnectorsMockResponse = (
         name: connector.name,
         type: connector.actionTypeId,
         fields: null,
-        needsToBePushed: false,
-        oldestPushDate: '2023-01-17T09:46:29.813Z',
-        latestPushDate: '2023-01-17T09:46:29.813Z',
-        hasBeenPushed: true,
-        ...overrides[connector.id],
+        push: {
+          needsToBePushed: false,
+          oldestUserActionPushDate: '2023-01-17T09:46:29.813Z',
+          latestUserActionPushDate: '2023-01-17T09:46:29.813Z',
+          hasBeenPushed: true,
+          externalService: {
+            ...basicPush,
+            connectorId: connector.id,
+            connectorName: connector.name,
+          },
+          ...overrides,
+        },
       },
     }),
     {}
