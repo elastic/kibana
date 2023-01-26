@@ -8,11 +8,11 @@ import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { APP_UI_ID } from '../../common/constants';
 
-/** actions are disabled for these fields in tables and popovers */
-export const FIELDS_WITHOUT_CELL_ACTIONS = [
+/** all cell actions are disabled for these fields */
+const FIELDS_WITHOUT_CELL_ACTIONS = [
   'signal.rule.risk_score',
-  'signal.reason',
   'kibana.alert.risk_score',
+  'signal.reason',
   'kibana.alert.reason',
 ];
 
