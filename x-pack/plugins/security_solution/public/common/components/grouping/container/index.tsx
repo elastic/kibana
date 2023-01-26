@@ -7,16 +7,15 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { isArray } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import type { BadgeMetric, CustomMetric } from '../accordion_panel';
-import { GroupingAccordion } from '../accordion_panel';
-import { GroupRightPanel } from '../accordion_panel/group_stats';
-import type { GroupSelection } from '../groups_selector';
+import { GroupPanel } from '../accordion_panel';
+import { GroupStats } from '../accordion_panel/group_stats';
 import { GroupsUnitCount } from '../styles';
 import { GROUPS_UNIT } from '../translations';
 import type { GroupingTableAggregation, RawBucket } from '../types';
-import { DEFAULT_GROUPING_QUERY_ID } from '../types';
 
 export const GroupingStyledContainer = styled.div`
   .euiAccordion__childWrapper {
@@ -28,7 +27,7 @@ export const GroupingStyledContainer = styled.div`
     border-radius: 5px;
     min-height: 77px;
   }
-  .euiAccordionForm {
+  .groupingAccordionForm {
     border-top: 1px solid #d3dae6;
     border-left: 1px solid #d3dae6;
     border-right: 1px solid #d3dae6;
@@ -38,52 +37,159 @@ export const GroupingStyledContainer = styled.div`
 `;
 
 interface GroupingContainerProps {
-  selectedGroup: GroupSelection;
-  takeActionItems: JSX.Element[];
-  groupsData: GroupingTableAggregation &
-    Record<string, { value?: number | null; buckets?: Array<{ doc_count?: number | null }> }>;
+  selectedGroup: string;
+  inspectButton?: JSX.Element;
+  takeActionItems: (groupFilters: Filter[]) => JSX.Element[];
+  data: GroupingTableAggregation &
+    Record<
+      string,
+      {
+        value?: number | null | undefined;
+        buckets?:
+          | Array<{
+              doc_count?: number | null | undefined;
+            }>
+          | undefined;
+      }
+    >;
   groupsSelector?: JSX.Element;
-  groupingId?: string;
-  onGroupPanelExpand: (bucket?: RawBucket) => void;
-  unitCountText?: (n: number) => string;
-  badgeMetricStats?: BadgeMetric[];
-  customMetricStats?: CustomMetric[];
+  unit?: (n: number) => string;
+  badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
+  customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
   renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
+  pagination: {
+    pageIndex: number;
+    pageSize: number;
+    onChangeItemsPerPage: (itemsPerPageNumber: number) => void;
+    onChangePage: (pageNumber: number) => void;
+  };
+  groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element;
 }
 
 const GroupingContainerComponent = ({
   selectedGroup,
   takeActionItems,
-  groupsData,
+  data,
   groupsSelector,
-  groupingId = DEFAULT_GROUPING_QUERY_ID,
-  onGroupPanelExpand,
-  unitCountText,
+  unit,
   badgeMetricStats,
   customMetricStats,
   renderChildComponent,
+  pagination,
+  inspectButton,
+  groupPanelRenderer,
 }: GroupingContainerProps) => {
-  const [activePage, setActivePage] = useState<number>(0);
-  const [groupsPageSize, setShowPerPageOptions] = useState<number>(5);
+  const [trigger, setTrigger] = useState<
+    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
+  >({});
   const [selectedBucket, setSelectedBucket] = useState<RawBucket>();
 
-  const onOpenGroupAction = useCallback(
-    (bucket: RawBucket) => {
+  const onOpenGroupAction = useCallback((bucket: RawBucket, isOpen: boolean) => {
+    if (isOpen) {
       setSelectedBucket(bucket);
-      onGroupPanelExpand(bucket);
-    },
-    [onGroupPanelExpand]
-  );
+    } else {
+      setSelectedBucket(undefined);
+    }
+  }, []);
 
-  const goToPage = (pageNumber: number) => {
-    setActivePage(pageNumber);
-  };
+  const unitCountText = useMemo(() => {
+    const countBuckets = data?.alertsCount?.buckets;
+    return `${(countBuckets && countBuckets.length > 0
+      ? countBuckets[0].doc_count ?? 0
+      : 0
+    ).toLocaleString()} ${
+      unit && unit(countBuckets && countBuckets.length > 0 ? countBuckets[0].doc_count ?? 0 : 0)
+    }`;
+  }, [data?.alertsCount?.buckets, unit]);
 
   const unitGroupsCountText = useMemo(() => {
-    return `${(groupsData?.groupsCount0?.value ?? 0).toLocaleString()} ${GROUPS_UNIT(
-      groupsData?.groupsCount0?.value ?? 0
+    return `${(data?.groupsNumber?.value ?? 0).toLocaleString()} ${GROUPS_UNIT(
+      data?.groupsNumber?.value ?? 0
     )}`;
-  }, [groupsData?.groupsCount0?.value]);
+  }, [data?.groupsNumber?.value]);
+
+  const groupPanels = useMemo(
+    () =>
+      data.stackByMupltipleFields0?.buckets?.map((groupBucket) => {
+        const groupKey = `group0-${
+          isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key
+        }`;
+
+        const groupFilters = [];
+        if (groupKey && selectedGroup) {
+          groupFilters.push({
+            meta: {
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: selectedGroup,
+              params: {
+                query: groupKey,
+              },
+            },
+            query: {
+              match_phrase: {
+                [selectedGroup]: {
+                  query: groupKey,
+                },
+              },
+            },
+          });
+        }
+        const panel = (
+          <GroupPanel
+            selectedGroup={selectedGroup}
+            groupBucket={groupBucket}
+            forceState={trigger[groupKey] && trigger[groupKey].state}
+            renderChildComponent={
+              trigger[groupKey] && trigger[groupKey].state === 'open'
+                ? renderChildComponent
+                : () => null
+            }
+            onToggleGroup={(isOpen) => {
+              setTrigger({
+                ...trigger,
+                [groupKey]: {
+                  state: isOpen ? 'open' : 'closed',
+                  selectedBucket: groupBucket,
+                },
+              });
+              if (isOpen) {
+                setSelectedBucket(groupBucket);
+              }
+            }}
+            extraAction={
+              <GroupStats
+                bucket={groupBucket}
+                takeActionItems={takeActionItems(groupFilters)}
+                onTakeActionsOpen={() => onOpenGroupAction(groupBucket, true)}
+                badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
+                customMetricStats={customMetricStats && customMetricStats(groupBucket)}
+              />
+            }
+            groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
+          />
+        );
+        return (
+          <>
+            {panel}
+            <EuiSpacer size="s" />
+          </>
+        );
+      }),
+    [
+      badgeMetricStats,
+      customMetricStats,
+      data.stackByMupltipleFields0?.buckets,
+      groupPanelRenderer,
+      onOpenGroupAction,
+      renderChildComponent,
+      selectedGroup,
+      takeActionItems,
+      trigger,
+    ]
+  );
 
   return (
     <>
@@ -104,49 +210,34 @@ const GroupingContainerComponent = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{groupsSelector}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
+            <EuiFlexItem>{groupsSelector}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <GroupingStyledContainer>
-        {groupsData.stackByMupltipleFields0?.buckets?.map((groupBucket) => (
-          <>
-            <GroupingAccordion
-              selectedGroup={selectedGroup}
-              groupBucket={groupBucket}
-              renderChildComponent={renderChildComponent}
-              extraAction={
-                <GroupRightPanel
-                  bucket={groupBucket}
-                  takeActionItems={takeActionItems}
-                  onTakeActionsOpen={() => onOpenGroupAction && onOpenGroupAction(groupBucket)}
-                  badgeMetricStats={badgeMetricStats}
-                  customMetricStats={customMetricStats}
-                />
-              }
-            />
-            <EuiSpacer size="s" />
-          </>
-        ))}
+        {groupPanels}
         <EuiSpacer size="m" />
-        {(groupsData.groupsNumber?.value && groupsPageSize
-          ? Math.ceil(groupsData.groupsNumber?.value / groupsPageSize)
-          : 0) > 1 && (
-          <EuiTablePagination
-            data-test-subj="hostTablePaginator"
-            activePage={activePage}
-            showPerPageOptions={true}
-            itemsPerPage={groupsPageSize}
-            onChangeItemsPerPage={(pageSize) => {
-              setShowPerPageOptions(pageSize);
-            }}
-            pageCount={
-              groupsData.groupsNumber?.value && groupsPageSize
-                ? Math.ceil(groupsData.groupsNumber?.value / groupsPageSize)
-                : 0
-            }
-            onChangePage={goToPage}
-            itemsPerPageOptions={[5, 10, 20, 50]}
-          />
-        )}
+        <EuiTablePagination
+          data-test-subj="hostTablePaginator"
+          activePage={pagination.pageIndex}
+          showPerPageOptions={true}
+          itemsPerPage={pagination.pageSize}
+          onChangeItemsPerPage={(pageSize) => {
+            pagination.onChangeItemsPerPage(pageSize);
+          }}
+          pageCount={
+            data.groupsNumber?.value && pagination.pageSize
+              ? Math.ceil(data.groupsNumber?.value / pagination.pageSize)
+              : 1
+          }
+          onChangePage={(pageNumber) => {
+            pagination.onChangePage(pageNumber);
+          }}
+          itemsPerPageOptions={[10, 25, 50, 100]}
+        />
       </GroupingStyledContainer>
     </>
   );

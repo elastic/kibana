@@ -14,15 +14,14 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import type { GenericBuckets } from '../../../../common/search_strategy';
-import type { RawBucket } from '../../../common/components/grouping';
-import { PopoverItems } from '../../../common/components/popover_items';
-import { COLUMN_TAGS } from '../../pages/detection_engine/rules/translations';
-// icon ip
+import type { GenericBuckets } from '../../../../../common/search_strategy';
+import type { RawBucket } from '../../../../common/components/grouping';
+import { PopoverItems } from '../../../../common/components/popover_items';
+import { COLUMN_TAGS } from '../../../pages/detection_engine/rules/translations';
 
 export const getSelectedGroupButtonContent = (selectedGroup: string, bucket: RawBucket) => {
   switch (selectedGroup) {
@@ -42,11 +41,11 @@ export const getSelectedGroupButtonContent = (selectedGroup: string, bucket: Raw
   return <DefaultGroupContent fieldValue={bucket.key} />;
 };
 
-const RuleNameGroupContent: FunctionComponent<{
+const RuleNameGroupContent = React.memo<{
   ruleName: string;
   ruleDescription: string;
   tags?: GenericBuckets[] | undefined;
-}> = ({ ruleName, ruleDescription, tags }) => {
+}>(({ ruleName, ruleDescription, tags }) => {
   const renderItem = (tag: string, i: number) => (
     <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tag">
       {tag}
@@ -81,9 +80,10 @@ const RuleNameGroupContent: FunctionComponent<{
       </EuiText>
     </div>
   );
-};
+});
+RuleNameGroupContent.displayName = 'RuleNameGroup';
 
-const HostNameGroupContent: FunctionComponent<{ hostName: string }> = ({ hostName }) => (
+const HostNameGroupContent = React.memo<{ hostName: string }>(({ hostName }) => (
   <div>
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -97,16 +97,15 @@ const HostNameGroupContent: FunctionComponent<{ hostName: string }> = ({ hostNam
       </EuiFlexItem>
     </EuiFlexGroup>
   </div>
-);
+));
+HostNameGroupContent.displayName = 'HostNameGroupContent';
 
-const UserNameGroupContent: FunctionComponent<{ userName: string }> = ({ userName }) => {
-  const { euiTheme } = useEuiTheme();
-
+const UserNameGroupContent = React.memo<{ userName: string }>(({ userName }) => {
   return (
     <div>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiAvatar name={userName} color={euiTheme.colors.success} />
+          <EuiAvatar name={userName.toString()} color={euiThemeVars.euiColorVis0} />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -117,7 +116,8 @@ const UserNameGroupContent: FunctionComponent<{ userName: string }> = ({ userNam
       </EuiFlexGroup>
     </div>
   );
-};
+});
+UserNameGroupContent.displayName = 'UserNameGroupContent';
 
 const DefaultGroupContent: FunctionComponent<{ fieldValue: string }> = ({ fieldValue }) => (
   <div>

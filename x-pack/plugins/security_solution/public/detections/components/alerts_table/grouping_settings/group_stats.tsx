@@ -10,9 +10,9 @@ import React from 'react';
 import type {
   BadgeMetric,
   CustomMetric,
-} from '../../../common/components/grouping/accordion_panel';
-import type { RawBucket } from '../../../common/components/grouping';
-import * as i18n from './translations';
+} from '../../../../common/components/grouping/accordion_panel';
+import type { RawBucket } from '../../../../common/components/grouping';
+import * as i18n from '../translations';
 
 const getSingleGroupSeverity = (severity?: string) => {
   switch (severity) {
@@ -30,7 +30,7 @@ const getSingleGroupSeverity = (severity?: string) => {
           {i18n.STATS_GROUP_SEVERITY_MEDIUM}
         </>
       );
-    case 'hight':
+    case 'high':
       return (
         <>
           <EuiIcon type="dot" color="#da8b45" />
@@ -47,6 +47,25 @@ const getSingleGroupSeverity = (severity?: string) => {
   }
   return null;
 };
+
+const multiSeverity = (
+  <>
+    <span className="smallDot">
+      <EuiIcon type="dot" color="#54b399" />
+    </span>
+    <span className="smallDot">
+      <EuiIcon type="dot" color="#d6bf57" />
+    </span>
+    <span className="smallDot">
+      <EuiIcon type="dot" color="#da8b45" />
+    </span>
+
+    <span>
+      <EuiIcon type="dot" color="#e7664c" />
+    </span>
+    {i18n.STATS_GROUP_SEVERITY_MULTI}
+  </>
+);
 
 export const getSelectedGroupBadgeMetrics = (
   selectedGroup: string,
@@ -115,7 +134,11 @@ export const getSelectedGroupCustomMetrics = (
     bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
       ? getSingleGroupSeverity(bucket.severitiesSubAggregation?.buckets[0].key)
       : null;
-  if (!singleSeverityComponent) {
+  const severityComponent =
+    bucket.countSeveritySubAggregation?.value && bucket.countSeveritySubAggregation?.value > 1
+      ? multiSeverity
+      : singleSeverityComponent;
+  if (!severityComponent) {
     return [];
   }
   switch (selectedGroup) {
@@ -123,21 +146,21 @@ export const getSelectedGroupCustomMetrics = (
       return [
         {
           title: i18n.STATS_GROUP_SEVERITY,
-          customStatRenderer: singleSeverityComponent,
+          customStatRenderer: severityComponent,
         },
       ];
     case 'host.name':
       return [
         {
           title: i18n.STATS_GROUP_SEVERITY,
-          customStatRenderer: singleSeverityComponent,
+          customStatRenderer: severityComponent,
         },
       ];
     case 'user.name':
       return [
         {
           title: i18n.STATS_GROUP_SEVERITY,
-          customStatRenderer: singleSeverityComponent,
+          customStatRenderer: severityComponent,
         },
       ];
   }

@@ -20,13 +20,21 @@ import { StatsContainer } from '../styles';
 import { TAKE_ACTION } from '../translations';
 import type { RawBucket } from '../types';
 
-export const GroupRightPanel = React.memo<{
+interface GroupStatsProps {
   bucket: RawBucket;
   takeActionItems: JSX.Element[];
   onTakeActionsOpen?: () => void;
   badgeMetricStats?: BadgeMetric[];
   customMetricStats?: CustomMetric[];
-}>(({ bucket, badgeMetricStats, customMetricStats, takeActionItems, onTakeActionsOpen }) => {
+}
+
+const GroupStatsComponent = ({
+  bucket,
+  badgeMetricStats,
+  customMetricStats,
+  takeActionItems,
+  onTakeActionsOpen,
+}: GroupStatsProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
@@ -93,6 +101,6 @@ export const GroupRightPanel = React.memo<{
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-});
+};
 
-GroupRightPanel.displayName = 'GroupRightPanel';
+export const GroupStats = React.memo(GroupStatsComponent);

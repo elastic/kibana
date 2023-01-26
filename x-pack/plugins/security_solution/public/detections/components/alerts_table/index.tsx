@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isArray } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { ConnectedProps } from 'react-redux';
@@ -14,30 +14,19 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import {
-  EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTablePagination,
-} from '@elastic/eui';
-import styled from 'styled-components';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { GroupRightPanel } from '../../../common/components/grouping/accordion_panel/group_stats';
-import { GROUPS_UNIT } from '../../../common/components/grouping/translations';
-import { defaultUnit, UnitCount } from '../../../common/components/toolbar/unit';
-import { useBulkActionItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
+import { InspectButton } from '../../../common/components/inspect';
+import { defaultUnit } from '../../../common/components/toolbar/unit';
 import type { GroupingTableAggregation, RawBucket } from '../../../common/components/grouping';
-import { getGroupingQuery, GroupsSelector } from '../../../common/components/grouping';
+import {
+  GroupingContainer,
+  getGroupingQuery,
+  GroupsSelector,
+} from '../../../common/components/grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertWorkflowStatus } from '../../../common/types';
-import type {
-  CustomBulkActionProp,
-  SetEventsDeleted,
-  SetEventsLoading,
-  TableIdLiteral,
-} from '../../../../common/types';
+import type { TableIdLiteral } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -69,53 +58,19 @@ import { useBulkAddToCaseActions } from './timeline_actions/use_bulk_add_to_case
 import { useAddBulkToTimelineAction } from './timeline_actions/use_add_bulk_to_timeline';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
-import { getSelectedGroupButtonContent } from './groups_buttons_renderers';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { getSelectedGroupBadgeMetrics, getSelectedGroupCustomMetrics } from './groups_stats';
+import {
+  defaultGroupingOptions,
+  getSelectedGroupBadgeMetrics,
+  getSelectedGroupButtonContent,
+  getSelectedGroupCustomMetrics,
+  useGroupTakeActionsItems,
+} from './grouping_settings';
 
 /** This local storage key stores the `Grid / Event rendered view` selection */
 export const ALERTS_TABLE_GROUPS_SELECTION_KEY = 'securitySolution.alerts.table.group-selection';
 const storage = new Storage(localStorage);
 
-export const GroupsContainer = styled.div`
-  .euiAccordion__childWrapper {
-    border-bottom: 1px solid #d3dae6;
-    border-radius: 5px;
-  }
-  .euiAccordion__triggerWrapper {
-    border-bottom: 1px solid #d3dae6;
-    border-radius: 5px;
-    min-height: 77px;
-  }
-  .euiAccordionForm {
-    border-top: 1px solid #d3dae6;
-    border-left: 1px solid #d3dae6;
-    border-right: 1px solid #d3dae6;
-    border-bottom: none;
-    border-radius: 5px;
-  }
-`;
-
 const ALERTS_GROUPING_ID = '';
-
-const defaultGroupingOptions = [
-  {
-    label: i18n.ruleName,
-    key: 'kibana.alert.rule.name',
-  },
-  {
-    label: i18n.userName,
-    key: 'user.name',
-  },
-  {
-    label: i18n.hostName,
-    key: 'host.name',
-  },
-  {
-    label: i18n.sourceIP,
-    key: 'source.ip',
-  },
-];
 
 interface OwnProps {
   defaultFilters?: Filter[];
@@ -325,8 +280,19 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFiltersMemo, globalFilters, globalQuery]);
 
-  const [activePage, setActivePage] = useState<number>(0);
-  const [groupsPageSize, setShowPerPageOptions] = useState<number>(25);
+  const [groupsActivePage, setGroupsActivePage] = useState<number>(0);
+  const [groupsItemsPerPage, setGroupsItemsPerPage] = useState<number>(25);
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex: groupsActivePage,
+      pageSize: groupsItemsPerPage,
+      onChangeItemsPerPage: (itemsPerPageNumber: number) =>
+        setGroupsItemsPerPage(itemsPerPageNumber),
+      onChangePage: (pageNumber: number) => setGroupsActivePage(pageNumber),
+    }),
+    [groupsActivePage, groupsItemsPerPage]
+  );
 
   const queryGroups = useMemo(
     () =>
@@ -408,18 +374,21 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             },
           },
         ],
-        stackByMupltipleFields0Size: groupsPageSize,
-        stackByMupltipleFields0From: activePage * groupsPageSize,
+        stackByMupltipleFields0Size: pagination.pageSize,
+        stackByMupltipleFields0From: pagination.pageIndex * pagination.pageSize,
         additionalStatsAggregationsFields1: [],
         stackByMupltipleFields1: [],
       }),
-    [additionalFilters, selectedGroup, from, runtimeMappings, to, groupsPageSize, activePage]
+    [
+      additionalFilters,
+      selectedGroup,
+      from,
+      runtimeMappings,
+      to,
+      pagination.pageSize,
+      pagination.pageIndex,
+    ]
   );
-
-  const [trigger, setTrigger] = useState<
-    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
-  >({});
-  const [selectedBucket, setSelectedBucket] = useState<RawBucket>();
 
   const {
     data: alertsGroupsData,
@@ -452,6 +421,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     uniqueQueryId,
   });
 
+  const inspect = useMemo(
+    () => <InspectButton queryId={uniqueQueryId} inspectIndex={0} title={''} />,
+    [uniqueQueryId]
+  );
+
   const [options, setOptions] = useState(
     defaultGroupingOptions.find((o) => o.key === selectedGroup)
       ? defaultGroupingOptions
@@ -474,7 +448,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         groupSelected={selectedGroup}
         onGroupChange={(groupSelection?: string) => {
           storage.set(ALERTS_TABLE_GROUPS_SELECTION_KEY, groupSelection);
-          setActivePage(0);
+          setGroupsActivePage(0);
           setSelectedGroup(groupSelection);
           if (groupSelection && !options.find((o) => o.key === groupSelection)) {
             setOptions([
@@ -489,6 +463,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           }
         }}
         onClearSelected={() => {
+          setGroupsActivePage(0);
           setSelectedGroup(undefined);
           setOptions(defaultGroupingOptions);
           storage.set(ALERTS_TABLE_GROUPS_SELECTION_KEY, undefined);
@@ -500,141 +475,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [indexPatterns.fields, options, selectedGroup]
   );
 
-  const getGlobalQuerySelector = inputsSelectors.globalQuery();
-  const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
-  const refetchQuery = useCallback(() => {
-    globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-  }, [globalQueries]);
-
-  const onUpdateSuccess = useCallback(
-    (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
-      refetchQuery();
-    },
-    [refetchQuery]
-  );
-
-  const onUpdateFailure = useCallback(
-    (newStatus: AlertWorkflowStatus, error: Error) => {
-      refetchQuery();
-    },
-    [refetchQuery]
-  );
-
-  const setEventsLoading = useCallback<SetEventsLoading>(
-    ({ eventIds, isLoading }) => {
-      dispatch(dataTableActions.setEventsLoading({ id: tableId, eventIds, isLoading }));
-    },
-    [dispatch, tableId]
-  );
-
-  const setEventsDeleted = useCallback<SetEventsDeleted>(
-    ({ eventIds, isDeleted }) => {
-      dispatch(dataTableActions.setEventsDeleted({ id: tableId, eventIds, isDeleted }));
-    },
-    [dispatch, tableId]
-  );
-
-  const groupFiltersMemo = useMemo(() => {
-    const groupFilters = [];
-    if (selectedBucket && selectedGroup) {
-      groupFilters.push({
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-          type: 'phrase',
-          key: selectedGroup,
-          params: {
-            query: isArray(selectedBucket.key) ? selectedBucket.key[0] : selectedBucket.key,
-          },
-        },
-        query: {
-          match_phrase: {
-            [selectedGroup]: {
-              query: isArray(selectedBucket.key) ? selectedBucket.key[0] : selectedBucket.key,
-            },
-          },
-        },
-      });
-    }
-    return groupFilters;
-  }, [selectedBucket, selectedGroup]);
-
-  const globalQueryWithGroup = useMemo(
-    () => getGlobalQuery([...(defaultFiltersMemo ?? []), ...groupFiltersMemo]),
-    [defaultFiltersMemo, getGlobalQuery, groupFiltersMemo]
-  );
-
-  const bulkActionItems = useBulkActionItems({
+  const takeActionItems = useGroupTakeActionsItems({
     indexName: indexPatterns.title,
-    eventIds: [],
     currentStatus: filterGroup as AlertWorkflowStatus,
-    setEventsLoading,
-    setEventsDeleted,
-    query: globalQueryWithGroup?.filterQuery,
     showAlertStatusActions: hasIndexWrite && hasIndexMaintenance,
-    onUpdateSuccess,
-    onUpdateFailure,
-    customBulkActions: bulkActions.customBulkActions as unknown as CustomBulkActionProp[],
   });
 
-  const onOpenGroupAction = useCallback((bucket: RawBucket, isOpen: boolean) => {
-    if (isOpen) {
-      setSelectedBucket(bucket);
-    } else {
-      setSelectedBucket(undefined);
-    }
-  }, []);
-
-  const unitCountText = useMemo(() => {
-    const countBuckets = alertsGroupsData?.aggregations?.alertsCount?.buckets;
-    return `${(countBuckets && countBuckets.length > 0
-      ? countBuckets[0].doc_count ?? 0
-      : 0
-    ).toLocaleString()} ${defaultUnit(
-      countBuckets && countBuckets.length > 0 ? countBuckets[0].doc_count ?? 0 : 0
-    )}`;
-  }, [alertsGroupsData?.aggregations?.alertsCount?.buckets]);
-
-  const unitGroupsCountText = useMemo(() => {
-    return `${(
-      alertsGroupsData?.aggregations?.groupsNumber?.value ?? 0
-    ).toLocaleString()} ${GROUPS_UNIT(alertsGroupsData?.aggregations?.groupsNumber?.value ?? 0)}`;
-  }, [alertsGroupsData?.aggregations?.groupsNumber?.value]);
-
-  const goToPage = (pageNumber: number) => {
-    setActivePage(pageNumber);
-  };
-
-  useEffect(
-    () => {
-      if (Object.keys(trigger).length < 2) {
-        return;
-      }
-      const curr =
-        selectedBucket && isArray(selectedBucket.key) ? selectedBucket.key[0] : selectedBucket?.key;
-      console.log(curr);
-      const n = Object.keys(trigger).reduce(
-        (
-          acc: Record<
-            string,
-            {
-              state: 'open' | 'closed' | undefined;
-              selectedBucket: RawBucket;
-            }
-          >,
-          key: string
-        ) => {
-          acc[key] = { ...trigger[key], state: `group0-${curr}` === key ? 'open' : 'closed' };
-          return acc;
-        },
-        {}
-      );
-      setTrigger(n);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [columns, itemsPerPage, itemsPerPageOptions, selectAll, sort, sessionViewConfig, graphEventId]
-  );
   if (loading || isLoadingGroups || isEmpty(selectedPatterns)) {
     return null;
   }
@@ -666,194 +512,47 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         dataTable
       ) : (
         <>
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            alignItems="center"
-            style={{ paddingBottom: 20, paddingTop: 20 }}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <UnitCount data-test-subj="alert-count">{unitCountText}</UnitCount>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <UnitCount data-test-subj="groups-count" style={{ borderRight: 'none' }}>
-                    {unitGroupsCountText}
-                  </UnitCount>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{groupsSelector}</EuiFlexItem>
-          </EuiFlexGroup>
-          <GroupsContainer>
-            {alertsGroupsData?.aggregations?.stackByMupltipleFields0?.buckets?.map(
-              (field0Bucket: RawBucket) => (
-                <>
-                  <EuiAccordion
-                    id={`group0-${
-                      isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key
-                    }`}
-                    className="euiAccordionForm"
-                    buttonClassName="euiAccordionForm__button"
-                    forceState={
-                      trigger[
-                        `group0-${
-                          isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key
-                        }`
-                      ] &&
-                      trigger[
-                        `group0-${
-                          isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key
-                        }`
-                      ].state
-                    }
-                    buttonContent={getSelectedGroupButtonContent(selectedGroup, field0Bucket)}
-                    extraAction={
-                      <GroupRightPanel
-                        bucket={field0Bucket}
-                        badgeMetricStats={getSelectedGroupBadgeMetrics(selectedGroup, field0Bucket)}
-                        customMetricStats={getSelectedGroupCustomMetrics(
-                          selectedGroup,
-                          field0Bucket
-                        )}
-                        takeActionItems={bulkActionItems}
-                        onTakeActionsOpen={() => onOpenGroupAction(field0Bucket, true)}
-                      />
-                    }
-                    paddingSize="l"
-                    onToggle={(isOpen) => {
-                      setTrigger({
-                        ...trigger,
-                        [`group0-${
-                          isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key
-                        }`]: {
-                          state: isOpen ? 'open' : 'closed',
-                          selectedBucket: field0Bucket,
-                        },
-                      });
-                      if (isOpen) {
-                        setSelectedBucket(field0Bucket);
-                      }
-                    }}
-                  >
-                    {trigger[
-                      `group0-${isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key}`
-                    ] &&
-                    trigger[
-                      `group0-${isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key}`
-                    ].state === 'open' ? (
-                      <StatefulEventsViewer
-                        currentFilter={filterGroup as AlertWorkflowStatus}
-                        defaultCellActions={defaultCellActions}
-                        defaultModel={getAlertsDefaultModel(license)}
-                        end={to}
-                        bulkActions={bulkActions}
-                        hasCrudPermissions={hasIndexWrite && hasIndexMaintenance}
-                        tableId={tableId}
-                        leadingControlColumns={leadingControlColumns}
-                        onRuleChange={onRuleChange}
-                        pageFilters={[
-                          ...(defaultFiltersMemo ?? []),
-                          {
-                            meta: {
-                              alias: null,
-                              negate: false,
-                              disabled: false,
-                              type: 'phrase',
-                              key: selectedGroup,
-                              params: {
-                                query: isArray(
-                                  trigger[
-                                    `group0-${
-                                      isArray(field0Bucket.key)
-                                        ? field0Bucket.key[0]
-                                        : field0Bucket.key
-                                    }`
-                                  ].selectedBucket.key
-                                )
-                                  ? trigger[
-                                      `group0-${
-                                        isArray(field0Bucket.key)
-                                          ? field0Bucket.key[0]
-                                          : field0Bucket.key
-                                      }`
-                                    ].selectedBucket.key[0]
-                                  : trigger[
-                                      `group0-${
-                                        isArray(field0Bucket.key)
-                                          ? field0Bucket.key[0]
-                                          : field0Bucket.key
-                                      }`
-                                    ].selectedBucket.key,
-                              },
-                            },
-                            query: {
-                              match_phrase: {
-                                [selectedGroup]: {
-                                  query: isArray(
-                                    trigger[
-                                      `group0-${
-                                        isArray(field0Bucket.key)
-                                          ? field0Bucket.key[0]
-                                          : field0Bucket.key
-                                      }`
-                                    ].selectedBucket.key
-                                  )
-                                    ? trigger[
-                                        `group0-${
-                                          isArray(field0Bucket.key)
-                                            ? field0Bucket.key[0]
-                                            : field0Bucket.key
-                                        }`
-                                      ].selectedBucket.key[0]
-                                    : trigger[
-                                        `group0-${
-                                          isArray(field0Bucket.key)
-                                            ? field0Bucket.key[0]
-                                            : field0Bucket.key
-                                        }`
-                                      ].selectedBucket.key,
-                                },
-                              },
-                            },
-                          },
-                        ]}
-                        renderCellValue={RenderCellValue}
-                        rowRenderers={defaultRowRenderers}
-                        sourcererScope={SourcererScopeName.detections}
-                        start={from}
-                        additionalRightMenuOptions={!selectedGroup ? [groupsSelector] : []}
-                      />
-                    ) : null}
-                  </EuiAccordion>
-                  <EuiSpacer size="s" />
-                </>
+          <GroupingContainer
+            selectedGroup={selectedGroup}
+            groupsSelector={groupsSelector}
+            inspectButton={inspect}
+            takeActionItems={(groupFilters: Filter[]) =>
+              takeActionItems(
+                getGlobalQuery([...(defaultFiltersMemo ?? []), ...groupFilters])?.filterQuery
               )
-            )}
-            <EuiSpacer size="m" />
-            {(alertsGroupsData?.aggregations?.groupsNumber?.value && groupsPageSize
-              ? Math.ceil(alertsGroupsData?.aggregations?.groupsNumber?.value / groupsPageSize)
-              : 0) > 1 && (
-              <EuiTablePagination
-                data-test-subj="hostTablePaginator"
-                activePage={activePage}
-                showPerPageOptions={true}
-                itemsPerPage={groupsPageSize}
-                onChangeItemsPerPage={(pageSize) => {
-                  setShowPerPageOptions(pageSize);
-                }}
-                pageCount={
-                  alertsGroupsData?.aggregations?.groupsNumber?.value && groupsPageSize
-                    ? Math.ceil(
-                        alertsGroupsData?.aggregations?.groupsNumber?.value / groupsPageSize
-                      )
-                    : 0
-                }
-                onChangePage={goToPage}
-                itemsPerPageOptions={[10, 25, 50, 100]}
+            }
+            data={alertsGroupsData?.aggregations ?? {}}
+            renderChildComponent={(groupFilter) => (
+              <StatefulEventsViewer
+                currentFilter={filterGroup as AlertWorkflowStatus}
+                defaultCellActions={defaultCellActions}
+                defaultModel={getAlertsDefaultModel(license)}
+                end={to}
+                bulkActions={bulkActions}
+                hasCrudPermissions={hasIndexWrite && hasIndexMaintenance}
+                tableId={tableId}
+                leadingControlColumns={leadingControlColumns}
+                onRuleChange={onRuleChange}
+                pageFilters={[...(defaultFiltersMemo ?? []), ...groupFilter]}
+                renderCellValue={RenderCellValue}
+                rowRenderers={defaultRowRenderers}
+                sourcererScope={SourcererScopeName.detections}
+                start={from}
+                additionalRightMenuOptions={!selectedGroup ? [groupsSelector] : []}
               />
             )}
-          </GroupsContainer>
+            unit={defaultUnit}
+            pagination={pagination}
+            groupPanelRenderer={(fieldBucket: RawBucket) =>
+              getSelectedGroupButtonContent(selectedGroup, fieldBucket)
+            }
+            badgeMetricStats={(fieldBucket: RawBucket) =>
+              getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket)
+            }
+            customMetricStats={(fieldBucket: RawBucket) =>
+              getSelectedGroupCustomMetrics(selectedGroup, fieldBucket)
+            }
+          />
         </>
       )}
     </>

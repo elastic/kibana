@@ -23,16 +23,17 @@ export interface CustomMetric {
   customStatRenderer: JSX.Element;
 }
 
-interface GroupingAccordionProps {
+interface GroupPanelProps {
   level?: number;
   groupBucket: RawBucket;
   selectedGroup: string;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
-  groupPanelRenderer?: (groupBucket: RawBucket) => JSX.Element;
+  groupPanelRenderer?: JSX.Element;
   onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket) => void;
   customAccordionClassName?: string;
   customAccordionButtonClassName?: string;
   extraAction?: React.ReactNode;
+  forceState: 'open' | 'closed' | undefined;
 }
 
 const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
@@ -47,7 +48,7 @@ const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
   </div>
 );
 
-const GroupingAccordionComponent = ({
+const GroupPanelComponent = ({
   level = 0,
   groupBucket,
   selectedGroup,
@@ -57,7 +58,8 @@ const GroupingAccordionComponent = ({
   extraAction,
   customAccordionClassName = 'groupingAccordionForm',
   customAccordionButtonClassName = 'groupingAccordionForm__button',
-}: GroupingAccordionProps) => {
+  forceState,
+}: GroupPanelProps) => {
   const groupFieldValue =
     groupBucket.key && isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key;
 
@@ -98,6 +100,7 @@ const GroupingAccordionComponent = ({
       buttonContent={groupPanelRenderer ?? <DefaultGroupPanelRenderer title={groupFieldValue} />}
       extraAction={extraAction}
       paddingSize="l"
+      forceState={forceState}
       onToggle={(isOpen) => {
         if (onToggleGroup) {
           onToggleGroup(isOpen, groupBucket);
@@ -109,4 +112,4 @@ const GroupingAccordionComponent = ({
   );
 };
 
-export const GroupingAccordion = React.memo(GroupingAccordionComponent);
+export const GroupPanel = React.memo(GroupPanelComponent);

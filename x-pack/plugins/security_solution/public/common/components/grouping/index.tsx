@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './container';
 export * from './query';
 export * from './groups_selector';
 export * from './types';
