@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash/fp';
-import type { Filter } from '@kbn/es-query';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ShapeTreeNode, ElementClickListener } from '@elastic/charts';
@@ -22,10 +21,6 @@ import { InspectButtonContainer } from '../../../../../common/components/inspect
 import { getSeverityTableColumns } from '../columns';
 import { getSeverityColor } from '../helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { getAlertsByStatusAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { VisualizationEmbeddable } from '../../../../../common/components/visualization_actions/visualization_embeddable';
-import { getAlertsBySeverityTableAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_severity_table';
 
 const DONUT_HEIGHT = 150;
 
@@ -34,18 +29,14 @@ type FieldFilter = ({ field, value }: { field: string; value: string | number })
 interface AlertsChartsPanelProps {
   addFilter?: FieldFilter;
   data: ParsedSeverityData;
-  filters?: Filter[];
   isLoading: boolean;
-  timerange: { from: string; to: string };
   uniqueQueryId: string;
 }
 
 export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
   addFilter,
   data,
-  filters,
   isLoading,
-  timerange,
   uniqueQueryId,
 }) => {
   const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
@@ -88,7 +79,6 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
     },
     [addFilter]
   );
-  const extraOptions = useMemo(() => ({ filters }), [filters]);
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
@@ -104,54 +94,25 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
           />
           <EuiFlexGroup data-test-subj="severty-chart" gutterSize="none">
             <EuiFlexItem style={style}>
-              {isChartEmbeddablesEnabled ? (
-                <VisualizationEmbeddable
-                  label={i18n.SEVERITY_TOTAL_ALERTS}
-                  timerange={timerange}
-                  extraOptions={extraOptions}
-                  height="135px"
-                  getLensAttributes={getAlertsBySeverityTableAttributes}
-                  stackByField="kibana.alert.severity"
-                  scopeId={SourcererScopeName.detections}
-                  id={`${uniqueQueryId}-table`}
-                />
-              ) : (
-                <EuiInMemoryTable
-                  data-test-subj="severity-level-alerts-table"
-                  columns={columns}
-                  items={items}
-                  loading={isLoading}
-                  sorting={sorting}
-                />
-              )}
+              <EuiInMemoryTable
+                data-test-subj="severity-level-alerts-table"
+                columns={columns}
+                items={items}
+                loading={isLoading}
+                sorting={sorting}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={style}>
-              {isChartEmbeddablesEnabled ? (
-                <VisualizationEmbeddable
-                  applyGlobalQueriesAndFilters={false}
-                  extraOptions={extraOptions}
-                  getLensAttributes={getAlertsByStatusAttributes}
-                  height="135px"
-                  id={`${uniqueQueryId}-donut`}
-                  isDonut={true}
-                  label={i18n.SEVERITY_TOTAL_ALERTS}
-                  scopeId={SourcererScopeName.detections}
-                  stackByField="kibana.alert.workflow_status"
-                  timerange={timerange}
-                  width="100%"
-                />
-              ) : (
-                <DonutChart
-                  data-test-subj="severity-level-donut"
-                  data={data}
-                  fillColor={fillColor}
-                  height={DONUT_HEIGHT}
-                  label={i18n.SEVERITY_TOTAL_ALERTS}
-                  title={<ChartLabel count={count} />}
-                  totalCount={count}
-                  onElementClick={onElementClick}
-                />
-              )}
+              <DonutChart
+                data-test-subj="severity-level-donut"
+                data={data}
+                fillColor={fillColor}
+                height={DONUT_HEIGHT}
+                label={i18n.SEVERITY_TOTAL_ALERTS}
+                title={<ChartLabel count={count} />}
+                totalCount={count}
+                onElementClick={onElementClick}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
