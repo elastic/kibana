@@ -10,7 +10,6 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { lastValueFrom } from 'rxjs';
-import { FIELD_EXISTENCE_SETTING } from '../../../common';
 import { fetchFieldExistence } from '../../../common/utils/field_existing_utils';
 
 interface FetchFieldExistenceParams {
@@ -40,8 +39,6 @@ export const loadFieldExisting: LoadFieldExistingHandler = async ({
   dataView,
 }) => {
   const includeFrozen = uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
-  // this needs to go higher up the chain
-  const useSampling = uiSettingsClient.get(FIELD_EXISTENCE_SETTING);
   const metaFields = uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
 
   return await fetchFieldExistence({
@@ -51,7 +48,6 @@ export const loadFieldExisting: LoadFieldExistingHandler = async ({
     timeFieldName,
     dataViewsService,
     includeFrozen,
-    useSampling,
     metaFields,
     dataView,
     search: async (params) => {

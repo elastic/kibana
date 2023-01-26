@@ -7,7 +7,8 @@
  */
 
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
-import { getDataViewFieldList } from './get_data_view_field_list';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { getDataViewFieldList, getTextBasedQueryFieldList } from './get_field_list';
 
 export enum DiscoverSidebarReducerActionType {
   RESET = 'RESET',
@@ -39,6 +40,7 @@ type DiscoverSidebarReducerAction =
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED;
       payload: {
         fieldCounts: DiscoverSidebarReducerState['fieldCounts'];
+        textBasedQueryColumns?: DatatableColumn[]; // from text-based searches
         isPlainRecord: boolean;
         dataView: DataView | null | undefined;
       };
@@ -100,11 +102,9 @@ export function discoverSidebarReducer(
       };
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED:
       // todo this
-      const mappedAndUnmappedFields = getDataViewFieldList(
-        action.payload.dataView,
-        action.payload.fieldCounts, // this is what it was waiting for
-        action.payload.isPlainRecord
-      );
+      const mappedAndUnmappedFields = action.payload.isPlainRecord
+        ? getTextBasedQueryFieldList(action.payload.textBasedQueryColumns)
+        : getDataViewFieldList(action.payload.dataView, action.payload.fieldCounts);
       return {
         ...state,
         dataView: action.payload.dataView,

@@ -19,7 +19,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiPortal,
-  EuiProgress,
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
@@ -33,7 +32,6 @@ import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import {
   AvailableFields$,
@@ -53,6 +51,7 @@ import {
 } from './lib/sidebar_reducer';
 
 const getBuildEsQueryAsync = async () => (await import('@kbn/es-query')).buildEsQuery;
+const EMPTY_FIELD_COUNTS = {};
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -132,7 +131,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
-  const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
@@ -235,13 +233,26 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
             });
           }
+          if (fieldsFromResults) {
+            dispatchSidebarStateAction({
+              type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+              payload: {
+                dataView: selectedDataViewRef.current,
+                fieldCounts: isPlainRecordType
+                  ? EMPTY_FIELD_COUNTS
+                  : calcFieldCounts(documentState.result),
+                textBasedQueryColumns: documentState.textBasedQueryColumns,
+                isPlainRecord: isPlainRecordType,
+              },
+            });
+          }
           break;
         case FetchStatus.ERROR:
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
               dataView: selectedDataViewRef.current,
-              fieldCounts: {},
+              fieldCounts: EMPTY_FIELD_COUNTS,
               isPlainRecord: isPlainRecordType,
             },
           });
@@ -394,13 +405,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     <>
       {!props.isClosed && (
         <EuiHideFor sizes={['xs', 's']}>
-          {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
           <DiscoverSidebar
             {...props}
+            isProcessing={isProcessing}
             onFieldEdited={onFieldEdited}
             allFields={sidebarState.allFields}
-            fieldFilter={fieldFilter}
-            setFieldFilter={setFieldFilter}
             editField={editField}
             createNewDataView={createNewDataView}
             showFieldList={showFieldList}
@@ -460,10 +469,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               </EuiFlyoutHeader>
               <DiscoverSidebar
                 {...props}
+                isProcessing={isProcessing}
                 onFieldEdited={onFieldEdited}
                 allFields={sidebarState.allFields}
-                fieldFilter={fieldFilter}
-                setFieldFilter={setFieldFilter}
                 alwaysShowActionButtons={true}
                 setFieldEditorRef={setFieldEditorRef}
                 closeFlyout={closeFlyout}
