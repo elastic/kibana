@@ -10,7 +10,7 @@ import { orderBy } from 'lodash/fp';
 import React, { createContext, FC, useCallback, useContext } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import type { Action } from '../../actions';
+import type { Action } from '@kbn/ui-actions-browser';
 import { CellActionExecutionContext } from './cell_actions';
 
 // It must to match `UiActionsService.getTriggerCompatibleActions`

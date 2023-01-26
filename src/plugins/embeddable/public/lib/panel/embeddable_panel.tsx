@@ -22,7 +22,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isPromise } from '@kbn/std';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
-import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
+import { buildContextMenuForActions, UiActionsService, Action } from '@kbn/ui-actions-browser';
 
 import { Start as InspectorStartContract } from '../inspector';
 import {

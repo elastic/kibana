@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ActionDefinition, Action } from './action';
+import { ActionDefinition, Action } from '@kbn/ui-actions-browser';
 
 export function createAction<Context extends object = object>(
   action: ActionDefinition<Context>

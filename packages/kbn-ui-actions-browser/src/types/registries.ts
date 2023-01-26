@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Trigger } from '@kbn/ui-actions-browser';
+import type { ActionInternal } from '../actions/action_internal';
+import type { TriggerInternal } from '../triggers/trigger_internal';
 
-export const VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_TRIGGER';
-export const visualizeFieldTrigger: Trigger = {
-  id: VISUALIZE_FIELD_TRIGGER,
-  title: 'Visualize field',
-  description: 'Triggered when user wants to visualize a field.',
-};
+export type TriggerRegistry = Map<string, TriggerInternal<object>>;
+export type ActionRegistry = Map<string, ActionInternal>;
+export type TriggerToActionsRegistry = Map<string, string[]>;

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import { Action } from '@kbn/ui-actions-browser';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { IEmbeddable } from '../../../embeddables';
 

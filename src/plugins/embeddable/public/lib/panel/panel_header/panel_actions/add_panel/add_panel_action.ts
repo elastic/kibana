@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-browser';
 import { NotificationsStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { EmbeddableStart } from '../../../../../plugin';

@@ -16,7 +16,7 @@ import {
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import type { Action } from '../../actions';
+import type { Action } from '@kbn/ui-actions-browser';
 import { EXTRA_ACTIONS_ARIA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 import { CellActionExecutionContext } from './cell_actions';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ActionInternal, ActionDefinition } from '../actions';
+import { ActionInternal, ActionDefinition } from '@kbn/ui-actions-browser';
 import { uiActionsPluginMock } from '../mocks';
 
 const action1: ActionDefinition = {

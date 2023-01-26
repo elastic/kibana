@@ -7,7 +7,7 @@
  */
 
 import { useMemo } from 'react';
-import { Action } from '../../actions';
+import type { Action } from '@kbn/ui-actions-browser';
 
 export const partitionActions = (actions: Action[], visibleCellActions: number) => {
   if (visibleCellActions <= 1) return { extraActions: actions, visibleActions: [] };

@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { ActionDefinition } from '../../actions';
+import { ActionDefinition } from '@kbn/ui-actions-browser';
 
 const MenuItem: React.FC = () => {
   return (

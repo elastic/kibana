@@ -14,16 +14,19 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { UiActionsSetup, UiActionsStart } from './plugin';
-export type { UiActionsServiceParams } from './service';
-export { UiActionsService } from './service';
-export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
-export { ActionInternal, createAction, IncompatibleActionError } from './actions';
-export { buildContextMenuForActions } from './context_menu';
+export { createAction } from './actions';
 export type {
   Presentable as UiActionsPresentable,
   PresentableGrouping as UiActionsPresentableGrouping,
+  ActionDefinition as UiActionsActionDefinition,
+  Action,
+  Trigger,
+  ActionExecutionMeta,
+  ActionMenuItemProps,
+  ActionExecutionContext,
+  UiActionsServiceParams,
 } from '@kbn/ui-actions-browser';
-export type { Trigger, RowClickContext } from './triggers';
+export type { RowClickContext } from './triggers';
 export {
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
@@ -38,7 +41,6 @@ export {
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,
 } from './types';
-export type { ActionExecutionContext, ActionExecutionMeta, ActionMenuItemProps } from './actions';
 export {
   CellActions,
   CellActionsMode,

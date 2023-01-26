@@ -8,7 +8,7 @@
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { UiActionsService } from './service';
+import { UiActionsService } from '@kbn/ui-actions-browser';
 import { rowClickTrigger, visualizeFieldTrigger, visualizeGeoFieldTrigger } from './triggers';
 import { setTheme } from './services';
 
