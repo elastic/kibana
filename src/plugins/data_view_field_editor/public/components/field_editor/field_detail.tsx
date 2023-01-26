@@ -23,7 +23,7 @@ const geti18nTexts = (): {
       defaultMessage: 'Set custom label',
     }),
     description: i18n.translate('indexPatternFieldEditor.editor.form.customLabelDescription', {
-      defaultMessage: `Create a label to display in place of the field name in Discover, Maps and Visualization editors. Useful for shortening a long field name.  Queries and filters use the original field name.`,
+      defaultMessage: `Create a label to display in place of the field name in Discover, Maps, Lens, Visualize, and TSVB. Useful for shortening a long field name. Queries and filters use the original field name.`,
     }),
   },
   value: {
