@@ -23,7 +23,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         return null;
       }
 
-      const errors: string[] = [];
+      const errors: React.ReactNode[] = [];
 
       // Determine if each endpoint returned a response code and if so,
       // see if we have a localized message for it
@@ -62,7 +62,11 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
             values={{ errorCount: errors.length }}
           />
           <EuiSpacer size="s" />
-          <div>{errors.join(' | ')}</div>
+          <>
+            {errors.map((error) => (
+              <div>{error}</div>
+            ))}
+          </>
         </>
       );
     }, [action]);
