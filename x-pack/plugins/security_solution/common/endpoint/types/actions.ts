@@ -151,7 +151,7 @@ export interface ResponseActionGetFileParameters {
 
 export interface ResponseActionsExecuteParameters {
   command: string;
-  timeout: number;
+  timeout?: number;
 }
 
 export type EndpointActionDataParameterTypes =
