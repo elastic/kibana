@@ -26,6 +26,8 @@ export interface PluginSetupContract {
    * @param handler The navigation handler should return either a relative URL, or a state object. This information can be used,
    * in conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details.
    * @throws an error if the given applicationId and ruleType combination has already been registered.
+   *
+   * @deprecated use "getViewInAppRelativeUrl" on the server side rule type instead.
    */
   registerNavigation: (
     applicationId: string,
@@ -42,6 +44,8 @@ export interface PluginSetupContract {
    * @param applicationId The application id that the user should be navigated to, to view a particular rule in a custom way.
    * @param handler The navigation handler should return either a relative URL, or a state object. This information can be used,
    * in conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details.
+   *
+   * @deprecated use "getViewInAppRelativeUrl" on the server side rule type instead.
    */
   registerDefaultNavigation: (applicationId: string, handler: AlertNavigationHandler) => void;
 }
