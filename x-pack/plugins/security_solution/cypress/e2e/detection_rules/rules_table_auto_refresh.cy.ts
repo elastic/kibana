@@ -12,7 +12,6 @@ import {
   REFRESH_SETTINGS_SELECTION_NOTE,
 } from '../../screens/alerts_detection_rules';
 import {
-  setRowsPerPageTo,
   checkAutoRefresh,
   waitForRulesTableToBeLoaded,
   selectAllRules,
@@ -30,6 +29,7 @@ import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { getNewRule } from '../../objects/rule';
+import { setRowsPerPageTo } from '../../tasks/table_pagination';
 
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
