@@ -7,6 +7,27 @@ The guided onboarding plugin includes a client-side code for the UI and the serv
 The client-side code registers a button in the Kibana header that controls the guided onboarding panel (checklist) depending on the current state. There is also an API service exposed from the client-side start contract. The API service is intended for external use by other plugins.
 
 ---
+## Current functionality
+
+The solution plugins register their config that specifies the title, the description and the steps of a guide. The config is fetched via an http request to a guided onboarding endpoint. This endpoint should only be used internally by the guided onboarding API service. The configs are basically just `js` objects that are loaded into the Kibana server memory on startup. Because configs are not expected to be changed by the user, we don’t need to use saved objects.
+
+The UI uses the guide config to display the guide: its title, description and steps. Each step has a title, a description and a url where the user will be redirected when they start this step. When a step is completed, the dropdown panel will automatically open and display the next step. When a guide is completed, the panel will automatically open and display a completion message with a button that (optionally) redirects the user to a specific solution page.
+
+A step is completed on the solution page code by calling a function in the guided onboarding API service when the user performs an expected action. A step can also be set to “manual completion” which means the dropdown will not automatically open and the user will only see a popover on the header button on step completion. That way, the UI allows the user to stay a little longer on the page after completing the expected action and explore.
+
+The plugin’s state keeps track of which guide has been started and its current progress. The state also includes the information if the user has started any guide, has completed any guide or if they skipped the guided onboarding, or if they quit the guide before completion. We also store the date when the user first looked at the landing page and if they haven't started any guide, the header button is displayed for the first 30 days. When clicked, the button redirects the user back to the landing page to start a guide.
+
+## Architecture description
+The guided onboarding is currently implemented in a separate `guided_onboarding` plugin that contains the code for the header button ([link](https://github.com/elastic/kibana/blob/main/src/plugins/guided_onboarding/public/components/guide_button.tsx)), the dropdown panel ([link](https://github.com/elastic/kibana/blob/main/src/plugins/guided_onboarding/public/components/guide_panel.tsx)) and the API service ([link](https://github.com/elastic/kibana/blob/main/src/plugins/guided_onboarding/public/services/api.service.ts)) exposed out of the client side that can be used by other plugins to get/update the state of the guided onboarding.
+
+For example, when a user goes through the SIEM guide they are first taken to the integrations page where they follow some EUI tour steps and install the Elastic Agent and the Elastic Defend integration. The code on the integrations page uses the guided onboarding API service to check if a guide for the Elastic Defend integration is currently in progress. If yes, the page will display the EUI tour steps to guide the user. The page will also use the API service to update the guided onboarding state to the next step when the user completes the installation.
+
+There is also a server side in the guided onboarding plugin that creates several endpoints for plugin only internal use. The endpoints are for fetching the guide configs, the state of the guided onboarding and to update the state.
+The server side also exposes a function ([link](https://github.com/elastic/kibana/blob/main/src/plugins/guided_onboarding/server/plugin.ts#L40)) that is used by consumers to register their guide configs. That way the config files are a part of the consumers code and the guided onboarding is only used as a framework.
+
+Another part of the guided onboarding code is in the home plugin where the code for the landing page ([link](https://github.com/elastic/kibana/tree/main/src/plugins/home/public/application/components/guided_onboarding)) is situated. The landing page can be found under `/app/home#/getting_started` and there is some logic ([link](https://github.com/elastic/kibana/blob/main/src/plugins/home/public/application/components/home.tsx#L200)) that redirects the user to the landing page when the deployment is new (i.e. there is no data in the deployment). Some of the static components for the landing page were extracted to the `kbn-guided-onboarding package ([link](https://github.com/elastic/kibana/tree/main/packages/kbn-guided-onboarding)).
+
+When starting Kibana with `yarn start --run-examples` the `guided_onboarding_example` plugin ([link](https://github.com/elastic/kibana/tree/main/examples/guided_onboarding_example)) can be found under `/app/guidedOnboardingExample`. This page displays the current state of the guided onboarding and allows setting the state to any point in the guide. Otherwise, it can be difficult and time consuming to reach a specific step in a production guide during dev work. The example plugin also registers a config for a test guide that can be completed on the pages of the example plugin. The test guide is also used for unit and functional tests of the guided onboarding plugin.
 
 ## Development
 
