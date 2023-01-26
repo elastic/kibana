@@ -25,7 +25,7 @@ export function NavNameWithBetaBadge({ label, iconType, isTechnicalPreview }: Pr
       <EuiFlexItem grow={false} style={{ height: 20 }}>
         {isTechnicalPreview ? (
           <EuiBetaBadge
-            color={'hollow'}
+            color="hollow"
             size="s"
             label={i18n.translate('xpack.observability.navigation.experimentalBadgeLabel', {
               defaultMessage: 'Technical preview',
