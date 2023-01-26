@@ -10,10 +10,7 @@ import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import type { Columns } from '../../../components/paginated_table';
 
 import * as i18n from './translations';
-import {
-  getRowItemDraggables,
-  getRowItemDraggable,
-} from '../../../../common/components/tables/helpers';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 
 export type UsersColumns = [
   Columns<NetworkUsersItem['name']>,
@@ -34,12 +31,11 @@ export const getUsersColumns = (
     mobileOptions: { show: true },
     sortable: true,
     render: (userName) =>
-      getRowItemDraggable({
-        rowItem: userName,
-        attrName: 'user.name',
-        idPrefix: `${tableId}-table-${flowTarget}-user`,
-        isAggregatable: true,
+      getRowItemsWithActions({
+        values: userName ? [userName] : undefined,
+        fieldName: 'user.name',
         fieldType: 'keyword',
+        idPrefix: `${tableId}-table-${flowTarget}-user`,
       }),
   },
   {
@@ -49,12 +45,11 @@ export const getUsersColumns = (
     mobileOptions: { show: true },
     sortable: false,
     render: (userIds) =>
-      getRowItemDraggables({
-        rowItems: userIds,
-        attrName: 'user.id',
-        idPrefix: `${tableId}-table-${flowTarget}`,
-        isAggregatable: true,
+      getRowItemsWithActions({
+        values: userIds,
+        fieldName: 'user.id',
         fieldType: 'keyword',
+        idPrefix: `${tableId}-table-${flowTarget}`,
       }),
   },
   {
@@ -64,12 +59,11 @@ export const getUsersColumns = (
     mobileOptions: { show: true },
     sortable: false,
     render: (groupNames) =>
-      getRowItemDraggables({
-        rowItems: groupNames,
-        attrName: 'user.group.name',
-        idPrefix: `${tableId}-table-${flowTarget}`,
-        isAggregatable: true,
+      getRowItemsWithActions({
+        values: groupNames,
+        fieldName: 'user.group.name',
         fieldType: 'keyword',
+        idPrefix: `${tableId}-table-${flowTarget}`,
       }),
   },
   {
@@ -79,12 +73,11 @@ export const getUsersColumns = (
     mobileOptions: { show: true },
     sortable: false,
     render: (groupId) =>
-      getRowItemDraggables({
-        rowItems: groupId,
-        attrName: 'user.group.id',
-        idPrefix: `${tableId}-table-${flowTarget}`,
-        isAggregatable: true,
+      getRowItemsWithActions({
+        values: groupId,
+        fieldName: 'user.group.id',
         fieldType: 'keyword',
+        idPrefix: `${tableId}-table-${flowTarget}`,
       }),
   },
   {

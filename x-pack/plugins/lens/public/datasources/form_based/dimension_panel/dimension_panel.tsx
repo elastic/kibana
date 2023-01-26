@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -15,12 +15,10 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../../types';
 import { GenericIndexPatternColumn } from '../form_based';
-import { isColumnInvalid } from '../utils';
 import { FormBasedPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
 import { DateRange } from '../../../../common';
 import { getOperationSupportMatrix } from './operation_support';
-import { DimensionTrigger } from '../../../shared_components/dimension_trigger';
 
 export type FormBasedDimensionTriggerProps =
   DatasourceDimensionTriggerProps<FormBasedPrivateState> & {
@@ -41,43 +39,6 @@ export type FormBasedDimensionEditorProps =
     uniqueLabel: string;
     dateRange: DateRange;
   };
-
-function wrapOnDot(str?: string) {
-  // u200B is a non-width white-space character, which allows
-  // the browser to efficiently word-wrap right after the dot
-  // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : '';
-}
-
-export const FormBasedDimensionTriggerComponent = function FormBasedDimensionTrigger(
-  props: FormBasedDimensionTriggerProps
-) {
-  const { columnId, uniqueLabel, invalid, invalidMessage, hideTooltip, layerId, dateRange } = props;
-  const layer = props.state.layers[layerId];
-  const currentIndexPattern = props.indexPatterns[layer.indexPatternId];
-
-  const currentColumnHasErrors = useMemo(
-    () => invalid || isColumnInvalid(layer, columnId, currentIndexPattern, dateRange),
-    [layer, columnId, currentIndexPattern, invalid, dateRange]
-  );
-
-  const selectedColumn: GenericIndexPatternColumn | null = layer.columns[props.columnId] ?? null;
-
-  if (!selectedColumn) {
-    return null;
-  }
-  const formattedLabel = wrapOnDot(uniqueLabel);
-
-  return (
-    <DimensionTrigger
-      id={columnId}
-      label={!currentColumnHasErrors ? formattedLabel : selectedColumn.label}
-      isInvalid={Boolean(currentColumnHasErrors)}
-      hideTooltip={hideTooltip}
-      invalidMessage={invalidMessage}
-    />
-  );
-};
 
 export const FormBasedDimensionEditorComponent = function FormBasedDimensionPanel(
   props: FormBasedDimensionEditorProps
@@ -102,5 +63,4 @@ export const FormBasedDimensionEditorComponent = function FormBasedDimensionPane
   );
 };
 
-export const FormBasedDimensionTrigger = memo(FormBasedDimensionTriggerComponent);
 export const FormBasedDimensionEditor = memo(FormBasedDimensionEditorComponent);

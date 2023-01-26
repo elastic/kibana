@@ -105,6 +105,13 @@ export class JobCreator {
     return this._type;
   }
 
+  public get dataView(): DataView {
+    return this._indexPattern;
+  }
+  public get dataViewId(): string | undefined {
+    return this._indexPattern.id;
+  }
+
   public get indexPatternTitle(): string {
     return this._indexPatternTitle;
   }
@@ -293,7 +300,11 @@ export class JobCreator {
   public set useDedicatedIndex(enable: boolean) {
     this._useDedicatedIndex = enable;
     if (enable) {
-      this._job_config.results_index_name = this._job_config.job_id;
+      if (this._job_config.results_index_name === undefined) {
+        // only set the results_index_name if it hasn't been set before.
+        // this allows it to be overwritten in the advanced JSON editor.
+        this._job_config.results_index_name = this._job_config.job_id;
+      }
     } else {
       // @ts-expect-error The operand of a 'delete' operator must be optional
       delete this._job_config.results_index_name;
