@@ -81,6 +81,7 @@ export const RunTestButton = () => {
           errors={data?.errors ?? []}
           isPushing={Boolean(isPushing)}
           testRun={testRun}
+          name={testRun.name}
           inProgress={inProgress}
           onClose={() => {
             setTestRun(undefined);

@@ -68,6 +68,7 @@ export function TestNowModeFlyoutContainer() {
             }
           : undefined
       }
+      name={flyoutOpenTestRun.name}
       inProgress={
         flyoutOpenTestRun.status === 'in-progress' || flyoutOpenTestRun.status === 'loading'
       }

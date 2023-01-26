@@ -30,6 +30,7 @@ export interface TestRun {
 }
 
 export function TestNowModeFlyout({
+  name,
   testRun,
   onClose,
   onDone,
@@ -38,6 +39,7 @@ export function TestNowModeFlyout({
   errors,
   serviceError,
 }: {
+  name: string;
   serviceError?: Error;
   errors: ServiceLocationErrors;
   testRun?: TestRun;
@@ -58,7 +60,7 @@ export function TestNowModeFlyout({
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2>
-            {testRun?.name}-{TEST_RESULTS}
+            {name}-{TEST_RESULTS}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>

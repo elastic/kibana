@@ -184,9 +184,7 @@ export function ActionsPopover({
       icon: 'beaker',
       disabled: testInProgress || isPrivateLocation,
       onClick: () => {
-        dispatch(
-          manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.configId })
-        );
+        dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
         dispatch(setFlyoutConfig(null));
         setIsPopoverOpen(false);
       },
