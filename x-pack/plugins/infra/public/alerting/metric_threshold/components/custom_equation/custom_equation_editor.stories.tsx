@@ -10,7 +10,7 @@ import React from 'react';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { Aggregators, Comparator } from '../../../../../common/alerting/metrics';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
-import { CustomEquationEditor, CustomEquationEditorProps } from '.';
+import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
 import { aggregationType } from '../expression_row';
 
 export default {
@@ -33,6 +33,7 @@ const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) =>
 
 export const CustomEquationEditorDefault = CustomEquationEditorTemplate.bind({});
 export const CustomEquationEditorWithEquationErrors = CustomEquationEditorTemplate.bind({});
+export const CustomEquationEditorWithFieldError = CustomEquationEditorTemplate.bind({});
 
 const BASE_ARGS = {
   expression: {
@@ -57,8 +58,27 @@ CustomEquationEditorDefault.args = {
 
 CustomEquationEditorWithEquationErrors.args = {
   ...BASE_ARGS,
+  expression: {
+    ...BASE_ARGS.expression,
+    equation: 'Math.round(A / B)',
+    customMetrics: [
+      { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.cpu.user.pct' },
+      { name: 'B', aggType: Aggregators.MAX, field: 'system.cpu.cores' },
+    ],
+  },
   errors: {
     equation:
       'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
+  },
+};
+
+CustomEquationEditorWithFieldError.args = {
+  ...BASE_ARGS,
+  expression: {
+    ...BASE_ARGS.expression,
+    customMetrics: [{ name: 'A', aggType: Aggregators.AVERAGE }],
+  },
+  errors: {
+    customMetrics: { A: { field: 'Field is required' } },
   },
 };
