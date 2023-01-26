@@ -236,7 +236,7 @@ describe('actions schemas', () => {
   });
 
   describe('NoParametersRequestSchema', () => {
-    it('should require endpoint_ids', () => {
+    it('should not accept when no endpoint_ids', () => {
       expect(() => {
         NoParametersRequestSchema.body.validate({});
       }).toThrow();
@@ -245,7 +245,23 @@ describe('actions schemas', () => {
     it('should require at least 1 endpoint id', () => {
       expect(() => {
         NoParametersRequestSchema.body.validate({
+          endpoint_ids: [],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept empty endpoint id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: [''],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept any empty endpoint_ids in the array', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['x', ' ', 'y'],
         });
       }).toThrow();
     });
@@ -287,9 +303,33 @@ describe('actions schemas', () => {
   });
 
   describe('KillOrSuspendProcessRequestSchema', () => {
-    it('should require at least 1 Endpoint ID', () => {
+    it('should not accept when no endpoint_ids', () => {
       expect(() => {
-        NoParametersRequestSchema.body.validate({});
+        KillOrSuspendProcessRequestSchema.body.validate({});
+      }).toThrow();
+    });
+
+    it('should not accept empty endpoint_ids array', () => {
+      expect(() => {
+        KillOrSuspendProcessRequestSchema.body.validate({
+          endpoint_ids: [],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept empty string as endpoint id', () => {
+      expect(() => {
+        KillOrSuspendProcessRequestSchema.body.validate({
+          endpoint_ids: [' '],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept any empty string in endpoint_ids array', () => {
+      expect(() => {
+        KillOrSuspendProcessRequestSchema.body.validate({
+          endpoint_ids: ['x', ' ', 'y'],
+        });
       }).toThrow();
     });
 
@@ -351,32 +391,56 @@ describe('actions schemas', () => {
   });
 
   describe('ExecuteActionRequestSchema', () => {
-    it('should require endpoint_ids and parameters.command', () => {
+    it('should not accept when no endpoint_ids', () => {
       expect(() => {
-        ExecuteActionRequestSchema.body.validate({});
+        NoParametersRequestSchema.body.validate({});
       }).toThrow();
     });
 
-    it('should require at least 1 endpoint id', () => {
+    it('should not accept empty endpoint_ids array', () => {
       expect(() => {
-        ExecuteActionRequestSchema.body.validate({
-          endpoint_ids: [''],
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: [],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept empty string as endpoint id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: [' '],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept any empty string in endpoint_ids array', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['x', ' ', 'y'],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept an empty command with a valid endpoint_id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
           parameters: {
-            command: 'ls -al',
+            command: '  ',
           },
         });
       }).toThrow();
     });
 
-    it('should require at least 1 endpoint id and a command', () => {
+    it('should accept at least 1 valid endpoint id and a command', () => {
       expect(() => {
         ExecuteActionRequestSchema.body.validate({
           endpoint_ids: ['endpoint_id'],
           parameters: {
-            command: '',
+            command: 'ls -al',
           },
         });
-      }).toThrow();
+      }).not.toThrow();
     });
 
     it('should accept at least one endpoint_id and a command parameter', () => {
