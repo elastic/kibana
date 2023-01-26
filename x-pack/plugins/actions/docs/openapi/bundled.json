@@ -1301,7 +1301,7 @@
     "parameters": {
       "kbn_xsrf": {
         "schema": {
-          "type": "boolean"
+          "type": "string"
         },
         "in": "header",
         "name": "kbn-xsrf",
