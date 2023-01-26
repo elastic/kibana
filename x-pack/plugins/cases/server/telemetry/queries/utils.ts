@@ -6,15 +6,22 @@
  */
 
 import { get } from 'lodash';
-import { KueryNode } from '@kbn/es-query';
-import { ISavedObjectsRepository } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../../common/constants';
-import { Buckets, CasesTelemetry, MaxBucketOnCaseAggregation } from '../types';
+import type {
+  CaseAggregationResult,
+  Buckets,
+  CasesTelemetry,
+  MaxBucketOnCaseAggregation,
+  SolutionTelemetry,
+} from '../types';
 import { buildFilter } from '../../client/utils';
+import type { OWNERS } from '../constants';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
@@ -147,6 +154,26 @@ export const getBucketFromAggregation = ({
   aggs?: Record<string, unknown>;
 }): Buckets['buckets'] => (get(aggs, `${key}.buckets`) ?? []) as Buckets['buckets'];
 
+export const getSolutionValues = (
+  aggregations: CaseAggregationResult | undefined,
+  owner: typeof OWNERS[number]
+): SolutionTelemetry => {
+  const aggregationsBuckets = getAggregationsBuckets({
+    aggs: aggregations,
+    keys: ['totalsByOwner', 'securitySolution.counts', 'observability.counts', 'cases.counts'],
+  });
+
+  return {
+    total: findValueInBuckets(aggregationsBuckets.totalsByOwner, owner),
+    ...getCountsFromBuckets(aggregationsBuckets[`${owner}.counts`]),
+    assignees: {
+      total: aggregations?.[owner].totalAssignees.value ?? 0,
+      totalWithZero: aggregations?.[owner].assigneeFilters.buckets.zero.doc_count ?? 0,
+      totalWithAtLeastOne: aggregations?.[owner].assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
+    },
+  };
+};
+
 export const findValueInBuckets = (buckets: Buckets['buckets'], value: string | number): number =>
   buckets.find(({ key }) => key === value)?.doc_count ?? 0;
 
@@ -184,6 +211,11 @@ export const getOnlyConnectorsFilter = () =>
 export const getTelemetryDataEmptyState = (): CasesTelemetry => ({
   cases: {
     all: {
+      assignees: {
+        total: 0,
+        totalWithZero: 0,
+        totalWithAtLeastOne: 0,
+      },
       total: 0,
       monthly: 0,
       weekly: 0,
@@ -206,9 +238,27 @@ export const getTelemetryDataEmptyState = (): CasesTelemetry => ({
         closedAt: null,
       },
     },
-    sec: { total: 0, monthly: 0, weekly: 0, daily: 0 },
-    obs: { total: 0, monthly: 0, weekly: 0, daily: 0 },
-    main: { total: 0, monthly: 0, weekly: 0, daily: 0 },
+    sec: {
+      total: 0,
+      monthly: 0,
+      weekly: 0,
+      daily: 0,
+      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
+    },
+    obs: {
+      total: 0,
+      monthly: 0,
+      weekly: 0,
+      daily: 0,
+      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
+    },
+    main: {
+      total: 0,
+      monthly: 0,
+      weekly: 0,
+      daily: 0,
+      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
+    },
   },
   userActions: { all: { total: 0, monthly: 0, weekly: 0, daily: 0, maxOnACase: 0 } },
   comments: { all: { total: 0, monthly: 0, weekly: 0, daily: 0, maxOnACase: 0 } },

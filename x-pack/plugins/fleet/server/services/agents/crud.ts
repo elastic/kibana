@@ -4,28 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
+import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { isAgentUpgradeable } from '../../../common/services';
-import { AGENTS_PREFIX, AGENTS_INDEX } from '../../constants';
-import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
-import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
+import { AGENTS_INDEX } from '../../constants';
+import { FleetError, isESClientError, AgentNotFoundError } from '../../errors';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
-const ACTIVE_AGENT_CONDITION = 'active:true';
-const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
+import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+
+const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
+const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
 
 function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
   try {
@@ -55,7 +54,7 @@ function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode
         undefined as KueryNode | undefined
       );
   } catch (err) {
-    throw new IngestManagerError(`Kuery is malformed: ${err.message}`);
+    throw new FleetError(`Kuery is malformed: ${err.message}`);
   }
 }
 
@@ -73,21 +72,25 @@ export type GetAgentsOptions =
       perPage?: number;
     };
 
-export async function getAgents(esClient: ElasticsearchClient, options: GetAgentsOptions) {
+export async function getAgents(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  options: GetAgentsOptions
+) {
   let agents: Agent[] = [];
   if ('agentIds' in options) {
-    agents = await getAgentsById(esClient, options.agentIds);
+    agents = (await getAgentsById(esClient, soClient, options.agentIds)).filter(
+      (maybeAgent) => !('notFound' in maybeAgent)
+    ) as Agent[];
   } else if ('kuery' in options) {
     agents = (
-      await getAllAgentsByKuery(esClient, {
+      await getAllAgentsByKuery(esClient, soClient, {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
       })
     ).agents;
   } else {
-    throw new IngestManagerError(
-      'Either options.agentIds or options.kuery are required to get agents'
-    );
+    throw new FleetError('Either options.agentIds or options.kuery are required to get agents');
   }
 
   return agents;
@@ -116,6 +119,7 @@ export async function closePointInTime(esClient: ElasticsearchClient, pitId: str
 }
 
 export async function getAgentTags(
+  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options: ListWithKuery & {
     showInactive: boolean;
@@ -134,11 +138,14 @@ export async function getAgentTags(
 
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
   try {
     const result = await esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
       index: AGENTS_INDEX,
       size: 0,
       body,
+      fields: Object.keys(runtimeFields),
+      runtime_mappings: runtimeFields,
       aggs: {
         tags: {
           terms: { field: 'tags', size: SO_SEARCH_LIMIT },
@@ -155,10 +162,39 @@ export async function getAgentTags(
   }
 }
 
+export function getElasticsearchQuery(
+  kuery: string,
+  showInactive = false,
+  includeHosted = false,
+  hostedPolicies: string[] = [],
+  extraFilters: string[] = []
+): estypes.QueryDslQueryContainer | undefined {
+  const filters = [];
+
+  if (kuery && kuery !== '') {
+    filters.push(kuery);
+  }
+
+  if (showInactive === false) {
+    filters.push(ACTIVE_AGENT_CONDITION);
+  }
+
+  if (!includeHosted && hostedPolicies.length > 0) {
+    filters.push('NOT (policy_id:{policyIds})'.replace('{policyIds}', hostedPolicies.join(',')));
+  }
+
+  filters.push(...extraFilters);
+
+  const kueryNode = _joinFilters(filters);
+  return kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
+}
+
 export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
+    getTotalInactive?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
     pitId?: string;
@@ -169,6 +205,7 @@ export async function getAgentsByKuery(
   total: number;
   page: number;
   perPage: number;
+  totalInactive?: number;
 }> {
   const {
     page = 1,
@@ -180,6 +217,7 @@ export async function getAgentsByKuery(
     showUpgradeable,
     searchAfter,
     pitId,
+    getTotalInactive = false,
   } = options;
   const filters = [];
 
@@ -192,22 +230,24 @@ export async function getAgentsByKuery(
   }
 
   const kueryNode = _joinFilters(filters);
-  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+
+  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+
   const isDefaultSort = sortField === 'enrolled_at' && sortOrder === 'desc';
   // if using default sorting (enrolled_at), adding a secondary sort on hostname, so that the results are not changing randomly in case many agents were enrolled at the same time
   const secondarySort: estypes.Sort = isDefaultSort
     ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
     : [];
   const queryAgents = async (from: number, size: number) =>
-    esClient.search<FleetServerAgent, {}>({
+    esClient.search<FleetServerAgent, { totalInactive?: { doc_count: number } }>({
       from,
       size,
       track_total_hits: true,
       rest_total_hits_as_int: true,
-      body: {
-        ...body,
-        sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
-      },
+      runtime_mappings: runtimeFields,
+      fields: Object.keys(runtimeFields),
+      sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
+      post_filter: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
       ...(pitId
         ? {
             pit: {
@@ -220,11 +260,28 @@ export async function getAgentsByKuery(
             ignore_unavailable: true,
           }),
       ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
+      ...(getTotalInactive && {
+        aggregations: {
+          totalInactive: {
+            filter: { bool: { must: { terms: { status: ['inactive', 'unenrolled'] } } } },
+          },
+        },
+      }),
     });
-  const res = await queryAgents((page - 1) * perPage, perPage);
+  let res;
+  try {
+    res = await queryAgents((page - 1) * perPage, perPage);
+  } catch (err) {
+    appContextService.getLogger().error(`Error getting agents by kuery: ${JSON.stringify(err)}`);
+    throw err;
+  }
 
   let agents = res.hits.hits.map(searchHitToAgent);
   let total = res.hits.total as number;
+  let totalInactive = 0;
+  if (getTotalInactive && res.aggregations) {
+    totalInactive = res.aggregations?.totalInactive?.doc_count ?? 0;
+  }
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
@@ -251,88 +308,13 @@ export async function getAgentsByKuery(
     total,
     page,
     perPage,
+    ...(getTotalInactive && { totalInactive }),
   };
-}
-
-export async function processAgentsInBatches(
-  esClient: ElasticsearchClient,
-  options: Omit<ListWithKuery, 'page' | 'perPage'> & {
-    showInactive: boolean;
-    batchSize?: number;
-  },
-  processAgents: (
-    agents: Agent[],
-    includeSuccess: boolean
-  ) => Promise<{ items: BulkActionResult[] }>
-): Promise<{ items: BulkActionResult[] }> {
-  const pitId = await openPointInTime(esClient);
-
-  const perPage = options.batchSize ?? SO_SEARCH_LIMIT;
-
-  const res = await getAgentsByKuery(esClient, {
-    ...options,
-    page: 1,
-    perPage,
-    pitId,
-  });
-
-  let currentAgents = res.agents;
-  // include successful agents if total agents does not exceed 10k
-  const skipSuccess = res.total > SO_SEARCH_LIMIT;
-
-  let results = await processAgents(currentAgents, skipSuccess);
-  let allAgentsProcessed = currentAgents.length;
-
-  while (allAgentsProcessed < res.total) {
-    const lastAgent = currentAgents[currentAgents.length - 1];
-    const nextPage = await getAgentsByKuery(esClient, {
-      ...options,
-      page: 1,
-      perPage,
-      pitId,
-      searchAfter: lastAgent.sort!,
-    });
-    currentAgents = nextPage.agents;
-    const currentResults = await processAgents(currentAgents, skipSuccess);
-    results = { items: results.items.concat(currentResults.items) };
-    allAgentsProcessed += currentAgents.length;
-  }
-
-  await closePointInTime(esClient, pitId);
-
-  return results;
-}
-
-export function errorsToResults(
-  agents: Agent[],
-  errors: Record<Agent['id'], Error>,
-  agentIds?: string[],
-  skipSuccess?: boolean
-): BulkActionResult[] {
-  if (!skipSuccess) {
-    const givenOrder = agentIds ? agentIds : agents.map((agent) => agent.id);
-    return givenOrder.map((agentId) => {
-      const hasError = agentId in errors;
-      const result: BulkActionResult = {
-        id: agentId,
-        success: !hasError,
-      };
-      if (hasError) {
-        result.error = errors[agentId];
-      }
-      return result;
-    });
-  } else {
-    return Object.entries(errors).map(([agentId, error]) => ({
-      id: agentId,
-      success: false,
-      error,
-    }));
-  }
 }
 
 export async function getAllAgentsByKuery(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
     showInactive: boolean;
   }
@@ -340,7 +322,11 @@ export async function getAllAgentsByKuery(
   agents: Agent[];
   total: number;
 }> {
-  const res = await getAgentsByKuery(esClient, { ...options, page: 1, perPage: SO_SEARCH_LIMIT });
+  const res = await getAgentsByKuery(esClient, soClient, {
+    ...options,
+    page: 1,
+    perPage: SO_SEARCH_LIMIT,
+  });
 
   return {
     agents: res.agents,
@@ -348,104 +334,108 @@ export async function getAllAgentsByKuery(
   };
 }
 
-export async function countInactiveAgents(
+export async function getAgentById(
   esClient: ElasticsearchClient,
-  options: Pick<ListWithKuery, 'kuery'>
-): Promise<number> {
-  const { kuery } = options;
-  const filters = [INACTIVE_AGENT_CONDITION];
+  soClient: SavedObjectsClientContract,
+  agentId: string
+) {
+  const [agentHit] = await getAgentsById(esClient, soClient, [agentId]);
 
-  if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENTS_PREFIX, kuery));
+  if ('notFound' in agentHit) {
+    throw new AgentNotFoundError(`Agent ${agentId} not found`);
   }
 
-  const kueryNode = _joinFilters(filters);
-  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-
-  const res = await esClient.search({
-    index: AGENTS_INDEX,
-    size: 0,
-    track_total_hits: true,
-    rest_total_hits_as_int: true,
-    filter_path: 'hits.total',
-    ignore_unavailable: true,
-    body,
-  });
-
-  return (res.hits.total as number) || 0;
+  return agentHit;
 }
 
-export async function getAgentById(esClient: ElasticsearchClient, agentId: string) {
-  const agentNotFoundError = new AgentNotFoundError(`Agent ${agentId} not found`);
+async function _filterAgents(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  query: estypes.QueryDslQueryContainer,
+  options: {
+    page?: number;
+    perPage?: number;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  } = {}
+): Promise<{
+  agents: Agent[];
+  total: number;
+  page: number;
+  perPage: number;
+}> {
+  const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
+  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+
+  let res;
   try {
-    const agentHit = await esClient.get<FleetServerAgent>({
+    res = await esClient.search<FleetServerAgent, {}>({
+      from: (page - 1) * perPage,
+      size: perPage,
+      track_total_hits: true,
+      rest_total_hits_as_int: true,
+      runtime_mappings: runtimeFields,
+      fields: Object.keys(runtimeFields),
+      sort: [{ [sortField]: { order: sortOrder } }],
+      query: { bool: { filter: query } },
       index: AGENTS_INDEX,
-      id: agentId,
+      ignore_unavailable: true,
     });
-
-    if (agentHit.found === false) {
-      throw agentNotFoundError;
-    }
-
-    return searchHitToAgent(agentHit);
   } catch (err) {
-    if (isESClientError(err) && err.meta.statusCode === 404) {
-      throw agentNotFoundError;
-    }
+    appContextService.getLogger().error(`Error querying agents: ${JSON.stringify(err)}`);
     throw err;
   }
-}
 
-export function isAgentDocument(
-  maybeDocument: any
-): maybeDocument is estypes.MgetResponseItem<FleetServerAgent> {
-  return '_id' in maybeDocument && '_source' in maybeDocument;
-}
+  const agents = res.hits.hits.map(searchHitToAgent);
+  const total = res.hits.total as number;
 
-export type ESAgentDocumentResult = estypes.MgetResponseItem<FleetServerAgent>;
-
-export async function getAgentDocuments(
-  esClient: ElasticsearchClient,
-  agentIds: string[]
-): Promise<ESAgentDocumentResult[]> {
-  const res = await esClient.mget<FleetServerAgent>({
-    index: AGENTS_INDEX,
-    body: { docs: agentIds.map((_id) => ({ _id })) },
-  });
-
-  return res.docs || [];
+  return {
+    agents,
+    total,
+    page,
+    perPage,
+  };
 }
 
 export async function getAgentsById(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentIds: string[]
-): Promise<Agent[]> {
-  const allDocs = await getAgentDocuments(esClient, agentIds);
-  const agents = allDocs.reduce<Agent[]>((results, doc) => {
-    if (isAgentDocument(doc)) {
-      results.push(searchHitToAgent(doc));
-    }
+): Promise<Array<Agent | { id: string; notFound: true }>> {
+  if (!agentIds.length) {
+    return [];
+  }
 
-    return results;
-  }, []);
+  const idsQuery = {
+    terms: {
+      _id: agentIds,
+    },
+  };
+  const { agents } = await _filterAgents(esClient, soClient, idsQuery, {
+    perPage: agentIds.length,
+  });
 
-  return agents;
+  // return agents in the same order as agentIds
+  return agentIds.map(
+    (agentId) => agents.find((agent) => agent.id === agentId) || { id: agentId, notFound: true }
+  );
 }
 
 export async function getAgentByAccessAPIKeyId(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   accessAPIKeyId: string
 ): Promise<Agent> {
-  const res = await esClient.search<FleetServerAgent>({
-    index: AGENTS_INDEX,
-    ignore_unavailable: true,
-    q: `access_api_key_id:${escapeSearchQueryPhrase(accessAPIKeyId)}`,
-  });
+  const query = {
+    term: {
+      access_api_key_id: accessAPIKeyId,
+    },
+  };
+  const { agents } = await _filterAgents(esClient, soClient, query);
 
-  const searchHit = res.hits.hits[0];
-  const agent = searchHit && searchHitToAgent(searchHit);
+  const agent = agents.length ? agents[0] : null;
 
-  if (!searchHit || !agent) {
+  if (!agent) {
     throw new AgentNotFoundError('Agent not found');
   }
   if (agent.access_api_key_id !== accessAPIKeyId) {
@@ -476,16 +466,18 @@ export async function bulkUpdateAgents(
   updateData: Array<{
     agentId: string;
     data: Partial<AgentSOAttributes>;
-  }>
-): Promise<{ items: BulkActionResult[] }> {
+  }>,
+  errors: { [key: string]: Error }
+): Promise<void> {
   if (updateData.length === 0) {
-    return { items: [] };
+    return;
   }
 
   const body = updateData.flatMap(({ agentId, data }) => [
     {
       update: {
         _id: agentId,
+        retry_on_conflict: 3,
       },
     },
     {
@@ -499,14 +491,12 @@ export async function bulkUpdateAgents(
     refresh: 'wait_for',
   });
 
-  return {
-    items: res.items.map((item) => ({
-      id: item.update!._id as string,
-      success: !item.update!.error,
+  res.items
+    .filter((item) => item.update!.error)
+    .forEach((item) => {
       // @ts-expect-error it not assignable to ErrorCause
-      error: item.update!.error as Error,
-    })),
-  };
+      errors[item.update!._id as string] = item.update!.error as Error;
+    });
 }
 
 export async function deleteAgent(esClient: ElasticsearchClient, agentId: string) {
@@ -526,12 +516,31 @@ export async function deleteAgent(esClient: ElasticsearchClient, agentId: string
   }
 }
 
+async function _getAgentDocById(esClient: ElasticsearchClient, agentId: string) {
+  try {
+    const res = await esClient.get<FleetServerAgent>({
+      id: agentId,
+      index: AGENTS_INDEX,
+    });
+
+    if (!res._source) {
+      throw new AgentNotFoundError(`Agent ${agentId} not found`);
+    }
+    return res._source;
+  } catch (err) {
+    if (isESClientError(err) && err.meta.statusCode === 404) {
+      throw new AgentNotFoundError(`Agent ${agentId} not found`);
+    }
+    throw err;
+  }
+}
+
 export async function getAgentPolicyForAgent(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentId: string
 ) {
-  const agent = await getAgentById(esClient, agentId);
+  const agent = await _getAgentDocById(esClient, agentId);
   if (!agent.policy_id) {
     return;
   }

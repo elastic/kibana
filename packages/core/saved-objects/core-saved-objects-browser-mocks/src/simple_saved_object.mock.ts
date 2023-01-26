@@ -24,6 +24,7 @@ const simpleSavedObjectMockDefaults: Partial<SimpleSavedObject<T>> = {
   error: undefined,
   references: [],
   updatedAt: '',
+  createdAt: '',
   namespaces: undefined,
 };
 
@@ -41,6 +42,7 @@ const createSimpleSavedObjectMock = (
     error: savedObject.error,
     references: savedObject.references,
     updatedAt: savedObject.updated_at,
+    createdAt: savedObject.created_at,
     namespaces: savedObject.namespaces,
     get: jest.fn(),
     set: jest.fn(),
@@ -61,6 +63,9 @@ const createSimpleSavedObjectMock = (
   return mock;
 };
 
+/**
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
+ */
 export const simpleSavedObjectMock = {
   create: (client: SavedObjectsClientContract, savedObject: SavedObject) =>
     createSimpleSavedObjectMock(savedObject),

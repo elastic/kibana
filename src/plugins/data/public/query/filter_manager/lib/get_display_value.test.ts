@@ -7,7 +7,12 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterStateStore, PhraseFilter } from '@kbn/es-query';
-import { stubIndexPattern, phraseFilter } from '../../../../common/stubs';
+import {
+  stubIndexPattern,
+  phraseFilter,
+  phrasesFilter,
+  rangeFilter,
+} from '../../../../common/stubs';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from './get_display_value';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
@@ -17,38 +22,84 @@ describe('getDisplayValueFromFilter', () => {
   });
 
   it('returns the value if string', () => {
-    phraseFilter.meta.value = 'abc';
-    const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
+    const filter = { ...phraseFilter, meta: { ...phraseFilter.meta, value: 'abc' } };
+    const displayValue = getDisplayValueFromFilter(filter, [stubIndexPattern]);
     expect(displayValue).toBe('abc');
   });
 
   it('returns the value if undefined', () => {
-    phraseFilter.meta.value = undefined;
-    const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
+    const filter = {
+      ...phraseFilter,
+      meta: { ...phraseFilter.meta, value: undefined, params: { query: undefined } },
+    };
+    const displayValue = getDisplayValueFromFilter(filter, [stubIndexPattern]);
     expect(displayValue).toBe('');
   });
 
-  it('calls the value function if provided', () => {
-    // The type of value currently doesn't match how it's used. Refactor needed.
-    phraseFilter.meta.value = jest.fn((x) => {
-      return 'abc';
-    }) as any;
-    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
-    const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
-    expect(displayValue).toBe('abc');
-    expect(phraseFilter.meta.value).toHaveBeenCalledWith(undefined);
+  it('returns 0 if value undefined and numeric field', () => {
+    const filter = {
+      meta: {
+        negate: false,
+        index: 'logstash-*',
+        type: 'phrase',
+        key: 'bytes',
+        value: undefined,
+        disabled: false,
+        alias: null,
+        params: {
+          query: undefined,
+        },
+      },
+      $state: {
+        store: FilterStateStore.APP_STATE,
+      },
+      query: {
+        match_phrase: {
+          bytes: '0',
+        },
+      },
+    };
+    const displayValue = getDisplayValueFromFilter(filter, [stubIndexPattern]);
+    expect(displayValue).toBe('0');
   });
 
-  it('calls the value function if provided, with formatter', () => {
+  it('phrase filters without formatter', () => {
+    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
+    const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
+    expect(displayValue).toBe('ios');
+  });
+
+  it('phrase filters with formatter', () => {
     const mockFormatter = new (FieldFormat.from((value: string) => 'banana' + value))();
     jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => mockFormatter);
-    phraseFilter.meta.value = jest.fn((x) => {
-      return x.convert('abc');
-    }) as any;
     const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
-    expect(stubIndexPattern.getFormatterForField).toHaveBeenCalledTimes(1);
-    expect(phraseFilter.meta.value).toHaveBeenCalledWith(mockFormatter);
-    expect(displayValue).toBe('bananaabc');
+    expect(displayValue).toBe('bananaios');
+  });
+
+  it('phrases filters without formatter', () => {
+    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
+    const displayValue = getDisplayValueFromFilter(phrasesFilter, [stubIndexPattern]);
+    expect(displayValue).toBe('win xp, osx');
+  });
+
+  it('phrases filters with formatter', () => {
+    const mockFormatter = new (FieldFormat.from((value: string) => 'banana' + value))();
+    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => mockFormatter);
+    const displayValue = getDisplayValueFromFilter(phrasesFilter, [stubIndexPattern]);
+    expect(displayValue).toBe('bananawin xp, bananaosx');
+  });
+
+  it('range filters without formatter', () => {
+    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
+    const displayValue = getDisplayValueFromFilter(rangeFilter, [stubIndexPattern]);
+    expect(displayValue).toBe('0 to 10');
+  });
+
+  it('range filters with formatter', () => {
+    const mockFormatter = new (FieldFormat.from((value: string) => 'banana' + value))();
+    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => mockFormatter);
+    const displayValue = getDisplayValueFromFilter(rangeFilter, [stubIndexPattern]);
+    expect(displayValue).toBe('banana0 to banana10');
   });
 });
 

@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { AppMockRenderer, buildCasesPermissions, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { buildCasesPermissions, createAppMockRenderer } from '../../common/mock';
 import { CasesTableHeader } from './header';
 
 describe('CasesTableHeader', () => {

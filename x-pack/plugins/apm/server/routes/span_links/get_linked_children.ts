@@ -15,27 +15,25 @@ import {
   SPAN_LINKS_SPAN_ID,
   TRACE_ID,
   TRANSACTION_ID,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { Setup } from '../../lib/helpers/setup_request';
 import { getBufferedTimerange } from './utils';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 async function fetchLinkedChildrenOfSpan({
   traceId,
-  setup,
+  apmEventClient,
   start,
   end,
   spanId,
 }: {
   traceId: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   spanId?: string;
 }) {
-  const { apmEventClient } = setup;
-
   const { startWithBuffer, endWithBuffer } = getBufferedTimerange({
     start,
     end,
@@ -49,6 +47,7 @@ async function fetchLinkedChildrenOfSpan({
       },
       _source: [SPAN_LINKS, TRACE_ID, SPAN_ID, PROCESSOR_EVENT, TRANSACTION_ID],
       body: {
+        track_total_hits: false,
         size: 1000,
         query: {
           bool: {
@@ -80,20 +79,20 @@ function getSpanId(source: TransactionRaw | SpanRaw) {
     : (source as TransactionRaw).transaction?.id;
 }
 
-export async function getLinkedChildrenCountBySpanId({
+export async function getSpanLinksCountById({
   traceId,
-  setup,
+  apmEventClient,
   start,
   end,
 }: {
   traceId: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) {
   const linkedChildren = await fetchLinkedChildrenOfSpan({
     traceId,
-    setup,
+    apmEventClient,
     start,
     end,
   });
@@ -114,20 +113,20 @@ export async function getLinkedChildrenCountBySpanId({
 export async function getLinkedChildrenOfSpan({
   traceId,
   spanId,
-  setup,
+  apmEventClient,
   start,
   end,
 }: {
   traceId: string;
   spanId: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) {
   const linkedChildren = await fetchLinkedChildrenOfSpan({
     traceId,
     spanId,
-    setup,
+    apmEventClient,
     start,
     end,
   });

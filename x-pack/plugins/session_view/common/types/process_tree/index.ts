@@ -12,12 +12,25 @@ export interface AlertStatusEventEntityIdMap {
   };
 }
 
-export const enum EventKind {
+export enum ProcessEventAlertCategory {
+  all = 'all',
+  file = 'file',
+  network = 'network',
+  process = 'process',
+}
+
+export interface AlertTypeCount {
+  category: ProcessEventAlertCategory;
+  count: number;
+}
+export type DefaultAlertFilterType = 'all';
+
+export enum EventKind {
   event = 'event',
   signal = 'signal',
 }
 
-export const enum EventAction {
+export enum EventAction {
   fork = 'fork',
   exec = 'exec',
   end = 'end',
@@ -69,14 +82,15 @@ export interface IOLine {
   value: string;
 }
 
-export interface ProcessEntityIdIOLine {
-  previous?: number;
-  value: number;
-  next?: number;
+export interface ProcessStartMarker {
+  event: ProcessEvent;
+  line: number;
+  maxBytesExceeded?: boolean;
 }
 
 export interface IOFields {
   text?: string;
+  max_bytes_per_process_exceeded?: boolean;
 }
 
 export interface ProcessFields {
@@ -155,14 +169,34 @@ export interface ProcessEventAlert {
   rule?: ProcessEventAlertRule;
 }
 
+export interface ProcessEventIPAddress {
+  address?: string;
+  ip?: string;
+  port?: number;
+}
+
+export interface ProcessEventNetwork {
+  type?: string;
+  transport?: string;
+  protocol?: string;
+}
+
 export interface ProcessEvent {
   '@timestamp'?: string;
   event?: {
     kind?: EventKind;
-    category?: string;
+    category?: string[];
     action?: EventAction;
     id?: string;
   };
+  file?: {
+    extension?: string;
+    path?: string;
+    name?: string;
+  };
+  network?: ProcessEventNetwork;
+  destination?: ProcessEventIPAddress;
+  source?: ProcessEventIPAddress;
   user?: User;
   group?: Group;
   host?: ProcessEventHost;

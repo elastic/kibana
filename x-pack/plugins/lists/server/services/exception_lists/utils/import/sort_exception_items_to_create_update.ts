@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
@@ -97,7 +97,7 @@ export const sortExceptionItemsToUpdateOrCreate = ({
             name,
             os_types: osTypes,
             tags,
-            tie_breaker_id: uuid.v4(),
+            tie_breaker_id: uuidv4(),
             type,
             updated_by: user,
             version: undefined,
@@ -129,31 +129,6 @@ export const sortExceptionItemsToUpdateOrCreate = ({
             },
             id: existingItems[itemId].id,
             type: savedObjectType,
-          },
-        ];
-      } else {
-        // If overwrite is true, the list parent container is deleted first along
-        // with its items, so to get here would mean the user hit a bit of an odd scenario.
-        // Sample scenario would be as follows:
-        // In system we have:
-        // List A ---> with item list_item_id
-        // Import is:
-        // List A ---> with item list_item_id_1
-        // List B ---> with item list_item_id_1
-        // If we just did an update of the item, we would overwrite
-        // list_item_id_1 of List A, which would be weird behavior
-        // What happens:
-        // List A and items are deleted and recreated
-        // List B is created, but list_item_id_1 already exists under List A and user warned
-        results.errors = [
-          ...results.errors,
-          {
-            error: {
-              message: `Error trying to update item_id: "${itemId}" and list_id: "${listId}". The item already exists under list_id: ${existingItems[itemId].list_id}`,
-              status_code: 409,
-            },
-            item_id: itemId,
-            list_id: listId,
           },
         ];
       }

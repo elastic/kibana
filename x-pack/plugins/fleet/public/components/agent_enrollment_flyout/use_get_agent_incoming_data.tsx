@@ -7,7 +7,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { SearchHit } from '@kbn/core/types/elasticsearch';
+import type { SearchHit } from '@kbn/es-types';
 
 import type { IncomingDataList } from '../../../common/types/rest_spec/agent';
 

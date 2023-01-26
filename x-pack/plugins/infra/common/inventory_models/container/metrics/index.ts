@@ -22,6 +22,12 @@ import { containerK8sOverview } from './tsvb/container_k8s_overview';
 import { containerK8sCpuUsage } from './tsvb/container_k8s_cpu_usage';
 import { containerK8sMemoryUsage } from './tsvb/container_k8s_memory_usage';
 
+const containerSnapshotMetrics = { cpu, memory, rx, tx };
+
+export const containerSnapshotMetricTypes = Object.keys(containerSnapshotMetrics) as Array<
+  keyof typeof containerSnapshotMetrics
+>;
+
 export const metrics: InventoryMetrics = {
   tsvb: {
     containerOverview,
@@ -35,7 +41,7 @@ export const metrics: InventoryMetrics = {
     containerK8sOverview,
     containerK8sMemoryUsage,
   },
-  snapshot: { cpu, memory, rx, tx },
+  snapshot: containerSnapshotMetrics,
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };

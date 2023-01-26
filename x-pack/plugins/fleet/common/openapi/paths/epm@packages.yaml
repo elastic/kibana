@@ -20,3 +20,20 @@ parameters:
       caching for the response via `cache-control` headers. If you don't need up-to-date installation
       info for a package, and are querying for a list of available packages, providing this flag can
       improve performance substantially.
+  - in: query 
+    name: prerelease
+    schema:
+      type: boolean
+      default: false
+    description: >-
+      Whether to return prerelease versions of packages (e.g. beta, rc, preview) 
+  - in: query 
+    name: experimental
+    deprecated: true
+    schema:
+      type: boolean
+      default: false
+  - in: query 
+    name: category
+    schema:
+      type: string

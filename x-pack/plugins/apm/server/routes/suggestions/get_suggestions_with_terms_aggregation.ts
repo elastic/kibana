@@ -7,15 +7,15 @@
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../lib/helpers/setup_request';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getSuggestionsWithTermsAggregation({
   fieldName,
   fieldValue,
   searchAggregatedTransactions,
   serviceName,
-  setup,
+  apmEventClient,
   size,
   start,
   end,
@@ -23,14 +23,12 @@ export async function getSuggestionsWithTermsAggregation({
   fieldName: string;
   fieldValue: string;
   searchAggregatedTransactions: boolean;
-  serviceName: string;
-  setup: Setup;
+  serviceName?: string;
+  apmEventClient: APMEventClient;
   size: number;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search(
     'get_suggestions_with_terms_aggregation',
     {
@@ -42,6 +40,7 @@ export async function getSuggestionsWithTermsAggregation({
         ],
       },
       body: {
+        track_total_hits: false,
         timeout: '1500ms',
         size: 0,
         query: {

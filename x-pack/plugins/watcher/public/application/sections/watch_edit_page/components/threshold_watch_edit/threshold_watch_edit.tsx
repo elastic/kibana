@@ -25,7 +25,7 @@ import {
   EuiText,
   EuiTitle,
   EuiPageHeader,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

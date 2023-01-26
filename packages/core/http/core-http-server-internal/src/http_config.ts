@@ -32,9 +32,14 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
 // The lower-case set of response headers which are forbidden within `customResponseHeaders`.
 const RESPONSE_HEADER_DENY_LIST = ['location', 'refresh'];
 
+const validHostName = () => {
+  // see https://github.com/elastic/kibana/issues/139730
+  return hostname().replace(/[^\x00-\x7F]/g, '');
+};
+
 const configSchema = schema.object(
   {
-    name: schema.string({ defaultValue: () => hostname() }),
+    name: schema.string({ defaultValue: () => validHostName() }),
     autoListen: schema.boolean({ defaultValue: true }),
     publicBaseUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     basePath: schema.maybe(
@@ -107,6 +112,10 @@ const configSchema = schema.object(
     }),
     compression: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      brotli: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+        quality: schema.number({ defaultValue: 3, min: 0, max: 11 }),
+      }),
       referrerWhitelist: schema.maybe(
         schema.arrayOf(
           schema.string({
@@ -204,7 +213,11 @@ export class HttpConfig implements IHttpConfig {
   public publicBaseUrl?: string;
   public rewriteBasePath: boolean;
   public ssl: SslConfig;
-  public compression: { enabled: boolean; referrerWhitelist?: string[] };
+  public compression: {
+    enabled: boolean;
+    referrerWhitelist?: string[];
+    brotli: { enabled: boolean; quality: number };
+  };
   public csp: ICspConfig;
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };

@@ -27,10 +27,13 @@ import { painlessErrorToMonacoMarker } from '../../../lib';
 import { useFieldPreviewContext, Context } from '../../preview';
 import { schema } from '../form_schema';
 import type { FieldFormInternal } from '../field_editor';
+import { useStateSelector } from '../../../state_utils';
+import { PreviewState } from '../../preview/types';
 
 interface Props {
   links: { runtimePainless: string };
   existingConcreteFields?: Array<{ name: string; type: string }>;
+  placeholder?: string;
 }
 
 const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessContext => {
@@ -52,18 +55,17 @@ const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessConte
   }
 };
 
-const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
+const currentDocumentSelector = (state: PreviewState) => state.documents[state.currentIdx];
+const currentDocumentIsLoadingSelector = (state: PreviewState) => state.isLoadingDocuments;
+
+const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Props) => {
   const monacoEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorValidationSubscription = useRef<Subscription>();
   const fieldCurrentValue = useRef<string>('');
 
-  const {
-    error,
-    isLoadingPreview,
-    isPreviewAvailable,
-    currentDocument: { isLoading: isFetchingDoc, value: currentDocument },
-    validation: { setScriptEditorValidation },
-  } = useFieldPreviewContext();
+  const { error, isLoadingPreview, isPreviewAvailable, controller } = useFieldPreviewContext();
+  const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
+  const isFetchingDoc = useStateSelector(controller.state$, currentDocumentIsLoadingSelector);
   const [validationData$, nextValidationData$] = useBehaviorSubject<
     | {
         isFetchingDoc: boolean;
@@ -141,7 +143,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
 
       editorValidationSubscription.current = PainlessLang.validation$().subscribe(
         ({ isValid, isValidating, errors }) => {
-          setScriptEditorValidation({
+          controller.setScriptEditorValidation({
             isValid,
             isValidating,
             message: errors[0]?.message ?? null,
@@ -149,7 +151,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
         }
       );
     },
-    [setScriptEditorValidation]
+    [controller]
   );
 
   const updateMonacoMarkers = useCallback((markers: monaco.editor.IMarkerData[]) => {
@@ -221,6 +223,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
               id="runtimeFieldScript"
               error={errorMessage}
               isInvalid={!isValid}
+              data-test-subj="scriptFieldRow"
               helpText={
                 <FormattedMessage
                   id="indexPatternFieldEditor.editor.form.source.scriptFieldHelpText"
@@ -276,6 +279,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
                     defaultMessage: 'Script editor',
                   }
                 )}
+                placeholder={placeholder}
               />
             </EuiFormRow>
           </>

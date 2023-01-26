@@ -7,23 +7,28 @@
 
 import { Logger } from '@kbn/logging';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
+import { getServiceAggregatedTransactionStats } from './get_service_aggregated_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getServicesAlerts } from './get_service_alerts';
+import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 
-export type ServicesItemsSetup = Setup;
-
-const MAX_NUMBER_OF_SERVICES = 500;
+export const MAX_NUMBER_OF_SERVICES = 500;
 
 export async function getServicesItems({
   environment,
   kuery,
-  setup,
+  mlClient,
+  apmEventClient,
+  apmAlertsClient,
   searchAggregatedTransactions,
+  searchAggregatedServiceMetrics,
   logger,
   start,
   end,
@@ -32,8 +37,11 @@ export async function getServicesItems({
 }: {
   environment: string;
   kuery: string;
-  setup: ServicesItemsSetup;
+  mlClient?: MlClient;
+  apmEventClient: APMEventClient;
+  apmAlertsClient: ApmAlertsClient;
   searchAggregatedTransactions: boolean;
+  searchAggregatedServiceMetrics: boolean;
   logger: Logger;
   start: number;
   end: number;
@@ -41,11 +49,11 @@ export async function getServicesItems({
   randomSampler: RandomSampler;
 }) {
   return withApmSpan('get_services_items', async () => {
-    const params = {
+    const commonParams = {
       environment,
       kuery,
-      setup,
       searchAggregatedTransactions,
+      searchAggregatedServiceMetrics,
       maxNumServices: MAX_NUMBER_OF_SERVICES,
       start,
       end,
@@ -57,10 +65,26 @@ export async function getServicesItems({
       transactionStats,
       servicesFromErrorAndMetricDocuments,
       healthStatuses,
+      alertCounts,
     ] = await Promise.all([
-      getServiceTransactionStats(params),
-      getServicesFromErrorAndMetricDocuments(params),
-      getHealthStatuses(params).catch((err) => {
+      searchAggregatedServiceMetrics
+        ? getServiceAggregatedTransactionStats({
+            ...commonParams,
+            apmEventClient,
+          })
+        : getServiceTransactionStats({
+            ...commonParams,
+            apmEventClient,
+          }),
+      getServicesFromErrorAndMetricDocuments({
+        ...commonParams,
+        apmEventClient,
+      }),
+      getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
+        logger.error(err);
+        return [];
+      }),
+      getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
         logger.error(err);
         return [];
       }),
@@ -70,6 +94,7 @@ export async function getServicesItems({
       transactionStats,
       servicesFromErrorAndMetricDocuments,
       healthStatuses,
+      alertCounts,
     });
   });
 }

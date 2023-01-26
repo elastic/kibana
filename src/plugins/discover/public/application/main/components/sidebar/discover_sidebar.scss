@@ -8,7 +8,7 @@
 
   @include euiBreakpoint('xs', 's') {
     width: 100%;
-    padding: $euiSize $euiSize 0 $euiSize;
+    padding: $euiSize;
     background-color: $euiPageBackgroundColor;
   }
 }
@@ -29,20 +29,6 @@
 
 .dscSidebar__flyoutHeader {
   align-items: center;
-}
-
-.dscFieldList {
-  padding: 0 $euiSizeXS $euiSizeXS;
-}
-
-.dscFieldListHeader {
-  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
-  background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
-}
-
-.dscFieldList--popular {
-  padding-bottom: $euiSizeS;
-  background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
 }
 
 .dscSidebarItem {

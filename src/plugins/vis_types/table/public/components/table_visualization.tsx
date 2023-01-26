@@ -64,6 +64,7 @@ const TableVisualizationComponent = ({
               tables={tables}
               visConfig={visConfig}
               uiStateProps={uiStateProps}
+              enforceMinWidth={direction === 'column'}
             />
           )}
         </div>

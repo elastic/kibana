@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-const Path = require('path');
-const Fs = require('fs');
+require('@kbn/babel-register').install();
 
-const globby = require('globby');
+const { getPackages } = require('@kbn/repo-packages');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -119,16 +119,10 @@ const VENN_DIAGRAM_HEADER = `
   */
 `;
 
-const packagePkgJsons = globby.sync('*/package.json', {
-  cwd: Path.resolve(__dirname, 'packages'),
-  absolute: true,
-});
-
 /** Packages which should not be included within production code. */
-const DEV_PACKAGES = packagePkgJsons.flatMap((path) => {
-  const pkg = JSON.parse(Fs.readFileSync(path, 'utf8'));
-  return pkg.kibana && pkg.kibana.devOnly ? Path.dirname(Path.basename(path)) : [];
-});
+const DEV_PACKAGE_DIRS = getPackages(REPO_ROOT).flatMap((pkg) =>
+  pkg.isDevOnly ? pkg.normalizedRepoRelativeDir : []
+);
 
 /** Directories (at any depth) which include dev-only code. */
 const DEV_DIRECTORIES = [
@@ -140,11 +134,13 @@ const DEV_DIRECTORIES = [
   '__mocks__',
   '__stories__',
   'e2e',
+  'cypress',
   'fixtures',
   'ftr_e2e',
   'integration_tests',
   'manual_tests',
   'mock',
+  'mocks',
   'storybook',
   'scripts',
   'test',
@@ -153,6 +149,7 @@ const DEV_DIRECTORIES = [
   'test_utilities',
   'test_helpers',
   'tests_client_integration',
+  'tsd_tests',
 ];
 
 /** File patterns for dev-only code. */
@@ -166,19 +163,20 @@ const DEV_FILE_PATTERNS = [
   'mock.{js,ts,tsx}',
   '_stubs.{js,ts,tsx}',
   '{testHelpers,test_helper,test_utils}.{js,ts,tsx}',
-  '{postcss,webpack}.config.js',
+  '{postcss,webpack,cypress}.config.{js,ts}',
 ];
 
 /** Glob patterns which describe dev-only code. */
 const DEV_PATTERNS = [
-  ...DEV_PACKAGES.map((pkg) => `packages/${pkg}/**/*`),
+  ...DEV_PACKAGE_DIRS.map((pkg) => `${pkg}/**/*`),
   ...DEV_DIRECTORIES.map((dir) => `{packages,src,x-pack}/**/${dir}/**/*`),
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
   'packages/kbn-interpreter/tasks/**/*',
   'src/dev/**/*',
-  'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
-  'x-pack/plugins/*/server/scripts/**/*',
-  'x-pack/plugins/fleet/cypress',
+  'x-pack/{dev-tools,tasks,test,build_chromium}/**/*',
+  'x-pack/performance/**/*',
+  'src/setup_node_env/index.js',
+  'src/cli/dev.js',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -285,12 +283,6 @@ module.exports = {
       files: ['x-pack/plugins/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
-      files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
       },
     },
 
@@ -600,12 +592,12 @@ module.exports = {
         'test/*/config_open.ts',
         'test/*/*.config.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
-        'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
         'x-pack/test/performance/**/*.ts',
+        '**/cypress.config.{js,ts}',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -905,7 +897,14 @@ module.exports = {
         ],
       },
     },
-
+    // Profiling
+    {
+      files: ['x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^(useAsync)$' }],
+      },
+    },
     {
       // disable imports from legacy uptime plugin
       files: ['x-pack/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}'],
@@ -1111,7 +1110,10 @@ module.exports = {
       },
       overrides: [
         {
-          files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+          files: [
+            'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+          ],
           rules: {
             '@typescript-eslint/consistent-type-imports': 'error',
           },
@@ -1322,7 +1324,7 @@ module.exports = {
     },
     {
       // typescript only for back end
-      files: ['x-pack/plugins/triggers_actions_ui/server/**/*.ts'],
+      files: ['x-pack/plugins/{stack_connectors,triggers_actions_ui}/server/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1403,6 +1405,30 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': [
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
+        ],
+      },
+    },
+    /**
+     * Allows snake_case variables in the server, because that's how we return API properties
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/server/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/naming-convention': [
+          'error',
+          {
+            selector: 'variable',
+            modifiers: ['destructured'],
+            format: null,
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
+          {
+            selector: 'variable',
+            format: ['camelCase', 'UPPER_CASE'],
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
         ],
       },
     },
@@ -1670,13 +1696,6 @@ module.exports = {
     },
 
     /**
-     * Prettier disables all conflicting rules, listing as last override so it takes precedence
-     */
-    {
-      files: ['**/*'],
-      rules: require('eslint-config-prettier').rules,
-    },
-    /**
      * Enterprise Search Prettier override
      * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
      */
@@ -1697,5 +1716,23 @@ module.exports = {
         '@kbn/imports/no_unresolvable_imports': 'off',
       },
     },
+
+    /**
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     */
+    {
+      files: 'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+      rules: {
+        'max-classes-per-file': 'off',
+      },
+    },
   ],
 };
+
+/**
+ * Prettier disables all conflicting rules, listing as last override so it takes precedence
+ * people kept ignoring that this was last so it's now defined outside of the overrides list
+ */
+/** eslint-disable-next-line */
+module.exports.overrides.push({ files: ['**/*'], rules: require('eslint-config-prettier').rules });
+/** PLEASE DON'T PUT THINGS AFTER THIS */

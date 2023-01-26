@@ -134,7 +134,7 @@ export class VisualizeEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('visualizations.displayName', {
-      defaultMessage: 'Visualization',
+      defaultMessage: 'visualization',
     });
   }
 
@@ -280,7 +280,6 @@ export class VisualizeEmbeddableFactory
         title: props.newTitle,
         lastSavedTitle: '',
         getEsType: () => this.type,
-        getDisplayName: this.getDisplayName || (() => this.type),
       },
       false,
       props.isTitleDuplicateConfirmed,

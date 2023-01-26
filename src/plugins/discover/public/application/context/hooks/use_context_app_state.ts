@@ -5,13 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useEffect, useMemo, useState } from 'react';
 
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
 import { AppState, getState, GlobalState } from '../services/context_state';
 
-export function useContextAppState({ services }: { services: DiscoverServices }) {
+export function useContextAppState({
+  services,
+  dataView,
+}: {
+  services: DiscoverServices;
+  dataView: DataView;
+}) {
   const { uiSettings: config, history, core } = services;
 
   const stateContainer = useMemo(() => {
@@ -22,8 +29,9 @@ export function useContextAppState({ services }: { services: DiscoverServices })
       toasts: core.notifications.toasts,
       uiSettings: config,
       data: services.data,
+      dataView,
     });
-  }, [config, history, core.notifications.toasts, services.data]);
+  }, [config, history, core.notifications.toasts, services.data, dataView]);
 
   const [appState, setAppState] = useState<AppState>(stateContainer.appState.getState());
   const [globalState, setGlobalState] = useState<GlobalState>(
@@ -59,6 +67,6 @@ export function useContextAppState({ services }: { services: DiscoverServices })
   return {
     appState,
     globalState,
-    setAppState: stateContainer.setAppState,
+    stateContainer,
   };
 }

@@ -6,7 +6,9 @@
   "requiredPlugins": [
     "expressions",
     "visualizations",
-    "fieldFormats"
+    "fieldFormats",
+    "dataViews",
+    "usageCollection"
   ],
   "requiredBundles": [
     "data",
@@ -17,7 +19,7 @@
   ],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Registers the datatable aggregation-based visualization."
 }

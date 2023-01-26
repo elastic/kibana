@@ -11,7 +11,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { basicCase, caseUserActions, getAlertUserAction } from '../../containers/mock';
-import { CaseActionBar, CaseActionBarProps } from '.';
+import type { CaseActionBarProps } from '.';
+import { CaseActionBar } from '.';
 import {
   allCasesPermissions,
   noDeleteCasesPermissions,
@@ -232,8 +233,10 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('property-actions-ellipses')).not.toBeInTheDocument();
+    userEvent.click(screen.getByTestId('property-actions-ellipses'));
     expect(queryByText('Delete case')).not.toBeInTheDocument();
+    expect(queryByTestId('property-actions-trash')).not.toBeInTheDocument();
+    expect(queryByTestId('property-actions-copyClipboard')).toBeInTheDocument();
   });
 
   it('should show the the delete item in the menu when the user does have delete privileges', () => {

@@ -29,6 +29,7 @@ import {
   SmallMultiples,
   VerticalAlignment,
   XYChartSeriesIdentifier,
+  Tooltip,
 } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
@@ -54,17 +55,15 @@ import {
   sampleLayer,
 } from '../../common/__mocks__';
 import { XYChart, XYChartRenderProps } from './xy_chart';
-import {
-  CommonXYAnnotationLayerConfig,
-  ExtendedDataLayerConfig,
-  XYProps,
-} from '../../common/types';
+import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
 import { DataLayers } from './data_layers';
-import { Annotations } from './annotations';
 import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
+import type { LayerCellValueActions } from '../types';
 
 const onClickValue = jest.fn();
+const onClickMultiValue = jest.fn();
+const layerCellValueActions: LayerCellValueActions = [];
 const onSelectRange = jest.fn();
 
 describe('XYChart component', () => {
@@ -119,12 +118,16 @@ describe('XYChart component', () => {
       paletteService,
       minInterval: 50,
       onClickValue,
+      onClickMultiValue,
+      layerCellValueActions,
       onSelectRange,
       syncColors: false,
       syncTooltips: false,
+      syncCursor: true,
       useLegacyTimeAxis: false,
       eventAnnotationService: eventAnnotationServiceMock,
       renderComplete: jest.fn(),
+      timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
     };
   });
 
@@ -316,7 +319,7 @@ describe('XYChart component', () => {
 
         const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
 
-        expect(axisStyle).toBe(3);
+        expect(axisStyle).toBe(2);
       });
       test('it should disable the new time axis for a vertical bar with break down dimension', () => {
         const timeLayer: DataLayerConfig = {
@@ -366,7 +369,7 @@ describe('XYChart component', () => {
 
         const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
 
-        expect(axisStyle).toBe(3);
+        expect(axisStyle).toBe(2);
       });
     });
     describe('endzones', () => {
@@ -1100,6 +1103,126 @@ describe('XYChart component', () => {
       />
     );
     expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBin')).toEqual(true);
+  });
+
+  test('should not have tooltip actions for the detailed tooltip', () => {
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          detailedTooltip: true,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              isHistogram: true,
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: 'b',
+              xScaleType: 'time',
+              splitAccessors: ['b'],
+              accessors: ['d'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+        }}
+      />
+    );
+
+    const tooltip = wrapper.find(Tooltip);
+    const actions = tooltip.prop('actions');
+    expect(actions).toBeUndefined();
+  });
+
+  test('should not have tooltip actions for no split accessor', () => {
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              isHistogram: true,
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: 'b',
+              xScaleType: 'time',
+              splitAccessors: undefined,
+              accessors: ['d'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+        }}
+      />
+    );
+
+    const tooltip = wrapper.find(Tooltip);
+    const actions = tooltip.prop('actions');
+    expect(actions).toBeUndefined();
+  });
+
+  test('should have tooltip actions for split accessor and default tooltip', () => {
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              isHistogram: true,
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: 'b',
+              xScaleType: 'time',
+              splitAccessors: ['d'],
+              accessors: ['d'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+        }}
+      />
+    );
+
+    const tooltip = wrapper.find(Tooltip);
+    const actions = tooltip.prop('actions');
+    expect(actions?.length).toBe(1);
+    expect(actions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          onSelect: expect.any(Function),
+          disabled: expect.any(Function),
+        }),
+      ])
+    );
   });
 
   test('onElementClick returns correct context data', () => {
@@ -3068,12 +3191,19 @@ describe('XYChart component', () => {
       label: 'Event range',
       type: 'manual_range_event_annotation' as const,
     };
+    const configToRowHelper = (config: EventAnnotationOutput) => {
+      return {
+        ...config,
+        timebucket: 1647591917100,
+        type: config.type === 'manual_point_event_annotation' ? 'point' : 'range',
+      };
+    };
     const createLayerWithAnnotations = (
       annotations: EventAnnotationOutput[] = [defaultLineStaticAnnotation]
-    ): CommonXYAnnotationLayerConfig => ({
+    ): AnnotationLayerConfigResult => ({
+      layerId: 'annotations',
       type: 'annotationLayer',
       layerType: LayerTypes.ANNOTATIONS,
-      layerId: 'annotation',
       annotations,
     });
     function sampleArgsWithAnnotations(annotationLayers = [createLayerWithAnnotations()]) {
@@ -3081,7 +3211,16 @@ describe('XYChart component', () => {
       return {
         args: {
           ...args,
-          layers: [dateHistogramLayer, ...annotationLayers],
+          layers: [dateHistogramLayer],
+          annotations: {
+            type: 'event_annotations_result' as const,
+            layers: annotationLayers,
+            datatable: {
+              type: 'datatable' as const,
+              columns: [],
+              rows: annotationLayers.flatMap((l) => l.annotations.map(configToRowHelper)),
+            },
+          },
         },
       };
     }
@@ -3102,7 +3241,7 @@ describe('XYChart component', () => {
       const { args } = sampleArgsWithAnnotations([
         createLayerWithAnnotations([defaultLineStaticAnnotation, defaultRangeStaticAnnotation]),
       ]);
-      (args.layers[1] as CommonXYAnnotationLayerConfig).simpleView = true;
+      args.annotations.layers[0].simpleView = true;
       const component = mount(<XYChart {...defaultProps} args={args} />);
       expect(component.find('LineAnnotation')).toMatchSnapshot();
       expect(component.find('RectAnnotation')).toMatchSnapshot();
@@ -3124,7 +3263,7 @@ describe('XYChart component', () => {
       const groupedAnnotation = component.find(LineAnnotation);
 
       expect(groupedAnnotation.length).toEqual(1);
-      // styles are passed because they are shared, dataValues & header is rounded to the interval
+      // styles are passed because they are shared, dataValues is rounded to the interval
       expect(groupedAnnotation).toMatchSnapshot();
       // renders numeric icon for grouped annotations
       const marker = mount(<div>{groupedAnnotation.prop('marker')}</div>);
@@ -3133,9 +3272,11 @@ describe('XYChart component', () => {
       expect(numberIcon.text()).toEqual('3');
 
       // checking tooltip
-      const renderLinks = mount(<div>{groupedAnnotation.prop('customTooltipDetails')!()}</div>);
+      const renderLinks = mount(
+        <div>{(groupedAnnotation.prop('customTooltip') as Function)!()}</div>
+      );
       expect(renderLinks.text()).toEqual(
-        ' Event 1 2022-03-18T08:25:00.000Z Event 3 2022-03-18T08:25:00.001Z Event 2 2022-03-18T08:25:00.020Z'
+        'Event 1Mar 18, 2022 @ 04:25:00.000Event 2Mar 18, 2022 @ 04:25:00.020Event 3Mar 18, 2022 @ 04:25:00.001'
       );
     });
 
@@ -3160,28 +3301,6 @@ describe('XYChart component', () => {
       expect(groupedAnnotation.length).toEqual(1);
       // styles are default because they are different for both annotations
       expect(groupedAnnotation).toMatchSnapshot();
-    });
-    test('should not render hidden annotations', () => {
-      const { args } = sampleArgsWithAnnotations([
-        createLayerWithAnnotations([
-          customLineStaticAnnotation,
-          { ...customLineStaticAnnotation, time: '2022-03-18T08:30:00.020Z', label: 'Event 2' },
-          {
-            ...customLineStaticAnnotation,
-            time: '2022-03-18T08:35:00.001Z',
-            label: 'Event 3',
-            isHidden: true,
-          },
-          defaultRangeStaticAnnotation,
-          { ...defaultRangeStaticAnnotation, label: 'range', isHidden: true },
-        ]),
-      ]);
-      const component = mount(<XYChart {...defaultProps} args={args} />);
-      const lineAnnotations = component.find(LineAnnotation);
-      const rectAnnotations = component.find(Annotations).find(RectAnnotation);
-
-      expect(lineAnnotations.length).toEqual(2);
-      expect(rectAnnotations.length).toEqual(1);
     });
   });
 
@@ -3288,14 +3407,11 @@ describe('XYChart component', () => {
           }}
         />
       );
-      const settings = component.find(Settings);
-      const tooltip = settings.prop('tooltip');
-      expect(tooltip).toEqual(
-        expect.objectContaining({
-          headerFormatter: undefined,
-          customTooltip: expect.any(Function),
-        })
-      );
+      const tooltip = component.find(Tooltip);
+      const customTooltip = tooltip.prop('customTooltip');
+      expect(customTooltip).not.toBeUndefined();
+      const headerFormatter = tooltip.prop('headerFormatter');
+      expect(headerFormatter).toBeUndefined();
     });
 
     it('should render default tooltip, if detailed tooltip is hidden', () => {
@@ -3310,14 +3426,11 @@ describe('XYChart component', () => {
           }}
         />
       );
-      const settings = component.find(Settings);
-      const tooltip = settings.prop('tooltip');
-      expect(tooltip).toEqual(
-        expect.objectContaining({
-          headerFormatter: expect.any(Function),
-          customTooltip: undefined,
-        })
-      );
+      const tooltip = component.find(Tooltip);
+      const customTooltip = tooltip.prop('customTooltip');
+      expect(customTooltip).toBeUndefined();
+      const headerFormatter = tooltip.prop('headerFormatter');
+      expect(headerFormatter).not.toBeUndefined();
     });
   });
 });

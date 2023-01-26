@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('navigates to Discover app to index pattern of the panel on action click', async () => {
-      await testSubjects.clickWhenNotDisabled(ACTION_TEST_SUBJ);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(ACTION_TEST_SUBJ);
       await discover.waitForDiscoverAppOnScreen();
 
       const el = await testSubjects.find('discover-dataView-switch-link');
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.saveDashboard('Dashboard with Pie Chart');
 
       await panelActions.openContextMenu();
-      await testSubjects.clickWhenNotDisabled(ACTION_TEST_SUBJ);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(ACTION_TEST_SUBJ);
       await discover.waitForDiscoverAppOnScreen();
 
       const text = await timePicker.getShowDatesButtonText();

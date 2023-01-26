@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const rackVariables = {
+  apmServiceName: 'service_name',
+  secretToken: 'secret_token',
+  apmServerUrl: 'server_url',
+  apmEnvironment: 'environment',
+};
+
 export const rack = `# config/elastic_apm.yml:
 
 # ${i18n.translate(
@@ -22,7 +29,7 @@ export const rack = `# config/elastic_apm.yml:
     defaultMessage: "Defaults to the name of your Rack app's class.",
   }
 )}
-service_name: 'my-service'
+${rackVariables.apmServiceName}: '{{{apmServiceName}}}'
 
 # ${i18n.translate(
   'xpack.apm.tutorial.rackClient.createConfig.commands.useIfApmServerRequiresTokenComment',
@@ -30,7 +37,7 @@ service_name: 'my-service'
     defaultMessage: 'Use if APM Server requires a token',
   }
 )}
-secret_token: '{{{secretToken}}}'
+${rackVariables.secretToken}: '{{{secretToken}}}'
 
 # ${i18n.translate(
   'xpack.apm.tutorial.rackClient.createConfig.commands.setCustomApmServerComment',
@@ -39,7 +46,7 @@ secret_token: '{{{secretToken}}}'
     values: { defaultServerUrl: 'http://localhost:8200' },
   }
 )}
-server_url: '{{{apmServerUrl}}}',
+${rackVariables.apmServerUrl}: '{{{apmServerUrl}}}',
 
 # ${i18n.translate(
   'xpack.apm.tutorial.rackClient.createConfig.commands.setServiceEnvironment',
@@ -47,4 +54,4 @@ server_url: '{{{apmServerUrl}}}',
     defaultMessage: 'Set the service environment',
   }
 )}
-environment: 'production'`;
+${rackVariables.apmEnvironment}: '{{{apmEnvironment}}}'`;

@@ -5,16 +5,34 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useMemo } from 'react';
+import type { Ecs } from '../../common/ecs';
+import ServicesWrapper from './services_wrapper';
+import type { ServicesWrapperProps } from './services_wrapper';
+import type { OsqueryActionProps } from './osquery_action';
+import { AlertAttachmentContext } from '../common/contexts';
 
-// @ts-expect-error update types
-// eslint-disable-next-line react/display-name
-export const getLazyOsqueryAction = (services) => (props) => {
-  const OsqueryAction = lazy(() => import('./osquery_action'));
+const OsqueryAction = lazy(() => import('./osquery_action'));
+export const getLazyOsqueryAction =
+  (services: ServicesWrapperProps['services']) =>
+  // eslint-disable-next-line react/display-name
+  (props: OsqueryActionProps & { ecsData?: Ecs }) => {
+    const { ecsData, ...restProps } = props;
+    const renderAction = useMemo(() => {
+      if (ecsData && ecsData?._id) {
+        return (
+          <AlertAttachmentContext.Provider value={ecsData}>
+            <OsqueryAction {...restProps} />
+          </AlertAttachmentContext.Provider>
+        );
+      }
 
-  return (
-    <Suspense fallback={null}>
-      <OsqueryAction services={services} {...props} />
-    </Suspense>
-  );
-};
+      return <OsqueryAction {...restProps} />;
+    }, [ecsData, restProps]);
+
+    return (
+      <Suspense fallback={null}>
+        <ServicesWrapper services={services}>{renderAction}</ServicesWrapper>
+      </Suspense>
+    );
+  };

@@ -7,21 +7,41 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel, EuiLoadingChart } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-plugin/public';
-import { useLocationName, useStatusByLocation } from '../../../../hooks';
+import { useDispatch, useSelector } from 'react-redux';
+import moment from 'moment';
+import { ManualTestRunProgress } from './manual_run_progress';
+import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
-import { MonitorOverviewItem, Ping } from '../../../../../../../common/runtime_types';
+import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
+import { OverviewGridItemLoader } from './overview_grid_item_loader';
+import {
+  hideTestNowFlyoutAction,
+  manualTestRunInProgressSelector,
+  toggleTestNowFlyoutAction,
+} from '../../../../state/manual_test_runs';
 
-export const getColor = (theme: ReturnType<typeof useTheme>, isEnabled: boolean, ping?: Ping) => {
+export const getColor = (
+  theme: ReturnType<typeof useTheme>,
+  isEnabled: boolean,
+  status?: string
+) => {
   if (!isEnabled) {
     return theme.eui.euiColorLightestShade;
   }
-  return (ping?.summary?.down || 0) > 0
-    ? theme.eui.euiColorVis9_behindText
-    : theme.eui.euiColorVis0_behindText;
+  switch (status) {
+    case 'down':
+      return theme.eui.euiColorVis9_behindText;
+    case 'up':
+      return theme.eui.euiColorVis0_behindText;
+    case 'unknown':
+      return theme.eui.euiColorGhost;
+    default:
+      return theme.eui.euiColorVis0_behindText;
+  }
 };
 
 export const MetricItem = ({
@@ -29,27 +49,30 @@ export const MetricItem = ({
   averageDuration,
   data,
   loaded,
+  onClick,
 }: {
   monitor: MonitorOverviewItem;
   data: Array<{ x: number; y: number }>;
   averageDuration: number;
   loaded: boolean;
+  onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const locationName = useLocationName({ locationId: monitor.location?.id });
-  const { locations } = useStatusByLocation(monitor.id);
-  const ping = locations.find((loc) => loc.observer?.geo?.name === locationName);
+  const { status, timestamp } = useStatusByLocationOverview(monitor.configId, locationName);
   const theme = useTheme();
 
+  const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
+
+  const dispatch = useDispatch();
+
   return (
-    <div
-      style={{
-        height: '160px',
-      }}
-    >
+    <div data-test-subj={`${monitor.name}-metric-item`} style={{ height: '160px' }}>
       {loaded ? (
         <EuiPanel
+          data-test-subj={`${monitor.name}-metric-item-${locationName}-${status}`}
+          paddingSize="none"
           onMouseOver={() => {
             if (!isMouseOver) {
               setIsMouseOver(true);
@@ -61,18 +84,36 @@ export const MetricItem = ({
             }
           }}
           style={{
-            padding: '0px',
             height: '100%',
             overflow: 'hidden',
           }}
+          title={moment(timestamp).format('LLL')}
         >
           <Chart>
-            <Settings baseTheme={DARK_THEME} />
+            <Settings
+              onElementClick={() => {
+                if (testInProgress) {
+                  dispatch(toggleTestNowFlyoutAction(monitor.configId));
+                } else {
+                  dispatch(hideTestNowFlyoutAction());
+                }
+                if (!testInProgress && locationName) {
+                  onClick({
+                    configId: monitor.configId,
+                    id: monitor.id,
+                    location: locationName,
+                    locationId: monitor.location?.id,
+                  });
+                }
+              }}
+              baseTheme={DARK_THEME}
+            />
             <Metric
-              id={`${monitor.id}-${monitor.location?.id}`}
+              id={`${monitor.configId}-${monitor.location?.id}`}
               data={[
                 [
                   {
+                    icon: () => <ManualTestRunProgress configId={monitor.configId} />,
                     title: monitor.name,
                     subtitle: locationName,
                     value: averageDuration,
@@ -81,12 +122,12 @@ export const MetricItem = ({
                     extra: (
                       <span>
                         {i18n.translate('xpack.synthetics.overview.duration.label', {
-                          defaultMessage: 'Duration',
+                          defaultMessage: 'Duration Avg.',
                         })}
                       </span>
                     ),
                     valueFormatter: (d: number) => formatDuration(d),
-                    color: getColor(theme, monitor.isEnabled, ping),
+                    color: getColor(theme, monitor.isEnabled, status),
                   },
                 ],
               ]}
@@ -97,11 +138,12 @@ export const MetricItem = ({
               monitor={monitor}
               isPopoverOpen={isPopoverOpen}
               setIsPopoverOpen={setIsPopoverOpen}
+              position="relative"
             />
           )}
         </EuiPanel>
       ) : (
-        <EuiLoadingChart mono />
+        <OverviewGridItemLoader />
       )}
     </div>
   );

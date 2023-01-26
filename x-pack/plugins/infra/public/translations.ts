@@ -49,3 +49,7 @@ export const metricsExplorerTitle = i18n.translate('xpack.infra.metrics.metricsE
 export const hostsTitle = i18n.translate('xpack.infra.metrics.hostsTitle', {
   defaultMessage: 'Hosts',
 });
+
+export const errorTitle = i18n.translate('xpack.infra.metricDetailPage.documentTitleError', {
+  defaultMessage: 'Uh oh',
+});

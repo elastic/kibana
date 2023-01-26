@@ -34,6 +34,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
   [ConfigKey.ENABLED]: true,
+  [ConfigKey.ALERT_CONFIG]: { status: { enabled: true } },
   [ConfigKey.SCHEDULE]: {
     number: '3',
     unit: ScheduleUnit.MINUTES,
@@ -46,6 +47,9 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.LOCATIONS]: [],
   [ConfigKey.NAMESPACE]: DEFAULT_NAMESPACE_STRING,
   [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.UI,
+  [ConfigKey.JOURNEY_ID]: '',
+  [ConfigKey.CONFIG_HASH]: '',
+  [ConfigKey.MONITOR_QUERY_ID]: '',
 };
 
 export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
@@ -63,7 +67,6 @@ export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
 
 export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   ...DEFAULT_COMMON_FIELDS,
-  [ConfigKey.JOURNEY_ID]: '',
   [ConfigKey.PROJECT_ID]: '',
   [ConfigKey.PLAYWRIGHT_OPTIONS]: '',
   [ConfigKey.METADATA]: {
@@ -88,14 +91,17 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   [ConfigKey.SOURCE_ZIP_FOLDER]: '',
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: '',
   [ConfigKey.TEXT_ASSERTION]: '',
+  [ConfigKey.URLS]: '',
+  [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
+  [ConfigKey.TIMEOUT]: null,
+
+  // Deprecated, slated to be removed in a future version
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: undefined,
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: undefined,
   [ConfigKey.ZIP_URL_TLS_KEY]: undefined,
   [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: undefined,
   [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: undefined,
   [ConfigKey.ZIP_URL_TLS_VERSION]: undefined,
-  [ConfigKey.URLS]: '',
-  [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
 };
 
 export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
@@ -107,6 +113,7 @@ export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
   [ConfigKey.MAX_REDIRECTS]: '0',
   [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
+  [ConfigKey.PORT]: null,
 };
 
 export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
@@ -141,8 +148,10 @@ export const DEFAULT_TCP_SIMPLE_FIELDS: TCPSimpleFields = {
     is_tls_enabled: false,
   },
   [ConfigKey.HOSTS]: '',
+  [ConfigKey.URLS]: '',
   [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
+  [ConfigKey.PORT]: null,
 };
 
 export const DEFAULT_TCP_ADVANCED_FIELDS: TCPAdvancedFields = {

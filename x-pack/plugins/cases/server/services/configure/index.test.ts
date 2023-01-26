@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   CaseConnector,
   CasesConfigureAttributes,
   CasesConfigurePatch,
-  ConnectorTypes,
 } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
+import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsCreateOptions,
@@ -24,10 +24,11 @@ import {
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { CaseConfigureService } from '.';
-import { ESCasesConfigureAttributes } from './types';
+import type { ESCasesConfigureAttributes } from './types';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
-import { createESJiraConnector, createJiraConnector, ESCaseConnectorWithId } from '../test_utils';
+import type { ESCaseConnectorWithId } from '../test_utils';
+import { createESJiraConnector, createJiraConnector } from '../test_utils';
 
 const basicConfigFields = {
   closure_type: 'close-by-pushing' as const,

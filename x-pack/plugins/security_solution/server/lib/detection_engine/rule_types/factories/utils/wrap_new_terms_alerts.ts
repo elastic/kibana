@@ -15,9 +15,10 @@ import type {
 } from '../../../../../../common/detection_engine/schemas/alerts';
 import { ALERT_NEW_TERMS } from '../../../../../../common/field_maps/field_names';
 import type { ConfigType } from '../../../../../config';
-import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../../../signals/reason_formatters';
 import type { SignalSource } from '../../../signals/types';
+import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import { buildBulkBody } from './build_bulk_body';
 
 export interface EventsAndTerms {
@@ -31,12 +32,16 @@ export const wrapNewTermsAlerts = ({
   completeRule,
   mergeStrategy,
   indicesToQuery,
+  alertTimestampOverride,
+  ruleExecutionLogger,
 }: {
   eventsAndTerms: EventsAndTerms[];
   spaceId: string | null | undefined;
   completeRule: CompleteRule<RuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
   indicesToQuery: string[];
+  alertTimestampOverride: Date | undefined;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Array<WrappedFieldsLatest<NewTermsFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const id = objectHash([
@@ -54,7 +59,9 @@ export const wrapNewTermsAlerts = ({
       [],
       true,
       buildReasonMessageForNewTermsAlert,
-      indicesToQuery
+      indicesToQuery,
+      alertTimestampOverride,
+      ruleExecutionLogger
     );
     return {
       _id: id,

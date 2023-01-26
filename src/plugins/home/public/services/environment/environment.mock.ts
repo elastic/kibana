@@ -18,14 +18,13 @@ const createSetupMock = (): jest.Mocked<EnvironmentServiceSetup> => {
 
 const createMock = (): jest.Mocked<PublicMethodsOf<EnvironmentService>> => {
   const service = {
-    setup: jest.fn(),
+    setup: jest.fn(createSetupMock),
     getEnvironment: jest.fn(() => ({
       cloud: false,
       apmUi: false,
       ml: false,
     })),
   };
-  service.setup.mockImplementation(createSetupMock);
   return service;
 };
 

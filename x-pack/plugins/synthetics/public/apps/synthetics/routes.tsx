@@ -7,57 +7,63 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import {
-  EuiPageTemplateProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  useEuiTheme,
-} from '@elastic/eui';
-import { Route, Switch, useHistory } from 'react-router-dom';
+import { EuiIcon, EuiLink, EuiPageHeaderProps, useEuiTheme } from '@elastic/eui';
+import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
-import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
-import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
-import { RunTestManually } from './components/monitor_summary/run_test_manually';
-import { MonitorSummaryHeaderContent } from './components/monitor_summary/monitor_summary_header_content';
-import { MonitorSummaryTitle } from './components/monitor_summary/monitor_summary_title';
-import { MonitorSummaryPage } from './components/monitor_summary/monitor_summary';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { EditMonitorLink } from './components/common/links/edit_monitor';
+import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
+import { getStepDetailsRoute } from './components/step_details_page/route_config';
+import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
+import { getSettingsRouteConfig } from './components/settings/route_config';
+import { TestRunDetails } from './components/test_run_details/test_run_details';
+import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/monitor_add_page';
+import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
+import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
+import { MonitorDetailsPage } from './components/monitor_details/monitor_details_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import { MonitorsPageHeader } from './components/monitors_page/management/page_header/monitors_page_header';
+import { CreateMonitorButton } from './components/monitors_page/create_monitor_button';
 import { OverviewPage } from './components/monitors_page/overview/overview_page';
 import { SyntheticsPageTemplateComponent } from './components/common/pages/synthetics_page_template';
 import { NotFoundPage } from './components/common/pages/not_found';
-import { ServiceAllowedWrapper } from './components/common/wrappers/service_allowed_wrapper';
 import {
   MonitorTypePortalNode,
   MonitorDetailsLinkPortalNode,
 } from './components/monitor_add_edit/portals';
 import {
+  GETTING_STARTED_ROUTE,
+  MONITORS_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
-  MONITORS_ROUTE,
-  OVERVIEW_ROUTE,
-  GETTING_STARTED_ROUTE,
+  MONITOR_ERRORS_ROUTE,
+  MONITOR_HISTORY_ROUTE,
   MONITOR_ROUTE,
+  OVERVIEW_ROUTE,
+  TEST_RUN_DETAILS_ROUTE,
 } from '../../../common/constants';
-import { MonitorPage } from './components/monitors_page/monitor_page';
+import { PLUGIN } from '../../../common/constants/plugin';
+import { MonitorsPageWithServiceAllowed } from './components/monitors_page/monitors_page';
 import { apiService } from '../../utils/api_service';
+import { RunTestManually } from './components/monitor_details/run_test_manually';
+import { MonitorDetailsStatus } from './components/monitor_details/monitor_details_status';
+import { MonitorDetailsLastRun } from './components/monitor_details/monitor_details_last_run';
+import { MonitorSummary } from './components/monitor_details/monitor_summary/monitor_summary';
+import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
+import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
+import { getErrorDetailsRouteConfig } from './components/error_details/route_config';
 
-type RouteProps = {
+export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  pageHeader?: {
-    pageTitle: string | JSX.Element;
-    children?: JSX.Element;
-    rightSideItems?: JSX.Element[];
-  };
-} & EuiPageTemplateProps;
+};
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
   defaultMessage: 'Synthetics - Kibana',
@@ -72,42 +78,68 @@ export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
 
 const getRoutes = (
   euiTheme: EuiThemeComputed,
-  history: ReturnType<typeof useHistory>
+  history: ReturnType<typeof useHistory>,
+  syntheticsPath: string
 ): RouteProps[] => {
   return [
+    ...getSettingsRouteConfig(history, syntheticsPath, baseTitle),
+    getErrorDetailsRouteConfig(history, syntheticsPath, baseTitle),
+    getTestRunDetailsRoute(history, syntheticsPath, baseTitle),
+    getStepDetailsRoute(history, syntheticsPath, baseTitle),
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
         defaultMessage: 'Synthetics Getting Started | {baseTitle}',
         values: { baseTitle },
       }),
       path: GETTING_STARTED_ROUTE,
-      component: () => <GettingStartedPage />,
+      component: GettingStartedPage,
       dataTestSubj: 'syntheticsGettingStartedPage',
-      template: 'centeredBody',
-      pageContentProps: {
+      pageSectionProps: {
+        alignment: 'center',
         paddingSize: 'none',
-        hasShadow: false,
       },
     },
     {
-      title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
-        defaultMessage: 'Synthetics Getting Started | {baseTitle}',
+      title: i18n.translate('xpack.synthetics.monitorDetails.title', {
+        defaultMessage: 'Synthetics Monitor Details | {baseTitle}',
         values: { baseTitle },
       }),
       path: MONITOR_ROUTE,
-      component: () => <MonitorSummaryPage />,
-      template: 'centeredBody',
-      dataTestSubj: 'syntheticsGettingStartedPage',
-      pageContentProps: {
-        paddingSize: 'none',
-        hasShadow: false,
-      },
-      pageHeader: {
-        paddingSize: 'none',
-        children: <MonitorSummaryHeaderContent />,
-        pageTitle: <MonitorSummaryTitle />,
-        rightSideItems: [<RunTestManually />],
-      },
+      component: () => (
+        <MonitorDetailsPage>
+          <MonitorSummary />
+        </MonitorDetailsPage>
+      ),
+      dataTestSubj: 'syntheticsMonitorDetailsPage',
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'overview'),
+    },
+    {
+      title: i18n.translate('xpack.synthetics.monitorHistory.title', {
+        defaultMessage: 'Synthetics Monitor History | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: MONITOR_HISTORY_ROUTE,
+      component: () => (
+        <MonitorDetailsPage>
+          <MonitorHistory />
+        </MonitorDetailsPage>
+      ),
+      dataTestSubj: 'syntheticsMonitorHistoryPage',
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'history'),
+    },
+    {
+      title: i18n.translate('xpack.synthetics.monitorErrors.title', {
+        defaultMessage: 'Synthetics Monitor Errors | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: MONITOR_ERRORS_ROUTE,
+      component: () => (
+        <MonitorDetailsPage>
+          <MonitorErrors />
+        </MonitorDetailsPage>
+      ),
+      dataTestSubj: 'syntheticsMonitorHistoryPage',
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'errors'),
     },
     {
       title: i18n.translate('xpack.synthetics.overviewRoute.title', {
@@ -115,22 +147,11 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: OVERVIEW_ROUTE,
-      component: () => <OverviewPage />,
+      component: OverviewPage,
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {
-        pageTitle: (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.synthetics.overview.pageHeader.title"
-                defaultMessage="Overview"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        rightSideItems: [
-          /* <AddMonitorBtn />*/
-        ],
+        pageTitle: <MonitorsPageHeader />,
+        rightSideItems: [<CreateMonitorButton />],
         tabs: [
           {
             label: (
@@ -140,6 +161,7 @@ const getRoutes = (
               />
             ),
             isSelected: true,
+            'data-test-subj': 'syntheticsMonitorOverviewTab',
           },
           {
             label: (
@@ -148,10 +170,8 @@ const getRoutes = (
                 defaultMessage="Management"
               />
             ),
-            onClick: () =>
-              history.push({
-                pathname: MONITORS_ROUTE,
-              }),
+            href: `${syntheticsPath}${MONITORS_ROUTE}`,
+            'data-test-subj': 'syntheticsMonitorManagementTab',
           },
         ],
       },
@@ -162,16 +182,11 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITORS_ROUTE,
-      component: () => (
-        <>
-          <ServiceAllowedWrapper>
-            <MonitorPage />
-          </ServiceAllowedWrapper>
-        </>
-      ),
+      component: MonitorsPageWithServiceAllowed,
       dataTestSubj: 'syntheticsMonitorManagementPage',
       pageHeader: {
         pageTitle: <MonitorsPageHeader />,
+        rightSideItems: [<CreateMonitorButton />],
         tabs: [
           {
             label: (
@@ -180,10 +195,8 @@ const getRoutes = (
                 defaultMessage="Overview"
               />
             ),
-            onClick: () =>
-              history.push({
-                pathname: OVERVIEW_ROUTE,
-              }),
+            href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
+            'data-test-subj': 'syntheticsMonitorOverviewTab',
           },
           {
             label: (
@@ -193,6 +206,7 @@ const getRoutes = (
               />
             ),
             isSelected: true,
+            'data-test-subj': 'syntheticsMonitorManagementTab',
           },
         ],
       },
@@ -203,12 +217,9 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_ADD_ROUTE,
-      component: () => (
-        <ServiceAllowedWrapper>
-          <MonitorAddPage />
-        </ServiceAllowedWrapper>
-      ),
+      component: MonitorAddPageWithServiceAllowed,
       dataTestSubj: 'syntheticsMonitorAddPage',
+      restrictWidth: true,
       pageHeader: {
         pageTitle: (
           <FormattedMessage
@@ -240,12 +251,9 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_EDIT_ROUTE,
-      component: () => (
-        <ServiceAllowedWrapper>
-          <MonitorEditPage />
-        </ServiceAllowedWrapper>
-      ),
+      component: MonitorEditPageWithServiceAllowed,
       dataTestSubj: 'syntheticsMonitorEditPage',
+      restrictWidth: true,
       pageHeader: {
         pageTitle: (
           <FormattedMessage
@@ -261,7 +269,94 @@ const getRoutes = (
         ],
       },
     },
+    {
+      title: i18n.translate('xpack.synthetics.testRunDetailsRoute.title', {
+        defaultMessage: 'Test run details | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: TEST_RUN_DETAILS_ROUTE,
+      component: TestRunDetails,
+      dataTestSubj: 'syntheticsMonitorTestRunDetailsPage',
+      pageHeader: {
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.synthetics.testRunDetailsRoute.page.title"
+            defaultMessage="Test run details"
+          />
+        ),
+      },
+    },
   ];
+};
+
+const getMonitorSummaryHeader = (
+  history: ReturnType<typeof useHistory>,
+  syntheticsPath: string,
+  selectedTab: 'overview' | 'history' | 'errors'
+): EuiPageHeaderProps => {
+  // Not a component, but it doesn't matter. Hooks are just functions
+  const match = useRouteMatch<{ monitorId: string }>(MONITOR_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
+
+  if (!match) {
+    return {};
+  }
+
+  const search = history.location.search;
+  const monitorId = match.params.monitorId;
+
+  return {
+    pageTitle: <MonitorDetailsPageTitle />,
+    breadcrumbs: [
+      {
+        text: (
+          <>
+            <EuiIcon size="s" type="arrowLeft" />{' '}
+            <FormattedMessage
+              id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
+              defaultMessage="Monitors"
+            />
+          </>
+        ),
+        color: 'primary',
+        'aria-current': false,
+        href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
+      },
+    ],
+    rightSideItems: [
+      <EditMonitorLink />,
+      <RunTestManually />,
+      <MonitorDetailsLastRun />,
+      <MonitorDetailsStatus />,
+      <MonitorDetailsLocation />,
+    ],
+    tabs: [
+      {
+        label: i18n.translate('xpack.synthetics.monitorOverviewTab.title', {
+          defaultMessage: 'Overview',
+        }),
+        isSelected: selectedTab === 'overview',
+        href: `${syntheticsPath}${MONITOR_ROUTE.replace(':monitorId?', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorOverviewTab',
+      },
+      {
+        label: i18n.translate('xpack.synthetics.monitorHistoryTab.title', {
+          defaultMessage: 'History',
+        }),
+        isSelected: selectedTab === 'history',
+        href: `${syntheticsPath}${MONITOR_HISTORY_ROUTE.replace(':monitorId', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorHistoryTab',
+      },
+      {
+        label: i18n.translate('xpack.synthetics.monitorErrorsTab.title', {
+          defaultMessage: 'Errors',
+        }),
+        prepend: <EuiIcon type="alert" color="danger" />,
+        isSelected: selectedTab === 'errors',
+        href: `${syntheticsPath}${MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorErrorsTab',
+      },
+    ],
+  };
 };
 
 const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }) => {
@@ -272,10 +367,15 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }
 };
 
 export const PageRouter: FC = () => {
+  const { services } = useKibana();
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
-  const routes = getRoutes(euiTheme, history);
+  const routes = getRoutes(
+    euiTheme,
+    history,
+    services.application!.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
+  );
 
   apiService.addInspectorRequest = addInspectorRequest;
 

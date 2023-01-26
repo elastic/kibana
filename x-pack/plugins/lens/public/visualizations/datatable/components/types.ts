@@ -10,7 +10,11 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import type { IAggType } from '@kbn/data-plugin/public';
 import type { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
-import type { ILensInterpreterRenderHandlers, LensEditEvent } from '../../../types';
+import type {
+  ILensInterpreterRenderHandlers,
+  LensCellValueAction,
+  LensEditEvent,
+} from '../../../types';
 import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
@@ -58,6 +62,12 @@ export type DatatableRenderProps = DatatableProps & {
    * ROW_CLICK_TRIGGER actions attached to it, otherwise false.
    */
   rowHasRowClickTriggerActions?: boolean[];
+  /**
+   * Array of LensCellValueAction to be rendered on each column by id
+   * uses CELL_VALUE_TRIGGER actions attached.
+   */
+  columnCellValueActions?: LensCellValueAction[][];
+  columnFilterable?: boolean[];
 };
 
 export interface DataContextType {
@@ -65,6 +75,13 @@ export interface DataContextType {
   rowHasRowClickTriggerActions?: boolean[];
   alignments?: Record<string, 'left' | 'right' | 'center'>;
   minMaxByColumnId?: Record<string, { min: number; max: number }>;
+  handleFilterClick?: (
+    field: string,
+    value: unknown,
+    colIndex: number,
+    rowIndex: number,
+    negate?: boolean
+  ) => void;
   getColorForValue?: (
     value: number | undefined,
     state: CustomPaletteState,

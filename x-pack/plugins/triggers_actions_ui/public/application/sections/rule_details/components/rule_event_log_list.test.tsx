@@ -6,17 +6,20 @@
  */
 
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionGroup, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { EuiSuperDatePicker, EuiDataGrid } from '@elastic/eui';
-import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
+import { EventLogListStatusFilter } from '../../common/components/event_log';
 import { RuleEventLogList } from './rule_event_log_list';
-import { RefineSearchPrompt } from '../refine_search_prompt';
-import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
-import { mockRule, mockRuleType, mockRuleSummary } from './test_helpers';
+import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
+import {
+  RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+  GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+} from '../../../constants';
+import { mockRule, mockRuleType, mockRuleSummary, mockLogResponse } from './test_helpers';
 import { RuleType } from '../../../../types';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 
@@ -29,84 +32,6 @@ jest.mock('../../../lib/rule_api/load_action_error_log', () => ({
 const loadActionErrorLogMock = loadActionErrorLog as unknown as jest.MockedFunction<
   typeof loadActionErrorLog
 >;
-
-const mockLogResponse: any = {
-  data: [
-    {
-      id: uuid.v4(),
-      timestamp: '2022-03-20T07:40:44-07:00',
-      duration: 5000000,
-      status: 'success',
-      message: 'rule execution #1',
-      version: '8.2.0',
-      num_active_alerts: 2,
-      num_new_alerts: 4,
-      num_recovered_alerts: 3,
-      num_triggered_actions: 10,
-      num_succeeded_actions: 0,
-      num_errored_actions: 4,
-      total_search_duration: 1000000,
-      es_search_duration: 1400000,
-      schedule_delay: 2000000,
-      timed_out: false,
-    },
-    {
-      id: uuid.v4(),
-      timestamp: '2022-03-20T07:40:45-07:00',
-      duration: 6000000,
-      status: 'success',
-      message: 'rule execution #2',
-      version: '8.2.0',
-      num_active_alerts: 4,
-      num_new_alerts: 2,
-      num_recovered_alerts: 4,
-      num_triggered_actions: 5,
-      num_succeeded_actions: 3,
-      num_errored_actions: 0,
-      total_search_duration: 300000,
-      es_search_duration: 300000,
-      schedule_delay: 300000,
-      timed_out: false,
-    },
-    {
-      id: uuid.v4(),
-      timestamp: '2022-03-20T07:40:46-07:00',
-      duration: 340000,
-      status: 'failure',
-      message: 'rule execution #3',
-      version: '8.2.0',
-      num_active_alerts: 8,
-      num_new_alerts: 5,
-      num_recovered_alerts: 0,
-      num_triggered_actions: 1,
-      num_succeeded_actions: 1,
-      num_errored_actions: 4,
-      total_search_duration: 2300000,
-      es_search_duration: 2300000,
-      schedule_delay: 2300000,
-      timed_out: false,
-    },
-    {
-      id: uuid.v4(),
-      timestamp: '2022-03-21T07:40:46-07:00',
-      duration: 3000000,
-      status: 'unknown',
-      message: 'rule execution #4',
-      version: '8.2.0',
-      num_active_alerts: 4,
-      num_new_alerts: 4,
-      num_recovered_alerts: 4,
-      num_triggered_actions: 4,
-      num_succeeded_actions: 4,
-      num_errored_actions: 4,
-      total_search_duration: 400000,
-      es_search_duration: 400000,
-      schedule_delay: 400000,
-      timed_out: false,
-    },
-  ],
-  total: 4,
-};
 
 const loadExecutionLogAggregationsMock = jest.fn();
 
@@ -161,7 +86,7 @@ describe.skip('rule_event_log_list', () => {
   it('renders correctly', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -199,7 +124,7 @@ describe.skip('rule_event_log_list', () => {
 
     expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeFalsy();
 
-    expect(wrapper.find(RuleEventLogListStatusFilter).exists()).toBeTruthy();
+    expect(wrapper.find(EventLogListStatusFilter).exists()).toBeTruthy();
     expect(wrapper.find('[data-gridcell-column-id="timestamp"]').length).toEqual(5);
     expect(wrapper.find(EuiDataGrid).props().rowCount).toEqual(mockLogResponse.total);
   });
@@ -207,7 +132,7 @@ describe.skip('rule_event_log_list', () => {
   it('can sort by single and/or multiple column(s)', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -312,7 +237,7 @@ describe.skip('rule_event_log_list', () => {
   it('can filter by execution log outcome status', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -327,9 +252,9 @@ describe.skip('rule_event_log_list', () => {
     });
 
     // Filter by success
-    wrapper.find('[data-test-subj="ruleEventLogStatusFilterButton"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="eventLogStatusFilterButton"]').at(0).simulate('click');
 
-    wrapper.find('[data-test-subj="ruleEventLogStatusFilter-success"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="eventLogStatusFilter-success"]').at(0).simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -347,9 +272,9 @@ describe.skip('rule_event_log_list', () => {
     );
 
     // Filter by failure as well
-    wrapper.find('[data-test-subj="ruleEventLogStatusFilterButton"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="eventLogStatusFilterButton"]').at(0).simulate('click');
 
-    wrapper.find('[data-test-subj="ruleEventLogStatusFilter-failure"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="eventLogStatusFilter-failure"]').at(0).simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -375,7 +300,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -435,7 +360,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -492,7 +417,7 @@ describe.skip('rule_event_log_list', () => {
   it('can save display columns to localStorage', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -510,7 +435,7 @@ describe.skip('rule_event_log_list', () => {
       JSON.parse(
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
-    ).toEqual(RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS);
+    ).toEqual(GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS);
 
     wrapper.find('[data-test-subj="dataGridColumnSelectorButton"] button').simulate('click');
 
@@ -535,7 +460,7 @@ describe.skip('rule_event_log_list', () => {
   it('does not show the refine search prompt normally', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -560,7 +485,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -610,7 +535,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -624,7 +549,7 @@ describe.skip('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
       'Showing 0 of 0 log entries'
     );
   });
@@ -637,7 +562,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -651,7 +576,7 @@ describe.skip('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
       'Showing 1 - 1 of 1 log entry'
     );
   });
@@ -664,7 +589,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -678,7 +603,7 @@ describe.skip('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
       'Showing 1 - 10 of 85 log entries'
     );
 
@@ -689,7 +614,7 @@ describe.skip('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
       'Showing 11 - 20 of 85 log entries'
     );
 
@@ -700,7 +625,7 @@ describe.skip('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
       'Showing 81 - 85 of 85 log entries'
     );
   });
@@ -709,7 +634,7 @@ describe.skip('rule_event_log_list', () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       data: [
         {
-          id: uuid.v4(),
+          id: uuidv4(),
           timestamp: '2022-03-20T07:40:44-07:00',
           duration: 5000000,
           status: 'success',
@@ -732,7 +657,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -749,10 +674,7 @@ describe.skip('rule_event_log_list', () => {
     expect(wrapper.find('[data-test-subj="ruleActionErrorBadge"]').first().text()).toEqual('4');
 
     // Click to open flyout
-    wrapper
-      .find('[data-test-subj="ruleEventLogDataGridErroredActionBadge"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="eventLogDataGridErroredActionBadge"]').first().simulate('click');
     expect(wrapper.find('[data-test-subj="ruleActionErrorLogFlyout"]').exists()).toBeTruthy();
   });
 
@@ -765,7 +687,7 @@ describe.skip('rule_event_log_list', () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
         fetchRuleSummary={false}
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -804,7 +726,7 @@ describe.skip('rule_event_log_list', () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
         fetchRuleSummary={false}
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleTypeCustom}
         ruleSummary={ruleSummary}
         numberOfExecutions={60}
@@ -842,7 +764,7 @@ describe.skip('rule_event_log_list', () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
         fetchRuleSummary={false}
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleTypeCustom}
         ruleSummary={ruleSummary}
         numberOfExecutions={60}

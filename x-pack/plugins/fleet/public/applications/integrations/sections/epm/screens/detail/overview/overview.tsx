@@ -6,11 +6,16 @@
  */
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useFleetStatus, useStartServices } from '../../../../../../../hooks';
+import {
+  isIntegrationPolicyTemplate,
+  isPackagePrerelease,
+} from '../../../../../../../../common/services';
+
+import { useFleetStatus, useLink, useStartServices } from '../../../../../../../hooks';
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
@@ -21,6 +26,7 @@ import { Details } from './details';
 interface Props {
   packageInfo: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
+  latestGAVersion?: string;
 }
 
 const LeftColumn = styled(EuiFlexItem)`
@@ -64,42 +70,97 @@ const UnverifiedCallout: React.FC = () => {
   );
 };
 
-export const OverviewPage: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
-  const screenshots = useMemo(
-    () => integrationInfo?.screenshots || packageInfo.screenshots || [],
-    [integrationInfo, packageInfo.screenshots]
-  );
-  const { packageVerificationKeyId } = useFleetStatus();
-  const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
+const PrereleaseCallout: React.FC<{
+  packageName: string;
+  latestGAVersion?: string;
+  packageTitle: string;
+}> = ({ packageName, packageTitle, latestGAVersion }) => {
+  const { getHref } = useLink();
+  const overviewPathLatestGA = getHref('integration_details_overview', {
+    pkgkey: `${packageName}-${latestGAVersion}`,
+  });
+
   return (
-    <EuiFlexGroup alignItems="flexStart">
-      <LeftColumn grow={2} />
-      <EuiFlexItem grow={9} className="eui-textBreakWord">
-        {isUnverified && <UnverifiedCallout />}
-        {packageInfo.readme ? (
-          <Readme
-            readmePath={integrationInfo?.readme || packageInfo.readme}
-            packageName={packageInfo.name}
-            version={packageInfo.version}
-          />
-        ) : null}
-      </EuiFlexItem>
-      <EuiFlexItem grow={3}>
-        <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
-          {screenshots.length ? (
-            <EuiFlexItem>
-              <Screenshots
-                images={screenshots}
-                packageName={packageInfo.name}
-                version={packageInfo.version}
+    <>
+      <EuiCallOut
+        data-test-subj="prereleaseCallout"
+        title={i18n.translate('xpack.fleet.epm.prereleaseWarningCalloutTitle', {
+          defaultMessage: 'This is a pre-release version of {packageTitle} integration.',
+          values: {
+            packageTitle,
+          },
+        })}
+        iconType="iInCircle"
+        color="warning"
+      >
+        {latestGAVersion && (
+          <p>
+            <EuiButton href={overviewPathLatestGA} color="warning" data-test-subj="switchToGABtn">
+              <FormattedMessage
+                id="xpack.fleet.epm.prereleaseWarningCalloutSwitchToGAButton"
+                defaultMessage="Switch to latest GA version"
               />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem>
-            <Details packageInfo={packageInfo} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            </EuiButton>
+          </p>
+        )}
+      </EuiCallOut>
+      <EuiSpacer size="l" />
+    </>
   );
-});
+};
+
+export const OverviewPage: React.FC<Props> = memo(
+  ({ packageInfo, integrationInfo, latestGAVersion }) => {
+    const screenshots = useMemo(
+      () => integrationInfo?.screenshots || packageInfo.screenshots || [],
+      [integrationInfo, packageInfo.screenshots]
+    );
+    const { packageVerificationKeyId } = useFleetStatus();
+    const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
+    const isPrerelease = isPackagePrerelease(packageInfo.version);
+    return (
+      <EuiFlexGroup alignItems="flexStart">
+        <LeftColumn grow={2} />
+        <EuiFlexItem grow={9} className="eui-textBreakWord">
+          {isUnverified && <UnverifiedCallout />}
+          {isPrerelease && (
+            <PrereleaseCallout
+              packageName={packageInfo.name}
+              packageTitle={packageInfo.title}
+              latestGAVersion={latestGAVersion}
+            />
+          )}
+          {packageInfo.readme ? (
+            <Readme
+              readmePath={
+                integrationInfo &&
+                isIntegrationPolicyTemplate(integrationInfo) &&
+                integrationInfo?.readme
+                  ? integrationInfo?.readme
+                  : packageInfo.readme
+              }
+              packageName={packageInfo.name}
+              version={packageInfo.version}
+            />
+          ) : null}
+        </EuiFlexItem>
+        <EuiFlexItem grow={3}>
+          <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
+            {screenshots.length ? (
+              <EuiFlexItem>
+                <Screenshots
+                  images={screenshots}
+                  packageName={packageInfo.name}
+                  version={packageInfo.version}
+                />
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem>
+              <Details packageInfo={packageInfo} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);

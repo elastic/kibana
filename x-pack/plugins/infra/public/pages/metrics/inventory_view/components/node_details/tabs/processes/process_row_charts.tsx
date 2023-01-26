@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import moment from 'moment';
-import { first, last } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
 import {
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiEmptyPrompt,
   EuiFlexItem,
   EuiLoadingChart,
-  EuiEmptyPrompt,
   EuiText,
 } from '@elastic/eui';
-import { Axis, Chart, Settings, Position, TooltipValue, niceTimeFormatter } from '@elastic/charts';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { createFormatter } from '../../../../../../../../common/formatters';
-import { getChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
-import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
-import { MetricsExplorerChartType } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
-import { MetricsExplorerAggregation } from '../../../../../../../../common/http_api';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { first, last } from 'lodash';
+import moment from 'moment';
+import React, { useMemo } from 'react';
 import { Color } from '../../../../../../../../common/color_palette';
+import { createFormatter } from '../../../../../../../../common/formatters';
+import { MetricsExplorerAggregation } from '../../../../../../../../common/http_api';
+import { getChartTheme } from '../../../../../../../utils/get_chart_theme';
+import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
+import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
+import { MetricsExplorerChartType } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { useProcessListRowChart } from '../../../../hooks/use_process_list_row_chart';
 import { Process } from './types';
 

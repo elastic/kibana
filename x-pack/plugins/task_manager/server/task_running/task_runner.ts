@@ -12,9 +12,9 @@
  */
 
 import apm from 'elastic-apm-node';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { identity, defaults, flow } from 'lodash';
+import { identity, defaults, flow, omit } from 'lodash';
 import { Logger, SavedObjectsErrorHelpers, ExecutionContextStart } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Middleware } from '../lib/middleware';
@@ -53,8 +53,6 @@ import {
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError } from './errors';
 import type { EventLoopDelayConfig } from '../config';
-
-const defaultBackoffPerFailure = 5 * 60 * 1000;
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
 export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
@@ -185,7 +183,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
-    this.uuid = uuid.v4();
+    this.uuid = uuidv4();
     this.eventLoopDelayConfig = eventLoopDelayConfig;
   }
 
@@ -375,7 +373,7 @@ export class TaskManagerRunner implements TaskRunner {
 
       this.instance = asReadyToRun(
         (await this.bufferedTaskStore.update({
-          ...taskInstance,
+          ...taskWithoutEnabled(taskInstance),
           status: TaskStatus.Running,
           startedAt: now,
           attempts,
@@ -456,7 +454,7 @@ export class TaskManagerRunner implements TaskRunner {
   private async releaseClaimAndIncrementAttempts(): Promise<Result<ConcreteTaskInstance, Error>> {
     return promiseResult(
       this.bufferedTaskStore.update({
-        ...this.instance.task,
+        ...taskWithoutEnabled(this.instance.task),
         status: TaskStatus.Idle,
         attempts: this.instance.task.attempts + 1,
         startedAt: null,
@@ -549,7 +547,7 @@ export class TaskManagerRunner implements TaskRunner {
               retryAt: null,
               ownerId: null,
             },
-            this.instance.task
+            taskWithoutEnabled(this.instance.task)
           )
         )
       );
@@ -654,7 +652,7 @@ export class TaskManagerRunner implements TaskRunner {
     if (retry instanceof Date) {
       result = retry;
     } else if (retry === true) {
-      result = new Date(Date.now() + attempts * defaultBackoffPerFailure);
+      result = new Date(Date.now() + calculateDelay(attempts));
     }
 
     // Add a duration to the result
@@ -675,6 +673,12 @@ function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance 
 
 function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
   return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
+}
+
+// Omits "enabled" field from task updates so we don't overwrite any user
+// initiated changes to "enabled" while the task was running
+function taskWithoutEnabled(task: ConcreteTaskInstance): ConcreteTaskInstance {
+  return omit(task, 'enabled');
 }
 
 // A type that extracts the Instance type out of TaskRunningStage
@@ -710,4 +714,14 @@ export function asRan(task: InstanceOf<TaskRunningStage.RAN, RanTask>): RanTask 
     stage: TaskRunningStage.RAN,
     task,
   };
+}
+
+export function calculateDelay(attempts: number) {
+  if (attempts === 1) {
+    return 30 * 1000; // 30s
+  } else {
+    // get multiples of 5 min
+    const defaultBackoffPerFailure = 5 * 60 * 1000;
+    return defaultBackoffPerFailure * Math.pow(2, attempts - 2);
+  }
 }

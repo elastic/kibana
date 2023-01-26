@@ -8,6 +8,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import {
   Chart,
   Settings,
@@ -27,21 +28,18 @@ import {
   Placement,
   Direction,
   XYChartElementEvent,
+  Tooltip,
+  XYChartSeriesIdentifier,
+  TooltipValue,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import moment from 'moment';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
-import { Datatable, DatatableRow, RenderMode } from '@kbn/expressions-plugin/common';
+import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import {
-  ManualPointEventAnnotationRow,
-  ManualRangeEventAnnotationOutput,
-  ManualPointEventAnnotationOutput,
-  ManualRangeEventAnnotationRow,
-} from '@kbn/event-annotation-plugin/common';
+import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import {
@@ -53,7 +51,13 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
+import type {
+  FilterEvent,
+  BrushEvent,
+  FormatFactory,
+  LayerCellValueActions,
+  MultiFilterEvent,
+} from '../types';
 import { isTimeChart } from '../../common/helpers';
 import type {
   CommonXYDataLayerConfig,
@@ -61,11 +65,9 @@ import type {
   ExtendedReferenceLineDecorationConfig,
   XYChartProps,
   AxisExtentConfigResult,
-  CommonXYAnnotationLayerConfig,
 } from '../../common/types';
 import {
   isHorizontalChart,
-  getAnnotationsLayers,
   getDataLayers,
   AxisConfiguration,
   getAxisPosition,
@@ -102,7 +104,7 @@ import {
 } from './annotations';
 import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
-import { Tooltip } from './tooltip';
+import { Tooltip as CustomTooltip } from './tooltip';
 import { XYCurrentTime } from './xy_current_time';
 
 import './xy_chart.scss';
@@ -118,7 +120,7 @@ declare global {
   }
 }
 
-export type XYChartRenderProps = XYChartProps & {
+export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   data: DataPublicPluginStart;
@@ -129,14 +131,22 @@ export type XYChartRenderProps = XYChartProps & {
   minInterval: number | undefined;
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
+  onClickMultiValue: (data: MultiFilterEvent['data']) => void;
+  layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
   syncTooltips: boolean;
+  syncCursor: boolean;
   eventAnnotationService: EventAnnotationServiceType;
   renderComplete: () => void;
   uiState?: PersistedState;
+  timeFormat: string;
 };
+
+function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
 
 function getValueLabelsStyling(isHorizontal: boolean): {
   displayValue: RecursivePartial<DisplayValueStyle>;
@@ -178,6 +188,9 @@ function createSplitPoint(
   table: Datatable
 ) {
   const splitPointRowIndex = rows.findIndex((row) => {
+    if (Array.isArray(value)) {
+      return value.includes(row[accessor]);
+    }
     return row[accessor] === value;
   });
   if (splitPointRowIndex !== -1) {
@@ -192,49 +205,6 @@ function createSplitPoint(
 
 export const XYChartReportable = React.memo(XYChart);
 
-// TODO: remove this function when we start using fetch_event_annotation expression
-const convertToAnnotationsTable = (
-  layers: CommonXYAnnotationLayerConfig[],
-  minInterval?: number,
-  firstTimestamp?: number
-) => {
-  return layers
-    .flatMap(({ annotations }) =>
-      annotations.filter(
-        (a): a is ManualPointEventAnnotationOutput | ManualRangeEventAnnotationOutput =>
-          !a.isHidden && 'time' in a
-      )
-    )
-    .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf())
-    .map((a) => {
-      const timebucket = getRoundedTimestamp(moment(a.time).valueOf(), firstTimestamp, minInterval);
-      if (a.type === 'manual_point_event_annotation') {
-        const pointRow: ManualPointEventAnnotationRow = {
-          ...a,
-          type: 'point',
-          timebucket: moment(timebucket).toISOString(),
-        };
-        return pointRow;
-      }
-      const rangeRow: ManualRangeEventAnnotationRow = {
-        ...a,
-        type: 'range',
-      };
-      return rangeRow;
-    });
-};
-
-export const sortByTime = (a: DatatableRow, b: DatatableRow) => {
-  return 'time' in a && 'time' in b ? a.time.localeCompare(b.time) : 0;
-};
-
-const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInterval?: number) => {
-  if (!firstTimestamp || !minInterval) {
-    return timestamp;
-  }
-  return timestamp - ((timestamp - firstTimestamp) % minInterval);
-};
-
 export function XYChart({
   args,
   data,
@@ -245,13 +215,17 @@ export function XYChart({
   paletteService,
   minInterval,
   onClickValue,
+  onClickMultiValue,
+  layerCellValueActions,
   onSelectRange,
   interactive = true,
   syncColors,
   syncTooltips,
+  syncCursor,
   useLegacyTimeAxis,
   renderComplete,
   uiState,
+  timeFormat,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -267,6 +241,7 @@ export function XYChart({
     splitColumnAccessor,
     splitRowAccessor,
     singleTable,
+    annotations,
   } = args;
   const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -321,8 +296,10 @@ export function XYChart({
     [uiState]
   );
 
+  // Exclude the reference layers from the cursor update
+  const cursorSyncLayers = filteredLayers.filter(isDataLayer);
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
-    datatables: filteredLayers.map(({ table }) => table),
+    datatables: cursorSyncLayers.map(({ table }) => table),
   });
 
   const onRenderChange = useCallback(
@@ -447,25 +424,16 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-
-  const annotationsLayers = getAnnotationsLayers(layers);
-  const firstTable = dataLayers[0]?.table;
-
-  const columnId = dataLayers[0]?.xAccessor
-    ? getColumnByAccessor(dataLayers[0]?.xAccessor, firstTable.columns)?.id
-    : null;
-
-  const annotations = convertToAnnotationsTable(
-    annotationsLayers,
-    minInterval,
-    columnId ? firstTable.rows[0]?.[columnId] : undefined
-  );
-
-  const [rangeAnnotations, lineAnnotations] = partition(annotations, isRangeAnnotation);
+  const [rangeAnnotations, lineAnnotations] = isTimeViz
+    ? partition(annotations?.datatable.rows, isRangeAnnotation)
+    : [[], []];
 
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
-    lineAnnotations as ManualPointEventAnnotationRow[],
-    xAxisFormatter
+    lineAnnotations as PointEventAnnotationRow[],
+    annotations?.layers.flatMap((l) => l.annotations),
+    annotations?.datatable.columns,
+    formatFactory,
+    timeFormat
   );
 
   const visualConfigs = [
@@ -483,7 +451,10 @@ export function XYChart({
     ...groupedLineAnnotations,
   ].filter(Boolean);
 
-  const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].simpleView : false;
+  const shouldHideDetails =
+    annotations?.layers && annotations.layers.length > 0
+      ? annotations?.layers[0].simpleView
+      : false;
   const linesPaddings = !shouldHideDetails
     ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate)
     : {};
@@ -575,17 +546,60 @@ export function XYChart({
     };
   };
 
-  const shouldShowValueLabels = uiState
-    ? valueLabels !== ValueLabelModes.HIDE
-    : // No stacked bar charts
-      dataLayers.every((layer) => !layer.isStacked) &&
-      // No histogram charts
-      !isHistogramViz;
+  const shouldShowValueLabels = !uiState || valueLabels !== ValueLabelModes.HIDE;
 
   const valueLabelsStyling =
     shouldShowValueLabels &&
     valueLabels !== ValueLabelModes.HIDE &&
     getValueLabelsStyling(shouldRotate);
+
+  const filterSelectedTooltipValues = (
+    tooltipSelectedValues: Array<
+      TooltipValue<Record<string, string | number>, XYChartSeriesIdentifier>
+    >
+  ) => {
+    const layerIndexes: number[] = [];
+    tooltipSelectedValues.forEach((v) => {
+      const index = dataLayers.findIndex((l) =>
+        v.seriesIdentifier.seriesKeys.some((key: string | number) =>
+          l.accessors.some(
+            (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
+          )
+        )
+      );
+      if (!layerIndexes.includes(index) && index !== -1) {
+        layerIndexes.push(index);
+      }
+    });
+
+    if (!layerIndexes.length) return;
+    layerIndexes.forEach((layerIndex) => {
+      const layer = dataLayers[layerIndex];
+      const { table } = layer;
+
+      if (layer.splitAccessors?.length !== 1) return;
+
+      const splitAccessor = getAccessorByDimension(layer.splitAccessors[0], table.columns);
+      const filterValues = tooltipSelectedValues
+        .map((v) => v.datum?.[splitAccessor])
+        .filter(nonNullable);
+
+      const splitPoints = filterValues
+        .map((v) =>
+          createSplitPoint(splitAccessor, v, formattedDatatables[layer.layerId].table.rows, table)
+        )
+        .filter(nonNullable);
+      if (splitPoints.length) {
+        onClickMultiValue({
+          data: {
+            column: splitPoints[0].column,
+            value: splitPoints.map(({ value }) => value),
+            table,
+          },
+        });
+      }
+    });
+  };
 
   const clickHandler: ElementClickListener = ([elementEvent]) => {
     // this cast is safe because we are rendering a cartesian chart
@@ -775,6 +789,8 @@ export function XYChart({
     overflowX: 'hidden',
     position: uiState ? 'absolute' : 'relative',
   });
+  // enable the tooltip actions only if there is at least one splitAccessor to the dataLayer
+  const hasTooltipActions = dataLayers.some((dataLayer) => dataLayer.splitAccessors) && interactive;
 
   return (
     <div css={chartContainerStyle}>
@@ -798,6 +814,60 @@ export function XYChart({
         }}
       >
         <Chart ref={chartRef}>
+          <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
+            boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+            headerFormatter={
+              !args.detailedTooltip
+                ? ({ value }) => (
+                    <TooltipHeader
+                      value={value}
+                      formatter={safeXAccessorLabelRenderer}
+                      xDomain={rawXDomain}
+                    />
+                  )
+                : undefined
+            }
+            actions={
+              !args.detailedTooltip && hasTooltipActions
+                ? [
+                    {
+                      disabled: (selected) => selected.length < 1,
+                      label: (selected) =>
+                        selected.length === 0
+                          ? i18n.translate('expressionXY.tooltipActions.emptyFilterSelection', {
+                              defaultMessage: 'Select at least one series to filter',
+                            })
+                          : i18n.translate('expressionXY.tooltipActions.filterValues', {
+                              defaultMessage: 'Filter {seriesNumber} series',
+                              values: { seriesNumber: selected.length },
+                            }),
+                      onSelect: filterSelectedTooltipValues,
+                    },
+                  ]
+                : undefined
+            }
+            customTooltip={
+              args.detailedTooltip
+                ? ({ header, values }) => (
+                    <CustomTooltip
+                      header={header}
+                      values={values}
+                      titles={titles}
+                      fieldFormats={fieldFormats}
+                      formatFactory={formatFactory}
+                      formattedDatatables={formattedDatatables}
+                      splitAccessors={{
+                        splitColumnAccessor: splitColumnId,
+                        splitRowAccessor: splitRowId,
+                      }}
+                      layers={dataLayers}
+                      xDomain={isTimeViz ? rawXDomain : undefined}
+                    />
+                  )
+                : undefined
+            }
+            type={args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None}
+          />
           <Settings
             noResults={
               <EmptyPlaceholder
@@ -807,7 +877,7 @@ export function XYChart({
               />
             }
             onRenderChange={onRenderChange}
-            onPointerUpdate={handleCursorUpdate}
+            onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
             externalPointerEvents={{
               tooltip: { visible: syncTooltips, placement: Placement.Right },
             }}
@@ -842,37 +912,6 @@ export function XYChart({
               markSizeRatio: args.markSizeRatio,
             }}
             baseTheme={chartBaseTheme}
-            tooltip={{
-              boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-              headerFormatter: !args.detailedTooltip
-                ? ({ value }) => (
-                    <TooltipHeader
-                      value={value}
-                      formatter={safeXAccessorLabelRenderer}
-                      xDomain={rawXDomain}
-                    />
-                  )
-                : undefined,
-              customTooltip: args.detailedTooltip
-                ? ({ header, values }) => (
-                    <Tooltip
-                      header={header}
-                      values={values}
-                      titles={titles}
-                      fieldFormats={fieldFormats}
-                      formatFactory={formatFactory}
-                      formattedDatatables={formattedDatatables}
-                      splitAccessors={{
-                        splitColumnAccessor: splitColumnId,
-                        splitRowAccessor: splitRowId,
-                      }}
-                      layers={dataLayers}
-                      xDomain={isTimeViz ? rawXDomain : undefined}
-                    />
-                  )
-                : undefined,
-              type: args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None,
-            }}
             allowBrushingLastHistogramBin={isTimeViz}
             rotation={shouldRotate ? 90 : 0}
             xDomain={xDomain}
@@ -883,6 +922,7 @@ export function XYChart({
                 ? getLegendAction(
                     dataLayers,
                     onClickValue,
+                    layerCellValueActions,
                     fieldFormats,
                     formattedDatatables,
                     titles,
@@ -927,7 +967,7 @@ export function XYChart({
             style={xAxisStyle}
             showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
             showDuplicatedTicks={xAxisConfig?.showDuplicates}
-            timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
+            timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
           />
           {isSplitChart && splitTable && (
             <SplitChart
@@ -1013,7 +1053,7 @@ export function XYChart({
               yAxesMap={yAxesMap}
             />
           ) : null}
-          {rangeAnnotations.length || groupedLineAnnotations.length ? (
+          {(rangeAnnotations.length || lineAnnotations.length) && isTimeViz ? (
             <Annotations
               rangeAnnotations={rangeAnnotations}
               groupedLineAnnotations={groupedLineAnnotations}

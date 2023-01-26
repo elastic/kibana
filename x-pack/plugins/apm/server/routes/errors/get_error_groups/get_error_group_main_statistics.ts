@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsTermsAggregationOrder } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import {
   kqlQuery,
   rangeQuery,
@@ -22,15 +22,15 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getErrorGroupMainStatistics({
   kuery,
   serviceName,
-  setup,
+  apmEventClient,
   environment,
   sortField,
   sortDirection = 'desc',
@@ -42,7 +42,7 @@ export async function getErrorGroupMainStatistics({
 }: {
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   environment: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
@@ -52,14 +52,12 @@ export async function getErrorGroupMainStatistics({
   transactionName?: string;
   transactionType?: string;
 }) {
-  const { apmEventClient } = setup;
-
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'lastSeen';
 
   const maxTimestampAggKey = 'max_timestamp';
 
-  const order: AggregationsTermsAggregationOrder = sortByLatestOccurrence
+  const order: AggregationsAggregateOrder = sortByLatestOccurrence
     ? { [maxTimestampAggKey]: sortDirection }
     : { _count: sortDirection };
 
@@ -70,6 +68,7 @@ export async function getErrorGroupMainStatistics({
         events: [ProcessorEvent.error],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

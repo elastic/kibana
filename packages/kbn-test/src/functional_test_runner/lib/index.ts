@@ -8,7 +8,7 @@
 
 export { Lifecycle } from './lifecycle';
 export { LifecyclePhase } from './lifecycle_phase';
-export { readConfigFile, Config, runCheckFtrConfigsCli } from './config';
+export * from './config';
 export * from './providers';
 // @internal
 export { runTests, setupMocha } from './mocha';

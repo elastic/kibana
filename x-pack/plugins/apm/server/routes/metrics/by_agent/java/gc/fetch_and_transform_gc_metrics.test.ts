@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { APMConfig } from '../../../../..';
 import {
   METRIC_JAVA_GC_COUNT,
   METRIC_JAVA_GC_TIME,
-} from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../../lib/helpers/setup_request';
+} from '../../../../../../common/es_fields/apm';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ChartBase } from '../../../types';
 
 import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
@@ -49,10 +50,10 @@ describe('fetchAndTransformGcMetrics', () => {
           },
         },
       };
-      const setup = {
-        apmEventClient: { search: () => Promise.resolve(response) },
-        config: { 'xpack.gc.metricsInterval': 0 },
-      } as unknown as Setup;
+      const config = { 'xpack.gc.metricsInterval': 0 } as unknown as APMConfig;
+      const apmEventClient = {
+        search: () => Promise.resolve(response),
+      } as unknown as APMEventClient;
       const fieldName = METRIC_JAVA_GC_TIME;
 
       const { series } = await fetchAndTransformGcMetrics({
@@ -61,7 +62,8 @@ describe('fetchAndTransformGcMetrics', () => {
         fieldName,
         kuery: '',
         operationName: 'test operation name',
-        setup,
+        config,
+        apmEventClient,
         serviceName: 'test service name',
         start: 1633456140000,
         end: 1633457078105,
@@ -109,10 +111,10 @@ describe('fetchAndTransformGcMetrics', () => {
           },
         },
       };
-      const setup = {
-        apmEventClient: { search: () => Promise.resolve(response) },
-        config: { 'xpack.gc.metricsInterval': 0 },
-      } as unknown as Setup;
+      const config = { 'xpack.gc.metricsInterval': 0 } as unknown as APMConfig;
+      const apmEventClient = {
+        search: () => Promise.resolve(response),
+      } as unknown as APMEventClient;
       const fieldName = METRIC_JAVA_GC_COUNT;
 
       const { series } = await fetchAndTransformGcMetrics({
@@ -121,7 +123,8 @@ describe('fetchAndTransformGcMetrics', () => {
         fieldName,
         kuery: '',
         operationName: 'test operation name',
-        setup,
+        config,
+        apmEventClient,
         serviceName: 'test service name',
         start: 1633456140000,
         end: 1633457078105,

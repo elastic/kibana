@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { BETA_LABEL } from '../../../shared/constants/labels';
 import { parseQueryParams } from '../../../shared/query_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
@@ -32,18 +33,25 @@ import { MethodApi } from './method_api/method_api';
 import { MethodConnector } from './method_connector/method_connector';
 import { MethodCrawler } from './method_crawler/method_crawler';
 
-export const enum IngestionMethodId {
+export enum IngestionMethodId {
+  api = 'api',
   connector = 'connector',
   crawler = 'crawler',
-  api = 'api',
+  native_connector = 'native_connector',
 }
+
+const betaBadge = (
+  <EuiBadge iconType="beaker">
+    <EuiText size="xs">{BETA_LABEL}</EuiText>
+  </EuiBadge>
+);
 
 const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
   {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
       {
-        defaultMessage: 'Discover, extract, index, and sync of all your website content',
+        defaultMessage: 'Discover, extract, index, and sync all of your website content',
       }
     ),
     footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.footer', {
@@ -54,6 +62,30 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
     label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
       defaultMessage: 'Use the web crawler',
     }),
+  },
+  {
+    badge: betaBadge,
+    description: i18n.translate(
+      'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.description',
+      {
+        defaultMessage:
+          'Configure a connector to extract, index, and sync all of your content from supported data sources ',
+      }
+    ),
+    footer: i18n.translate(
+      'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.footer',
+      {
+        defaultMessage: 'No development required',
+      }
+    ),
+    icon: 'visVega',
+    id: IngestionMethodId.native_connector,
+    label: i18n.translate(
+      'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.label',
+      {
+        defaultMessage: 'Use a connector',
+      }
+    ),
   },
   {
     description: i18n.translate(
@@ -72,11 +104,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
     }),
   },
   {
-    badge: (
-      <EuiBadge iconType="beaker">
-        <EuiText size="xs">Technical Preview</EuiText>
-      </EuiBadge>
-    ),
+    badge: betaBadge,
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
       {
@@ -162,7 +190,12 @@ export const NewIndex: React.FC = () => {
             <>
               {selectedMethod.id === IngestionMethodId.crawler && <MethodCrawler />}
               {selectedMethod.id === IngestionMethodId.api && <MethodApi />}
-              {selectedMethod.id === IngestionMethodId.connector && <MethodConnector />}
+              {selectedMethod.id === IngestionMethodId.connector && (
+                <MethodConnector isNative={false} />
+              )}
+              {selectedMethod.id === IngestionMethodId.native_connector && (
+                <MethodConnector isNative />
+              )}
             </>
           ) : (
             <SearchIndexEmptyState />

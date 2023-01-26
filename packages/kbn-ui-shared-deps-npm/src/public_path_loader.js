@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
-const Qs = require('querystring');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const { stringifyRequest } = require('loader-utils');
 
 const VAL_LOADER = require.resolve('val-loader');
 const MODULE_CREATOR = require.resolve('./public_path_module_creator');
 
+/**
+ * @this {any} this
+ * @param {string} source
+ */
 module.exports = function (source) {
   const options = this.query;
-  const valOpts = Qs.stringify({ key: options.key });
+  const valOpts = new URLSearchParams({ key: options.key }).toString();
   const req = `${VAL_LOADER}?${valOpts}!${MODULE_CREATOR}`;
   return `require(${stringifyRequest(this, req)});${source}`;
 };

@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.DeepPartialArray",
+        "id": "def-common.DeepPartialArray",
         "type": "Interface",
         "tags": [],
         "label": "DeepPartialArray",
@@ -22,29 +30,30 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.DeepPartialArray",
+            "section": "def-common.DeepPartialArray",
             "text": "DeepPartialArray"
           },
           "<T> extends ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.DeepPartial",
+            "section": "def-common.DeepPartial",
             "text": "DeepPartial"
           },
           "<T>[]"
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.JsonArray",
+        "id": "def-common.JsonArray",
         "type": "Interface",
         "tags": [],
         "label": "JsonArray",
@@ -52,39 +61,41 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.JsonArray",
+            "section": "def-common.JsonArray",
             "text": "JsonArray"
           },
           " extends ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.JsonValue",
+            "section": "def-common.JsonValue",
             "text": "JsonValue"
           },
           "[]"
         ],
         "path": "packages/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.JsonObject",
+        "id": "def-common.JsonObject",
         "type": "Interface",
         "tags": [],
         "label": "JsonObject",
         "description": [],
         "path": "packages/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utility-types",
-            "id": "def-server.JsonObject.Unnamed",
+            "id": "def-common.JsonObject.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: JsonValue",
@@ -93,21 +104,22 @@
               "[key: string]:  ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonValue",
+                "section": "def-common.JsonValue",
                 "text": "JsonValue"
               }
             ],
             "path": "packages/kbn-utility-types/src/serializable/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.ObservableLike",
+        "id": "def-common.ObservableLike",
         "type": "Interface",
         "tags": [],
         "label": "ObservableLike",
@@ -117,19 +129,20 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.ObservableLike",
+            "section": "def-common.ObservableLike",
             "text": "ObservableLike"
           },
           "<T>"
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utility-types",
-            "id": "def-server.ObservableLike.subscribe",
+            "id": "def-common.ObservableLike.subscribe",
             "type": "Function",
             "tags": [],
             "label": "subscribe",
@@ -139,10 +152,11 @@
             ],
             "path": "packages/kbn-utility-types/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/utility-types",
-                "id": "def-server.ObservableLike.subscribe.$1",
+                "id": "def-common.ObservableLike.subscribe.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "observer",
@@ -152,6 +166,7 @@
                 ],
                 "path": "packages/kbn-utility-types/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -162,7 +177,7 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.RecursiveReadonlyArray",
+        "id": "def-common.RecursiveReadonlyArray",
         "type": "Interface",
         "tags": [],
         "label": "RecursiveReadonlyArray",
@@ -170,29 +185,30 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.RecursiveReadonlyArray",
+            "section": "def-common.RecursiveReadonlyArray",
             "text": "RecursiveReadonlyArray"
           },
           "<T> extends readonly ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.RecursiveReadonly",
+            "section": "def-common.RecursiveReadonly",
             "text": "RecursiveReadonly"
           },
           "<T>[]"
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.SerializableRecord",
+        "id": "def-common.SerializableRecord",
         "type": "Interface",
         "tags": [],
         "label": "SerializableRecord",
@@ -200,23 +216,24 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           " extends Record<string, ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Serializable",
+            "section": "def-common.Serializable",
             "text": "Serializable"
           },
           ">"
         ],
         "path": "packages/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       }
@@ -225,7 +242,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.$Values",
+        "id": "def-common.$Values",
         "type": "Type",
         "tags": [
           "desc",
@@ -240,11 +257,12 @@
         ],
         "path": "node_modules/utility-types/dist/utility-types.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.Assign",
+        "id": "def-common.Assign",
         "type": "Type",
         "tags": [
           "desc"
@@ -258,11 +276,12 @@
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.AugmentedRequired",
+        "id": "def-common.AugmentedRequired",
         "type": "Type",
         "tags": [
           "desc"
@@ -277,11 +296,12 @@
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.AwaitedProperties",
+        "id": "def-common.AwaitedProperties",
         "type": "Type",
         "tags": [],
         "label": "AwaitedProperties",
@@ -293,11 +313,12 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.Class",
+        "id": "def-common.Class",
         "type": "Type",
         "tags": [
           "desc",
@@ -312,11 +333,12 @@
         ],
         "path": "node_modules/utility-types/dist/utility-types.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.DedotObject",
+        "id": "def-common.DedotObject",
         "type": "Type",
         "tags": [],
         "label": "DedotObject",
@@ -334,11 +356,12 @@
         ],
         "path": "packages/kbn-utility-types/src/dot.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.DeepPartial",
+        "id": "def-common.DeepPartial",
         "type": "Type",
         "tags": [],
         "label": "DeepPartial",
@@ -349,28 +372,29 @@
           "T extends any[] ? ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.DeepPartialArray",
+            "section": "def-common.DeepPartialArray",
             "text": "DeepPartialArray"
           },
           "<T[number]> : T extends object ? ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.DeepPartialObject",
+            "section": "def-common.DeepPartialObject",
             "text": "DeepPartialObject"
           },
           "<T> : T"
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.DeepPartialObject",
+        "id": "def-common.DeepPartialObject",
         "type": "Type",
         "tags": [],
         "label": "DeepPartialObject",
@@ -379,20 +403,21 @@
           "{ [P in keyof T]+?: ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.DeepPartial",
+            "section": "def-common.DeepPartial",
             "text": "DeepPartial"
           },
           "<T[P]> | undefined; }"
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.DotObject",
+        "id": "def-common.DotObject",
         "type": "Type",
         "tags": [],
         "label": "DotObject",
@@ -406,11 +431,12 @@
         ],
         "path": "packages/kbn-utility-types/src/dot.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.Ensure",
+        "id": "def-common.Ensure",
         "type": "Type",
         "tags": [],
         "label": "Ensure",
@@ -422,11 +448,12 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.JsonValue",
+        "id": "def-common.JsonValue",
         "type": "Type",
         "tags": [],
         "label": "JsonValue",
@@ -435,28 +462,29 @@
           "string | number | boolean | ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.JsonArray",
-            "text": "JsonArray"
+            "section": "def-common.JsonObject",
+            "text": "JsonObject"
           },
           " | ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.JsonObject",
-            "text": "JsonObject"
+            "section": "def-common.JsonArray",
+            "text": "JsonArray"
           },
           " | null"
         ],
         "path": "packages/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.MaybePromise",
+        "id": "def-common.MaybePromise",
         "type": "Type",
         "tags": [],
         "label": "MaybePromise",
@@ -468,11 +496,12 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.MethodKeysOf",
+        "id": "def-common.MethodKeysOf",
         "type": "Type",
         "tags": [],
         "label": "MethodKeysOf",
@@ -484,11 +513,12 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.OneOf",
+        "id": "def-common.OneOf",
         "type": "Type",
         "tags": [],
         "label": "OneOf",
@@ -500,11 +530,12 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.Optional",
+        "id": "def-common.Optional",
         "type": "Type",
         "tags": [
           "desc"
@@ -519,11 +550,12 @@
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.PublicContract",
+        "id": "def-common.PublicContract",
         "type": "Type",
         "tags": [],
         "label": "PublicContract",
@@ -535,11 +567,12 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.PublicKeys",
+        "id": "def-common.PublicKeys",
         "type": "Type",
         "tags": [],
         "label": "PublicKeys",
@@ -551,11 +584,12 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.PublicMethodsOf",
+        "id": "def-common.PublicMethodsOf",
         "type": "Type",
         "tags": [],
         "label": "PublicMethodsOf",
@@ -566,20 +600,21 @@
           "{ [P in ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.MethodKeysOf",
+            "section": "def-common.MethodKeysOf",
             "text": "MethodKeysOf"
           },
           "<T>]: T[P]; }"
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.RecursiveReadonly",
+        "id": "def-common.RecursiveReadonly",
         "type": "Type",
         "tags": [],
         "label": "RecursiveReadonly",
@@ -588,28 +623,29 @@
           "T extends (...args: any) => any ? T : T extends any[] ? ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.RecursiveReadonlyArray",
+            "section": "def-common.RecursiveReadonlyArray",
             "text": "RecursiveReadonlyArray"
           },
           "<T[number]> : T extends object ? Readonly<{ [K in keyof T]: ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.RecursiveReadonly",
+            "section": "def-common.RecursiveReadonly",
             "text": "RecursiveReadonly"
           },
           "<T[K]>; }> : T"
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.Serializable",
+        "id": "def-common.Serializable",
         "type": "Type",
         "tags": [],
         "label": "Serializable",
@@ -618,9 +654,9 @@
           "string | number | boolean | ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           " | ",
@@ -629,11 +665,12 @@
         ],
         "path": "packages/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.ShallowPromise",
+        "id": "def-common.ShallowPromise",
         "type": "Type",
         "tags": [],
         "label": "ShallowPromise",
@@ -645,11 +682,12 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.UnionToIntersection",
+        "id": "def-common.UnionToIntersection",
         "type": "Type",
         "tags": [],
         "label": "UnionToIntersection",
@@ -661,11 +699,12 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.UnwrapObservable",
+        "id": "def-common.UnwrapObservable",
         "type": "Type",
         "tags": [],
         "label": "UnwrapObservable",
@@ -676,20 +715,21 @@
           "T extends ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.ObservableLike",
+            "section": "def-common.ObservableLike",
             "text": "ObservableLike"
           },
           "<infer U> ? U : never"
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.Values",
+        "id": "def-common.Values",
         "type": "Type",
         "tags": [],
         "label": "Values",
@@ -701,11 +741,12 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.Writable",
+        "id": "def-common.Writable",
         "type": "Type",
         "tags": [],
         "label": "Writable",
@@ -717,17 +758,10 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

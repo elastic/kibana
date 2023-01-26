@@ -142,6 +142,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="importSavedObjectsConfirmBtn"
           fill={true}
           isLoading={false}
@@ -376,6 +377,7 @@ exports[`Flyout should render import step 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="importSavedObjectsImportBtn"
           fill={true}
           isDisabled={true}

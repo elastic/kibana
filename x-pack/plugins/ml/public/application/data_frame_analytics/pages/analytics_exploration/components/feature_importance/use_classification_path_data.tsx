@@ -94,6 +94,7 @@ export const useDecisionPathData = ({
         predictedProbability,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseline, featureImportance, predictedValue]);
 
   return { decisionPathData };

@@ -14,7 +14,7 @@ import type {
   ImportResponseError,
   ImportRulesResponseError,
   ExceptionsImportError,
-} from '../../../detections/containers/detection_engine/rules';
+} from '../../../detection_engine/rule_management/logic';
 
 export const formatError = (
   i18nFailedDetailedMessage: (message: string) => string,

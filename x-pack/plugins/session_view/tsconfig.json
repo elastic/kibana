@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     // add all the folders containg files to be compiled
@@ -17,27 +14,28 @@
     "storybook/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../encrypted_saved_objects/tsconfig.json" },
 
     // optionalPlugins from ./kibana.json
-    { "path": "../security/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
-    { "path": "../cloud/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/home/tsconfig.json" },
+    "@kbn/security-plugin",
 
     // requiredBundles from ./kibana.json
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
-    { "path": "../infra/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../rule_registry/tsconfig.json" }
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/rule-registry-plugin",
+    "@kbn/i18n",
+    "@kbn/std",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/alerting-plugin",
+    "@kbn/rule-data-utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

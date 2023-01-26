@@ -83,6 +83,12 @@ export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
     label: i18n.translate('xpack.lens.xyChart.iconSelect.starLabel', { defaultMessage: 'Star' }),
   },
   {
+    value: 'starFilled',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.starFilledLabel', {
+      defaultMessage: 'Star filled',
+    }),
+  },
+  {
     value: 'tag',
     label: i18n.translate('xpack.lens.xyChart.iconSelect.tagIconLabel', {
       defaultMessage: 'Tag',

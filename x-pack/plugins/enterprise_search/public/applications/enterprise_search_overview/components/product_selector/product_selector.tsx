@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { Chat } from '@kbn/cloud-plugin/public';
+import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -71,7 +71,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     <>
       <AddContentEmptyPrompt
         title={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptTitle', {
-          defaultMessage: 'A new start for search',
+          defaultMessage: 'Add data and start searching',
         })}
         buttonLabel={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptButtonLabel', {
           defaultMessage: 'Create an Elasticsearch index',
@@ -145,7 +145,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     defaultMessage: 'Set up a language client',
                   }
                 ),
-                to: docLinks.start,
+                to: docLinks.languageClients,
               },
               {
                 label: i18n.translate(

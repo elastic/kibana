@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { dirname, relative } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
@@ -24,6 +24,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     reportName = 'Unnamed Mocha Tests',
     rootDirectory = REPO_ROOT,
     getTestMetadata = () => ({}),
+    metadata,
   } = options;
 
   const stats = {};
@@ -104,6 +105,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       tests: allTests.length + failedHooks.length,
       failures: failures.length,
       skipped: skippedResults.length,
+      'metadata-json': JSON.stringify(metadata ?? {}),
     });
 
     function addTestcaseEl(node) {

@@ -8,40 +8,45 @@
 
 import { XJsonLang } from './xjson';
 import { PainlessLang } from './painless';
-import { EsqlLang } from './esql';
+import { SQLLang } from './sql';
 import { monaco } from './monaco_imports';
-import { registerLanguage } from './helpers';
+import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
+import { registerLanguage, registerTheme } from './helpers';
 
-// @ts-ignore
-import xJsonWorkerSrc from '!!raw-loader!../../target_workers/xjson.editor.worker.js';
-// @ts-ignore
-import defaultWorkerSrc from '!!raw-loader!../../target_workers/default.editor.worker.js';
-// @ts-ignore
-import painlessWorkerSrc from '!!raw-loader!../../target_workers/painless.editor.worker.js';
+export const DEFAULT_WORKER_ID = 'default';
+const langSpecificWorkerIds = [
+  XJsonLang.ID,
+  PainlessLang.ID,
+  ESQLLang.ID,
+  monaco.languages.json.jsonDefaults.languageId,
+  'yaml',
+];
 
 /**
  * Register languages and lexer rules
  */
 registerLanguage(XJsonLang);
 registerLanguage(PainlessLang);
-registerLanguage(EsqlLang);
+registerLanguage(SQLLang);
+registerLanguage(ESQLLang);
 
 /**
- * Create web workers by language ID
+ * Register custom themes
  */
-const mapLanguageIdToWorker: { [key: string]: any } = {
-  [XJsonLang.ID]: xJsonWorkerSrc,
-  [PainlessLang.ID]: painlessWorkerSrc,
-};
+registerTheme(ESQL_THEME_ID, buildESQlTheme());
+
+const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 
 // @ts-ignore
 window.MonacoEnvironment = {
   // needed for functional tests so that we can get value from 'editor'
   monaco,
-  getWorker: (module: string, languageId: string) => {
-    const workerSrc = mapLanguageIdToWorker[languageId] || defaultWorkerSrc;
-
-    const blob = new Blob([workerSrc], { type: 'application/javascript' });
-    return new Worker(URL.createObjectURL(blob));
-  },
+  getWorkerUrl: monacoBundleDir
+    ? (_: string, languageId: string) => {
+        const workerId = langSpecificWorkerIds.includes(languageId)
+          ? languageId
+          : DEFAULT_WORKER_ID;
+        return `${monacoBundleDir}${workerId}.editor.worker.js`;
+      }
+    : () => undefined,
 };

@@ -7,7 +7,7 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { EuiPage, EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 import { IBasePath } from '@kbn/core/public';
 import { PLUGIN_ID } from '../../common';
 

@@ -17,6 +17,8 @@ export interface CategoryFacet {
   count: number;
   id: string;
   title: string;
+  parent_id?: string;
+  parent_title?: string;
 }
 
 export const UPDATES_AVAILABLE = 'updates_available';
@@ -64,6 +66,7 @@ export function CategoryFacets({
         categories.map((category) => {
           return (
             <EuiFacetButton
+              data-test-subj={`epmList.categories.${category.id}`}
               isSelected={category.id === selectedCategory}
               key={category.id}
               id={category.id}

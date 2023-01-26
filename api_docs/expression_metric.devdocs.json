@@ -14,7 +14,13 @@
           "(theme$?: ",
           "Observable",
           "<",
-          "CoreTheme",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          },
           ">) => () => ",
           {
             "pluginId": "expressions",
@@ -35,6 +41,7 @@
         ],
         "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetric",
@@ -46,11 +53,18 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -67,10 +81,10 @@
         "signature": [
           "(core: ",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreSetup",
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreSetup",
             "text": "CoreSetup"
           },
           "<object, unknown>) => () => ",
@@ -93,6 +107,7 @@
         ],
         "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetric",
@@ -103,16 +118,17 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>"
             ],
             "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -136,6 +152,7 @@
       ],
       "path": "src/plugins/expression_metric/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -159,6 +176,7 @@
       ],
       "path": "src/plugins/expression_metric/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -174,7 +192,7 @@
         "label": "metricFunction",
         "description": [],
         "signature": [
-          "() => { name: \"metric\"; aliases: never[]; type: \"render\"; inputTypes: (\"number\" | \"null\" | \"string\")[]; help: string; args: { label: { types: \"string\"[]; aliases: string[]; help: string; default: string; }; labelFont: { types: \"style\"[]; help: string; default: string; }; metricFont: { types: \"style\"[]; help: string; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: string; }; }; fn: (input: ",
+          "() => { name: \"metric\"; aliases: never[]; type: \"render\"; inputTypes: (\"number\" | \"null\" | \"string\")[]; help: any; args: { label: { types: \"string\"[]; aliases: string[]; help: any; default: string; }; labelFont: { types: \"style\"[]; help: any; default: string; }; metricFont: { types: \"style\"[]; help: any; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: any; }; }; fn: (input: ",
           {
             "pluginId": "expressionMetric",
             "scope": "common",
@@ -210,6 +228,7 @@
         ],
         "path": "src/plugins/expression_metric/common/expression_functions/metric_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -225,6 +244,7 @@
         "description": [],
         "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetric",
@@ -234,7 +254,8 @@
             "label": "label",
             "description": [],
             "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetric",
@@ -253,7 +274,8 @@
               }
             ],
             "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetric",
@@ -263,7 +285,8 @@
             "label": "metricFormat",
             "description": [],
             "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetric",
@@ -282,7 +305,8 @@
               }
             ],
             "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -296,6 +320,7 @@
         "description": [],
         "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetric",
@@ -307,7 +332,8 @@
               "The text to display under the metric"
             ],
             "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetric",
@@ -328,7 +354,8 @@
               }
             ],
             "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetric",
@@ -343,7 +370,8 @@
               "string | number | null"
             ],
             "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetric",
@@ -364,7 +392,8 @@
               }
             ],
             "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetric",
@@ -376,7 +405,8 @@
               "NumeralJS format string"
             ],
             "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -390,6 +420,7 @@
         "description": [],
         "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetric",
@@ -399,7 +430,8 @@
             "label": "width",
             "description": [],
             "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetric",
@@ -409,7 +441,8 @@
             "label": "height",
             "description": [],
             "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -429,6 +462,7 @@
         ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -496,11 +530,18 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -517,6 +558,7 @@
         ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -531,6 +573,7 @@
         ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -552,6 +595,7 @@
         ],
         "path": "src/plugins/expression_metric/common/expression_functions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -566,6 +610,7 @@
         ],
         "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -580,6 +625,7 @@
         ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -594,6 +640,7 @@
         ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -608,6 +655,7 @@
         ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

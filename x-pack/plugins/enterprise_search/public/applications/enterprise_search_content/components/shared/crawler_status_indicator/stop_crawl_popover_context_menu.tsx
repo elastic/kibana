@@ -73,7 +73,7 @@ export const StopCrawlPopoverContextMenu: React.FC = () => {
             {i18n.translate(
               'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.cancelCrawlMenuItemLabel',
               {
-                defaultMessage: 'Cancel Crawl',
+                defaultMessage: 'Cancel Crawls',
               }
             )}
           </EuiContextMenuItem>,

@@ -75,3 +75,11 @@ export const AND = i18n.translate('xpack.lists.exceptions.andDescription', {
 export const OR = i18n.translate('xpack.lists.exceptions.orDescription', {
   defaultMessage: 'OR',
 });
+
+export const CUSTOM_COMBOBOX_OPTION_TEXT = i18n.translate(
+  'xpack.lists.exceptions.comboBoxCustomOptionText',
+  {
+    defaultMessage:
+      'Select a field from the list. If your field is not available, create a custom one.',
+  }
+);

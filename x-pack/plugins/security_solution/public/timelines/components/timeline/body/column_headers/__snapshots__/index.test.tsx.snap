@@ -626,6 +626,26 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
             },
             "type": "string",
           },
+          "nestedField.thirdAttributes": Object {
+            "aggregatable": false,
+            "category": "nestedField",
+            "description": "",
+            "example": "",
+            "format": "",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "nestedField.thirdAttributes",
+            "searchable": true,
+            "subType": Object {
+              "nested": Object {
+                "path": "nestedField",
+              },
+            },
+            "type": "date",
+          },
         },
       },
       "source": Object {
@@ -776,7 +796,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
     ]
   }
   tabType="query"
-  timelineId="test"
+  timelineId="timeline-test"
   trailingControlColumns={Array []}
 />
 `;

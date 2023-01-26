@@ -31,8 +31,10 @@ const DEFAULT_VALUES = {
   deleteModalIndex: null,
   deleteModalIndexName: '',
   deleteModalIngestionMethod: IngestionMethod.API,
+  deleteStatus: Status.IDLE,
   hasNoIndices: false,
   indices: [],
+  isDeleteLoading: false,
   isDeleteModalVisible: false,
   isFirstRequest: true,
   isLoading: true,
@@ -255,6 +257,36 @@ describe('IndicesLogic', () => {
         });
       });
     });
+    describe('deleteRequest', () => {
+      it('should update isDeleteLoading to true on deleteIndex', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.LOADING,
+          isDeleteLoading: true,
+        });
+      });
+      it('should update isDeleteLoading to false on apiError', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        IndicesLogic.actions.deleteError({} as HttpError);
+
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.ERROR,
+          isDeleteLoading: false,
+        });
+      });
+      it('should update isDeleteLoading to false on apiSuccess', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        IndicesLogic.actions.deleteSuccess({ indexName: 'to-delete' });
+
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.SUCCESS,
+          isDeleteLoading: false,
+        });
+      });
+    });
   });
 
   describe('listeners', () => {
@@ -262,20 +294,10 @@ describe('IndicesLogic', () => {
       IndicesLogic.actions.makeRequest({ meta: DEFAULT_META, returnHiddenIndices: false });
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
-    it('calls flashAPIErrors on apiError', () => {
-      IndicesLogic.actions.apiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
-    it('calls flashAPIErrors on deleteError', () => {
-      IndicesLogic.actions.deleteError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
     it('calls flashSuccessToast, closeDeleteModal and fetchIndices on deleteSuccess', () => {
       IndicesLogic.actions.fetchIndices = jest.fn();
       IndicesLogic.actions.closeDeleteModal = jest.fn();
-      IndicesLogic.actions.deleteSuccess();
+      IndicesLogic.actions.deleteSuccess({ indexName: 'index-name' });
       expect(mockFlashMessageHelpers.flashSuccessToast).toHaveBeenCalledTimes(1);
       expect(IndicesLogic.actions.fetchIndices).toHaveBeenCalledWith(
         IndicesLogic.values.searchParams
@@ -283,7 +305,7 @@ describe('IndicesLogic', () => {
       expect(IndicesLogic.actions.closeDeleteModal).toHaveBeenCalled();
     });
     it('calls makeRequest on fetchIndices', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
       IndicesLogic.actions.makeRequest = jest.fn();
       IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
       jest.advanceTimersByTime(150);
@@ -294,7 +316,7 @@ describe('IndicesLogic', () => {
       });
     });
     it('calls makeRequest once on two fetchIndices calls within 150ms', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
       IndicesLogic.actions.makeRequest = jest.fn();
       IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
       jest.advanceTimersByTime(130);
@@ -309,7 +331,7 @@ describe('IndicesLogic', () => {
       expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledTimes(1);
     });
     it('calls makeRequest twice on two fetchIndices calls outside 150ms', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
       IndicesLogic.actions.makeRequest = jest.fn();
       IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
       jest.advanceTimersByTime(150);

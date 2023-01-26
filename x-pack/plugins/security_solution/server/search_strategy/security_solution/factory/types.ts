@@ -11,6 +11,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   FactoryQueryTypes,
   StrategyRequestType,
@@ -29,6 +30,7 @@ export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
       endpointContext: EndpointAppContext;
       request: KibanaRequest;
       spaceId?: string;
+      ruleDataClient?: IRuleDataClient | null;
     }
   ) => Promise<StrategyResponseType<T>>;
 }

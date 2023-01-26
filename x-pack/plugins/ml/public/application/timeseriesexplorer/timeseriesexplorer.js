@@ -87,6 +87,7 @@ import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
 import { ExplorerNoJobsSelected } from '../explorer/components';
+import { getSourceIndicesWithGeoFields } from '../explorer/explorer_utils';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -131,6 +132,7 @@ function getTimeseriesexplorerDefaultState() {
     zoomFromFocusLoaded: undefined,
     zoomToFocusLoaded: undefined,
     chartDataError: undefined,
+    sourceIndicesWithGeoFields: {},
   };
 }
 
@@ -152,6 +154,7 @@ export class TimeSeriesExplorer extends React.Component {
     tableSeverity: PropTypes.number,
     zoom: PropTypes.object,
     toastNotificationService: PropTypes.object,
+    dataViewsService: PropTypes.object,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -844,10 +847,22 @@ export class TimeSeriesExplorer extends React.Component {
 
   componentDidUpdate(previousProps) {
     if (previousProps === undefined || previousProps.selectedJobId !== this.props.selectedJobId) {
+      const selectedJob = mlJobService.getJob(this.props.selectedJobId);
       this.contextChartSelectedInitCallDone = false;
-      this.setState({ fullRefresh: false, loading: true }, () => {
-        this.loadForJobId(this.props.selectedJobId);
-      });
+      getSourceIndicesWithGeoFields([selectedJob], this.props.dataViewsService)
+        .then((getSourceIndicesWithGeoFieldsResp) =>
+          this.setState(
+            {
+              fullRefresh: false,
+              loading: true,
+              sourceIndicesWithGeoFields: getSourceIndicesWithGeoFieldsResp,
+            },
+            () => {
+              this.loadForJobId(this.props.selectedJobId);
+            }
+          )
+        )
+        .catch(console.error); // eslint-disable-line no-console
     }
 
     if (
@@ -954,6 +969,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
       chartDataError,
+      sourceIndicesWithGeoFields,
     } = this.state;
     const chartProps = {
       modelPlotEnabled,
@@ -1296,7 +1312,18 @@ export class TimeSeriesExplorer extends React.Component {
             </div>
           )}
         {arePartitioningFieldsProvided && jobs.length > 0 && hasResults === true && (
-          <AnomaliesTable bounds={bounds} tableData={tableData} filter={this.tableFilter} />
+          <AnomaliesTable
+            bounds={bounds}
+            tableData={tableData}
+            filter={this.tableFilter}
+            sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+            selectedJobs={[
+              {
+                id: selectedJob.job_id,
+                modelPlotEnabled,
+              },
+            ]}
+          />
         )}
       </TimeSeriesExplorerPage>
     );

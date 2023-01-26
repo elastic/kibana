@@ -14,59 +14,7 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-overlays-browser-mocks",
-        "id": "def-server.overlayServiceMock",
-        "type": "Object",
-        "tags": [],
-        "label": "overlayServiceMock",
-        "description": [],
-        "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-overlays-browser-mocks",
-            "id": "def-server.overlayServiceMock.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "PublicMethodsOf",
-              "<",
-              "OverlayService",
-              ">>"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser-mocks",
-            "id": "def-server.overlayServiceMock.createStartContract",
-            "type": "Function",
-            "tags": [],
-            "label": "createStartContract",
-            "description": [],
-            "signature": [
-              "() => ",
-              "DeeplyMockedKeys",
-              "<",
-              "OverlayStart",
-              ">"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   },
   "common": {
     "classes": [],
@@ -74,6 +22,79 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-overlays-browser-mocks",
+        "id": "def-common.overlayServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "overlayServiceMock",
+        "description": [],
+        "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-overlays-browser-mocks",
+            "id": "def-common.overlayServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              "OverlayService",
+              ">>"
+            ],
+            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-overlays-browser-mocks",
+            "id": "def-common.overlayServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-common.OverlayStart",
+                "text": "OverlayStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

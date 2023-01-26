@@ -6,66 +6,62 @@
  * Side Public License, v 1.
  */
 
+import { ApmFields, Instance, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
-import { apm, timerange } from '../..';
-import { ApmFields } from '../lib/apm/apm_fields';
-import { Instance } from '../lib/apm/instance';
 import { Scenario } from '../cli/scenario';
-import { getLogger } from '../cli/utils/get_common_services';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
-  const logger = getLogger(runOptions);
-
-  const numServices = 3;
+const scenario: Scenario<ApmFields> = async ({ logger }) => {
   const languages = ['go', 'dotnet', 'java', 'python'];
-  const services = ['web', 'order-processing', 'api-backend', 'proxy'];
+  const services = ['web', 'order-processing', 'api-backend'];
 
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
+    generate: ({ range }) => {
+      const successfulTimestamps = range.ratePerMinute(60);
 
-      const successfulTimestamps = range.interval('1s').rate(1);
-      // `.randomize(3, 180);
-
-      const instances = [...Array(numServices).keys()].map((index) =>
+      const instances = services.map((serviceName, index) =>
         apm
-          .service(
-            `${services[index % services.length]}-${languages[index % languages.length]}-${index}`,
-            ENVIRONMENT,
-            languages[index % languages.length]
-          )
-          .instance('instance')
+          .service({
+            name: `${services[index % services.length]}-${
+              languages[index % languages.length]
+            }-${index}`,
+            environment: ENVIRONMENT,
+            agentName: languages[index % languages.length],
+          })
+          .instance(`instance-${index}`)
       );
 
       const urls = ['GET /order/{id}', 'POST /basket/{id}', 'DELETE /basket', 'GET /products'];
 
       const instanceSpans = (instance: Instance, url: string, index: number) => {
         const successfulTraceEvents = successfulTimestamps.generator((timestamp) => {
-          const mod = index % 4;
-          const randomHigh = random(100, mod * 1000);
-          const randomLow = random(10, randomHigh / 10 + mod * 3);
-          const duration = random(randomLow, randomHigh);
-          const childDuration = random(randomLow, duration);
+          const mod = (index % 4) + 1;
+          const randomHigh = random(100, mod * 1000, false);
+          const randomLow = random(10, randomHigh / 10 + mod * 3, false);
+          const duration = random(randomLow, randomHigh, false);
+          const childDuration = random(randomLow, duration, false);
           const remainderDuration = duration - childDuration;
           const generateError = index % random(mod, 9) === 0;
           const generateChildError = index % random(mod, 9) === 0;
           const span = instance
-            .transaction(url)
+            .transaction({ transactionName: url })
             .timestamp(timestamp)
             .duration(duration)
             .children(
               instance
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .span({
+                  spanName: 'GET apm-*/_search',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
                 .duration(childDuration)
                 .destination('elasticsearch')
                 .timestamp(timestamp)
                 .outcome(generateError && generateChildError ? 'failure' : 'success'),
               instance
-                .span('custom_operation', 'custom')
+                .span({ spanName: 'custom_operation', spanType: 'custom' })
                 .duration(remainderDuration)
                 .success()
                 .timestamp(timestamp + childDuration)
@@ -74,18 +70,19 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             ? span.success()
             : span
                 .failure()
-                .errors(instance.error(`No handler for ${url}`).timestamp(timestamp + 50));
+                .errors(
+                  instance.error({ message: `No handler for ${url}` }).timestamp(timestamp + 50)
+                );
         });
 
         return successfulTraceEvents;
       };
 
-      return instances
-        .flatMap((instance) => urls.map((url) => ({ instance, url })))
-        .map(({ instance, url }, index) =>
-          logger.perf('generating_apm_events', () => instanceSpans(instance, url, index))
-        )
-        .reduce((p, c) => p.merge(c));
+      return logger.perf('generating_apm_events', () =>
+        instances
+          .flatMap((instance) => urls.map((url) => ({ instance, url })))
+          .map(({ instance, url }, index) => instanceSpans(instance, url, index))
+      );
     },
   };
 };

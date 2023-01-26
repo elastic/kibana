@@ -19,6 +19,7 @@ const createStartContractMock = () => {
       bulkCreate: jest.fn(),
       bulkResolve: jest.fn(),
       bulkUpdate: jest.fn(),
+      bulkDelete: jest.fn(),
       delete: jest.fn(),
       bulkGet: jest.fn(),
       find: jest.fn(),
@@ -40,6 +41,9 @@ const createMock = () => {
   return mocked;
 };
 
+/**
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
+ */
 export const savedObjectsServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,

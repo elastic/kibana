@@ -6,34 +6,36 @@
  */
 import Boom from '@hapi/boom';
 
-import {
+import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import {
+import type {
   CaseResponse,
-  CaseResponseRt,
-  CaseStatuses,
   CommentAttributes,
   CommentPatchRequest,
   CommentRequest,
-  CommentType,
   CommentRequestUserType,
-  CaseAttributes,
+  CommentRequestAlertType,
+} from '../../../common/api';
+import {
+  CaseResponseRt,
+  CaseStatuses,
+  CommentType,
   ActionTypes,
   Actions,
-  CommentRequestAlertType,
 } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   MAX_ALERTS_PER_CASE,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import { CasesClientArgs } from '../../client';
-import { RefreshSetting } from '../../services/types';
+import type { CasesClientArgs } from '../../client';
+import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
+import type { CaseSavedObject } from '../types';
 import {
   countAlertsForID,
   flattenCommentSavedObjects,
@@ -51,9 +53,9 @@ const ALERT_LIMIT_MSG = `Case has reached the maximum allowed number (${MAX_ALER
  */
 export class CaseCommentModel {
   private readonly params: CaseCommentModelParams;
-  private readonly caseInfo: SavedObject<CaseAttributes>;
+  private readonly caseInfo: CaseSavedObject;
 
-  private constructor(caseInfo: SavedObject<CaseAttributes>, params: CaseCommentModelParams) {
+  private constructor(caseInfo: CaseSavedObject, params: CaseCommentModelParams) {
     this.caseInfo = caseInfo;
     this.params = params;
   }
@@ -69,7 +71,7 @@ export class CaseCommentModel {
     return new CaseCommentModel(savedObject, options);
   }
 
-  public get savedObject(): SavedObject<CaseAttributes> {
+  public get savedObject(): CaseSavedObject {
     return this.caseInfo;
   }
 
@@ -169,7 +171,7 @@ export class CaseCommentModel {
     }
   }
 
-  private newObjectWithInfo(caseInfo: SavedObject<CaseAttributes>): CaseCommentModel {
+  private newObjectWithInfo(caseInfo: CaseSavedObject): CaseCommentModel {
     return new CaseCommentModel(caseInfo, this.params);
   }
 
@@ -180,10 +182,9 @@ export class CaseCommentModel {
   ) {
     const { id, version, ...queryRestAttributes } = updateRequest;
 
-    await this.params.services.userActionService.createUserAction({
+    await this.params.services.userActionService.creator.createUserAction({
       type: ActionTypes.comment,
       action: Actions.update,
-      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
       caseId: this.caseInfo.id,
       attachmentId: comment.id,
       payload: { attachment: queryRestAttributes },
@@ -334,10 +335,9 @@ export class CaseCommentModel {
     comment: SavedObject<CommentAttributes>,
     req: CommentRequest
   ) {
-    await this.params.services.userActionService.createUserAction({
+    await this.params.services.userActionService.creator.createUserAction({
       type: ActionTypes.comment,
       action: Actions.create,
-      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
       caseId: this.caseInfo.id,
       attachmentId: comment.id,
       payload: {
@@ -349,8 +349,7 @@ export class CaseCommentModel {
   }
 
   private async bulkCreateCommentUserAction(attachments: Array<{ id: string } & CommentRequest>) {
-    await this.params.services.userActionService.bulkCreateAttachmentCreation({
-      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
+    await this.params.services.userActionService.creator.bulkCreateAttachmentCreation({
       caseId: this.caseInfo.id,
       attachments: attachments.map(({ id, ...attachment }) => ({
         id,

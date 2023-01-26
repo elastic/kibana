@@ -9,8 +9,7 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { mockAppDataView, mockUxSeries, render } from '../../rtl_helpers';
 import { DataTypesSelect } from './data_type_select';
-import { DataTypes } from '../../configurations/constants';
-import { DataTypesLabels } from '../../obsv_exploratory_view';
+import { DataTypes, DataTypesLabels } from '../../labels';
 
 describe('DataTypeSelect', function () {
   const seriesId = 0;

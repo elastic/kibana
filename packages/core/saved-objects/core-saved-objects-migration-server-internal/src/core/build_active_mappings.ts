@@ -139,6 +139,9 @@ function defaultMapping(): IndexMapping {
       updated_at: {
         type: 'date',
       },
+      created_at: {
+        type: 'date',
+      },
       references: {
         type: 'nested',
         properties: {

@@ -6,7 +6,9 @@
  */
 
 import type { ReactNode, FunctionComponent } from 'react';
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import { useMemo } from 'react';
+import React, { useCallback, useState } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiFlexGrid,
@@ -15,9 +17,16 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
-  EuiSearchBar,
+  EuiFieldSearch,
   EuiText,
-  EuiBadge,
+  useEuiTheme,
+  EuiIcon,
+  EuiScreenReaderOnly,
+  EuiButton,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -31,22 +40,33 @@ import type { IntegrationCardItem } from '../../../../../../common/types/models'
 
 import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
 
+import type { IntegrationsURLParameters } from '../screens/home/hooks/use_available_packages';
+
+import { ExperimentalFeaturesService } from '../../../services';
+
+import { promoteFeaturedIntegrations } from './utils';
+
 import { PackageCard } from './package_card';
 
 export interface Props {
   isLoading?: boolean;
   controls?: ReactNode | ReactNode[];
-  title?: string;
   list: IntegrationCardItem[];
-  featuredList?: JSX.Element | null;
-  initialSearch?: string;
+  searchTerm: string;
+  setSearchTerm: (search: string) => void;
   selectedCategory: ExtendedIntegrationCategory;
-  setSelectedCategory: (category: string) => void;
+  setCategory: (category: ExtendedIntegrationCategory) => void;
   categories: CategoryFacet[];
-  onSearchChange: (search: string) => void;
-  showMissingIntegrationMessage?: boolean;
+  setUrlandReplaceHistory: (params: IntegrationsURLParameters) => void;
+  setUrlandPushHistory: (params: IntegrationsURLParameters) => void;
   callout?: JSX.Element | null;
+  // Props used only in AvailablePackages component:
   showCardLabels?: boolean;
+  title?: string;
+  availableSubCategories?: CategoryFacet[];
+  selectedSubCategory?: string;
+  setSelectedSubCategory?: (c: string | undefined) => void;
+  showMissingIntegrationMessage?: boolean;
 }
 
 export const PackageListGrid: FunctionComponent<Props> = ({
@@ -54,60 +74,69 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   controls,
   title,
   list,
-  initialSearch,
-  onSearchChange,
+  searchTerm,
+  setSearchTerm,
   selectedCategory,
-  setSelectedCategory,
+  setCategory,
   categories,
+  availableSubCategories,
+  setSelectedSubCategory,
+  selectedSubCategory,
+  setUrlandReplaceHistory,
+  setUrlandPushHistory,
   showMissingIntegrationMessage = false,
-  featuredList = null,
   callout,
   showCardLabels = true,
 }) => {
-  const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [isSticky, setIsSticky] = useState(false);
-  const [windowScrollY] = useState(window.scrollY);
+  const { euiTheme } = useEuiTheme();
 
-  useEffect(() => {
-    const menuRefCurrent = menuRef.current;
-    const onScroll = () => {
-      if (menuRefCurrent) {
-        setIsSticky(menuRefCurrent?.getBoundingClientRect().top < 110);
-      }
-    };
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [windowScrollY, isSticky]);
+  const [isPopoverOpen, setPopover] = useState(false);
 
-  const onQueryChange = ({
-    queryText,
-    error,
-  }: {
-    queryText: string;
-    error: { message: string } | null;
-  }) => {
-    if (!error) {
-      onSearchChange(queryText);
-      setSearchTerm(queryText);
-    }
+  const MAX_SUBCATEGORIES_NUMBER = 6;
+
+  const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
+
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  const onQueryChange = (e: any) => {
+    const queryText = e.target.value;
+    setSearchTerm(queryText);
+    setUrlandReplaceHistory({
+      searchString: queryText,
+      categoryId: selectedCategory,
+      subCategoryId: selectedSubCategory,
+    });
   };
 
   const resetQuery = () => {
     setSearchTerm('');
+    setUrlandReplaceHistory({ searchString: '', categoryId: '', subCategoryId: '' });
   };
+
+  const onSubCategoryClick = useCallback(
+    (subCategory: string) => {
+      if (setSelectedSubCategory) setSelectedSubCategory(subCategory);
+      setUrlandPushHistory({
+        categoryId: selectedCategory,
+        subCategoryId: subCategory,
+      });
+    },
+    [selectedCategory, setSelectedSubCategory, setUrlandPushHistory]
+  );
 
   const selectedCategoryTitle = selectedCategory
     ? categories.find((category) => category.id === selectedCategory)?.title
     : undefined;
 
-  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
-  let gridContent: JSX.Element;
-
-  if (isLoading || !localSearchRef.current) {
-    gridContent = <Loading />;
-  } else {
+  const filteredPromotedList = useMemo(() => {
+    if (isLoading) return [];
     const filteredList = searchTerm
       ? list.filter((item) =>
           (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
@@ -115,84 +144,203 @@ export const PackageListGrid: FunctionComponent<Props> = ({
             .includes(item[searchIdField])
         )
       : list;
-    gridContent = (
-      <GridColumn
-        list={filteredList}
-        showMissingIntegrationMessage={showMissingIntegrationMessage}
-        showCardLabels={showCardLabels}
-      />
-    );
-  }
+
+    return promoteFeaturedIntegrations(filteredList, selectedCategory);
+  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
+
+  const splitSubcategories = (
+    subcategories: CategoryFacet[] | undefined
+  ): { visibleSubCategories?: CategoryFacet[]; hiddenSubCategories?: CategoryFacet[] } => {
+    if (!subcategories) return {};
+    else if (subcategories && subcategories?.length < MAX_SUBCATEGORIES_NUMBER) {
+      return { visibleSubCategories: subcategories, hiddenSubCategories: [] };
+    } else if (subcategories && subcategories?.length >= MAX_SUBCATEGORIES_NUMBER) {
+      return {
+        visibleSubCategories: subcategories.slice(0, MAX_SUBCATEGORIES_NUMBER),
+        hiddenSubCategories: subcategories.slice(MAX_SUBCATEGORIES_NUMBER),
+      };
+    }
+    return {};
+  };
+
+  const splitSubcat = splitSubcategories(availableSubCategories);
+  const { visibleSubCategories } = splitSubcat;
+  const hiddenSubCategoriesItems = useMemo(() => {
+    return splitSubcat?.hiddenSubCategories?.map((subCategory) => {
+      return (
+        <EuiContextMenuItem
+          key={subCategory.id}
+          onClick={() => {
+            onSubCategoryClick(subCategory.id);
+            closePopover();
+          }}
+        >
+          {subCategory.title}
+        </EuiContextMenuItem>
+      );
+    });
+  }, [onSubCategoryClick, splitSubcat.hiddenSubCategories]);
 
   return (
-    <>
-      {featuredList}
-      <div ref={menuRef}>
-        <EuiFlexGroup alignItems="flexStart" gutterSize="xl">
-          <EuiFlexItem grow={1} className={isSticky ? 'kbnStickyMenu' : ''}>
-            {controlsContent}
-          </EuiFlexItem>
-          <EuiFlexItem grow={5}>
-            <EuiSearchBar
-              query={searchTerm || undefined}
-              box={{
-                'data-test-subj': 'epmList.searchBar',
-                placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
-                  defaultMessage: 'Search for integrations',
-                }),
-                incremental: true,
-              }}
-              onChange={onQueryChange}
-              toolsRight={
-                selectedCategoryTitle ? (
-                  <div>
-                    <EuiBadge
-                      color="accent"
-                      iconType="cross"
-                      iconSide="right"
-                      iconOnClick={() => {
-                        setSelectedCategory('');
-                      }}
-                      iconOnClickAriaLabel="Remove category"
-                      data-test-sub="epmList.categoryBadge"
-                    >
-                      {selectedCategoryTitle}
-                    </EuiBadge>
-                  </div>
-                ) : undefined
-              }
-            />
-            {callout ? (
-              <>
-                <EuiSpacer />
-                {callout}
-              </>
+    <EuiFlexGroup alignItems="flexStart" gutterSize="xl" data-test-subj="epmList.integrationCards">
+      <EuiFlexItem
+        data-test-subj="epmList.controlsSideColumn"
+        grow={1}
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+        }}
+      >
+        <ControlsColumn controls={controls} title={title} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn">
+        <EuiFieldSearch
+          data-test-subj="epmList.searchBar"
+          placeholder={i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
+            defaultMessage: 'Search for integrations',
+          })}
+          value={searchTerm}
+          onChange={(e) => onQueryChange(e)}
+          isClearable={true}
+          incremental={true}
+          fullWidth={true}
+          prepend={
+            selectedCategoryTitle ? (
+              <EuiText
+                data-test-subj="epmList.categoryBadge"
+                size="xs"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontWeight: euiTheme.font.weight.bold,
+                  backgroundColor: euiTheme.colors.lightestShade,
+                }}
+              >
+                <EuiScreenReaderOnly>
+                  <span>Searching category: </span>
+                </EuiScreenReaderOnly>
+                {selectedCategoryTitle}
+                <button
+                  data-test-subj="epmList.categoryBadge.closeBtn"
+                  onClick={() => {
+                    setCategory('');
+                    if (setSelectedSubCategory) setSelectedSubCategory(undefined);
+                    setUrlandReplaceHistory({
+                      searchString: '',
+                      categoryId: '',
+                      subCategoryId: '',
+                    });
+                  }}
+                  aria-label="Remove filter"
+                  style={{
+                    padding: euiTheme.size.xs,
+                    paddingTop: '2px',
+                  }}
+                >
+                  <EuiIcon
+                    type="cross"
+                    color="text"
+                    size="s"
+                    style={{
+                      width: 'auto',
+                      padding: 0,
+                      backgroundColor: euiTheme.colors.lightestShade,
+                    }}
+                  />
+                </button>
+              </EuiText>
+            ) : undefined
+          }
+        />
+        {showIntegrationsSubcategories && availableSubCategories?.length ? <EuiSpacer /> : null}
+        {showIntegrationsSubcategories ? (
+          <EuiFlexGroup
+            data-test-subj="epmList.subcategoriesRow"
+            justifyContent="flexStart"
+            direction="row"
+            gutterSize="s"
+            style={{
+              maxWidth: 943,
+            }}
+          >
+            {visibleSubCategories?.map((subCategory) => (
+              <EuiFlexItem grow={false} key={subCategory.id}>
+                <EuiButton
+                  color="text"
+                  aria-label={subCategory?.title}
+                  onClick={() => onSubCategoryClick(subCategory.id)}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.epmList.subcategoriesButton"
+                    defaultMessage="{subcategory}"
+                    values={{
+                      subcategory: subCategory.title,
+                    }}
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            ))}
+            {hiddenSubCategoriesItems?.length ? (
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  data-test-subj="epmList.showMoreSubCategoriesButton"
+                  id="moreSubCategories"
+                  button={
+                    <EuiButtonIcon
+                      display="base"
+                      onClick={onButtonClick}
+                      iconType="boxesHorizontal"
+                      aria-label="Show more subcategories"
+                      size="m"
+                    />
+                  }
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                >
+                  <EuiContextMenuPanel size="s" items={hiddenSubCategoriesItems} />
+                </EuiPopover>
+              </EuiFlexItem>
             ) : null}
+          </EuiFlexGroup>
+        ) : null}
+        {callout ? (
+          <>
             <EuiSpacer />
-            {gridContent}
-            {showMissingIntegrationMessage && (
-              <>
-                <EuiSpacer />
-                <MissingIntegrationContent
-                  resetQuery={resetQuery}
-                  setSelectedCategory={setSelectedCategory}
-                />
-              </>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    </>
+            {callout}
+          </>
+        ) : null}
+        <EuiSpacer />
+        <GridColumn
+          isLoading={isLoading || !localSearchRef.current}
+          list={filteredPromotedList}
+          showMissingIntegrationMessage={showMissingIntegrationMessage}
+          showCardLabels={showCardLabels}
+        />
+        {showMissingIntegrationMessage && (
+          <>
+            <EuiSpacer />
+            <MissingIntegrationContent
+              setUrlandPushHistory={setUrlandPushHistory}
+              resetQuery={resetQuery}
+              setSelectedCategory={setCategory}
+            />
+            <EuiSpacer />
+          </>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
 interface ControlsColumnProps {
   controls: ReactNode;
   title: string | undefined;
-  sticky: boolean;
 }
 
-function ControlsColumn({ controls, title, sticky }: ControlsColumnProps) {
+const ControlsColumn = ({ controls, title }: ControlsColumnProps) => {
   let titleContent;
   if (title) {
     titleContent = (
@@ -205,30 +353,44 @@ function ControlsColumn({ controls, title, sticky }: ControlsColumnProps) {
     );
   }
   return (
-    <EuiFlexGroup direction="column" className={sticky ? 'kbnStickyMenu' : ''} gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none">
       {titleContent}
       {controls}
     </EuiFlexGroup>
   );
-}
+};
 
 interface GridColumnProps {
   list: IntegrationCardItem[];
+  isLoading: boolean;
   showMissingIntegrationMessage?: boolean;
   showCardLabels?: boolean;
 }
 
-function GridColumn({
+const GridColumn = ({
   list,
   showMissingIntegrationMessage = false,
   showCardLabels = false,
-}: GridColumnProps) {
+  isLoading,
+}: GridColumnProps) => {
+  if (isLoading) return <Loading />;
+
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
         list.map((item) => {
           return (
-            <EuiFlexItem key={item.id}>
+            <EuiFlexItem
+              key={item.id}
+              // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
+              css={css`
+                & > .euiPopover,
+                & > .euiPopover > .euiPopover__anchor,
+                & > .euiPopover > .euiPopover__anchor > .euiCard {
+                  height: 100%;
+                }
+              `}
+            >
               <PackageCard {...item} showLabels={showCardLabels} />
             </EuiFlexItem>
           );
@@ -254,21 +416,27 @@ function GridColumn({
       )}
     </EuiFlexGrid>
   );
-}
+};
 
 interface MissingIntegrationContentProps {
   resetQuery: () => void;
-  setSelectedCategory: (category: string) => void;
+  setSelectedCategory: (category: ExtendedIntegrationCategory) => void;
+  setUrlandPushHistory: (params: IntegrationsURLParameters) => void;
 }
 
-function MissingIntegrationContent({
+const MissingIntegrationContent = ({
   resetQuery,
   setSelectedCategory,
-}: MissingIntegrationContentProps) {
+  setUrlandPushHistory,
+}: MissingIntegrationContentProps) => {
   const handleCustomInputsLinkClick = useCallback(() => {
     resetQuery();
     setSelectedCategory('custom');
-  }, [resetQuery, setSelectedCategory]);
+    setUrlandPushHistory({
+      categoryId: 'custom',
+      subCategoryId: '',
+    });
+  }, [resetQuery, setSelectedCategory, setUrlandPushHistory]);
 
   return (
     <EuiText size="s" color="subdued">
@@ -298,4 +466,4 @@ function MissingIntegrationContent({
       </p>
     </EuiText>
   );
-}
+};

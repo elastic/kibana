@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiButtonGroup,
   EuiFlexGroup,
@@ -16,12 +16,15 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
+  EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
 
-import { useStartServices } from '../../hooks';
+import { useStartServices, useFlyoutContext } from '../../hooks';
 
 import { QuickStartTab } from './quick_start_tab';
 import { AdvancedTab } from './advanced_tab';
@@ -35,20 +38,20 @@ interface Props {
   onClose: () => void;
 }
 
-const useFleetServerTabs = () => {
+const useFleetServerTabs = (onClose: () => void) => {
   const [currentTab, setCurrentTab] = useState('quickStart');
 
   const quickStartTab = {
     id: 'quickStart',
     label: 'Quick Start',
-    content: <QuickStartTab />,
+    content: <QuickStartTab onClose={onClose} />,
     'data-test-subj': 'fleetServerFlyoutTab-quickStart',
   };
 
   const advancedTab = {
     id: 'advanced',
     label: 'Advanced',
-    content: <AdvancedTab />,
+    content: <AdvancedTab onClose={onClose} />,
     'data-test-subj': 'fleetServerFlyoutTab-advanced',
   };
 
@@ -116,7 +119,7 @@ const Header: React.FunctionComponent<{
 
 // Renders instructions inside of a flyout
 export const FleetServerFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
-  const { tabs, currentTab, setCurrentTab, currentTabContent } = useFleetServerTabs();
+  const { tabs, currentTab, setCurrentTab, currentTabContent } = useFleetServerTabs(onClose);
 
   return (
     <EuiFlyout data-test-subj="fleetServerFlyout" onClose={onClose} size="m">
@@ -134,17 +137,78 @@ export const FleetServerFlyout: React.FunctionComponent<Props> = ({ onClose }) =
   );
 };
 
-// Renders instructions directly
-export const FleetServerInstructions: React.FunctionComponent = () => {
-  const { tabs, currentTab, setCurrentTab, currentTabContent } = useFleetServerTabs();
+export const AddFleetServerLanding: React.FunctionComponent = () => {
+  const { docLinks } = useStartServices();
+  const flyoutContext = useFlyoutContext();
+
+  const onClickAddFleetServer = useCallback(() => {
+    flyoutContext.openFleetServerFlyout();
+  }, [flyoutContext]);
 
   return (
     <ContentWrapper gutterSize="none" justifyContent="center" direction="column">
-      <Header tabs={tabs} currentTab={currentTab} onTabClick={(id) => setCurrentTab(id)} />
+      <EuiFlexGroup alignItems="center" direction="column">
+        <EuiFlexItem>
+          <EuiTitle size="m">
+            <h2 data-test-subj="addFleetServerHeader">
+              <FormattedMessage
+                id="xpack.fleet.fleetServerLanding.title"
+                defaultMessage="Add a Fleet Server"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
 
-      <EuiSpacer size="m" />
-
-      {currentTabContent}
+        <EuiFlexItem>
+          <EuiText
+            css={`
+              max-width: 500px;
+              text-align: center;
+            `}
+          >
+            <FormattedMessage
+              id="xpack.fleet.fleetServerLanding.instructions"
+              defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. Follow the instructions below to set up a Fleet Server. For more information, see the {userGuideLink}"
+              values={{
+                userGuideLink: (
+                  <EuiLink
+                    href={docLinks.links.fleet.fleetServerAddFleetServer}
+                    external
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.fleetServerSetup.setupGuideLink"
+                      defaultMessage="Fleet and Elastic Agent Guide"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiSpacer size="s" />
+        <EuiFlexItem>
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.fleet.fleetServerLanding.addFleetServerButton.tooltip"
+                defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
+              />
+            }
+          >
+            <EuiButton
+              onClick={onClickAddFleetServer}
+              fill
+              data-test-subj="fleetServerLanding.addFleetServerButton"
+            >
+              <FormattedMessage
+                id="xpack.fleet.fleetServerLanding.addFleetServerButton"
+                defaultMessage="Add Fleet Server"
+              />
+            </EuiButton>
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </ContentWrapper>
   );
 };

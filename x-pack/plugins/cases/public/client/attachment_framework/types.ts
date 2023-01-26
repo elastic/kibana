@@ -6,12 +6,12 @@
  */
 
 import type React from 'react';
-import { EuiCommentProps, IconType } from '@elastic/eui';
-import {
+import type { EuiCommentProps, IconType } from '@elastic/eui';
+import type {
   CommentRequestExternalReferenceType,
   CommentRequestPersistableStateType,
 } from '../../../common/api';
-import { Case } from '../../containers/types';
+import type { Case } from '../../containers/types';
 
 export interface AttachmentViewObject<Props = {}> {
   timelineAvatar?: EuiCommentProps['timelineAvatar'];

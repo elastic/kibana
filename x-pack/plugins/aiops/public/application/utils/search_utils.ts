@@ -10,7 +10,7 @@
 
 import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { SearchSource } from '@kbn/data-plugin/common';
+import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
 import {
@@ -23,7 +23,6 @@ import {
 } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { SimpleSavedObject } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
@@ -204,7 +203,7 @@ export function getEsQueryFromSavedSearch({
     };
   }
 
-  // If saved search available, merge saved search with latest user query or filters
+  // If saved search available, merge saved search with the latest user query or filters
   // which might differ from extracted saved search data
   if (savedSearchData) {
     const globalFilters = filterManager?.getGlobalFilters();

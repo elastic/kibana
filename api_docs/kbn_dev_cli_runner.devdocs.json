@@ -9,10 +9,568 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.RunWithCommands",
+        "id": "def-common.FlagsReader",
+        "type": "Class",
+        "tags": [],
+        "label": "FlagsReader",
+        "description": [],
+        "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "flags",
+                "description": [],
+                "signature": [
+                  "Record<string, FlagValue | undefined>"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/dev-cli-runner",
+                    "id": "def-common.FlagsReader.Unnamed.$2.aliases",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "aliases",
+                    "description": [],
+                    "signature": [
+                      "Record<string, string> | undefined"
+                    ],
+                    "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.arrayOfStrings",
+            "type": "Function",
+            "tags": [],
+            "label": "arrayOfStrings",
+            "description": [
+              "\nRead a string flag that supports multiple instances into an array of strings. If the\nflag is only passed once an array with a single item will be returned. If the flag is not\npassed then undefined will be returned."
+            ],
+            "signature": [
+              "(key: string) => string[] | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.arrayOfStrings.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.requiredArrayOfStrings",
+            "type": "Function",
+            "tags": [],
+            "label": "requiredArrayOfStrings",
+            "description": [
+              "\nSame as #arrayOfStrings() except when the flag is not passed a \"flag error\" is thrown telling\nthe user that the flag is required and shows them the help text."
+            ],
+            "signature": [
+              "(key: string) => string[]"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.requiredArrayOfStrings.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.string",
+            "type": "Function",
+            "tags": [],
+            "label": "string",
+            "description": [
+              "\nRead the value of a string flag. If the flag is passed multiple times the last value is returned. If\nthe flag is not passed then undefined is returned."
+            ],
+            "signature": [
+              "(key: string) => string | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.string.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.enum",
+            "type": "Function",
+            "tags": [],
+            "label": "enum",
+            "description": [
+              "\nSame as #string() except when the flag is passed it is validated against a list\nof valid values"
+            ],
+            "signature": [
+              "<T extends string>(key: string, values: readonly T[]) => T | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.enum.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.enum.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "values",
+                "description": [],
+                "signature": [
+                  "readonly T[]"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.requiredString",
+            "type": "Function",
+            "tags": [],
+            "label": "requiredString",
+            "description": [
+              "\nSame as #string() except when a flag is not passed a \"flag error\" is thrown telling the user\nthat the flag is required and shows them the help text."
+            ],
+            "signature": [
+              "(key: string) => string"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.requiredString.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.path",
+            "type": "Function",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "\nSame as #string(), except that when there is a value for the string it is resolved to an\nabsolute path based on the current working directory"
+            ],
+            "signature": [
+              "(key: string) => string | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.path.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.requiredPath",
+            "type": "Function",
+            "tags": [],
+            "label": "requiredPath",
+            "description": [
+              "\nSame as #requiredString() except that values are converted to absolute paths based on the\ncurrent working directory"
+            ],
+            "signature": [
+              "(key: string) => string"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.requiredPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.arrayOfPaths",
+            "type": "Function",
+            "tags": [],
+            "label": "arrayOfPaths",
+            "description": [
+              "\nSame as #arrayOfStrings(), except that when there are values they are resolved to\nabsolute paths based on the current working directory"
+            ],
+            "signature": [
+              "(key: string) => string[] | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.arrayOfPaths.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.requiredArrayOfPaths",
+            "type": "Function",
+            "tags": [],
+            "label": "requiredArrayOfPaths",
+            "description": [
+              "\nSame as #requiredArrayOfStrings(), except that values are resolved to absolute paths\nbased on the current working directory"
+            ],
+            "signature": [
+              "(key: string) => string[]"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.requiredArrayOfPaths.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.number",
+            "type": "Function",
+            "tags": [],
+            "label": "number",
+            "description": [
+              "\nParsed the provided flag as a number, if the value does not parse to a valid number\nusing Number.parseFloat() then a \"flag error\" is thrown. If the flag is not passed\nundefined is returned."
+            ],
+            "signature": [
+              "(key: string) => number | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.number.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.requiredNumber",
+            "type": "Function",
+            "tags": [],
+            "label": "requiredNumber",
+            "description": [
+              "\nSame as #number() except that when the flag is missing a \"flag error\" is thrown"
+            ],
+            "signature": [
+              "(key: string) => number"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.requiredNumber.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.boolean",
+            "type": "Function",
+            "tags": [],
+            "label": "boolean",
+            "description": [
+              "\nRead a boolean flag value, if the flag is properly defined as a \"boolean\" in the run options\nthen the value will always be a boolean, defaulting to `false`, so there is no need for an\noptional/requiredBoolean() method."
+            ],
+            "signature": [
+              "(key: string) => boolean"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-common.FlagsReader.boolean.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.getPositionals",
+            "type": "Function",
+            "tags": [],
+            "label": "getPositionals",
+            "description": [
+              "\nGet the positional arguments passed, includes any values that are not associated with\na specific --flag"
+            ],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.getUnused",
+            "type": "Function",
+            "tags": [],
+            "label": "getUnused",
+            "description": [
+              "\nReturns all of the unused flags. When a flag is read via any of the key-specific methods\nthe key is marked as \"used\" and this method will return a map of just the flags which\nhave not been used yet (excluding the default flags like --debug, --verbose, and --help)"
+            ],
+            "signature": [
+              "() => Map<string, FlagValue>"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagsReader.getUsed",
+            "type": "Function",
+            "tags": [],
+            "label": "getUsed",
+            "description": [
+              "\nReturns all of the used flags. When a flag is read via any of the key-specific methods\nthe key is marked as \"used\" and from then on this method will return a map including that\nand any other key used by these methods."
+            ],
+            "signature": [
+              "() => Map<string, FlagValue>"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-cli-runner",
+        "id": "def-common.RunWithCommands",
         "type": "Class",
         "tags": [],
         "label": "RunWithCommands",
@@ -20,19 +578,20 @@
         "signature": [
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.RunWithCommands",
+            "section": "def-common.RunWithCommands",
             "text": "RunWithCommands"
           },
           "<T>"
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunWithCommands.Unnamed",
+            "id": "def-common.RunWithCommands.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -42,10 +601,11 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
-                "id": "def-server.RunWithCommands.Unnamed.$1",
+                "id": "def-common.RunWithCommands.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -53,20 +613,21 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/dev-cli-runner",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnDevCliRunnerPluginApi",
-                    "section": "def-server.RunWithCommandsOptions",
+                    "section": "def-common.RunWithCommandsOptions",
                     "text": "RunWithCommandsOptions"
                   },
                   "<T>"
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
-                "id": "def-server.RunWithCommands.Unnamed.$2",
+                "id": "def-common.RunWithCommands.Unnamed.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "commands",
@@ -74,15 +635,16 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/dev-cli-runner",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnDevCliRunnerPluginApi",
-                    "section": "def-server.Command",
+                    "section": "def-common.Command",
                     "text": "Command"
                   },
                   "<T>[]"
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -90,7 +652,7 @@
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunWithCommands.command",
+            "id": "def-common.RunWithCommands.command",
             "type": "Function",
             "tags": [],
             "label": "command",
@@ -99,27 +661,28 @@
               "(options: ",
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.Command",
+                "section": "def-common.Command",
                 "text": "Command"
               },
               "<T>) => ",
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.RunWithCommands",
+                "section": "def-common.RunWithCommands",
                 "text": "RunWithCommands"
               },
               "<T>"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
-                "id": "def-server.RunWithCommands.command.$1",
+                "id": "def-common.RunWithCommands.command.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -127,15 +690,16 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/dev-cli-runner",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnDevCliRunnerPluginApi",
-                    "section": "def-server.Command",
+                    "section": "def-common.Command",
                     "text": "Command"
                   },
                   "<T>"
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -143,7 +707,7 @@
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunWithCommands.execute",
+            "id": "def-common.RunWithCommands.execute",
             "type": "Function",
             "tags": [],
             "label": "execute",
@@ -153,6 +717,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -163,7 +728,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.getFlags",
+        "id": "def-common.getFlags",
         "type": "Function",
         "tags": [],
         "label": "getFlags",
@@ -172,26 +737,27 @@
           "(argv: string[], flagOptions: ",
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.FlagOptions",
+            "section": "def-common.FlagOptions",
             "text": "FlagOptions"
           },
           " | undefined, defaultLogLevel: string) => ",
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.Flags",
+            "section": "def-common.Flags",
             "text": "Flags"
           }
         ],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.getFlags.$1",
+            "id": "def-common.getFlags.$1",
             "type": "Array",
             "tags": [],
             "label": "argv",
@@ -201,11 +767,12 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.getFlags.$2",
+            "id": "def-common.getFlags.$2",
             "type": "Object",
             "tags": [],
             "label": "flagOptions",
@@ -213,20 +780,21 @@
             "signature": [
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.FlagOptions",
+                "section": "def-common.FlagOptions",
                 "text": "FlagOptions"
               },
               " | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.getFlags.$3",
+            "id": "def-common.getFlags.$3",
             "type": "string",
             "tags": [],
             "label": "defaultLogLevel",
@@ -236,6 +804,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -244,7 +813,7 @@
       },
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.mergeFlagOptions",
+        "id": "def-common.mergeFlagOptions",
         "type": "Function",
         "tags": [],
         "label": "mergeFlagOptions",
@@ -253,34 +822,35 @@
           "(global: ",
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.FlagOptions",
+            "section": "def-common.FlagOptions",
             "text": "FlagOptions"
           },
           ", local: ",
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.FlagOptions",
+            "section": "def-common.FlagOptions",
             "text": "FlagOptions"
           },
           ") => ",
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.FlagOptions",
+            "section": "def-common.FlagOptions",
             "text": "FlagOptions"
           }
         ],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.mergeFlagOptions.$1",
+            "id": "def-common.mergeFlagOptions.$1",
             "type": "Object",
             "tags": [],
             "label": "global",
@@ -288,19 +858,20 @@
             "signature": [
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.FlagOptions",
+                "section": "def-common.FlagOptions",
                 "text": "FlagOptions"
               }
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.mergeFlagOptions.$2",
+            "id": "def-common.mergeFlagOptions.$2",
             "type": "Object",
             "tags": [],
             "label": "local",
@@ -308,14 +879,15 @@
             "signature": [
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.FlagOptions",
+                "section": "def-common.FlagOptions",
                 "text": "FlagOptions"
               }
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -324,7 +896,7 @@
       },
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.run",
+        "id": "def-common.run",
         "type": "Function",
         "tags": [],
         "label": "run",
@@ -333,27 +905,28 @@
           "(fn: ",
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.RunFn",
+            "section": "def-common.RunFn",
             "text": "RunFn"
           },
           ", options: ",
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.RunOptions",
+            "section": "def-common.RunOptions",
             "text": "RunOptions"
           },
           ") => Promise<void>"
         ],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.run.$1",
+            "id": "def-common.run.$1",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -361,19 +934,20 @@
             "signature": [
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.RunFn",
+                "section": "def-common.RunFn",
                 "text": "RunFn"
               }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.run.$2",
+            "id": "def-common.run.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -381,14 +955,15 @@
             "signature": [
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.RunOptions",
+                "section": "def-common.RunOptions",
                 "text": "RunOptions"
               }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -399,7 +974,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.Command",
+        "id": "def-common.Command",
         "type": "Interface",
         "tags": [],
         "label": "Command",
@@ -407,29 +982,31 @@
         "signature": [
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.Command",
+            "section": "def-common.Command",
             "text": "Command"
           },
           "<T>"
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Command.name",
+            "id": "def-common.Command.name",
             "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Command.run",
+            "id": "def-common.Command.run",
             "type": "Function",
             "tags": [],
             "label": "run",
@@ -438,20 +1015,21 @@
               "(context: ",
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.RunContext",
+                "section": "def-common.RunContext",
                 "text": "RunContext"
               },
               " & T) => void | Promise<void>"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
-                "id": "def-server.Command.run.$1",
+                "id": "def-common.Command.run.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "context",
@@ -459,21 +1037,22 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/dev-cli-runner",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnDevCliRunnerPluginApi",
-                    "section": "def-server.RunContext",
+                    "section": "def-common.RunContext",
                     "text": "RunContext"
                   },
                   " & T"
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Command.description",
+            "id": "def-common.Command.description",
             "type": "string",
             "tags": [],
             "label": "description",
@@ -482,11 +1061,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Command.usage",
+            "id": "def-common.Command.usage",
             "type": "string",
             "tags": [],
             "label": "usage",
@@ -495,11 +1075,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Command.flags",
+            "id": "def-common.Command.flags",
             "type": "Object",
             "tags": [],
             "label": "flags",
@@ -507,32 +1088,34 @@
             "signature": [
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.FlagOptions",
+                "section": "def-common.FlagOptions",
                 "text": "FlagOptions"
               },
               " | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.FlagOptions",
+        "id": "def-common.FlagOptions",
         "type": "Interface",
         "tags": [],
         "label": "FlagOptions",
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.FlagOptions.allowUnexpected",
+            "id": "def-common.FlagOptions.allowUnexpected",
             "type": "CompoundType",
             "tags": [],
             "label": "allowUnexpected",
@@ -541,11 +1124,12 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.FlagOptions.guessTypesForUnexpectedFlags",
+            "id": "def-common.FlagOptions.guessTypesForUnexpectedFlags",
             "type": "CompoundType",
             "tags": [],
             "label": "guessTypesForUnexpectedFlags",
@@ -554,11 +1138,12 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.FlagOptions.help",
+            "id": "def-common.FlagOptions.help",
             "type": "string",
             "tags": [],
             "label": "help",
@@ -567,11 +1152,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.FlagOptions.alias",
+            "id": "def-common.FlagOptions.alias",
             "type": "Object",
             "tags": [],
             "label": "alias",
@@ -580,11 +1166,12 @@
               "{ [key: string]: string | string[]; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.FlagOptions.boolean",
+            "id": "def-common.FlagOptions.boolean",
             "type": "Array",
             "tags": [],
             "label": "boolean",
@@ -593,11 +1180,12 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.FlagOptions.string",
+            "id": "def-common.FlagOptions.string",
             "type": "Array",
             "tags": [],
             "label": "string",
@@ -606,11 +1194,12 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.FlagOptions.default",
+            "id": "def-common.FlagOptions.default",
             "type": "Object",
             "tags": [],
             "label": "default",
@@ -619,74 +1208,81 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.Flags",
+        "id": "def-common.Flags",
         "type": "Interface",
         "tags": [],
         "label": "Flags",
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Flags.verbose",
+            "id": "def-common.Flags.verbose",
             "type": "boolean",
             "tags": [],
             "label": "verbose",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Flags.quiet",
+            "id": "def-common.Flags.quiet",
             "type": "boolean",
             "tags": [],
             "label": "quiet",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Flags.silent",
+            "id": "def-common.Flags.silent",
             "type": "boolean",
             "tags": [],
             "label": "silent",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Flags.debug",
+            "id": "def-common.Flags.debug",
             "type": "boolean",
             "tags": [],
             "label": "debug",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Flags.help",
+            "id": "def-common.Flags.help",
             "type": "boolean",
             "tags": [],
             "label": "help",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Flags._",
+            "id": "def-common.Flags._",
             "type": "Array",
             "tags": [],
             "label": "_",
@@ -695,11 +1291,12 @@
               "string[]"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Flags.unexpected",
+            "id": "def-common.Flags.unexpected",
             "type": "Array",
             "tags": [],
             "label": "unexpected",
@@ -708,11 +1305,12 @@
               "string[]"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.Flags.Unnamed",
+            "id": "def-common.Flags.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: string | boolean | string[] | undefined",
@@ -721,37 +1319,46 @@
               "[key: string]:  string | boolean | string[] | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.RunContext",
+        "id": "def-common.RunContext",
         "type": "Interface",
         "tags": [],
         "label": "RunContext",
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunContext.log",
+            "id": "def-common.RunContext.log",
             "type": "Object",
             "tags": [],
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunContext.flags",
+            "id": "def-common.RunContext.flags",
             "type": "Object",
             "tags": [],
             "label": "flags",
@@ -759,31 +1366,39 @@
             "signature": [
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.Flags",
+                "section": "def-common.Flags",
                 "text": "Flags"
               }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunContext.procRunner",
+            "id": "def-common.RunContext.procRunner",
             "type": "Object",
             "tags": [],
             "label": "procRunner",
             "description": [],
             "signature": [
-              "ProcRunner"
+              {
+                "pluginId": "@kbn/dev-proc-runner",
+                "scope": "common",
+                "docId": "kibKbnDevProcRunnerPluginApi",
+                "section": "def-common.ProcRunner",
+                "text": "ProcRunner"
+              }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunContext.statsMeta",
+            "id": "def-common.RunContext.statsMeta",
             "type": "Object",
             "tags": [],
             "label": "statsMeta",
@@ -792,11 +1407,12 @@
               "Map<string, string | number | boolean>"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunContext.addCleanupTask",
+            "id": "def-common.RunContext.addCleanupTask",
             "type": "Function",
             "tags": [],
             "label": "addCleanupTask",
@@ -805,19 +1421,20 @@
               "(task: ",
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.CleanupTask",
+                "section": "def-common.CleanupTask",
                 "text": "CleanupTask"
               },
               ") => void"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
-                "id": "def-server.RunContext.addCleanupTask.$1",
+                "id": "def-common.RunContext.addCleanupTask.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "task",
@@ -825,35 +1442,57 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/dev-cli-runner",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnDevCliRunnerPluginApi",
-                    "section": "def-server.CleanupTask",
+                    "section": "def-common.CleanupTask",
                     "text": "CleanupTask"
                   }
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.RunContext.flagsReader",
+            "type": "Object",
+            "tags": [],
+            "label": "flagsReader",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dev-cli-runner",
+                "scope": "common",
+                "docId": "kibKbnDevCliRunnerPluginApi",
+                "section": "def-common.FlagsReader",
+                "text": "FlagsReader"
+              }
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/run.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.RunOptions",
+        "id": "def-common.RunOptions",
         "type": "Interface",
         "tags": [],
         "label": "RunOptions",
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunOptions.usage",
+            "id": "def-common.RunOptions.usage",
             "type": "string",
             "tags": [],
             "label": "usage",
@@ -862,11 +1501,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunOptions.description",
+            "id": "def-common.RunOptions.description",
             "type": "string",
             "tags": [],
             "label": "description",
@@ -875,11 +1515,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunOptions.log",
+            "id": "def-common.RunOptions.log",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -888,11 +1529,12 @@
               "{ defaultLevel?: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunOptions.flags",
+            "id": "def-common.RunOptions.flags",
             "type": "Object",
             "tags": [],
             "label": "flags",
@@ -900,22 +1542,23 @@
             "signature": [
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.FlagOptions",
+                "section": "def-common.FlagOptions",
                 "text": "FlagOptions"
               },
               " | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.RunWithCommandsOptions",
+        "id": "def-common.RunWithCommandsOptions",
         "type": "Interface",
         "tags": [],
         "label": "RunWithCommandsOptions",
@@ -923,19 +1566,20 @@
         "signature": [
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.RunWithCommandsOptions",
+            "section": "def-common.RunWithCommandsOptions",
             "text": "RunWithCommandsOptions"
           },
           "<T>"
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunWithCommandsOptions.log",
+            "id": "def-common.RunWithCommandsOptions.log",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -944,11 +1588,12 @@
               "{ defaultLevel?: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunWithCommandsOptions.description",
+            "id": "def-common.RunWithCommandsOptions.description",
             "type": "string",
             "tags": [],
             "label": "description",
@@ -957,11 +1602,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunWithCommandsOptions.usage",
+            "id": "def-common.RunWithCommandsOptions.usage",
             "type": "string",
             "tags": [],
             "label": "usage",
@@ -970,11 +1616,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunWithCommandsOptions.globalFlags",
+            "id": "def-common.RunWithCommandsOptions.globalFlags",
             "type": "Object",
             "tags": [],
             "label": "globalFlags",
@@ -982,19 +1629,20 @@
             "signature": [
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.FlagOptions",
+                "section": "def-common.FlagOptions",
                 "text": "FlagOptions"
               },
               " | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunWithCommandsOptions.extendContext",
+            "id": "def-common.RunWithCommandsOptions.extendContext",
             "type": "Function",
             "tags": [],
             "label": "extendContext",
@@ -1003,19 +1651,20 @@
               "((context: ",
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.RunContext",
+                "section": "def-common.RunContext",
                 "text": "RunContext"
               },
               ") => T | Promise<T>) | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
-                "id": "def-server.RunWithCommandsOptions.extendContext.$1",
+                "id": "def-common.RunWithCommandsOptions.extendContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -1023,14 +1672,15 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/dev-cli-runner",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnDevCliRunnerPluginApi",
-                    "section": "def-server.RunContext",
+                    "section": "def-common.RunContext",
                     "text": "RunContext"
                   }
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1044,7 +1694,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.CleanupTask",
+        "id": "def-common.CleanupTask",
         "type": "Type",
         "tags": [],
         "label": "CleanupTask",
@@ -1056,13 +1706,14 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/cleanup.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.CommandRunFn",
+        "id": "def-common.CommandRunFn",
         "type": "Type",
         "tags": [],
         "label": "CommandRunFn",
@@ -1071,20 +1722,21 @@
           "(context: ",
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.RunContext",
+            "section": "def-common.RunContext",
             "text": "RunContext"
           },
           " & T) => void | Promise<void>"
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.CommandRunFn.$1",
+            "id": "def-common.CommandRunFn.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "context",
@@ -1092,22 +1744,23 @@
             "signature": [
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.RunContext",
+                "section": "def-common.RunContext",
                 "text": "RunContext"
               },
               " & T"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-cli-runner",
-        "id": "def-server.RunFn",
+        "id": "def-common.RunFn",
         "type": "Type",
         "tags": [],
         "label": "RunFn",
@@ -1116,20 +1769,21 @@
           "(context: ",
           {
             "pluginId": "@kbn/dev-cli-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevCliRunnerPluginApi",
-            "section": "def-server.RunContext",
+            "section": "def-common.RunContext",
             "text": "RunContext"
           },
           ") => void | Promise<void>"
         ],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
-            "id": "def-server.RunFn.$1",
+            "id": "def-common.RunFn.$1",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -1137,27 +1791,46 @@
             "signature": [
               {
                 "pluginId": "@kbn/dev-cli-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevCliRunnerPluginApi",
-                "section": "def-server.RunContext",
+                "section": "def-common.RunContext",
                 "text": "RunContext"
               }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/dev-cli-runner",
+        "id": "def-common.DEFAULT_FLAG_ALIASES",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_FLAG_ALIASES",
+        "description": [],
+        "path": "packages/kbn-dev-cli-runner/src/flags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.DEFAULT_FLAG_ALIASES.v",
+            "type": "string",
+            "tags": [],
+            "label": "v",
+            "description": [],
+            "path": "packages/kbn-dev-cli-runner/src/flags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

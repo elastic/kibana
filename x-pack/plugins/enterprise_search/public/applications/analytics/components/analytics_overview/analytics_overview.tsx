@@ -20,12 +20,6 @@ import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
 
-export const baseBreadcrumbs = [
-  i18n.translate('xpack.enterpriseSearch.analytics.collections.breadcrumb', {
-    defaultMessage: 'Analytics collections',
-  }),
-];
-
 export const AnalyticsOverview: React.FC = () => {
   const { fetchAnalyticsCollections } = useActions(AnalyticsCollectionsLogic);
   const { analyticsCollections, isLoading, hasNoAnalyticsCollections } =
@@ -37,7 +31,7 @@ export const AnalyticsOverview: React.FC = () => {
 
   return (
     <EnterpriseSearchAnalyticsPageTemplate
-      pageChrome={baseBreadcrumbs}
+      pageChrome={[]}
       restrictWidth
       isLoading={isLoading}
       pageViewTelemetry="Analytics Collections Overview"
@@ -50,7 +44,7 @@ export const AnalyticsOverview: React.FC = () => {
           }
         ),
         pageTitle: i18n.translate('xpack.enterpriseSearch.analytics.collections.pageTitle', {
-          defaultMessage: 'Behaviorial Analytics',
+          defaultMessage: 'Behavioral Analytics',
         }),
       }}
     >

@@ -338,6 +338,131 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('`has_no_reference` and `has_no_reference_operator` parameters', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          { space: SPACE_ID }
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          { space: SPACE_ID }
+        );
+      });
+
+      it('search for objects not containing a reference', async () => {
+        await supertest
+          .get(`/s/${SPACE_ID}/api/saved_objects/_find`)
+          .query({
+            type: 'visualization',
+            has_no_reference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = resp.body.saved_objects;
+            const ids = objects.map((obj: SavedObject) => obj.id);
+            expect(ids).to.contain('only-ref-2');
+            expect(ids).to.contain('only-ref-3');
+            expect(ids).not.to.contain('only-ref-1');
+            expect(ids).not.to.contain('ref-1-and-ref-2');
+          });
+      });
+
+      it('search for multiple references with OR operator', async () => {
+        await supertest
+          .get(`/s/${SPACE_ID}/api/saved_objects/_find`)
+          .query({
+            type: 'visualization',
+            has_no_reference: JSON.stringify([
+              { type: 'ref-type', id: 'ref-1' },
+              { type: 'ref-type', id: 'ref-2' },
+            ]),
+            has_no_reference_operator: 'OR',
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = resp.body.saved_objects;
+            const ids = objects.map((obj: SavedObject) => obj.id);
+
+            expect(ids).to.contain('only-ref-3');
+            expect(ids).not.to.contain('only-ref-1');
+            expect(ids).not.to.contain('only-ref-2');
+            expect(ids).not.to.contain('ref-1-and-ref-2');
+          });
+      });
+
+      it('search for multiple references with AND operator', async () => {
+        await supertest
+          .get(`/s/${SPACE_ID}/api/saved_objects/_find`)
+          .query({
+            type: 'visualization',
+            has_no_reference: JSON.stringify([
+              { type: 'ref-type', id: 'ref-1' },
+              { type: 'ref-type', id: 'ref-2' },
+            ]),
+            has_no_reference_operator: 'AND',
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = resp.body.saved_objects;
+            const ids = objects.map((obj: SavedObject) => obj.id);
+            expect(ids).to.contain('only-ref-1');
+            expect(ids).to.contain('only-ref-2');
+            expect(ids).to.contain('only-ref-3');
+            expect(ids).not.to.contain('ref-1-and-ref-2');
+          });
+      });
+    });
+
+    describe('with both `has_reference` and `has_no_reference` parameters', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          { space: SPACE_ID }
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          { space: SPACE_ID }
+        );
+      });
+
+      it('search for objects containing a reference and excluding another reference', async () => {
+        await supertest
+          .get(`/s/${SPACE_ID}/api/saved_objects/_find`)
+          .query({
+            type: 'visualization',
+            has_reference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
+            has_no_reference: JSON.stringify({ type: 'ref-type', id: 'ref-2' }),
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = resp.body.saved_objects;
+            const ids = objects.map((obj: SavedObject) => obj.id);
+            expect(ids).to.eql(['only-ref-1']);
+          });
+      });
+
+      it('search for objects with same reference passed to `has_reference` and `has_no_reference`', async () => {
+        await supertest
+          .get(`/s/${SPACE_ID}/api/saved_objects/_find`)
+          .query({
+            type: 'visualization',
+            has_reference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
+            has_no_reference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = resp.body.saved_objects;
+            const ids = objects.map((obj: SavedObject) => obj.id);
+            expect(ids).to.eql([]);
+          });
+      });
+    });
+
     describe('searching for special characters', () => {
       before(async () => {
         await kibanaServer.importExport.load(

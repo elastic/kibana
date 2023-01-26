@@ -7,7 +7,7 @@
 
 import { PopoverAnchorPosition } from '@elastic/eui';
 import { Dispatch, SetStateAction } from 'react';
-import { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESFilter } from '@kbn/es-types';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
 
 interface CommonProps {
@@ -30,13 +30,15 @@ interface CommonProps {
   cardinalityField?: string;
   required?: boolean;
   keepHistory?: boolean;
+  showLogicalConditionSwitch?: boolean;
+  useLogicalAND?: boolean;
+  onChange: (val?: string[], excludedValue?: string[], isLogicalAND?: boolean) => void;
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {
   dataViewTitle?: string;
   sourceField: string;
   asCombobox?: boolean;
-  onChange: (val?: string[], excludedValue?: string[]) => void;
   filters: ESFilter[];
   time?: { from: string; to: string };
   inspector?: IInspectorInfo;
@@ -44,7 +46,6 @@ export type FieldValueSuggestionsProps = CommonProps & {
 
 export type FieldValueSelectionProps = CommonProps & {
   loading?: boolean;
-  onChange: (val?: string[], excludedValue?: string[]) => void;
   values?: ListItem[];
   query?: string;
   setQuery: Dispatch<SetStateAction<string>>;

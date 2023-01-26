@@ -45,7 +45,7 @@ export const SimpleMonitorForm = () => {
     setMonitorData(data);
   };
 
-  const { loading } = useSimpleMonitor({ monitorData });
+  const { loading, data: newMonitor } = useSimpleMonitor({ monitorData });
 
   const hasURLError = !!errors?.[ConfigKey.URLS];
 
@@ -53,7 +53,7 @@ export const SimpleMonitorForm = () => {
     <EuiForm
       onSubmit={handleSubmit(onSubmit)}
       component="form"
-      isInvalid={isSubmitted && !isValid && !loading}
+      isInvalid={isSubmitted && !isValid && !loading && !newMonitor?.id}
       noValidate
     >
       <EuiFormRow
@@ -91,13 +91,6 @@ export const SimpleMonitorForm = () => {
     </EuiForm>
   );
 };
-
-export const MY_FIRST_MONITOR = i18n.translate(
-  'xpack.synthetics.monitorManagement.myFirstMonitor',
-  {
-    defaultMessage: 'My first monitor',
-  }
-);
 
 export const WEBSITE_URL_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.websiteUrlLabel',

@@ -8,19 +8,15 @@
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useStore } from 'react-redux';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { downloadMultipleAs } from '@kbn/share-plugin/public';
-import { tableHasFormulas } from '@kbn/data-plugin/common';
-import { exporters, getEsQueryConfig } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  LensAppServices,
-  LensTopNavActions,
-  LensTopNavMenuProps,
-  LensTopNavTooltips,
-} from './types';
+import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { ENABLE_SQL } from '../../common';
+import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
 import {
   setState,
@@ -28,6 +24,7 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
+  switchAndCleanDatasource,
 } from '../state_management';
 import {
   getIndexPatternsObjects,
@@ -37,48 +34,105 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
+import { LensByReferenceInput } from '../embeddable';
+import { getShareURL } from './share_action';
+
+function getSaveButtonMeta({
+  contextFromEmbeddable,
+  showSaveAndReturn,
+  showReplaceInDashboard,
+  showReplaceInCanvas,
+}: {
+  contextFromEmbeddable: boolean | undefined;
+  showSaveAndReturn: boolean;
+  showReplaceInDashboard: boolean;
+  showReplaceInCanvas: boolean;
+}) {
+  if (showSaveAndReturn) {
+    return {
+      label: contextFromEmbeddable
+        ? i18n.translate('xpack.lens.app.saveAndReplace', {
+            defaultMessage: 'Save and replace',
+          })
+        : i18n.translate('xpack.lens.app.saveAndReturn', {
+            defaultMessage: 'Save and return',
+          }),
+      emphasize: true,
+      iconType: contextFromEmbeddable ? 'save' : 'checkInCircleFilled',
+      testId: 'lnsApp_saveAndReturnButton',
+      description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
+        defaultMessage: 'Save the current lens visualization and return to the last app',
+      }),
+    };
+  }
+
+  if (showReplaceInDashboard) {
+    return {
+      label: i18n.translate('xpack.lens.app.replaceInDashboard', {
+        defaultMessage: 'Replace in dashboard',
+      }),
+      emphasize: true,
+      iconType: 'merge',
+      testId: 'lnsApp_replaceInDashboardButton',
+      description: i18n.translate('xpack.lens.app.replaceInDashboardButtonAriaLabel', {
+        defaultMessage:
+          'Replace legacy visualization with lens visualization and return to the dashboard',
+      }),
+    };
+  }
+
+  if (showReplaceInCanvas) {
+    return {
+      label: i18n.translate('xpack.lens.app.replaceInCanvas', {
+        defaultMessage: 'Replace in canvas',
+      }),
+      emphasize: true,
+      iconType: 'merge',
+      testId: 'lnsApp_replaceInCanvasButton',
+      description: i18n.translate('xpack.lens.app.replaceInCanvasButtonAriaLabel', {
+        defaultMessage:
+          'Replace legacy visualization with lens visualization and return to the canvas',
+      }),
+    };
+  }
+}
 
 function getLensTopNavConfig(options: {
-  showSaveAndReturn: boolean;
-  enableExportToCSV: boolean;
-  showOpenInDiscover?: boolean;
-  showCancel: boolean;
   isByValueMode: boolean;
   allowByValue: boolean;
   actions: LensTopNavActions;
-  tooltips: LensTopNavTooltips;
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
   contextOriginatingApp?: string;
   isSaveable: boolean;
+  showReplaceInDashboard: boolean;
+  showReplaceInCanvas: boolean;
+  contextFromEmbeddable?: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
-    showCancel,
     allowByValue,
-    enableExportToCSV,
-    showOpenInDiscover,
-    showSaveAndReturn,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
-    tooltips,
     contextOriginatingApp,
-    isSaveable,
+    showReplaceInDashboard,
+    showReplaceInCanvas,
+    contextFromEmbeddable,
+    isByValueMode,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
+  const showSaveAndReturn = actions.saveAndReturn.visible;
+
   const enableSaveButton =
     savingToLibraryPermitted ||
-    (allowByValue &&
-      savingToDashboardPermitted &&
-      !options.isByValueMode &&
-      !options.showSaveAndReturn);
+    (allowByValue && savingToDashboardPermitted && !isByValueMode && !showSaveAndReturn);
 
-  const saveButtonLabel = options.isByValueMode
+  const saveButtonLabel = isByValueMode
     ? i18n.translate('xpack.lens.app.addToLibrary', {
         defaultMessage: 'Save to library',
       })
-    : options.showSaveAndReturn
+    : actions.saveAndReturn.visible
     ? i18n.translate('xpack.lens.app.saveAs', {
         defaultMessage: 'Save as',
       })
@@ -86,37 +140,38 @@ function getLensTopNavConfig(options: {
         defaultMessage: 'Save',
       });
 
-  if (contextOriginatingApp) {
+  if (contextOriginatingApp && !actions.cancel.visible) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.goBackLabel', {
         defaultMessage: `Go back to {contextOriginatingApp}`,
         values: { contextOriginatingApp },
       }),
-      run: actions.goBack,
-      className: 'lnsNavItem__goBack',
+      run: actions.goBack.execute,
+      className: 'lnsNavItem__withDivider',
       testId: 'lnsApp_goBackToAppButton',
       description: i18n.translate('xpack.lens.app.goBackLabel', {
         defaultMessage: `Go back to {contextOriginatingApp}`,
         values: { contextOriginatingApp },
       }),
-      disableButton: false,
+      disableButton: !actions.goBack.enabled,
     });
   }
 
-  if (showOpenInDiscover) {
+  if (actions.getUnderlyingDataUrl.visible) {
     const exploreDataInDiscoverLabel = i18n.translate('xpack.lens.app.exploreDataInDiscover', {
       defaultMessage: 'Explore data in Discover',
     });
 
     topNavMenu.push({
       label: exploreDataInDiscoverLabel,
-      run: () => {},
+      run: actions.getUnderlyingDataUrl.execute,
       testId: 'lnsApp_openInDiscover',
+      className: 'lnsNavItem__withDivider',
       description: exploreDataInDiscoverLabel,
-      disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
-      tooltip: tooltips.showUnderlyingDataWarning,
+      disableButton: !actions.getUnderlyingDataUrl.enabled,
+      tooltip: actions.getUnderlyingDataUrl.tooltip,
       target: '_blank',
-      href: actions.getUnderlyingDataUrl(),
+      href: actions.getUnderlyingDataUrl.getLink?.(),
     });
   }
 
@@ -124,7 +179,7 @@ function getLensTopNavConfig(options: {
     label: i18n.translate('xpack.lens.app.inspect', {
       defaultMessage: 'Inspect',
     }),
-    run: actions.inspect,
+    run: actions.inspect.execute,
     testId: 'lnsApp_inspectButton',
     description: i18n.translate('xpack.lens.app.inspectAriaLabel', {
       defaultMessage: 'inspect',
@@ -132,36 +187,39 @@ function getLensTopNavConfig(options: {
     disableButton: false,
   });
 
-  topNavMenu.push({
-    label: i18n.translate('xpack.lens.app.downloadCSV', {
-      defaultMessage: 'Download as CSV',
-    }),
-    run: actions.exportToCSV,
-    testId: 'lnsApp_downloadCSVButton',
-    description: i18n.translate('xpack.lens.app.downloadButtonAriaLabel', {
-      defaultMessage: 'Download the data as CSV file',
-    }),
-    disableButton: !enableExportToCSV,
-    tooltip: tooltips.showExportWarning,
-  });
+  if (actions.share.visible) {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.shareTitle', {
+        defaultMessage: 'Share',
+      }),
+      run: actions.share.execute,
+      testId: 'lnsApp_shareButton',
+      description: i18n.translate('xpack.lens.app.shareTitleAria', {
+        defaultMessage: 'Share visualization',
+      }),
+      disableButton: !actions.share.enabled,
+      tooltip: actions.share.tooltip,
+    });
+  }
 
   topNavMenu.push({
     label: i18n.translate('xpack.lens.app.settings', {
       defaultMessage: 'Settings',
     }),
-    run: actions.openSettings,
+    run: actions.openSettings.execute,
+    className: 'lnsNavItem__withDivider',
     testId: 'lnsApp_settingsButton',
     description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
       defaultMessage: 'Open the Lens settings menu',
     }),
   });
 
-  if (showCancel) {
+  if (actions.cancel.visible) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.cancel', {
         defaultMessage: 'Cancel',
       }),
-      run: actions.cancel,
+      run: actions.cancel.execute,
       testId: 'lnsApp_cancelButton',
       description: i18n.translate('xpack.lens.app.cancelButtonAriaLabel', {
         defaultMessage: 'Return to the last app without saving changes',
@@ -171,9 +229,11 @@ function getLensTopNavConfig(options: {
 
   topNavMenu.push({
     label: saveButtonLabel,
-    iconType: !showSaveAndReturn ? 'save' : undefined,
-    emphasize: !showSaveAndReturn,
-    run: actions.showSaveModal,
+    iconType: (showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn)
+      ? 'save'
+      : undefined,
+    emphasize: showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn,
+    run: actions.showSaveModal.execute,
     testId: 'lnsApp_saveButton',
     description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
       defaultMessage: 'Save the current lens visualization',
@@ -181,21 +241,21 @@ function getLensTopNavConfig(options: {
     disableButton: !enableSaveButton,
   });
 
-  if (showSaveAndReturn) {
+  const saveButtonMeta = getSaveButtonMeta({
+    showSaveAndReturn,
+    showReplaceInDashboard,
+    showReplaceInCanvas,
+    contextFromEmbeddable,
+  });
+
+  if (saveButtonMeta) {
     topNavMenu.push({
-      label: i18n.translate('xpack.lens.app.saveAndReturn', {
-        defaultMessage: 'Save and return',
-      }),
-      emphasize: true,
-      iconType: 'checkInCircleFilled',
-      run: actions.saveAndReturn,
-      testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !isSaveable,
-      description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
-        defaultMessage: 'Save the current lens visualization and return to the last app',
-      }),
+      ...saveButtonMeta,
+      run: actions.saveAndReturn.execute,
+      disableButton: !actions.saveAndReturn.enabled,
     });
   }
+
   return topNavMenu;
 }
 
@@ -210,6 +270,7 @@ export const LensTopNavMenu = ({
   onAppLeave,
   redirectToOrigin,
   datasourceMap,
+  visualizationMap,
   title,
   goBackToOriginatingApp,
   contextOriginatingApp,
@@ -219,15 +280,18 @@ export const LensTopNavMenu = ({
   theme$,
   indexPatternService,
   currentDoc,
+  onTextBasedSavedAndExit,
+  getUserMessages,
+  shortUrlService,
+  isCurrentStateDirty,
 }: LensTopNavMenuProps) => {
   const {
     data,
-    fieldFormats,
     navigation,
     uiSettings,
     application,
     attributeService,
-    discover,
+    share,
     dashboardFeatureFlag,
     dataViewFieldEditor,
     dataViewEditor,
@@ -254,6 +318,7 @@ export const LensTopNavMenu = ({
   );
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
+  const [isOnTextBasedMode, setIsOnTextBasedMode] = useState(false);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const dispatchChangeIndexPattern = React.useCallback(
@@ -281,7 +346,8 @@ export const LensTopNavMenu = ({
     ]
   );
 
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const canEditDataView =
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || !currentIndexPattern?.isPersisted();
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -305,11 +371,15 @@ export const LensTopNavMenu = ({
           {}
         ),
         datasourceStates,
+        visualizationState: visualization.state,
+        activeVisualization: visualization.activeId
+          ? visualizationMap[visualization.activeId]
+          : undefined,
       })
     );
     // Add ad-hoc data views from the Lens state even if they are not used
     Object.values(dataViews.indexPatterns)
-      .filter((indexPattern) => indexPattern.spec)
+      .filter((indexPattern) => !indexPattern.isPersisted)
       .forEach((indexPattern) => {
         indexPatternIds.add(indexPattern.id);
       });
@@ -337,16 +407,39 @@ export const LensTopNavMenu = ({
     activeDatasourceId,
     rejectedIndexPatterns,
     datasourceMap,
+    visualizationMap,
+    visualization,
     indexPatterns,
     dataViewsService,
     dataViews,
   ]);
 
   useEffect(() => {
-    if (indexPatterns.length > 0) {
-      setCurrentIndexPattern(indexPatterns[0]);
+    const setCurrentPattern = async () => {
+      if (activeDatasourceId && datasourceStates[activeDatasourceId].state) {
+        const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
+          datasourceStates[activeDatasourceId].state
+        );
+        const dataView = dataViewId ? await data.dataViews.get(dataViewId) : undefined;
+        setCurrentIndexPattern(dataView ?? indexPatterns[0]);
+      }
+    };
+
+    setCurrentPattern();
+  }, [
+    activeDatasourceId,
+    datasourceMap,
+    datasourceStates,
+    indexPatterns,
+    data.dataViews,
+    isOnTextBasedMode,
+  ]);
+
+  useEffect(() => {
+    if (typeof query === 'object' && query !== null && isOfAggregateQueryType(query)) {
+      setIsOnTextBasedMode(true);
     }
-  }, [indexPatterns]);
+  }, [query]);
 
   useEffect(() => {
     return () => {
@@ -356,7 +449,7 @@ export const LensTopNavMenu = ({
     };
   }, []);
 
-  const { TopNavMenu } = navigation.ui;
+  const { AggregateQueryTopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
 
   const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
@@ -396,13 +489,20 @@ export const LensTopNavMenu = ({
     currentDoc,
   ]);
 
+  const discoverLocator = share?.url.locators.get('DISCOVER_APP_LOCATOR');
+
   const layerMetaInfo = useMemo(() => {
-    if (!activeDatasourceId || !discover) {
+    if (!activeDatasourceId || !discoverLocator) {
+      return;
+    }
+    if (visualization.activeId == null) {
       return;
     }
     return getLayerMetaInfo(
       datasourceMap[activeDatasourceId],
       datasourceStates[activeDatasourceId].state,
+      visualizationMap[visualization.activeId],
+      visualization.state,
       activeData,
       dataViews.indexPatterns,
       data.query.timefilter.timefilter.getTime(),
@@ -410,9 +510,11 @@ export const LensTopNavMenu = ({
     );
   }, [
     activeDatasourceId,
-    discover,
+    discoverLocator,
+    visualization,
     datasourceMap,
     datasourceStates,
+    visualizationMap,
     activeData,
     dataViews.indexPatterns,
     data.query.timefilter.timefilter,
@@ -421,175 +523,254 @@ export const LensTopNavMenu = ({
 
   const lensStore = useStore();
 
+  const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
+
   const topNavConfig = useMemo(() => {
+    const showReplaceInDashboard =
+      initialContext?.originatingApp === 'dashboards' &&
+      !(initialInput as LensByReferenceInput)?.savedObjectId;
+    const showReplaceInCanvas =
+      initialContext?.originatingApp === 'canvas' &&
+      !(initialInput as LensByReferenceInput)?.savedObjectId;
+    const contextFromEmbeddable =
+      initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
+    const showSaveAndReturn =
+      !(showReplaceInDashboard || showReplaceInCanvas) &&
+      (Boolean(
+        isLinkedToOriginatingApp &&
+          // Temporarily required until the 'by value' paradigm is default.
+          (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
+      ) ||
+        Boolean(initialContextIsEmbedded));
+
+    const hasData = Boolean(activeData && Object.keys(activeData).length);
+    const csvEnabled = Boolean(isSaveable && hasData);
+    const shareUrlEnabled = Boolean(application.capabilities.visualize.createShortUrl && hasData);
+
+    const showShareMenu = csvEnabled || shareUrlEnabled;
     const baseMenuEntries = getLensTopNavConfig({
-      showSaveAndReturn:
-        Boolean(
-          isLinkedToOriginatingApp &&
-            // Temporarily required until the 'by value' paradigm is default.
-            (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-        ) || Boolean(initialContextIsEmbedded),
-      enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
-      showOpenInDiscover: Boolean(layerMetaInfo?.isVisible),
       isByValueMode: getIsByValueMode(),
       allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
-      showCancel: Boolean(isLinkedToOriginatingApp),
       savingToLibraryPermitted,
       savingToDashboardPermitted,
       isSaveable,
       contextOriginatingApp,
-      tooltips: {
-        showExportWarning: () => {
-          if (activeData) {
-            const datatables = Object.values(activeData);
-            const formulaDetected = datatables.some((datatable) => {
-              return tableHasFormulas(datatable.columns, datatable.rows);
-            });
-            if (formulaDetected) {
-              return i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
-                defaultMessage:
-                  'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
+      showReplaceInDashboard,
+      showReplaceInCanvas,
+      contextFromEmbeddable,
+      actions: {
+        inspect: { visible: true, execute: () => lensInspector.inspect({ title }) },
+        share: {
+          visible: true,
+          enabled: showShareMenu,
+          tooltip: () => {
+            if (!showShareMenu) {
+              return i18n.translate('xpack.lens.app.shareButtonDisabledWarning', {
+                defaultMessage: 'The visualization has no data to share.',
               });
             }
-          }
-          return undefined;
-        },
-        showUnderlyingDataWarning: () => {
-          return layerMetaInfo?.error;
-        },
-      },
-      actions: {
-        inspect: () => lensInspector.inspect({ title }),
-        exportToCSV: () => {
-          if (!activeData) {
-            return;
-          }
-          const datatables = Object.values(activeData);
-          const content = datatables.reduce<Record<string, { content: string; type: string }>>(
-            (memo, datatable, i) => {
-              // skip empty datatables
-              if (datatable) {
-                const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+          },
+          execute: async (anchorElement) => {
+            if (!share) {
+              return;
+            }
+            const sharingData = {
+              activeData,
+              csvEnabled,
+              title: title || unsavedTitle,
+            };
 
-                memo[`${title || unsavedTitle}${postFix}.csv`] = {
-                  content: exporters.datatableToCSV(datatable, {
-                    csvSeparator: uiSettings.get('csv:separator', ','),
-                    quoteValues: uiSettings.get('csv:quoteValues', true),
-                    formatFactory: fieldFormats.deserialize,
-                    escapeFormulaValues: false,
-                  }),
-                  type: exporters.CSV_MIME_TYPE,
-                };
-              }
-              return memo;
-            },
-            {}
-          );
-          if (content) {
-            downloadMultipleAs(content);
-          }
-        },
-        saveAndReturn: () => {
-          if (isSaveable) {
-            // disabling the validation on app leave because the document has been saved.
-            onAppLeave((actions) => {
-              return actions.default();
-            });
-            runSave(
+            const { shareableUrl, savedObjectURL } = await getShareURL(
+              shortUrlService,
+              { application, data },
               {
-                newTitle: title || '',
-                newCopyOnSave: false,
-                isTitleDuplicateConfirmed: false,
-                returnToOrigin: true,
-              },
-              {
-                saveToLibrary:
-                  (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+                filters,
+                query,
+                activeDatasourceId,
+                datasourceStates,
+                datasourceMap,
+                visualizationMap,
+                visualization,
+                currentDoc,
+                adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
               }
             );
-          }
-        },
-        showSaveModal: () => {
-          if (savingToDashboardPermitted || savingToLibraryPermitted) {
-            setIsSaveModalVisible(true);
-          }
-        },
-        goBack: () => {
-          if (contextOriginatingApp) {
-            goBackToOriginatingApp?.();
-          }
-        },
-        cancel: () => {
-          if (redirectToOrigin) {
-            redirectToOrigin();
-          }
-        },
-        getUnderlyingDataUrl: () => {
-          if (!layerMetaInfo) {
-            return;
-          }
-          const { error, meta } = layerMetaInfo;
-          // If Discover is not available, return
-          // If there's no data, return
-          if (error || !discover || !meta) {
-            return;
-          }
-          const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
-            query,
-            filters,
-            meta,
-            indexPatterns,
-            getEsQueryConfig(uiSettings)
-          );
 
-          return discover.locator!.getRedirectUrl({
-            indexPatternId: meta.id,
-            timeRange: data.query.timefilter.timefilter.getTime(),
-            filters: newFilters,
-            query: newQuery,
-            columns: meta.columns,
-          });
+            share.toggleShareContextMenu({
+              anchorElement,
+              allowEmbed: false,
+              allowShortUrl: false, // we'll manage this implicitly via the new service
+              shareableUrl: shareableUrl || '',
+              shareableUrlForSavedObject: savedObjectURL.href,
+              objectId: currentDoc?.savedObjectId,
+              objectType: 'lens_visualization',
+              objectTypeTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
+                defaultMessage: 'visualization',
+              }),
+              sharingData,
+              isDirty: isCurrentStateDirty,
+              // disable the menu if both shortURL permission and the visualization has not been saved
+              // TODO: improve here the disabling state with more specific checks
+              disabledShareUrl: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
+              showPublicUrlSwitch: () => false,
+              onClose: () => {
+                anchorElement?.focus();
+              },
+            });
+          },
         },
-        openSettings: (anchorElement: HTMLElement) =>
-          toggleSettingsMenuOpen({
-            lensStore,
-            anchorElement,
-            theme$,
-          }),
+        saveAndReturn: {
+          visible: showSaveAndReturn,
+          enabled: isSaveable,
+          execute: () => {
+            if (isSaveable) {
+              // disabling the validation on app leave because the document has been saved.
+              onAppLeave((actions) => {
+                return actions.default();
+              });
+              runSave(
+                {
+                  newTitle:
+                    title ||
+                    (initialContext &&
+                    'isEmbeddable' in initialContext &&
+                    initialContext.isEmbeddable
+                      ? i18n.translate('xpack.lens.app.convertedLabel', {
+                          defaultMessage: '{title} (converted)',
+                          values: {
+                            title:
+                              initialContext.title ||
+                              `${initialContext.visTypeTitle} visualization`,
+                          },
+                        })
+                      : ''),
+                  newCopyOnSave: false,
+                  isTitleDuplicateConfirmed: false,
+                  returnToOrigin: true,
+                },
+                {
+                  saveToLibrary:
+                    (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+                }
+              );
+            }
+          },
+        },
+        showSaveModal: {
+          visible: Boolean(savingToDashboardPermitted || savingToLibraryPermitted),
+          execute: () => {
+            if (savingToDashboardPermitted || savingToLibraryPermitted) {
+              setIsSaveModalVisible(true);
+            }
+          },
+        },
+        goBack: {
+          visible: Boolean(contextOriginatingApp),
+          enabled: Boolean(contextOriginatingApp),
+          execute: () => {
+            if (contextOriginatingApp) {
+              goBackToOriginatingApp?.();
+            }
+          },
+        },
+        cancel: {
+          visible: Boolean(isLinkedToOriginatingApp),
+          execute: () => {
+            if (redirectToOrigin) {
+              redirectToOrigin();
+            }
+          },
+        },
+        getUnderlyingDataUrl: {
+          visible: Boolean(layerMetaInfo?.isVisible),
+          enabled: !layerMetaInfo?.error,
+          tooltip: () => {
+            return layerMetaInfo?.error;
+          },
+          execute: () => {},
+          getLink: () => {
+            if (!layerMetaInfo) {
+              return;
+            }
+            const { error, meta } = layerMetaInfo;
+            // If Discover is not available, return
+            // If there's no data, return
+            if (error || !discoverLocator || !meta) {
+              return;
+            }
+            const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
+              query,
+              filters,
+              meta,
+              indexPatterns,
+              getEsQueryConfig(uiSettings)
+            );
+
+            return discoverLocator.getRedirectUrl({
+              dataViewSpec: dataViews.indexPatterns[meta.id]?.spec,
+              timeRange: data.query.timefilter.timefilter.getTime(),
+              filters: newFilters,
+              query: isOnTextBasedMode ? query : newQuery,
+              columns: meta.columns,
+            });
+          },
+        },
+        openSettings: {
+          visible: true,
+          execute: (anchorElement) =>
+            toggleSettingsMenuOpen({
+              lensStore,
+              anchorElement,
+              theme$,
+            }),
+        },
       },
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
   }, [
+    initialContext,
+    initialInput,
     isLinkedToOriginatingApp,
     dashboardFeatureFlag.allowByValueEmbeddables,
-    initialInput,
     initialContextIsEmbedded,
-    isSaveable,
     activeData,
-    layerMetaInfo,
+    isSaveable,
+    shortUrlService,
+    application,
     getIsByValueMode,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     contextOriginatingApp,
+    layerMetaInfo,
     additionalMenuEntries,
     lensInspector,
     title,
+    share,
     unsavedTitle,
-    uiSettings,
-    fieldFormats.deserialize,
+    data,
+    filters,
+    query,
+    activeDatasourceId,
+    datasourceStates,
+    datasourceMap,
+    visualizationMap,
+    visualization,
+    currentDoc,
+    isCurrentStateDirty,
     onAppLeave,
     runSave,
     attributeService,
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,
-    discover,
-    query,
-    filters,
+    discoverLocator,
     indexPatterns,
-    data.query.timefilter.timefilter,
+    uiSettings,
+    dataViews.indexPatterns,
+    isOnTextBasedMode,
     lensStore,
     theme$,
+    adHocDataViews,
   ]);
 
   const onQuerySubmitWrapped = useCallback(
@@ -609,10 +790,30 @@ export const LensTopNavMenu = ({
       if (newQuery) {
         if (!isEqual(newQuery, query)) {
           dispatchSetState({ query: newQuery });
+          // check if query is text-based (sql, essql etc) and switchAndCleanDatasource
+          if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
+            setIsOnTextBasedMode(true);
+            dispatch(
+              switchAndCleanDatasource({
+                newDatasourceId: 'textBased',
+                visualizationId: visualization?.activeId,
+                currentIndexPatternId: currentIndexPattern?.id,
+              })
+            );
+          }
         }
       }
     },
-    [data.query.timefilter.timefilter, data.search.session, dispatchSetState, query]
+    [
+      currentIndexPattern?.id,
+      data.query.timefilter.timefilter,
+      data.search.session,
+      dispatch,
+      dispatchSetState,
+      isOnTextBasedMode,
+      query,
+      visualization?.activeId,
+    ]
   );
 
   const onSavedWrapped = useCallback(
@@ -707,25 +908,70 @@ export const LensTopNavMenu = ({
     [editField, canEditDataView]
   );
 
-  const createNewDataView = useMemo(
-    () =>
-      canEditDataView
-        ? () => {
-            closeDataViewEditor.current = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                if (dataView.id) {
-                  dispatchChangeIndexPattern(dataView);
-                  setCurrentIndexPattern(dataView);
-                }
-              },
-              allowAdHocDataView: true,
-            });
+  const createNewDataView = useCallback(() => {
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        if (dataView.id) {
+          if (isOnTextBasedMode) {
+            dispatch(
+              switchAndCleanDatasource({
+                newDatasourceId: 'formBased',
+                visualizationId: visualization?.activeId,
+                currentIndexPatternId: dataView?.id,
+              })
+            );
           }
-        : undefined,
-    [canEditDataView, dataViewEditor, dispatchChangeIndexPattern]
+          dispatchChangeIndexPattern(dataView);
+          setCurrentIndexPattern(dataView);
+        }
+      },
+      allowAdHocDataView: true,
+    });
+  }, [
+    dataViewEditor,
+    dispatch,
+    dispatchChangeIndexPattern,
+    isOnTextBasedMode,
+    visualization?.activeId,
+  ]);
+
+  const onCreateDefaultAdHocDataView = useCallback(
+    async (pattern: string) => {
+      const dataView = await dataViewsService.create({
+        title: pattern,
+      });
+      if (dataView.fields.getByName('@timestamp')?.type === 'date') {
+        dataView.timeFieldName = '@timestamp';
+      }
+      if (isOnTextBasedMode) {
+        dispatch(
+          switchAndCleanDatasource({
+            newDatasourceId: 'formBased',
+            visualizationId: visualization?.activeId,
+            currentIndexPatternId: dataView?.id,
+          })
+        );
+      }
+      dispatchChangeIndexPattern(dataView);
+      setCurrentIndexPattern(dataView);
+    },
+    [
+      dataViewsService,
+      dispatch,
+      dispatchChangeIndexPattern,
+      isOnTextBasedMode,
+      visualization?.activeId,
+    ]
   );
 
-  const dataViewPickerProps = {
+  // setting that enables/disables SQL
+  const isSQLModeEnabled = uiSettings.get(ENABLE_SQL);
+  const supportedTextBasedLanguages = [];
+  if (isSQLModeEnabled) {
+    supportedTextBasedLanguages.push('SQL');
+  }
+
+  const dataViewPickerProps: DataViewPickerProps = {
     trigger: {
       label: currentIndexPattern?.getName?.() || '',
       'data-test-subj': 'lns-dataView-switch-link',
@@ -734,18 +980,65 @@ export const LensTopNavMenu = ({
     currentDataViewId: currentIndexPattern?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    adHocDataViews: indexPatterns.filter((pattern) => !pattern.isPersisted()),
-    onChangeDataView: (newIndexPatternId: string) => {
-      const currentDataView = indexPatterns.find(
-        (indexPattern) => indexPattern.id === newIndexPatternId
-      );
+    onCreateDefaultAdHocDataView,
+    adHocDataViews,
+    onChangeDataView: async (newIndexPatternId: string) => {
+      const currentDataView = await data.dataViews.get(newIndexPatternId);
       setCurrentIndexPattern(currentDataView);
       dispatchChangeIndexPattern(newIndexPatternId);
+      if (isOnTextBasedMode) {
+        dispatch(
+          switchAndCleanDatasource({
+            newDatasourceId: 'formBased',
+            visualizationId: visualization?.activeId,
+            currentIndexPatternId: newIndexPatternId,
+          })
+        );
+        setIsOnTextBasedMode(false);
+      }
     },
+    onEditDataView: async (updatedDataViewStub) => {
+      if (!currentIndexPattern) return;
+      if (currentIndexPattern.isPersisted()) {
+        // clear instance cache and fetch again to make sure fields are up to date (in case pattern changed)
+        dataViewsService.clearInstanceCache(currentIndexPattern.id);
+        const updatedCurrentIndexPattern = await dataViewsService.get(currentIndexPattern.id!);
+        // if the data view was persisted, reload it from cache
+        const updatedCache = {
+          ...dataViews.indexPatterns,
+        };
+        delete updatedCache[currentIndexPattern.id!];
+        const newIndexPatterns = await indexPatternService.ensureIndexPattern({
+          id: updatedCurrentIndexPattern.id!,
+          cache: updatedCache,
+        });
+        dispatch(
+          changeIndexPattern({
+            dataViews: { indexPatterns: newIndexPatterns },
+            indexPatternId: updatedCurrentIndexPattern.id!,
+          })
+        );
+        // Renew session id to make sure the request is done again
+        dispatchSetState({
+          searchSessionId: data.search.session.start(),
+          resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+        });
+        // update list of index patterns to pick up mutations in the changed data view
+        setCurrentIndexPattern(updatedCurrentIndexPattern);
+      } else {
+        // if it was an ad-hoc data view, we need to switch to a new data view anyway
+        indexPatternService.replaceDataViewId(updatedDataViewStub);
+      }
+    },
+    textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
+  const textBasedLanguageModeErrors = getUserMessages('textBasedLanguagesQueryInput', {
+    severity: 'error',
+  }).map(({ shortMessage }) => new Error(shortMessage));
+
   return (
-    <TopNavMenu
+    <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
       config={topNavConfig}
       showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
@@ -772,7 +1065,8 @@ export const LensTopNavMenu = ({
             )
         )
       }
-      showQueryBar={true}
+      textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}

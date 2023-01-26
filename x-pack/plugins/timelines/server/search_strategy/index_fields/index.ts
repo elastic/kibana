@@ -10,6 +10,7 @@ import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 import {
+  DataViewsServerPluginStart,
   IndexPatternsFetcher,
   ISearchStrategy,
   SearchStrategyDependencies,
@@ -37,11 +38,11 @@ export const indexFieldsProvider = (
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
+  const beatFields: BeatFields = require('../../utils/beat_schema/fields.json').fieldsBeat;
 
   return {
     search: (request, options, deps) =>
-      from(requestIndexFieldSearch(request, deps, beatFields, getStartServices)),
+      from(requestIndexFieldSearchHandler(request, deps, beatFields, getStartServices)),
   };
 };
 
@@ -70,27 +71,40 @@ export const findExistingIndices = async (
       .map((p) => p.catch((e) => false))
   );
 
-export const requestIndexFieldSearch = async (
+export const requestIndexFieldSearchHandler = async (
   request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
-  { savedObjectsClient, esClient, request: kRequest }: SearchStrategyDependencies,
+  deps: SearchStrategyDependencies,
   beatFields: BeatFields,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  useInternalUser?: boolean
 ): Promise<IndexFieldsStrategyResponse> => {
-  const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
-  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
-  if ('dataViewId' in request && 'indices' in request) {
-    throw new Error('Provide index field search with either `dataViewId` or `indices`, not both');
-  }
   const [
     ,
     {
       data: { indexPatterns },
     },
   ] = await getStartServices();
+  return requestIndexFieldSearch(request, deps, beatFields, indexPatterns, useInternalUser);
+};
+
+export const requestIndexFieldSearch = async (
+  request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
+  { savedObjectsClient, esClient, request: kRequest }: SearchStrategyDependencies,
+  beatFields: BeatFields,
+  indexPatterns: DataViewsServerPluginStart,
+  useInternalUser?: boolean
+): Promise<IndexFieldsStrategyResponse> => {
+  const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
+  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
+  if ('dataViewId' in request && 'indices' in request) {
+    throw new Error('Provide index field search with either `dataViewId` or `indices`, not both');
+  }
+
+  const esUser = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
 
   const dataViewService = await indexPatterns.dataViewsServiceFactory(
     savedObjectsClient,
-    esClient.asCurrentUser,
+    esUser,
     kRequest,
     true
   );
@@ -118,7 +132,7 @@ export const requestIndexFieldSearch = async (
     }
 
     const patternList = dataView.title.split(',');
-    indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
+    indicesExist = (await findExistingIndices(patternList, esUser)).reduce(
       (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
       []
     );
@@ -131,7 +145,7 @@ export const requestIndexFieldSearch = async (
     }
   } else if ('indices' in request) {
     const patternList = dedupeIndexName(request.indices);
-    indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
+    indicesExist = (await findExistingIndices(patternList, esUser)).reduce(
       (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
       []
     );
@@ -139,7 +153,7 @@ export const requestIndexFieldSearch = async (
       const fieldDescriptor = (
         await Promise.all(
           indicesExist.map(async (index, n) => {
-            if (index.startsWith('.alerts-observability')) {
+            if (index.startsWith('.alerts-observability') || useInternalUser) {
               return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
                 pattern: index,
               });

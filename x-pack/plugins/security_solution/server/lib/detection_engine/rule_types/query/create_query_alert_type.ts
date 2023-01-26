@@ -6,25 +6,39 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { QueryRuleParams } from '../../schemas/rule_schemas';
-import { queryRuleParams } from '../../schemas/rule_schemas';
+import type { BucketHistory } from '../../signals/alert_suppression/group_and_bulk_create';
+import type { UnifiedQueryRuleParams } from '../../rule_schema';
+import { unifiedQueryRuleParams } from '../../rule_schema';
 import { queryExecutor } from '../../signals/executors/query';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
+import { validateIndexPatterns } from '../utils';
+
+export interface QueryRuleState {
+  suppressionGroupHistory?: BucketHistory[];
+  [key: string]: unknown;
+}
+
 export const createQueryAlertType = (
-  createOptions: CreateRuleOptions
-): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, version } = createOptions;
+  createOptions: CreateQueryRuleOptions
+): SecurityAlertType<UnifiedQueryRuleParams, QueryRuleState, {}, 'default'> => {
+  const {
+    eventsTelemetry,
+    experimentalFeatures,
+    version,
+    osqueryCreateAction,
+    licensing,
+    id,
+    name,
+  } = createOptions;
   return {
-    id: QUERY_RULE_TYPE_ID,
-    name: 'Custom Query Rule',
+    id,
+    name,
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, queryRuleParams);
+          const [validated, errors] = validateNonExact(object, unifiedQueryRuleParams);
           if (errors != null) {
             throw new Error(errors);
           }
@@ -40,7 +54,6 @@ export const createQueryAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
@@ -61,44 +74,18 @@ export const createQueryAlertType = (
     isExportable: false,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
-      const {
-        runOpts: {
-          inputIndex,
-          runtimeMappings,
-          completeRule,
-          tuple,
-          exceptionItems,
-          listClient,
-          ruleExecutionLogger,
-          searchAfterSize,
-          bulkCreate,
-          wrapHits,
-          primaryTimestamp,
-          secondaryTimestamp,
-        },
-        services,
-        state,
-      } = execOptions;
-
-      const result = await queryExecutor({
-        completeRule,
-        tuple,
-        exceptionItems,
-        listClient,
+      const { runOpts, services, spaceId, state } = execOptions;
+      return queryExecutor({
+        runOpts,
         experimentalFeatures,
-        ruleExecutionLogger,
         eventsTelemetry,
         services,
         version,
-        searchAfterSize,
-        bulkCreate,
-        wrapHits,
-        inputIndex,
-        runtimeMappings,
-        primaryTimestamp,
-        secondaryTimestamp,
+        spaceId,
+        bucketHistory: state.suppressionGroupHistory,
+        osqueryCreateAction,
+        licensing,
       });
-      return { ...result, state };
     },
   };
 };

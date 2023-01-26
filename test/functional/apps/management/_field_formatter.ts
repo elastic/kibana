@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const indexPatterns = getService('indexPatterns');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/135110
-  describe.skip('field formatter', function () {
+  describe('field formatter', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
@@ -167,6 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               FIELD_FORMAT_IDS.BOOLEAN,
               FIELD_FORMAT_IDS.BYTES,
               FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
               FIELD_FORMAT_IDS.DURATION,
               FIELD_FORMAT_IDS.NUMBER,
               FIELD_FORMAT_IDS.PERCENT,
@@ -190,6 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               FIELD_FORMAT_IDS.BOOLEAN,
               FIELD_FORMAT_IDS.BYTES,
               FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
               FIELD_FORMAT_IDS.DURATION,
               FIELD_FORMAT_IDS.NUMBER,
               FIELD_FORMAT_IDS.PERCENT,
@@ -370,6 +371,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               FIELD_FORMAT_IDS.BOOLEAN,
               FIELD_FORMAT_IDS.BYTES,
               FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
               FIELD_FORMAT_IDS.DURATION,
               FIELD_FORMAT_IDS.NUMBER,
               FIELD_FORMAT_IDS.PERCENT,
@@ -478,36 +480,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       specs.forEach((spec, index) => {
         const fieldName = `${index}`;
-        it(
-          `edit field format of "${fieldName}" field to "${spec.applyFormatterType}"` +
-            spec.expectFormatterTypes
-            ? `, and check available formats types`
-            : '',
-          async () => {
-            await PageObjects.settings.filterField(fieldName);
-            await PageObjects.settings.openControlsByName(fieldName);
-            await PageObjects.settings.toggleRow('formatRow');
+        it(`edit field format of "${fieldName}" field to "${spec.applyFormatterType}"${
+          spec.expectFormatterTypes ? ', and check available formats types' : ''
+        }`, async () => {
+          await PageObjects.settings.filterField(fieldName);
+          await PageObjects.settings.openControlsByName(fieldName);
+          await PageObjects.settings.toggleRow('formatRow');
 
-            if (spec.expectFormatterTypes) {
-              expect(
-                (
-                  await Promise.all(
-                    (
-                      await (
-                        await testSubjects.find('editorSelectedFormatId')
-                      ).findAllByTagName('option')
-                    ).map((option) => option.getAttribute('value'))
-                  )
-                ).filter(Boolean)
-              ).to.eql(spec.expectFormatterTypes);
-            }
-
-            await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
-            if (spec.beforeSave) {
-              await spec.beforeSave(await testSubjects.find('formatRow'));
-            }
+          if (spec.expectFormatterTypes) {
+            expect(
+              (
+                await Promise.all(
+                  (
+                    await (
+                      await testSubjects.find('editorSelectedFormatId')
+                    ).findAllByTagName('option')
+                  ).map((option) => option.getAttribute('value'))
+                )
+              ).filter(Boolean)
+            ).to.eql(spec.expectFormatterTypes);
           }
-        );
+
+          await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
+          if (spec.beforeSave) {
+            await spec.beforeSave(await testSubjects.find('formatRow'));
+          }
+        });
       });
     });
 

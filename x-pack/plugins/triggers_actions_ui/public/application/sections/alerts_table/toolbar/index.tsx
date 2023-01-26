@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getToolbarVisibility } from './toolbar_visibility';
+export * from './toolbar_visibility';

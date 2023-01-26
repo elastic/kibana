@@ -103,6 +103,25 @@ export const TCP_ADVANCED = {
   },
 };
 
+export const BROWSER_ADVANCED = [
+  {
+    title: i18n.translate('xpack.synthetics.monitorConfig.section.syntAgentOptions.title', {
+      defaultMessage: 'Synthetics agent options',
+    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.section.syntAgentOptions.description',
+      {
+        defaultMessage: 'Provide fine-tuned configuration for the synthetics agent.',
+      }
+    ),
+    components: [
+      FIELD[ConfigKey.IGNORE_HTTPS_ERRORS],
+      FIELD[ConfigKey.SYNTHETICS_ARGS],
+      FIELD[ConfigKey.PLAYWRIGHT_OPTIONS],
+    ],
+  },
+];
+
 interface AdvancedFieldGroup {
   title: string;
   description: string;
@@ -149,6 +168,8 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.MAX_REDIRECTS],
       FIELD[ConfigKey.TIMEOUT],
+      FIELD[ConfigKey.ENABLED],
+      FIELD[ConfigKey.ALERT_CONFIG],
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS,
@@ -166,6 +187,8 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.TIMEOUT],
+      FIELD[ConfigKey.ENABLED],
+      FIELD[ConfigKey.ALERT_CONFIG],
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS,
@@ -181,8 +204,10 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.THROTTLING_CONFIG],
+      FIELD[ConfigKey.ENABLED],
+      FIELD[ConfigKey.ALERT_CONFIG],
     ],
-    step3: [FIELD[ConfigKey.SOURCE_INLINE]],
+    step3: [FIELD[ConfigKey.SOURCE_INLINE], FIELD[ConfigKey.PARAMS]],
     scriptEdit: [FIELD[ConfigKey.SOURCE_INLINE]],
     advanced: [
       {
@@ -194,6 +219,7 @@ export const FORM_CONFIG: FieldConfig = {
           FIELD[ConfigKey.NAMESPACE],
         ],
       },
+      ...BROWSER_ADVANCED,
     ],
   },
   [FormMonitorType.SINGLE]: {
@@ -205,6 +231,8 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.THROTTLING_CONFIG],
+      FIELD[ConfigKey.ENABLED],
+      FIELD[ConfigKey.ALERT_CONFIG],
     ],
     advanced: [
       {
@@ -216,6 +244,7 @@ export const FORM_CONFIG: FieldConfig = {
           FIELD[ConfigKey.NAMESPACE],
         ],
       },
+      ...BROWSER_ADVANCED,
     ],
   },
   [FormMonitorType.ICMP]: {
@@ -227,6 +256,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.WAIT],
       FIELD[ConfigKey.TIMEOUT],
+      FIELD[ConfigKey.ENABLED],
     ],
     advanced: [DEFAULT_DATA_OPTIONS],
   },

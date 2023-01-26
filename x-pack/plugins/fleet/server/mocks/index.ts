@@ -18,13 +18,13 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import type { PackagePolicyServiceInterface } from '../services/package_policy';
+import type { PackagePolicyClient } from '../services/package_policy_service';
 import type { AgentPolicyServiceInterface } from '../services';
 import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
-import { createFleetAuthzMock } from '../../common';
+import { createFleetAuthzMock } from '../../common/mocks';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
 import type { FleetRequestHandlerContext } from '../types';
 import { packageServiceMock } from '../services/epm/package_service.mock';
@@ -73,6 +73,7 @@ export const createAppContextStartContractMock = (
     kibanaVersion: '8.99.0', // Fake version :)
     kibanaBranch: 'main',
     telemetryEventsSender: createMockTelemetryEventsSender(),
+    bulkActionsResolver: {} as any,
   };
 };
 
@@ -85,10 +86,13 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
       asCurrentUser: agentServiceMock.createClient(),
       asInternalUser: agentServiceMock.createClient(),
     },
-    epm: {
-      internalSoClient: savedObjectsClientMock.create(),
+    packagePolicyService: {
+      asCurrentUser: createPackagePolicyServiceMock(),
+      asInternalUser: createPackagePolicyServiceMock(),
     },
+    internalSoClient: savedObjectsClientMock.create(),
     spaceId: 'default',
+    limitedToPackages: undefined,
   };
 };
 
@@ -104,7 +108,7 @@ export const xpackMocks = {
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
 
-export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
+export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClient> => {
   return {
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
@@ -115,8 +119,10 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServi
     list: jest.fn(),
     listIds: jest.fn(),
     update: jest.fn(),
+    bulkUpdate: jest.fn(),
     runExternalCallbacks: jest.fn(),
     runDeleteExternalCallbacks: jest.fn(),
+    runPostDeleteExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
     getUpgradePackagePolicyInfo: jest.fn(),

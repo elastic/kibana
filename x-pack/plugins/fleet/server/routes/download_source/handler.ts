@@ -21,7 +21,7 @@ import type {
   GetDownloadSourceResponse,
 } from '../../../common/types';
 import { downloadSourceService } from '../../services/download_source';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 import { agentPolicyService } from '../../services';
 
 export const getDownloadSourcesHandler: RequestHandler = async (context, request, response) => {
@@ -38,7 +38,7 @@ export const getDownloadSourcesHandler: RequestHandler = async (context, request
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -61,7 +61,7 @@ export const getOneDownloadSourcesHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -98,7 +98,7 @@ export const putDownloadSourcesHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -123,7 +123,7 @@ export const postDownloadSourcesHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -146,6 +146,6 @@ export const deleteDownloadSourcesHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

@@ -340,20 +340,47 @@ export class TelemetryCollectionManagerPlugin
     }
 
     const cacheKey = this.createCacheKey(collectionSource, clustersDetails);
-    const cachedUsageStatsPayload = this.cacheManager.getFromCache<UsageStatsPayload[]>(cacheKey);
-    if (cachedUsageStatsPayload) {
-      return this.updateFetchedAt(cachedUsageStatsPayload);
+    const cachedUsageStatsPromise =
+      this.cacheManager.getFromCache<Promise<UsageStatsPayload[]>>(cacheKey);
+    if (cachedUsageStatsPromise) {
+      return this.updateFetchedAt(await cachedUsageStatsPromise);
     }
 
+    const statsFromCollectionPromise = this.getStatsFromCollection(
+      clustersDetails,
+      collection,
+      statsCollectionConfig
+    );
+    this.cacheManager.setCache(cacheKey, statsFromCollectionPromise);
+
+    try {
+      const stats = await statsFromCollectionPromise;
+      return this.updateFetchedAt(stats);
+    } catch (err) {
+      this.logger.debug(
+        `Failed to generate the telemetry report (${err.message}). Resetting the cache...`
+      );
+      this.cacheManager.resetCache();
+      throw err;
+    }
+  }
+
+  private async getStatsFromCollection(
+    clustersDetails: ClusterDetails[],
+    collection: CollectionStrategy,
+    statsCollectionConfig: StatsCollectionConfig
+  ) {
+    const context: StatsCollectionContext = {
+      logger: this.logger.get(collection.title),
+      version: this.version,
+    };
+    const { title: collectionSource } = collection;
     const now = new Date().toISOString();
     const stats = await collection.statsGetter(clustersDetails, statsCollectionConfig, context);
-    const usageStatsPayload = stats.map((stat) => ({
+    return stats.map((stat) => ({
       collectionSource,
       cacheDetails: { updatedAt: now, fetchedAt: now },
       ...stat,
     }));
-    this.cacheManager.setCache(cacheKey, usageStatsPayload);
-
-    return this.updateFetchedAt(usageStatsPayload);
   }
 }

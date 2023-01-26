@@ -8,7 +8,8 @@
 import React from 'react';
 import { getAllCasesSelectorModalNoProviderLazy } from '../../client/ui/get_all_cases_selector_modal';
 import { getCreateCaseFlyoutLazyNoProvider } from '../../client/ui/get_create_case_flyout';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { getInitialCasesContextState } from './cases_context_reducer';
 import { CasesGlobalComponents } from './cases_global_components';
 

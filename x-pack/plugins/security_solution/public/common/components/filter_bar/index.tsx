@@ -59,7 +59,6 @@ export const FilterBar = memo<FilterBarComponentProps>(
         showAutoRefreshOnly={false}
         showFilterBar={true}
         showDatePicker={false}
-        showQueryBar={false}
         showQueryInput={false}
         showSaveQuery={false}
         dataTestSubj={dataTestSubj}

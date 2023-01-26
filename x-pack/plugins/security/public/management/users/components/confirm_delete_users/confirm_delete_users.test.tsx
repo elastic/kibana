@@ -71,7 +71,7 @@ describe('ConfirmDeleteUsers', () => {
       />
     );
 
-    wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
     expect(apiClientMock.deleteUser).toBeCalledTimes(2);
     expect(apiClientMock.deleteUser).toBeCalledWith('foo');
@@ -98,7 +98,7 @@ describe('ConfirmDeleteUsers', () => {
       />
     );
 
-    wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
     expect(apiClientMock.deleteUser).toBeCalledTimes(2);
     expect(apiClientMock.deleteUser).toBeCalledWith('foo');

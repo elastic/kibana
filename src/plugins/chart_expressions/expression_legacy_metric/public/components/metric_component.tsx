@@ -127,7 +127,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     return this.props.visParams.metric.autoScale && this.props.visParams.metric.colorFullBackground;
   };
 
-  private renderMetric = (metric: MetricOptions, index: number) => {
+  private renderMetric = (metric: MetricOptions, index: number, arrayRef: MetricOptions[]) => {
     const hasBuckets = this.props.visParams.dimensions.bucket !== undefined;
     const MetricComponent = this.props.visParams.metric.autoScale
       ? AutoScaleMetricVisValue
@@ -143,6 +143,12 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
                   minHeight: '100%',
                   minWidth: '100%',
                 },
+                ...(this.props.visParams.metric?.autoScaleMetricAlignment
+                  ? {
+                      autoScaleMetricAlignment:
+                        this.props.visParams.metric?.autoScaleMetricAlignment,
+                    }
+                  : {}),
               }
             : undefined
         }
@@ -157,7 +163,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         autoScale={this.props.visParams.metric.autoScale}
         colorFullBackground={this.props.visParams.metric.colorFullBackground}
         labelConfig={this.props.visParams.metric.labels}
-        renderComplete={this.props.renderComplete}
+        renderComplete={arrayRef.length - 1 === index ? this.props.renderComplete : undefined}
       />
     );
   };

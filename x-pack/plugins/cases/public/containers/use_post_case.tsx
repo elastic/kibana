@@ -6,10 +6,10 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { CasePostRequest } from '../../common/api';
+import type { CasePostRequest } from '../../common/api';
 import { postCase } from './api';
 import * as i18n from './translations';
-import { Case } from './types';
+import type { Case } from './types';
 import { useToasts } from '../common/lib/kibana';
 interface NewCaseState {
   isLoading: boolean;

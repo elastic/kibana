@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
+  const dataGrid = getService('dataGrid');
   const a11y = getService('a11y');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const inspector = getService('inspector');
@@ -17,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const TEST_COLUMN_NAMES = ['dayOfWeek', 'DestWeather'];
   const toasts = getService('toasts');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('Discover a11y tests', () => {
     before(async () => {
@@ -117,16 +119,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test for actions on a field', async () => {
       await PageObjects.discover.clickDocViewerTab(0);
-      await testSubjects.click('openFieldActionsButton-Cancelled');
+      if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
+        await testSubjects.click('openFieldActionsButton-Cancelled');
+      } else {
+        await testSubjects.existOrFail('fieldActionsGroup-Cancelled');
+      }
       await a11y.testAppSnapshot();
     });
 
     it('a11y test for data-grid table with columns', async () => {
-      await testSubjects.click('toggleColumnButton-Cancelled');
-      await testSubjects.click('openFieldActionsButton-Carrier');
-      await testSubjects.click('toggleColumnButton-Carrier');
-      await testSubjects.click('euiFlyoutCloseButton');
-      await toasts.dismissAllToasts();
+      await retry.try(async () => {
+        await dataGrid.clickFieldActionInFlyout('Cancelled', 'toggleColumnButton');
+      });
+
+      await retry.try(async () => {
+        await dataGrid.clickFieldActionInFlyout('Carrier', 'toggleColumnButton');
+      });
+
+      await retry.try(async () => {
+        await testSubjects.click('euiFlyoutCloseButton');
+        await toasts.dismissAllToasts();
+      });
+
       await a11y.testAppSnapshot();
     });
 
@@ -136,23 +150,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for chart options panel', async () => {
-      await testSubjects.click('discoverChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test for data grid with hidden chart', async () => {
-      await testSubjects.click('discoverChartToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
       await a11y.testAppSnapshot();
-      await testSubjects.click('discoverChartOptionsToggle');
-      await testSubjects.click('discoverChartToggle');
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
     });
 
     it('a11y test for time interval panel', async () => {
-      await testSubjects.click('discoverChartOptionsToggle');
-      await testSubjects.click('discoverTimeIntervalPanel');
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramTimeIntervalPanel');
       await a11y.testAppSnapshot();
       await testSubjects.click('contextMenuPanelTitleButton');
-      await testSubjects.click('discoverChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
     });
 
     it('a11y test for data grid sort panel', async () => {

@@ -24,6 +24,9 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('loads the overview page');
       await ml.navigation.navigateToOverview();
 
+      await ml.testExecution.logTestStep('loads the notifications page');
+      await ml.navigation.navigateToNotifications();
+
       await ml.testExecution.logTestStep('loads the anomaly detection area');
       await ml.navigation.navigateToAnomalyDetection();
 

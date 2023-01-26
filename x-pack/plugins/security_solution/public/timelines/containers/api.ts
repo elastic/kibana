@@ -49,7 +49,7 @@ import type {
   ExportDocumentsProps,
   ImportDataProps,
   ImportDataResponse,
-} from '../../detections/containers/detection_engine/rules';
+} from '../../detection_engine/rule_management/logic';
 import type { TimelineInput } from '../../../common/search_strategy';
 
 interface RequestPostTimeline {

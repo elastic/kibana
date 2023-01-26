@@ -6,11 +6,11 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { CaseConnector } from '../../common/api';
+import type { CaseConnector } from '../../common/api';
 
 import { pushCase } from './api';
 import * as i18n from './translations';
-import { Case } from './types';
+import type { Case } from './types';
 import { useToasts } from '../common/lib/kibana';
 
 interface PushToServiceState {

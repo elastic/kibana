@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiText, EuiBadge, EuiScreenReaderOnly } from '@elastic/eui';
 import React from 'react';
 
 import * as i18n from './translations';
@@ -34,7 +34,7 @@ const TooltipWithKeyboardShortcutComponent = ({
       <EuiText color="subdued" data-test-subj="shortcut" size="s" textAlign="center">
         <span>{i18n.PRESS}</span>
         {'\u00a0'}
-        <span className="euiBadge euiBadge--hollow">{shortcut}</span>
+        <EuiBadge color="hollow">{shortcut}</EuiBadge>
       </EuiText>
     )}
   </>

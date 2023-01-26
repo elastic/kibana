@@ -18,6 +18,7 @@ import {
   EuiButton,
   EuiLoadingSpinner,
   EuiText,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -42,6 +43,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   const [jobIds, setJobIds] = useState<string[]>([]);
   const [canDelete, setCanDelete] = useState(false);
   const [hasManagedJob, setHasManagedJob] = useState(false);
+  const [deleteUserAnnotations, setDeleteUserAnnotations] = useState(false);
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -52,6 +54,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
         unsetShowFunction();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const showModal = useCallback((jobs: MlSummaryJob[]) => {
@@ -59,6 +62,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     setHasManagedJob(jobs.some((job) => isManagedJob(job)));
     setModalVisible(true);
     setDeleting(false);
+    setDeleteUserAnnotations(false);
   }, []);
 
   const closeModal = useCallback(() => {
@@ -68,13 +72,16 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
 
   const deleteJob = useCallback(() => {
     setDeleting(true);
-    deleteJobs(jobIds.map((id) => ({ id })));
+    deleteJobs(
+      jobIds.map((id) => ({ id })),
+      deleteUserAnnotations
+    );
 
     setTimeout(() => {
       closeModal();
       refreshJobs();
     }, DELETING_JOBS_REFRESH_INTERVAL_MS);
-  }, [jobIds, refreshJobs]);
+  }, [jobIds, deleteUserAnnotations, closeModal, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;
@@ -85,14 +92,16 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
       <EuiModal data-test-subj="mlDeleteJobConfirmModal" onClose={closeModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
-              defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}?"
-              values={{
-                jobsCount: jobIds.length,
-                jobId: jobIds[0],
-              }}
-            />
+            <h1>
+              <FormattedMessage
+                id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
+                defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}?"
+                values={{
+                  jobsCount: jobIds.length,
+                  jobId: jobIds[0],
+                }}
+              />
+            </h1>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
@@ -130,6 +139,18 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                     values={{
                       jobsCount: jobIds.length,
                     }}
+                  />
+                  <EuiSpacer />
+                  <EuiSwitch
+                    label={i18n.translate(
+                      'xpack.ml.jobsList.deleteJobModal.deleteUserAnnotations',
+                      {
+                        defaultMessage: 'Delete annotations.',
+                      }
+                    )}
+                    checked={deleteUserAnnotations}
+                    onChange={(e) => setDeleteUserAnnotations(e.target.checked)}
+                    data-test-subj="mlDeleteJobConfirmModalDeleteAnnotationsSwitch"
                   />
                 </EuiText>
               </>

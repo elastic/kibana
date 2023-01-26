@@ -36,7 +36,7 @@ const StyledEuiTitle = styled(EuiTitle)`
 
 export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) => (
   <EuiFlexGrid columns={3} gutterSize="xl">
-    {items.map(({ title, description, id, icon, isBeta }) => (
+    {items.map(({ title, description, id, icon, isBeta, betaOptions }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
         <EuiFlexGroup
           direction="column"
@@ -59,7 +59,7 @@ export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) 
                 </EuiFlexItem>
                 {isBeta && (
                   <EuiFlexItem grow={false}>
-                    <NavItemBetaBadge />
+                    <NavItemBetaBadge text={betaOptions?.text} />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

@@ -24,6 +24,7 @@ export const CheckboxShowCharts: FC = () => {
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     chartsStateService.setShowCharts(e.target.checked);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const id = useMemo(() => htmlIdGenerator()(), []);

@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { RuleAlertsSummary } from './rule_alerts_summary';
-export type { RuleAlertsSummaryProps, AlertChartData, AlertsChartProps } from './types';
-export { formatChartAlertData, getColorSeries } from './helpers';
+export { AlertSummaryWidget } from './alert_summary_widget';
+export type { AlertSummaryWidgetProps } from './types';

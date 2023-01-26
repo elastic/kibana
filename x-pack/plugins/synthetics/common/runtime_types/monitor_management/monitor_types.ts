@@ -6,13 +6,10 @@
  */
 
 import * as t from 'io-ts';
+import { AlertConfigsCodec } from './alert_config';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
-import {
-  MonitorServiceLocationsCodec,
-  MonitorServiceLocationCodec,
-  ServiceLocationErrors,
-} from './locations';
+import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import {
   DataStream,
   DataStreamCodec,
@@ -25,6 +22,7 @@ import {
   VerificationModeCodec,
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
+import { PrivateLocationCodec } from './synthetics_private_locations';
 
 const ScheduleCodec = t.interface({
   number: t.string,
@@ -77,14 +75,21 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.SCHEDULE]: ScheduleCodec,
     [ConfigKey.APM_SERVICE_NAME]: t.string,
     [ConfigKey.TAGS]: t.array(t.string),
-    [ConfigKey.LOCATIONS]: MonitorServiceLocationsCodec,
+    [ConfigKey.LOCATIONS]: t.array(t.union([MonitorServiceLocationCodec, PrivateLocationCodec])),
+    [ConfigKey.MONITOR_QUERY_ID]: t.string,
+    [ConfigKey.CONFIG_ID]: t.string,
   }),
   t.partial({
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
-    [ConfigKey.CONFIG_ID]: t.string,
+    [ConfigKey.CONFIG_HASH]: t.string,
+    [ConfigKey.JOURNEY_ID]: t.string,
+    [ConfigKey.PROJECT_ID]: t.string,
+    [ConfigKey.ORIGINAL_SPACE]: t.string,
+    [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
+    [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
   }),
 ]);
 
@@ -95,6 +100,10 @@ export const TCPSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.HOSTS]: t.string,
+    [ConfigKey.PORT]: t.union([t.number, t.null]),
+  }),
+  t.partial({
+    [ConfigKey.URLS]: t.string,
   }),
   CommonFieldsCodec,
 ]);
@@ -152,6 +161,7 @@ export const HTTPSimpleFieldsCodec = t.intersection([
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.MAX_REDIRECTS]: t.string,
     [ConfigKey.URLS]: t.string,
+    [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   CommonFieldsCodec,
 ]);
@@ -218,10 +228,6 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
     }),
     t.partial({
       [ConfigKey.PLAYWRIGHT_OPTIONS]: t.string,
-      [ConfigKey.JOURNEY_ID]: t.string,
-      [ConfigKey.PROJECT_ID]: t.string,
-      [ConfigKey.ORIGINAL_SPACE]: t.string,
-      [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
       [ConfigKey.TEXT_ASSERTION]: t.string,
     }),
   ]),
@@ -244,7 +250,7 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   CommonFieldsCodec,
 ]);
 
-export const BrowserAdvancedFieldsCodec = t.interface({
+export const EncryptedBrowserAdvancedFieldsCodec = t.interface({
   [ConfigKey.SCREENSHOTS]: t.string,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: t.string,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: t.array(t.string),
@@ -266,25 +272,26 @@ export const BrowserSensitiveAdvancedFieldsCodec = t.interface({
   [ConfigKey.SYNTHETICS_ARGS]: t.array(t.string),
 });
 
-export const BrowserAdvancedsCodec = t.intersection([
-  BrowserAdvancedFieldsCodec,
+export const BrowserAdvancedFieldsCodec = t.intersection([
+  EncryptedBrowserAdvancedFieldsCodec,
   BrowserSensitiveAdvancedFieldsCodec,
 ]);
 
 export const EncryptedBrowserFieldsCodec = t.intersection([
   EncryptedBrowserSimpleFieldsCodec,
-  BrowserAdvancedFieldsCodec,
+  EncryptedBrowserAdvancedFieldsCodec,
+  TLSFieldsCodec,
 ]);
 
 export const BrowserFieldsCodec = t.intersection([
   BrowserSimpleFieldsCodec,
   BrowserAdvancedFieldsCodec,
-  BrowserSensitiveAdvancedFieldsCodec,
+  TLSCodec,
 ]);
 
 export type BrowserFields = t.TypeOf<typeof BrowserFieldsCodec>;
 export type BrowserSimpleFields = t.TypeOf<typeof BrowserSimpleFieldsCodec>;
-export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedsCodec>;
+export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedFieldsCodec>;
 
 // MonitorFields, represents any possible monitor type
 export const MonitorFieldsCodec = t.intersection([
@@ -344,7 +351,7 @@ export const EncryptedSyntheticsMonitorWithIdCodec = t.intersection([
 // TODO: Remove EncryptedSyntheticsMonitorWithIdCodec (as well as SyntheticsMonitorWithIdCodec if possible) along with respective TypeScript types in favor of EncryptedSyntheticsSavedMonitorCodec
 export const EncryptedSyntheticsSavedMonitorCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
-  t.interface({ id: t.string, updated_at: t.string }),
+  t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
 ]);
 
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
@@ -368,11 +375,16 @@ export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
 
 export const MonitorManagementListResultCodec = t.type({
   monitors: t.array(
-    t.interface({
-      id: t.string,
-      attributes: EncryptedSyntheticsMonitorCodec,
-      updated_at: t.string,
-    })
+    t.intersection([
+      t.interface({
+        id: t.string,
+        attributes: EncryptedSyntheticsMonitorCodec,
+      }),
+      t.partial({
+        updated_at: t.string,
+        created_at: t.string,
+      }),
+    ])
   ),
   page: t.number,
   perPage: t.number,
@@ -386,8 +398,10 @@ export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListR
 export const MonitorOverviewItemCodec = t.interface({
   name: t.string,
   id: t.string,
+  configId: t.string,
   location: MonitorServiceLocationCodec,
   isEnabled: t.boolean,
+  isStatusAlertEnabled: t.boolean,
 });
 
 export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
@@ -395,7 +409,7 @@ export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
 export const MonitorOverviewResultCodec = t.type({
   total: t.number,
   allMonitorIds: t.array(t.string),
-  pages: t.record(t.string, t.array(MonitorOverviewItemCodec)),
+  monitors: t.array(MonitorOverviewItemCodec),
 });
 
 export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;

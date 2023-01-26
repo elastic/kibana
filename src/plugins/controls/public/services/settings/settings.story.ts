@@ -13,4 +13,5 @@ export type SettingsServiceFactory = PluginServiceFactory<ControlsSettingsServic
 export const settingsServiceFactory: SettingsServiceFactory = () => ({
   getTimezone: () => 'Browser',
   getDateFormat: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+  getDefaultTimeRange: () => ({ from: 'now-15m', to: 'now' }),
 });

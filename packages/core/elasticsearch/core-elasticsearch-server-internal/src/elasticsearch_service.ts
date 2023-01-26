@@ -22,7 +22,7 @@ import type {
   UnauthorizedErrorHandler,
   ElasticsearchClientConfig,
 } from '@kbn/core-elasticsearch-server';
-import { ClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
+import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
@@ -58,6 +58,7 @@ export class ElasticsearchService
   private esNodesCompatibility$?: Observable<NodesVersionCompatibility>;
   private client?: ClusterClient;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
+  private agentManager: AgentManager;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -65,6 +66,7 @@ export class ElasticsearchService
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
+    this.agentManager = new AgentManager();
   }
 
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
@@ -118,6 +120,7 @@ export class ElasticsearchService
         }
         this.unauthorizedErrorHandler = handler;
       },
+      agentStore: this.agentManager,
     };
   }
 
@@ -172,6 +175,7 @@ export class ElasticsearchService
     clientConfig: Partial<ElasticsearchClientConfig> = {}
   ) {
     const config = mergeConfig(baseConfig, clientConfig);
+
     return new ClusterClient({
       config,
       logger: this.coreContext.logger.get('elasticsearch'),
@@ -179,6 +183,8 @@ export class ElasticsearchService
       authHeaders: this.authHeaders,
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
+      agentFactoryProvider: this.agentManager,
+      kibanaVersion: this.kibanaVersion,
     });
   }
 }

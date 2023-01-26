@@ -6,15 +6,17 @@
  */
 
 import './app.scss';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { LensAppLocatorParams } from '../../common/locator/locator';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
-import { EditorFrameInstance } from '../types';
+import { AddUserMessages, EditorFrameInstance, UserMessage, UserMessagesGetter } from '../types';
 import { Document } from '../persistence/saved_object_store';
 
 import {
@@ -26,13 +28,20 @@ import {
   DispatchSetState,
   selectSavedObjectFormat,
   updateIndexPatterns,
+  updateDatasourceState,
+  selectActiveDatasourceId,
+  selectFrameDatasourceAPI,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
-import { IndexPatternServiceAPI, createIndexPatternService } from '../indexpattern_service/service';
+import {
+  type IndexPatternServiceAPI,
+  createIndexPatternService,
+} from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
+import { filterUserMessages, getApplicationUserMessages } from './get_application_user_messages';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -57,11 +66,15 @@ export function App({
   topNavMenuEntryGenerators,
   initialContext,
   theme$,
+  coreStart,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
   const {
     data,
+    dataViews,
+    uiActions,
+    uiSettings,
     chrome,
     inspector: lensInspector,
     application,
@@ -73,7 +86,11 @@ export function App({
     executionContext,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
+    locator,
+    share,
   } = lensAppServices;
+
+  const saveAndExit = useRef<() => void>();
 
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = useCallback(
@@ -86,8 +103,10 @@ export function App({
     sharingSavedObjectProps,
     isLinkedToOriginatingApp,
     searchSessionId,
+    datasourceStates,
     isLoading,
     isSaveable,
+    visualization,
   } = useLensSelector((state) => state.lens);
 
   const selectorDependencies = useMemo(
@@ -103,6 +122,8 @@ export function App({
     selectSavedObjectFormat(state, selectorDependencies)
   );
 
+  const shortUrls = useMemo(() => share?.url.shortUrls.get(null), [share]);
+
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
@@ -111,6 +132,7 @@ export function App({
     undefined
   );
   const [isGoBackToVizEditorModalVisible, setIsGoBackToVizEditorModalVisible] = useState(false);
+  const [shouldCloseAndSaveTextBasedQuery, setShouldCloseAndSaveTextBasedQuery] = useState(false);
   const savedObjectId = (initialInput as LensByReferenceInput)?.savedObjectId;
 
   useEffect(() => {
@@ -243,6 +265,19 @@ export function App({
         ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit visualization' })
         : persistedDoc.title;
     }
+    if (
+      !persistedDoc?.title &&
+      initialContext &&
+      'isEmbeddable' in initialContext &&
+      initialContext.isEmbeddable
+    ) {
+      currentDocTitle = i18n.translate('xpack.lens.breadcrumbsEditInLensFromDashboard', {
+        defaultMessage: 'Converting {title} visualization',
+        values: {
+          title: initialContext.title ? `"${initialContext.title}"` : initialContext.visTypeTitle,
+        },
+      });
+    }
     breadcrumbs.push({ text: currentDocTitle });
     chrome.setBreadcrumbs(breadcrumbs);
   }, [
@@ -257,6 +292,12 @@ export function App({
     initialContext,
   ]);
 
+  const switchDatasource = useCallback(() => {
+    if (saveAndExit && saveAndExit.current) {
+      saveAndExit.current();
+    }
+  }, []);
+
   const runSave = useCallback(
     (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
       dispatch(applyChanges());
@@ -270,7 +311,9 @@ export function App({
           persistedDoc,
           onAppLeave,
           redirectTo,
+          switchDatasource,
           originatingApp: incomingState?.originatingApp,
+          textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
           ...lensAppServices,
         },
         saveProps,
@@ -280,6 +323,7 @@ export function App({
           if (newState) {
             dispatchSetState(newState);
             setIsSaveModalVisible(false);
+            setShouldCloseAndSaveTextBasedQuery(false);
           }
         },
         () => {
@@ -289,19 +333,20 @@ export function App({
       );
     },
     [
-      incomingState?.originatingApp,
+      dispatch,
       lastKnownDoc,
-      persistedDoc,
       getIsByValueMode,
       savedObjectsTagging,
       initialInput,
       redirectToOrigin,
+      persistedDoc,
       onAppLeave,
       redirectTo,
+      switchDatasource,
+      incomingState?.originatingApp,
+      shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
       dispatchSetState,
-      dispatch,
-      setIsSaveModalVisible,
     ]
   );
 
@@ -319,13 +364,13 @@ export function App({
       'vizEditorOriginatingAppUrl' in initialContext &&
       initialContext.vizEditorOriginatingAppUrl
     ) {
-      const initialDocFromContextHasChanged = !isLensEqual(
+      const [initialDocFromContextUnchanged, currentDocHasBeenSavedInLens] = [
         initialDocFromContext,
-        lastKnownDoc,
-        data.query.filterManager.inject,
-        datasourceMap
+        persistedDoc,
+      ].map((refDoc) =>
+        isLensEqual(refDoc, lastKnownDoc, data.query.filterManager.inject, datasourceMap)
       );
-      if (!initialDocFromContextHasChanged) {
+      if (initialDocFromContextUnchanged || currentDocHasBeenSavedInLens) {
         onAppLeave((actions) => {
           return actions.default();
         });
@@ -342,6 +387,7 @@ export function App({
     initialDocFromContext,
     lastKnownDoc,
     onAppLeave,
+    persistedDoc,
   ]);
 
   const navigateToVizEditor = useCallback(() => {
@@ -367,10 +413,11 @@ export function App({
   const indexPatternService = useMemo(
     () =>
       createIndexPatternService({
-        dataViews: lensAppServices.dataViews,
-        uiSettings: lensAppServices.uiSettings,
-        uiActions: lensAppServices.uiActions,
-        core: { http, notifications },
+        dataViews,
+        uiActions,
+        core: { http, notifications, uiSettings },
+        data,
+        contextDataViewSpec: (initialContext as VisualizeFieldContext | undefined)?.dataViewSpec,
         updateIndexPatterns: (newIndexPatternsState, options) => {
           dispatch(updateIndexPatterns(newIndexPatternsState));
           if (options?.applyImmediately) {
@@ -384,12 +431,150 @@ export function App({
           }
         },
       }),
-    [dispatch, http, notifications, lensAppServices]
+    [dataViews, uiActions, http, notifications, uiSettings, data, initialContext, dispatch]
   );
+
+  const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel }) => {
+    setIsSaveModalVisible(true);
+    setShouldCloseAndSaveTextBasedQuery(true);
+    saveAndExit.current = () => {
+      onSave();
+    };
+  }, []);
+
+  // remember latest URL based on the configuration
+  // url_panel_content has a similar logic
+  const shareURLCache = useRef({ params: '', url: '' });
+
+  const shortUrlService = useCallback(
+    async (params: LensAppLocatorParams) => {
+      const cacheKey = JSON.stringify(params);
+      if (shareURLCache.current.params === cacheKey) {
+        return shareURLCache.current.url;
+      }
+      if (locator && shortUrls) {
+        // This is a stripped down version of what the share URL plugin is doing
+        const relativeUrl = await shortUrls.create({ locator, params });
+        const absoluteShortUrl = application.getUrlForApp('', {
+          path: `/r/s/${relativeUrl.data.slug}`,
+          absolute: true,
+        });
+        shareURLCache.current = { params: cacheKey, url: absoluteShortUrl };
+        return absoluteShortUrl;
+      }
+      return '';
+    },
+    [locator, application, shortUrls]
+  );
+
+  const returnToOriginSwitchLabelForContext =
+    initialContext &&
+    'isEmbeddable' in initialContext &&
+    initialContext.isEmbeddable &&
+    !persistedDoc
+      ? i18n.translate('xpack.lens.app.replacePanel', {
+          defaultMessage: 'Replace panel on {originatingApp}',
+          values: {
+            originatingApp: initialContext?.originatingApp,
+          },
+        })
+      : undefined;
+
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+
+  const frameDatasourceAPI = useLensSelector((state) =>
+    selectFrameDatasourceAPI(state, datasourceMap)
+  );
+
+  const [userMessages, setUserMessages] = useState<UserMessage[]>([]);
+
+  useEffect(() => {
+    setUserMessages([
+      ...(activeDatasourceId
+        ? datasourceMap[activeDatasourceId].getUserMessages(
+            datasourceStates[activeDatasourceId].state,
+            {
+              frame: frameDatasourceAPI,
+              setState: (newStateOrUpdater) =>
+                dispatch(
+                  updateDatasourceState({
+                    updater: newStateOrUpdater,
+                    datasourceId: activeDatasourceId,
+                  })
+                ),
+            }
+          )
+        : []),
+      ...(visualization.activeId && visualization.state
+        ? visualizationMap[visualization.activeId]?.getUserMessages?.(visualization.state, {
+            frame: frameDatasourceAPI,
+          }) ?? []
+        : []),
+      ...getApplicationUserMessages({
+        visualizationType: persistedDoc?.visualizationType,
+        visualizationMap,
+        visualization,
+        activeDatasource: activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+        activeDatasourceState: activeDatasourceId ? datasourceStates[activeDatasourceId] : null,
+        core: coreStart,
+        dataViews: frameDatasourceAPI.dataViews,
+      }),
+    ]);
+  }, [
+    activeDatasourceId,
+    coreStart,
+    datasourceMap,
+    datasourceStates,
+    dispatch,
+    frameDatasourceAPI,
+    persistedDoc?.visualizationType,
+    visualization,
+    visualizationMap,
+  ]);
+
+  // these are messages managed from other parts of Lens
+  const [additionalUserMessages, setAdditionalUserMessages] = useState<Record<string, UserMessage>>(
+    {}
+  );
+
+  const getUserMessages: UserMessagesGetter = (locationId, filterArgs) =>
+    filterUserMessages(
+      [...userMessages, ...Object.values(additionalUserMessages)],
+      locationId,
+      filterArgs
+    );
+
+  const addUserMessages: AddUserMessages = (messages) => {
+    const newMessageMap = {
+      ...additionalUserMessages,
+    };
+
+    const addedMessageIds: string[] = [];
+    messages.forEach((message) => {
+      if (!newMessageMap[message.uniqueId]) {
+        addedMessageIds.push(message.uniqueId);
+        newMessageMap[message.uniqueId] = message;
+      }
+    });
+
+    if (addedMessageIds.length) {
+      setAdditionalUserMessages(newMessageMap);
+    }
+
+    return () => {
+      const withMessagesRemoved = {
+        ...additionalUserMessages,
+      };
+
+      addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
+
+      setAdditionalUserMessages(withMessagesRemoved);
+    };
+  };
 
   return (
     <>
-      <div className="lnsApp" data-test-subj="lnsApp">
+      <div className="lnsApp" data-test-subj="lnsApp" role="main">
         <LensTopNavMenu
           initialInput={initialInput}
           redirectToOrigin={redirectToOrigin}
@@ -400,9 +585,18 @@ export function App({
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
           datasourceMap={datasourceMap}
+          visualizationMap={visualizationMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
           currentDoc={currentDoc}
+          isCurrentStateDirty={
+            !isLensEqual(
+              persistedDoc,
+              lastKnownDoc,
+              data.query.filterManager.inject.bind(data.query.filterManager),
+              datasourceMap
+            )
+          }
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}
           initialContextIsEmbedded={initialContextIsEmbedded}
@@ -410,6 +604,9 @@ export function App({
           initialContext={initialContext}
           theme$={theme$}
           indexPatternService={indexPatternService}
+          onTextBasedSavedAndExit={onTextBasedSavedAndExit}
+          getUserMessages={getUserMessages}
+          shortUrlService={shortUrlService}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
@@ -418,13 +615,19 @@ export function App({
             showNoDataPopover={showNoDataPopover}
             lensInspector={lensInspector}
             indexPatternService={indexPatternService}
+            getUserMessages={getUserMessages}
+            addUserMessages={addUserMessages}
           />
         )}
       </div>
       {isSaveModalVisible && (
         <SaveModalContainer
           lensServices={lensAppServices}
-          originatingApp={isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+          originatingApp={
+            isLinkedToOriginatingApp
+              ? incomingState?.originatingApp ?? initialContext?.originatingApp
+              : undefined
+          }
           isSaveable={isSaveable}
           runSave={runSave}
           onClose={() => {
@@ -437,13 +640,15 @@ export function App({
           initialInput={initialInput}
           redirectTo={redirectTo}
           redirectToOrigin={redirectToOrigin}
+          initialContext={initialContext}
           returnToOriginSwitchLabel={
-            getIsByValueMode() && initialInput
+            returnToOriginSwitchLabelForContext ??
+            (getIsByValueMode() && initialInput
               ? i18n.translate('xpack.lens.app.updatePanel', {
                   defaultMessage: 'Update panel on {originatingAppName}',
                   values: { originatingAppName: getOriginatingAppName() },
                 })
-              : undefined
+              : undefined)
           }
         />
       )}
@@ -463,6 +668,7 @@ export function App({
           })}
           buttonColor="danger"
           defaultFocusedButton="confirm"
+          data-test-subj="lnsApp_discardChangesModalOrigin"
         >
           {i18n.translate('xpack.lens.app.goBackModalMessage', {
             defaultMessage:
@@ -478,18 +684,24 @@ export function App({
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   showNoDataPopover,
+  getUserMessages,
+  addUserMessages,
   lensInspector,
   indexPatternService,
 }: {
   editorFrame: EditorFrameInstance;
   lensInspector: LensInspector;
   showNoDataPopover: () => void;
+  getUserMessages: UserMessagesGetter;
+  addUserMessages: AddUserMessages;
   indexPatternService: IndexPatternServiceAPI;
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
     <EditorFrameContainer
       showNoDataPopover={showNoDataPopover}
+      getUserMessages={getUserMessages}
+      addUserMessages={addUserMessages}
       lensInspector={lensInspector}
       indexPatternService={indexPatternService}
     />

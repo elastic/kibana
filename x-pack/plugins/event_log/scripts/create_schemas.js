@@ -161,6 +161,11 @@ function generateSchemaLines(lineWriter, prop, mappings) {
     return;
   }
 
+  if (mappings.type === 'boolean') {
+    lineWriter.addLine(`${propKey}: ecsBoolean(),`);
+    return;
+  }
+
   // only handling objects for the rest of this function
   if (mappings.properties == null) {
     logError(`unknown properties to map: ${prop}: ${JSON.stringify(mappings)}`);
@@ -322,6 +327,10 @@ function ecsStringOrNumber() {
 
 function ecsDate() {
   return schema.maybe(schema.string({ validate: validateDate }));
+}
+
+function ecsBoolean() {
+  return schema.maybe(schema.boolean());
 }
 
 const ISO_DATE_PATTERN = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/;

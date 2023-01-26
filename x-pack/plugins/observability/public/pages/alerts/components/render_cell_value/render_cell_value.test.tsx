@@ -75,5 +75,5 @@ const requiredProperties: CellValueElementProps = {
   },
   isDraggable: false,
   linkValues: [],
-  timelineId: '',
+  scopeId: '',
 };

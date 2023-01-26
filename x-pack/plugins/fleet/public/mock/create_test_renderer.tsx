@@ -20,10 +20,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
 
+import { allowedExperimentalValues } from '../../common/experimental_features';
+
 import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
 import type { FleetConfigType } from '../plugin';
 import type { UIExtensionsStorage } from '../types';
+import { ExperimentalFeaturesService } from '../services';
 
 import { createConfigurationMock } from './plugin_configuration';
 import { createStartMock } from './plugin_interfaces';
@@ -62,6 +65,8 @@ export const createFleetTestRendererMock = (): TestRenderer => {
   const startServices = createStartServices(basePath);
   const history = createMemoryHistory({ initialEntries: [basePath] });
   const mountHistory = new CoreScopedHistory(history, basePath);
+
+  ExperimentalFeaturesService.init(allowedExperimentalValues);
 
   const HookWrapper = memo(({ children }) => {
     return (

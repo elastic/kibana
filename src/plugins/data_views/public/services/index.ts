@@ -6,4 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { HttpStart } from '@kbn/core/public';
+import { MatchedItem } from '../types';
+
 export * from './has_data';
+
+export async function getIndices(props: {
+  http: HttpStart;
+  pattern: string;
+  showAllIndices?: boolean;
+  isRollupIndex: (indexName: string) => boolean;
+}): Promise<MatchedItem[]> {
+  const { getIndices: getIndicesLazy } = await import('./get_indices');
+  return getIndicesLazy(props);
+}

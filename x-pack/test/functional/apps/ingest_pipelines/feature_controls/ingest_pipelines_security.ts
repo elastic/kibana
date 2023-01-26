@@ -15,8 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/132159
-  describe.skip('security', () => {
+  describe('security', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');

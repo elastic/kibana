@@ -16,6 +16,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import type { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { isEmpty } from 'lodash';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { TimestampTooltip } from '../../../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../../../common/utils/formatters';
@@ -38,6 +39,20 @@ export const getMappedNonEcsValue = ({
   return undefined;
 };
 
+const getRenderValue = (mappedNonEcsValue: any) => {
+  // can be updated when working on https://github.com/elastic/kibana/issues/140819
+  const value = Array.isArray(mappedNonEcsValue) ? mappedNonEcsValue.join() : mappedNonEcsValue;
+
+  if (!isEmpty(value)) {
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    return value;
+  }
+
+  return '—';
+};
+
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
@@ -53,10 +68,12 @@ export const getRenderCellValue = ({
 }) => {
   return ({ columnId, data }: CellValueElementProps) => {
     if (!data) return null;
-    const value = getMappedNonEcsValue({
+    const mappedNonEcsValue = getMappedNonEcsValue({
       data,
       fieldName: columnId,
-    })?.reduce((x) => x[0]);
+    });
+
+    const value = getRenderValue(mappedNonEcsValue);
 
     switch (columnId) {
       case ALERT_STATUS:

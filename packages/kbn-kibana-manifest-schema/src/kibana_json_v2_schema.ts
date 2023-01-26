@@ -13,42 +13,47 @@ export const PLUGIN_ID_PATTERN = /^[a-z][a-zA-Z_]*$/;
 
 export const MANIFEST_V2: JSONSchema = {
   type: 'object',
-  required: ['id', 'type', 'owner', 'typeDependencies', 'runtimeDependencies'],
+  required: ['id', 'type', 'owner'],
+  // @ts-expect-error VSCode specific JSONSchema extension
+  allowTrailingCommas: true,
   properties: {
     id: {
       type: 'string',
       pattern: '^@kbn/',
+      description: desc`
+        Module ID for this package. This must be globbally unique amoungst all
+        packages and should include the most important information about how this
+        package should be used. Avoid generic names to aid in disambiguation.
+      `,
     },
     owner: {
-      type: 'string',
+      oneOf: [
+        {
+          type: 'string',
+          pattern: '^@',
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+            pattern: '^@',
+          },
+        },
+      ],
       description: desc`
         Github handle for the person or team who is responsible for this package.
         This owner will be used in the codeowners files for this package.
 
-        For additional codeowners, you add additional entries at the end of the
-        codeowners file.
+        For additional codeowners, the value can be an array of user/team names.
       `,
-      pattern: '^@',
     },
-    typeDependencies: {
-      type: 'array',
+    devOnly: {
+      type: 'boolean',
       description: desc`
-        Packages which are required for the source code in the package to be
-        type-checked. This list is updated automatically by the package linter.
+        A devOnly package can be used by other devOnly packages and only by other devOnly
+        packages and will never be included in the distributable.
       `,
-      items: {
-        type: 'string',
-      },
-    },
-    runtimeDependencies: {
-      type: 'array',
-      description: desc`
-        Packages which are required for the source code in the package to run. This list
-        is updated automatically by the package linter.
-      `,
-      items: {
-        type: 'string',
-      },
+      default: false,
     },
   },
   oneOf: [

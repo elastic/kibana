@@ -6,10 +6,10 @@
  */
 
 import { Position } from '@elastic/charts';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { getSuggestions } from './suggestions';
 import type { HeatmapVisualizationState } from './types';
 import { HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
-import { layerTypes } from '../../../common';
 
 describe('heatmap suggestions', () => {
   describe('rejects suggestions', () => {
@@ -25,7 +25,7 @@ describe('heatmap suggestions', () => {
           state: {
             shape: 'heatmap',
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -72,7 +72,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -118,7 +118,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -173,7 +173,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -220,7 +220,7 @@ describe('heatmap suggestions', () => {
           state: {
             shape: 'heatmap',
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             xAccessor: 'some-field',
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
@@ -269,7 +269,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -277,7 +277,7 @@ describe('heatmap suggestions', () => {
         {
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             shape: 'heatmap',
             valueAccessor: 'metric-column',
             xAccessor: 'date-column-01',
@@ -324,7 +324,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -332,7 +332,7 @@ describe('heatmap suggestions', () => {
         {
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             shape: 'heatmap',
             xAccessor: 'test-column',
             gridConfig: {
@@ -377,7 +377,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -385,7 +385,7 @@ describe('heatmap suggestions', () => {
         {
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             shape: 'heatmap',
             valueAccessor: 'test-column',
             gridConfig: {
@@ -440,7 +440,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -448,7 +448,7 @@ describe('heatmap suggestions', () => {
         {
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             shape: 'heatmap',
             xAccessor: 'date-column',
             valueAccessor: 'metric-column',
@@ -506,7 +506,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -514,7 +514,7 @@ describe('heatmap suggestions', () => {
         {
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             shape: 'heatmap',
             xAccessor: 'number-column',
             valueAccessor: 'metric-column',
@@ -579,7 +579,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -587,7 +587,7 @@ describe('heatmap suggestions', () => {
         {
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             shape: 'heatmap',
             yAccessor: 'date-column',
             xAccessor: 'number-column',
@@ -653,7 +653,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -661,7 +661,7 @@ describe('heatmap suggestions', () => {
         {
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             shape: 'heatmap',
             xAccessor: 'number-column',
             yAccessor: 'group-column',

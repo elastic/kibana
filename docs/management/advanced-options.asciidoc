@@ -146,8 +146,7 @@ Enables you to use {es} indices in *TSVB* visualizations.
 Affects the *TSVB* histogram density. Must be set higher than `histogram:maxBars`.
 
 [[query-allowleadingwildcards]]`query:allowLeadingWildcards`::
-Allows a wildcard (*) as the first character in a query clause. Only applies
-when experimental query features are enabled in the query bar. To disallow
+Allows a wildcard (*) as the first character in a query clause. To disallow
 leading wildcards in Lucene queries, use `query:queryString:options`.
 
 [[query-querystring-options]]`query:queryString:options`::
@@ -319,6 +318,9 @@ the minimum and maximum values of a numeric field or a map of a geo field.
 
 [[discover:showMultiFields]]`discover:showMultiFields`::
 Controls the display of multi-fields in the expanded document view.
+
+[[discover:showLegacyFieldTopValues]]`discover:showLegacyFieldTopValues`::
+To calculate the top values for a field in the sidebar using 500 instead of 5,000 records per shard, turn on this option.
 
 [[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
 The default sort direction for time-based data views.
@@ -536,10 +538,6 @@ Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
-
-[[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
-**The legacy pie charts are deprecated and will not be supported in a future version.**
-The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use the legacy charts library.
 
 [[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::
 Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..

@@ -14,7 +14,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 
 import {
@@ -36,7 +36,6 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { DataViewListItem, DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { IFieldSubTypeMulti } from '@kbn/es-query';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -53,6 +52,7 @@ import {
 } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 import { pluginServices } from '../../services';
+import { getDataControlFieldRegistry } from './data_control_editor_tools';
 interface EditControlProps {
   embeddable?: ControlEmbeddable<DataControlInput>;
   isCreate: boolean;
@@ -97,7 +97,7 @@ export const ControlEditor = ({
 }: EditControlProps) => {
   const {
     dataViews: { getIdsWithTitle, getDefaultId, get },
-    controls: { getControlTypes, getControlFactory },
+    controls: { getControlFactory },
   } = pluginServices.getServices();
   const [state, setState] = useState<ControlEditorState>({
     dataViewListItems: [],
@@ -112,49 +112,14 @@ export const ControlEditor = ({
     embeddable ? embeddable.getInput().fieldName : undefined
   );
 
-  const doubleLinkFields = (dataView: DataView) => {
-    // double link the parent-child relationship specifically for case-sensitivity support for options lists
-    const fieldRegistry: DataControlFieldRegistry = {};
-
-    for (const field of dataView.fields.getAll()) {
-      if (!fieldRegistry[field.name]) {
-        fieldRegistry[field.name] = { field, compatibleControlTypes: [] };
+  const [fieldRegistry, setFieldRegistry] = useState<DataControlFieldRegistry>();
+  useEffect(() => {
+    (async () => {
+      if (state.selectedDataView?.id) {
+        setFieldRegistry(await getDataControlFieldRegistry(await get(state.selectedDataView.id)));
       }
-      const parentFieldName = (field.subType as IFieldSubTypeMulti)?.multi?.parent;
-      if (parentFieldName) {
-        fieldRegistry[field.name].parentFieldName = parentFieldName;
-
-        const parentField = dataView.getFieldByName(parentFieldName);
-        if (!fieldRegistry[parentFieldName] && parentField) {
-          fieldRegistry[parentFieldName] = { field: parentField, compatibleControlTypes: [] };
-        }
-        fieldRegistry[parentFieldName].childFieldName = field.name;
-      }
-    }
-    return fieldRegistry;
-  };
-
-  const fieldRegistry = useMemo(() => {
-    if (!state.selectedDataView) return;
-    const newFieldRegistry: DataControlFieldRegistry = doubleLinkFields(state.selectedDataView);
-
-    const controlFactories = getControlTypes().map(
-      (controlType) => getControlFactory(controlType) as IEditableControlFactory
-    );
-    state.selectedDataView.fields.map((dataViewField) => {
-      for (const factory of controlFactories) {
-        if (factory.isFieldCompatible) {
-          factory.isFieldCompatible(newFieldRegistry[dataViewField.name]);
-        }
-      }
-
-      if (newFieldRegistry[dataViewField.name]?.compatibleControlTypes.length === 0) {
-        delete newFieldRegistry[dataViewField.name];
-      }
-    });
-
-    return newFieldRegistry;
-  }, [state.selectedDataView, getControlFactory, getControlTypes]);
+    })();
+  }, [state.selectedDataView?.id, get]);
 
   useMount(() => {
     let mounted = true;
@@ -278,34 +243,41 @@ export const ControlEditor = ({
             />
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
-            <EuiButtonGroup
-              color="primary"
-              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-              options={CONTROL_WIDTH_OPTIONS}
-              idSelected={currentWidth}
-              onChange={(newWidth: string) => {
-                setCurrentWidth(newWidth as ControlWidth);
-                updateWidth(newWidth as ControlWidth);
-              }}
-            />
-          </EuiFormRow>
-          {updateGrow ? (
-            <EuiFormRow>
-              <EuiSwitch
-                label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
+            <>
+              <EuiButtonGroup
                 color="primary"
-                checked={currentGrow}
-                onChange={() => {
-                  setCurrentGrow(!currentGrow);
-                  updateGrow(!currentGrow);
+                legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+                options={CONTROL_WIDTH_OPTIONS}
+                idSelected={currentWidth}
+                onChange={(newWidth: string) => {
+                  setCurrentWidth(newWidth as ControlWidth);
+                  updateWidth(newWidth as ControlWidth);
                 }}
-                data-test-subj="control-editor-grow-switch"
               />
-            </EuiFormRow>
-          ) : null}
+              {updateGrow && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiSwitch
+                    label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
+                    color="primary"
+                    checked={currentGrow}
+                    onChange={() => {
+                      setCurrentGrow(!currentGrow);
+                      updateGrow(!currentGrow);
+                    }}
+                    data-test-subj="control-editor-grow-switch"
+                  />
+                </>
+              )}
+            </>
+          </EuiFormRow>
           {CustomSettings && (factory as IEditableControlFactory).controlEditorOptionsComponent && (
             <EuiFormRow label={ControlGroupStrings.manageControl.getControlSettingsTitle()}>
-              <CustomSettings onChange={onTypeEditorChange} initialInput={embeddable?.getInput()} />
+              <CustomSettings
+                onChange={onTypeEditorChange}
+                initialInput={embeddable?.getInput()}
+                fieldType={fieldRegistry[selectedField].field.type}
+              />
             </EuiFormRow>
           )}
           {removeControl && (

@@ -14,6 +14,7 @@ import {
   formatEndpointActionResults,
   getUniqueLogData,
   getActionCompletionInfo,
+  getActionStatus,
   isLogsEndpointAction,
   isLogsEndpointActionResponse,
   mapToNormalizedActionRequest,
@@ -28,7 +29,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Results } from '../../routes/actions/mocks';
 import { mockAuditLogSearchResult } from '../../routes/actions/mocks';
 
@@ -229,7 +230,7 @@ describe('When using Actions service utilities', () => {
       let endpointResponseAtError: EndpointActivityLogActionResponse;
 
       beforeEach(() => {
-        const actionId = uuid.v4();
+        const actionId = uuidv4();
         fleetResponseAtError = fleetActionGenerator.generateActivityLogActionResponse({
           item: {
             data: { agent_id: '123', action_id: actionId, error: 'agent failed to deliver' },
@@ -325,7 +326,7 @@ describe('When using Actions service utilities', () => {
 
       beforeEach(() => {
         agentIds = ['123', '456', '789'];
-        actionId = uuid.v4();
+        actionId = uuidv4();
         action123Responses = [
           fleetActionGenerator.generateActivityLogActionResponse({
             item: { data: { agent_id: '123', error: '', action_id: actionId } },
@@ -440,7 +441,24 @@ describe('When using Actions service utilities', () => {
           completedAt: COMPLETED_AT,
           wasSuccessful: true,
           errors: undefined,
-          outputs: {},
+          outputs: {
+            '456': {
+              content: {
+                code: 'ra_get-file_success_done',
+                contents: [
+                  {
+                    file_name: 'bad_file.txt',
+                    path: '/some/path/bad_file.txt',
+                    sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
+                    size: 1234,
+                    type: 'file',
+                  },
+                ],
+                zip_size: 123,
+              },
+              type: 'json',
+            },
+          },
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',
@@ -581,8 +599,8 @@ describe('When using Actions service utilities', () => {
     let errorResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
 
     beforeEach(() => {
-      const actionId0 = uuid.v4();
-      const actionId1 = uuid.v4();
+      const actionId0 = uuidv4();
+      const actionId1 = uuidv4();
       actionRequests123 = [
         fleetActionGenerator.generateActivityLogAction({
           item: {
@@ -705,7 +723,7 @@ describe('When using Actions service utilities', () => {
 
     beforeEach(() => {
       const agents = ['agent-id'];
-      const actionIds = [uuid.v4(), uuid.v4()];
+      const actionIds = [uuidv4(), uuidv4()];
 
       fleetActions = actionIds.map((id) => {
         return {
@@ -808,6 +826,48 @@ describe('When using Actions service utilities', () => {
           (e) => 'EndpointActions' in e.item.data
         )[0]
       ).toBeTruthy();
+    });
+  });
+
+  describe('#getActionStatus', () => {
+    it('should show isExpired as TRUE and status as `failed` correctly', () => {
+      expect(
+        getActionStatus({
+          expirationDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
+          isCompleted: false,
+          wasSuccessful: false,
+        })
+      ).toEqual({ isExpired: true, status: 'failed' });
+    });
+
+    it('should show isExpired as FALSE and status as `pending` correctly', () => {
+      expect(
+        getActionStatus({
+          expirationDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
+          isCompleted: false,
+          wasSuccessful: false,
+        })
+      ).toEqual({ isExpired: false, status: 'pending' });
+    });
+
+    it('should show isExpired as FALSE and status as `successful` correctly', () => {
+      expect(
+        getActionStatus({
+          expirationDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
+          isCompleted: true,
+          wasSuccessful: true,
+        })
+      ).toEqual({ isExpired: false, status: 'successful' });
+    });
+
+    it('should show isExpired as FALSE and status as `failed` correctly', () => {
+      expect(
+        getActionStatus({
+          expirationDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
+          isCompleted: true,
+          wasSuccessful: false,
+        })
+      ).toEqual({ isExpired: false, status: 'failed' });
     });
   });
 });

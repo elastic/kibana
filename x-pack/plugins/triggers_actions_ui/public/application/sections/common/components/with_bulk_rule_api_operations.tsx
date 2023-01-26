@@ -7,7 +7,11 @@
 
 import React from 'react';
 
-import { IExecutionLogResult, IExecutionErrorsResult } from '@kbn/alerting-plugin/common';
+import {
+  IExecutionLogResult,
+  IExecutionErrorsResult,
+  IExecutionKPIResult,
+} from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleType,
@@ -16,15 +20,13 @@ import {
   AlertingFrameworkHealth,
   ResolvedRule,
   SnoozeSchedule,
+  BulkEditResponse,
+  BulkOperationResponse,
+  BulkOperationAttributesWithoutHttp,
 } from '../../../../types';
 import {
-  deleteRules,
-  disableRules,
-  enableRules,
   muteRules,
   unmuteRules,
-  disableRule,
-  enableRule,
   muteRule,
   unmuteRule,
   muteAlertInstance,
@@ -36,45 +38,62 @@ import {
   alertingFrameworkHealth,
   resolveRule,
   loadExecutionLogAggregations,
+  loadGlobalExecutionLogAggregations,
   LoadExecutionLogAggregationsProps,
+  LoadGlobalExecutionLogAggregationsProps,
   loadActionErrorLog,
   LoadActionErrorLogProps,
   snoozeRule,
+  bulkSnoozeRules,
+  BulkSnoozeRulesProps,
   unsnoozeRule,
+  loadExecutionKPIAggregations,
+  LoadExecutionKPIAggregationsProps,
+  loadGlobalExecutionKPIAggregations,
+  LoadGlobalExecutionKPIAggregationsProps,
+  bulkUnsnoozeRules,
+  BulkUnsnoozeRulesProps,
+  cloneRule,
+  bulkDeleteRules,
+  bulkEnableRules,
+  bulkDisableRules,
 } from '../../../lib/rule_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   muteRules: (rules: Rule[]) => Promise<void>;
   unmuteRules: (rules: Rule[]) => Promise<void>;
-  enableRules: (rules: Rule[]) => Promise<void>;
-  disableRules: (rules: Rule[]) => Promise<void>;
-  deleteRules: (rules: Rule[]) => Promise<{
-    successes: string[];
-    errors: string[];
-  }>;
   muteRule: (rule: Rule) => Promise<void>;
   unmuteRule: (rule: Rule) => Promise<void>;
   muteAlertInstance: (rule: Rule, alertInstanceId: string) => Promise<void>;
   unmuteAlertInstance: (rule: Rule, alertInstanceId: string) => Promise<void>;
-  enableRule: (rule: Rule) => Promise<void>;
-  disableRule: (rule: Rule) => Promise<void>;
-  deleteRule: (rule: Rule) => Promise<{
-    successes: string[];
-    errors: string[];
-  }>;
   loadRule: (id: Rule['id']) => Promise<Rule>;
   loadRuleState: (id: Rule['id']) => Promise<RuleTaskState>;
   loadRuleSummary: (id: Rule['id'], numberOfExecutions?: number) => Promise<RuleSummary>;
   loadRuleTypes: () => Promise<RuleType[]>;
+  loadExecutionKPIAggregations: (
+    props: LoadExecutionKPIAggregationsProps
+  ) => Promise<IExecutionKPIResult>;
   loadExecutionLogAggregations: (
     props: LoadExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
+  loadGlobalExecutionLogAggregations: (
+    props: LoadGlobalExecutionLogAggregationsProps
+  ) => Promise<IExecutionLogResult>;
+  loadGlobalExecutionKPIAggregations: (
+    props: LoadGlobalExecutionKPIAggregationsProps
+  ) => Promise<IExecutionKPIResult>;
   loadActionErrorLog: (props: LoadActionErrorLogProps) => Promise<IExecutionErrorsResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
   snoozeRule: (rule: Rule, snoozeSchedule: SnoozeSchedule) => Promise<void>;
+  bulkSnoozeRules: (props: BulkSnoozeRulesProps) => Promise<BulkEditResponse>;
   unsnoozeRule: (rule: Rule, scheduleIds?: string[]) => Promise<void>;
+  bulkUnsnoozeRules: (props: BulkUnsnoozeRulesProps) => Promise<BulkEditResponse>;
+  cloneRule: (ruleId: string) => Promise<Rule>;
+  bulkDeleteRules: (props: BulkOperationAttributesWithoutHttp) => Promise<BulkOperationResponse>;
+  bulkEnableRules: (props: BulkOperationAttributesWithoutHttp) => Promise<BulkOperationResponse>;
+  bulkDisableRules: (props: BulkOperationAttributesWithoutHttp) => Promise<BulkOperationResponse>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -96,18 +115,6 @@ export function withBulkRuleOperations<T>(
         unmuteRules={async (items: Rule[]) =>
           unmuteRules({ http, ids: items.filter(isRuleMuted).map((item) => item.id) })
         }
-        enableRules={async (items: Rule[]) =>
-          enableRules({ http, ids: items.filter(isRuleDisabled).map((item) => item.id) })
-        }
-        disableRules={async (items: Rule[]) =>
-          disableRules({
-            http,
-            ids: items.filter((item) => !isRuleDisabled(item)).map((item) => item.id),
-          })
-        }
-        deleteRules={async (items: Rule[]) =>
-          deleteRules({ http, ids: items.map((item) => item.id) })
-        }
         muteRule={async (rule: Rule) => {
           if (!isRuleMuted(rule)) {
             return await muteRule({ http, id: rule.id });
@@ -128,17 +135,6 @@ export function withBulkRuleOperations<T>(
             return unmuteAlertInstance({ http, id: rule.id, instanceId });
           }
         }}
-        enableRule={async (rule: Rule) => {
-          if (isRuleDisabled(rule)) {
-            return await enableRule({ http, id: rule.id });
-          }
-        }}
-        disableRule={async (rule: Rule) => {
-          if (!isRuleDisabled(rule)) {
-            return await disableRule({ http, id: rule.id });
-          }
-        }}
-        deleteRule={async (rule: Rule) => deleteRules({ http, ids: [rule.id] })}
         loadRule={async (ruleId: Rule['id']) => loadRule({ http, ruleId })}
         loadRuleState={async (ruleId: Rule['id']) => loadRuleState({ http, ruleId })}
         loadRuleSummary={async (ruleId: Rule['id'], numberOfExecutions?: number) =>
@@ -151,9 +147,33 @@ export function withBulkRuleOperations<T>(
             http,
           })
         }
+        loadGlobalExecutionLogAggregations={async (
+          loadProps: LoadGlobalExecutionLogAggregationsProps
+        ) =>
+          loadGlobalExecutionLogAggregations({
+            ...loadProps,
+            http,
+          })
+        }
         loadActionErrorLog={async (loadProps: LoadActionErrorLogProps) =>
           loadActionErrorLog({
             ...loadProps,
+            http,
+          })
+        }
+        loadExecutionKPIAggregations={async (
+          loadExecutionKPIAggregationProps: LoadExecutionKPIAggregationsProps
+        ) =>
+          loadExecutionKPIAggregations({
+            ...loadExecutionKPIAggregationProps,
+            http,
+          })
+        }
+        loadGlobalExecutionKPIAggregations={async (
+          loadGlobalExecutionKPIAggregationsProps: LoadGlobalExecutionKPIAggregationsProps
+        ) =>
+          loadGlobalExecutionKPIAggregations({
+            ...loadGlobalExecutionKPIAggregationsProps,
             http,
           })
         }
@@ -162,16 +182,30 @@ export function withBulkRuleOperations<T>(
         snoozeRule={async (rule: Rule, snoozeSchedule: SnoozeSchedule) => {
           return await snoozeRule({ http, id: rule.id, snoozeSchedule });
         }}
+        bulkSnoozeRules={async (bulkSnoozeRulesProps: BulkSnoozeRulesProps) => {
+          return await bulkSnoozeRules({ http, ...bulkSnoozeRulesProps });
+        }}
         unsnoozeRule={async (rule: Rule, scheduleIds?: string[]) => {
           return await unsnoozeRule({ http, id: rule.id, scheduleIds });
+        }}
+        bulkUnsnoozeRules={async (bulkUnsnoozeRulesProps: BulkUnsnoozeRulesProps) => {
+          return await bulkUnsnoozeRules({ http, ...bulkUnsnoozeRulesProps });
+        }}
+        cloneRule={async (ruleId: string) => {
+          return await cloneRule({ http, ruleId });
+        }}
+        bulkDeleteRules={async (bulkDeleteProps: BulkOperationAttributesWithoutHttp) => {
+          return await bulkDeleteRules({ http, ...bulkDeleteProps });
+        }}
+        bulkEnableRules={async (bulkEnableProps: BulkOperationAttributesWithoutHttp) => {
+          return await bulkEnableRules({ http, ...bulkEnableProps });
+        }}
+        bulkDisableRules={async (bulkDisableProps: BulkOperationAttributesWithoutHttp) => {
+          return await bulkDisableRules({ http, ...bulkDisableProps });
         }}
       />
     );
   };
-}
-
-function isRuleDisabled(rule: Rule) {
-  return rule.enabled === false;
 }
 
 function isRuleMuted(rule: Rule) {

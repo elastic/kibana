@@ -21,6 +21,7 @@ const FEATURES = {
   KILL_PROCESS: 'Kill process',
   SUSPEND_PROCESS: 'Suspend process',
   RUNNING_PROCESSES: 'Get running processes',
+  GET_FILE: 'Get file',
   ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
 } as const;
 

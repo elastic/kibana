@@ -29,7 +29,7 @@ describe('streamFactory', () => {
   let mockLogger: Logger;
 
   beforeEach(() => {
-    mockLogger = { error: jest.fn() } as unknown as Logger;
+    mockLogger = { debug: jest.fn(), error: jest.fn(), info: jest.fn() } as unknown as Logger;
   });
 
   it('should encode and receive an uncompressed string based stream', async () => {
@@ -44,7 +44,12 @@ describe('streamFactory', () => {
       streamResult += chunk.toString('utf8');
     }
 
-    expect(responseWithHeaders.headers).toBe(undefined);
+    expect(responseWithHeaders.headers).toStrictEqual({
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'Transfer-Encoding': 'chunked',
+      'X-Accel-Buffering': 'no',
+    });
     expect(streamResult).toBe('push1push2');
   });
 
@@ -65,7 +70,12 @@ describe('streamFactory', () => {
 
     const parsedItems = streamItems.map((d) => JSON.parse(d));
 
-    expect(responseWithHeaders.headers).toBe(undefined);
+    expect(responseWithHeaders.headers).toStrictEqual({
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'Transfer-Encoding': 'chunked',
+      'X-Accel-Buffering': 'no',
+    });
     expect(parsedItems).toHaveLength(2);
     expect(parsedItems[0]).toStrictEqual(mockItem1);
     expect(parsedItems[1]).toStrictEqual(mockItem2);
@@ -105,7 +115,13 @@ describe('streamFactory', () => {
 
         const streamResult = decoded.toString('utf8');
 
-        expect(responseWithHeaders.headers).toStrictEqual({ 'content-encoding': 'gzip' });
+        expect(responseWithHeaders.headers).toStrictEqual({
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+          'content-encoding': 'gzip',
+          'Transfer-Encoding': 'chunked',
+          'X-Accel-Buffering': 'no',
+        });
         expect(streamResult).toBe('push1push2');
 
         done();
@@ -143,7 +159,13 @@ describe('streamFactory', () => {
 
         const parsedItems = streamItems.map((d) => JSON.parse(d));
 
-        expect(responseWithHeaders.headers).toStrictEqual({ 'content-encoding': 'gzip' });
+        expect(responseWithHeaders.headers).toStrictEqual({
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+          'content-encoding': 'gzip',
+          'Transfer-Encoding': 'chunked',
+          'X-Accel-Buffering': 'no',
+        });
         expect(parsedItems).toHaveLength(2);
         expect(parsedItems[0]).toStrictEqual(mockItem1);
         expect(parsedItems[1]).toStrictEqual(mockItem2);

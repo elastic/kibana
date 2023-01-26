@@ -228,6 +228,7 @@ exports[`renderLegendDetailRow Should render line width simple range 1`] = `
       </React.Fragment>
     </EuiFlexGroup>
   }
+  invert={false}
   maxLabel="100_format"
   minLabel="0_format"
   propertyLabel="Border width"

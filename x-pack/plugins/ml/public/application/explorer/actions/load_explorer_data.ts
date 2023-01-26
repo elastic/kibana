@@ -14,6 +14,7 @@ import { switchMap, map } from 'rxjs/operators';
 
 import { useCallback, useMemo } from 'react';
 import { TimefilterContract } from '@kbn/data-plugin/public';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import {
   getDateFormatTz,
   getSelectionInfluencers,
@@ -28,11 +29,12 @@ import {
   ExplorerJob,
 } from '../explorer_utils';
 import { ExplorerState } from '../reducers';
-import { useMlKibana, useTimefilter } from '../../contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
 import { MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { TimeBucketsInterval, TimeRangeBounds } from '../../util/time_buckets';
+import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -207,23 +209,23 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
     },
   } = useMlKibana();
 
+  const { anomalyExplorerChartsService } = useAnomalyExplorerContext();
+
   const loadExplorerData = useMemo(() => {
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
 
-    const anomalyExplorerChartsService = new AnomalyExplorerChartsService(
-      timefilter,
-      mlApiServices,
-      mlResultsService
-    );
     return loadExplorerDataProvider(mlResultsService, anomalyExplorerChartsService, timefilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadExplorerData$ = useMemo(() => new Subject<LoadExplorerDataConfig>(), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const explorerData$ = useMemo(() => loadExplorerData$.pipe(switchMap(loadExplorerData)), []);
   const explorerData = useObservable(explorerData$);
 
   const update = useCallback((c) => {
     loadExplorerData$.next(c);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return [explorerData, update];

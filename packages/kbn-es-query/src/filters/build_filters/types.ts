@@ -37,6 +37,7 @@ export enum FILTERS {
   RANGE = 'range',
   RANGE_FROM_VALUE = 'range_from_value',
   SPATIAL_FILTER = 'spatial_filter',
+  COMBINED = 'combined',
 }
 
 /**

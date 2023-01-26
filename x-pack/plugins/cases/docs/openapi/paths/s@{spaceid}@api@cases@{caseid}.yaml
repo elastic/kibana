@@ -7,7 +7,6 @@ get:
     feature privileges, depending on the owner of the case you're seeking.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: ../components/parameters/case_id.yaml
     - $ref: '../components/parameters/space_id.yaml'
@@ -22,14 +21,18 @@ get:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
-            type: object
-            properties:
-              $ref: '../components/schemas/case_response_properties.yaml'
+            $ref: '../components/schemas/case_response_properties.yaml'
           examples:
             getCaseResponse:
               $ref: '../components/examples/get_case_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

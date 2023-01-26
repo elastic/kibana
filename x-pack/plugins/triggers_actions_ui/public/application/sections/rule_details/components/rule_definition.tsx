@@ -22,7 +22,6 @@ import { RuleDefinitionProps } from '../../../../types';
 import { RuleType, useLoadRuleTypes } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
 import { RuleActions } from './rule_actions';
 import { RuleEdit } from '../../rule_form';
 
@@ -61,14 +60,10 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
       values: { numberOfConditions },
     });
   };
-  const getNotifyText = () =>
-    NOTIFY_WHEN_OPTIONS.find((options) => options.value === rule?.notifyWhen)?.inputDisplay ||
-    rule?.notifyWhen;
-
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const canSaveRule =
     rule &&
-    hasAllPrivilege(rule, ruleType) &&
+    hasAllPrivilege(rule.consumer, ruleType) &&
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
   const hasEditButton = useMemo(() => {
@@ -164,6 +159,21 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
             <EuiSpacer size="m" />
 
+            <EuiFlexGroup>
+              <ItemTitleRuleSummary>
+                {i18n.translate('xpack.triggersActionsUI.ruleDetails.runsEvery', {
+                  defaultMessage: 'Runs every',
+                })}
+              </ItemTitleRuleSummary>
+
+              <ItemValueRuleSummary
+                data-test-subj="ruleSummaryRuleInterval"
+                itemValue={formatDuration(rule.schedule.interval)}
+              />
+            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+
             <EuiFlexGroup alignItems="center">
               <ItemTitleRuleSummary>
                 {i18n.translate('xpack.triggersActionsUI.ruleDetails.conditionsTitle', {
@@ -188,33 +198,10 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup>
-              <ItemTitleRuleSummary>
-                {i18n.translate('xpack.triggersActionsUI.ruleDetails.runsEvery', {
-                  defaultMessage: 'Runs every',
-                })}
-              </ItemTitleRuleSummary>
-
-              <ItemValueRuleSummary
-                data-test-subj="ruleSummaryRuleInterval"
-                itemValue={formatDuration(rule.schedule.interval)}
-              />
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-
-            <EuiFlexGroup>
-              <ItemTitleRuleSummary>
-                {i18n.translate('xpack.triggersActionsUI.ruleDetails.notifyWhen', {
-                  defaultMessage: 'Notify',
-                })}
-              </ItemTitleRuleSummary>
-              <ItemValueRuleSummary itemValue={String(getNotifyText())} />
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
             <EuiFlexGroup alignItems="baseline">
               <ItemTitleRuleSummary>
                 {i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
@@ -222,7 +209,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                 })}
               </ItemTitleRuleSummary>
               <EuiFlexItem grow={3}>
-                <RuleActions ruleActions={rule.actions} actionTypeRegistry={actionTypeRegistry} />
+                <RuleActions
+                  ruleActions={rule.actions}
+                  actionTypeRegistry={actionTypeRegistry}
+                  legacyNotifyWhen={rule.notifyWhen}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

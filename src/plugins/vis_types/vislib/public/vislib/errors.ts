@@ -33,12 +33,6 @@ export class ContainerTooSmall extends VislibError {
   }
 }
 
-export class PieContainsAllZeros extends VislibError {
-  constructor() {
-    super('No results displayed because all values equal 0.');
-  }
-}
-
 export class NoResults extends VislibError {
   constructor() {
     super(

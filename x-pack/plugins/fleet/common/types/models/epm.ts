@@ -48,10 +48,16 @@ export type InstallSource = 'registry' | 'upload' | 'bundled';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
 
-export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
+export type DetailViewPanelName =
+  | 'overview'
+  | 'policies'
+  | 'assets'
+  | 'settings'
+  | 'custom'
+  | 'api-reference';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
-export type DocAssetType = 'doc' | 'notice';
+export type DocAssetType = 'doc' | 'notice' | 'license';
 export type AssetType =
   | KibanaAssetType
   | ElasticsearchAssetType
@@ -95,6 +101,7 @@ export enum KibanaSavedObjectType {
 }
 
 export enum ElasticsearchAssetType {
+  index = 'index',
   componentTemplate = 'component_template',
   ingestPipeline = 'ingest_pipeline',
   indexTemplate = 'index_template',
@@ -103,6 +110,10 @@ export enum ElasticsearchAssetType {
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
   mlModel = 'ml_model',
 }
+export type FleetElasticsearchAssetType = Exclude<
+  ElasticsearchAssetType,
+  ElasticsearchAssetType.index
+>;
 
 export type DataType = typeof dataTypes;
 export type MonitoringType = typeof monitoringTypes;
@@ -157,30 +168,46 @@ export interface RegistryImage extends PackageSpecIcon {
 }
 
 export enum RegistryPolicyTemplateKeys {
-  name = 'name',
-  title = 'title',
-  description = 'description',
-  icons = 'icons',
-  screenshots = 'screenshots',
   categories = 'categories',
   data_streams = 'data_streams',
   inputs = 'inputs',
   readme = 'readme',
   multiple = 'multiple',
+  type = 'type',
+  vars = 'vars',
+  input = 'input',
+  template_path = 'template_path',
+  name = 'name',
+  title = 'title',
+  description = 'description',
+  icons = 'icons',
+  screenshots = 'screenshots',
 }
-
-export interface RegistryPolicyTemplate {
+interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
   [RegistryPolicyTemplateKeys.title]: string;
   [RegistryPolicyTemplateKeys.description]: string;
   [RegistryPolicyTemplateKeys.icons]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
+  [RegistryPolicyTemplateKeys.multiple]?: boolean;
+}
+export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
   [RegistryPolicyTemplateKeys.data_streams]?: string[];
   [RegistryPolicyTemplateKeys.inputs]?: RegistryInput[];
   [RegistryPolicyTemplateKeys.readme]?: string;
-  [RegistryPolicyTemplateKeys.multiple]?: boolean;
 }
+
+export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
+  [RegistryPolicyTemplateKeys.type]: string;
+  [RegistryPolicyTemplateKeys.input]: string;
+  [RegistryPolicyTemplateKeys.template_path]: string;
+  [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
+}
+
+export type RegistryPolicyTemplate =
+  | RegistryPolicyIntegrationTemplate
+  | RegistryPolicyInputOnlyTemplate;
 
 export enum RegistryInputKeys {
   type = 'type',
@@ -222,6 +249,8 @@ export interface RegistryStream {
   [RegistryStreamKeys.template_path]: string;
 }
 
+export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
+
 export type RequirementVersion = string;
 export type RequirementVersionRange = string;
 export interface ServiceRequirements {
@@ -260,6 +289,8 @@ export interface CategorySummaryItem {
   id: CategoryId;
   title: string;
   count: number;
+  parent_id?: string;
+  parent_title?: string;
 }
 
 export type RequirementsByServiceName = PackageSpecManifest['conditions'];
@@ -289,7 +320,7 @@ export type ElasticsearchAssetParts = AssetParts & {
 
 export type KibanaAssetTypeToParts = Record<KibanaAssetType, KibanaAssetParts[]>;
 export type ElasticsearchAssetTypeToParts = Record<
-  ElasticsearchAssetType,
+  FleetElasticsearchAssetType,
   ElasticsearchAssetParts[]
 >;
 
@@ -315,7 +346,7 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.hidden]?: boolean;
   [RegistryDataStreamKeys.dataset]: string;
   [RegistryDataStreamKeys.title]: string;
-  [RegistryDataStreamKeys.release]: string;
+  [RegistryDataStreamKeys.release]: RegistryRelease;
   [RegistryDataStreamKeys.streams]?: RegistryStream[];
   [RegistryDataStreamKeys.package]: string;
   [RegistryDataStreamKeys.path]: string;
@@ -328,7 +359,14 @@ export interface RegistryElasticsearch {
   privileges?: RegistryDataStreamPrivileges;
   'index_template.settings'?: estypes.IndicesIndexSettings;
   'index_template.mappings'?: estypes.MappingTypeMapping;
+  'index_template.data_stream'?: RegistryDataStreamProperties;
   'ingest_pipeline.name'?: string;
+  source_mode?: 'default' | 'synthetic';
+  index_mode?: 'time_series';
+}
+
+export interface RegistryDataStreamProperties {
+  hidden?: boolean;
 }
 
 export interface RegistryDataStreamPrivileges {
@@ -382,6 +420,7 @@ export interface EpmPackageAdditions {
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
   notice?: string;
+  licensePath?: string;
   keepPoliciesUpToDate?: boolean;
 }
 
@@ -395,9 +434,11 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
 };
 
+export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
+
 export interface IntegrationCardItem {
   url: string;
-  release?: 'beta' | 'experimental' | 'ga';
+  release?: IntegrationCardReleaseLabel;
   description: string;
   name: string;
   title: string;
@@ -408,6 +449,7 @@ export interface IntegrationCardItem {
   categories: string[];
   fromIntegrations?: string;
   isUnverified?: boolean;
+  isUpdateAvailable?: boolean;
   showLabels?: boolean;
 }
 
@@ -416,6 +458,18 @@ export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, Packag
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
+
+// TODO - Expand this with other experimental indexing types
+export type ExperimentalIndexingFeature =
+  | 'synthetic_source'
+  | 'tsdb'
+  | 'doc_value_only_numeric'
+  | 'doc_value_only_other';
+
+export interface ExperimentalDataStreamFeature {
+  data_stream: string;
+  features: Record<ExperimentalIndexingFeature, boolean>;
+}
 
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
@@ -433,6 +487,11 @@ export interface Installation extends SavedObjectAttributes {
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;
   verification_key_id?: string | null;
+  // TypeScript doesn't like using the `ExperimentalDataStreamFeature` type defined above here
+  experimental_data_stream_features?: Array<{
+    data_stream: string;
+    features: Record<ExperimentalIndexingFeature, boolean>;
+  }>;
 }
 
 export interface PackageUsageStats {

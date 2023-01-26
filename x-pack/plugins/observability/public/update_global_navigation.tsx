@@ -37,6 +37,11 @@ export function updateGlobalNavigation({
           ...link,
           navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
         };
+      case 'slos':
+        return {
+          ...link,
+          navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+        };
       case 'rules':
         return {
           ...link,

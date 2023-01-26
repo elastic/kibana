@@ -41,7 +41,7 @@ import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_RULE_INDICES,
 } from '../../../../../../common/field_maps/field_names';
-import { getCompleteRuleMock, getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
+import { getCompleteRuleMock, getQueryRuleParams } from '../../../rule_schema/mocks';
 
 type SignalDoc = SignalSourceHit & {
   _source: Required<SignalSourceHit>['_source'] & { [TIMESTAMP]: string };
@@ -65,7 +65,8 @@ describe('buildAlert', () => {
         completeRule,
         SPACE_ID,
         reason,
-        completeRule.ruleParams.index as string[]
+        completeRule.ruleParams.index as string[],
+        undefined
       ),
       ...additionalAlertFields(doc),
     };
@@ -245,7 +246,8 @@ describe('buildAlert', () => {
         completeRule,
         SPACE_ID,
         reason,
-        completeRule.ruleParams.index as string[]
+        completeRule.ruleParams.index as string[],
+        undefined
       ),
       ...additionalAlertFields(doc),
     };

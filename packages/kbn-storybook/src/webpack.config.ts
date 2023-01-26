@@ -83,6 +83,12 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
           },
         },
         {
+          test: /\.peggy$/,
+          use: {
+            loader: require.resolve('@kbn/peggy-loader'),
+          },
+        },
+        {
           test: /\.scss$/,
           exclude: /\.module.(s(a|c)ss)$/,
           use: [
@@ -92,7 +98,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
               loader: 'postcss-loader',
               options: {
                 postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                  config: require.resolve('@kbn/optimizer/postcss.config'),
                 },
               },
             },
@@ -102,7 +108,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
                 additionalData(content: string, loaderContext: any) {
                   return `@import ${stringifyRequest(
                     loaderContext,
-                    resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v8light.scss')
+                    resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
                   )};\n${content}`;
                 },
                 implementation: require('node-sass'),
@@ -120,7 +126,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
-        core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
+        core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
       },
       symlinks: false,
@@ -145,8 +151,9 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
 
       // move the plugins to the top of the preset array so they will run after the typescript preset
       options.presets = [
+        require.resolve('@kbn/babel-preset/common_preset'),
         {
-          plugins: [...plugins, require.resolve('@kbn/babel-plugin-synthetic-packages')],
+          plugins: [...plugins, require.resolve('@kbn/babel-plugin-package-imports')],
         },
         ...(options.presets as Preset[]).filter(isDesiredPreset).map((preset) => {
           const tsPreset = getTsPreset(preset);

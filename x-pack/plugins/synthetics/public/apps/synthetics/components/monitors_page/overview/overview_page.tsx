@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiLoadingElastic, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { Redirect } from 'react-router-dom';
-import { useEnablement } from '../../../hooks';
+import { Redirect, useLocation } from 'react-router-dom';
+import { OverviewAlerts } from './overview/overview_alerts';
+import { useEnablement, useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
-  selectOverviewState,
+  quietFetchOverviewAction,
+  setOverviewPageStateAction,
+  selectOverviewPageState,
   selectServiceLocationsState,
 } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
@@ -24,6 +26,11 @@ import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/
 import { useMonitorList } from '../hooks/use_monitor_list';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
+import { OverviewStatus } from './overview/overview_status';
+import { QuickFilters } from './overview/quick_filters';
+import { SearchField } from '../common/search_field';
+import { NoMonitorsFound } from '../common/no_monitors_found';
+import { OverviewErrors } from './overview/overview_errors/overview_errors';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -32,27 +39,36 @@ export const OverviewPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const { refreshApp } = useSyntheticsRefreshContext();
+  const { lastRefresh } = useSyntheticsRefreshContext();
+  const { query } = useGetUrlParams();
+  const { search } = useLocation();
 
-  const { loading, pageState } = useSelector(selectOverviewState);
+  const pageState = useSelector(selectOverviewPageState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshApp();
-    }, 1000 * 30);
-    return () => clearInterval(interval);
-  }, [refreshApp]);
 
   useEffect(() => {
     if (!locationsLoading && !locationsLoaded) {
       dispatch(getServiceLocations());
     }
-  }, [dispatch, locationsLoaded, locationsLoading, pageState]);
+  }, [dispatch, locationsLoaded, locationsLoading]);
 
+  // fetch overview for query state changes
+  useEffect(() => {
+    if (pageState.query !== query) {
+      dispatch(fetchMonitorOverviewAction.get({ ...pageState, query }));
+      dispatch(setOverviewPageStateAction({ query }));
+    }
+  }, [dispatch, pageState, query]);
+
+  // fetch overview for all other page state changes
   useEffect(() => {
     dispatch(fetchMonitorOverviewAction.get(pageState));
   }, [dispatch, pageState]);
+
+  // fetch overview for refresh
+  useEffect(() => {
+    dispatch(quietFetchOverviewAction.get(pageState));
+  }, [dispatch, pageState, lastRefresh]);
 
   const {
     enablement: { isEnabled },
@@ -61,22 +77,55 @@ export const OverviewPage: React.FC = () => {
 
   const { syntheticsMonitors, loading: monitorsLoading, loaded: monitorsLoaded } = useMonitorList();
 
-  if (!enablementLoading && isEnabled && !monitorsLoading && syntheticsMonitors.length === 0) {
+  if (
+    !search &&
+    !enablementLoading &&
+    isEnabled &&
+    !monitorsLoading &&
+    syntheticsMonitors.length === 0
+  ) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 
-  if (!enablementLoading && !isEnabled && monitorsLoaded && syntheticsMonitors.length === 0) {
+  if (
+    !search &&
+    !enablementLoading &&
+    !isEnabled &&
+    monitorsLoaded &&
+    syntheticsMonitors.length === 0
+  ) {
     return <Redirect to={MONITORS_ROUTE} />;
   }
 
-  return !loading ? (
-    <OverviewGrid />
-  ) : (
-    <EuiFlexGroup alignItems="center" justifyContent="center">
-      <EuiSpacer size="xxl" />
-      <EuiFlexItem grow={false}>
-        <EuiLoadingElastic size="xxl" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+  return (
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <SearchField />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <QuickFilters />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      {Boolean(!monitorsLoaded || syntheticsMonitors?.length > 0) && (
+        <>
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <OverviewStatus />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <OverviewErrors />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <OverviewAlerts />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <OverviewGrid />
+        </>
+      )}
+      {monitorsLoaded && syntheticsMonitors?.length === 0 && <NoMonitorsFound />}
+    </>
   );
 };

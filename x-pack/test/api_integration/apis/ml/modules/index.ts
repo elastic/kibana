@@ -38,5 +38,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./get_module'));
     loadTestFile(require.resolve('./recognize_module'));
     loadTestFile(require.resolve('./setup_module'));
+    loadTestFile(require.resolve('./jobs_exist'));
   });
 }

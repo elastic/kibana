@@ -14,14 +14,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
@@ -100,7 +104,9 @@ export function TransactionsTable({
     },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions',
-    '/services/{serviceName}/overview'
+    '/services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions',
+    '/mobile-services/{serviceName}/overview'
   );
 
   const [tableOptions, setTableOptions] = useState<{
@@ -154,7 +160,7 @@ export function TransactionsTable({
 
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          requestId: uuid(),
+          requestId: uuidv4(),
           mainStatisticsData: {
             ...response,
             transactionGroups: currentPageTransactionGroups,
@@ -241,9 +247,9 @@ export function TransactionsTable({
   const columns = getColumns({
     serviceName,
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-    transactionGroupDetailedStatisticsLoading:
-      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
-      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED,
+    transactionGroupDetailedStatisticsLoading: isPending(
+      transactionGroupDetailedStatisticsStatus
+    ),
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,

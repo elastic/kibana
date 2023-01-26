@@ -4,35 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { mockDataView } from '../../rtl_helpers';
 import { RECORDS_FIELD } from '../constants';
 
 export const sampleAttribute = {
   description: '',
-  references: [
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    },
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-layer-layer0',
-      type: 'index-pattern',
-    },
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-layer-layer0-reference-lines',
-      type: 'index-pattern',
-    },
-  ],
+  references: [],
   state: {
+    internalReferences: [
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-layer-layer0',
+        type: 'index-pattern',
+      },
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-layer-layer0-reference-lines',
+        type: 'index-pattern',
+      },
+    ],
+    adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           layer0: {
             columnOrder: [
               'x-axis-column-layer0',
-              'y-axis-column-layer0',
+              'y-axis-column-layer0-0',
               'y-axis-column-layer0X0',
               'y-axis-column-layer0X1',
               'y-axis-column-layer0X2',
@@ -58,7 +61,7 @@ export const sampleAttribute = {
                 scale: 'interval',
                 sourceField: 'transaction.duration.us',
               },
-              'y-axis-column-layer0': {
+              'y-axis-column-layer0-0': {
                 customLabel: true,
                 dataType: 'number',
                 filter: {
@@ -67,7 +70,7 @@ export const sampleAttribute = {
                     'transaction.type: page-load and processor.event: transaction and transaction.type : *',
                 },
                 isBucketed: false,
-                label: 'Pages loaded',
+                label: 'test-series',
                 operationType: 'formula',
                 params: {
                   format: {
@@ -250,7 +253,7 @@ export const sampleAttribute = {
       },
       layers: [
         {
-          accessors: ['y-axis-column-layer0'],
+          accessors: ['y-axis-column-layer0-0'],
           layerId: 'layer0',
           layerType: 'data',
           palette: undefined,
@@ -259,7 +262,7 @@ export const sampleAttribute = {
           yConfig: [
             {
               color: 'green',
-              forAccessor: 'y-axis-column-layer0',
+              forAccessor: 'y-axis-column-layer0-0',
               axisMode: 'left',
             },
           ],
@@ -322,6 +325,8 @@ export const sampleAttribute = {
         isVisible: true,
         position: 'right',
         showSingleSeries: true,
+        legendSize: 'auto',
+        shouldTruncate: false,
       },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: {

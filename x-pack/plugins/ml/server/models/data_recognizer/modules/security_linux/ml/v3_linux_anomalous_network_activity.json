@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Linux - Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity.",
   "groups": [
     "auditbeat",
@@ -32,14 +31,14 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "custom_settings": {
     "job_tags": {
       "euid": "4004",
       "maturity": "release",
       "author": "@randomuserid/Elastic",
       "version": "3",
       "updated_date": "5/16/2022"
-  },
+    },
+    "created_by": "ml-module-security-linux-v3",
     "custom_urls": [
       {
         "url_name": "Host Details by process name",
@@ -57,7 +56,7 @@
         "url_name": "Hosts Overview by user name",
         "url_value": "siem#/ml-hosts?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
-    ]
+    ],
+    "security_app_display_name": "Unusual Linux Network Activity"
   }
-}
 }

@@ -99,15 +99,17 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should apply new container state (time, query, filters) to embeddable', async () => {
-      await filterBar.selectIndexPattern('logstash-*');
-      await filterBar.addFilter('machine.os', 'is', 'win 8');
+      await filterBar.addFilterAndSelectDataView('logstash-*', {
+        field: 'machine.os',
+        operation: 'is',
+        value: 'win 8',
+      });
       await PageObjects.maps.waitForLayersToLoad();
 
-      // retry is fix for flaky test https://github.com/elastic/kibana/issues/113993
-      // timing issue where click for addFilter opens filter pill created above instead of clicking addFilter
-      await retry.try(async () => {
-        await filterBar.selectIndexPattern('meta_for_geo_shapes*');
-        await filterBar.addFilter('shape_name', 'is', 'alpha'); // runtime fields do not have autocomplete
+      await filterBar.addFilterAndSelectDataView('meta_for_geo_shapes*', {
+        field: 'shape_name',
+        operation: 'is',
+        value: 'alpha',
       });
       await PageObjects.maps.waitForLayersToLoad();
 
@@ -132,7 +134,7 @@ export default function ({ getPageObjects, getService }) {
       await dashboardPanelActions.editPanelByTitle('geo grid vector grid example');
       await PageObjects.maps.waitForLayersToLoad();
 
-      await filterBar.addFilter('machine.os', 'is', 'ios');
+      await filterBar.addFilter({ field: 'machine.os', operation: 'is', value: 'ios' });
       await PageObjects.maps.waitForLayersToLoad();
       await testSubjects.click('mapSaveAndReturnButton');
       const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(

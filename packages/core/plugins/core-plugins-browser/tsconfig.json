@@ -1,0 +1,23 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/core-base-common",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/logging",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

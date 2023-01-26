@@ -2,8 +2,6 @@
   "name": "@kbn/safer-lodash-set",
   "version": "0.0.0",
   "description": "A safer version of the lodash set and setWith functions",
-  "main": "index.js",
-  "types": "index.d.ts",
   "scripts": {
     "lint": "../../node_modules/.bin/dependency-check --missing ../../package.json ./packages/kbn-safer-lodash-set/set.js ./packages/kbn-safer-lodash-set/setWith.js ./packages/kbn-safer-lodash-set/fp/*.js",
     "test": "npm run lint && ../../node_modules/.bin/tape test/*.js && npm run test:types",

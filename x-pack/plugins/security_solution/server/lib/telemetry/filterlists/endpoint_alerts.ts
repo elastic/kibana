@@ -26,9 +26,12 @@ const baseAllowlistFields: AllowlistFields = {
     malware_signature: true,
     memory_region: true,
     protection: true,
+    session_info: true,
     real: {
       entity_id: true,
     },
+    relative_file_creation_time: true,
+    relative_file_name_modify_time: true,
     token: {
       elevation: true,
       elevation_type: true,
@@ -50,6 +53,14 @@ const allowlistBaseEventFields: AllowlistFields = {
     hash: true,
     malware_signature: true,
     pe: true,
+    Ext: {
+      device: {
+        volume_device_type: true,
+      },
+      load_index: true,
+      relative_file_creation_time: true,
+      relative_file_name_modify_time: true,
+    },
   },
   dns: true,
   event: true,

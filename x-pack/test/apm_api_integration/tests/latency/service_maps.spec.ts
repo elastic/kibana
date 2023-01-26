@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { meanBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -67,10 +67,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_DEV_DURATION = 500;
       before(async () => {
         const serviceGoProdInstance = apm
-          .service(serviceName, 'production', 'go')
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
         const serviceGoDevInstance = apm
-          .service(serviceName, 'development', 'go')
+          .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
 
         await synthtraceEsClient.index([
@@ -79,7 +79,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction('GET /api/product/list', 'Worker')
+                .transaction({
+                  transactionName: 'GET /api/product/list',
+                  transactionType: 'Worker',
+                })
                 .duration(GO_PROD_DURATION)
                 .timestamp(timestamp)
             ),
@@ -88,7 +91,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_DEV_RATE)
             .generator((timestamp) =>
               serviceGoDevInstance
-                .transaction('GET /api/product/:id')
+                .transaction({ transactionName: 'GET /api/product/:id' })
                 .duration(GO_DEV_DURATION)
                 .timestamp(timestamp)
             ),

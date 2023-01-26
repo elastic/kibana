@@ -8,6 +8,7 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
+  useEuiTheme,
   type Pagination,
   type EuiBasicTableProps,
   type CriteriaWithPagination,
@@ -15,8 +16,8 @@ import {
   type EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import * as TEST_SUBJECTS from '../test_subjects';
-import type { CspFinding } from '../types';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import {
   baseFindingsColumns,
@@ -24,6 +25,7 @@ import {
   getExpandColumn,
   type OnAddFilter,
 } from '../layout/findings_layout';
+import { getSelectedRowStyle } from '../utils/utils';
 
 type TableProps = Required<EuiBasicTableProps<CspFinding>>;
 
@@ -44,10 +46,12 @@ const FindingsTableComponent = ({
   setTableOptions,
   onAddFilter,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
   const getRowProps = (row: CspFinding) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsTableRowTestId(row.resource.id),
+    style: getSelectedRowStyle(euiTheme, row, selectedFinding),
   });
 
   const getCellProps = (row: CspFinding, column: EuiTableFieldDataColumnType<CspFinding>) => ({
@@ -60,14 +64,13 @@ const FindingsTableComponent = ({
   ] = useMemo(
     () => [
       getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
-      createColumnWithFilters(baseFindingsColumns['resource.id'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.id'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
+      baseFindingsColumns['rule.benchmark.rule_number'],
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
-      baseFindingsColumns['rule.tags'],
-      createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
       baseFindingsColumns['@timestamp'],
     ],
     [onAddFilter]

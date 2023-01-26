@@ -25,7 +25,7 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiSelect,
   EuiSpacer,
   EuiPageHeader,

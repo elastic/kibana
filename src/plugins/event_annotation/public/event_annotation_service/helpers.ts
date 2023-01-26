@@ -14,6 +14,7 @@ import {
   QueryPointEventAnnotationConfig,
 } from '../../common';
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;
+// Do not compute it live as dependencies will add tens of Kbs to the plugin
 export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
 
 export const defaultAnnotationLabel = i18n.translate(
@@ -38,5 +39,5 @@ export const isManualPointAnnotationConfig = (
 export const isQueryAnnotationConfig = (
   annotation?: EventAnnotationConfig
 ): annotation is QueryPointEventAnnotationConfig => {
-  return Boolean(annotation && 'filter' in annotation);
+  return Boolean(annotation && annotation.type === 'query');
 };

@@ -107,6 +107,10 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     openCaseModal(true);
   }, [openCaseModal, handlePopoverClose]);
 
+  const onCaseModalClose = useCallback(() => {
+    openCaseModal(false);
+  }, [openCaseModal]);
+
   const closePopover = useCallback(() => {
     setPopover(false);
   }, []);
@@ -163,6 +167,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
       {isCaseModalOpen &&
         cases.ui.getAllCasesSelectorModal({
           onRowClick,
+          onClose: onCaseModalClose,
           owner: [APP_ID],
           permissions: userCasesPermissions,
         })}

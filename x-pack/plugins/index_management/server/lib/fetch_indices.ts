@@ -60,7 +60,6 @@ async function fetchIndicesCall(
       documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
       size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
       primary_size: new ByteSizeValue(indexStats?.primaries?.store?.size_in_bytes ?? 0).toString(),
-      // @ts-expect-error
       isFrozen: indexData.settings?.index?.frozen === 'true',
       aliases: aliases.length ? aliases : 'none',
       hidden: indexData.settings?.index?.hidden === 'true',

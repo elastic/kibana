@@ -20,8 +20,18 @@ async function printLines(stream, prefix) {
     crlfDelay: Infinity,
   });
 
+  // A validation between the previous logged line and the new one to log was introduced
+  // as the last line of the Bazel task when ran with progress enabled was being logged
+  // twice after parsing the log output with the logic we have here.
+  // The original output when letting Bazel taking care of it on its own doesn't include the repeated line
+  // so this check logic is useful until we get rid of Bazel.
+  let prevLine = null;
   for await (const line of int) {
+    if (prevLine === line) {
+      continue;
+    }
     console.log(prefix ? `${prefix} ${line}` : line);
+    prevLine = line;
   }
 }
 

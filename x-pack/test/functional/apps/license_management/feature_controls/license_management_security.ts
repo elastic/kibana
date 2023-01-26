@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global dashboard read with license_management_user', () => {
+    describe('global dashboard read with license_management_user and upgrade assistant', () => {
       before(async () => {
         await security.testUser.setRoles(['global_dashboard_read', 'license_management_user']);
       });
@@ -57,15 +57,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      describe('[SkipCloud] global dashboard with license management user: skip cloud', function () {
+      describe('[SkipCloud] global dashboard with license management user and upgrade assistant : skip cloud', function () {
         this.tags('skipCloud');
-        it('should render the "Stack" section with License Management', async () => {
+        it('should render the "Stack" section with License Management and Upgrade Assistant', async () => {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();
           expect(sections).to.have.length(3);
           expect(sections[2]).to.eql({
             sectionId: 'stack',
-            sectionLinks: ['license_management'],
+            sectionLinks: ['license_management', 'upgrade_assistant'],
           });
         });
       });

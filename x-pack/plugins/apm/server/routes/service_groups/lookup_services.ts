@@ -12,24 +12,22 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../lib/helpers/setup_request';
+} from '../../../common/es_fields/apm';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function lookupServices({
-  setup,
+  apmEventClient,
   kuery,
   start,
   end,
   maxNumberOfServices,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   kuery: string;
   start: number;
   end: number;
   maxNumberOfServices: number;
 }) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search('lookup_services', {
     apm: {
       events: [
@@ -40,6 +38,7 @@ export async function lookupServices({
       ],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

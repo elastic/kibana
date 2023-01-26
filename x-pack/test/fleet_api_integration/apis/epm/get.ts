@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { PackageInfo } from '@kbn/fleet-plugin/common/types/models/epm';
 import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -40,6 +41,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('EPM - get', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     it('returns package info from the registry if it was installed from the registry', async function () {
       // this will install through the registry by default
       await installPackage(testPkgName, testPkgVersion);
@@ -143,6 +145,97 @@ export default function (providerContext: FtrProviderContext) {
       // the uploaded version will have this description
       expect(packageInfo.name).to.equal('apache');
       await uninstallPackage(testPkgName, testPkgVersion);
+    });
+    it('should return all fields for input only packages', async function () {
+      // input packages have to get their package info from the manifest directly
+      // not from the package registry. This is because they contain a field the registry
+      // does not support
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/integration_to_input/0.9.1?prerelease=true`)
+        .expect(200);
+
+      const packageInfo = res.body.item;
+      expect(packageInfo.policy_templates.length).to.equal(1);
+      expect(packageInfo.policy_templates[0].vars).not.to.be(undefined);
+    });
+    describe('Pkg verification', () => {
+      it('should return validation error for unverified input only pkg', async function () {
+        const res = await supertest
+          .get(`/api/fleet/epm/packages/input_only/0.1.0?prerelease=true`)
+          .expect(400);
+        const error = res.body;
+
+        expect(error?.attributes?.type).to.equal('verification_failed');
+      });
+      it('should not return validation error for unverified input only pkg if ignoreUnverified is true', async function () {
+        await supertest
+          .get(`/api/fleet/epm/packages/input_only/0.1.0?ignoreUnverified=true&prerelease=true`)
+          .expect(200);
+      });
+    });
+    it('returns package info from the archive if ?full=true', async function () {
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=true`)
+        .expect(200);
+      const packageInfo = res.body.item as PackageInfo;
+      expect(packageInfo?.data_streams?.length).equal(3);
+      const dataStream = packageInfo?.data_streams?.find(
+        ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
+      );
+      expect(dataStream?.elasticsearch?.source_mode).equal('default');
+    });
+    it('returns package info from the registry if ?full=false', async function () {
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=false`)
+        .expect(200);
+      const packageInfo = res.body.item as PackageInfo;
+      expect(packageInfo?.data_streams?.length).equal(3);
+      const dataStream = packageInfo?.data_streams?.find(
+        ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
+      );
+      // this field is only returned if we go to the archive
+      // it is not part of the EPR API
+      expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
+    });
+    it('returns package info from the registry if ?full not provided', async function () {
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=false`)
+        .expect(200);
+      const packageInfo = res.body.item as PackageInfo;
+      expect(packageInfo?.data_streams?.length).equal(3);
+      const dataStream = packageInfo?.data_streams?.find(
+        ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
+      );
+      expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
+    });
+
+    it('allows user with only package level permission to access corresponding packages', async function () {
+      const pkg = 'endpoint';
+      const pkgVersion = '8.6.0';
+      await installPackage(pkg, pkgVersion);
+      const response = await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${pkg}`)
+        .auth(
+          testUsers.endpoint_integr_read_only_fleet_none.username,
+          testUsers.endpoint_integr_read_only_fleet_none.password
+        )
+        .expect(200);
+      expect(response.body.item.name).to.be(pkg);
+      expect(response.body.item.version).to.be(pkgVersion);
+      await uninstallPackage(pkg, pkgVersion);
+    });
+
+    it('rejects user with only package level permission to access unauthorized packages', async function () {
+      const response = await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${testPkgName}`)
+        .auth(
+          testUsers.endpoint_integr_read_only_fleet_none.username,
+          testUsers.endpoint_integr_read_only_fleet_none.password
+        )
+        .expect(403);
+      expect(response.body.message).to.be(
+        'Authorization denied to package: apache. Allowed package(s): endpoint'
+      );
     });
   });
 }

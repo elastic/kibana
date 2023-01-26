@@ -12,28 +12,25 @@ import React from 'react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { ApplicationStart } from '@kbn/core/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-plugin/common';
-import type { ViewMode } from '@kbn/embeddable-plugin/common';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 
 interface VisualizationMissedSavedObjectErrorProps {
   savedObjectMeta: {
     savedObjectType: typeof DATA_VIEW_SAVED_OBJECT_TYPE | 'search';
-    savedObjectId?: string;
   };
   application: ApplicationStart;
-  viewMode: ViewMode;
+  message: string;
   renderMode: RenderMode;
 }
 
 export const VisualizationMissedSavedObjectError = ({
   savedObjectMeta,
   application,
-  viewMode,
+  message,
   renderMode,
 }: VisualizationMissedSavedObjectErrorProps) => {
   const { management: isManagementEnabled } = application.capabilities.navLinks;
   const isIndexPatternManagementEnabled = application.capabilities.management.kibana.indexPatterns;
-  const isEditVisEnabled = application.capabilities.visualize?.save;
 
   return (
     <EuiEmptyPrompt
@@ -51,6 +48,7 @@ export const VisualizationMissedSavedObjectError = ({
                 path: '/kibana/indexPatterns/create',
               })}
               data-test-subj="configuration-failure-reconfigure-indexpatterns"
+              style={{ width: '100%' }}
             >
               {i18n.translate('visualizations.missedDataView.dataViewReconfigure', {
                 defaultMessage: `Recreate it in the data view management page`,
@@ -59,33 +57,7 @@ export const VisualizationMissedSavedObjectError = ({
           </RedirectAppLinks>
         ) : null
       }
-      body={
-        <>
-          <p>
-            {i18n.translate('visualizations.missedDataView.errorMessage', {
-              defaultMessage: `Could not find the {type}: {id}`,
-              values: {
-                id: savedObjectMeta.savedObjectId ?? '-',
-                type:
-                  savedObjectMeta.savedObjectType === 'search'
-                    ? i18n.translate('visualizations.noSearch.label', {
-                        defaultMessage: 'search',
-                      })
-                    : i18n.translate('visualizations.noDataView.label', {
-                        defaultMessage: 'data view',
-                      }),
-              },
-            })}
-          </p>
-          {viewMode === 'edit' && renderMode !== 'edit' && isEditVisEnabled ? (
-            <p>
-              {i18n.translate('visualizations.missedDataView.editInVisualizeEditor', {
-                defaultMessage: `Edit in Visualize editor to fix the error`,
-              })}
-            </p>
-          ) : null}
-        </>
-      }
+      body={<p>{message}</p>}
     />
   );
 };

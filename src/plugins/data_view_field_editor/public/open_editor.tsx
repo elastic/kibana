@@ -15,11 +15,11 @@ import type { ApiService } from './lib/api';
 import type {
   DataPublicPluginStart,
   DataView,
-  DataViewField,
+  UsageCollectionStart,
+  RuntimeType,
   DataViewsPublicPluginStart,
   FieldFormatsStart,
-  RuntimeType,
-  UsageCollectionStart,
+  DataViewField,
 } from './shared_imports';
 import { createKibanaReactContext, toMountPoint } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
@@ -37,8 +37,9 @@ export interface OpenFieldEditorOptions {
   };
   /**
    * action to take after field is saved
+   * @param field - the fields that were saved
    */
-  onSave?: (field: DataViewField) => void;
+  onSave?: (field: DataViewField[]) => void;
   /**
    * field to edit, for existing field
    */
@@ -100,7 +101,7 @@ export const getFieldEditorOpener =
         }
       };
 
-      const onSaveField = (updatedField: DataViewField) => {
+      const onSaveField = (updatedField: DataViewField[]) => {
         closeEditor();
 
         if (onSave) {
@@ -108,9 +109,27 @@ export const getFieldEditorOpener =
         }
       };
 
-      const fieldToEdit = fieldNameToEdit ? dataView.getFieldByName(fieldNameToEdit) : undefined;
+      const getRuntimeField = (name: string) => {
+        const fld = dataView.getAllRuntimeFields()[name];
+        return {
+          name,
+          runtimeField: fld,
+          isMapped: false,
+          esTypes: [],
+          type: undefined,
+          customLabel: undefined,
+          count: undefined,
+          spec: {
+            parentName: undefined,
+          },
+        };
+      };
 
-      if (fieldNameToEdit && !fieldToEdit) {
+      const dataViewField = fieldNameToEdit
+        ? dataView.getFieldByName(fieldNameToEdit) || getRuntimeField(fieldNameToEdit)
+        : undefined;
+
+      if (fieldNameToEdit && !dataViewField) {
         const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
           defaultMessage: "Field named '{fieldName}' not found on index pattern",
           values: { fieldName: fieldNameToEdit },
@@ -121,14 +140,43 @@ export const getFieldEditorOpener =
 
       const isNewRuntimeField = !fieldNameToEdit;
       const isExistingRuntimeField =
-        fieldToEdit &&
-        fieldToEdit.runtimeField &&
-        !fieldToEdit.isMapped &&
-        // treat composite field instances as mapped fields for field editing purposes
-        fieldToEdit.runtimeField.type !== ('composite' as RuntimeType);
+        dataViewField &&
+        dataViewField.runtimeField &&
+        !dataViewField.isMapped &&
+        // treat composite subfield instances as mapped fields for field editing purposes
+        (dataViewField.runtimeField.type !== ('composite' as RuntimeType) || !dataViewField.type);
+
       const fieldTypeToProcess: InternalFieldType =
         isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 
+      let field: Field | undefined;
+      if (dataViewField) {
+        if (isExistingRuntimeField && dataViewField.runtimeField!.type === 'composite') {
+          // Composite runtime subfield
+          const [compositeName] = fieldNameToEdit!.split('.');
+          field = {
+            name: compositeName,
+            ...dataView.getRuntimeField(compositeName)!,
+          };
+        } else if (isExistingRuntimeField) {
+          // Runtime field
+          field = {
+            name: fieldNameToEdit!,
+            format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
+            ...dataView.getRuntimeField(fieldNameToEdit!)!,
+          };
+        } else {
+          // Concrete field
+          field = {
+            name: fieldNameToEdit!,
+            type: (dataViewField?.esTypes ? dataViewField.esTypes[0] : 'keyword') as RuntimeType,
+            customLabel: dataViewField.customLabel,
+            popularity: dataViewField.count,
+            format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
+            parentName: dataViewField.spec.parentName,
+          };
+        }
+      }
       overlayRef = overlays.openFlyout(
         toMountPoint(
           <KibanaReactContextProvider>
@@ -137,7 +185,7 @@ export const getFieldEditorOpener =
               onCancel={closeEditor}
               onMounted={onMounted}
               docLinks={docLinks}
-              fieldToEdit={fieldToEdit}
+              fieldToEdit={field}
               fieldToCreate={fieldToCreate}
               fieldTypeToProcess={fieldTypeToProcess}
               dataView={dataView}

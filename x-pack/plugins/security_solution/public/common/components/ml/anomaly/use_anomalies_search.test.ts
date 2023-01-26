@@ -4,27 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// import React from 'react';
-import type { RenderResult } from '@testing-library/react-hooks';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../mock';
-import type { Refetch } from '../../../store/inputs/model';
-import type { AnomaliesCount } from './use_anomalies_search';
-import { useNotableAnomaliesSearch, AnomalyJobStatus } from './use_anomalies_search';
+import { useNotableAnomaliesSearch, AnomalyEntity } from './use_anomalies_search';
 
 const jobId = 'auth_rare_source_ip_for_a_user';
 const from = 'now-24h';
 const to = 'now';
-const JOBS = [{ id: jobId, jobState: 'started', datafeedState: 'started' }];
+const job = { id: jobId, jobState: 'started', datafeedState: 'started' };
+const JOBS = [job];
+const useSecurityJobsRefetch = jest.fn();
 
-const mockuseInstalledSecurityJobs = jest.fn().mockReturnValue({
+const mockUseSecurityJobs = jest.fn().mockReturnValue({
   loading: false,
-  isMlUser: true,
+  isMlAdmin: true,
   jobs: JOBS,
+  refetch: useSecurityJobsRefetch,
 });
 
-jest.mock('../hooks/use_installed_security_jobs', () => ({
-  useInstalledSecurityJobs: () => mockuseInstalledSecurityJobs(),
+jest.mock('../../ml_popover/hooks/use_security_jobs', () => ({
+  useSecurityJobs: () => mockUseSecurityJobs(),
 }));
 
 const mockAddToastError = jest.fn();
@@ -51,7 +50,7 @@ describe('useNotableAnomaliesSearch', () => {
       wrapper: TestProviders,
     });
 
-    expect(result.current.data.length).toEqual(6);
+    expect(result.current.data.length).toEqual(0);
   });
 
   it('calls notableAnomaliesSearch when skip is false', async () => {
@@ -72,14 +71,7 @@ describe('useNotableAnomaliesSearch', () => {
     expect(mockNotableAnomaliesSearch).not.toHaveBeenCalled();
   });
 
-  it('refetch calls notableAnomaliesSearch', async () => {
-    let renderResult: RenderResult<{
-      isLoading: boolean;
-      data: AnomaliesCount[];
-      refetch: Refetch;
-    }>;
-
-    // first notableAnomaliesSearch call
+  it('refetch calls useSecurityJobs().refetch', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(
         () => useNotableAnomaliesSearch({ skip: false, from, to }),
@@ -87,17 +79,13 @@ describe('useNotableAnomaliesSearch', () => {
           wrapper: TestProviders,
         }
       );
-      renderResult = result;
 
       await waitForNextUpdate();
+
+      result.current.refetch();
     });
 
-    await act(async () => {
-      mockNotableAnomaliesSearch.mockClear(); // clear the first notableAnomaliesSearch call
-      await renderResult.current.refetch();
-    });
-
-    expect(mockNotableAnomaliesSearch).toHaveBeenCalled();
+    expect(useSecurityJobsRefetch).toHaveBeenCalled();
   });
 
   it('returns formated data', async () => {
@@ -119,26 +107,51 @@ describe('useNotableAnomaliesSearch', () => {
         expect.arrayContaining([
           {
             count: 99,
-            jobId,
             name: jobId,
-            status: AnomalyJobStatus.enabled,
+            job,
+            entity: AnomalyEntity.Host,
           },
         ])
       );
     });
   });
 
-  it('returns uninstalled jobs', async () => {
-    mockuseInstalledSecurityJobs.mockReturnValue({
-      loading: false,
-      isMlUser: true,
-      jobs: [],
-    });
-
+  it('returns jobs sorted by name', async () => {
     await act(async () => {
+      const firstJobId = 'v3_windows_anomalous_script';
+      const secondJobId = 'auth_rare_source_ip_for_a_user';
+      const fistJobCount = { key: firstJobId, doc_count: 99 };
+      const secondJobCount = { key: secondJobId, doc_count: 99 };
+      const firstJobSecurityName = '0000001';
+      const secondJobSecurityName = '0000002';
+      const firstJob = {
+        id: firstJobId,
+        jobState: 'started',
+        datafeedState: 'started',
+        customSettings: {
+          security_app_display_name: firstJobSecurityName,
+        },
+      };
+      const secondJob = {
+        id: secondJobId,
+        jobState: 'started',
+        datafeedState: 'started',
+        customSettings: {
+          security_app_display_name: secondJobSecurityName,
+        },
+      };
+
       mockNotableAnomaliesSearch.mockResolvedValue({
-        aggregations: { number_of_anomalies: { buckets: [] } },
+        aggregations: { number_of_anomalies: { buckets: [fistJobCount, secondJobCount] } },
       });
+
+      mockUseSecurityJobs.mockReturnValue({
+        loading: false,
+        isMlAdmin: true,
+        jobs: [firstJob, secondJob],
+        refetch: useSecurityJobsRefetch,
+      });
+
       const { result, waitForNextUpdate } = renderHook(
         () => useNotableAnomaliesSearch({ skip: false, from, to }),
         {
@@ -148,16 +161,31 @@ describe('useNotableAnomaliesSearch', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      expect(result.current.data).toEqual(
-        expect.arrayContaining([
-          {
-            count: 0,
-            jobId: undefined,
-            name: jobId,
-            status: AnomalyJobStatus.uninstalled,
-          },
-        ])
+      const names = result.current.data.map(({ name }) => name);
+      expect(names).toEqual([
+        firstJobSecurityName,
+        secondJobSecurityName,
+        'packetbeat_dns_tunneling',
+        'packetbeat_rare_dns_question',
+        'packetbeat_rare_server_domain',
+        'suspicious_login_activity',
+      ]);
+    });
+  });
+
+  it('does not throw error when aggregations is undefined', async () => {
+    await act(async () => {
+      mockNotableAnomaliesSearch.mockResolvedValue({});
+      const { waitForNextUpdate } = renderHook(
+        () => useNotableAnomaliesSearch({ skip: false, from, to }),
+        {
+          wrapper: TestProviders,
+        }
       );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      expect(mockAddToastError).not.toBeCalled();
     });
   });
 
@@ -167,16 +195,18 @@ describe('useNotableAnomaliesSearch', () => {
     mockNotableAnomaliesSearch.mockResolvedValue({
       aggregations: { number_of_anomalies: { buckets: [jobCount] } },
     });
-    mockuseInstalledSecurityJobs.mockReturnValue({
+
+    const customJob = {
+      id: customJobId,
+      jobState: 'started',
+      datafeedState: 'started',
+    };
+
+    mockUseSecurityJobs.mockReturnValue({
       loading: false,
-      isMlUser: true,
-      jobs: [
-        {
-          id: customJobId,
-          jobState: 'started',
-          datafeedState: 'started',
-        },
-      ],
+      isMlAdmin: true,
+      jobs: [customJob],
+      refetch: useSecurityJobsRefetch,
     });
 
     await act(async () => {
@@ -194,9 +224,9 @@ describe('useNotableAnomaliesSearch', () => {
         expect.arrayContaining([
           {
             count: 99,
-            jobId: customJobId,
-            name: jobId,
-            status: AnomalyJobStatus.enabled,
+            name: job.id,
+            job: customJob,
+            entity: AnomalyEntity.Host,
           },
         ])
       );
@@ -206,6 +236,12 @@ describe('useNotableAnomaliesSearch', () => {
   it('returns the most recent job when there are multiple jobs matching one notable job id`', async () => {
     const mostRecentJobId = `mostRecent_${jobId}`;
     const leastRecentJobId = `leastRecent_${jobId}`;
+    const mostRecentJob = {
+      id: mostRecentJobId,
+      jobState: 'started',
+      datafeedState: 'started',
+      latestTimestampSortValue: 1661731200000, // 2022-08-29
+    };
 
     mockNotableAnomaliesSearch.mockResolvedValue({
       aggregations: {
@@ -218,9 +254,9 @@ describe('useNotableAnomaliesSearch', () => {
       },
     });
 
-    mockuseInstalledSecurityJobs.mockReturnValue({
+    mockUseSecurityJobs.mockReturnValue({
       loading: false,
-      isMlUser: true,
+      isMlAdmin: true,
       jobs: [
         {
           id: leastRecentJobId,
@@ -228,13 +264,9 @@ describe('useNotableAnomaliesSearch', () => {
           datafeedState: 'started',
           latestTimestampSortValue: 1661644800000, // 2022-08-28
         },
-        {
-          id: mostRecentJobId,
-          jobState: 'started',
-          datafeedState: 'started',
-          latestTimestampSortValue: 1661731200000, // 2022-08-29
-        },
+        mostRecentJob,
       ],
+      refetch: useSecurityJobsRefetch,
     });
 
     await act(async () => {
@@ -251,9 +283,9 @@ describe('useNotableAnomaliesSearch', () => {
         expect.arrayContaining([
           {
             count: 99,
-            jobId: mostRecentJobId,
             name: jobId,
-            status: AnomalyJobStatus.enabled,
+            job: mostRecentJob,
+            entity: AnomalyEntity.Host,
           },
         ])
       );

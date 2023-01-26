@@ -31,10 +31,13 @@ const createStartContract = (): Start => {
       hasDataView: jest.fn().mockReturnValue(Promise.resolve(true)),
     },
     getDefaultDataView: jest.fn().mockReturnValue(Promise.resolve({})),
+    getDefaultId: jest.fn().mockReturnValue(Promise.resolve('')),
     get: jest.fn().mockReturnValue(Promise.resolve({})),
     clearCache: jest.fn(),
     getCanSaveSync: jest.fn(),
     getIdsWithTitle: jest.fn(),
+    getFieldsForIndexPattern: jest.fn(),
+    create: jest.fn().mockReturnValue(Promise.resolve({})),
   } as unknown as jest.Mocked<DataViewsContract>;
 };
 

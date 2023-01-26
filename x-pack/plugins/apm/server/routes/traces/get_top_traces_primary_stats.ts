@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sortBy } from 'lodash';
 import {
   kqlQuery,
@@ -14,7 +13,6 @@ import {
 } from '@kbn/observability-plugin/server';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { Setup } from '../../lib/helpers/setup_request';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { calculateImpactBuilder } from './calculate_impact_builder';
@@ -23,16 +21,16 @@ import {
   getDurationFieldForTransactions,
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
+  isRootTransaction,
 } from '../../lib/helpers/transactions';
 import {
   AGENT_NAME,
-  PARENT_ID,
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-  TRANSACTION_ROOT,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type BucketKey = Record<
   typeof TRANSACTION_NAME | typeof SERVICE_NAME,
@@ -46,7 +44,7 @@ interface TopTracesParams {
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   randomSampler: RandomSampler;
 }
 export async function getTopTracesPrimaryStats({
@@ -56,11 +54,11 @@ export async function getTopTracesPrimaryStats({
   searchAggregatedTransactions,
   start,
   end,
-  setup,
+  apmEventClient,
   randomSampler,
 }: TopTracesParams) {
   return withApmSpan('get_top_traces_primary_stats', async () => {
-    const response = await setup.apmEventClient.search(
+    const response = await apmEventClient.search(
       'get_transaction_group_stats',
       {
         apm: {
@@ -69,6 +67,7 @@ export async function getTopTracesPrimaryStats({
           ],
         },
         body: {
+          track_total_hits: false,
           size: 0,
           query: {
             bool: {
@@ -80,26 +79,7 @@ export async function getTopTracesPrimaryStats({
                 ...rangeQuery(start, end),
                 ...environmentQuery(environment),
                 ...kqlQuery(kuery),
-                ...(searchAggregatedTransactions
-                  ? [
-                      {
-                        term: {
-                          [TRANSACTION_ROOT]: true,
-                        },
-                      },
-                    ]
-                  : []),
-              ] as estypes.QueryDslQueryContainer[],
-              must_not: [
-                ...(!searchAggregatedTransactions
-                  ? [
-                      {
-                        exists: {
-                          field: PARENT_ID,
-                        },
-                      },
-                    ]
-                  : []),
+                isRootTransaction(searchAggregatedTransactions),
               ],
             },
           },

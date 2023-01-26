@@ -30,6 +30,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -42,7 +43,8 @@
               "\"geojson\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -52,7 +54,8 @@
             "label": "id",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -62,7 +65,8 @@
             "label": "minzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -72,7 +76,8 @@
             "label": "maxzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -82,7 +87,8 @@
             "label": "tileSize",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -92,7 +98,8 @@
             "label": "attribution",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -105,7 +112,8 @@
               "string | { [_: string]: string; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -115,7 +123,8 @@
             "label": "isTileClipped",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -125,7 +134,8 @@
             "label": "reparseOverscaled",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -138,7 +148,8 @@
               "string | GeoJSON.GeoJSON"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -151,7 +162,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -164,7 +176,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -177,7 +190,8 @@
               "maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -190,7 +204,8 @@
               "maplibregl.Actor"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -200,7 +215,8 @@
             "label": "_pendingLoads",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -210,7 +226,8 @@
             "label": "_collectResourceTiming",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -220,7 +237,8 @@
             "label": "_removed",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -236,6 +254,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -249,6 +268,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -263,6 +283,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -277,6 +298,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -291,6 +313,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -308,6 +331,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -323,6 +347,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -336,6 +361,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -355,6 +381,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -370,6 +397,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -391,6 +419,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -406,6 +435,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -422,6 +452,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -443,6 +474,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -458,6 +490,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -474,6 +507,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -495,6 +529,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -510,6 +545,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -526,6 +562,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -542,6 +579,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -558,6 +596,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -577,6 +616,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -590,6 +630,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -607,6 +648,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -622,6 +664,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -635,6 +678,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -649,6 +693,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -666,6 +711,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -679,6 +725,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -696,6 +743,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -709,6 +757,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -726,6 +775,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -741,6 +791,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -756,6 +807,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -774,6 +826,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -783,7 +836,8 @@
             "label": "lng",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -793,7 +847,8 @@
             "label": "lat",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -807,6 +862,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -820,6 +876,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -834,6 +891,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -853,6 +911,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The wrapped `LngLat` object."
@@ -872,6 +931,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The coordinates represeted as an array of longitude and latitude."
@@ -891,6 +951,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The coordinates represented as a string of the format `'LngLat(lng, lat)'`."
@@ -910,6 +971,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -925,6 +987,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -946,6 +1009,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -961,6 +1025,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -982,6 +1047,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -997,6 +1063,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1019,6 +1086,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1031,7 +1099,8 @@
               "maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1044,7 +1113,8 @@
               "maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1058,6 +1128,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -1071,6 +1142,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1085,6 +1157,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1104,6 +1177,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -1119,6 +1193,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1140,6 +1215,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -1155,6 +1231,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1176,6 +1253,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -1191,6 +1269,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1212,6 +1291,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The bounding box's center."
@@ -1231,6 +1311,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The southwest corner of the bounding box."
@@ -1250,6 +1331,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The northeast corner of the bounding box."
@@ -1269,6 +1351,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The northwest corner of the bounding box."
@@ -1288,6 +1371,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The southeast corner of the bounding box."
@@ -1307,6 +1391,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The west edge of the bounding box."
@@ -1326,6 +1411,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The south edge of the bounding box."
@@ -1345,6 +1431,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The east edge of the bounding box."
@@ -1364,6 +1451,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The north edge of the bounding box."
@@ -1383,6 +1471,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The bounding box represented as an array, consisting of the\nsouthwest and northeast coordinates of the bounding represented as arrays of numbers."
@@ -1402,6 +1491,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The bounding box represents as a string of the format\n`'LngLatBounds(LngLat(lng, lat), LngLat(lng, lat))'`."
@@ -1421,6 +1511,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "True if bounds have been defined, otherwise false."
@@ -1440,6 +1531,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -1455,6 +1547,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1476,6 +1569,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -1491,6 +1585,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1513,6 +1608,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1525,7 +1621,8 @@
               "maplibregl.Style"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1538,7 +1635,8 @@
               "maplibregl.Painter"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1551,7 +1649,8 @@
               "maplibregl.HandlerManager"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1564,7 +1663,8 @@
               "HTMLElement"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1577,7 +1677,8 @@
               "HTMLElement"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1590,7 +1691,8 @@
               "HTMLElement"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1603,7 +1705,8 @@
               "{ [_: string]: HTMLElement; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1613,7 +1716,8 @@
             "label": "_interactive",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1623,7 +1727,8 @@
             "label": "_showTileBoundaries",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1633,7 +1738,8 @@
             "label": "_showCollisionBoxes",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1643,7 +1749,8 @@
             "label": "_showPadding",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1653,7 +1760,8 @@
             "label": "_showOverdrawInspector",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1663,7 +1771,8 @@
             "label": "_repaint",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1673,7 +1782,8 @@
             "label": "_vertices",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1686,7 +1796,8 @@
               "HTMLCanvasElement"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1696,7 +1807,8 @@
             "label": "_maxTileCacheSize",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1709,7 +1821,8 @@
               "{ cancel: () => void; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1719,7 +1832,8 @@
             "label": "_styleDirty",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1729,7 +1843,8 @@
             "label": "_sourcesDirty",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1739,7 +1854,8 @@
             "label": "_placementDirty",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1749,7 +1865,8 @@
             "label": "_loaded",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1759,7 +1876,8 @@
             "label": "_fullyLoaded",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1769,7 +1887,8 @@
             "label": "_trackResize",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1779,7 +1898,8 @@
             "label": "_preserveDrawingBuffer",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1789,7 +1909,8 @@
             "label": "_failIfMajorPerformanceCaveat",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1799,7 +1920,8 @@
             "label": "_antialias",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1809,7 +1931,8 @@
             "label": "_refreshExpiredTiles",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1822,7 +1945,8 @@
               "maplibregl.Hash"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1835,7 +1959,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1845,7 +1970,8 @@
             "label": "_fadeDuration",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1855,7 +1981,8 @@
             "label": "_crossSourceCollisions",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1865,7 +1992,8 @@
             "label": "_crossFadingFactor",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1875,7 +2003,8 @@
             "label": "_collectResourceTiming",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1888,7 +2017,8 @@
               "maplibregl.TaskQueue"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1901,7 +2031,8 @@
               "maplibregl.IControl[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1911,7 +2042,8 @@
             "label": "_mapId",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1921,7 +2053,8 @@
             "label": "_localIdeographFontFamily",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1934,7 +2067,8 @@
               "maplibregl.RequestManager"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1947,7 +2081,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1957,7 +2092,8 @@
             "label": "_removed",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1967,7 +2103,8 @@
             "label": "_clickTolerance",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1977,7 +2114,8 @@
             "label": "_pixelRatio",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -1992,7 +2130,8 @@
               "maplibregl.ScrollZoomHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -2007,7 +2146,8 @@
               "maplibregl.BoxZoomHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -2022,7 +2162,8 @@
               "maplibregl.DragRotateHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -2037,7 +2178,8 @@
               "maplibregl.DragPanHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -2052,7 +2194,8 @@
               "maplibregl.KeyboardHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -2067,7 +2210,8 @@
               "maplibregl.DoubleClickZoomHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -2082,7 +2226,8 @@
               "maplibregl.TouchZoomRotateHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -2097,7 +2242,8 @@
               "maplibregl.TouchPitchHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -2111,6 +2257,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2124,6 +2271,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2141,6 +2289,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2160,6 +2309,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2175,6 +2325,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2191,6 +2342,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2212,6 +2364,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2227,6 +2380,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2248,6 +2402,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2263,6 +2418,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2284,6 +2440,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2299,6 +2456,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2320,6 +2478,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The pixel ratio."
@@ -2339,6 +2498,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2354,6 +2514,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2373,6 +2534,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The geographical bounds of the map as {@link LngLatBounds }."
@@ -2392,6 +2554,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The map object."
@@ -2411,6 +2574,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2426,6 +2590,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2447,6 +2612,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2462,6 +2628,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2483,6 +2650,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "minZoom"
@@ -2502,6 +2670,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2517,6 +2686,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2538,6 +2708,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "maxZoom"
@@ -2557,6 +2728,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2572,6 +2744,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2593,6 +2766,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "minPitch"
@@ -2612,6 +2786,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2627,6 +2802,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2648,6 +2824,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "maxPitch"
@@ -2669,6 +2846,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "renderWorldCopies"
@@ -2690,6 +2868,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2705,6 +2884,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2727,6 +2907,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2742,6 +2923,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2763,6 +2945,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2778,6 +2961,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2799,6 +2983,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "True if the map is moving."
@@ -2818,6 +3003,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "True if the map is zooming."
@@ -2837,6 +3023,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "True if the map is rotating."
@@ -2854,6 +3041,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2867,6 +3055,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2881,6 +3070,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2895,6 +3085,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2919,6 +3110,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2934,6 +3126,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2948,6 +3141,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2964,6 +3158,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2983,6 +3178,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -2996,6 +3192,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3010,6 +3207,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3027,6 +3225,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3040,6 +3239,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3054,6 +3254,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3078,6 +3279,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3093,6 +3295,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3107,6 +3310,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3123,6 +3327,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3142,6 +3347,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3155,6 +3361,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3169,6 +3376,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3186,6 +3394,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3199,6 +3408,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3213,6 +3423,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3237,6 +3448,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3252,6 +3464,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3266,6 +3479,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3282,6 +3496,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3301,6 +3516,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3314,6 +3530,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3328,6 +3545,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3345,6 +3563,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3358,6 +3577,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3372,6 +3592,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3393,6 +3614,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3408,6 +3630,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -3424,6 +3647,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3445,6 +3669,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3460,6 +3685,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3476,6 +3702,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3497,6 +3724,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3512,6 +3740,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -3528,6 +3757,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3549,6 +3779,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3564,6 +3795,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3583,6 +3815,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3596,6 +3829,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3613,6 +3847,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3626,6 +3861,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -3640,6 +3876,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3657,6 +3894,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3672,6 +3910,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3685,6 +3924,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3699,6 +3939,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3716,6 +3957,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3729,6 +3971,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3743,6 +3986,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3762,6 +4006,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The map's style JSON object."
@@ -3781,6 +4026,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "A Boolean indicating whether the style is fully loaded."
@@ -3803,6 +4049,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3818,6 +4065,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3834,6 +4082,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3855,6 +4104,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3870,6 +4120,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3891,6 +4142,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "A Boolean indicating whether all tiles are loaded."
@@ -3912,6 +4164,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3927,6 +4180,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3943,6 +4197,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3959,6 +4214,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3978,6 +4234,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -3993,6 +4250,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4018,6 +4276,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4033,6 +4292,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4057,6 +4317,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4072,6 +4333,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4088,6 +4350,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4102,6 +4365,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4121,6 +4385,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4136,6 +4401,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4152,6 +4418,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4171,6 +4438,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4186,6 +4454,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4207,6 +4476,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4222,6 +4492,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4243,6 +4514,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4258,6 +4530,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4274,6 +4547,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4293,6 +4567,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "An Array of strings containing the names of all sprites/images currently available in the map."
@@ -4316,6 +4591,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4331,6 +4607,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4347,6 +4624,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4368,6 +4646,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4383,6 +4662,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4399,6 +4679,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4422,6 +4703,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4437,6 +4719,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4459,6 +4742,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4474,6 +4758,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4495,6 +4780,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4510,6 +4796,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4526,6 +4813,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4542,6 +4830,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4565,6 +4854,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4580,6 +4870,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4596,6 +4887,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -4612,6 +4904,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4633,6 +4926,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4648,6 +4942,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4672,6 +4967,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4687,6 +4983,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4703,6 +5000,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4719,6 +5017,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4735,6 +5034,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4756,6 +5056,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4771,6 +5072,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4787,6 +5089,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4808,6 +5111,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4823,6 +5127,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4839,6 +5144,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4855,6 +5161,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4871,6 +5178,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4892,6 +5200,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4907,6 +5216,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4923,6 +5233,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4944,6 +5255,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -4959,6 +5271,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4975,6 +5288,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4996,6 +5310,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "light Light properties of the style."
@@ -5017,6 +5332,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5032,6 +5348,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -5048,6 +5365,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5067,6 +5385,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5082,6 +5401,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -5098,6 +5418,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -5117,6 +5438,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5132,6 +5454,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5153,6 +5476,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The map's container."
@@ -5174,6 +5498,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The container of the map's `<canvas>`."
@@ -5197,6 +5522,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "The map's `<canvas>` element."
@@ -5214,6 +5540,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -5229,6 +5556,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -5244,6 +5572,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5257,6 +5586,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -5271,6 +5601,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -5285,6 +5616,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5302,6 +5634,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -5317,6 +5650,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5330,6 +5664,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5347,6 +5682,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5360,6 +5696,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5377,6 +5714,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5390,6 +5728,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5409,6 +5748,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "A Boolean indicating whether the map is fully loaded."
@@ -5430,6 +5770,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5445,6 +5786,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -5468,6 +5810,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5481,6 +5824,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5500,6 +5844,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5513,6 +5858,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5534,6 +5880,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5549,6 +5896,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5570,6 +5918,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "`this`"
@@ -5589,6 +5938,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -5609,6 +5959,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -5624,6 +5975,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -5639,6 +5991,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5652,6 +6005,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5672,7 +6026,8 @@
               "\nGets and sets a Boolean indicating whether the map will render an outline\naround each tile and the tile ID. These tile boundaries are useful for\ndebugging.\n\nThe uncompressed file size of the first vector source is drawn in the top left\ncorner of each tile, next to the tile ID.\n"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5682,7 +6037,8 @@
             "label": "showTileBoundaries",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5699,7 +6055,8 @@
               "\nGets and sets a Boolean indicating whether the map will visualize\nthe padding offsets.\n"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5709,7 +6066,8 @@
             "label": "showPadding",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5726,7 +6084,8 @@
               "\nGets and sets a Boolean indicating whether the map will render boxes\naround all symbols in the data source, revealing which symbols\nwere rendered or which were hidden due to collisions.\nThis information is useful for debugging.\n"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5736,7 +6095,8 @@
             "label": "showCollisionBoxes",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5746,7 +6106,8 @@
             "label": "showOverdrawInspector",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5756,7 +6117,8 @@
             "label": "showOverdrawInspector",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5773,7 +6135,8 @@
               "\nGets and sets a Boolean indicating whether the map will\ncontinuously repaint. This information is useful for analyzing performance.\n"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5783,7 +6146,8 @@
             "label": "repaint",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5793,7 +6157,8 @@
             "label": "vertices",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5803,7 +6168,8 @@
             "label": "vertices",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5817,6 +6183,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -5830,6 +6197,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -5844,6 +6212,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5864,6 +6233,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5878,7 +6248,8 @@
               "\"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5893,7 +6264,8 @@
               "maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5908,7 +6280,8 @@
               "MouseEvent"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5923,7 +6296,8 @@
               "node_modules/@types/mapbox__point-geometry/index"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5938,7 +6312,8 @@
               "maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5954,6 +6329,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -5969,7 +6345,8 @@
               "\n`true` if `preventDefault` has been called."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5979,7 +6356,8 @@
             "label": "_defaultPrevented",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -5995,6 +6373,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -6008,6 +6387,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6022,6 +6402,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6036,6 +6417,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6050,6 +6432,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -6070,6 +6453,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6082,7 +6466,8 @@
               "\"raster\" | \"raster-dem\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6092,7 +6477,8 @@
             "label": "id",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6102,7 +6488,8 @@
             "label": "minzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6112,7 +6499,8 @@
             "label": "maxzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6122,7 +6510,8 @@
             "label": "url",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6132,7 +6521,8 @@
             "label": "scheme",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6142,7 +6532,8 @@
             "label": "tileSize",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6155,7 +6546,8 @@
               "[number, number, number, number]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6168,7 +6560,8 @@
               "maplibregl.TileBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6178,7 +6571,8 @@
             "label": "roundZoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6191,7 +6585,8 @@
               "maplibregl.Dispatcher"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6204,7 +6599,8 @@
               "maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6217,7 +6613,8 @@
               "string[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6227,7 +6624,8 @@
             "label": "_loaded",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6240,7 +6638,8 @@
               "maplibregl.RasterSourceSpecification | maplibregl.RasterDEMSourceSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6253,7 +6652,8 @@
               "{ cancel: () => void; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6267,6 +6667,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -6280,6 +6681,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6294,6 +6696,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6308,6 +6711,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6322,6 +6726,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -6339,6 +6744,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -6354,6 +6760,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -6369,6 +6776,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -6382,6 +6790,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -6399,6 +6808,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -6414,6 +6824,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -6429,6 +6840,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -6442,6 +6854,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -6459,6 +6872,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -6472,6 +6886,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6486,6 +6901,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -6503,6 +6919,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -6516,6 +6933,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6530,6 +6948,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -6547,6 +6966,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -6560,6 +6980,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6574,6 +6995,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -6591,6 +7013,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -6609,6 +7032,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6621,7 +7045,8 @@
               "\"vector\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6631,7 +7056,8 @@
             "label": "id",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6641,7 +7067,8 @@
             "label": "minzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6651,7 +7078,8 @@
             "label": "maxzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6661,7 +7089,8 @@
             "label": "url",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6671,7 +7100,8 @@
             "label": "scheme",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6681,7 +7111,8 @@
             "label": "tileSize",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6694,7 +7125,8 @@
               "string | { [_: string]: string; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6707,7 +7139,8 @@
               "{ type: \"vector\"; url?: string | undefined; tiles?: string[] | undefined; bounds?: [number, number, number, number] | undefined; scheme?: \"xyz\" | \"tms\" | undefined; minzoom?: number | undefined; maxzoom?: number | undefined; attribution?: string | undefined; promoteId?: maplibregl.PromoteIdSpecification | undefined; volatile?: boolean | undefined; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6717,7 +7150,8 @@
             "label": "_collectResourceTiming",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6730,7 +7164,8 @@
               "maplibregl.Dispatcher"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6743,7 +7178,8 @@
               "maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6756,7 +7192,8 @@
               "[number, number, number, number]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6769,7 +7206,8 @@
               "string[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6782,7 +7220,8 @@
               "maplibregl.TileBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6792,7 +7231,8 @@
             "label": "reparseOverscaled",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6802,7 +7242,8 @@
             "label": "isTileClipped",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6815,7 +7256,8 @@
               "{ cancel: () => void; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6825,7 +7267,8 @@
             "label": "_loaded",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -6839,6 +7282,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -6852,6 +7296,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6866,6 +7311,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6880,6 +7326,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6894,6 +7341,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -6911,6 +7359,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -6926,6 +7375,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -6941,6 +7391,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -6954,6 +7405,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -6971,6 +7423,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -6984,6 +7437,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7001,6 +7455,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7014,6 +7469,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7033,6 +7489,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7048,6 +7505,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7069,6 +7527,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7084,6 +7543,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7103,6 +7563,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -7118,6 +7579,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -7133,6 +7595,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7146,6 +7609,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -7160,6 +7624,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7177,6 +7642,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7190,6 +7656,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7207,6 +7674,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7220,6 +7688,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7237,6 +7706,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -7262,6 +7732,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7273,7 +7744,8 @@
             "label": "id",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7288,7 +7760,8 @@
               "\"custom\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7303,7 +7776,8 @@
               "\"2d\" | \"3d\" | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7326,6 +7800,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -7341,7 +7816,8 @@
                   "WebGLRenderingContext"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7356,7 +7832,8 @@
                   "Float32Array | [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number]"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -7378,7 +7855,8 @@
               "maplibregl.CustomRenderMethod | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7399,6 +7877,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7414,6 +7893,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -7430,6 +7910,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7454,6 +7935,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7469,6 +7951,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -7485,6 +7968,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7505,6 +7989,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7517,7 +8002,8 @@
               "\"source\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7527,7 +8013,8 @@
             "label": "isSourceLoaded",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7540,7 +8027,8 @@
               "maplibregl.VectorSourceSpecification | maplibregl.RasterSourceSpecification | maplibregl.RasterDEMSourceSpecification | maplibregl.GeoJSONSourceSpecification | maplibregl.VideoSourceSpecification | maplibregl.ImageSourceSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7550,7 +8038,8 @@
             "label": "sourceId",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7563,7 +8052,8 @@
               "\"metadata\" | \"content\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7576,7 +8066,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7604,6 +8095,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7613,7 +8105,8 @@
             "label": "type",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7623,7 +8116,8 @@
             "label": "id",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7633,7 +8127,8 @@
             "label": "minzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7643,7 +8138,8 @@
             "label": "maxzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7653,7 +8149,8 @@
             "label": "tileSize",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7666,7 +8163,8 @@
               "string | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7679,7 +8177,8 @@
               "boolean | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7692,7 +8191,8 @@
               "boolean | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7705,7 +8205,8 @@
               "maplibregl.CanonicalTileID | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7718,7 +8219,8 @@
               "boolean | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7731,7 +8233,8 @@
               "string[] | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -7745,6 +8248,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -7760,6 +8264,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -7775,6 +8280,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7788,6 +8294,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7805,6 +8312,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7818,6 +8326,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7835,6 +8344,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7848,6 +8358,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7865,6 +8376,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7878,6 +8390,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -7892,6 +8405,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7909,6 +8423,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7922,6 +8437,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7939,6 +8455,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7952,6 +8469,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -7966,6 +8484,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7983,6 +8502,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
@@ -7996,6 +8516,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -8010,6 +8531,7 @@
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -8029,6 +8551,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "A plain (stringifiable) JS object representing the current state of the source.\nCreating a source using the returned object as the `options` should result in a Source that is\nequivalent to this one."
@@ -8046,6 +8569,7 @@
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -8067,6 +8591,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -8081,6 +8606,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -8095,6 +8621,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -8109,6 +8636,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -8123,6 +8651,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -8137,6 +8666,7 @@
         ],
         "path": "packages/kbn-mapbox-gl/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -8151,6 +8681,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -8165,6 +8696,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -8184,6 +8716,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -8198,6 +8731,7 @@
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -30,9 +30,7 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { RiskyHostLinks } from '../components/overview_risky_host_links';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { LandingPageComponent } from '../../common/components/landing_page';
 
 const OverviewComponent = () => {
@@ -67,8 +65,6 @@ const OverviewComponent = () => {
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
   const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
-
-  const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   return (
     <>
@@ -136,18 +132,6 @@ const OverviewComponent = () => {
                             from={from}
                             setQuery={setQuery}
                             to={to}
-                          />
-                        )}
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={1}>
-                        {riskyHostsEnabled && (
-                          <RiskyHostLinks
-                            deleteQuery={deleteQuery}
-                            setQuery={setQuery}
-                            timerange={{
-                              from,
-                              to,
-                            }}
                           />
                         )}
                       </EuiFlexItem>

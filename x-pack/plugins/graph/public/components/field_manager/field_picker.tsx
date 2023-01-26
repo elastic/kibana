@@ -49,7 +49,7 @@ export function FieldPicker({
   return (
     <EuiPopover
       id="graphFieldPicker"
-      anchorPosition="downLeft"
+      anchorPosition="downCenter"
       ownFocus
       panelPaddingSize="none"
       button={

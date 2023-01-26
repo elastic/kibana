@@ -41,6 +41,10 @@ kibana_vars=(
     csp.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
+    data.search.asyncSearch.waitForCompletion
+    data.search.asyncSearch.keepAlive
+    data.search.asyncSearch.batchedReduceSize
+    data.search.asyncSearch.pollInterval
     data.search.sessions.defaultExpiration
     data.search.sessions.enabled
     data.search.sessions.maxUpdateRetries
@@ -161,6 +165,7 @@ kibana_vars=(
     server.securityResponseHeaders.referrerPolicy
     server.securityResponseHeaders.strictTransportSecurity
     server.securityResponseHeaders.xContentTypeOptions
+    server.securityResponseHeaders.crossOriginOpenerPolicy
     server.shutdownTimeout
     server.socketTimeout
     server.ssl.cert
@@ -295,6 +300,10 @@ kibana_vars=(
     xpack.ingestManager.registryUrl
     xpack.observability.annotations.index
     xpack.observability.unsafe.slo.enabled
+    xpack.observability.unsafe.alertDetails.apm.enabled
+    xpack.observability.unsafe.alertDetails.metrics.enabled
+    xpack.observability.unsafe.alertDetails.logs.enabled
+    xpack.observability.unsafe.alertDetails.uptime.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect
@@ -341,6 +350,7 @@ kibana_vars=(
     xpack.reporting.roles.allow
     xpack.reporting.roles.enabled
     xpack.ruleRegistry.write.enabled
+    xpack.security.accessAgreement.message
     xpack.security.audit.appender.fileName
     xpack.security.audit.appender.layout.highlight
     xpack.security.audit.appender.layout.pattern
@@ -371,6 +381,7 @@ kibana_vars=(
     xpack.security.sameSiteCookies
     xpack.security.secureCookies
     xpack.security.session.cleanupInterval
+    xpack.security.session.concurrentSessions.maxSessions
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
     xpack.security.sessionTimeout
@@ -383,8 +394,7 @@ kibana_vars=(
     xpack.securitySolution.maxTimelineImportExportSize
     xpack.securitySolution.maxTimelineImportPayloadBytes
     xpack.securitySolution.packagerTaskInterval
-    xpack.securitySolution.prebuiltRulesFromFileSystem
-    xpack.securitySolution.prebuiltRulesFromSavedObjects
+    xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
     xpack.task_manager.max_attempts
     xpack.task_manager.max_poll_inactivity_cycles

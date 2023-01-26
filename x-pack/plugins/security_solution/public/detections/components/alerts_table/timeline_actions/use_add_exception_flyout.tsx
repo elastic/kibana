@@ -5,64 +5,66 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
-import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import { useCallback, useState } from 'react';
+import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
-import { TimelineId } from '../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../common/store';
 
 interface UseExceptionFlyoutProps {
-  ruleIndex: string[] | null | undefined;
   refetch?: inputsModel.Refetch;
-  timelineId: string;
+  onRuleChange?: () => void;
+  isActiveTimelines: boolean;
 }
 interface UseExceptionFlyout {
-  exceptionFlyoutType: ExceptionListType | null;
-  onAddExceptionTypeClick: (type: ExceptionListType) => void;
-  onAddExceptionCancel: () => void;
-  onAddExceptionConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
-  ruleIndices: string[];
+  exceptionFlyoutType: ExceptionListTypeEnum | null;
+  openAddExceptionFlyout: boolean;
+  onAddExceptionTypeClick: (type?: ExceptionListTypeEnum) => void;
+  onAddExceptionCancel: (didRuleChange: boolean) => void;
+  onAddExceptionConfirm: (
+    didRuleChange: boolean,
+    didCloseAlert: boolean,
+    didBulkCloseAlert: boolean
+  ) => void;
 }
 
 export const useExceptionFlyout = ({
-  ruleIndex,
   refetch,
-  timelineId,
+  onRuleChange,
+  isActiveTimelines,
 }: UseExceptionFlyoutProps): UseExceptionFlyout => {
-  const [exceptionFlyoutType, setOpenAddExceptionFlyout] = useState<ExceptionListType | null>(null);
+  const [openAddExceptionFlyout, setOpenAddExceptionFlyout] = useState<boolean>(false);
+  const [exceptionFlyoutType, setExceptionFlyoutType] = useState<ExceptionListTypeEnum | null>(
+    null
+  );
 
-  const ruleIndices = useMemo((): string[] => {
-    if (ruleIndex != null) {
-      return ruleIndex;
-    } else {
-      return DEFAULT_INDEX_PATTERN;
-    }
-  }, [ruleIndex]);
-
-  const onAddExceptionTypeClick = useCallback((exceptionListType: ExceptionListType): void => {
-    setOpenAddExceptionFlyout(exceptionListType);
+  const onAddExceptionTypeClick = useCallback((exceptionListType?: ExceptionListTypeEnum): void => {
+    setExceptionFlyoutType(exceptionListType ?? null);
+    setOpenAddExceptionFlyout(true);
   }, []);
 
   const onAddExceptionCancel = useCallback(() => {
-    setOpenAddExceptionFlyout(null);
+    setExceptionFlyoutType(null);
+    setOpenAddExceptionFlyout(false);
   }, []);
 
   const onAddExceptionConfirm = useCallback(
-    (didCloseAlert: boolean, didBulkCloseAlert) => {
-      if (refetch && (timelineId !== TimelineId.active || didBulkCloseAlert)) {
+    (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert) => {
+      if (refetch && (isActiveTimelines === false || didBulkCloseAlert)) {
         refetch();
       }
-      setOpenAddExceptionFlyout(null);
+      if (onRuleChange != null && didRuleChange) {
+        onRuleChange();
+      }
+      setOpenAddExceptionFlyout(false);
     },
-    [refetch, timelineId]
+    [onRuleChange, refetch, isActiveTimelines]
   );
 
   return {
     exceptionFlyoutType,
+    openAddExceptionFlyout,
     onAddExceptionTypeClick,
     onAddExceptionCancel,
     onAddExceptionConfirm,
-    ruleIndices,
   };
 };

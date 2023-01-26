@@ -63,21 +63,13 @@ export function parseRunCliFlags(flags: RunCliFlags) {
   return {
     ...pick(
       flags,
-      'maxDocs',
-      'maxDocsConfidence',
       'target',
-      'cloudId',
-      'username',
-      'password',
       'workers',
-      'flushSizeBulk',
-      'flushSize',
-      'numShards',
       'scenarioOpts',
-      'forceLegacyIndices',
-      'dryRun',
-      'gcpRepository',
-      'streamProcessors'
+      'kibana',
+      'concurrency',
+      'versionOverride',
+      'clean'
     ),
     logLevel: parsedLogLevel,
     file: parsedFile,

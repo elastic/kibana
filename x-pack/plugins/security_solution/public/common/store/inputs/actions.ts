@@ -55,6 +55,7 @@ export const setQuery = actionCreator<{
   loading: boolean;
   refetch: Refetch | RefetchKql;
   inspect: InspectQuery | null;
+  searchSessionId?: string;
 }>('SET_QUERY');
 
 export const deleteOneQuery = actionCreator<{
@@ -67,6 +68,7 @@ export const setInspectionParameter = actionCreator<{
   inputId: InputsModelId.global | InputsModelId.timeline;
   isInspected: boolean;
   selectedInspectIndex: number;
+  searchSessionId?: string;
 }>('SET_INSPECTION_PARAMETER');
 
 export const deleteAllQuery = actionCreator<{ id: InputsModelId }>('DELETE_ALL_QUERY');

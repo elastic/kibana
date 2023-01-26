@@ -13,16 +13,18 @@ import {
   type EuiBasicTableColumn,
   type EuiTableActionsColumnType,
   type EuiBasicTableProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import {
   baseFindingsColumns,
   createColumnWithFilters,
   getExpandColumn,
   type OnAddFilter,
 } from '../../layout/findings_layout';
-import type { CspFinding } from '../../types';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
+import { getSelectedRowStyle } from '../../utils/utils';
 
 interface Props {
   items: CspFinding[];
@@ -41,7 +43,12 @@ const ResourceFindingsTableComponent = ({
   setTableOptions,
   onAddFilter,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
+
+  const getRowProps = (row: CspFinding) => ({
+    style: getSelectedRowStyle(euiTheme, row, selectedFinding),
+  });
 
   const columns: [
     EuiTableActionsColumnType<CspFinding>,
@@ -49,24 +56,15 @@ const ResourceFindingsTableComponent = ({
   ] = useMemo(
     () => [
       getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
-      baseFindingsColumns['resource.id'],
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
-      createColumnWithFilters(
-        { ...baseFindingsColumns['resource.sub_type'], sortable: false },
-        { onAddFilter }
-      ),
-      createColumnWithFilters(
-        { ...baseFindingsColumns['resource.name'], sortable: false },
-        { onAddFilter }
-      ),
+      baseFindingsColumns['rule.benchmark.rule_number'],
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
-      baseFindingsColumns['rule.tags'],
-      createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
       baseFindingsColumns['@timestamp'],
     ],
     [onAddFilter]
   );
+
   if (!loading && !items.length)
     return (
       <EuiEmptyPrompt
@@ -91,6 +89,7 @@ const ResourceFindingsTableComponent = ({
         onChange={setTableOptions}
         pagination={pagination}
         sorting={sorting}
+        rowProps={getRowProps}
       />
       {selectedFinding && (
         <FindingsRuleFlyout

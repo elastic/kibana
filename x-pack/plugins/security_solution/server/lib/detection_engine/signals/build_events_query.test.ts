@@ -7,6 +7,8 @@
 
 import { buildEqlSearchRequest, buildEventsSearchQuery } from './build_events_query';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 
 const emptyFilter = {
   bool: {
@@ -48,9 +50,6 @@ describe('create_signals', () => {
                     format: 'strict_date_optional_time',
                   },
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
@@ -139,9 +138,6 @@ describe('create_signals', () => {
                   minimum_should_match: 1,
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -208,9 +204,6 @@ describe('create_signals', () => {
                   },
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -267,9 +260,6 @@ describe('create_signals', () => {
                     format: 'strict_date_optional_time',
                   },
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
@@ -328,9 +318,6 @@ describe('create_signals', () => {
                   },
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -386,9 +373,6 @@ describe('create_signals', () => {
                     format: 'strict_date_optional_time',
                   },
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
@@ -452,9 +436,6 @@ describe('create_signals', () => {
                     format: 'strict_date_optional_time',
                   },
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
@@ -564,9 +545,9 @@ describe('create_signals', () => {
         filters: undefined,
         primaryTimestamp: '@timestamp',
         secondaryTimestamp: undefined,
-        exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
+        exceptionFilter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -615,10 +596,10 @@ describe('create_signals', () => {
         filters: undefined,
         primaryTimestamp: 'event.ingested',
         secondaryTimestamp: '@timestamp',
-        exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
         timestampField: undefined,
+        exceptionFilter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -703,10 +684,10 @@ describe('create_signals', () => {
         filters: undefined,
         primaryTimestamp: 'event.ingested',
         secondaryTimestamp: undefined,
-        exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
         timestampField: undefined,
+        exceptionFilter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -746,7 +727,14 @@ describe('create_signals', () => {
       });
     });
 
-    test('should build a request with exceptions', () => {
+    test('should build a request with exceptions', async () => {
+      const { filter } = await buildExceptionFilter({
+        listClient: getListClientMock(),
+        lists: [getExceptionListItemSchemaMock()],
+        alias: null,
+        chunkSize: 1024,
+        excludeExceptions: true,
+      });
       const request = buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
@@ -756,95 +744,103 @@ describe('create_signals', () => {
         filters: undefined,
         primaryTimestamp: '@timestamp',
         secondaryTimestamp: undefined,
-        exceptionLists: [getExceptionListItemSchemaMock()],
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
+        exceptionFilter: filter,
       });
-      expect(request).toEqual({
-        allow_no_indices: true,
-        index: ['testindex1', 'testindex2'],
-        body: {
-          size: 100,
-          query: 'process where true',
-          runtime_mappings: undefined,
-          filter: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: 'now-5m',
-                      lte: 'now',
-                      format: 'strict_date_optional_time',
+      expect(request).toMatchInlineSnapshot(`
+        Object {
+          "allow_no_indices": true,
+          "body": Object {
+            "event_category_field": undefined,
+            "fields": Array [
+              Object {
+                "field": "*",
+                "include_unmapped": true,
+              },
+              Object {
+                "field": "@timestamp",
+                "format": "strict_date_optional_time",
+              },
+            ],
+            "filter": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "format": "strict_date_optional_time",
+                        "gte": "now-5m",
+                        "lte": "now",
+                      },
                     },
                   },
-                },
-                {
-                  bool: {
-                    must: [],
-                    filter: [],
-                    should: [],
-                    must_not: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              bool: {
-                                filter: [
-                                  {
-                                    nested: {
-                                      path: 'some.parentField',
-                                      query: {
-                                        bool: {
-                                          minimum_should_match: 1,
-                                          should: [
-                                            {
-                                              match_phrase: {
-                                                'some.parentField.nested.field': 'some value',
+                  Object {
+                    "bool": Object {
+                      "filter": Array [],
+                      "must": Array [],
+                      "must_not": Array [
+                        Object {
+                          "bool": Object {
+                            "should": Array [
+                              Object {
+                                "bool": Object {
+                                  "filter": Array [
+                                    Object {
+                                      "nested": Object {
+                                        "path": "some.parentField",
+                                        "query": Object {
+                                          "bool": Object {
+                                            "minimum_should_match": 1,
+                                            "should": Array [
+                                              Object {
+                                                "match_phrase": Object {
+                                                  "some.parentField.nested.field": "some value",
+                                                },
                                               },
-                                            },
-                                          ],
-                                        },
-                                      },
-                                      score_mode: 'none',
-                                    },
-                                  },
-                                  {
-                                    bool: {
-                                      minimum_should_match: 1,
-                                      should: [
-                                        {
-                                          match_phrase: {
-                                            'some.not.nested.field': 'some value',
+                                            ],
                                           },
                                         },
-                                      ],
+                                        "score_mode": "none",
+                                      },
                                     },
-                                  },
-                                ],
+                                    Object {
+                                      "bool": Object {
+                                        "minimum_should_match": 1,
+                                        "should": Array [
+                                          Object {
+                                            "match_phrase": Object {
+                                              "some.not.nested.field": "some value",
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    },
+                                  ],
+                                },
                               },
-                            },
-                          ],
+                            ],
+                          },
                         },
-                      },
-                    ],
+                      ],
+                      "should": Array [],
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
+            "query": "process where true",
+            "runtime_mappings": undefined,
+            "size": 100,
+            "tiebreaker_field": undefined,
+            "timestamp_field": undefined,
           },
-          fields: [
-            {
-              field: '*',
-              include_unmapped: true,
-            },
-            {
-              field: '@timestamp',
-              format: 'strict_date_optional_time',
-            },
+          "index": Array [
+            "testindex1",
+            "testindex2",
           ],
-        },
-      });
+        }
+      `);
     });
 
     test('should build a request with filters', () => {
@@ -891,8 +887,8 @@ describe('create_signals', () => {
         filters,
         primaryTimestamp: '@timestamp',
         secondaryTimestamp: undefined,
-        exceptionLists: [],
         runtimeMappings: undefined,
+        exceptionFilter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,

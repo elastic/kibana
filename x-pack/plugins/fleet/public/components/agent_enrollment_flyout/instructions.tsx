@@ -32,7 +32,7 @@ export const Instructions = (props: InstructionProps) => {
   const {
     agentPolicies,
     isFleetServerPolicySelected,
-    settings,
+    fleetServerHosts,
     isLoadingAgentPolicies,
     selectionType,
     setSelectionType,
@@ -66,24 +66,20 @@ export const Instructions = (props: InstructionProps) => {
 
   const fleetServers = agents?.items || [];
 
-  const fleetServerHosts = useMemo(() => {
-    return settings?.fleet_server_hosts || [];
-  }, [settings]);
-
   if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
 
-  const hasNoFleetServerHost = fleetStatus.isReady && fleetServerHosts.length === 0;
+  const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
   const showAgentEnrollment =
     fleetStatus.isReady &&
-    !isFleetServerUnhealthy &&
-    fleetServers.length > 0 &&
-    fleetServerHosts.length > 0;
+    (isFleetServerPolicySelected ||
+      (!isFleetServerUnhealthy && fleetServers.length > 0 && (fleetServerHosts?.length ?? 0) > 0));
 
   const showFleetServerEnrollment =
-    fleetServers.length === 0 ||
-    isFleetServerUnhealthy ||
-    (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE);
+    !isFleetServerPolicySelected &&
+    (fleetServers.length === 0 ||
+      isFleetServerUnhealthy ||
+      (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
   if (!isIntegrationFlow && showAgentEnrollment) {
     setSelectionType('radio');
@@ -113,7 +109,7 @@ export const Instructions = (props: InstructionProps) => {
             </>
           )}
           {isFleetServerPolicySelected ? (
-            <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} />
+            <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} onClose={() => undefined} />
           ) : (
             <ManagedSteps {...props} />
           )}

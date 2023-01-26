@@ -2,107 +2,114 @@
 
 exports[`SampleDataCard installed renders with app links 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasBetaBadge emotion-euiPanel-grow-m-m-plain-hasShadow"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left-hasBetaBadge"
   data-test-subj="sampleDataSetCardsample-data-set"
 >
   <div
-    class="euiCard__top"
+    class="euiCard__main emotion-euiCard__main-vertical"
   >
     <div
-      class="euiCard__image"
-    >
-      <img
-        alt=""
-        src="test-file-stub"
-      />
-    </div>
-  </div>
-  <div
-    class="euiCard__content"
-  >
-    <span
-      class="euiTitle euiCard__title emotion-euiTitle-s"
-      id="generated-idTitle"
-    >
-      Sample Data Set
-    </span>
-    <div
-      class="euiText euiCard__description emotion-euiText-s"
-      id="generated-idDescription"
-    >
-      <p>
-        This is a sample data set you can use.
-      </p>
-    </div>
-  </div>
-  <span
-    class="euiCard__betaBadgeWrapper"
-  >
-    <span
-      class="euiBetaBadge euiBetaBadge--hollow euiCard__betaBadge"
-      id="generated-idBetaBadge"
-      title="installed"
-    >
-      installed
-    </span>
-  </span>
-  <div
-    class="euiCard__footer"
-  >
-    <div
-      class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+      class="euiCard__top emotion-euiCard__top-vertical"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiCard__image emotion-euiCard__image"
       >
-        <button
-          aria-label="Remove Sample Data Set"
-          class="euiButtonEmpty euiButtonEmpty--danger euiButtonEmpty--flushLeft"
-          data-test-subj="removeSampleDataSetsample-data-set"
-          type="button"
-        >
-          <span
-            class="euiButtonContent euiButtonEmpty__content"
-          >
-            <span
-              class="euiButtonEmpty__text"
-            >
-              Remove
-            </span>
-          </span>
-        </button>
+        <img
+          alt=""
+          src="test-file-stub"
+        />
       </div>
+    </div>
+    <div
+      class="euiCard__content emotion-euiCard__content-vertical"
+    >
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <span
+          class="emotion-euiCard__text-left"
+        >
+          Sample Data Set
+        </span>
+      </p>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          This is a sample data set you can use.
+        </p>
+      </div>
+    </div>
+    <span
+      class="emotion-euiCard__betaBadgeAnchor"
+    >
+      <span
+        class="euiBetaBadge emotion-euiBetaBadge-hollow-m-baseline-euiCard__betaBadge"
+        id="generated-idBetaBadge"
+        title="installed"
+      >
+        installed
+      </span>
+    </span>
+    <div
+      class="emotion-euiCard__footer"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-stretch-row"
       >
         <div
-          class="euiPopover emotion-euiPopover"
-          data-test-subj="launchSampleDataSetsample-data-set"
-          id="sampleDataLinkssample-data-set"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
-          <div
-            class="euiPopover__anchor css-16vtueo-render"
+          <button
+            aria-label="Remove Sample Data Set"
+            class="euiButtonEmpty euiButtonEmpty--flushLeft css-1v3a3p6-empty-danger"
+            data-test-subj="removeSampleDataSetsample-data-set"
+            type="button"
           >
-            <button
-              aria-label="View Sample Data Set"
-              class="euiButton euiButton--primary"
-              type="button"
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
             >
               <span
-                class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                class="euiButtonEmpty__text"
+              >
+                Remove
+              </span>
+            </span>
+          </button>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiPopover emotion-euiPopover"
+            data-test-subj="launchSampleDataSetsample-data-set"
+            id="sampleDataLinkssample-data-set"
+          >
+            <div
+              class="euiPopover__anchor css-16vtueo-render"
+            >
+              <button
+                aria-label="View Sample Data Set"
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+                type="button"
               >
                 <span
-                  class="euiButtonContent__icon"
-                  color="inherit"
-                  data-euiicon-type="arrowDown"
-                />
-                <span
-                  class="euiButton__text"
+                  class="emotion-euiButtonDisplayContent"
                 >
-                  View data
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    View data
+                  </span>
+                  <span
+                    color="inherit"
+                    data-euiicon-type="arrowDown"
+                  />
                 </span>
-              </span>
-            </button>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -113,95 +120,103 @@ exports[`SampleDataCard installed renders with app links 1`] = `
 
 exports[`SampleDataCard installed renders without app links 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasBetaBadge emotion-euiPanel-grow-m-m-plain-hasShadow"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left-hasBetaBadge"
   data-test-subj="sampleDataSetCardsample-data-set"
 >
   <div
-    class="euiCard__top"
+    class="euiCard__main emotion-euiCard__main-vertical"
   >
     <div
-      class="euiCard__image"
-    >
-      <img
-        alt=""
-        src="test-file-stub"
-      />
-    </div>
-  </div>
-  <div
-    class="euiCard__content"
-  >
-    <span
-      class="euiTitle euiCard__title emotion-euiTitle-s"
-      id="generated-idTitle"
-    >
-      Sample Data Set
-    </span>
-    <div
-      class="euiText euiCard__description emotion-euiText-s"
-      id="generated-idDescription"
-    >
-      <p>
-        This is a sample data set you can use.
-      </p>
-    </div>
-  </div>
-  <span
-    class="euiCard__betaBadgeWrapper"
-  >
-    <span
-      class="euiBetaBadge euiBetaBadge--hollow euiCard__betaBadge"
-      id="generated-idBetaBadge"
-      title="installed"
-    >
-      installed
-    </span>
-  </span>
-  <div
-    class="euiCard__footer"
-  >
-    <div
-      class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+      class="euiCard__top emotion-euiCard__top-vertical"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiCard__image emotion-euiCard__image"
       >
-        <button
-          aria-label="Remove Sample Data Set"
-          class="euiButtonEmpty euiButtonEmpty--danger euiButtonEmpty--flushLeft"
-          data-test-subj="removeSampleDataSetsample-data-set"
-          type="button"
-        >
-          <span
-            class="euiButtonContent euiButtonEmpty__content"
-          >
-            <span
-              class="euiButtonEmpty__text"
-            >
-              Remove
-            </span>
-          </span>
-        </button>
+        <img
+          alt=""
+          src="test-file-stub"
+        />
       </div>
-      <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+    </div>
+    <div
+      class="euiCard__content emotion-euiCard__content-vertical"
+    >
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
       >
-        <button
-          aria-label="View Sample Data Set"
-          class="euiButton euiButton--primary"
-          data-test-subj="launchSampleDataSetsample-data-set"
-          type="button"
+        <span
+          class="emotion-euiCard__text-left"
         >
-          <span
-            class="euiButtonContent euiButton__content"
+          Sample Data Set
+        </span>
+      </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          This is a sample data set you can use.
+        </p>
+      </div>
+    </div>
+    <span
+      class="emotion-euiCard__betaBadgeAnchor"
+    >
+      <span
+        class="euiBetaBadge emotion-euiBetaBadge-hollow-m-baseline-euiCard__betaBadge"
+        id="generated-idBetaBadge"
+        title="installed"
+      >
+        installed
+      </span>
+    </span>
+    <div
+      class="emotion-euiCard__footer"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <button
+            aria-label="Remove Sample Data Set"
+            class="euiButtonEmpty euiButtonEmpty--flushLeft css-1v3a3p6-empty-danger"
+            data-test-subj="removeSampleDataSetsample-data-set"
+            type="button"
           >
             <span
-              class="euiButton__text"
+              class="euiButtonContent euiButtonEmpty__content"
             >
-              View data
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Remove
+              </span>
             </span>
-          </span>
-        </button>
+          </button>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <button
+            aria-label="View Sample Data Set"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+            data-test-subj="launchSampleDataSetsample-data-set"
+            type="button"
+          >
+            <span
+              class="emotion-euiButtonDisplayContent"
+            >
+              <span
+                class="eui-textTruncate"
+              >
+                View data
+              </span>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -210,64 +225,72 @@ exports[`SampleDataCard installed renders without app links 1`] = `
 
 exports[`SampleDataCard not installed renders 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned emotion-euiPanel-grow-m-m-plain-hasShadow"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left"
   data-test-subj="sampleDataSetCardsample-data-set"
 >
   <div
-    class="euiCard__top"
+    class="euiCard__main emotion-euiCard__main-vertical"
   >
     <div
-      class="euiCard__image"
-    >
-      <img
-        alt=""
-        src="test-file-stub"
-      />
-    </div>
-  </div>
-  <div
-    class="euiCard__content"
-  >
-    <span
-      class="euiTitle euiCard__title emotion-euiTitle-s"
-      id="generated-idTitle"
-    >
-      Sample Data Set
-    </span>
-    <div
-      class="euiText euiCard__description emotion-euiText-s"
-      id="generated-idDescription"
-    >
-      <p>
-        This is a sample data set you can use.
-      </p>
-    </div>
-  </div>
-  <div
-    class="euiCard__footer"
-  >
-    <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiCard__top emotion-euiCard__top-vertical"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiCard__image emotion-euiCard__image"
       >
-        <button
-          aria-label="Add Sample Data Set"
-          class="euiButton euiButton--primary"
-          data-test-subj="addSampleDataSetsample-data-set"
-          type="button"
+        <img
+          alt=""
+          src="test-file-stub"
+        />
+      </div>
+    </div>
+    <div
+      class="euiCard__content emotion-euiCard__content-vertical"
+    >
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <span
+          class="emotion-euiCard__text-left"
         >
-          <span
-            class="euiButtonContent euiButton__content"
+          Sample Data Set
+        </span>
+      </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          This is a sample data set you can use.
+        </p>
+      </div>
+    </div>
+    <div
+      class="emotion-euiCard__footer"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <button
+            aria-label="Add Sample Data Set"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+            data-test-subj="addSampleDataSetsample-data-set"
+            type="button"
           >
             <span
-              class="euiButton__text"
+              class="emotion-euiButtonDisplayContent"
             >
-              Add data
+              <span
+                class="eui-textTruncate"
+              >
+                Add data
+              </span>
             </span>
-          </span>
-        </button>
+          </button>
+        </div>
       </div>
     </div>
   </div>

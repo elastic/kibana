@@ -15,6 +15,7 @@ import { LogQueryFields } from '../../metrics/types';
 import { InfraSource } from '../../sources';
 import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
+import { AdditionalContext } from '../common/utils';
 
 export type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean;
@@ -22,6 +23,7 @@ export type ConditionResult = InventoryMetricConditions & {
   currentValue: number;
   isNoData: boolean;
   isError: boolean;
+  context: AdditionalContext;
 };
 
 export const evaluateCondition = async ({
@@ -82,6 +84,14 @@ export const evaluateCondition = async ({
       isNoData: value === null,
       isError: value === undefined,
       currentValue: value.value,
+      context: {
+        cloud: value.cloud,
+        host: value.host,
+        container: value.container,
+        orchestrator: value.orchestrator,
+        labels: value.labels,
+        tags: value.tags,
+      },
     };
   }) as unknown; // Typescript doesn't seem to know what `throw` is doing
 

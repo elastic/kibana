@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { getBreakpoint } from '@elastic/eui';
+import { useCurrentEuiBreakpoint } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
@@ -58,6 +58,8 @@ export const NodesOverview = ({
   topMargin,
   showLoading,
 }: Props) => {
+  const currentBreakpoint = useCurrentEuiBreakpoint();
+
   const handleDrilldown = useCallback(
     (filter: string) => {
       onDrilldown({
@@ -102,7 +104,7 @@ export const NodesOverview = ({
   }
   const dataBounds = calculateBoundsFromNodes(nodes);
   const bounds = autoBounds ? dataBounds : boundsOverride;
-  const isStatic = ['xs', 's'].includes(getBreakpoint(window.innerWidth)!);
+  const isStatic = ['xs', 's'].includes(currentBreakpoint!);
 
   if (view === 'table') {
     return (

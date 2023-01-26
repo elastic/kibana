@@ -10,7 +10,7 @@ import {
   deleteUsersAndRoles,
 } from '../../../cases_api_integration/common/lib/authentication';
 
-import { loginUsers } from '../../../cases_api_integration/common/lib/utils';
+import { loginUsers } from '../../../cases_api_integration/common/lib/user_profiles';
 import { casesAllUser, obsCasesAllUser, secAllUser, users } from './common/users';
 import { roles } from './common/roles';
 import { FtrProviderContext } from '../../ftr_provider_context';

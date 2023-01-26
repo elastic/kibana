@@ -49,7 +49,7 @@ export default function (providerContext: FtrProviderContext) {
           supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx'),
           supertest.get(`/api/fleet/agents/agent4`).set('kbn-xsrf', 'xxx'),
         ]);
-        expect(agent1data.body.item.tags).to.eql(['tag1', 'newTag']);
+        expect(agent1data.body.item.tags).to.eql(['newTag', 'tag1']);
         expect(agent4data.body.item.tags).to.eql(['newTag']);
       });
 
@@ -68,50 +68,78 @@ export default function (providerContext: FtrProviderContext) {
         expect(agent2data.body.item.tags).to.eql(['existingTag']);
       });
 
-      it('should allow to update tags of multiple agents by kuery', async () => {
-        await supertest
+      async function pollResult(
+        actionId: string,
+        nbAgentsAck: number,
+        verifyActionResult: Function
+      ) {
+        await new Promise((resolve, reject) => {
+          let attempts = 0;
+          const intervalId = setInterval(async () => {
+            if (attempts > 4) {
+              clearInterval(intervalId);
+              reject('action timed out');
+            }
+            ++attempts;
+            const {
+              body: { items: actionStatuses },
+            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+            const action = actionStatuses.find((a: any) => a.actionId === actionId);
+            if (action && action.nbAgentsAck === nbAgentsAck) {
+              clearInterval(intervalId);
+              await verifyActionResult();
+              resolve({});
+            }
+          }, 1000);
+        }).catch((e) => {
+          throw e;
+        });
+      }
+
+      it('should bulk update tags of multiple agents by kuery - add', async () => {
+        const { body: actionBody } = await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
           .set('kbn-xsrf', 'xxx')
           .send({
             agents: 'active: true',
             tagsToAdd: ['newTag'],
-            tagsToRemove: ['existingTag'],
+            tagsToRemove: [],
           })
           .expect(200);
 
-        const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
-        expect(body.total).to.eql(4);
-        body.items.forEach((agent: any) => {
-          expect(agent.tags.includes('newTag')).to.be(true);
-          expect(agent.tags.includes('existingTag')).to.be(false);
-        });
+        const actionId = actionBody.actionId;
+
+        const verifyActionResult = async () => {
+          const { body } = await supertest
+            .get(`/api/fleet/agents?kuery=tags:newTag`)
+            .set('kbn-xsrf', 'xxx');
+          expect(body.total).to.eql(4);
+        };
+
+        await pollResult(actionId, 4, verifyActionResult);
       });
 
-      it('should bulk update tags of multiple agents by kuery in batches', async () => {
-        const { body: updatedBody } = await supertest
+      it('should bulk update tags of multiple agents by kuery - remove', async () => {
+        const { body: actionBody } = await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
           .set('kbn-xsrf', 'xxx')
           .send({
             agents: 'active: true',
-            tagsToAdd: ['newTag'],
+            tagsToAdd: [],
             tagsToRemove: ['existingTag'],
-            batchSize: 2,
           })
           .expect(200);
 
-        expect(updatedBody).to.eql({
-          agent1: { success: true },
-          agent2: { success: true },
-          agent3: { success: true },
-          agent4: { success: true },
-        });
+        const actionId = actionBody.actionId;
 
-        const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
-        expect(body.total).to.eql(4);
-        body.items.forEach((agent: any) => {
-          expect(agent.tags.includes('newTag')).to.be(true);
-          expect(agent.tags.includes('existingTag')).to.be(false);
-        });
+        const verifyActionResult = async () => {
+          const { body } = await supertest
+            .get(`/api/fleet/agents?kuery=tags:existingTag`)
+            .set('kbn-xsrf', 'xxx');
+          expect(body.total).to.eql(0);
+        };
+
+        await pollResult(actionId, 2, verifyActionResult);
       });
 
       it('should return a 403 if user lacks fleet all permissions', async () => {
@@ -140,7 +168,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         // attempt to update tags of agent in hosted agent policy
-        const { body } = await supertest
+        await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -149,14 +177,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(body).to.eql({
-          agent1: {
-            success: false,
-            error: `Cannot modify tags on a hosted agent in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`,
-          },
-          agent2: { success: true },
-        });
-
         const [agent1data, agent2data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent1`),
           supertest.get(`/api/fleet/agents/agent2`),
@@ -164,6 +184,13 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(agent1data.body.item.tags.includes('newTag')).to.be(false);
         expect(agent2data.body.item.tags.includes('newTag')).to.be(true);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+        expect(actionStatus.status).to.eql('COMPLETE');
+        expect(actionStatus.nbAgentsAck).to.eql(1);
       });
     });
   });

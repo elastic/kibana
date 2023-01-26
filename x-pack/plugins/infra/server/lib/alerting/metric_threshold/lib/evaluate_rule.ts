@@ -10,10 +10,12 @@ import moment from 'moment';
 import type { Logger } from '@kbn/logging';
 import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
-import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
+import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
+import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
+import { AdditionalContext } from '../../common/utils';
 
 export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];
@@ -29,6 +31,8 @@ export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
   shouldFire: boolean;
   shouldWarn: boolean;
   isNoData: boolean;
+  bucketKey: Record<string, string>;
+  context?: AdditionalContext;
 };
 
 export const evaluateRule = async <Params extends EvaluatedRuleParams = EvaluatedRuleParams>(
@@ -40,7 +44,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   logger: Logger,
   lastPeriodEnd?: number,
   timeframe?: { start?: number; end: number },
-  missingGroups: string[] = []
+  missingGroups: MissingGroupsRecord[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
   const { criteria, groupBy, filterQuery } = params;
 
@@ -69,12 +73,24 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         lastPeriodEnd
       );
 
-      for (const missingGroup of missingGroups) {
-        if (currentValues[missingGroup] == null) {
-          currentValues[missingGroup] = {
+      const verifiedMissingGroups = await checkMissingGroups(
+        esClient,
+        criterion,
+        config.metricAlias,
+        groupBy,
+        filterQuery,
+        logger,
+        calculatedTimerange,
+        missingGroups
+      );
+
+      for (const missingGroup of verifiedMissingGroups) {
+        if (currentValues[missingGroup.key] == null) {
+          currentValues[missingGroup.key] = {
             value: null,
             trigger: false,
             warn: false,
+            bucketKey: missingGroup.bucketKey,
           };
         }
       }
@@ -91,6 +107,15 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
             shouldFire: result.trigger,
             shouldWarn: result.warn,
             isNoData: result.value === null,
+            bucketKey: result.bucketKey,
+            context: {
+              cloud: result.cloud,
+              host: result.host,
+              container: result.container,
+              orchestrator: result.orchestrator,
+              labels: result.labels,
+              tags: result.tags,
+            },
           };
         }
       }

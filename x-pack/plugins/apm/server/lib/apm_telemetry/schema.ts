@@ -118,6 +118,8 @@ const apmPerAgentSchema: Pick<
 
 export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
   service_id: keyword,
+  num_service_nodes: long,
+  num_transaction_types: long,
   timed_out: { type: 'boolean' },
   cloud: {
     availability_zones: { type: 'array', items: { type: 'keyword' } },
@@ -191,7 +193,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     span: timeframeMapSchema,
     error: timeframeMapSchema,
     metric: timeframeMapSchema,
-    sourcemap: timeframeMapSchema,
     onboarding: timeframeMapSchema,
     agent_configuration: timeframeMapAllSchema,
     max_transaction_groups_per_service: timeframeMapSchema,
@@ -219,12 +220,29 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     transaction: { ms: long },
     error: { ms: long },
     metric: { ms: long },
-    sourcemap: { ms: long },
     onboarding: { ms: long },
   },
   integrations: { ml: { all_jobs_count: long } },
 
   indices: {
+    metric: {
+      shards: { total: long },
+      all: {
+        total: {
+          docs: { count: long },
+          store: { size_in_bytes: long },
+        },
+      },
+    },
+    traces: {
+      shards: { total: long },
+      all: {
+        total: {
+          docs: { count: long },
+          store: { size_in_bytes: long },
+        },
+      },
+    },
     shards: { total: long },
     all: {
       total: {
@@ -235,6 +253,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
   },
   service_groups: {
     kuery_fields: { type: 'array', items: { type: 'keyword' } },
+    total: long,
   },
   per_service: { type: 'array', items: { ...apmPerServiceSchema } },
   tasks: {

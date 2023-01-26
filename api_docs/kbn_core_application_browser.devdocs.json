@@ -46,6 +46,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -57,7 +58,8 @@
               "\nThe unique identifier of the application.\n\nCan only be composed of alphanumeric characters, `-`, `:` and `_`"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -69,7 +71,8 @@
               "\nThe title of the application."
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -81,11 +84,18 @@
               "\nThe category definition of the product\nSee {@link AppCategory}\nSee DEFAULT_APP_CATEGORIES for more reference"
             ],
             "signature": [
-              "AppCategory",
+              {
+                "pluginId": "@kbn/core-application-common",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationCommonPluginApi",
+                "section": "def-common.AppCategory",
+                "text": "AppCategory"
+              },
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -107,7 +117,8 @@
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -129,7 +140,8 @@
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -144,7 +156,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -159,7 +172,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -183,7 +197,8 @@
               "> | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -196,11 +211,18 @@
             ],
             "signature": [
               "Partial<",
-              "Capabilities",
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              },
               "> | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -215,7 +237,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -255,6 +278,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -275,7 +299,8 @@
                   "<HistoryLocationState>"
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -292,7 +317,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -307,7 +333,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -322,7 +349,8 @@
               "string[] | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -344,7 +372,8 @@
               "[] | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -360,6 +389,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -372,7 +402,7 @@
             ],
             "signature": [
               "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: ",
-              "ButtonColor",
+              "EuiButtonColor",
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-application-browser",
@@ -384,6 +414,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -399,6 +430,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -415,6 +447,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -431,6 +464,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -447,6 +481,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -459,11 +494,12 @@
                   "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
                 ],
                 "signature": [
-                  "ButtonColor",
+                  "EuiButtonColor",
                   " | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -490,6 +526,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -507,6 +544,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -526,7 +564,8 @@
               ".confirm"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -536,7 +575,8 @@
             "label": "text",
             "description": [],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -549,7 +589,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -562,7 +603,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -572,11 +614,12 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "ButtonColor",
+              "EuiButtonColor",
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -590,6 +633,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -607,6 +651,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -626,7 +671,8 @@
               ".default"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -640,6 +686,7 @@
         "description": [],
         "path": "packages/core/application/core-application-browser/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -663,6 +710,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -685,6 +733,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -714,6 +763,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -736,6 +786,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -753,6 +804,7 @@
         "description": [],
         "path": "packages/core/application/core-application-browser/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -767,7 +819,8 @@
               "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; }"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -791,7 +844,8 @@
               ">>"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -815,6 +869,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -828,6 +883,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -851,6 +907,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -878,6 +935,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -893,6 +951,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -916,6 +975,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -935,6 +995,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -948,6 +1009,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -959,6 +1021,7 @@
                 "description": [],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-application-browser",
@@ -971,7 +1034,8 @@
                       "string | undefined"
                     ],
                     "path": "packages/core/application/core-application-browser/src/contracts.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/core-application-browser",
@@ -984,7 +1048,8 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/core/application/core-application-browser/src/contracts.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/core-application-browser",
@@ -997,7 +1062,8 @@
                       "string | undefined"
                     ],
                     "path": "packages/core/application/core-application-browser/src/contracts.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -1018,7 +1084,8 @@
               "<string | undefined>"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1042,6 +1109,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_mount.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1056,7 +1124,8 @@
               "HTMLElement"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1078,7 +1147,8 @@
               "<HistoryLocationState>"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1094,18 +1164,46 @@
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
-            "references": []
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-application-browser-internal",
+                "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
+              },
+              {
+                "plugin": "@kbn/core-application-browser-mocks",
+                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
+              },
+              {
+                "plugin": "management",
+                "path": "src/plugins/management/public/application.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
+              },
+              {
+                "plugin": "kibanaOverview",
+                "path": "src/plugins/kibana_overview/public/application.tsx"
+              },
+              {
+                "plugin": "core",
+                "path": "src/core/public/mocks.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
             "id": "def-common.AppMountParameters.onAppLeave",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "onAppLeave",
             "description": [
-              "\nA function that can be used to register a handler that will be called\nwhen the user is leaving the current application, allowing to\nprompt a confirmation message before actually changing the page.\n\nThis will be called either when the user goes to another application, or when\ntrying to close the tab or manually changing the url.\n"
+              "\nA function that can be used to register a handler that will be called\nwhen the user is leaving the current application, allowing to\nprompt a confirmation message before actually changing the page.\n\nThis will be called either when the user goes to another application, or when\ntrying to close the tab or manually changing the url.\n\n"
             ],
             "signature": [
               "(handler: ",
@@ -1119,9 +1217,8 @@
               ") => void"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "references": [],
+            "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -1141,6 +1238,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_mount.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1157,11 +1255,18 @@
             ],
             "signature": [
               "(menuMount: ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement> | undefined) => void"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -1171,11 +1276,18 @@
                 "label": "menuMount",
                 "description": [],
                 "signature": [
-                  "MountPoint",
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
                   "<HTMLElement> | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_mount.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1193,11 +1305,18 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1213,6 +1332,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1227,7 +1347,8 @@
               "number | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1242,7 +1363,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1257,7 +1379,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1272,7 +1395,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1288,6 +1412,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1302,7 +1427,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1317,7 +1443,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1332,7 +1459,8 @@
               "unknown"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1347,7 +1475,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1362,7 +1491,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1377,7 +1507,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1393,6 +1524,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1407,7 +1539,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1422,7 +1555,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1437,7 +1571,8 @@
               "unknown"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1465,6 +1600,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1488,6 +1624,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -1503,6 +1640,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1524,6 +1662,7 @@
             ],
             "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -1538,6 +1677,7 @@
                 ],
                 "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1549,6 +1689,7 @@
                 "description": [],
                 "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-application-browser",
@@ -1561,7 +1702,8 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -1584,6 +1726,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1597,6 +1740,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1610,6 +1754,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1660,6 +1805,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1690,15 +1836,14 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
         "id": "def-common.AppLeaveHandler",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": [],
         "label": "AppLeaveHandler",
         "description": [
           "\nA handler that will be executed before leaving the application, either when\ngoing to another application or when closing the browser tab or manually changing\nthe url.\nShould return `confirm` to prompt a message to the user before leaving the page, or `default`\nto keep the default behavior (doing nothing).\n\nSee {@link AppMountParameters} for detailed usage examples.\n"
@@ -1722,9 +1867,8 @@
           }
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-        "deprecated": true,
-        "removeBy": "8.8.0",
-        "references": [],
+        "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1744,7 +1888,8 @@
               }
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1757,7 +1902,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1800,6 +1946,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_mount.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [
           "An unmounting function that will be called to unmount the application. See {@link AppUnmount }."
         ],
@@ -1824,7 +1971,8 @@
               "<HistoryLocationState>"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1843,6 +1991,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/app_mount.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -1865,7 +2014,7 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; tooltip?: string | undefined; searchable?: boolean | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -1881,10 +2030,11 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
+          " | undefined; defaultPath?: string | undefined; }"
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1917,6 +2067,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1937,7 +2088,8 @@
               "<unknown>"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1980,6 +2132,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2028,6 +2181,7 @@
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

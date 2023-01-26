@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
-import { getSimpleRuleOutput } from './get_simple_rule_output';
+import type { MachineLearningRule } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { getMockSharedResponseSchema } from './get_simple_rule_output';
+import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 
-export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => {
-  const rule = getSimpleRuleOutput(ruleId);
-  const { query, language, index, ...rest } = rule;
-
+const getBaseMlRuleOutput = (ruleId = 'rule-1'): MachineLearningRule => {
   return {
-    ...rest,
+    ...getMockSharedResponseSchema(ruleId),
     name: 'Simple ML Rule',
     description: 'Simple Machine Learning Rule',
     anomaly_threshold: 44,
     machine_learning_job_id: ['some_job_id'],
     type: 'machine_learning',
   };
+};
+
+export const getSimpleMlRuleOutput = (ruleId = 'rule-1') => {
+  return removeServerGeneratedProperties(getBaseMlRuleOutput(ruleId));
 };

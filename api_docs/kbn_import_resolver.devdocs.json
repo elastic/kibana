@@ -9,20 +9,29 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/import-resolver",
-        "id": "def-server.ImportResolver",
+        "id": "def-common.ImportResolver",
         "type": "Class",
         "tags": [],
         "label": "ImportResolver",
         "description": [],
         "path": "packages/kbn-import-resolver/src/import_resolver.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.ImportResolver.create",
+            "id": "def-common.ImportResolver.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -31,18 +40,19 @@
               "(repoRoot: string) => ",
               {
                 "pluginId": "@kbn/import-resolver",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnImportResolverPluginApi",
-                "section": "def-server.ImportResolver",
+                "section": "def-common.ImportResolver",
                 "text": "ImportResolver"
               }
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
-                "id": "def-server.ImportResolver.create.$1",
+                "id": "def-common.ImportResolver.create.$1",
                 "type": "string",
                 "tags": [],
                 "label": "repoRoot",
@@ -52,6 +62,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -59,7 +70,7 @@
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.ImportResolver.Unnamed",
+            "id": "def-common.ImportResolver.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -69,10 +80,11 @@
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
-                "id": "def-server.ImportResolver.Unnamed.$1",
+                "id": "def-common.ImportResolver.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "cwd",
@@ -82,11 +94,12 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/import-resolver",
-                "id": "def-server.ImportResolver.Unnamed.$2",
+                "id": "def-common.ImportResolver.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "pkgMap",
@@ -96,20 +109,24 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/import-resolver",
-                "id": "def-server.ImportResolver.Unnamed.$3",
+                "id": "def-common.ImportResolver.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
-                "label": "synthPkgMap",
+                "label": "pkgManifests",
                 "description": [],
                 "signature": [
-                  "PackageMap"
+                  "Map<string, ",
+                  "KibanaPackageManifest",
+                  ">"
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -117,7 +134,7 @@
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.ImportResolver.getPackageIdForPath",
+            "id": "def-common.ImportResolver.getPackageIdForPath",
             "type": "Function",
             "tags": [],
             "label": "getPackageIdForPath",
@@ -127,10 +144,11 @@
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
-                "id": "def-server.ImportResolver.getPackageIdForPath.$1",
+                "id": "def-common.ImportResolver.getPackageIdForPath.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -140,6 +158,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -147,7 +166,41 @@
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.ImportResolver.getAbsolutePackageDir",
+            "id": "def-common.ImportResolver.getPackageManifestForPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getPackageManifestForPath",
+            "description": [],
+            "signature": [
+              "(path: string) => ",
+              "KibanaPackageManifest",
+              " | undefined"
+            ],
+            "path": "packages/kbn-import-resolver/src/import_resolver.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/import-resolver",
+                "id": "def-common.ImportResolver.getPackageManifestForPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-import-resolver/src/import_resolver.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/import-resolver",
+            "id": "def-common.ImportResolver.getAbsolutePackageDir",
             "type": "Function",
             "tags": [],
             "label": "getAbsolutePackageDir",
@@ -157,10 +210,11 @@
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
-                "id": "def-server.ImportResolver.getAbsolutePackageDir.$1",
+                "id": "def-common.ImportResolver.getAbsolutePackageDir.$1",
                 "type": "string",
                 "tags": [],
                 "label": "pkgId",
@@ -170,6 +224,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -177,20 +232,47 @@
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.ImportResolver.isBazelPackage",
+            "id": "def-common.ImportResolver.isBazelPackage",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "isBazelPackage",
-            "description": [],
+            "description": [
+              "\nIs the package a bazel package?"
+            ],
             "signature": [
               "(pkgId: string) => boolean"
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
-            "deprecated": false,
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/repo-source-classifier",
+                "path": "packages/kbn-repo-source-classifier/src/repo_path.ts"
+              },
+              {
+                "plugin": "@kbn/eslint-plugin-imports",
+                "path": "packages/kbn-eslint-plugin-imports/src/rules/uniform_imports.ts"
+              },
+              {
+                "plugin": "@kbn/find-used-node-modules",
+                "path": "packages/kbn-find-used-node-modules/src/find_used_node_modules.ts"
+              },
+              {
+                "plugin": "@kbn/find-used-node-modules",
+                "path": "packages/kbn-find-used-node-modules/src/find_used_node_modules.test.ts"
+              },
+              {
+                "plugin": "@kbn/find-used-node-modules",
+                "path": "packages/kbn-find-used-node-modules/src/find_used_node_modules.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
-                "id": "def-server.ImportResolver.isBazelPackage.$1",
+                "id": "def-common.ImportResolver.isBazelPackage.$1",
                 "type": "string",
                 "tags": [],
                 "label": "pkgId",
@@ -200,6 +282,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -207,20 +290,23 @@
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.ImportResolver.isSyntheticPackage",
+            "id": "def-common.ImportResolver.getPkgManifest",
             "type": "Function",
             "tags": [],
-            "label": "isSyntheticPackage",
+            "label": "getPkgManifest",
             "description": [],
             "signature": [
-              "(pkgId: string) => boolean"
+              "(pkgId: string) => ",
+              "KibanaPackageManifest",
+              " | undefined"
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
-                "id": "def-server.ImportResolver.isSyntheticPackage.$1",
+                "id": "def-common.ImportResolver.getPkgManifest.$1",
                 "type": "string",
                 "tags": [],
                 "label": "pkgId",
@@ -230,6 +316,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -237,7 +324,7 @@
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.ImportResolver.resolve",
+            "id": "def-common.ImportResolver.resolve",
             "type": "Function",
             "tags": [],
             "label": "resolve",
@@ -248,19 +335,20 @@
               "(req: string, dirname: string) => ",
               {
                 "pluginId": "@kbn/import-resolver",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnImportResolverPluginApi",
-                "section": "def-server.ResolveResult",
+                "section": "def-common.ResolveResult",
                 "text": "ResolveResult"
               },
               " | null"
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
-                "id": "def-server.ImportResolver.resolve.$1",
+                "id": "def-common.ImportResolver.resolve.$1",
                 "type": "string",
                 "tags": [],
                 "label": "req",
@@ -270,11 +358,12 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/import-resolver",
-                "id": "def-server.ImportResolver.resolve.$2",
+                "id": "def-common.ImportResolver.resolve.$2",
                 "type": "string",
                 "tags": [],
                 "label": "dirname",
@@ -284,6 +373,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -296,7 +386,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/import-resolver",
-        "id": "def-server.getPackageRelativeImportReq",
+        "id": "def-common.getPackageRelativeImportReq",
         "type": "Function",
         "tags": [],
         "label": "getPackageRelativeImportReq",
@@ -306,10 +396,11 @@
         ],
         "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.getPackageRelativeImportReq.$1",
+            "id": "def-common.getPackageRelativeImportReq.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -319,6 +410,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -327,7 +419,7 @@
       },
       {
         "parentPluginId": "@kbn/import-resolver",
-        "id": "def-server.getRelativeImportReq",
+        "id": "def-common.getRelativeImportReq",
         "type": "Function",
         "tags": [],
         "label": "getRelativeImportReq",
@@ -337,10 +429,11 @@
         ],
         "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.getRelativeImportReq.$1",
+            "id": "def-common.getRelativeImportReq.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -350,6 +443,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -358,7 +452,7 @@
       },
       {
         "parentPluginId": "@kbn/import-resolver",
-        "id": "def-server.reduceImportRequest",
+        "id": "def-common.reduceImportRequest",
         "type": "Function",
         "tags": [],
         "label": "reduceImportRequest",
@@ -367,19 +461,20 @@
           "(req: string, type: ",
           {
             "pluginId": "@kbn/import-resolver",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnImportResolverPluginApi",
-            "section": "def-server.ImportType",
+            "section": "def-common.ImportType",
             "text": "ImportType"
           },
-          ", original: string | undefined) => string"
+          ", original: string | undefined, sourceExt: string | undefined) => string"
         ],
         "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.reduceImportRequest.$1",
+            "id": "def-common.reduceImportRequest.$1",
             "type": "string",
             "tags": [],
             "label": "req",
@@ -389,11 +484,12 @@
             ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.reduceImportRequest.$2",
+            "id": "def-common.reduceImportRequest.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
@@ -401,19 +497,20 @@
             "signature": [
               {
                 "pluginId": "@kbn/import-resolver",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnImportResolverPluginApi",
-                "section": "def-server.ImportType",
+                "section": "def-common.ImportType",
                 "text": "ImportType"
               }
             ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.reduceImportRequest.$3",
+            "id": "def-common.reduceImportRequest.$3",
             "type": "string",
             "tags": [],
             "label": "original",
@@ -423,6 +520,22 @@
             ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/import-resolver",
+            "id": "def-common.reduceImportRequest.$4",
+            "type": "string",
+            "tags": [],
+            "label": "sourceExt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -433,7 +546,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/import-resolver",
-        "id": "def-server.BuiltInResult",
+        "id": "def-common.BuiltInResult",
         "type": "Interface",
         "tags": [],
         "label": "BuiltInResult",
@@ -442,10 +555,11 @@
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.BuiltInResult.type",
+            "id": "def-common.BuiltInResult.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -454,14 +568,15 @@
               "\"built-in\""
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/import-resolver",
-        "id": "def-server.FileResult",
+        "id": "def-common.FileResult",
         "type": "Interface",
         "tags": [],
         "label": "FileResult",
@@ -470,10 +585,11 @@
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.FileResult.type",
+            "id": "def-common.FileResult.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -482,21 +598,37 @@
               "\"file\""
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.FileResult.absolute",
+            "id": "def-common.FileResult.absolute",
             "type": "string",
             "tags": [],
             "label": "absolute",
             "description": [],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.FileResult.nodeModule",
+            "id": "def-common.FileResult.pkgId",
+            "type": "string",
+            "tags": [],
+            "label": "pkgId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-import-resolver/src/resolve_result.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/import-resolver",
+            "id": "def-common.FileResult.nodeModule",
             "type": "string",
             "tags": [],
             "label": "nodeModule",
@@ -505,11 +637,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.FileResult.prefix",
+            "id": "def-common.FileResult.prefix",
             "type": "string",
             "tags": [],
             "label": "prefix",
@@ -518,11 +651,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.FileResult.postfix",
+            "id": "def-common.FileResult.postfix",
             "type": "string",
             "tags": [],
             "label": "postfix",
@@ -531,14 +665,15 @@
               "string | undefined"
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/import-resolver",
-        "id": "def-server.IgnoreResult",
+        "id": "def-common.IgnoreResult",
         "type": "Interface",
         "tags": [],
         "label": "IgnoreResult",
@@ -547,10 +682,11 @@
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.IgnoreResult.type",
+            "id": "def-common.IgnoreResult.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -559,14 +695,15 @@
               "\"ignore\""
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/import-resolver",
-        "id": "def-server.OptionalDepResult",
+        "id": "def-common.OptionalDepResult",
         "type": "Interface",
         "tags": [],
         "label": "OptionalDepResult",
@@ -575,10 +712,11 @@
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.OptionalDepResult.type",
+            "id": "def-common.OptionalDepResult.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -587,14 +725,15 @@
               "\"optional-and-missing\""
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/import-resolver",
-        "id": "def-server.TypesResult",
+        "id": "def-common.TypesResult",
         "type": "Interface",
         "tags": [],
         "label": "TypesResult",
@@ -603,10 +742,11 @@
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.TypesResult.type",
+            "id": "def-common.TypesResult.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -615,17 +755,19 @@
               "\"@types\""
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-server.TypesResult.module",
+            "id": "def-common.TypesResult.module",
             "type": "string",
             "tags": [],
             "label": "module",
             "description": [],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -635,7 +777,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/import-resolver",
-        "id": "def-server.ImportType",
+        "id": "def-common.ImportType",
         "type": "Type",
         "tags": [],
         "label": "ImportType",
@@ -645,11 +787,12 @@
         ],
         "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/import-resolver",
-        "id": "def-server.ResolveResult",
+        "id": "def-common.ResolveResult",
         "type": "Type",
         "tags": [],
         "label": "ResolveResult",
@@ -659,57 +802,50 @@
         "signature": [
           {
             "pluginId": "@kbn/import-resolver",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnImportResolverPluginApi",
-            "section": "def-server.BuiltInResult",
+            "section": "def-common.BuiltInResult",
             "text": "BuiltInResult"
           },
           " | ",
           {
             "pluginId": "@kbn/import-resolver",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnImportResolverPluginApi",
-            "section": "def-server.IgnoreResult",
+            "section": "def-common.IgnoreResult",
             "text": "IgnoreResult"
           },
           " | ",
           {
             "pluginId": "@kbn/import-resolver",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnImportResolverPluginApi",
-            "section": "def-server.TypesResult",
+            "section": "def-common.TypesResult",
             "text": "TypesResult"
           },
           " | ",
           {
             "pluginId": "@kbn/import-resolver",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnImportResolverPluginApi",
-            "section": "def-server.FileResult",
+            "section": "def-common.FileResult",
             "text": "FileResult"
           },
           " | ",
           {
             "pluginId": "@kbn/import-resolver",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnImportResolverPluginApi",
-            "section": "def-server.OptionalDepResult",
+            "section": "def-common.OptionalDepResult",
             "text": "OptionalDepResult"
           }
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

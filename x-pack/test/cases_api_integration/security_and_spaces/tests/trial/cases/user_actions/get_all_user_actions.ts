@@ -7,23 +7,28 @@
 
 import http from 'http';
 import expect from '@kbn/expect';
-import { UserActionWithResponse, PushedUserAction } from '@kbn/cases-plugin/common/api';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { UserActionWithResponse, PushedUserAction, User } from '@kbn/cases-plugin/common/api';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { defaultUser } from '../../../../../common/lib/mock';
+import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
 import {
-  createCaseWithConnector,
+  createCase,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
   deleteConfiguration,
-  getCaseUserActions,
-  getServiceNowSimulationServer,
   pushCase,
+  updateCase,
   updateConfiguration,
 } from '../../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../../common/lib/user_actions';
+import {
+  createCaseWithConnector,
+  getServiceNowSimulationServer,
+} from '../../../../../common/lib/connectors';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
+import { setupSuperUserProfile } from '../../../../../common/lib/user_profiles';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -112,6 +117,93 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusUserAction.type).to.eql('status');
       expect(statusUserAction.action).to.eql('update');
       expect(statusUserAction.payload).to.eql({ status: 'closed' });
+    });
+
+    it('creates an add and delete assignees user action', async () => {
+      const theCase = await createCase(
+        supertest,
+        getPostCaseRequest({ assignees: [{ uid: '1' }] })
+      );
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: theCase.id,
+              version: theCase.version,
+              assignees: [{ uid: '2' }, { uid: '3' }],
+            },
+          ],
+        },
+      });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const addAssigneesUserAction = userActions[1];
+      const deleteAssigneesUserAction = userActions[2];
+
+      expect(userActions.length).to.eql(3);
+      expect(addAssigneesUserAction.type).to.eql('assignees');
+      expect(addAssigneesUserAction.action).to.eql('add');
+      expect(addAssigneesUserAction.payload).to.eql({ assignees: [{ uid: '2' }, { uid: '3' }] });
+      expect(deleteAssigneesUserAction.type).to.eql('assignees');
+      expect(deleteAssigneesUserAction.action).to.eql('delete');
+      expect(deleteAssigneesUserAction.payload).to.eql({ assignees: [{ uid: '1' }] });
+    });
+
+    describe('user profile uid', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+      let headers: Record<string, string>;
+      let superUserWithProfile: User;
+      let superUserInfo: User;
+
+      before(async () => {
+        ({ headers, superUserInfo, superUserWithProfile } = await setupSuperUserProfile(
+          getService
+        ));
+      });
+
+      it('sets the profile uid', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest: supertestWithoutAuth,
+          serviceNowSimulatorURL,
+          actionsRemover,
+          auth: null,
+          headers,
+        });
+
+        await pushCase({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+          auth: null,
+          headers,
+        });
+
+        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const pushUserAction = userActions[1] as UserActionWithResponse<PushedUserAction>;
+
+        expect(pushUserAction.payload.externalService.pushed_by).to.eql(superUserWithProfile);
+      });
+
+      it('falls back to authc to get the user information when the profile uid is not available', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest: supertestWithoutAuth,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        await pushCase({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+        });
+
+        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const pushUserAction = userActions[1] as UserActionWithResponse<PushedUserAction>;
+
+        expect(pushUserAction.payload.externalService.pushed_by).to.eql(superUserInfo);
+      });
     });
   });
 };

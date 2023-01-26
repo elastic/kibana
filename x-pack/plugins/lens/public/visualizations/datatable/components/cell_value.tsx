@@ -6,11 +6,11 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import classNames from 'classnames';
 import type { FormatFactory } from '../../../../common';
-import { getOriginalId } from '../../../../common/expressions';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { ColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import { getContrastColor, getNumericValue } from '../../../shared_components/coloring/utils';
@@ -25,13 +25,16 @@ export const createGridCell = (
   // Changing theme requires a full reload of the page, so we can cache here
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
-    const { table, alignments, minMaxByColumnId, getColorForValue } = useContext(DataContext);
+    const { table, alignments, minMaxByColumnId, getColorForValue, handleFilterClick } =
+      useContext(DataContext);
     const rowValue = table?.rows[rowIndex]?.[columnId];
-    const content = formatters[columnId]?.convert(rowValue, 'html');
-    const currentAlignment = alignments && alignments[columnId];
 
-    const { colorMode, palette } =
-      columnConfig.columns.find(({ columnId: id }) => id === columnId) || {};
+    const colIndex = columnConfig.columns.findIndex(({ columnId: id }) => id === columnId);
+    const { colorMode, palette, oneClickFilter } = columnConfig.columns[colIndex] || {};
+    const filterOnClick = oneClickFilter && handleFilterClick;
+
+    const content = formatters[columnId]?.convert(rowValue, filterOnClick ? 'text' : 'html');
+    const currentAlignment = alignments && alignments[columnId];
 
     useEffect(() => {
       const originalId = getOriginalId(columnId);
@@ -68,6 +71,25 @@ export const createGridCell = (
       };
     }, [rowValue, columnId, setCellProps, colorMode, palette, minMaxByColumnId, getColorForValue]);
 
+    if (filterOnClick) {
+      return (
+        <div
+          data-test-subj="lnsTableCellContent"
+          className={classNames({
+            'lnsTableCell--multiline': fitRowToContent,
+            [`lnsTableCell--${currentAlignment}`]: true,
+          })}
+        >
+          <EuiLink
+            onClick={() => {
+              handleFilterClick?.(columnId, rowValue, colIndex, rowIndex);
+            }}
+          >
+            {content}
+          </EuiLink>
+        </div>
+      );
+    }
     return (
       <div
         /*

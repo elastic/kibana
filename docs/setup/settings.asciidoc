@@ -80,8 +80,17 @@ configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enable
 *Default: `true`*
 
 [[elasticsearch-maxSockets]] `elasticsearch.maxSockets`::
-The maximum number of sockets that can be used for communications with elasticsearch.
+The maximum number of sockets that can be used for communications with {es}.
 *Default: `Infinity`*
+
+
+[[elasticsearch-maxIdleSockets]] `elasticsearch.maxIdleSockets`::
+The maximum number of idle sockets to keep open between {kib} and {es}. If more sockets become idle, they will be closed.
+*Default: `256`*
+
+[[elasticsearch-idleSocketTimeout]] `elasticsearch.idleSocketTimeout`::
+The timeout for idle sockets kept open between {kib} and {es}. If the socket is idle for longer than this timeout, it will be closed. If you have a transparent proxy between {kib} and {es} be sure to set this value lower than or equal to the proxy's timeout.
+*Default: `60s`*
 
 `elasticsearch.customHeaders`::
  | Header names and values to send to {es}. Any custom headers cannot be
@@ -316,6 +325,10 @@ experimental[] Indicates which roles to configure the {kib} process with, which 
 run {kib} in different modes. Valid options are `background_tasks` and `ui`,
 or `*` to select all roles. *Default: `*`*
 
+`notifications.connectors.default.email`::
+Specifies the name of the connector that is used to send email notifications.
+In {ecloud}, the default value is `elastic-cloud-email`.
+
 [[path-data]] `path.data`::
 The path where {kib} stores persistent data
 not saved in {es}. *Default: `data`*
@@ -377,6 +390,11 @@ Specifies an array of trusted hostnames, such as the {kib} host, or a reverse
 proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header.
 This setting may not be used when <<server-compression, `server.compression.enabled`>> is set to `false`. *Default: `none`*
 
+`server.compression.brotli.enabled`::
+Set to `true` to enable brotli (br) compression format.
+Note: browsers not supporting brotli compression will fallback to using gzip instead. 
+This setting may not be used when <<server-compression, `server.compression.enabled`>> is set to `false`. *Default: `false`*
+
 [[server-securityResponseHeaders-strictTransportSecurity]] `server.securityResponseHeaders.strictTransportSecurity`::
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`]
 header is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or
@@ -403,6 +421,10 @@ Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/C
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
 {kib} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors:
 'self'` directive to the `Content-Security-Policy` response header and adds the `X-Frame-Options: SAMEORIGIN` response header. *Default:* `false`
+
+[[server-securityResponseHeaders-crossOriginOpenerPolicy]] `server.securityResponseHeaders.crossOriginOpenerPolicy`::
+Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy[`Cross-Origin-Opener-Policy`] header is used in all
+responses to the client from the {kib} server, and specifies what value is used. Allowed values are `unsafe-none`, `same-origin-allow-popups`, `same-origin`, or `null`. To disable, set to `null`. *Default:* `"same-origin"`
 
 `server.customResponseHeaders` {ess-icon}::
 Header names and values to send on all responses to the client from the {kib} server. *Default: `{}`*

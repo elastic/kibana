@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFilterButton,
   EuiFilterSelectItem,
@@ -19,7 +19,7 @@ import styled from 'styled-components';
 
 interface FilterPopoverProps {
   buttonLabel: string;
-  onSelectedOptionsChanged: Dispatch<SetStateAction<string[]>>;
+  onSelectedOptionsChanged: (value: string[]) => void;
   options: string[];
   optionsEmptyLabel?: string;
   selectedOptions: string[];

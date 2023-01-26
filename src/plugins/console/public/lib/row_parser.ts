@@ -57,8 +57,9 @@ export default class RowParser {
       return MODE.BETWEEN_REQUESTS;
     } // empty line or a comment waiting for a new req to start
 
-    if (line.indexOf('}', line.length - 1) >= 0) {
-      // check for a multi doc request (must start a new json doc immediately after this one end.
+    // Check for multi doc requests
+    if (line.endsWith('}') && !this.isRequestLine(line)) {
+      // check for a multi doc request must start a new json doc immediately after this one end.
       lineNumber++;
       if (lineNumber < linesCount + 1) {
         line = (this.editor.getLineValue(lineNumber) || '').trim();
@@ -162,5 +163,10 @@ export default class RowParser {
         token.type === 'comment.line' ||
         token.type === 'comment.block')
     );
+  }
+
+  isRequestLine(line: string) {
+    const methods = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'];
+    return methods.some((m) => line.startsWith(m));
   }
 }

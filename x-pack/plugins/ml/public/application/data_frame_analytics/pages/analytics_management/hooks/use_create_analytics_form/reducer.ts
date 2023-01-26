@@ -7,12 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { memoize, isEqual } from 'lodash';
+
 // @ts-ignore
 import numeral from '@elastic/numeral';
-import { indexPatterns } from '@kbn/data-plugin/public';
-import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
-import { collapseLiteralStrings } from '../../../../../../../shared_imports';
+import { indexPatterns } from '@kbn/data-plugin/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
+
+import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
 import {
@@ -47,6 +49,8 @@ import {
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { isAdvancedConfig } from '../../components/action_clone/clone_action_name';
+
+const { collapseLiteralStrings } = XJson;
 
 const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(
   ', '

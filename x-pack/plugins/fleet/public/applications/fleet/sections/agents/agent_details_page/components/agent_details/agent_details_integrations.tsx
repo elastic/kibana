@@ -20,11 +20,13 @@ import {
   EuiBadge,
   useEuiTheme,
 } from '@elastic/eui';
+import { filter } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../types';
+import type { FleetServerAgentComponentUnit } from '../../../../../../../../common/types/models/agent';
 import { useLink, useUIExtension } from '../../../../../hooks';
 import { ExtensionWrapper, PackageIcon } from '../../../../../components';
 
@@ -94,10 +96,15 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
   const { getHref } = useLink();
   const theme = useEuiTheme();
 
-  const [showNeedsAttentionBadge, setShowNeedsAttentionBadge] = useState(false);
+  const [isAttentionBadgeNeededForPolicyResponse, setIsAttentionBadgeNeededForPolicyResponse] =
+    useState(false);
   const extensionView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-response'
+  );
+  const genericErrorsListExtensionView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-generic-errors-list'
   );
 
   const policyResponseExtensionView = useMemo(() => {
@@ -106,12 +113,40 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
         <ExtensionWrapper>
           <extensionView.Component
             agent={agent}
-            onShowNeedsAttentionBadge={setShowNeedsAttentionBadge}
+            onShowNeedsAttentionBadge={setIsAttentionBadgeNeededForPolicyResponse}
           />
         </ExtensionWrapper>
       )
     );
   }, [agent, extensionView]);
+
+  const packageErrors = useMemo(() => {
+    const packageErrorUnits: FleetServerAgentComponentUnit[] = [];
+    if (!agent.components) {
+      return packageErrorUnits;
+    }
+
+    const filteredPackageComponents = filter(agent.components, {
+      type: packagePolicy.package?.name,
+    });
+
+    filteredPackageComponents.forEach((component) => {
+      packageErrorUnits.push(...filter(component.units, { status: 'failed' }));
+    });
+    return packageErrorUnits;
+  }, [agent.components, packagePolicy]);
+
+  const showNeedsAttentionBadge = isAttentionBadgeNeededForPolicyResponse || !!packageErrors.length;
+
+  const genericErrorsListExtensionViewWrapper = useMemo(() => {
+    return (
+      genericErrorsListExtensionView && (
+        <ExtensionWrapper>
+          <genericErrorsListExtensionView.Component packageErrors={packageErrors} />
+        </ExtensionWrapper>
+      )
+    );
+  }, [packageErrors, genericErrorsListExtensionView]);
 
   const inputItems = [
     {
@@ -217,6 +252,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
         aria-labelledby="inputsTreeView"
       />
       {policyResponseExtensionView}
+      {genericErrorsListExtensionViewWrapper}
       <EuiSpacer />
     </CollapsablePanel>
   );

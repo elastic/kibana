@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseResponse } from '../../../common/api';
+import type { CaseResponse } from '../../../common/api';
 import { format } from './format';
 
 describe('Jira formatter', () => {

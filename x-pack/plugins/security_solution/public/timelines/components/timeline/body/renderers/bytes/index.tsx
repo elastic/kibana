@@ -24,7 +24,8 @@ export const Bytes = React.memo<{
   isAggregatable: boolean;
   isDraggable: boolean;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, fieldType, isAggregatable, isDraggable, value }) =>
+  scopeId?: string;
+}>(({ contextId, eventId, fieldName, fieldType, isAggregatable, isDraggable, value, scopeId }) =>
   isDraggable ? (
     <DefaultDraggable
       id={`bytes-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
@@ -36,6 +37,7 @@ export const Bytes = React.memo<{
       field={fieldName}
       tooltipContent={null}
       value={value}
+      scopeId={scopeId}
     >
       <PreferenceFormattedBytes value={`${value}`} />
     </DefaultDraggable>

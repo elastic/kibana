@@ -27,7 +27,7 @@ describe('Field editor Preview panel', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -745,7 +745,13 @@ describe('Field editor Preview panel', () => {
       } = testBed;
 
       const expectedParamsToFetchClusterData = {
-        params: { index: indexPatternNameForTest, body: { size: 50 } },
+        params: {
+          index: indexPatternNameForTest,
+          body: {
+            fields: ['*'],
+            size: 50,
+          },
+        },
       };
 
       // Initial state
@@ -770,6 +776,7 @@ describe('Field editor Preview panel', () => {
       expect(searchMeta.lastCallParams).toEqual({
         params: {
           body: {
+            fields: ['*'],
             query: {
               ids: {
                 values: [nextId],
@@ -811,6 +818,50 @@ describe('Field editor Preview panel', () => {
       await waitForUpdates(); // wait for docs to be fetched
       expect(exists('isUpdatingIndicator')).toBe(false);
       expect(exists('previewNotAvailableCallout')).toBe(true);
+    });
+  });
+
+  describe('composite runtime field', () => {
+    test('should display composite editor when composite type is selected', async () => {
+      testBed = await setup();
+      const {
+        exists,
+        actions: { fields, waitForUpdates },
+      } = testBed;
+      fields.updateType('composite', 'Composite');
+      await waitForUpdates();
+      expect(exists('compositeEditor')).toBe(true);
+    });
+
+    test('should show composite field types and update appropriately', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: { 'composite_field.a': [1] } });
+      testBed = await setup();
+      const {
+        exists,
+        actions: { fields, waitForUpdates },
+      } = testBed;
+      await fields.updateType('composite', 'Composite');
+      await fields.updateScript("emit('a',1)");
+      await waitForUpdates();
+      expect(exists('typeField_0')).toBe(true);
+
+      // increase the number of fields
+      httpRequestsMockHelpers.setFieldPreviewResponse({
+        values: { 'composite_field.a': [1], 'composite_field.b': [1] },
+      });
+      await fields.updateScript("emit('a',1); emit('b',1)");
+      await waitForUpdates();
+      expect(exists('typeField_0')).toBe(true);
+      expect(exists('typeField_1')).toBe(true);
+
+      // decrease the number of fields
+      httpRequestsMockHelpers.setFieldPreviewResponse({
+        values: { 'composite_field.a': [1] },
+      });
+      await fields.updateScript("emit('a',1)");
+      await waitForUpdates();
+      expect(exists('typeField_0')).toBe(true);
+      expect(exists('typeField_1')).toBe(false);
     });
   });
 });

@@ -1326,7 +1326,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
               >
                 <button
                   aria-label="Previous Page"
-                  className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                  className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-disabled-hoverStyles"
                   data-test-subj="pageControlsPrevPage"
                   disabled={true}
                   onClick={[Function]}
@@ -1347,7 +1347,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  className="euiButtonEmpty euiButtonEmpty--ghost euiButtonEmpty--small"
+                  className="euiButtonEmpty euiButtonEmpty--small css-14l66eu-empty-text"
                   data-test-subj="pageControlsCurrentPage"
                   disabled={false}
                   onClick={[Function]}
@@ -1360,8 +1360,12 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                       className="euiButtonEmpty__text"
                     >
                       <div
-                        className="euiText emotion-euiText-s-euiTextColor-ghost"
-                        style={Object {}}
+                        className="euiText emotion-euiText-s-euiTextColor-customColor"
+                        style={
+                          Object {
+                            "color": "text",
+                          }
+                        }
                       >
                         Page 
                         1
@@ -1376,8 +1380,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
               >
                 <button
                   aria-label="Next Page"
-                  className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                  className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
                   data-test-subj="pageControlsNextPage"
+                  disabled={false}
                   onClick={[Function]}
                   type="button"
                 >
@@ -1408,7 +1413,8 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                   >
                     <button
                       aria-label="Settings"
-                      className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                      className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+                      disabled={false}
                       onClick={[Function]}
                       type="button"
                     >
@@ -1578,7 +1584,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
               >
                 <button
                   aria-label="Previous Page"
-                  className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                  className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-disabled-hoverStyles"
                   data-test-subj="pageControlsPrevPage"
                   disabled={true}
                   onClick={[Function]}
@@ -1599,7 +1605,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  className="euiButtonEmpty euiButtonEmpty--ghost euiButtonEmpty--small"
+                  className="euiButtonEmpty euiButtonEmpty--small css-14l66eu-empty-text"
                   data-test-subj="pageControlsCurrentPage"
                   disabled={false}
                   onClick={[Function]}
@@ -1612,8 +1618,12 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                       className="euiButtonEmpty__text"
                     >
                       <div
-                        className="euiText emotion-euiText-s-euiTextColor-ghost"
-                        style={Object {}}
+                        className="euiText emotion-euiText-s-euiTextColor-customColor"
+                        style={
+                          Object {
+                            "color": "text",
+                          }
+                        }
                       >
                         Page 
                         1
@@ -1627,7 +1637,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
               >
                 <button
                   aria-label="Next Page"
-                  className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                  className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-disabled-hoverStyles"
                   data-test-subj="pageControlsNextPage"
                   disabled={true}
                   onClick={[Function]}
@@ -1660,7 +1670,8 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                   >
                     <button
                       aria-label="Settings"
-                      className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                      className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+                      disabled={false}
                       onClick={[Function]}
                       type="button"
                     >

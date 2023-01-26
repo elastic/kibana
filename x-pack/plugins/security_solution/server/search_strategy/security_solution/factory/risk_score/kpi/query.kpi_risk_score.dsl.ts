@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { RiskScoreEntity, RiskScoreFields } from '../../../../../../common/search_strategy';
 import type { KpiRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildKpiRiskScoreQuery = ({
   defaultIndex,
   filterQuery,
-  aggBy,
+  entity,
 }: KpiRiskScoreRequestOptions) => {
   const filter = [...createQueryFilterClauses(filterQuery)];
 
@@ -24,12 +25,16 @@ export const buildKpiRiskScoreQuery = ({
       aggs: {
         risk: {
           terms: {
-            field: 'risk.keyword',
+            field:
+              entity === RiskScoreEntity.user ? RiskScoreFields.userRisk : RiskScoreFields.hostRisk,
           },
           aggs: {
             unique_entries: {
               cardinality: {
-                field: aggBy,
+                field:
+                  entity === RiskScoreEntity.user
+                    ? RiskScoreFields.userName
+                    : RiskScoreFields.hostName,
               },
             },
           },

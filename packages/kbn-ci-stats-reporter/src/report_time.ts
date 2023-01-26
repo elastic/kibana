@@ -19,7 +19,24 @@ export const getTimeReporter = (log: ToolingLog, group: string) => {
           group,
           id,
           ms: Date.now() - startTime,
-          meta,
+          meta: Object.fromEntries(
+            Object.entries(meta).flatMap(([k, v]) => {
+              const type = typeof v;
+              if (type === 'undefined') {
+                return [];
+              }
+
+              if (type === 'string' || type === 'number' || type === 'boolean') {
+                return [[k, v]];
+              }
+
+              if (Array.isArray(v) && v.every((i): i is string => typeof i === 'string')) {
+                return [[k, v]];
+              }
+
+              return [[k, JSON.stringify(v)]];
+            })
+          ),
         },
       ],
     });

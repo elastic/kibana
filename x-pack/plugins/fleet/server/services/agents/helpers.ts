@@ -7,17 +7,23 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { SearchHit } from '@kbn/core/types/elasticsearch';
+import type { SearchHit } from '@kbn/es-types';
 
-import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
-import { getAgentStatus } from '../../../common/services/agent_status';
+import { appContextService } from '..';
+
+import type { Agent, AgentSOAttributes, AgentStatus, FleetServerAgent } from '../../types';
 
 type FleetServerAgentESResponse =
   | estypes.GetGetResult<FleetServerAgent>
   | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
   | SearchHit<FleetServerAgent>;
 
-export function searchHitToAgent(hit: FleetServerAgentESResponse & { sort?: SortResults }): Agent {
+export function searchHitToAgent(
+  hit: FleetServerAgentESResponse & {
+    sort?: SortResults;
+    fields?: { status?: AgentStatus[] };
+  }
+): Agent {
   // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
   const agent: Agent = {
     id: hit._id,
@@ -29,7 +35,16 @@ export function searchHitToAgent(hit: FleetServerAgentESResponse & { sort?: Sort
     sort: hit.sort,
   };
 
-  agent.status = getAgentStatus(agent);
+  if (!hit.fields?.status?.length) {
+    appContextService
+      .getLogger()
+      .error(
+        'Agent status runtime field is missing, unable to get agent status for agent ' + agent.id
+      );
+  } else {
+    agent.status = hit.fields.status[0];
+  }
+
   return agent;
 }
 

@@ -36,10 +36,17 @@
             "text": "FullStoryShipper"
           },
           " implements ",
-          "IShipper"
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.IShipper",
+            "text": "IShipper"
+          }
         ],
         "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -51,7 +58,8 @@
               "Shipper's unique name"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -67,6 +75,7 @@
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -88,6 +97,7 @@
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -100,10 +110,17 @@
                   "{@link AnalyticsClientInitContext }"
                 ],
                 "signature": [
-                  "AnalyticsClientInitContext"
+                  {
+                    "pluginId": "@kbn/analytics-client",
+                    "scope": "common",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
+                    "section": "def-common.AnalyticsClientInitContext",
+                    "text": "AnalyticsClientInitContext"
+                  }
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -120,11 +137,18 @@
             ],
             "signature": [
               "(newContext: ",
-              "EventContext",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.EventContext",
+                "text": "EventContext"
+              },
               ") => void"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -136,10 +160,17 @@
                   "The full new context to set {@link EventContext }"
                 ],
                 "signature": [
-                  "EventContext"
+                  {
+                    "pluginId": "@kbn/analytics-client",
+                    "scope": "common",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
+                    "section": "def-common.EventContext",
+                    "text": "EventContext"
+                  }
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -159,6 +190,7 @@
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -174,6 +206,7 @@
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -190,11 +223,18 @@
             ],
             "signature": [
               "(events: ",
-              "Event",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.Event",
+                "text": "Event"
+              },
               "<Record<string, unknown>>[]) => void"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -206,14 +246,39 @@
                   "batched events {@link Event }"
                 ],
                 "signature": [
-                  "Event",
+                  {
+                    "pluginId": "@kbn/analytics-client",
+                    "scope": "common",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
+                    "section": "def-common.Event",
+                    "text": "Event"
+                  },
                   "<Record<string, unknown>>[]"
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-common.FullStoryShipper.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nFlushes all internal queues of the shipper.\nIt doesn't really do anything inside because this shipper doesn't hold any internal queues."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -230,6 +295,7 @@
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -267,6 +333,7 @@
         ],
         "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -281,7 +348,8 @@
               "string[] | undefined"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -297,6 +365,7 @@
         ],
         "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -308,7 +377,8 @@
               "\nThe FullStory account id."
             ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -323,7 +393,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -338,7 +409,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -353,7 +425,8 @@
               "boolean | undefined"
             ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -368,7 +441,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

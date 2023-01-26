@@ -6,84 +6,91 @@
  */
 
 import { format } from './formatter';
+import { DataStream } from '../../../../../../common/runtime_types';
+import { DEFAULT_FIELDS } from '../../../../../../common/constants/monitor_defaults';
 
 describe('format', () => {
-  const formValues = {
-    type: 'http',
-    form_monitor_type: 'http',
-    enabled: true,
-    schedule: {
-      number: '3',
-      unit: 'm',
-    },
-    'service.name': '',
-    tags: [],
-    timeout: '16',
-    name: 'Sample name',
-    locations: [
-      {
-        id: 'us_central',
-        isServiceManaged: true,
+  let formValues: Record<string, unknown>;
+  beforeEach(() => {
+    formValues = {
+      type: 'http',
+      form_monitor_type: 'http',
+      enabled: true,
+      schedule: {
+        number: '3',
+        unit: 'm',
       },
-    ],
-    namespace: 'default',
-    origin: 'ui',
-    __ui: {
-      is_tls_enabled: false,
-    },
-    urls: 'sample url',
-    max_redirects: '0',
-    password: '',
-    proxy_url: '',
-    'check.response.body.negative': [],
-    'check.response.body.positive': [],
-    'response.include_body': 'on_error',
-    'check.response.headers': {},
-    'response.include_headers': true,
-    'check.response.status': [],
-    'check.request.body': {
-      value: '',
-      type: 'text',
-    },
-    'check.request.headers': {},
-    'check.request.method': 'GET',
-    username: '',
-    'ssl.certificate_authorities': '',
-    'ssl.certificate': '',
-    'ssl.key': '',
-    'ssl.key_passphrase': '',
-    'ssl.verification_mode': 'full',
-    'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-    isTLSEnabled: false,
-    service: {
-      name: '',
-    },
-    check: {
-      request: {
-        method: 'GET',
-        headers: {},
-        body: {
-          type: 'text',
-          value: '',
+      'service.name': '',
+      tags: [],
+      timeout: '16',
+      name: 'Sample name',
+      locations: [
+        {
+          id: 'us_central',
+          isServiceManaged: true,
+        },
+      ],
+      namespace: 'default',
+      origin: 'ui',
+      __ui: {
+        is_tls_enabled: false,
+      },
+      urls: 'sample url',
+      max_redirects: '0',
+      password: '',
+      proxy_url: '',
+      'check.response.body.negative': [],
+      'check.response.body.positive': [],
+      'response.include_body': 'on_error',
+      'check.response.headers': {},
+      'response.include_headers': true,
+      'check.response.status': [],
+      'check.request.body': {
+        value: '',
+        type: 'text',
+      },
+      'check.request.headers': {},
+      'check.request.method': 'GET',
+      username: '',
+      'ssl.certificate_authorities': '',
+      'ssl.certificate': '',
+      'ssl.key': '',
+      'ssl.key_passphrase': '',
+      'ssl.verification_mode': 'full',
+      'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+      isTLSEnabled: false,
+      service: {
+        name: '',
+      },
+      check: {
+        request: {
+          method: 'GET',
+          headers: {},
+          body: {
+            type: 'text',
+            value: '',
+          },
+        },
+        response: {
+          status: [],
+          headers: {},
+          body: {
+            positive: [],
+            negative: [],
+          },
         },
       },
       response: {
-        status: [],
-        headers: {},
-        body: {
-          positive: [],
-          negative: [],
-        },
+        include_headers: true,
+        include_body: 'on_error',
       },
-    },
-    response: {
-      include_headers: true,
-      include_body: 'on_error',
-    },
-  };
+    };
+  });
 
-  it('correctly formats form fields to monitor type', () => {
+  it.each([[true], [false]])('correctly formats form fields to monitor type', (enabled) => {
+    formValues.enabled = enabled;
     expect(format(formValues)).toEqual({
+      ...DEFAULT_FIELDS[DataStream.HTTP],
       __ui: {
         is_tls_enabled: false,
       },
@@ -98,8 +105,9 @@ describe('format', () => {
       'check.response.body.positive': [],
       'check.response.headers': {},
       'check.response.status': [],
-      enabled: true,
+      enabled,
       form_monitor_type: 'http',
+      journey_id: '',
       locations: [
         {
           id: 'us_central',
@@ -129,7 +137,9 @@ describe('format', () => {
       timeout: '16',
       type: 'http',
       urls: 'sample url',
+      'url.port': null,
       username: '',
+      id: '',
     });
   });
 
@@ -216,6 +226,7 @@ describe('format', () => {
         },
       };
       expect(format(browserFormFields)).toEqual({
+        ...DEFAULT_FIELDS[DataStream.BROWSER],
         __ui: {
           script_source: {
             file_name: fileName,
@@ -278,24 +289,24 @@ describe('format', () => {
         type: 'browser',
         'url.port': null,
         urls: '',
+        id: '',
       });
     }
   );
 
-  it.each([
-    ['testCA', true],
-    ['', false],
-  ])('correctly formats form fields to monitor type', (certificateAuthorities, isTLSEnabled) => {
+  it.each([true, false])('correctly formats isTLSEnabled', (isTLSEnabled) => {
     expect(
       format({
         ...formValues,
+        isTLSEnabled,
         ssl: {
           // @ts-ignore next
           ...formValues.ssl,
-          certificate_authorities: certificateAuthorities,
+          certificate_authorities: 'mockCA',
         },
       })
     ).toEqual({
+      ...DEFAULT_FIELDS[DataStream.HTTP],
       __ui: {
         is_tls_enabled: isTLSEnabled,
       },
@@ -312,6 +323,7 @@ describe('format', () => {
       'check.response.status': [],
       enabled: true,
       form_monitor_type: 'http',
+      journey_id: '',
       locations: [
         {
           id: 'us_central',
@@ -332,7 +344,7 @@ describe('format', () => {
       },
       'service.name': '',
       'ssl.certificate': '',
-      'ssl.certificate_authorities': certificateAuthorities,
+      'ssl.certificate_authorities': 'mockCA',
       'ssl.key': '',
       'ssl.key_passphrase': '',
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
@@ -341,7 +353,9 @@ describe('format', () => {
       timeout: '16',
       type: 'http',
       urls: 'sample url',
+      'url.port': null,
       username: '',
+      id: '',
     });
   });
 });

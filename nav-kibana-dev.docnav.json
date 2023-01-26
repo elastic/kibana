@@ -26,6 +26,15 @@
       ]
     },
     {
+      "label": "Operations",
+      "items": [
+        {
+          "id": "kibDevDocsOpsOverview",
+          "label": "Overview"
+        }
+      ]
+    },
+    {
       "label": "Contributing",
       "items": [
         {
@@ -97,6 +106,10 @@
         },
         {
           "id": "kibDevDocsEmbeddables"
+        },
+        {
+          "id": "kibCloudExperimentsPlugin",
+          "label": "A/B testing on Elastic Cloud"
         }
       ]
     },
@@ -104,7 +117,7 @@
       "label": "Tutorials",
       "items": [
         {
-          "id": "kibDevTutorialAddingPerformanceMetrics"
+          "id": "kibDevTutorialAddingCustomPerformanceMetrics"
         },
         {
           "id": "kibDevTutorialSetupWindowsDevWSL"
@@ -127,6 +140,10 @@
         {
           "id": "kibDevTutorialDataSearchAndSessions",
           "label": "data.search"
+        },
+        {
+          "id": "kibDevTutorialFileService",
+          "label": "File service"
         },
         {
           "id": "kibDevTutorialDataViews"
@@ -158,6 +175,18 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibNovember2022ContributorNewsletter"
+        },
+        {
+          "id": "kibOctober2022ContributorNewsletter"
+        },
+        {
+          "id": "kibSeptember2022ContributorNewsletter"
+        },
+        {
+          "id": "kibAugust2022ContributorNewsletter"
+        },
         {
           "id": "kibJuly2022ContributorNewsletter"
         },
@@ -233,9 +262,6 @@
           "id": "kibCorePluginApi"
         },
         {
-          "id": "kibCoreChromePluginApi"
-        },
-        {
           "id": "kibFieldFormatsPluginApi"
         },
         {
@@ -303,6 +329,9 @@
         },
         {
           "id": "kibFileUploadPluginApi"
+        },
+        {
+          "id": "kibFilesPluginApi"
         },
         {
           "id": "kibFleetPluginApi"
@@ -432,145 +461,6 @@
         },
         {
           "id": "kibDevDocsOpsTest"
-        }
-      ]
-    },
-    {
-      "label": "Operations",
-      "items": [
-        {
-          "id": "kibDevDocsOpsOverview",
-          "label": "Overview"
-        },
-        {
-          "label": "Initiatives",
-          "items": [
-            {
-              "id": "kibDevDocsOpsPackages"
-            }
-          ]
-        },
-        {
-          "label": "CI",
-          "items": [
-            {
-              "id": "kibDevDocsOpsCiStats"
-            }
-          ]
-        },
-        {
-          "label": "Build tooling",
-          "items": [
-            {
-              "id": "kibDevDocsOpsKbnPm"
-            },
-            {
-              "id": "kibDevDocsOpsOptimizer"
-            },
-            {
-              "id": "kibDevDocsOpsBabelPreset"
-            },
-            {
-              "id": "kibDevDocsOpsTypeSummarizer"
-            },
-            {
-              "id": "kibDevDocsOpsBabelPluginSyntheticPackages"
-            },
-            {
-              "id": "kibDevDocsOpsUiSharedDepsNpm"
-            },
-            {
-              "id": "kibDevDocsOpsUiSharedDepsSrc"
-            },
-            {
-              "id": "kibDevDocsOpsPluginDiscovery"
-            }
-          ]
-        },
-        {
-          "label": "Linting & Validation",
-          "items": [
-            {
-              "id": "kibDevDocsOpsEslintConfig"
-            },
-            {
-              "id": "kibDevDocsOpsEslintPluginEslint"
-            },
-            {
-              "id": "kibDevDocsOpsEslintWithTypes"
-            },
-            {
-              "id": "kibDevDocsOpsEslintPluginImports"
-            },
-            {
-              "id": "kibDevDocsOpsEslintPluginDisable"
-            },
-            {
-              "id": "kibDevDocsOpsKbnYarnLockValidator"
-            }
-          ]
-        },
-        {
-          "label": "Utilities",
-          "items": [
-            {
-              "id": "kibDevDocsToolingLog"
-            },
-            {
-              "id": "kibDevDocsOpsJestSerializers"
-            },
-            {
-              "id": "kibDevDocsOpsExpect"
-            },
-            {
-              "id": "kibDevDocsOpsAmbientStorybookTypes"
-            },
-            {
-              "id": "kibDevDocsOpsAmbientUiTypes"
-            },
-            {
-              "id": "kibDevDocsOpsTestSubjSelector"
-            },
-            {
-              "id": "kibDevDocsOpsBazelRunner"
-            },
-            {
-              "id": "kibDevDocsOpsCliDevMode"
-            },
-            {
-              "id": "kibDevDocsOpsEs"
-            },
-            {
-              "id": "kibDevDocsOpsSomeDevLog"
-            },
-            {
-              "id": "kibDevDocsOpsDevCliRunner"
-            },
-            {
-              "id": "kibDevDocsOpsGetRepoFiles"
-            },
-            {
-              "id": "kibDevDocsOpsRepoSourceClassifier"
-            },
-            {
-              "id": "kibDevDocsOpsJsonc"
-            },
-            {
-              "id": "kibDevDocsOpsKibanaManifestParser"
-            },
-            {
-              "id": "kibDevDocsOpsKibanaManifestSchema"
-            },
-            {
-              "id": "kibDevDocsOpsManagedVscodeConfig"
-            },
-            {
-              "id": "kibDevDocsOpsManagedVscodeConfigCli"
-            },
-            {
-              "id": "kibDevDocsOpsTest"
-            }
-          ]
         }
       ]
     }

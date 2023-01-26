@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  KIBANA_NAVIGATION_TOGGLE,
-  SPACES_BUTTON,
-  getGoToSpaceMenuItem,
-} from '../screens/kibana_navigation';
+import { KIBANA_NAVIGATION_TOGGLE } from '../screens/kibana_navigation';
 
 export const navigateFromKibanaCollapsibleTo = (page: string) => {
   cy.get(page).click();
@@ -17,10 +13,4 @@ export const navigateFromKibanaCollapsibleTo = (page: string) => {
 
 export const openKibanaNavigation = () => {
   cy.get(KIBANA_NAVIGATION_TOGGLE).click();
-};
-
-export const changeSpace = (space: string) => {
-  cy.get(`${SPACES_BUTTON}`).click();
-  cy.get(getGoToSpaceMenuItem(space)).click();
-  cy.get(`[data-test-subj="space-avatar-${space}"]`).should('exist');
 };

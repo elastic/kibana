@@ -14,7 +14,7 @@ import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-obj
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
 import { persistSavedSearch } from '../../utils/persist_saved_search';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
@@ -33,7 +33,7 @@ async function saveDataSource({
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
   services: DiscoverServices;
-  state: GetStateReturn;
+  state: DiscoverStateContainer;
   navigateOrReloadSavedSearch: boolean;
 }) {
   const prevSavedSearchId = savedSearch.id;
@@ -53,7 +53,7 @@ async function saveDataSource({
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          state.resetAppState();
+          state.resetAppState(savedSearch);
           services.chrome.docTitle.change(savedSearch.title!);
 
           setBreadcrumbsTitle(
@@ -85,7 +85,7 @@ async function saveDataSource({
     onSuccess,
     saveOptions,
     services,
-    state: state.appStateContainer.getState(),
+    state: state.appState.getState(),
   });
 }
 
@@ -97,21 +97,24 @@ export async function onSaveSearch({
   state,
   onClose,
   onSaveCb,
+  updateAdHocDataViewId,
 }: {
   dataView: DataView;
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-  state: GetStateReturn;
+  state: DiscoverStateContainer;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   onClose?: () => void;
   onSaveCb?: () => void;
 }) {
-  const { uiSettings } = services;
+  const { uiSettings, savedObjectsTagging } = services;
   const onSave = async ({
     newTitle,
     newCopyOnSave,
     newTimeRestore,
     newDescription,
+    newTags,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: {
@@ -119,26 +122,36 @@ export async function onSaveSearch({
     newTimeRestore: boolean;
     newCopyOnSave: boolean;
     newDescription: string;
+    newTags: string[];
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
     const currentTitle = savedSearch.title;
     const currentTimeRestore = savedSearch.timeRestore;
     const currentRowsPerPage = savedSearch.rowsPerPage;
+    const currentDescription = savedSearch.description;
+    const currentTags = savedSearch.tags;
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
     savedSearch.timeRestore = newTimeRestore;
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
-      : state.appStateContainer.getState().rowsPerPage;
+      : state.appState.getState().rowsPerPage;
+    if (savedObjectsTagging) {
+      savedSearch.tags = newTags;
+    }
     const saveOptions: SaveSavedSearchOptions = {
       onTitleDuplicate,
       copyOnSave: newCopyOnSave,
       isTitleDuplicateConfirmed,
     };
+
+    const updatedDataView =
+      !dataView.isPersisted() && newCopyOnSave ? await updateAdHocDataViewId(dataView) : dataView;
+
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
     const response = await saveDataSource({
-      dataView,
+      dataView: updatedDataView,
       saveOptions,
       services,
       navigateTo,
@@ -151,6 +164,10 @@ export async function onSaveSearch({
       savedSearch.title = currentTitle;
       savedSearch.timeRestore = currentTimeRestore;
       savedSearch.rowsPerPage = currentRowsPerPage;
+      savedSearch.description = currentDescription;
+      if (savedObjectsTagging) {
+        savedSearch.tags = currentTags;
+      }
     } else {
       state.resetInitialAppState();
     }
@@ -160,35 +177,60 @@ export async function onSaveSearch({
 
   const saveModal = (
     <SaveSearchObjectModal
+      services={services}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
       description={savedSearch.description}
       timeRestore={savedSearch.timeRestore}
+      tags={savedSearch.tags ?? []}
       onSave={onSave}
       onClose={onClose ?? (() => {})}
     />
   );
-  showSaveModal(saveModal, services.core.i18n.Context);
+  showSaveModal(saveModal);
 }
 
 const SaveSearchObjectModal: React.FC<{
+  services: DiscoverServices;
   title: string;
   showCopyOnSave: boolean;
   description?: string;
   timeRestore?: boolean;
-  onSave: (props: OnSaveProps & { newTimeRestore: boolean }) => void;
+  tags: string[];
+  onSave: (props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }) => void;
   onClose: () => void;
-}> = ({ title, description, showCopyOnSave, timeRestore: savedTimeRestore, onSave, onClose }) => {
+}> = ({
+  services,
+  title,
+  description,
+  tags,
+  showCopyOnSave,
+  timeRestore: savedTimeRestore,
+  onSave,
+  onClose,
+}) => {
+  const { savedObjectsTagging } = services;
   const [timeRestore, setTimeRestore] = useState<boolean>(savedTimeRestore || false);
+  const [currentTags, setCurrentTags] = useState(tags);
 
   const onModalSave = (params: OnSaveProps) => {
     onSave({
       ...params,
       newTimeRestore: timeRestore,
+      newTags: currentTags,
     });
   };
 
-  const options = (
+  const tagSelector = savedObjectsTagging ? (
+    <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+      initialSelection={currentTags}
+      onTagsSelected={(newTags) => {
+        setCurrentTags(newTags);
+      }}
+    />
+  ) : undefined;
+
+  const timeSwitch = (
     <EuiFormRow
       helpText={
         <FormattedMessage
@@ -209,6 +251,15 @@ const SaveSearchObjectModal: React.FC<{
         }
       />
     </EuiFormRow>
+  );
+
+  const options = tagSelector ? (
+    <>
+      {tagSelector}
+      {timeSwitch}
+    </>
+  ) : (
+    timeSwitch
   );
 
   return (

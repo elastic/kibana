@@ -2,8 +2,8 @@
 [[rule-types]]
 == Rule types
 
-A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the Elastic Stack and rules registered by one of the {kib} apps.
-You can create most rules types in <<create-and-manage-rules,Stack Management > Rules and Connectors>>. For information on creating security rules, refer to {security-guide}/rules-ui-create.html[Create a detection rule].
+A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the {stack} and rules registered by one of the {kib} apps.
+You can create most rules types in <<create-and-manage-rules,{stack-manage-app} > {rules-ui}>>. For information on creating security rules, refer to {security-guide}/rules-ui-create.html[Create a detection rule].
 
 [NOTE]
 ==============================================
@@ -37,9 +37,9 @@ see {subscriptions}[the subscription page].
 
 [float]
 [[observability-rules]]
-=== Observability rules
+=== {observability} rules
 
-Observability rules are categorized into APM and User Experience, Logs, Metrics, Stack Monitoring, and Uptime.
+{observability} rules are categorized into APM and {user-experience}, Logs, Metrics, {stack-monitor-app}, and Uptime.
 
 [NOTE]
 ==============================================
@@ -55,16 +55,16 @@ If you create a rule in the {observability} app, its alerts are not visible in
 | Detect complex conditions in *APM* data and trigger built-in actions when the conditions are met.
 
 | {observability-guide}/create-alerts.html[Logs rules]
-| Detect complex conditions in the *Logs* app.
+| Detect complex conditions in the {logs-app}.
 
 | {observability-guide}/create-alerts.html[Metrics rules]
-| Detect complex conditions in the *Metrics* app.
+| Detect complex conditions in the {metrics-app}.
 
-| <<kibana-alerts,Stack Monitoring>>
-| Provide {kib} Alerting rules out-of-the box to notify you of potential issues in the Elastic Stack.
+| <<kibana-alerts,{stack-monitor-app}>>
+| Provide {kib} alerting rules out-of-the box to notify you of potential issues in the {stack}.
 
 | {observability-guide}/create-alerts.html[Uptime rules]
-| Detect complex conditions in the *Uptime* app.
+| Detect complex conditions in the {uptime-app}.
 
 |===
 
@@ -87,5 +87,5 @@ they are not visible in *{stack-manage-app} > {rules-ui}*.
 ==============================================
 
 include::rule-types/index-threshold.asciidoc[]
-include::rule-types/es-query.asciidoc[]
+include::rule-types/es-query.asciidoc[leveloffset=+1]
 include::rule-types/geo-rule-types.asciidoc[]

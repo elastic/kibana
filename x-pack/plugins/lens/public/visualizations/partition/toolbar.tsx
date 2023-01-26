@@ -15,13 +15,21 @@ import {
   EuiRange,
   EuiHorizontalRule,
   EuiButtonGroup,
+  EuiColorPicker,
+  euiPaletteColorBlind,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../../common';
+import {
+  LegendDisplay,
+  PieLayerState,
+  PieVisualizationState,
+  SharedPieLayerState,
+} from '../../../common';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../../types';
 import {
   ToolbarPopover,
@@ -31,6 +39,8 @@ import {
 } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { getDefaultColorForMultiMetricDimension, isCollapsed } from './visualization';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -301,19 +311,182 @@ const DecimalPlaceSlider = ({
   );
 };
 
-export function DimensionEditor(
+type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
+  paletteService: PaletteRegistry;
+};
+
+export function DimensionEditor(props: DimensionEditorProps) {
+  const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
+
+  if (!currentLayer) {
+    return null;
+  }
+
+  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
+    (id) => !isCollapsed(id, currentLayer)
+  );
+
+  const showColorPicker =
+    currentLayer.metrics.includes(props.accessor) && currentLayer.allowMultipleMetrics;
+
+  return (
+    <>
+      {props.accessor === firstNonCollapsedColumnId && (
+        <PalettePicker
+          palettes={props.paletteService}
+          activePalette={props.state.palette}
+          setPalette={(newPalette) => {
+            props.setState({ ...props.state, palette: newPalette });
+          }}
+        />
+      )}
+      {showColorPicker && <StaticColorControls {...props} currentLayer={currentLayer} />}
+    </>
+  );
+}
+
+function StaticColorControls({
+  state,
+  paletteService,
+  accessor,
+  setState,
+  datasource,
+  currentLayer,
+}: DimensionEditorProps & { currentLayer: PieLayerState }) {
+  const colorLabel = i18n.translate('xpack.lens.pieChart.color', {
+    defaultMessage: 'Color',
+  });
+
+  const disabledMessage = currentLayer.primaryGroups.length
+    ? ['pie', 'donut'].includes(state.shape)
+      ? i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseSliceBy', {
+          defaultMessage:
+            'You are unable to apply custom colors to individual slices when the layer includes one or more "Slice by" dimensions.',
+        })
+      : i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseGroupBy', {
+          defaultMessage:
+            'You are unable to apply custom colors to individual slices when the layer includes one or more "Group by" dimensions.',
+        })
+    : '';
+
+  const defaultColor = getDefaultColorForMultiMetricDimension({
+    layer: currentLayer,
+    columnId: accessor,
+    paletteService,
+    datasource,
+  });
+
+  const setColor = useCallback(
+    (color: string) => {
+      const newColorsByDimension = { ...currentLayer.colorsByDimension };
+
+      if (color) {
+        newColorsByDimension[accessor] = color;
+      } else {
+        delete newColorsByDimension[accessor];
+      }
+
+      setState({
+        ...state,
+        layers: state.layers.map((layer) =>
+          layer.layerId === currentLayer.layerId
+            ? {
+                ...layer,
+                colorsByDimension: newColorsByDimension,
+              }
+            : layer
+        ),
+      });
+    },
+    [accessor, currentLayer.colorsByDimension, currentLayer.layerId, setState, state]
+  );
+
+  const { inputValue: currentColor, handleInputChange: handleColorChange } =
+    useDebouncedValue<string>(
+      {
+        onChange: setColor,
+        value: currentLayer.colorsByDimension?.[accessor] || defaultColor,
+      },
+      { allowFalsyValue: true }
+    );
+
+  const isDisabled = Boolean(disabledMessage);
+
+  const renderColorPicker = () => (
+    <EuiColorPicker
+      fullWidth
+      compressed
+      disabled={isDisabled}
+      isClearable={true}
+      placeholder={
+        isDisabled
+          ? i18n.translate('xpack.lens.pieChart.colorPicker.auto', {
+              defaultMessage: 'Auto',
+            })
+          : defaultColor
+      }
+      onChange={(color: string) => handleColorChange(color)}
+      color={isDisabled ? '' : currentColor}
+      aria-label={colorLabel}
+      showAlpha={false}
+      swatches={euiPaletteColorBlind()}
+    />
+  );
+
+  return (
+    <EuiFormRow display="columnCompressed" fullWidth label={colorLabel}>
+      {disabledMessage ? (
+        <EuiToolTip
+          position="top"
+          delay="long"
+          anchorClassName="eui-displayBlock"
+          content={disabledMessage}
+        >
+          {renderColorPicker()}
+        </EuiToolTip>
+      ) : (
+        renderColorPicker()
+      )}
+    </EuiFormRow>
+  );
+}
+
+export function DimensionDataExtraEditor(
   props: VisualizationDimensionEditorProps<PieVisualizationState> & {
     paletteService: PaletteRegistry;
   }
 ) {
-  if (props.accessor !== Object.values(props.state.layers)[0].groups[0]) return null;
+  const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
+
+  if (!currentLayer) {
+    return null;
+  }
+
   return (
-    <PalettePicker
-      palettes={props.paletteService}
-      activePalette={props.state.palette}
-      setPalette={(newPalette) => {
-        props.setState({ ...props.state, palette: newPalette });
-      }}
-    />
+    <>
+      {[...currentLayer.primaryGroups, ...(currentLayer.secondaryGroups ?? [])].includes(
+        props.accessor
+      ) && (
+        <CollapseSetting
+          value={currentLayer?.collapseFns?.[props.accessor] || ''}
+          onChange={(collapseFn) => {
+            props.setState({
+              ...props.state,
+              layers: props.state.layers.map((layer) =>
+                layer.layerId !== props.layerId
+                  ? layer
+                  : {
+                      ...layer,
+                      collapseFns: {
+                        ...layer.collapseFns,
+                        [props.accessor]: collapseFn,
+                      },
+                    }
+              ),
+            });
+          }}
+        />
+      )}
+    </>
   );
 }

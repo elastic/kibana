@@ -68,13 +68,15 @@ describe('Background Search Session Management Table', () => {
               id: 'wtywp9u2802hahgp-flps',
               url: '/app/great-app-url/#48',
               appId: 'canvas',
-              status: SearchSessionStatus.IN_PROGRESS,
               created: '2020-12-02T00:19:32Z',
               expires: '2020-12-07T00:19:32Z',
               idMapping: {},
             },
           },
         ],
+        statuses: {
+          'wtywp9u2802hahgp-flps': { status: SearchSessionStatus.EXPIRED },
+        },
       };
     };
 
@@ -150,7 +152,7 @@ describe('Background Search Session Management Table', () => {
   // FLAKY: https://github.com/elastic/kibana/issues/88928
   describe.skip('fetching sessions data', () => {
     test('re-fetches data', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
       sessionsClient.find = jest.fn();
       mockConfig = {
         ...mockConfig,

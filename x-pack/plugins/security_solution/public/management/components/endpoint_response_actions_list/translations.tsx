@@ -65,6 +65,12 @@ export const OUTPUT_MESSAGES = Object.freeze({
         defaultMessage: 'Execution completed',
       }
     ),
+    comment: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.expandSection.comment',
+      {
+        defaultMessage: 'Comment',
+      }
+    ),
   },
 });
 
@@ -92,11 +98,11 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
 export const UX_MESSAGES = Object.freeze({
   flyoutTitle: (hostname: string) =>
     i18n.translate('xpack.securitySolution.responseActionsList.flyout.title', {
-      defaultMessage: `Actions log : {hostname}`,
+      defaultMessage: `Response actions history : {hostname}`,
       values: { hostname },
     }),
-  pageTitle: i18n.translate('xpack.securitySolution.responseActionsList.list.title', {
-    defaultMessage: 'Response actions',
+  pageSubTitle: i18n.translate('xpack.securitySolution.responseActionsList.list.pageSubTitle', {
+    defaultMessage: 'View the history of response actions performed on hosts.',
   }),
   fetchError: i18n.translate('xpack.securitySolution.responseActionsList.list.errorMessage', {
     defaultMessage: 'Error while retrieving response actions',
@@ -112,11 +118,16 @@ export const UX_MESSAGES = Object.freeze({
       defaultMessage: 'Search {filterName}',
       values: { filterName },
     }),
+  filterEmptyMessage: (filterName: string) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.filter.emptyMessage', {
+      defaultMessage: 'No {filterName} available',
+      values: { filterName },
+    }),
   badge: {
-    completed: i18n.translate(
-      'xpack.securitySolution.responseActionsList.list.item.badge.completed',
+    successful: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.badge.successful',
       {
-        defaultMessage: 'Completed',
+        defaultMessage: 'Successful',
       }
     ),
     failed: i18n.translate('xpack.securitySolution.responseActionsList.list.item.badge.failed', {
@@ -125,6 +136,20 @@ export const UX_MESSAGES = Object.freeze({
     pending: i18n.translate('xpack.securitySolution.responseActionsList.list.item.badge.pending', {
       defaultMessage: 'Pending',
     }),
+  },
+  unenrolled: {
+    hosts: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.hosts.unenrolled.hosts',
+      {
+        defaultMessage: 'Hosts unenrolled',
+      }
+    ),
+    host: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.hosts.unenrolled.host',
+      {
+        defaultMessage: 'Host unenrolled',
+      }
+    ),
   },
   screenReaderExpand: i18n.translate(
     'xpack.securitySolution.responseActionsList.list.screenReader.expand',
@@ -141,9 +166,17 @@ export const UX_MESSAGES = Object.freeze({
     }),
 });
 
-// TODO: Add more filter names here (hosts, statuses) etc
 export const FILTER_NAMES = Object.freeze({
   actions: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.actions', {
     defaultMessage: 'Actions',
+  }),
+  hosts: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.Hosts', {
+    defaultMessage: 'Hosts',
+  }),
+  statuses: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.statuses', {
+    defaultMessage: 'Statuses',
+  }),
+  users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
+    defaultMessage: 'Filter by username',
   }),
 });

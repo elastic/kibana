@@ -31,11 +31,18 @@
         "description": [],
         "signature": [
           "{ setup: () => Promise<void>; start: ({ uiSettings }: ",
-          "IntegrationsServiceSetupDeps",
+          {
+            "pluginId": "@kbn/core-integrations-browser-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreIntegrationsBrowserInternalPluginApi",
+            "section": "def-common.IntegrationsServiceSetupDeps",
+            "text": "IntegrationsServiceSetupDeps"
+          },
           ") => Promise<void>; stop: () => Promise<void>; }"
         ],
         "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -47,7 +54,13 @@
         "description": [],
         "signature": [
           "{ setup: jest.MockInstance<Promise<void>, []>; start: jest.MockInstance<Promise<void>, [",
-          "IntegrationsServiceSetupDeps",
+          {
+            "pluginId": "@kbn/core-integrations-browser-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreIntegrationsBrowserInternalPluginApi",
+            "section": "def-common.IntegrationsServiceSetupDeps",
+            "text": "IntegrationsServiceSetupDeps"
+          },
           "]>; stop: jest.MockInstance<Promise<void>, []>; } & ",
           {
             "pluginId": "@kbn/core-integrations-browser-mocks",
@@ -59,6 +72,7 @@
         ],
         "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -72,6 +86,7 @@
         "description": [],
         "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-integrations-browser-mocks",
@@ -92,6 +107,7 @@
             ],
             "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

@@ -7,6 +7,7 @@
 
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
@@ -28,6 +29,7 @@ export const createStartDepsMock = () => {
   return {
     licensing: licensingMock.createStart(),
     data: dataPluginMock.createStartContract(),
+    dataViews: dataViewPluginMocks.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     navigation: navigationPluginMock.createStartContract(),
     customIntegrations: customIntegrationsMock.createStart(),

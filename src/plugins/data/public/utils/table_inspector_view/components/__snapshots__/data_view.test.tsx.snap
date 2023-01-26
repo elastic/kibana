@@ -167,13 +167,13 @@ exports[`Inspector Data View component should render loading state 1`] = `
 exports[`Inspector Data View component should render single table without selector 1`] = `
 Array [
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     />
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -183,22 +183,17 @@ Array [
           class="euiPopover__anchor css-16vtueo-render"
         >
           <button
-            class="euiButton euiButton--primary euiButton--small"
+            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
+              Download CSV
               <span
-                class="euiButtonContent__icon"
                 color="inherit"
                 data-euiicon-type="arrowDown"
               />
-              <span
-                class="euiButton__text"
-              >
-                Download CSV
-              </span>
             </span>
           </button>
         </div>
@@ -217,13 +212,13 @@ Array [
         class="euiTableHeaderMobile"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           />
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
               class="euiTableSortMobile"
@@ -235,7 +230,7 @@ Array [
                   class="euiPopover__anchor css-16vtueo-render"
                 >
                   <button
-                    class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                    class="euiButtonEmpty euiButtonEmpty--xSmall euiButtonEmpty--flushRight css-9t7nyf-empty-primary"
                     type="button"
                   >
                     <span
@@ -311,18 +306,18 @@ Array [
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     123
                   </div>
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                      class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
                     />
                   </div>
                 </div>
@@ -337,10 +332,10 @@ Array [
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
+        class="euiFlexGroup eui-xScroll emotion-euiFlexGroup-wrap-s-spaceBetween-center-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class="euiPopover emotion-euiPopover"
@@ -349,7 +344,7 @@ Array [
               class="euiPopover__anchor css-16vtueo-render"
             >
               <button
-                class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                class="euiButtonEmpty euiButtonEmpty--xSmall css-wvaqcf-empty-text"
                 data-test-subj="tablePaginationPopoverButton"
                 type="button"
               >
@@ -372,11 +367,11 @@ Array [
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <nav
             aria-label="Pagination for table: "
-            class="euiPagination"
+            class="euiPagination emotion-euiPagination-EuiPagination"
           >
             <span
               aria-atomic="true"
@@ -388,7 +383,7 @@ Array [
             </span>
             <button
               aria-label="Previous page"
-              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
               data-test-subj="pagination-button-previous"
               disabled=""
               type="button"
@@ -402,7 +397,7 @@ Array [
             </button>
             <ul
               aria-label="Pagination for table: "
-              class="euiPagination__list"
+              class="euiPagination__list emotion-euiPagination__list"
             >
               <li
                 class="euiPagination__item"
@@ -411,7 +406,7 @@ Array [
                   aria-controls="__table_generated-id"
                   aria-current="true"
                   aria-label="Page 1 of 1"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
+                  class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-7ubx5w-empty-disabled-euiPaginationButton-isActive"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
@@ -430,7 +425,7 @@ Array [
             </ul>
             <button
               aria-label="Next page"
-              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
               data-test-subj="pagination-button-next"
               disabled=""
               type="button"
@@ -453,10 +448,10 @@ Array [
 exports[`Inspector Data View component should support multiple datatables 1`] = `
 Array [
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
         class="euiText emotion-euiText-xs"
@@ -473,17 +468,17 @@ Array [
         class="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <strong>
             Selected:
           </strong>
         </div>
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
             class="euiPopover emotion-euiPopover"
@@ -493,7 +488,7 @@ Array [
               class="euiPopover__anchor css-16vtueo-render"
             >
               <button
-                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+                class="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
                 data-test-subj="inspectorTableChooser"
                 type="button"
               >
@@ -518,7 +513,7 @@ Array [
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -528,22 +523,17 @@ Array [
           class="euiPopover__anchor css-16vtueo-render"
         >
           <button
-            class="euiButton euiButton--primary euiButton--small"
+            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
+              Download CSV
               <span
-                class="euiButtonContent__icon"
                 color="inherit"
                 data-euiicon-type="arrowDown"
               />
-              <span
-                class="euiButton__text"
-              >
-                Download CSV
-              </span>
             </span>
           </button>
         </div>
@@ -562,13 +552,13 @@ Array [
         class="euiTableHeaderMobile"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           />
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
               class="euiTableSortMobile"
@@ -580,7 +570,7 @@ Array [
                   class="euiPopover__anchor css-16vtueo-render"
                 >
                   <button
-                    class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                    class="euiButtonEmpty euiButtonEmpty--xSmall euiButtonEmpty--flushRight css-9t7nyf-empty-primary"
                     type="button"
                   >
                     <span
@@ -657,18 +647,18 @@ Array [
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     123
                   </div>
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                      class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
                     />
                   </div>
                 </div>
@@ -683,10 +673,10 @@ Array [
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
+        class="euiFlexGroup eui-xScroll emotion-euiFlexGroup-wrap-s-spaceBetween-center-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class="euiPopover emotion-euiPopover"
@@ -695,7 +685,7 @@ Array [
               class="euiPopover__anchor css-16vtueo-render"
             >
               <button
-                class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                class="euiButtonEmpty euiButtonEmpty--xSmall css-wvaqcf-empty-text"
                 data-test-subj="tablePaginationPopoverButton"
                 type="button"
               >
@@ -718,11 +708,11 @@ Array [
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <nav
             aria-label="Pagination for table: "
-            class="euiPagination"
+            class="euiPagination emotion-euiPagination-EuiPagination"
           >
             <span
               aria-atomic="true"
@@ -734,7 +724,7 @@ Array [
             </span>
             <button
               aria-label="Previous page"
-              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
               data-test-subj="pagination-button-previous"
               disabled=""
               type="button"
@@ -748,7 +738,7 @@ Array [
             </button>
             <ul
               aria-label="Pagination for table: "
-              class="euiPagination__list"
+              class="euiPagination__list emotion-euiPagination__list"
             >
               <li
                 class="euiPagination__item"
@@ -757,7 +747,7 @@ Array [
                   aria-controls="__table_generated-id"
                   aria-current="true"
                   aria-label="Page 1 of 1"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
+                  class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-7ubx5w-empty-disabled-euiPaginationButton-isActive"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
@@ -776,7 +766,7 @@ Array [
             </ul>
             <button
               aria-label="Next page"
-              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
               data-test-subj="pagination-button-next"
               disabled=""
               type="button"

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
+import semver from 'semver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     ];
 
     const dashboardTests = [
-      { name: 'flights', numPanels: 16 },
+      { name: 'flights', numPanels: 15 },
       { name: 'logs', numPanels: 10 },
       { name: 'ecommerce', numPanels: 11 },
     ];
@@ -41,12 +41,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         dashboardTests.forEach(({ name, numPanels }) => {
           it('should launch sample ' + name + ' data set dashboard', async () => {
             await PageObjects.home.launchSampleDashboard(name);
+            await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
             await PageObjects.header.waitUntilLoadingHasFinished();
             await renderable.waitForRender();
-            const todayYearMonthDay = moment().format('MMM D, YYYY');
-            const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
-            const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
-            await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
             const panelCount = await PageObjects.dashboard.getPanelCount();
             expect(panelCount).to.be.above(numPanels);
           });
@@ -54,11 +51,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should render visualizations', async () => {
           await PageObjects.home.launchSampleDashboard('flights');
           await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
           await renderable.waitForRender();
           log.debug('Checking saved searches rendered');
           await dashboardExpect.savedSearchRowCount(49);
           log.debug('Checking input controls rendered');
-          await dashboardExpect.inputControlItemCount(3);
+          if (semver.lt(process.env.ORIGINAL_VERSION!, '8.6.0-SNAPSHOT')) {
+            await dashboardExpect.inputControlItemCount(3);
+          } else {
+            await dashboardExpect.controlCount(3);
+          }
           log.debug('Checking tag cloud rendered');
           await dashboardExpect.tagCloudWithValuesFound([
             'Sunny',

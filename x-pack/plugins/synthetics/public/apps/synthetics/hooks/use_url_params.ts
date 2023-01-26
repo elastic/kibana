@@ -15,9 +15,12 @@ function getParsedParams(search: string) {
 }
 
 export type GetUrlParams = () => SyntheticsUrlParams;
-export type UpdateUrlParams = (updatedParams: {
-  [key: string]: string | number | boolean | undefined;
-}) => void;
+export type UpdateUrlParams = (
+  updatedParams: {
+    [key: string]: string | number | boolean | undefined;
+  } | null,
+  replaceState?: boolean
+) => void;
 
 export type SyntheticsUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 
@@ -32,31 +35,40 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
   const history = useHistory();
 
   const updateUrlParams: UpdateUrlParams = useCallback(
-    (updatedParams) => {
+    (updatedParams, replaceState = false) => {
       const currentParams = getParsedParams(search);
       const mergedParams = {
         ...currentParams,
         ...updatedParams,
       };
 
-      const updatedSearch = stringify(
-        // drop any parameters that have no value
-        Object.keys(mergedParams).reduce((params, key) => {
-          const value = mergedParams[key];
-          if (value === undefined || value === '') {
-            return params;
-          }
+      const updatedSearch = updatedParams
+        ? stringify(
+            // drop any parameters that have no value
+            Object.keys(mergedParams).reduce((params, key) => {
+              const value = mergedParams[key];
+              if (value === undefined || value === '') {
+                return params;
+              }
 
-          return {
-            ...params,
-            [key]: value,
-          };
-        }, {})
-      );
+              return {
+                ...params,
+                [key]: value,
+              };
+            }, {})
+          )
+        : null;
 
       // only update the URL if the search has actually changed
       if (search !== updatedSearch) {
-        history.push({ pathname, search: updatedSearch });
+        if (replaceState) {
+          history.replace({
+            pathname,
+            search: updatedSearch || undefined,
+          });
+        } else {
+          history.push({ pathname, search: updatedSearch || undefined });
+        }
       }
     },
     [history, pathname, search]

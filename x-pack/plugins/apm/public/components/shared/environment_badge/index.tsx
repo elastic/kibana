@@ -7,40 +7,23 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { ItemsBadge } from '../item_badge';
 
 interface Props {
   environments: string[];
 }
 export function EnvironmentBadge({ environments = [] }: Props) {
-  if (environments.length < 2) {
-    return (
-      <>
-        {environments.map((env) => (
-          <EuiBadge color="hollow" key={env}>
-            {env}
-          </EuiBadge>
-        ))}
-      </>
-    );
-  }
   return (
-    <EuiToolTip
-      position="right"
-      content={environments.map((env) => (
-        <React.Fragment key={env}>
-          {env}
-          <br />
-        </React.Fragment>
-      ))}
-    >
-      <EuiBadge>
-        {i18n.translate('xpack.apm.servicesTable.environmentCount', {
+    <ItemsBadge
+      items={environments ?? []}
+      multipleItemsMessage={i18n.translate(
+        'xpack.apm.servicesTable.environmentCount',
+        {
           values: { environmentCount: environments.length },
           defaultMessage:
             '{environmentCount, plural, one {1 environment} other {# environments}}',
-        })}
-      </EuiBadge>
-    </EuiToolTip>
+        }
+      )}
+    />
   );
 }

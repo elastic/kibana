@@ -65,6 +65,10 @@
     "SetupModule",
     "CheckExistingModuleJobs",
 
+    "Notifications",
+    "GetNotifications",
+    "GetNotificationCounts",
+
     "Annotations",
     "GetAnnotations",
     "IndexAnnotations",
@@ -169,9 +173,11 @@
     "GetTrainedModelsNodesOverview",
     "GetTrainedModelPipelines",
     "StartTrainedModelDeployment",
+    "UpdateTrainedModelDeployment",
     "StopTrainedModelDeployment",
     "PutTrainedModel",
     "DeleteTrainedModel",
+    "SimulateIngestPipeline",
     "InferTrainedModelDeployment",
 
     "Alerting",

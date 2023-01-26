@@ -1,0 +1,292 @@
+{
+  "id": "@kbn/shared-ux-file-picker",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-picker",
+        "id": "def-common.FilePicker",
+        "type": "Function",
+        "tags": [],
+        "label": "FilePicker",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/shared-ux-file-picker",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFilePickerPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          "<string>) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/file/file_picker/impl/src/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-picker",
+            "id": "def-common.FilePicker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-file-picker",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFilePickerPluginApi",
+                "section": "def-common.Props",
+                "text": "Props"
+              },
+              "<string>"
+            ],
+            "path": "packages/shared-ux/file/file_picker/impl/src/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-picker",
+        "id": "def-common.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-file-picker",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFilePickerPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          "<Kind>"
+        ],
+        "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-picker",
+            "id": "def-common.Props.kind",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "kind",
+            "description": [
+              "\nThe file kind that was passed to the registry."
+            ],
+            "signature": [
+              "Kind"
+            ],
+            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-picker",
+            "id": "def-common.Props.shouldAllowDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldAllowDelete",
+            "description": [
+              "\nA function which determines whether to show a delete button for a file."
+            ],
+            "signature": [
+              "((file: ",
+              "FileJSON",
+              "<unknown>) => boolean) | undefined"
+            ],
+            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-picker",
+                "id": "def-common.Props.shouldAllowDelete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "file",
+                "description": [],
+                "signature": [
+                  "FileJSON",
+                  "<unknown>"
+                ],
+                "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-picker",
+            "id": "def-common.Props.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [
+              "\nWill be called when the modal is closed"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-picker",
+            "id": "def-common.Props.onDone",
+            "type": "Function",
+            "tags": [],
+            "label": "onDone",
+            "description": [
+              "\nWill be called after a user has a selected a set of files"
+            ],
+            "signature": [
+              "(files: ",
+              "FileJSON",
+              "<unknown>[]) => void"
+            ],
+            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-picker",
+                "id": "def-common.Props.onDone.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "files",
+                "description": [],
+                "signature": [
+                  "FileJSON",
+                  "<unknown>[]"
+                ],
+                "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-picker",
+            "id": "def-common.Props.onUpload",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpload",
+            "description": [
+              "\nWhen a user has successfully uploaded some files this callback will be called"
+            ],
+            "signature": [
+              "((done: ",
+              {
+                "pluginId": "@kbn/shared-ux-file-upload",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileUploadPluginApi",
+                "section": "def-common.DoneNotification",
+                "text": "DoneNotification"
+              },
+              "<unknown>[]) => void) | undefined"
+            ],
+            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-picker",
+                "id": "def-common.Props.onUpload.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "done",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/shared-ux-file-upload",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileUploadPluginApi",
+                    "section": "def-common.DoneNotification",
+                    "text": "DoneNotification"
+                  },
+                  "<unknown>[]"
+                ],
+                "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-picker",
+            "id": "def-common.Props.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [
+              "\nThe number of results to show per page."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-picker",
+            "id": "def-common.Props.multiple",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "multiple",
+            "description": [
+              "\nWhether you can select one or more files\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

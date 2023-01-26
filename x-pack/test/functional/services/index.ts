@@ -61,16 +61,14 @@ import { InfraSourceConfigurationFormProvider } from './infra_source_configurati
 import { LogsUiProvider } from './logs_ui';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
-import {
-  DashboardDrilldownPanelActionsProvider,
-  DashboardDrilldownsManageProvider,
-  DashboardPanelTimeRangeProvider,
-} from './dashboard';
+import { DashboardPanelTimeRangeProvider } from './dashboard';
 import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
-// import { CompareImagesProvider } from './compare_images';
 import { CasesServiceProvider } from './cases';
+import { ActionsServiceProvider } from './actions';
+import { RulesServiceProvider } from './rules';
 import { AiopsProvider } from './aiops';
+import { SampleDataServiceProvider } from './sample_data';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -123,13 +121,14 @@ export const services = {
   logsUi: LogsUiProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
-  dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
-  dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
   reporting: ReportingFunctionalProvider,
   searchSessions: SearchSessionsService,
   observability: ObservabilityProvider,
   // compareImages: CompareImagesProvider,
+  actions: ActionsServiceProvider,
+  rules: RulesServiceProvider,
   cases: CasesServiceProvider,
   aiops: AiopsProvider,
+  sampleData: SampleDataServiceProvider,
 };

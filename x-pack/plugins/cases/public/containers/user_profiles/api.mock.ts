@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserProfile } from '@kbn/security-plugin/common';
+import type { UserProfile } from '@kbn/security-plugin/common';
 
 export const userProfiles: UserProfile[] = [
   {
@@ -40,4 +40,30 @@ export const userProfiles: UserProfile[] = [
   },
 ];
 
+export const suggestionUserProfiles: UserProfile[] = [
+  ...userProfiles,
+  {
+    uid: 'u_IbBVXpDtrjOByJ-syBdr425fLGqwpzY_xdQqCFAFXLI_0',
+    enabled: true,
+    data: {},
+    user: {
+      email: 'silly_hare@profiles.elastic.co',
+      full_name: 'Silly Hare',
+      username: 'silly_hare',
+    },
+  },
+  {
+    uid: 'u_topzjXNuXi1aka-8kv3vUylKyK3B21NJq7cSQaMhqDo_0',
+    enabled: true,
+    data: {},
+    user: {
+      email: 'convenient_orca@profiles.elastic.co',
+      full_name: 'Convenient Orca',
+      username: 'convenient_orca',
+    },
+  },
+];
+
 export const userProfilesIds = userProfiles.map((profile) => profile.uid);
+
+export const userProfilesMap = new Map(userProfiles.map((profile) => [profile.uid, profile]));

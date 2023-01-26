@@ -17,12 +17,12 @@ export type { UiActionsSetup, UiActionsStart } from './plugin';
 export type { UiActionsServiceParams } from './service';
 export { UiActionsService } from './service';
 export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
-export { createAction, IncompatibleActionError } from './actions';
+export { ActionInternal, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
 export type {
   Presentable as UiActionsPresentable,
   PresentableGrouping as UiActionsPresentableGrouping,
-} from './util';
+} from '@kbn/ui-actions-browser';
 export type { Trigger, RowClickContext } from './triggers';
 export {
   VISUALIZE_FIELD_TRIGGER,
@@ -39,3 +39,10 @@ export {
   ACTION_VISUALIZE_LENS_FIELD,
 } from './types';
 export type { ActionExecutionContext, ActionExecutionMeta, ActionMenuItemProps } from './actions';
+export {
+  CellActions,
+  CellActionsMode,
+  CellActionsContextProvider,
+} from './cell_actions/components';
+
+export type { CellActionExecutionContext } from './cell_actions/components/cell_actions';

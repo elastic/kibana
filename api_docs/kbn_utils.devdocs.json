@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-server.concatStreamProviders",
+        "id": "def-common.concatStreamProviders",
         "type": "Function",
         "tags": [
           "return"
@@ -32,10 +40,11 @@
         ],
         "path": "packages/kbn-utils/src/streams/concat_stream_providers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.concatStreamProviders.$1",
+            "id": "def-common.concatStreamProviders.$1",
             "type": "Array",
             "tags": [],
             "label": "sourceProviders",
@@ -47,11 +56,12 @@
             ],
             "path": "packages/kbn-utils/src/streams/concat_stream_providers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.concatStreamProviders.$2",
+            "id": "def-common.concatStreamProviders.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -64,6 +74,7 @@
             ],
             "path": "packages/kbn-utils/src/streams/concat_stream_providers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -74,7 +85,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-server.createConcatStream",
+        "id": "def-common.createConcatStream",
         "type": "Function",
         "tags": [
           "return"
@@ -89,10 +100,11 @@
         ],
         "path": "packages/kbn-utils/src/streams/concat_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.createConcatStream.$1",
+            "id": "def-common.createConcatStream.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "initial",
@@ -104,6 +116,7 @@
             ],
             "path": "packages/kbn-utils/src/streams/concat_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -112,7 +125,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-server.createFilterStream",
+        "id": "def-common.createFilterStream",
         "type": "Function",
         "tags": [],
         "label": "createFilterStream",
@@ -123,10 +136,11 @@
         ],
         "path": "packages/kbn-utils/src/streams/filter_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.createFilterStream.$1",
+            "id": "def-common.createFilterStream.$1",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -136,6 +150,7 @@
             ],
             "path": "packages/kbn-utils/src/streams/filter_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -144,7 +159,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-server.createIntersperseStream",
+        "id": "def-common.createIntersperseStream",
         "type": "Function",
         "tags": [
           "return"
@@ -159,10 +174,11 @@
         ],
         "path": "packages/kbn-utils/src/streams/intersperse_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.createIntersperseStream.$1",
+            "id": "def-common.createIntersperseStream.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "intersperseChunk",
@@ -172,6 +188,7 @@
             ],
             "path": "packages/kbn-utils/src/streams/intersperse_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -180,7 +197,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-server.createListStream",
+        "id": "def-common.createListStream",
         "type": "Function",
         "tags": [
           "return"
@@ -195,10 +212,11 @@
         ],
         "path": "packages/kbn-utils/src/streams/list_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.createListStream.$1",
+            "id": "def-common.createListStream.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "items",
@@ -210,6 +228,7 @@
             ],
             "path": "packages/kbn-utils/src/streams/list_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -218,7 +237,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-server.createMapStream",
+        "id": "def-common.createMapStream",
         "type": "Function",
         "tags": [],
         "label": "createMapStream",
@@ -229,10 +248,11 @@
         ],
         "path": "packages/kbn-utils/src/streams/map_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.createMapStream.$1",
+            "id": "def-common.createMapStream.$1",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -242,6 +262,7 @@
             ],
             "path": "packages/kbn-utils/src/streams/map_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -250,7 +271,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-server.createPromiseFromStreams",
+        "id": "def-common.createPromiseFromStreams",
         "type": "Function",
         "tags": [],
         "label": "createPromiseFromStreams",
@@ -264,10 +285,11 @@
         ],
         "path": "packages/kbn-utils/src/streams/promise_from_streams.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.createPromiseFromStreams.$1",
+            "id": "def-common.createPromiseFromStreams.$1",
             "type": "Object",
             "tags": [],
             "label": "streams",
@@ -281,6 +303,7 @@
             ],
             "path": "packages/kbn-utils/src/streams/promise_from_streams.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -289,7 +312,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-server.createReduceStream",
+        "id": "def-common.createReduceStream",
         "type": "Function",
         "tags": [
           "return"
@@ -304,10 +327,11 @@
         ],
         "path": "packages/kbn-utils/src/streams/reduce_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.createReduceStream.$1",
+            "id": "def-common.createReduceStream.$1",
             "type": "Function",
             "tags": [],
             "label": "reducer",
@@ -317,11 +341,12 @@
             ],
             "path": "packages/kbn-utils/src/streams/reduce_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.createReduceStream.$2",
+            "id": "def-common.createReduceStream.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "initial",
@@ -333,6 +358,7 @@
             ],
             "path": "packages/kbn-utils/src/streams/reduce_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -341,7 +367,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-server.createReplaceStream",
+        "id": "def-common.createReplaceStream",
         "type": "Function",
         "tags": [],
         "label": "createReplaceStream",
@@ -352,10 +378,11 @@
         ],
         "path": "packages/kbn-utils/src/streams/replace_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.createReplaceStream.$1",
+            "id": "def-common.createReplaceStream.$1",
             "type": "string",
             "tags": [],
             "label": "toReplace",
@@ -365,11 +392,12 @@
             ],
             "path": "packages/kbn-utils/src/streams/replace_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.createReplaceStream.$2",
+            "id": "def-common.createReplaceStream.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "replacement",
@@ -379,6 +407,7 @@
             ],
             "path": "packages/kbn-utils/src/streams/replace_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -387,7 +416,7 @@
       },
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-server.createSplitStream",
+        "id": "def-common.createSplitStream",
         "type": "Function",
         "tags": [
           "return"
@@ -402,10 +431,11 @@
         ],
         "path": "packages/kbn-utils/src/streams/split_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utils",
-            "id": "def-server.createSplitStream.$1",
+            "id": "def-common.createSplitStream.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "splitChunk",
@@ -415,56 +445,10 @@
             ],
             "path": "packages/kbn-utils/src/streams/split_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/utils",
-        "id": "def-server.fromRoot",
-        "type": "Function",
-        "tags": [],
-        "label": "fromRoot",
-        "description": [],
-        "signature": [
-          "(...paths: string[]) => string"
-        ],
-        "path": "packages/kbn-utils/src/repo_root.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/utils",
-            "id": "def-server.fromRoot.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "paths",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "packages/kbn-utils/src/repo_root.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/utils",
-        "id": "def-server.isKibanaDistributable",
-        "type": "Function",
-        "tags": [],
-        "label": "isKibanaDistributable",
-        "description": [],
-        "signature": [
-          "() => boolean"
-        ],
-        "path": "packages/kbn-utils/src/package_json/index.ts",
-        "deprecated": false,
-        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -474,7 +458,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/utils",
-        "id": "def-server.PathConfigType",
+        "id": "def-common.PathConfigType",
         "type": "Type",
         "tags": [],
         "label": "PathConfigType",
@@ -484,54 +468,10 @@
         ],
         "path": "packages/kbn-utils/src/path/index.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/utils",
-        "id": "def-server.REPO_ROOT",
-        "type": "string",
-        "tags": [],
-        "label": "REPO_ROOT",
-        "description": [],
-        "path": "packages/kbn-utils/src/repo_root.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/utils",
-        "id": "def-server.UPSTREAM_BRANCH",
-        "type": "string",
-        "tags": [],
-        "label": "UPSTREAM_BRANCH",
-        "description": [],
-        "path": "packages/kbn-utils/src/repo_root.ts",
-        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/utils",
-        "id": "def-server.kibanaPackageJson",
-        "type": "Object",
-        "tags": [],
-        "label": "kibanaPackageJson",
-        "description": [],
-        "signature": [
-          "KibanaPackageJson"
-        ],
-        "path": "packages/kbn-utils/src/package_json/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

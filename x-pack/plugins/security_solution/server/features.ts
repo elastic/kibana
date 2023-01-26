@@ -7,12 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { createUICapabilities } from '@kbn/cases-plugin/common';
+
+import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import { APP_ID, CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { savedObjectTypes } from './saved_objects';
+import type { ConfigType } from './config';
 
 export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
   const casesCapabilities = createUICapabilities();
@@ -45,7 +48,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         ui: casesCapabilities.all,
       },
       read: {
-        api: ['bulkGetUserProfiles'],
+        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -99,7 +102,442 @@ const CLOUD_POSTURE_APP_ID = 'csp';
 // Same as the saved-object type for rules defined by Cloud Security Posture
 const CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE = 'csp_rule';
 
-export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): KibanaFeatureConfig => ({
+const responseActionSubFeatures: SubFeatureConfig[] = [
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory.privilegesTooltip',
+      {
+        defaultMessage: 'All Spaces is required for Response Actions History access.',
+      }
+    ),
+    name: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory',
+      {
+        defaultMessage: 'Response Actions History',
+      }
+    ),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [`${APP_ID}-writeActionsLogManagement`, `${APP_ID}-readActionsLogManagement`],
+            id: 'actions_log_management_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['writeActionsLogManagement', 'readActionsLogManagement'],
+          },
+          {
+            api: [`${APP_ID}-readActionsLogManagement`],
+            id: 'actions_log_management_read',
+            includeIn: 'none',
+            name: 'Read',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['readActionsLogManagement'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.hostIsolation.privilegesTooltip',
+      {
+        defaultMessage: 'All Spaces is required for Host Isolation access.',
+      }
+    ),
+    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.hostIsolation', {
+      defaultMessage: 'Host Isolation',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [`${APP_ID}-writeHostIsolation`],
+            id: 'host_isolation_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['writeHostIsolation'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.processOperations.privilegesTooltip',
+      {
+        defaultMessage: 'All Spaces is required for Process Operations access.',
+      }
+    ),
+    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.processOperations', {
+      defaultMessage: 'Process Operations',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [`${APP_ID}-writeProcessOperations`],
+            id: 'process_operations_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['writeProcessOperations'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.fileOperations.privilegesTooltip',
+      {
+        defaultMessage: 'All Spaces is required for File Operations access.',
+      }
+    ),
+    name: i18n.translate('xpack.securitySolution.featureRegistr.subFeatures.fileOperations', {
+      defaultMessage: 'File Operations',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [`${APP_ID}-writeFileOperations`],
+            id: 'file_operations_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['writeFileOperations'],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+const subFeatures: SubFeatureConfig[] = [
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+      {
+        defaultMessage: 'All Spaces is required for Endpoint List access.',
+      }
+    ),
+    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.endpointList', {
+      defaultMessage: 'Endpoint List',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [`${APP_ID}-writeEndpointList`, `${APP_ID}-readEndpointList`],
+            id: 'endpoint_list_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['writeEndpointList', 'readEndpointList'],
+          },
+          {
+            api: [`${APP_ID}-readEndpointList`],
+            id: 'endpoint_list_read',
+            includeIn: 'none',
+            name: 'Read',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['readEndpointList'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.trustedApplications.privilegesTooltip',
+      {
+        defaultMessage: 'All Spaces is required for Trusted Applications access.',
+      }
+    ),
+    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.trustedApplications', {
+      defaultMessage: 'Trusted Applications',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeTrustedApplications`,
+              `${APP_ID}-readTrustedApplications`,
+            ],
+            id: 'trusted_applications_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
+              read: [],
+            },
+            ui: ['writeTrustedApplications', 'readTrustedApplications'],
+          },
+          {
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedApplications`],
+            id: 'trusted_applications_read',
+            includeIn: 'none',
+            name: 'Read',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['readTrustedApplications'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
+      {
+        defaultMessage: 'All Spaces is required for Host Isolation Exceptions access.',
+      }
+    ),
+    name: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions',
+      {
+        defaultMessage: 'Host Isolation Exceptions',
+      }
+    ),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeHostIsolationExceptions`,
+              `${APP_ID}-readHostIsolationExceptions`,
+            ],
+            id: 'host_isolation_exceptions_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
+              read: [],
+            },
+            ui: ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
+          },
+          {
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
+            id: 'host_isolation_exceptions_read',
+            includeIn: 'none',
+            name: 'Read',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['readHostIsolationExceptions'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.blockList.privilegesTooltip',
+      {
+        defaultMessage: 'All Spaces is required for Blocklist access.',
+      }
+    ),
+    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.blockList', {
+      defaultMessage: 'Blocklist',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeBlocklist`,
+              `${APP_ID}-readBlocklist`,
+            ],
+            id: 'blocklist_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
+              read: [],
+            },
+            ui: ['writeBlocklist', 'readBlocklist'],
+          },
+          {
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readBlocklist`],
+            id: 'blocklist_read',
+            includeIn: 'none',
+            name: 'Read',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['readBlocklist'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.eventFilters.privilegesTooltip',
+      {
+        defaultMessage: 'All Spaces is required for Event Filters access.',
+      }
+    ),
+    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.eventFilters', {
+      defaultMessage: 'Event Filters',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeEventFilters`,
+              `${APP_ID}-readEventFilters`,
+            ],
+            id: 'event_filters_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
+              read: [],
+            },
+            ui: ['writeEventFilters', 'readEventFilters'],
+          },
+          {
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readEventFilters`],
+            id: 'event_filters_read',
+            includeIn: 'none',
+            name: 'Read',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['readEventFilters'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.policyManagement.privilegesTooltip',
+      {
+        defaultMessage: 'All Spaces is required for Policy Management access.',
+      }
+    ),
+    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.policyManagement', {
+      defaultMessage: 'Policy Management',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [`${APP_ID}-writePolicyManagement`, `${APP_ID}-readPolicyManagement`],
+            id: 'policy_management_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['writePolicyManagement', 'readPolicyManagement'],
+          },
+          {
+            api: [`${APP_ID}-readPolicyManagement`],
+            id: 'policy_management_read',
+            includeIn: 'none',
+            name: 'Read',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['readPolicyManagement'],
+          },
+        ],
+      },
+    ],
+  },
+  ...responseActionSubFeatures,
+];
+
+function getSubFeatures(experimentalFeatures: ConfigType['experimentalFeatures']) {
+  let filteredSubFeatures: SubFeatureConfig[] = [];
+
+  if (experimentalFeatures.endpointRbacEnabled) {
+    filteredSubFeatures = subFeatures;
+  } else if (experimentalFeatures.endpointRbacV1Enabled) {
+    filteredSubFeatures = responseActionSubFeatures;
+  }
+
+  if (!experimentalFeatures.responseActionGetFileEnabled) {
+    filteredSubFeatures = filteredSubFeatures.filter((subFeat) => {
+      return subFeat.name !== 'File Operations';
+    });
+  }
+
+  return filteredSubFeatures;
+}
+
+export const getKibanaPrivilegesFeaturePrivileges = (
+  ruleTypes: string[],
+  experimentalFeatures: ConfigType['experimentalFeatures']
+): KibanaFeatureConfig => ({
   id: SERVER_APP_ID,
   name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
     defaultMessage: 'Security',
@@ -112,7 +550,6 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
     insightsAndAlerting: ['triggersActions'],
   },
   alerting: ruleTypes,
-  subFeatures: [],
   privileges: {
     all: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
@@ -130,7 +567,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
         all: [
           'alert',
           'exception-list',
-          'exception-list-agnostic',
+          EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
           CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
@@ -158,7 +595,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
         all: [],
         read: [
           'exception-list',
-          'exception-list-agnostic',
+          EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
           CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
@@ -178,4 +615,5 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
       ui: ['show'],
     },
   },
+  subFeatures: getSubFeatures(experimentalFeatures),
 });

@@ -69,7 +69,7 @@ Tests run on buildkite PR pipeline is parallelized(current value = 4 parallel jo
 ```yml
     ...
     agents:
-      queue: ci-group-6
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     parallelism: 4
@@ -83,7 +83,7 @@ This configuration runs cypress tests against an arbitrary host.
 
 #### integration-test (CI)
 
-This configuration is driven by [elastic/integration-test](https://github.com/elastic/integration-test) which, as part of a bigger set of tests, provisions one VM with two instances configured in CCS mode and runs the [CCS Cypress test specs](./ccs_integration).
+This configuration is driven by [elastic/integration-test](https://github.com/elastic/integration-test) which, as part of a bigger set of tests, provisions one VM with two instances configured in CCS mode and runs the [CCS Cypress test specs](./ccs_e2e).
 
 The two clusters are named `admin` and `data` and are reachable as follows:
 
@@ -280,13 +280,13 @@ If you are debugging a flaky test, a good tip is to insert a `cy.wait(<some long
 
 Below you can find the folder structure used on our Cypress tests.
 
-### ccs_integration/
+### ccs_e2e/
 
 Contains the specs that are executed in a Cross Cluster Search configuration.
 
-### integration/
+### e2e/
 
-Cypress convention. Contains the specs that are going to be executed.
+Cypress convention starting version 10 (previously known as integration). Contains the specs that are going to be executed.
 
 ### fixtures/
 

@@ -16,7 +16,6 @@ import {
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
-import { RelatedSavedObjects } from './lib/related_saved_objects';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
@@ -25,21 +24,18 @@ interface CreateExecuteFunctionOptions {
   preconfiguredActions: PreConfiguredAction[];
 }
 
-export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | 'source'> {
+export interface ExecuteOptions
+  extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects' | 'consumer'> {
   id: string;
   spaceId: string;
   apiKey: string | null;
   executionId: string;
-  consumer?: string;
-  relatedSavedObjects?: RelatedSavedObjects;
 }
 
-export interface ActionTaskParams extends Pick<ActionExecutorOptions, 'params'> {
-  actionId: string;
+interface ActionTaskParams
+  extends Pick<ActionExecutorOptions, 'actionId' | 'params' | 'consumer' | 'relatedSavedObjects'> {
   apiKey: string | null;
   executionId: string;
-  consumer?: string;
-  relatedSavedObjects?: RelatedSavedObjects;
 }
 
 export interface GetConnectorsResult {
@@ -176,45 +172,42 @@ export function createBulkExecutionEnqueuerFunction({
       connectorIsPreconfigured[id] = isPreconfigured;
     });
 
-    const actions = await Promise.all(
-      actionsToExecute.map(async (actionToExecute) => {
-        // Get saved object references from action ID and relatedSavedObjects
-        const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
-          actionToExecute.id,
-          connectorIsPreconfigured[actionToExecute.id],
-          actionToExecute.relatedSavedObjects
-        );
-        const executionSourceReference = executionSourceAsSavedObjectReferences(
-          actionToExecute.source
-        );
+    const actions = actionsToExecute.map((actionToExecute) => {
+      // Get saved object references from action ID and relatedSavedObjects
+      const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
+        actionToExecute.id,
+        connectorIsPreconfigured[actionToExecute.id],
+        actionToExecute.relatedSavedObjects
+      );
+      const executionSourceReference = executionSourceAsSavedObjectReferences(
+        actionToExecute.source
+      );
 
-        const taskReferences = [];
-        if (executionSourceReference.references) {
-          taskReferences.push(...executionSourceReference.references);
-        }
-        if (references) {
-          taskReferences.push(...references);
-        }
+      const taskReferences = [];
+      if (executionSourceReference.references) {
+        taskReferences.push(...executionSourceReference.references);
+      }
+      if (references) {
+        taskReferences.push(...references);
+      }
 
-        spaceIds[actionToExecute.id] = actionToExecute.spaceId;
+      spaceIds[actionToExecute.id] = actionToExecute.spaceId;
 
-        return {
-          type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-          attributes: {
-            actionId: actionToExecute.id,
-            params: actionToExecute.params,
-            apiKey: actionToExecute.apiKey,
-            executionId: actionToExecute.executionId,
-            consumer: actionToExecute.consumer,
-            relatedSavedObjects: relatedSavedObjectWithRefs,
-          },
-          references: taskReferences,
-        };
-      })
-    );
-
+      return {
+        type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        attributes: {
+          actionId: actionToExecute.id,
+          params: actionToExecute.params,
+          apiKey: actionToExecute.apiKey,
+          executionId: actionToExecute.executionId,
+          consumer: actionToExecute.consumer,
+          relatedSavedObjects: relatedSavedObjectWithRefs,
+        },
+        references: taskReferences,
+      };
+    });
     const actionTaskParamsRecords: SavedObjectsBulkResponse<ActionTaskParams> =
-      await unsecuredSavedObjectsClient.bulkCreate(actions);
+      await unsecuredSavedObjectsClient.bulkCreate(actions, { refresh: false });
     const taskInstances = actionTaskParamsRecords.saved_objects.map((so) => {
       const actionId = so.attributes.actionId;
       return {

@@ -21,6 +21,7 @@ import { DEFAULT_PERCENT_DECIMALS } from '../../common';
 import { PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
+import { convertToLens } from '../convert_to_lens';
 
 export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,
@@ -123,4 +124,10 @@ export const getPieVisTypeDefinition = ({
   },
   hierarchicalData: true,
   requiresSearch: true,
+  navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
+    };
+  },
 });

@@ -59,7 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('should NOT allow access to endpoint management pages', async () => {
           await PageObjects.endpoint.navigateToEndpointList();
-          await testSubjects.existOrFail('noIngestPermissions');
+          await testSubjects.existOrFail('noPrivilegesPage');
         });
 
         it('should display endpoint data on Host Details', async () => {
@@ -75,20 +75,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // The values for these are calculated, so let's just make sure its not teh default when no data is returned
           expect(endpointSummary['Policy status']).not.be('—');
           expect(endpointSummary['Agent status']).not.to.be('—');
-        });
-
-        // FIXME: this area (detections) is unstable and due to time, skipping it.
-        //        The page does not always (its intermittent) display with the created roles. Sometimes you get a
-        //        "not enought priviliges" and others the data shows up.
-        it.skip('should display endpoint data on Alert Details', async () => {
-          await PageObjects.detections.navigateToAlerts();
-          await PageObjects.detections.openFirstAlertDetailsForHostName(
-            indexedData.hosts[0].host.name
-          );
-
-          const hostAgentStatus = await testSubjects.getVisibleText('rowHostStatus');
-
-          expect(hostAgentStatus).to.eql('Healthy');
         });
       });
     }

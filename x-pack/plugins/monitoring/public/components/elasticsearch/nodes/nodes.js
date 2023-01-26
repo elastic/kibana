@@ -18,7 +18,7 @@ import {
   EuiToolTip,
   EuiSpacer,
   EuiPage,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
   EuiPanel,
   EuiCallOut,

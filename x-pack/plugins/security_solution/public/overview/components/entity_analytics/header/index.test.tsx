@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { EntityAnalyticsHeader } from '.';
 import { Direction, RiskScoreFields, RiskSeverity } from '../../../../../common/search_strategy';
-import type { SeverityCount } from '../../../../common/components/severity/types';
+import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
 import { TestProviders } from '../../../../common/mock';
-import { hostsActions } from '../../../../hosts/store';
-import { HostsType } from '../../../../hosts/store/model';
-import { usersActions } from '../../../../users/store';
-import { UsersTableType } from '../../../../users/store/model';
+import { hostsActions } from '../../../../explore/hosts/store';
+import { HostsType } from '../../../../explore/hosts/store/model';
+import { usersActions } from '../../../../explore/users/store';
+import { UsersTableType } from '../../../../explore/users/store/model';
 
 const mockSeverityCount: SeverityCount = {
   [RiskSeverity.low]: 1,
@@ -24,14 +24,13 @@ const mockSeverityCount: SeverityCount = {
   [RiskSeverity.critical]: 99,
 };
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => true,
+jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
+  useMlCapabilities: () => ({ isPlatinumOrTrialLicense: true, capabilities: {} }),
 }));
 
-jest.mock('../../../../risk_score/containers', () => {
+jest.mock('../../../../explore/containers/risk_score', () => {
   return {
-    useHostRiskScoreKpi: () => ({ severityCount: mockSeverityCount }),
-    useUserRiskScoreKpi: () => ({ severityCount: mockSeverityCount }),
+    useRiskScoreKpi: () => ({ severityCount: mockSeverityCount }),
   };
 });
 
@@ -44,28 +43,31 @@ jest.mock('react-redux', () => {
   };
 });
 
-describe('RiskScoreDonutChart', () => {
-  it('renders critical hosts', () => {
+describe('Entity analytics header', () => {
+  it('renders critical hosts', async () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <EntityAnalyticsHeader />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(getByTestId('critical_hosts_quantity')).toHaveTextContent('99');
+    });
+  });
+
+  it('renders critical users', async () => {
     const { getByTestId } = render(
       <TestProviders>
         <EntityAnalyticsHeader />
       </TestProviders>
     );
 
-    expect(getByTestId('critical_hosts_quantity')).toHaveTextContent('99');
+    await waitFor(() => {
+      expect(getByTestId('critical_users_quantity')).toHaveTextContent('99');
+    });
   });
 
-  it('renders critical users', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <EntityAnalyticsHeader />
-      </TestProviders>
-    );
-
-    expect(getByTestId('critical_users_quantity')).toHaveTextContent('99');
-  });
-
-  it('dispatches user risk tab filters actions', () => {
+  it('dispatches user risk tab filters actions', async () => {
     const { getByTestId } = render(
       <TestProviders>
         <EntityAnalyticsHeader />
@@ -76,21 +78,23 @@ describe('RiskScoreDonutChart', () => {
       fireEvent.click(getByTestId('critical_users_link'));
     });
 
-    expect(mockDispatch).toHaveBeenCalledWith(
-      usersActions.updateUserRiskScoreSeverityFilter({
-        severitySelection: [RiskSeverity.critical],
-      })
-    );
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith(
+        usersActions.updateUserRiskScoreSeverityFilter({
+          severitySelection: [RiskSeverity.critical],
+        })
+      );
 
-    expect(mockDispatch).toHaveBeenCalledWith(
-      usersActions.updateTableSorting({
-        sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
-        tableType: UsersTableType.risk,
-      })
-    );
+      expect(mockDispatch).toHaveBeenCalledWith(
+        usersActions.updateTableSorting({
+          sort: { field: RiskScoreFields.userRiskScore, direction: Direction.desc },
+          tableType: UsersTableType.risk,
+        })
+      );
+    });
   });
 
-  it('dispatches host risk tab filters actions', () => {
+  it('dispatches host risk tab filters actions', async () => {
     const { getByTestId } = render(
       <TestProviders>
         <EntityAnalyticsHeader />
@@ -101,18 +105,20 @@ describe('RiskScoreDonutChart', () => {
       fireEvent.click(getByTestId('critical_hosts_link'));
     });
 
-    expect(mockDispatch).toHaveBeenCalledWith(
-      hostsActions.updateHostRiskScoreSeverityFilter({
-        severitySelection: [RiskSeverity.critical],
-        hostsType: HostsType.page,
-      })
-    );
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith(
+        hostsActions.updateHostRiskScoreSeverityFilter({
+          severitySelection: [RiskSeverity.critical],
+          hostsType: HostsType.page,
+        })
+      );
 
-    expect(mockDispatch).toHaveBeenCalledWith(
-      hostsActions.updateHostRiskScoreSort({
-        sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
-        hostsType: HostsType.page,
-      })
-    );
+      expect(mockDispatch).toHaveBeenCalledWith(
+        hostsActions.updateHostRiskScoreSort({
+          sort: { field: RiskScoreFields.hostRiskScore, direction: Direction.desc },
+          hostsType: HostsType.page,
+        })
+      );
+    });
   });
 });

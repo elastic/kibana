@@ -7,9 +7,18 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { DataViewBase, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  DataViewBase,
+  EsQueryConfig,
+  Filter,
+  Query,
+  AggregateQuery,
+  TimeRange,
+  isOfQueryType,
+} from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
@@ -43,25 +52,35 @@ import {
   ReferenceOrValueEmbeddable,
   SelfStyledEmbeddable,
   FilterableEmbeddable,
+  cellValueTrigger,
+  CELL_VALUE_TRIGGER,
+  type CellValueContext,
 } from '@kbn/embeddable-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
   Capabilities,
+  CoreStart,
   IBasePath,
   IUiSettingsClient,
   KibanaExecutionContext,
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import {
+  BrushTriggerEvent,
+  ClickTriggerEvent,
+  Warnings,
+  MultiClickTriggerEvent,
+} from '@kbn/charts-plugin/public';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import {
   isLensBrushEvent,
   isLensFilterEvent,
+  isLensMultiFilterEvent,
   isLensEditEvent,
   isLensTableRowContextMenuClickEvent,
   LensTableRowContextMenuEvent,
@@ -70,16 +89,32 @@ import {
   DatasourceMap,
   Datasource,
   IndexPatternMap,
+  GetCompatibleCellValueActions,
+  UserMessage,
+  IndexPatternRef,
+  FrameDatasourceAPI,
+  AddUserMessages,
+  isMessageRemovable,
+  UserMessagesGetter,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
 import { LensAttributeService } from '../lens_attribute_service';
-import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
+import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
-import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
+import {
+  getActiveDatasourceIdFromDoc,
+  getActiveVisualizationIdFromDoc,
+  getIndexPatternsObjects,
+  getSearchWarningMessages,
+  inferTimeField,
+} from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
-import { convertDataViewIntoLensIndexPattern } from '../indexpattern_service/loader';
+import {
+  filterUserMessages,
+  getApplicationUserMessages,
+} from '../app_plugin/get_application_user_messages';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -96,13 +131,15 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  timeslice?: [number, number];
   palette?: PaletteOutput;
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
+  noPadding?: boolean;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
-  onFilter?: (data: ClickTriggerEvent['data']) => void;
+  onFilter?: (data: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => void;
   onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
 
@@ -120,9 +157,11 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
   data: DataPublicPluginStart;
-  documentToExpression: (
-    doc: Document
-  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  documentToExpression: (doc: Document) => Promise<{
+    ast: Ast | null;
+    indexPatterns: IndexPatternMap;
+    indexPatternRefs: IndexPatternRef[];
+  }>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -139,6 +178,7 @@ export interface LensEmbeddableDeps {
     navLinks: Capabilities['navLinks'];
     discover: Capabilities['discover'];
   };
+  coreStart: CoreStart;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
@@ -146,10 +186,10 @@ export interface LensEmbeddableDeps {
 }
 
 export interface ViewUnderlyingDataArgs {
-  indexPatternId: string;
+  dataViewSpec: DataViewSpec;
   timeRange: TimeRange;
   filters: Filter[];
-  query: Query | undefined;
+  query: Query | AggregateQuery | undefined;
   columns: string[];
 }
 
@@ -157,16 +197,15 @@ const getExpressionFromDocument = async (
   document: Document,
   documentToExpression: LensEmbeddableDeps['documentToExpression']
 ) => {
-  const { ast, errors } = await documentToExpression(document);
-  return {
-    expression: ast ? toExpression(ast) : null,
-    errors,
-  };
+  const { ast, indexPatterns, indexPatternRefs } = await documentToExpression(document);
+  return { ast: ast ? toExpression(ast) : null, indexPatterns, indexPatternRefs };
 };
 
 function getViewUnderlyingDataArgs({
   activeDatasource,
   activeDatasourceState,
+  activeVisualization,
+  activeVisualizationState,
   activeData,
   dataViews,
   capabilities,
@@ -178,6 +217,8 @@ function getViewUnderlyingDataArgs({
 }: {
   activeDatasource: Datasource;
   activeDatasourceState: unknown;
+  activeVisualization: Visualization;
+  activeVisualizationState: unknown;
   activeData: TableInspectorAdapter | undefined;
   dataViews: DataViewBase[] | undefined;
   capabilities: LensEmbeddableDeps['capabilities'];
@@ -190,6 +231,8 @@ function getViewUnderlyingDataArgs({
   const { error, meta } = getLayerMetaInfo(
     activeDatasource,
     activeDatasourceState,
+    activeVisualization,
+    activeVisualizationState,
     activeData,
     indexPatternsCache,
     timeRange,
@@ -199,20 +242,34 @@ function getViewUnderlyingDataArgs({
   if (error || !meta) {
     return;
   }
+  const luceneOrKuery: Query[] = [];
+  const aggregateQuery: AggregateQuery[] = [];
+
+  if (Array.isArray(query)) {
+    query.forEach((q) => {
+      if (isOfQueryType(q)) {
+        luceneOrKuery.push(q);
+      } else {
+        aggregateQuery.push(q);
+      }
+    });
+  }
 
   const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
-    query as Query,
+    luceneOrKuery.length > 0 ? luceneOrKuery : (query as Query),
     filters,
     meta,
     dataViews,
     esQueryConfig
   );
 
+  const dataViewSpec = indexPatternsCache[meta.id]!.spec;
+
   return {
-    indexPatternId: meta.id,
+    dataViewSpec,
     timeRange,
     filters: newFilters,
-    query: newQuery,
+    query: aggregateQuery.length > 0 ? aggregateQuery[0] : newQuery,
     columns: meta.columns,
   };
 }
@@ -232,9 +289,9 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
+  private warningDomNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
-  private errors: ErrorMessage[] | undefined;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
   private embeddableTitle?: string;
@@ -254,13 +311,9 @@ export class Embeddable
     searchSessionId?: string;
   } = {};
 
-  private activeDataInfo: {
-    activeData?: TableInspectorAdapter;
-    activeDatasource?: Datasource;
-    activeDatasourceState?: unknown;
-  } = {};
+  private activeData?: TableInspectorAdapter;
 
-  private indexPatterns: DataView[] = [];
+  private dataViews: DataView[] = [];
 
   private viewUnderlyingDataArgs?: ViewUnderlyingDataArgs;
 
@@ -279,13 +332,22 @@ export class Embeddable
 
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
+    let containerStateChangedCalledAlready = false;
     this.initializeSavedVis(initialInput)
-      .then(() => this.onContainerStateChanged(initialInput))
+      .then(() => {
+        this.loadUserMessages();
+        if (!containerStateChangedCalledAlready) {
+          this.onContainerStateChanged(initialInput);
+        } else {
+          this.reload();
+        }
+      })
       .catch((e) => this.onFatalError(e));
 
-    this.subscription = this.getUpdated$().subscribe(() =>
-      this.onContainerStateChanged(this.input)
-    );
+    this.subscription = this.getUpdated$().subscribe(() => {
+      containerStateChangedCalledAlready = true;
+      this.onContainerStateChanged(this.input);
+    });
 
     const input$ = this.getInput$();
     this.embeddableTitle = this.getTitle();
@@ -365,6 +427,151 @@ export class Embeddable
     );
   }
 
+  private get activeDatasourceId() {
+    return getActiveDatasourceIdFromDoc(this.savedVis);
+  }
+
+  private get activeDatasource() {
+    if (!this.activeDatasourceId) return;
+    return this.deps.datasourceMap[this.activeDatasourceId];
+  }
+
+  private get activeVisualizationId() {
+    return getActiveVisualizationIdFromDoc(this.savedVis);
+  }
+
+  private get activeVisualization() {
+    if (!this.activeVisualizationId) return;
+    return this.deps.visualizationMap[this.activeVisualizationId];
+  }
+
+  private get activeVisualizationState() {
+    if (!this.activeVisualization) return;
+    return this.activeVisualization.initialize(() => '', this.savedVis?.state.visualization);
+  }
+
+  private indexPatterns: IndexPatternMap = {};
+
+  private indexPatternRefs: IndexPatternRef[] = [];
+
+  private get activeDatasourceState(): undefined | unknown {
+    if (!this.activeDatasourceId || !this.activeDatasource) return;
+
+    const docDatasourceState = this.savedVis?.state.datasourceStates[this.activeDatasourceId];
+
+    return this.activeDatasource.initialize(
+      docDatasourceState,
+      [...(this.savedVis?.references || []), ...(this.savedVis?.state.internalReferences || [])],
+      undefined,
+      undefined,
+      this.indexPatterns
+    );
+  }
+
+  public getUserMessages: UserMessagesGetter = (locationId, filters) => {
+    return filterUserMessages(
+      [...this._userMessages, ...Object.values(this.additionalUserMessages)],
+      locationId,
+      filters
+    );
+  };
+
+  private get hasAnyErrors() {
+    return this.getUserMessages(undefined, { severity: 'error' }).length > 0;
+  }
+
+  private _userMessages: UserMessage[] = [];
+
+  // loads all available user messages
+  private loadUserMessages() {
+    const userMessages: UserMessage[] = [];
+
+    if (this.activeVisualizationState && this.activeDatasource) {
+      userMessages.push(
+        ...getApplicationUserMessages({
+          visualizationType: this.savedVis?.visualizationType,
+          visualization: {
+            state: this.activeVisualizationState,
+            activeId: this.activeVisualizationId,
+          },
+          visualizationMap: this.deps.visualizationMap,
+          activeDatasource: this.activeDatasource,
+          activeDatasourceState: { state: this.activeDatasourceState },
+          dataViews: {
+            indexPatterns: this.indexPatterns,
+            indexPatternRefs: this.indexPatternRefs, // TODO - are these actually used?
+          },
+          core: this.deps.coreStart,
+        })
+      );
+    }
+
+    const mergedSearchContext = this.getMergedSearchContext();
+
+    if (!this.savedVis) {
+      return userMessages;
+    }
+
+    const frameDatasourceAPI: FrameDatasourceAPI = {
+      dataViews: {
+        indexPatterns: this.indexPatterns,
+        indexPatternRefs: this.indexPatternRefs,
+      },
+      datasourceLayers: {}, // TODO
+      query: this.savedVis.state.query,
+      filters: mergedSearchContext.filters ?? [],
+      dateRange: {
+        fromDate: mergedSearchContext.timeRange?.from ?? '',
+        toDate: mergedSearchContext.timeRange?.to ?? '',
+      },
+      activeData: this.activeData,
+    };
+
+    userMessages.push(
+      ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
+        setState: () => {},
+        frame: frameDatasourceAPI,
+      }) ?? []),
+      ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
+        frame: frameDatasourceAPI,
+      }) ?? [])
+    );
+
+    this._userMessages = userMessages;
+  }
+
+  private additionalUserMessages: Record<string, UserMessage> = {};
+
+  // used to add warnings and errors from elsewhere in the embeddable
+  private addUserMessages: AddUserMessages = (messages) => {
+    const newMessageMap = {
+      ...this.additionalUserMessages,
+    };
+
+    const addedMessageIds: string[] = [];
+    messages.forEach((message) => {
+      if (!newMessageMap[message.uniqueId]) {
+        addedMessageIds.push(message.uniqueId);
+        newMessageMap[message.uniqueId] = message;
+      }
+    });
+
+    if (addedMessageIds.length) {
+      this.additionalUserMessages = newMessageMap;
+      this.renderBadgeMessages();
+    }
+
+    return () => {
+      const withMessagesRemoved = {
+        ...this.additionalUserMessages,
+      };
+
+      messages.map(({ uniqueId }) => uniqueId).forEach((id) => delete withMessagesRemoved[id]);
+
+      this.additionalUserMessages = withMessagesRemoved;
+    };
+  };
+
   public reportsEmbeddableLoad() {
     return true;
   }
@@ -379,54 +586,6 @@ export class Embeddable
 
   public getInspectorAdapters() {
     return this.lensInspector.adapters;
-  }
-
-  private maybeAddConflictError(
-    errors?: ErrorMessage[],
-    sharingSavedObjectProps?: SharingSavedObjectProps
-  ) {
-    const ret = [...(errors || [])];
-
-    if (sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
-      ret.push({
-        shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
-          defaultMessage: `You've encountered a URL conflict`,
-        }),
-        longMessage: (
-          <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
-            targetType={DOC_TYPE}
-            sourceId={sharingSavedObjectProps.sourceId!}
-          />
-        ),
-      });
-    }
-
-    return ret?.length ? ret : undefined;
-  }
-
-  private maybeAddTimeRangeError(
-    errors: ErrorMessage[] | undefined,
-    input: LensEmbeddableInput,
-    indexPatterns: DataView[]
-  ) {
-    // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
-    if (
-      input.timeRange == null &&
-      indexPatterns.some((indexPattern) => indexPattern.isTimeBased())
-    ) {
-      return [
-        ...(errors || []),
-        {
-          shortMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.shortMessage', {
-            defaultMessage: `Missing timeRange property`,
-          }),
-          longMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.longMessage', {
-            defaultMessage: `The timeRange property is required for the given configuration`,
-          }),
-        },
-      ];
-    }
-    return errors;
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
@@ -448,19 +607,47 @@ export class Embeddable
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
 
-    const { expression, errors } = await getExpressionFromDocument(
+    const { ast, indexPatterns, indexPatternRefs } = await getExpressionFromDocument(
       this.savedVis,
       this.deps.documentToExpression
     );
-    this.expression = expression;
-    this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
+
+    this.expression = ast;
+    this.indexPatterns = indexPatterns;
+    this.indexPatternRefs = indexPatternRefs;
+
+    if (metaInfo?.sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
+      this.addUserMessages([
+        {
+          uniqueId: 'url-conflict',
+          severity: 'error',
+          displayLocations: [{ id: 'visualization' }],
+          shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
+            defaultMessage: `You've encountered a URL conflict`,
+          }),
+          longMessage: (
+            <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
+              targetType={DOC_TYPE}
+              sourceId={metaInfo?.sharingSavedObjectProps?.sourceId!}
+            />
+          ),
+          fixableInEditor: false,
+        },
+      ]);
+    }
 
     await this.initializeOutput();
+
+    // deferred loading of this embeddable is complete
+    this.setInitializationFinished();
+
     this.isInitialized = true;
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState) || this.errors?.length) this.reload();
+    if (this.handleContainerStateChanged(containerState)) {
+      this.reload();
+    }
   }
 
   handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
@@ -468,15 +655,23 @@ export class Embeddable
     const cleanedFilters = containerState.filters
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
+    const nextTimeRange =
+      containerState.timeslice !== undefined
+        ? {
+            from: new Date(containerState.timeslice[0]).toISOString(),
+            to: new Date(containerState.timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : containerState.timeRange;
     if (
-      !isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
+      !isEqual(nextTimeRange, this.externalSearchContext.timeRange) ||
       !isEqual(containerState.query, this.externalSearchContext.query) ||
       !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
       this.externalSearchContext.searchSessionId !== containerState.searchSessionId ||
       this.embeddableTitle !== this.getTitle()
     ) {
       this.externalSearchContext = {
-        timeRange: containerState.timeRange,
+        timeRange: nextTimeRange,
         query: containerState.query,
         filters: cleanedFilters,
         searchSessionId: containerState.searchSessionId,
@@ -488,8 +683,27 @@ export class Embeddable
     return isDirty;
   }
 
+  private getSearchWarningMessages(adapters?: Partial<DefaultInspectorAdapters>): UserMessage[] {
+    if (!this.activeDatasource || !this.activeDatasourceId || !adapters?.requests) {
+      return [];
+    }
+
+    const docDatasourceState = this.savedVis?.state.datasourceStates[this.activeDatasourceId];
+
+    const requestWarnings = getSearchWarningMessages(
+      adapters.requests,
+      this.activeDatasource,
+      docDatasourceState,
+      {
+        searchService: this.deps.data.search,
+      }
+    );
+
+    return requestWarnings;
+  }
+
+  private removeActiveDataWarningMessages: () => void = () => {};
   private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
-    this.activeDataInfo.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false, adapters);
@@ -497,10 +711,19 @@ export class Embeddable
 
     const { type, error } = data as { type: string; error: ErrorLike };
     this.updateOutput({
-      ...this.getOutput(),
       loading: false,
       error: type === 'error' ? error : undefined,
     });
+
+    const newActiveData = adapters?.tables?.tables;
+
+    this.removeActiveDataWarningMessages();
+    const searchWarningMessages = this.getSearchWarningMessages(adapters);
+    this.removeActiveDataWarningMessages = this.addUserMessages(
+      searchWarningMessages.filter(isMessageRemovable)
+    );
+
+    this.activeData = newActiveData;
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -528,10 +751,18 @@ export class Embeddable
 
     const executionContext = this.getExecutionContext();
 
-    trackUiCounterEvents(
-      [...datasourceEvents, ...visualizationEvents, ...getExecutionContextEvents(executionContext)],
-      executionContext
-    );
+    const events = [
+      ...datasourceEvents,
+      ...visualizationEvents,
+      ...getExecutionContextEvents(executionContext),
+    ];
+
+    const adHocDataViews = Object.values(this.savedVis?.state.adHocDataViews || {});
+    adHocDataViews.forEach(() => {
+      events.push('ad_hoc_data_view');
+    });
+
+    trackUiCounterEvents(events, executionContext);
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
@@ -577,12 +808,26 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
-    this.updateOutput({
-      ...this.getOutput(),
-      loading: true,
-      error: undefined,
+    const errors = this.getUserMessages(['visualization', 'visualizationOnEmbeddable'], {
+      severity: 'error',
     });
-    this.renderComplete.dispatchInProgress();
+
+    this.updateOutput({
+      loading: true,
+      error: errors.length
+        ? new Error(
+            typeof errors[0].longMessage === 'string'
+              ? errors[0].longMessage
+              : errors[0].shortMessage
+          )
+        : undefined,
+    });
+
+    if (errors.length) {
+      this.renderComplete.dispatchError();
+    } else {
+      this.renderComplete.dispatchInProgress();
+    }
 
     const input = this.getInput();
 
@@ -591,7 +836,7 @@ export class Embeddable
         <ExpressionWrapper
           ExpressionRenderer={this.expressionRenderer}
           expression={this.expression || null}
-          errors={this.errors}
+          errors={errors}
           lensInspector={this.lensInspector}
           searchContext={this.getMergedSearchContext()}
           variables={{
@@ -606,25 +851,62 @@ export class Embeddable
           renderMode={input.renderMode}
           syncColors={input.syncColors}
           syncTooltips={input.syncTooltips}
+          syncCursor={input.syncCursor}
           hasCompatibleActions={this.hasCompatibleActions}
+          getCompatibleCellValueActions={this.getCompatibleCellValueActions}
           className={input.className}
           style={input.style}
           executionContext={this.getExecutionContext()}
           canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-          onRuntimeError={() => {
+          onRuntimeError={(message) => {
+            this.updateOutput({ error: new Error(message) });
             this.logError('runtime');
           }}
-          noPadding={this.visDisplayOptions?.noPadding}
+          noPadding={this.visDisplayOptions.noPadding}
+        />
+        <div
+          css={css({
+            position: 'absolute',
+            zIndex: 2,
+            left: 0,
+            bottom: 0,
+          })}
+          ref={(el) => {
+            if (el) {
+              this.warningDomNode = el;
+            }
+          }}
         />
       </KibanaThemeProvider>,
       domNode
     );
+
+    this.renderBadgeMessages();
+  }
+
+  private renderBadgeMessages() {
+    const warningsToDisplay = this.getUserMessages('embeddableBadge', {
+      severity: 'warning',
+    });
+
+    if (warningsToDisplay.length && this.warningDomNode) {
+      render(
+        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <Warnings warnings={warningsToDisplay.map((message) => message.longMessage)} compressed />
+        </KibanaThemeProvider>,
+        this.warningDomNode
+      );
+    }
   }
 
   private readonly hasCompatibleActions = async (
     event: ExpressionRendererEvent
   ): Promise<boolean> => {
-    if (isLensTableRowContextMenuClickEvent(event) || isLensFilterEvent(event)) {
+    if (
+      isLensTableRowContextMenuClickEvent(event) ||
+      isLensMultiFilterEvent(event) ||
+      isLensFilterEvent(event)
+    ) {
       const { getTriggerCompatibleActions } = this.deps;
       if (!getTriggerCompatibleActions) {
         return false;
@@ -638,6 +920,27 @@ export class Embeddable
     }
 
     return false;
+  };
+
+  private readonly getCompatibleCellValueActions: GetCompatibleCellValueActions = async (data) => {
+    const { getTriggerCompatibleActions } = this.deps;
+    if (getTriggerCompatibleActions) {
+      const embeddable = this;
+      const actions: Array<Action<CellValueContext>> = (await getTriggerCompatibleActions(
+        CELL_VALUE_TRIGGER,
+        { data, embeddable }
+      )) as Array<Action<CellValueContext>>;
+      return actions
+        .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
+        .map((action) => ({
+          id: action.id,
+          iconType: action.getIconType({ embeddable, data, trigger: cellValueTrigger })!,
+          displayName: action.getDisplayName({ embeddable, data, trigger: cellValueTrigger }),
+          execute: (cellData) =>
+            action.execute({ embeddable, data: cellData, trigger: cellValueTrigger }),
+        }));
+    }
+    return [];
   };
 
   /**
@@ -656,6 +959,7 @@ export class Embeddable
         this.savedVis.state.filters,
         this.savedVis.references
       ),
+      disableShardWarnings: true,
     };
 
     if (this.externalSearchContext.query) {
@@ -698,7 +1002,7 @@ export class Embeddable
         this.input.onBrushEnd(event.data);
       }
     }
-    if (isLensFilterEvent(event)) {
+    if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: {
           ...event.data,
@@ -736,13 +1040,14 @@ export class Embeddable
       newVis.state.visualization = this.onEditAction(newVis.state.visualization, event);
       this.savedVis = newVis;
 
-      const { expression, errors } = await getExpressionFromDocument(
+      const { ast } = await getExpressionFromDocument(
         this.savedVis,
         this.deps.documentToExpression
       );
-      this.expression = expression;
-      this.errors = errors;
 
+      this.expression = ast;
+
+      this.loadUserMessages();
       this.reload();
     }
   };
@@ -758,64 +1063,36 @@ export class Embeddable
   }
 
   private async loadViewUnderlyingDataArgs(): Promise<boolean> {
-    if (!this.savedVis || !this.activeDataInfo.activeData) {
+    if (
+      !this.savedVis ||
+      !this.activeData ||
+      !this.activeDatasource ||
+      !this.activeDatasourceState ||
+      !this.activeVisualization ||
+      !this.activeVisualizationState
+    ) {
       return false;
     }
+
     const mergedSearchContext = this.getMergedSearchContext();
 
     if (!mergedSearchContext.timeRange) {
       return false;
     }
 
-    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (!activeDatasourceId) {
-      return false;
-    }
-
-    this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
-    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const adHocDataviews = await Promise.all(
-      Object.values(this.savedVis?.state.adHocDataViews || {})
-        .map((persistedSpec) => {
-          return DataViewPersistableStateService.inject(
-            persistedSpec,
-            this.savedVis?.references || []
-          );
-        })
-        .map((spec) => this.deps.dataViews.create(spec))
-    );
-
-    const allIndexPatterns = [...this.indexPatterns, ...adHocDataviews];
-
-    const indexPatternsCache = allIndexPatterns.reduce(
-      (acc, indexPattern) => ({
-        [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern),
-        ...acc,
-      }),
-      {}
-    );
-
-    if (!this.activeDataInfo.activeDatasourceState) {
-      this.activeDataInfo.activeDatasourceState = this.activeDataInfo.activeDatasource.initialize(
-        docDatasourceState,
-        [...(this.savedVis?.references || []), ...(this.savedVis?.state.internalReferences || [])],
-        undefined,
-        undefined,
-        indexPatternsCache
-      );
-    }
-
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
-      activeDatasource: this.activeDataInfo.activeDatasource,
-      activeDatasourceState: this.activeDataInfo.activeDatasourceState,
-      activeData: this.activeDataInfo.activeData,
-      dataViews: this.indexPatterns,
+      activeDatasource: this.activeDatasource,
+      activeDatasourceState: this.activeDatasourceState,
+      activeVisualization: this.activeVisualization,
+      activeVisualizationState: this.activeVisualizationState,
+      activeData: this.activeData,
+      dataViews: this.dataViews,
       capabilities: this.deps.capabilities,
       query: mergedSearchContext.query,
       filters: mergedSearchContext.filters || [],
       timeRange: mergedSearchContext.timeRange,
       esQueryConfig: getEsQueryConfig(this.deps.uiSettings),
-      indexPatternsCache,
+      indexPatternsCache: this.indexPatterns,
     });
 
     const loaded = typeof viewUnderlyingDataArgs !== 'undefined';
@@ -855,33 +1132,48 @@ export class Embeddable
       )
     ).forEach((dataView) => indexPatterns.push(dataView));
 
-    this.indexPatterns = uniqBy(indexPatterns, 'id');
+    this.dataViews = uniqBy(indexPatterns, 'id');
 
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
     // config dropdown correctly.
     const input = this.getInput();
 
-    this.errors = this.maybeAddTimeRangeError(this.errors, input, this.indexPatterns);
+    // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
+    if (
+      input.timeRange == null &&
+      indexPatterns.some((indexPattern) => indexPattern.isTimeBased())
+    ) {
+      this.addUserMessages([
+        {
+          uniqueId: 'missing-time-range-on-embeddable',
+          severity: 'error',
+          fixableInEditor: false,
+          displayLocations: [{ id: 'visualization' }],
+          shortMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.shortMessage', {
+            defaultMessage: `Missing timeRange property`,
+          }),
+          longMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.longMessage', {
+            defaultMessage: `The timeRange property is required for the given configuration`,
+          }),
+        },
+      ]);
+    }
 
-    if (this.errors) {
+    if (this.hasAnyErrors) {
       this.logError('validation');
     }
 
     const title = input.hidePanelTitles ? '' : input.title ?? this.savedVis.title;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
-      ...this.getOutput(),
       defaultTitle: this.savedVis.title,
       editable: this.getIsEditable(),
       title,
       editPath: getEditPath(savedObjectId),
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
-      indexPatterns: this.indexPatterns,
+      indexPatterns: this.dataViews,
     });
-
-    // deferred loading of this embeddable is complete
-    this.setInitializationFinished();
   }
 
   private getIsEditable() {
@@ -957,17 +1249,25 @@ export class Embeddable
 
   public getSelfStyledOptions() {
     return {
-      hideTitle: this.visDisplayOptions?.noPanelTitle,
+      hideTitle: this.visDisplayOptions.noPanelTitle,
     };
   }
 
-  private get visDisplayOptions(): VisualizationDisplayOptions | undefined {
-    if (
-      !this.savedVis?.visualizationType ||
-      !this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions
-    ) {
-      return;
+  private get visDisplayOptions(): VisualizationDisplayOptions {
+    if (!this.savedVis?.visualizationType) {
+      return {};
     }
-    return this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+
+    let displayOptions =
+      this.deps.visualizationMap[this.savedVis.visualizationType]?.getDisplayOptions?.() ?? {};
+
+    if (this.input.noPadding !== undefined) {
+      displayOptions = {
+        ...displayOptions,
+        noPadding: this.input.noPadding,
+      };
+    }
+
+    return displayOptions;
   }
 }

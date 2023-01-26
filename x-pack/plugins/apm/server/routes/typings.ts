@@ -47,6 +47,11 @@ export type TelemetryUsageCounter = ReturnType<
   UsageCollectionSetup['createUsageCounter']
 >;
 
+export interface APMCore {
+  setup: CoreSetup;
+  start: () => Promise<CoreStart>;
+}
+
 export interface APMRouteHandlerResources {
   request: KibanaRequest;
   context: ApmPluginRequestHandlerContext;
@@ -59,10 +64,7 @@ export interface APMRouteHandlerResources {
   };
   config: APMConfig;
   logger: Logger;
-  core: {
-    setup: CoreSetup;
-    start: () => Promise<CoreStart>;
-  };
+  core: APMCore;
   plugins: {
     [key in keyof APMPluginSetupDependencies]: {
       setup: Required<APMPluginSetupDependencies>[key];

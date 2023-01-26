@@ -15,15 +15,13 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { TimelineId } from '../../../../common/types';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { removeColumn, upsertColumn } from '../../store/timeline/actions';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
-import type { BrowserFieldItem } from '@kbn/timelines-plugin/common/types';
 import { EuiInMemoryTable } from '@elastic/eui';
+import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');
@@ -52,14 +50,8 @@ jest.mock('../../../common/containers/source/use_data_view', () => ({
   }),
 }));
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
-  return {
-    ...original,
-    useDispatch: () => mockDispatch,
-  };
-});
+const mockRemoveColumn = jest.fn();
+const mockUpsertColumn = jest.fn();
 const mockOnHide = jest.fn();
 
 const runAllPromises = () => new Promise(setImmediate);
@@ -70,7 +62,8 @@ const renderUseFieldBrowserOptions = (props: Partial<UseFieldBrowserOptionsProps
     () =>
       useFieldBrowserOptions({
         sourcererScope: SourcererScopeName.default,
-        timelineId: TimelineId.test,
+        removeColumn: mockRemoveColumn,
+        upsertColumn: mockUpsertColumn,
         ...props,
       }),
     {
@@ -185,7 +178,7 @@ describe('useFieldBrowserOptions', () => {
   });
 
   it('should dispatch the proper action when a new field is saved', async () => {
-    let onSave: ((field: DataViewField) => void) | undefined;
+    let onSave: ((field: DataViewField[]) => void) | undefined;
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
     useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
       onSave = options.onSave;
@@ -202,27 +195,24 @@ describe('useFieldBrowserOptions', () => {
     getByRole('button').click();
     expect(onSave).toBeDefined();
 
-    const savedField = { name: 'newField' } as DataViewField;
+    const savedField = [{ name: 'newField' }] as DataViewField[];
     onSave!(savedField);
     await runAllPromises();
 
     expect(mockIndexFieldsSearch).toHaveBeenCalled();
-    expect(mockDispatch).toHaveBeenCalledTimes(1);
-    expect(mockDispatch).toHaveBeenCalledWith(
-      upsertColumn({
-        id: TimelineId.test,
-        column: {
-          columnHeaderType: defaultColumnHeaderType,
-          id: savedField.name,
-          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-        },
-        index: 0,
-      })
+    expect(mockUpsertColumn).toHaveBeenCalledTimes(1);
+    expect(mockUpsertColumn).toHaveBeenCalledWith(
+      {
+        columnHeaderType: defaultColumnHeaderType,
+        id: savedField[0].name,
+        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+      },
+      0
     );
   });
 
   it('should dispatch the proper actions when a field is edited', async () => {
-    let onSave: ((field: DataViewField) => void) | undefined;
+    let onSave: ((field: DataViewField[]) => void) | undefined;
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
     useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
       onSave = options.onSave;
@@ -243,28 +233,19 @@ describe('useFieldBrowserOptions', () => {
     getByTestId('actionEditRuntimeField').click();
     expect(onSave).toBeDefined();
 
-    const savedField = { name: `new ${fieldItem.name}` } as DataViewField;
+    const savedField = [{ name: `new ${fieldItem.name}` }] as DataViewField[];
     onSave!(savedField);
     await runAllPromises();
 
     expect(mockIndexFieldsSearch).toHaveBeenCalled();
-    expect(mockDispatch).toHaveBeenCalledTimes(2);
-    expect(mockDispatch).toHaveBeenCalledWith(
-      removeColumn({
-        id: TimelineId.test,
-        columnId: fieldItem.name,
-      })
-    );
-    expect(mockDispatch).toHaveBeenCalledWith(
-      upsertColumn({
-        id: TimelineId.test,
-        column: {
-          columnHeaderType: defaultColumnHeaderType,
-          id: savedField.name,
-          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-        },
-        index: 0,
-      })
+    expect(mockRemoveColumn).toHaveBeenCalledWith(fieldItem.name);
+    expect(mockUpsertColumn).toHaveBeenCalledWith(
+      {
+        columnHeaderType: defaultColumnHeaderType,
+        id: savedField[0].name,
+        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+      },
+      0
     );
   });
 
@@ -294,13 +275,8 @@ describe('useFieldBrowserOptions', () => {
     await runAllPromises();
 
     expect(mockIndexFieldsSearch).toHaveBeenCalled();
-    expect(mockDispatch).toHaveBeenCalledTimes(1);
-    expect(mockDispatch).toHaveBeenCalledWith(
-      removeColumn({
-        id: TimelineId.test,
-        columnId: fieldItem.name,
-      })
-    );
+    expect(mockRemoveColumn).toHaveBeenCalledTimes(1);
+    expect(mockRemoveColumn).toHaveBeenCalledWith(fieldItem.name);
   });
 
   it("should store 'closeEditor' in the actions ref when editor is open by create button", async () => {

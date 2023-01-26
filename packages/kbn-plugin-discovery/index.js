@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/** @typedef {import('./src/types').KibanaPlatformPlugin} KibanaPlatformPlugin */
+
 const { parseKibanaPlatformPlugin } = require('./src/parse_kibana_platform_plugin');
 const { getPluginSearchPaths } = require('./src/plugin_search_paths');
 const {

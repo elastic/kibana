@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kbnLoadingIndicator is hidden by default 1`] = `
+<EuiIcon
+  aria-label="Elastic Logo"
+  className="chrHeaderLogo__cluster"
+  data-test-subj="globalLoadingIndicator-hidden"
+  size="l"
+  type="logoElastic"
+/>
+`;
+
+exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
+<EuiIcon
+  aria-label="Elastic Logo"
+  className="chrHeaderLogo__cluster"
+  data-test-subj="globalLoadingIndicator-hidden"
+  size="l"
+  type="logoElastic"
+/>
+`;
+
+exports[`kbnLoadingIndicator shows EuiLoadingSpinner when showPlainSpinner is true 1`] = `
+<EuiLoadingSpinner
+  aria-hidden={false}
+  aria-label="Loading content"
+  data-test-subj="globalLoadingIndicator"
+  size="l"
+/>
+`;

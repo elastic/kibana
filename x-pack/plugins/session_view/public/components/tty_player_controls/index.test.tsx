@@ -8,6 +8,7 @@ import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYPlayerControls, TTYPlayerControlsDeps } from '.';
+import { TTYPlayerLineMarkerType } from './tty_player_controls_markers';
 
 const MOCK_PROCESS_EVENT_START: ProcessEvent = {
   process: {
@@ -38,22 +39,11 @@ describe('TTYPlayerControls component', () => {
 
     props = {
       currentProcessEvent: MOCK_PROCESS_EVENT_START,
-      processIdLineMap: {
-        '1': {
-          value: 0,
-          next: 2,
-        },
-        '2': {
-          value: 2,
-          previous: 0,
-          next: 4,
-        },
-        '3': {
-          value: 4,
-          previous: 2,
-        },
-      },
-      lastProcessEntityId: '3',
+      processStartMarkers: [
+        { event: MOCK_PROCESS_EVENT_START, line: 0 },
+        { event: MOCK_PROCESS_EVENT_MIDDLE, line: 2 },
+        { event: MOCK_PROCESS_EVENT_END, line: 4 },
+      ],
       isPlaying: false,
       currentLine: 0,
       linesLength: 10,
@@ -108,24 +98,43 @@ describe('TTYPlayerControls component', () => {
   it('clicking on end button triggers onSeekLine', async () => {
     renderResult = mockedContext.render(<TTYPlayerControls {...props} />);
     renderResult.queryByTestId('sessionView:TTYPlayerControlsEnd')?.click();
-    expect(props.onSeekLine).toHaveBeenCalledWith(4);
+    expect(props.onSeekLine).toHaveBeenCalledWith(9);
   });
 
-  it('start and previous buttons are disabled if currentProcessEntityId is start', async () => {
+  it('render process_changed markers', async () => {
     renderResult = mockedContext.render(<TTYPlayerControls {...props} />);
-    renderResult.queryByTestId('sessionView:TTYPlayerControlsPrevious')?.click();
-    expect(props.onSeekLine).not.toHaveBeenCalled();
-    renderResult.queryByTestId('sessionView:TTYPlayerControlsStart')?.click();
-    expect(props.onSeekLine).not.toHaveBeenCalled();
+    expect(
+      renderResult.queryAllByRole('button', {
+        name: TTYPlayerLineMarkerType.ProcessChanged,
+      })
+    ).toHaveLength(props.processStartMarkers.length);
   });
-
-  it('end and next buttons are disabled if currentProcessEntityId is end', async () => {
+  it('render data_limited markers', async () => {
+    const processStartMarkers = [
+      { event: MOCK_PROCESS_EVENT_START, line: 0 },
+      {
+        event: {
+          process: {
+            ...MOCK_PROCESS_EVENT_MIDDLE,
+          },
+        },
+        line: 2,
+        maxBytesExceeded: true,
+      },
+      { event: MOCK_PROCESS_EVENT_END, line: 4 },
+    ];
     renderResult = mockedContext.render(
-      <TTYPlayerControls {...props} currentProcessEvent={MOCK_PROCESS_EVENT_END} />
+      <TTYPlayerControls {...props} processStartMarkers={processStartMarkers} />
     );
-    renderResult.queryByTestId('sessionView:TTYPlayerControlsNext')?.click();
-    expect(props.onSeekLine).not.toHaveBeenCalled();
-    renderResult.queryByTestId('sessionView:TTYPlayerControlsEnd')?.click();
-    expect(props.onSeekLine).not.toHaveBeenCalled();
+    expect(
+      renderResult.queryAllByRole('button', {
+        name: TTYPlayerLineMarkerType.ProcessChanged,
+      })
+    ).toHaveLength(2);
+    expect(
+      renderResult.queryAllByRole('button', {
+        name: TTYPlayerLineMarkerType.ProcessDataLimitReached,
+      })
+    ).toHaveLength(1);
   });
 });

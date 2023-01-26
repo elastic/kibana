@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CasesFeaturesAllRequired } from './ui/types';
+import { CASE_VIEW_PAGE_TABS } from './types';
+import type { CasesFeaturesAllRequired } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -17,6 +18,14 @@ export const APP_ID = 'cases' as const;
 export const FEATURE_ID = 'generalCases' as const;
 export const APP_OWNER = 'cases' as const;
 export const APP_PATH = '/app/management/insightsAndAlerting/cases' as const;
+export const CASES_CREATE_PATH = '/create' as const;
+export const CASES_CONFIGURE_PATH = '/configure' as const;
+export const CASE_VIEW_PATH = '/:detailName' as const;
+export const CASE_VIEW_COMMENT_PATH = `${CASE_VIEW_PATH}/:commentId` as const;
+export const CASE_VIEW_ALERT_TABLE_PATH =
+  `${CASE_VIEW_PATH}/?tabId=${CASE_VIEW_PAGE_TABS.ALERTS}` as const;
+export const CASE_VIEW_TAB_PATH = `${CASE_VIEW_PATH}/?tabId=:tabId` as const;
+
 /**
  * The main Cases application is in the stack management under the
  * Alerts and Insights section. To do that, Cases registers to the management
@@ -35,7 +44,7 @@ export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments' as const;
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
 
 /**
- * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/fixtures/plugins
+ * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
  */
 export const SAVED_OBJECT_TYPES = [
   CASE_SAVED_OBJECT,
@@ -64,6 +73,7 @@ export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_STATUS_URL = `${CASES_URL}/status` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const;
+export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as const;
 
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
@@ -80,6 +90,8 @@ export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
 export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
+export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
+export const INTERNAL_BULK_GET_CASES_URL = `${CASES_INTERNAL_URL}/_bulk_get` as const;
 
 /**
  * Action routes
@@ -103,16 +115,22 @@ export const GENERAL_CASES_OWNER = APP_ID;
 
 export const OWNER_INFO = {
   [SECURITY_SOLUTION_OWNER]: {
+    appId: 'securitySolutionUI',
     label: 'Security',
     iconType: 'logoSecurity',
+    appRoute: '/app/security',
   },
   [OBSERVABILITY_OWNER]: {
+    appId: 'observability-overview',
     label: 'Observability',
     iconType: 'logoObservability',
+    appRoute: '/app/observability',
   },
   [GENERAL_CASES_OWNER]: {
+    appId: 'management',
     label: 'Stack',
     iconType: 'casesApp',
+    appRoute: '/app/management/insightsAndAlerting',
   },
 } as const;
 
@@ -121,12 +139,13 @@ export const OWNER_INFO = {
  */
 export const MAX_DOCS_PER_PAGE = 10000 as const;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
+export const MAX_BULK_GET_CASES = 1000 as const;
 
 /**
  * Validation
  */
 
-export const MAX_TITLE_LENGTH = 64 as const;
+export const MAX_TITLE_LENGTH = 160 as const;
 
 /**
  * Cases features
@@ -163,3 +182,18 @@ export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
  */
 
 export const DEFAULT_USER_SIZE = 10;
+export const MAX_ASSIGNEES_PER_CASE = 10;
+export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
+
+/**
+ * Delays
+ */
+export const SEARCH_DEBOUNCE_MS = 500;
+
+/**
+ * Local storage keys
+ */
+export const LOCAL_STORAGE_KEYS = {
+  casesQueryParams: 'cases.list.queryParams',
+  casesFilterOptions: 'cases.list.filterOptions',
+};

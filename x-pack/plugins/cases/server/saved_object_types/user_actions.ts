@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
-import { createUserActionsMigrations, UserActionsMigrationsDeps } from './migrations/user_actions';
+import type { UserActionsMigrationsDeps } from './migrations/user_actions';
+import { createUserActionsMigrations } from './migrations/user_actions';
 
 export const createCaseUserActionSavedObjectType = (
   migrationDeps: UserActionsMigrationsDeps
@@ -35,6 +36,9 @@ export const createCaseUserActionSavedObjectType = (
           full_name: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       payload: {
@@ -44,6 +48,16 @@ export const createCaseUserActionSavedObjectType = (
             properties: {
               // connector.type
               type: { type: 'keyword' },
+            },
+          },
+          comment: {
+            properties: {
+              // comment.type
+              type: { type: 'keyword' },
+              // comment.externalReferenceAttachmentTypeId
+              externalReferenceAttachmentTypeId: { type: 'keyword' },
+              // comment.persistableStateAttachmentTypeId
+              persistableStateAttachmentTypeId: { type: 'keyword' },
             },
           },
         },

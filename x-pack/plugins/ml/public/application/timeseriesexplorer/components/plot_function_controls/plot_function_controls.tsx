@@ -96,6 +96,7 @@ export const PlotByFunctionControls = ({
         );
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     setFunctionDescription,
     selectedDetectorIndex,

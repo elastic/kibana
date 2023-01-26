@@ -12,10 +12,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHideFor,
-  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +23,10 @@ import { isOfQueryType } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import { InspectorSession } from '@kbn/inspector-plugin/public';
+import { VIEW_MODE } from '../../../../../common/constants';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { useInspector } from '../../hooks/use_inspector';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -34,20 +36,16 @@ import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../..
 import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg, RecordRawType } from '../../hooks/use_saved_search';
+import { DataMainMsg, RecordRawType } from '../../services/discover_data_state_container';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
-import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import { FieldStatisticsTable } from '../field_stats_table';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { hasActiveFilter } from './utils';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
+import { DiscoverHistogramLayout } from './discover_histogram_layout';
 
 /**
  * Local storage key for sidebar persistence state
@@ -56,25 +54,22 @@ export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
-const DiscoverChartMemoized = React.memo(DiscoverChart);
-const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
 export function DiscoverLayout({
-  dataView,
-  dataViewList,
   inspectorAdapters,
   expandedDoc,
   navigateTo,
   onChangeDataView,
   onUpdateQuery,
   setExpandedDoc,
-  savedSearchRefetch$,
   resetSavedSearch,
-  savedSearchData$,
   savedSearch,
   searchSource,
-  state,
   stateContainer,
+  persistDataView,
+  updateAdHocDataViewId,
+  searchSessionManager,
+  updateDataViewList,
 }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
@@ -88,29 +83,20 @@ export function DiscoverLayout({
     spaces,
     inspector,
   } = useDiscoverServices();
-  const { main$, charts$, totalHits$ } = savedSearchData$;
-  const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
-  const dataState: DataMainMsg = useDataState(main$);
-
-  const viewMode = useMemo(() => {
+  const { main$ } = stateContainer.dataState.data$;
+  const [query, savedQuery, filters, columns, sort] = useAppStateSelector((state) => [
+    state.query,
+    state.savedQuery,
+    state.filters,
+    state.columns,
+    state.sort,
+  ]);
+  const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
-  }, [uiSettings, state.viewMode]);
-
-  const setDiscoverViewMode = useCallback(
-    (mode: VIEW_MODE) => {
-      stateContainer.setAppState({ viewMode: mode });
-
-      if (trackUiMetric) {
-        if (mode === VIEW_MODE.AGGREGATED_LEVEL) {
-          trackUiMetric(METRIC_TYPE.CLICK, FIELD_STATISTICS_VIEW_CLICK);
-        } else {
-          trackUiMetric(METRIC_TYPE.CLICK, DOCUMENTS_VIEW_CLICK);
-        }
-      }
-    },
-    [trackUiMetric, stateContainer]
-  );
+  });
+  const dataView = useInternalStateSelector((state) => state.dataView!);
+  const dataState: DataMainMsg = useDataState(main$);
 
   const fetchCounter = useRef<number>(0);
 
@@ -132,41 +118,32 @@ export function DiscoverLayout({
   const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const isPlainRecord = useMemo(
-    () => getRawRecordType(state.query) === RecordRawType.PLAIN,
-    [state.query]
-  );
+  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const resultState = useMemo(
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments!, isPlainRecord),
     [dataState.fetchStatus, dataState.foundDocuments, isPlainRecord]
   );
 
-  const onOpenInspector = useCallback(() => {
-    // prevent overlapping
-    setExpandedDoc(undefined);
-    const session = inspector.open(inspectorAdapters, {
-      title: savedSearch.title,
-    });
-    setInspectorSession(session);
-  }, [setExpandedDoc, inspectorAdapters, savedSearch, inspector]);
+  const onOpenInspector = useInspector({
+    setExpandedDoc,
+    inspector,
+    inspectorAdapters,
+    savedSearch,
+  });
 
-  useEffect(() => {
-    return () => {
-      if (inspectorSession) {
-        // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
-        inspectorSession.close();
-      }
-    };
-  }, [inspectorSession]);
-
-  const { columns, onAddColumn, onRemoveColumn } = useColumns({
+  const {
+    columns: currentColumns,
+    onAddColumn,
+    onRemoveColumn,
+  } = useColumns({
     capabilities,
     config: uiSettings,
     dataView,
     dataViews,
     setAppState: stateContainer.setAppState,
-    state,
     useNewFieldsApi,
+    columns,
+    sort,
   });
 
   const onAddFilter = useCallback(
@@ -182,9 +159,12 @@ export function DiscoverLayout({
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
-  const onFieldEdited = useCallback(() => {
-    savedSearchRefetch$.next('reset');
-  }, [savedSearchRefetch$]);
+  const onFieldEdited = useCallback(async () => {
+    if (!dataView.isPersisted()) {
+      await updateAdHocDataViewId(dataView);
+    }
+    stateContainer.dataState.refetch$.next('reset');
+  }, [dataView, stateContainer, updateAdHocDataViewId]);
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager
@@ -200,12 +180,17 @@ export function DiscoverLayout({
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const onDataViewCreated = useCallback(
-    (nextDataView: DataView) => {
+    async (nextDataView: DataView) => {
+      if (!nextDataView.isPersisted()) {
+        stateContainer.actions.appendAdHocDataViews(nextDataView);
+      } else {
+        await stateContainer.actions.loadDataViewList();
+      }
       if (nextDataView.id) {
         onChangeDataView(nextDataView.id);
       }
     },
-    [onChangeDataView]
+    [onChangeDataView, stateContainer]
   );
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);
@@ -218,6 +203,77 @@ export function DiscoverLayout({
       return dataState.error;
     }
   }, [dataState.error, isPlainRecord]);
+
+  const resizeRef = useRef<HTMLDivElement>(null);
+
+  const mainDisplay = useMemo(() => {
+    if (resultState === 'none') {
+      return (
+        <DiscoverNoResults
+          isTimeBased={isTimeBased}
+          data={data}
+          error={dataState.error}
+          hasQuery={isOfQueryType(query) && !!query?.query}
+          hasFilters={hasActiveFilter(filters)}
+          onDisableFilters={onDisableFilters}
+        />
+      );
+    }
+
+    if (resultState === 'uninitialized') {
+      return (
+        <DiscoverUninitialized
+          onRefresh={() => stateContainer.dataState.refetch$.next(undefined)}
+        />
+      );
+    }
+
+    return (
+      <>
+        <DiscoverHistogramLayout
+          isPlainRecord={isPlainRecord}
+          dataView={dataView}
+          navigateTo={navigateTo}
+          resetSavedSearch={resetSavedSearch}
+          expandedDoc={expandedDoc}
+          setExpandedDoc={setExpandedDoc}
+          savedSearch={savedSearch}
+          stateContainer={stateContainer}
+          isTimeBased={isTimeBased}
+          columns={currentColumns}
+          viewMode={viewMode}
+          onAddFilter={onAddFilter as DocViewFilterFn}
+          onFieldEdited={onFieldEdited}
+          resizeRef={resizeRef}
+          inspectorAdapters={inspectorAdapters}
+          searchSessionManager={searchSessionManager}
+        />
+        {resultState === 'loading' && <LoadingSpinner />}
+      </>
+    );
+  }, [
+    currentColumns,
+    data,
+    dataState.error,
+    dataView,
+    expandedDoc,
+    filters,
+    inspectorAdapters,
+    isPlainRecord,
+    isTimeBased,
+    navigateTo,
+    onAddFilter,
+    onDisableFilters,
+    onFieldEdited,
+    query,
+    resetSavedSearch,
+    resultState,
+    savedSearch,
+    searchSessionManager,
+    setExpandedDoc,
+    stateContainer,
+    viewMode,
+  ]);
 
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
@@ -240,20 +296,23 @@ export function DiscoverLayout({
             })}
       </h1>
       <TopNavMemoized
-        dataView={dataView}
         onOpenInspector={onOpenInspector}
-        query={state.query}
+        query={query}
         navigateTo={navigateTo}
-        savedQuery={state.savedQuery}
+        savedQuery={savedQuery}
         savedSearch={savedSearch}
         searchSource={searchSource}
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
         onChangeDataView={onChangeDataView}
+        onDataViewCreated={onDataViewCreated}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
+        persistDataView={persistDataView}
+        updateAdHocDataViewId={updateAdHocDataViewId}
+        updateDataViewList={updateDataViewList}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -262,24 +321,22 @@ export function DiscoverLayout({
           history={history}
         />
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="dscPageBody__sidebar">
             <SidebarMemoized
-              columns={columns}
-              documents$={savedSearchData$.documents$}
-              dataViewList={dataViewList}
+              documents$={stateContainer.dataState.data$.documents$}
               onAddField={onAddColumn}
+              columns={currentColumns}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               onRemoveField={onRemoveColumn}
               onChangeDataView={onChangeDataView}
               selectedDataView={dataView}
-              state={state}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onFieldEdited={onFieldEdited}
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
-              availableFields$={savedSearchData$.availableFields$}
+              availableFields$={stateContainer.dataState.data$.availableFields$}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
@@ -303,6 +360,7 @@ export function DiscoverLayout({
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper">
             <EuiPageContent
+              panelRef={resizeRef}
               verticalPosition={contentCentered ? 'center' : undefined}
               horizontalPosition={contentCentered ? 'center' : undefined}
               paddingSize="none"
@@ -312,77 +370,7 @@ export function DiscoverLayout({
                 'dscPageContent--emptyPrompt': resultState === 'none',
               })}
             >
-              {resultState === 'none' && (
-                <DiscoverNoResults
-                  isTimeBased={isTimeBased}
-                  data={data}
-                  error={dataState.error}
-                  hasQuery={isOfQueryType(state.query) && !!state.query?.query}
-                  hasFilters={hasActiveFilter(state.filters)}
-                  onDisableFilters={onDisableFilters}
-                />
-              )}
-              {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />
-              )}
-              {resultState === 'loading' && <LoadingSpinner />}
-              {resultState === 'ready' && (
-                <EuiFlexGroup
-                  className="dscPageContent__inner"
-                  direction="column"
-                  alignItems="stretch"
-                  gutterSize="none"
-                  responsive={false}
-                >
-                  {!isPlainRecord && (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <DiscoverChartMemoized
-                          resetSavedSearch={resetSavedSearch}
-                          savedSearch={savedSearch}
-                          savedSearchDataChart$={charts$}
-                          savedSearchDataTotalHits$={totalHits$}
-                          stateContainer={stateContainer}
-                          dataView={dataView}
-                          viewMode={viewMode}
-                          setDiscoverViewMode={setDiscoverViewMode}
-                          hideChart={state.hideChart}
-                          interval={state.interval}
-                          isTimeBased={isTimeBased}
-                        />
-                      </EuiFlexItem>
-                      <EuiHorizontalRule margin="none" />
-                    </>
-                  )}
-                  {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-                    <DiscoverDocuments
-                      documents$={savedSearchData$.documents$}
-                      expandedDoc={expandedDoc}
-                      dataView={dataView}
-                      navigateTo={navigateTo}
-                      onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
-                      savedSearch={savedSearch}
-                      setExpandedDoc={setExpandedDoc}
-                      state={state}
-                      stateContainer={stateContainer}
-                      onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
-                    />
-                  ) : (
-                    <FieldStatisticsTableMemoized
-                      availableFields$={savedSearchData$.availableFields$}
-                      savedSearch={savedSearch}
-                      dataView={dataView}
-                      query={state.query}
-                      filters={state.filters}
-                      columns={columns}
-                      stateContainer={stateContainer}
-                      onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
-                      trackUiMetric={trackUiMetric}
-                      savedSearchRefetch$={savedSearchRefetch$}
-                    />
-                  )}
-                </EuiFlexGroup>
-              )}
+              {mainDisplay}
             </EuiPageContent>
           </EuiFlexItem>
         </EuiFlexGroup>

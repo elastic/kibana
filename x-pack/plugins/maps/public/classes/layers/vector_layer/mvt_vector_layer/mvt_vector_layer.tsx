@@ -45,6 +45,7 @@ import {
   getAggsMeta,
   getHitsMeta,
 } from '../../../util/tile_meta_feature_utils';
+import { syncBoundsData } from '../bounds_data';
 
 const MAX_RESULT_WINDOW_DATA_REQUEST_ID = 'maxResultWindow';
 
@@ -77,7 +78,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       : super.isInitialDataLoadComplete();
   }
 
-  async getBounds(syncContext: DataRequestContext) {
+  async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     // Add filter to narrow bounds to features with matching join keys
     let joinKeyFilter;
     if (this.getSource().isESSource()) {
@@ -93,12 +94,18 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       }
     }
 
-    return super.getBounds({
-      ...syncContext,
-      dataFilters: {
-        ...syncContext.dataFilters,
-        joinKeyFilter,
+    const syncContext = getDataRequestContext(this.getId());
+    return syncBoundsData({
+      layerId: this.getId(),
+      syncContext: {
+        ...syncContext,
+        dataFilters: {
+          ...syncContext.dataFilters,
+          joinKeyFilter,
+        },
       },
+      source: this.getSource(),
+      sourceQuery: this.getQuery(),
     });
   }
 

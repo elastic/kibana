@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { QueryStringInput, QueryStringInputProps } from '@kbn/unified-search-plugin/public';
-import { CoreStartContext } from '../contexts/query_input_bar_context';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IndexPatternValue } from '../../../common/types';
 
 import { getDataViewsStart } from '../../services';
 import { fetchIndexPattern, isStringTypeIndexPattern } from '../../../common/index_patterns_utils';
+import { TimeseriesVisDependencies } from '../../plugin';
 
 type QueryBarWrapperProps = Pick<QueryStringInputProps, 'query' | 'onChange' | 'isInvalid'> & {
   indexPatterns: IndexPatternValue[];
@@ -30,7 +31,18 @@ export function QueryBarWrapper({
   const dataViews = getDataViewsStart();
   const [indexes, setIndexes] = useState<QueryStringInputProps['indexPatterns']>([]);
 
-  const coreStartContext = useContext(CoreStartContext);
+  const kibana = useKibana<TimeseriesVisDependencies>();
+  const {
+    appName,
+    unifiedSearch,
+    storage,
+    data,
+    notifications,
+    http,
+    docLinks,
+    uiSettings,
+    usageCollection,
+  } = kibana.services;
 
   useEffect(() => {
     async function fetchIndexes() {
@@ -63,11 +75,22 @@ export function QueryBarWrapper({
 
   return (
     <QueryStringInput
+      appName={appName}
+      deps={{
+        unifiedSearch,
+        notifications,
+        http,
+        docLinks,
+        uiSettings,
+        data,
+        dataViews,
+        storage,
+        usageCollection,
+      }}
       query={query}
       onChange={onChange}
       isInvalid={isInvalid}
       indexPatterns={indexes}
-      {...coreStartContext}
       dataTestSubj={dataTestSubj}
     />
   );

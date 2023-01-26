@@ -78,7 +78,10 @@ export function checkPrivilegesFactory(
 
       const response = await clusterClient.asInternalUser.transport.request<{
         has_privilege_uids: string[];
-        error_uids?: string[];
+        errors: {
+          count: number;
+          details: Record<string, { type: string; reason: string }>;
+        };
       }>({
         method: 'POST',
         path: '_security/profile/_has_privileges',
@@ -90,7 +93,7 @@ export function checkPrivilegesFactory(
 
       return {
         hasPrivilegeUids: response.has_privilege_uids,
-        errorUids: response.error_uids ?? [],
+        ...(response.errors && { errors: response.errors }),
       };
     };
 

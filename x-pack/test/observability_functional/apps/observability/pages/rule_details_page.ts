@@ -16,6 +16,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const observability = getService('observability');
   const supertest = getService('supertest');
   const find = getService('find');
@@ -45,7 +46,6 @@ export default ({ getService }: FtrProviderContext) => {
     const logThresholdRuleName = 'error-log';
 
     before(async () => {
-      await observability.users.restoreDefaultTestUserRole();
       const uptimeRule = {
         params: {
           search: '',
@@ -82,6 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
       uptimeRuleId = await createRule(uptimeRule);
       logThresholdRuleId = await createRule(logThresholdRule);
     });
+
     after(async () => {
       await deleteRuleById(uptimeRuleId);
       await deleteRuleById(logThresholdRuleId);
@@ -141,9 +142,54 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('Alert summary widget component', () => {
+      before(async () => {
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(uptimeRuleId);
+      });
+
+      it('shows component on the rule detils page', async () => {
+        await observability.components.alertSummaryWidget.getCompactComponentSelectorOrFail();
+
+        const timeRangeTitle =
+          await observability.components.alertSummaryWidget.getCompactTimeRangeTitle();
+        expect(timeRangeTitle).to.be('Last 30 days');
+      });
+
+      it('handles clicking on active correctly', async () => {
+        const activeAlerts =
+          await observability.components.alertSummaryWidget.getCompactActiveAlertSelector();
+        await activeAlerts.click();
+
+        const url = await browser.getCurrentUrl();
+        const { from, to } = await observability.components.alertSearchBar.getAbsoluteTimeRange();
+
+        expect(url.includes('tabId=alerts')).to.be(true);
+        expect(url.includes('status%3Aactive')).to.be(true);
+        expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
+        expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
+      });
+
+      it('handles clicking on recovered correctly', async () => {
+        const recoveredAlerts =
+          await observability.components.alertSummaryWidget.getCompactRecoveredAlertSelector();
+        await recoveredAlerts.click();
+
+        const url = await browser.getCurrentUrl();
+        const { from, to } = await observability.components.alertSearchBar.getAbsoluteTimeRange();
+
+        expect(url.includes('tabId=alerts')).to.be(true);
+        expect(url.includes('status%3Arecovered')).to.be(true);
+        expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
+        expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
+      });
+    });
+
     describe('User permissions', () => {
       before(async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+      });
+      after(async () => {
+        await observability.users.restoreDefaultTestUserRole();
       });
       it('should show the actions button if user has permissions', async () => {
         await retry.waitFor(

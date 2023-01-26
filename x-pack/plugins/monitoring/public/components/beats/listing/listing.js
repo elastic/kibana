@@ -10,7 +10,7 @@ import { uniq, get } from 'lodash';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiLink,
   EuiScreenReaderOnly,

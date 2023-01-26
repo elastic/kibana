@@ -12,6 +12,10 @@ import type {
   DataView,
   DataViewSpec,
 } from '@kbn/data-views-plugin/public';
+import { RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
+import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
+import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
 import { rumFieldFormats } from '../../components/shared/exploratory_view/configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../../components/shared/exploratory_view/configurations/synthetics/field_formats';
 import {
@@ -30,10 +34,21 @@ const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   apm: apmFieldFormats,
   synthetics: syntheticsFieldFormats,
   mobile: apmFieldFormats,
+  alerts: null,
+};
+
+const appRuntimeFields: Record<AppDataType, Array<{ name: string; field: RuntimeField }> | null> = {
+  infra_logs: null,
+  infra_metrics: null,
+  ux: null,
+  apm: null,
+  synthetics: syntheticsRuntimeFields,
+  mobile: null,
+  alerts: null,
 };
 
 function getFieldFormatsForApp(app: AppDataType) {
-  return appFieldFormats[app];
+  return { runtimeFields: appRuntimeFields[app], formats: appFieldFormats[app] };
 }
 
 export const dataViewList: Record<AppDataType, string> = {
@@ -43,19 +58,11 @@ export const dataViewList: Record<AppDataType, string> = {
   infra_logs: 'infra_logs_static_index_pattern_id',
   infra_metrics: 'infra_metrics_static_index_pattern_id',
   mobile: 'mobile_static_index_pattern_id',
-};
-
-const appToPatternMap: Record<AppDataType, string> = {
-  synthetics: '(synthetics-data-view)*',
-  apm: 'apm-*',
-  ux: '(rum-data-view)*',
-  infra_logs: '(infra-logs-data-view)*',
-  infra_metrics: '(infra-metrics-data-view)*',
-  mobile: '(mobile-data-view)*',
+  alerts: 'alerts_static_index_pattern_id',
 };
 
 const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
-  return `${appToPatternMap?.[app] ?? app},${indices}`;
+  return `${indices}`;
 };
 
 const getAppDataViewId = (app: AppDataType, indices: string) => {
@@ -64,6 +71,27 @@ const getAppDataViewId = (app: AppDataType, indices: string) => {
 
   return `${dataViewList?.[app] ?? app}_${postfix}`;
 };
+
+export async function getDataTypeIndices(dataType: AppDataType) {
+  switch (dataType) {
+    case 'mobile':
+    case 'ux':
+    case 'apm':
+      const resultApm = await getDataHandler('apm')?.hasData();
+      return {
+        hasData: Boolean(resultApm?.hasData),
+        indices: getApmDataViewTitle(resultApm?.indices),
+      };
+    case 'alerts':
+      return {
+        hasData: true,
+        indices: '.alerts-observability*',
+      };
+    default:
+      const resultUx = await getDataHandler(dataType)?.hasData();
+      return { hasData: Boolean(resultUx?.hasData), indices: resultUx?.indices as string };
+  }
+}
 
 export function isParamsSame(param1: IFieldFormat['_params'], param2?: FieldFormatParams) {
   const isSame =
@@ -80,28 +108,56 @@ export function isParamsSame(param1: IFieldFormat['_params'], param2?: FieldForm
 }
 
 export class ObservabilityDataViews {
-  dataViews?: DataViewsPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  adHocDataViews: boolean = false;
 
-  constructor(dataViews: DataViewsPublicPluginStart) {
+  constructor(dataViews: DataViewsPublicPluginStart, adHocDataViews?: boolean) {
     this.dataViews = dataViews;
+    this.adHocDataViews = adHocDataViews ?? false;
   }
 
   async createDataView(app: AppDataType, indices: string) {
-    if (!this.dataViews) {
-      throw new Error('data is not defined');
+    const appIndicesPattern = getAppIndicesWithPattern(app, indices);
+
+    const { runtimeFields } = getFieldFormatsForApp(app);
+
+    const dataView = await this.dataViews.create(
+      {
+        title: appIndicesPattern,
+        id: getAppDataViewId(app, indices),
+        timeFieldName: '@timestamp',
+        fieldFormats: this.getFieldFormats(app),
+        name: DataTypesLabels[app],
+      },
+      false,
+      false
+    );
+
+    if (runtimeFields !== null) {
+      runtimeFields.forEach(({ name, field }) => {
+        dataView.addRuntimeField(name, field);
+      });
     }
 
+    return dataView;
+  }
+
+  async createAndSavedDataView(app: AppDataType, indices: string) {
     const appIndicesPattern = getAppIndicesWithPattern(app, indices);
+
+    const dataViewId = getAppDataViewId(app, indices);
+
     return await this.dataViews.createAndSave({
       title: appIndicesPattern,
-      id: getAppDataViewId(app, indices),
+      id: dataViewId,
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
+      name: DataTypesLabels[app],
     });
   }
   // we want to make sure field formats remain same
   async validateFieldFormats(app: AppDataType, dataView: DataView) {
-    const defaultFieldFormats = getFieldFormatsForApp(app);
+    const { formats: defaultFieldFormats, runtimeFields } = getFieldFormatsForApp(app);
     if (defaultFieldFormats && defaultFieldFormats.length > 0) {
       let isParamsDifferent = false;
       defaultFieldFormats.forEach(({ field, format }) => {
@@ -115,7 +171,17 @@ export class ObservabilityDataViews {
           }
         }
       });
-      if (isParamsDifferent) {
+      let hasNewRuntimeField = false;
+      if (runtimeFields !== null) {
+        const allRunTimeFields = dataView.getAllRuntimeFields();
+        runtimeFields.forEach(({ name, field }) => {
+          if (!allRunTimeFields[name]) {
+            hasNewRuntimeField = true;
+            dataView.addRuntimeField(name, field);
+          }
+        });
+      }
+      if (isParamsDifferent || hasNewRuntimeField) {
         await this.dataViews?.updateSavedObject(dataView);
       }
     }
@@ -131,26 +197,10 @@ export class ObservabilityDataViews {
     return fieldFormatMap;
   }
 
-  async getDataTypeIndices(dataType: AppDataType) {
-    switch (dataType) {
-      case 'ux':
-      case 'synthetics':
-        const resultUx = await getDataHandler(dataType)?.hasData();
-        return resultUx?.indices;
-      case 'apm':
-      case 'mobile':
-        const resultApm = await getDataHandler('apm')?.hasData();
-        return resultApm?.indices.transaction;
-    }
-  }
-
   async getDataView(app: AppDataType, indices?: string): Promise<DataView | undefined> {
-    if (!this.dataViews) {
-      throw new Error('data is not defined');
-    }
     let appIndices = indices;
     if (!appIndices) {
-      appIndices = await this.getDataTypeIndices(app);
+      appIndices = (await getDataTypeIndices(app)).indices;
     }
 
     if (appIndices) {
@@ -158,11 +208,16 @@ export class ObservabilityDataViews {
         const dataViewId = getAppDataViewId(app, appIndices);
         const dataViewTitle = getAppIndicesWithPattern(app, appIndices);
         // we will get the data view by id
+
+        if (this.adHocDataViews) {
+          return await this.createDataView(app, appIndices);
+        }
+
         const dataView = await this.dataViews?.get(dataViewId);
 
         // and make sure title matches, otherwise, we will need to create it
         if (dataView.title !== dataViewTitle) {
-          return await this.createDataView(app, appIndices);
+          return await this.createAndSavedDataView(app, appIndices);
         }
 
         // this is intentional a non blocking call, so no await clause
@@ -170,7 +225,7 @@ export class ObservabilityDataViews {
         return dataView;
       } catch (e: unknown) {
         if (e instanceof SavedObjectNotFound) {
-          return await this.createDataView(app, appIndices);
+          return await this.createAndSavedDataView(app, appIndices);
         }
       }
     }

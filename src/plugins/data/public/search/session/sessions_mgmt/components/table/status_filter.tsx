@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldValueOptionType, SearchFilterConfig } from '@elastic/eui';
+import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { TableText } from '..';
@@ -20,14 +20,7 @@ export const getStatusFilter: (tableData: UISession[]) => SearchFilterConfig = (
   }),
   field: 'status',
   multiSelect: 'or',
-  options: tableData.reduce((options: FieldValueOptionType[], session) => {
-    const { status: statusType } = session;
-    const existingOption = options.find((o) => o.value === statusType);
-    if (!existingOption) {
-      const view = <TableText>{getStatusText(session.status)}</TableText>;
-      return [...options, { value: statusType, view }];
-    }
-
-    return options;
-  }, []),
+  options: [...new Set(tableData.map((data) => data.status ?? 'unknown'))]
+    .sort()
+    .map((status) => ({ value: status, view: <TableText>{getStatusText(status)}</TableText> })),
 });

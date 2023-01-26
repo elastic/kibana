@@ -49,6 +49,11 @@ describe('aggregateRulesRoute', () => {
         pending: 1,
         unknown: 0,
       },
+      ruleLastRunOutcome: {
+        succeeded: 1,
+        failed: 2,
+        warning: 3,
+      },
       ruleEnabledStatus: {
         disabled: 1,
         enabled: 40,
@@ -87,6 +92,11 @@ describe('aggregateRulesRoute', () => {
             "ok": 15,
             "pending": 1,
             "unknown": 0,
+          },
+          "rule_last_run_outcome": Object {
+            "failed": 2,
+            "succeeded": 1,
+            "warning": 3,
           },
           "rule_muted_status": Object {
             "muted": 2,
@@ -128,6 +138,11 @@ describe('aggregateRulesRoute', () => {
           pending: 1,
           unknown: 0,
         },
+        rule_last_run_outcome: {
+          succeeded: 1,
+          failed: 2,
+          warning: 3,
+        },
         rule_muted_status: {
           muted: 2,
           unmuted: 39,
@@ -155,6 +170,11 @@ describe('aggregateRulesRoute', () => {
         active: 23,
         pending: 1,
         unknown: 0,
+      },
+      ruleLastRunOutcome: {
+        succeeded: 2,
+        failed: 4,
+        warning: 6,
       },
     });
 
@@ -208,6 +228,11 @@ describe('aggregateRulesRoute', () => {
         active: 23,
         pending: 1,
         unknown: 0,
+      },
+      ruleLastRunOutcome: {
+        succeeded: 2,
+        failed: 4,
+        warning: 6,
       },
     };
     rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);

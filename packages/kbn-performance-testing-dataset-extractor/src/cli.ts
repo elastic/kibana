@@ -12,16 +12,13 @@
  *
  *************************************************************/
 
+import path from 'path';
+
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import { EsVersion, readConfigFile } from '@kbn/test';
-import path from 'path';
-import { extractor } from './extractor';
-import { ScalabilitySetup } from './types';
+import { Journey } from '@kbn/journeys';
 
-interface Vars {
-  [key: string]: string;
-}
+import { extractor } from './extractor';
 
 export async function runExtractor() {
   run(
@@ -50,48 +47,7 @@ export async function runExtractor() {
         throw createFlagError('--es-password must be defined');
       }
 
-      const configPath = flags.config;
-      if (typeof configPath !== 'string') {
-        throw createFlagError('--config must be a string');
-      }
-      const config = await readConfigFile(log, EsVersion.getDefault(), path.resolve(configPath));
-
-      const scalabilitySetup: ScalabilitySetup = config.get('scalabilitySetup');
-
-      if (!scalabilitySetup) {
-        log.warning(
-          `'scalabilitySetup' is not defined in config file, output file for Kibana scalability run won't be generated`
-        );
-      }
-
-      const env = config.get(`kbnTestServer.env`);
-      if (
-        typeof env !== 'object' ||
-        typeof env.ELASTIC_APM_GLOBAL_LABELS !== 'string' ||
-        !env.ELASTIC_APM_GLOBAL_LABELS.includes('journeyName=')
-      ) {
-        log.error(
-          `'journeyName' must be defined in config file:
-
-      env: {
-        ...config.kbnTestServer.env,
-        ELASTIC_APM_GLOBAL_LABELS: Object.entries({
-          journeyName: <journey name>,
-        })
-      },`
-        );
-        return;
-      }
-
-      const envVars: Vars = env.ELASTIC_APM_GLOBAL_LABELS.split(',').reduce(
-        (acc: Vars, pair: string) => {
-          const [key, value] = pair.split('=');
-          return { ...acc, [key]: value };
-        },
-        {}
-      );
-      const journeyName = envVars.journeyName;
-
+      const withoutStaticResources = !!flags['without-static-resources'] || false;
       const buildId = flags.buildId;
       if (buildId && typeof buildId !== 'string') {
         throw createFlagError('--buildId must be a string');
@@ -100,11 +56,37 @@ export async function runExtractor() {
         throw createFlagError('--buildId must be defined');
       }
 
-      const withoutStaticResources = !!flags['without-static-resources'] || false;
+      const configPath = flags.config;
+      if (typeof configPath !== 'string') {
+        throw createFlagError('--config must be a string');
+      }
+      const journey = await Journey.load(path.resolve(configPath));
+
+      const scalabilitySetup = journey.config.getScalabilityConfig();
+      if (!scalabilitySetup) {
+        log.warning(
+          `'scalabilitySetup' is not defined in config file, output file for Kibana scalability run won't be generated`
+        );
+      }
+
+      const testData = {
+        esArchives: journey.config.getEsArchives(),
+        kbnArchives: journey.config.getKbnArchives(),
+      };
 
       return extractor({
-        param: { journeyName, scalabilitySetup, buildId, withoutStaticResources },
-        client: { baseURL, username, password },
+        param: {
+          journeyName: journey.config.getName(),
+          scalabilitySetup,
+          testData,
+          buildId,
+          withoutStaticResources,
+        },
+        client: {
+          baseURL,
+          username,
+          password,
+        },
         log,
       });
     },

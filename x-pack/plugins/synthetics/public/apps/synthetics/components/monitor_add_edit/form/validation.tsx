@@ -57,6 +57,21 @@ export const validateTimeout = ({
   return parseFloat(timeout) > schedule;
 };
 
+export const validJSONFormat = (value: string) => {
+  let obj;
+
+  try {
+    obj = JSON.parse(value);
+    if (!obj || typeof obj !== 'object') {
+      return false;
+    }
+  } catch (e) {
+    return false;
+  }
+
+  return true;
+};
+
 // validation functions return true when invalid
 const validateCommon: ValidationLibrary = {
   [ConfigKey.SCHEDULE]: ({ [ConfigKey.SCHEDULE]: value }) => {
@@ -145,6 +160,10 @@ const validateBrowser: ValidationLibrary = {
   [ConfigKey.UPLOAD_SPEED]: ({ [ConfigKey.UPLOAD_SPEED]: uploadSpeed }) =>
     validateThrottleValue(uploadSpeed),
   [ConfigKey.LATENCY]: ({ [ConfigKey.LATENCY]: latency }) => validateThrottleValue(latency, true),
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: ({ [ConfigKey.PLAYWRIGHT_OPTIONS]: playwrightOptions }) =>
+    playwrightOptions ? !validJSONFormat(playwrightOptions) : false,
+  [ConfigKey.PARAMS]: ({ [ConfigKey.PARAMS]: params }) =>
+    params ? !validJSONFormat(params) : false,
 };
 
 export type ValidateDictionary = Record<DataStream, Validation>;

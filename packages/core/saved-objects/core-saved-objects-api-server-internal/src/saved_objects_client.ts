@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
@@ -39,6 +39,9 @@ import type {
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
@@ -81,6 +84,14 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /** {@inheritDoc SavedObjectsClientContract.delete} */
   async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}) {
     return await this._repository.delete(type, id, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.bulkDelete} */
+  async bulkDelete(
+    objects: SavedObjectsBulkDeleteObject[],
+    options: SavedObjectsBulkDeleteOptions = {}
+  ): Promise<SavedObjectsBulkDeleteResponse> {
+    return await this._repository.bulkDelete(objects, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.find} */

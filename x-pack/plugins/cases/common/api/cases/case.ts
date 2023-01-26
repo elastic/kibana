@@ -14,27 +14,21 @@ import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors';
 import { CaseAssigneesRt } from './assignee';
 
-const BucketsAggs = rt.array(
-  rt.type({
-    key: rt.string,
-  })
-);
-
-export const GetCaseIdsByAlertIdAggsRt = rt.type({
-  references: rt.type({
-    doc_count: rt.number,
-    caseIds: rt.type({
-      buckets: BucketsAggs,
-    }),
-  }),
+export const AttachmentTotalsRt = rt.type({
+  alerts: rt.number,
+  userComments: rt.number,
 });
 
-export const CasesByAlertIdRt = rt.array(
-  rt.type({
-    id: rt.string,
-    title: rt.string,
-  })
-);
+export const RelatedCaseInfoRt = rt.type({
+  id: rt.string,
+  title: rt.string,
+  description: rt.string,
+  status: CaseStatusRt,
+  createdAt: rt.string,
+  totals: AttachmentTotalsRt,
+});
+
+export const CasesByAlertIdRt = rt.array(RelatedCaseInfoRt);
 
 export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
@@ -220,6 +214,10 @@ export const CasesFindRequestRt = rt.partial({
    */
   searchFields: rt.union([rt.array(rt.string), rt.string]),
   /**
+   * The root fields to perform the simple_query_string parsed query against
+   */
+  rootSearchFields: rt.array(rt.string),
+  /**
    * The field to use for sorting the found objects.
    *
    * This only supports, `create_at`, `closed_at`, and `status`
@@ -331,6 +329,27 @@ export const AllTagsFindRequestRt = rt.partial({
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
+export const CasesBulkGetRequestRt = rt.intersection([
+  rt.type({
+    ids: rt.array(rt.string),
+  }),
+  rt.partial({
+    fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
+  }),
+]);
+
+export const CasesBulkGetResponseRt = rt.type({
+  cases: CasesResponseRt,
+  errors: rt.array(
+    rt.type({
+      error: rt.string,
+      message: rt.string,
+      status: rt.union([rt.undefined, rt.number]),
+      caseId: rt.string,
+    })
+  ),
+});
+
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
@@ -350,5 +369,19 @@ export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasic
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
 
-export type GetCaseIdsByAlertIdAggs = rt.TypeOf<typeof GetCaseIdsByAlertIdAggsRt>;
+export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
+export type RelatedCaseInfo = rt.TypeOf<typeof RelatedCaseInfoRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
+
+export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
+export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
+export type CasesBulkGetRequestCertainFields<
+  Field extends keyof CaseResponse = keyof CaseResponse
+> = Omit<CasesBulkGetRequest, 'fields'> & {
+  fields?: Field[];
+};
+export type CasesBulkGetResponseCertainFields<
+  Field extends keyof CaseResponse = keyof CaseResponse
+> = Omit<CasesBulkGetResponse, 'cases'> & {
+  cases: Array<Pick<CaseResponse, Field | 'id' | 'version' | 'owner'>>;
+};

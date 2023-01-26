@@ -36,11 +36,18 @@
           " implements ",
           "CoreService",
           "<void, ",
-          "DeprecationsServiceStart",
+          {
+            "pluginId": "@kbn/core-deprecations-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
+            "section": "def-common.DeprecationsServiceStart",
+            "text": "DeprecationsServiceStart"
+          },
           ">"
         ],
         "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-browser-internal",
@@ -54,6 +61,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -66,12 +74,25 @@
             "description": [],
             "signature": [
               "({ http }: { http: ",
-              "HttpSetup",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              },
               "; }) => ",
-              "DeprecationsServiceStart"
+              {
+                "pluginId": "@kbn/core-deprecations-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
+                "section": "def-common.DeprecationsServiceStart",
+                "text": "DeprecationsServiceStart"
+              }
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-browser-internal",
@@ -82,6 +103,7 @@
                 "description": [],
                 "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-deprecations-browser-internal",
@@ -91,10 +113,17 @@
                     "label": "http",
                     "description": [],
                     "signature": [
-                      "HttpSetup"
+                      {
+                        "pluginId": "@kbn/core-http-browser",
+                        "scope": "common",
+                        "docId": "kibKbnCoreHttpBrowserPluginApi",
+                        "section": "def-common.HttpSetup",
+                        "text": "HttpSetup"
+                      }
                     ],
                     "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -113,6 +142,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }

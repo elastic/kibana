@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiButtonGroup,
   EuiText,
@@ -24,27 +25,24 @@ import { isEqual, isEmpty, omit } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
+import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  DEFAULT_INDEX_KEY,
-  DEFAULT_THREAT_INDEX_KEY,
-  DEFAULT_THREAT_MATCH_QUERY,
-} from '../../../../../common/constants';
-import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
+import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { useUiSetting$, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import {
   filterRuleFieldsForType,
   getStepDataDataSource,
-} from '../../../pages/detection_engine/rules/create/helpers';
+} from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 import type { DefineStepRule, RuleStepProps } from '../../../pages/detection_engine/rules/types';
 import { RuleStep, DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
+import type { QueryBarDefineRuleProps } from '../query_bar';
 import { QueryBarDefineRule } from '../query_bar';
 import { SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
@@ -63,24 +61,28 @@ import {
   useFormData,
 } from '../../../../shared_imports';
 import { schema } from './schema';
+import { getTermsAggregationFields } from './utils';
 import * as i18n from './translations';
 import {
   isEqlRule,
   isNewTermsRule,
   isThreatMatchRule,
   isThresholdRule,
+  isQueryRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
 import { ThreatMatchInput } from '../threatmatch_input';
 import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { RulePreview } from '../rule_preview';
-import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
-import { StepDefineRuleNewFeaturesTour } from './new_features_tour';
+import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
+import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
+import { GroupByFields } from '../group_by_fields';
+import { useLicense } from '../../../../common/hooks/use_license';
+import { minimumLicenseForSuppression } from '../../../../../common/detection_engine/rule_schema';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -88,61 +90,13 @@ const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
   display: ${(props) => (props.isVisible ? 'block' : 'none')};
 `;
 interface StepDefineRuleProps extends RuleStepProps {
-  defaultValues?: DefineStepRule;
+  indicesConfig: string[];
+  threatIndicesConfig: string[];
+  defaultValues: DefineStepRule;
+  onRuleDataChange?: (data: DefineStepRule) => void;
+  onPreviewDisabledStateChange?: (isDisabled: boolean) => void;
+  defaultSavedQuery?: SavedQuery;
 }
-
-export const stepDefineDefaultValue: DefineStepRule = {
-  anomalyThreshold: 50,
-  index: [],
-  machineLearningJobId: [],
-  ruleType: 'query',
-  threatIndex: [],
-  queryBar: {
-    query: { query: '', language: 'kuery' },
-    filters: [],
-    saved_id: null,
-  },
-  threatQueryBar: {
-    query: { query: DEFAULT_THREAT_MATCH_QUERY, language: 'kuery' },
-    filters: [],
-    saved_id: null,
-  },
-  requiredFields: [],
-  relatedIntegrations: [],
-  threatMapping: [],
-  threshold: {
-    field: [],
-    value: '200',
-    cardinality: {
-      field: [],
-      value: '',
-    },
-  },
-  timeline: {
-    id: null,
-    title: DEFAULT_TIMELINE_TITLE,
-  },
-  eqlOptions: {},
-  dataSourceType: DataSourceType.IndexPatterns,
-  newTermsFields: [],
-  historyWindowSize: '7d',
-};
-
-/**
- * This default query will be used for threat query/indicator matches
- * as the default when the user swaps to using it by changing their
- * rule type from any rule type to the "threatMatchRule" type. Only
- * difference is that "*:*" is used instead of '' for its query.
- */
-const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
-  ...stepDefineDefaultValue.queryBar,
-  query: { ...stepDefineDefaultValue.queryBar.query, query: '*:*' },
-};
-
-const defaultCustomQuery = {
-  forNormalRules: stepDefineDefaultValue.queryBar,
-  forThreatMatchRules: threatQueryBarDefaultValue,
-};
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
   height: 18px;
@@ -166,7 +120,7 @@ const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ 
 
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
-  defaultValues,
+  defaultValues: initialState,
   descriptionColumns = 'singleSplit',
   isReadOnlyView,
   isLoading,
@@ -174,20 +128,18 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   onSubmit,
   setForm,
   kibanaDataViews,
+  indicesConfig,
+  threatIndicesConfig,
+  onRuleDataChange,
+  onPreviewDisabledStateChange,
+  defaultSavedQuery,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const [dataViewTitle, setDataViewTitle] = useState<string>();
-
-  const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
-  const initialState = defaultValues ?? {
-    ...stepDefineDefaultValue,
-    index: indicesConfig,
-    threatIndex: threatIndicesConfig,
-  };
+  const license = useLicense();
 
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
@@ -195,24 +147,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     schema,
   });
 
-  const { getFields, getFormData, reset, submit } = form;
-  const [
-    {
-      index: formIndex,
-      ruleType: formRuleType,
-      queryBar: formQuery,
-      dataViewId: formDataViewId,
-      threatIndex: formThreatIndex,
-      threatQueryBar: formThreatQuery,
-      threshold: formThreshold,
-      threatMapping: formThreatMapping,
-      machineLearningJobId: formMachineLearningJobId,
-      anomalyThreshold: formAnomalyThreshold,
-      dataSourceType: formDataSourceType,
-      newTermsFields: formNewTermsFields,
-      historyWindowSize: formHistoryWindowSize,
-    },
-  ] = useFormData<DefineStepRule>({
+  const { getFields, getFormData, reset, setFieldValue, validate } = form;
+  const [formData] = useFormData<DefineStepRule>({
     form,
     watch: [
       'index',
@@ -231,26 +167,94 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'dataSourceType',
       'newTermsFields',
       'historyWindowSize',
+      'shouldLoadQueryDynamically',
+      'groupByFields',
     ],
+    onChange: (data: DefineStepRule) => {
+      if (onRuleDataChange) {
+        onRuleDataChange({
+          ...data,
+          eqlOptions: optionsSelected,
+        });
+      }
+    },
   });
+
+  const handleSetRuleFromTimeline = useCallback(
+    ({ index: timelineIndex, queryBar: timelineQueryBar }) => {
+      setFieldValue('index', timelineIndex);
+      setFieldValue('queryBar', timelineQueryBar);
+    },
+    [setFieldValue]
+  );
+  const { onOpenTimeline, loading: timelineQueryLoading } =
+    useRuleFromTimeline(handleSetRuleFromTimeline);
+
+  const {
+    index: formIndex,
+    ruleType: formRuleType,
+    queryBar: formQuery,
+    dataViewId: formDataViewId,
+    threatIndex: formThreatIndex,
+    threatMapping: formThreatMapping,
+    machineLearningJobId: formMachineLearningJobId,
+    dataSourceType: formDataSourceType,
+    newTermsFields,
+    shouldLoadQueryDynamically: formShouldLoadQueryDynamically,
+  } = formData;
 
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
-  const dataView = formDataViewId || initialState.dataViewId;
+  const dataViewId = formDataViewId || initialState.dataViewId;
   const threatIndex = formThreatIndex || initialState.threatIndex;
-  const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
-  const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
-  const newTermsFields = formNewTermsFields ?? initialState.newTermsFields;
-  const historyWindowSize = formHistoryWindowSize ?? initialState.historyWindowSize;
   const ruleType = formRuleType || initialState.ruleType;
   const dataSourceType = formDataSourceType || initialState.dataSourceType;
+  const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
+  const queryBar = formQuery ?? initialState.queryBar;
+
+  const [isPreviewValid, setIsPreviewValid] = useState(false);
+  useEffect(() => {
+    if (onPreviewDisabledStateChange) {
+      onPreviewDisabledStateChange(!isPreviewValid);
+    }
+  }, [isPreviewValid, onPreviewDisabledStateChange]);
+  useEffect(() => {
+    const isDisabled = getIsRulePreviewDisabled({
+      ruleType,
+      isQueryBarValid,
+      isThreatQueryBarValid,
+      index,
+      dataViewId,
+      dataSourceType,
+      threatIndex,
+      threatMapping: formThreatMapping,
+      machineLearningJobId,
+      queryBar,
+      newTermsFields,
+    });
+    setIsPreviewValid(!isDisabled);
+  }, [
+    dataSourceType,
+    formDataViewId,
+    newTermsFields,
+    formQuery,
+    dataViewId,
+    formThreatMapping,
+    index,
+    queryBar,
+    isQueryBarValid,
+    isThreatQueryBarValid,
+    machineLearningJobId,
+    ruleType,
+    threatIndex,
+  ]);
 
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
   const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
-    defaultValues?.eqlOptions || {}
+    initialState.eqlOptions || {}
   );
   const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] = useFetchIndex(
     index,
@@ -273,8 +277,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
     if (dataSourceType === DataSourceType.DataView) {
       const fetchDataView = async () => {
-        if (dataView != null) {
-          const dv = await data.dataViews.get(dataView);
+        if (dataViewId != null) {
+          const dv = await data.dataViews.get(dataViewId);
           setDataViewTitle(dv.title);
           setIndexPattern(dv);
         }
@@ -282,7 +286,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
       fetchDataView();
     }
-  }, [dataSourceType, isIndexPatternLoading, data, dataView, initIndexPattern]);
+  }, [dataSourceType, isIndexPatternLoading, data, dataViewId, initIndexPattern]);
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
@@ -314,6 +318,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setAggregatableFields(aggregatableFields(fields as BrowserField[]));
   }, [indexPattern]);
 
+  const termsAggregationFields: BrowserField[] = useMemo(
+    () => getTermsAggregationFields(aggFields),
+    [aggFields]
+  );
+
   const [
     threatIndexPatternsLoading,
     { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
@@ -339,8 +348,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    *   * from '*:*' back to '' if the type is switched back from "threat_match" to another one
    */
   useEffect(() => {
-    const { queryBar } = getFields();
-    if (queryBar == null) {
+    const { queryBar: currentQuery } = getFields();
+    if (currentQuery == null) {
       return;
     }
 
@@ -356,15 +365,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     //   NOTE: It's important to do a deep object comparison by value.
     //   Don't do it by reference because the forms lib can change it internally.
 
-    // 2. We call queryBar.reset() in both cases to not trigger validation errors
+    // 2. We call currentQuery.reset() in both cases to not trigger validation errors
     // as the user has not entered data into those areas yet.
 
     // If the user switched rule type to "threat_match" from any other one,
     // but hasn't changed the custom query used for normal rules (''),
     // we reset the custom query to the default used for "threat_match" rules ('*:*').
     if (isThreatMatchRule(ruleType) && !isThreatMatchRule(previousRuleType)) {
-      if (isEqual(queryBar.value, defaultCustomQuery.forNormalRules)) {
-        queryBar.reset({
+      if (isEqual(currentQuery.value, defaultCustomQuery.forNormalRules)) {
+        currentQuery.reset({
           defaultValue: defaultCustomQuery.forThreatMatchRules,
         });
         return;
@@ -375,13 +384,21 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     // but hasn't changed the custom query used for "threat_match" rules ('*:*'),
     // we reset the custom query to another default value ('').
     if (!isThreatMatchRule(ruleType) && isThreatMatchRule(previousRuleType)) {
-      if (isEqual(queryBar.value, defaultCustomQuery.forThreatMatchRules)) {
-        queryBar.reset({
+      if (isEqual(currentQuery.value, defaultCustomQuery.forThreatMatchRules)) {
+        currentQuery.reset({
           defaultValue: defaultCustomQuery.forNormalRules,
         });
       }
     }
   }, [ruleType, previousRuleType, getFields]);
+
+  // if saved query failed to load:
+  // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution
+  const handleSavedQueryError = useCallback(() => {
+    if (!isQueryBarValid) {
+      form.setFieldValue('shouldLoadQueryDynamically', false);
+    }
+  }, [isQueryBarValid, form]);
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
@@ -390,21 +407,23 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [onSubmit]);
 
   const getData = useCallback(async () => {
-    const result = await submit();
-    result.data = {
-      ...result.data,
-      eqlOptions: optionsSelected,
+    // validate doesn't return actual state of form
+    // more details here: https://github.com/elastic/kibana/issues/144322#issuecomment-1321838136
+    // wrapping in setTimeout is a workaround until solution within forms-lib can be found
+    const isValid = await new Promise<boolean>((resolve) => {
+      setTimeout(async () => {
+        const valid = await validate();
+        resolve(valid);
+      }, 0);
+    });
+    return {
+      isValid,
+      data: {
+        ...getFormData(),
+        eqlOptions: optionsSelected,
+      },
     };
-    return result.isValid
-      ? result
-      : {
-          isValid: false,
-          data: {
-            ...getFormData(),
-            eqlOptions: optionsSelected,
-          },
-        };
-  }, [getFormData, optionsSelected, submit]);
+  }, [getFormData, optionsSelected, validate]);
 
   useEffect(() => {
     let didCancel = false;
@@ -446,11 +465,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [aggFields]
   );
-  const SourcererFlex = styled(EuiFlexItem)`
-    align-items: flex-end;
-  `;
-
-  SourcererFlex.displayName = 'SourcererFlex';
 
   const ThreatMatchInputChildren = useCallback(
     ({ threatMapping }) => (
@@ -501,7 +515,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const DataViewSelectorMemo = useMemo(() => {
-    return (
+    return kibanaDataViews == null || Object.keys(kibanaDataViews).length === 0 ? (
+      <EuiLoadingSpinner size="l" />
+    ) : (
       <UseField
         key="DataViewSelector"
         path="dataViewId"
@@ -515,7 +531,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const DataSource = useMemo(() => {
     return (
-      <RuleTypeEuiFormRow id="dataSourceSelector" label={i18n.SOURCE} $isVisible={true} fullWidth>
+      <RuleTypeEuiFormRow label={i18n.SOURCE} $isVisible={true} fullWidth>
         <EuiFlexGroup
           direction="column"
           gutterSize="s"
@@ -578,6 +594,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   euiFieldProps: {
                     fullWidth: true,
                     placeholder: '',
+                    isDisabled: timelineQueryLoading,
+                    isLoading: timelineQueryLoading,
                   },
                 }}
               />
@@ -587,6 +605,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       </RuleTypeEuiFormRow>
     );
   }, [
+    timelineQueryLoading,
     dataSourceType,
     onChangeDataSource,
     dataViewIndexPatternToggleButtonOptions,
@@ -607,34 +626,45 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <MyLabelButton
               data-test-subj="importQueryFromSavedTimeline"
               onClick={handleOpenTimelineSearch}
+              disabled={formShouldLoadQueryDynamically}
             >
               {i18n.IMPORT_TIMELINE_QUERY}
             </MyLabelButton>
           ),
         }}
         component={QueryBarDefineRule}
-        componentProps={{
-          browserFields,
-          // runtimeMappings,
-          idAria: 'detectionEngineStepDefineRuleQueryBar',
-          indexPattern,
-          isDisabled: isLoading,
-          isLoading: isIndexPatternLoading,
-          dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-          openTimelineSearch,
-          onValidityChange: setIsQueryBarValid,
-          onCloseTimelineSearch: handleCloseTimelineSearch,
-        }}
+        componentProps={
+          {
+            browserFields,
+            idAria: 'detectionEngineStepDefineRuleQueryBar',
+            indexPattern,
+            isDisabled: isLoading || formShouldLoadQueryDynamically || timelineQueryLoading,
+            resetToSavedQuery: formShouldLoadQueryDynamically,
+            isLoading: isIndexPatternLoading || timelineQueryLoading,
+            dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+            openTimelineSearch,
+            onValidityChange: setIsQueryBarValid,
+            onCloseTimelineSearch: handleCloseTimelineSearch,
+            onSavedQueryError: handleSavedQueryError,
+            defaultSavedQuery,
+            onOpenTimeline,
+          } as QueryBarDefineRuleProps
+        }
       />
     ),
     [
-      browserFields,
-      handleCloseTimelineSearch,
       handleOpenTimelineSearch,
+      formShouldLoadQueryDynamically,
+      browserFields,
       indexPattern,
-      isIndexPatternLoading,
       isLoading,
+      timelineQueryLoading,
+      isIndexPatternLoading,
       openTimelineSearch,
+      handleCloseTimelineSearch,
+      handleSavedQueryError,
+      defaultSavedQuery,
+      onOpenTimeline,
     ]
   );
   const onOptionsChange = useCallback((field: FieldsEqlOptions, value: string | undefined) => {
@@ -684,7 +714,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
-        <StepDefineRuleNewFeaturesTour />
         <Form form={form} data-test-subj="stepDefineRule">
           <StyledVisibleContainer isVisible={false}>
             <UseField
@@ -741,6 +770,45 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               )}
             </>
           </RuleTypeEuiFormRow>
+
+          {isQueryRule(ruleType) && (
+            <>
+              <EuiSpacer size="s" />
+              <RuleTypeEuiFormRow
+                label={i18n.SAVED_QUERY_FORM_ROW_LABEL}
+                $isVisible={Boolean(queryBar?.saved_id && queryBar?.title)}
+                fullWidth
+              >
+                <CommonUseField
+                  path="shouldLoadQueryDynamically"
+                  componentProps={{
+                    idAria: 'detectionEngineStepDefineRuleShouldLoadQueryDynamically',
+                    'data-test-subj': 'detectionEngineStepDefineRuleShouldLoadQueryDynamically',
+                    euiFieldProps: {
+                      disabled: isLoading,
+                      label: queryBar?.title
+                        ? i18n.getSavedQueryCheckboxLabel(queryBar.title)
+                        : undefined,
+                    },
+                  }}
+                />
+              </RuleTypeEuiFormRow>
+            </>
+          )}
+
+          <RuleTypeEuiFormRow $isVisible={isQueryRule(ruleType)}>
+            <UseField
+              path="groupByFields"
+              component={GroupByFields}
+              componentProps={{
+                browserFields: termsAggregationFields,
+                isDisabled:
+                  !license.isAtLeast(minimumLicenseForSuppression) &&
+                  initialState.groupByFields.length === 0,
+              }}
+            />
+          </RuleTypeEuiFormRow>
+
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField
@@ -812,7 +880,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 path="newTermsFields"
                 component={NewTermsFields}
                 componentProps={{
-                  browserFields: aggFields,
+                  browserFields: termsAggregationFields,
                 }}
               />
               <UseField
@@ -836,39 +904,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             }}
           />
         </Form>
-        <EuiSpacer size="m" />
-        <RuleTypeEuiFormRow label={i18n.RULE_PREVIEW_TITLE} $isVisible={true} fullWidth>
-          <RulePreview
-            index={index}
-            indexPattern={indexPattern}
-            dataViewId={formDataViewId}
-            dataSourceType={dataSourceType}
-            isDisabled={getIsRulePreviewDisabled({
-              ruleType,
-              isQueryBarValid,
-              isThreatQueryBarValid,
-              index,
-              dataViewId: formDataViewId,
-              dataSourceType,
-              threatIndex,
-              threatMapping: formThreatMapping,
-              machineLearningJobId,
-              queryBar: formQuery ?? initialState.queryBar,
-              newTermsFields: formNewTermsFields,
-            })}
-            query={formQuery}
-            ruleType={ruleType}
-            threatIndex={threatIndex}
-            threatQuery={formThreatQuery}
-            threatMapping={formThreatMapping}
-            threshold={formThreshold}
-            machineLearningJobId={machineLearningJobId}
-            anomalyThreshold={anomalyThreshold}
-            eqlOptions={optionsSelected}
-            newTermsFields={newTermsFields}
-            historyWindowSize={historyWindowSize}
-          />
-        </RuleTypeEuiFormRow>
       </StepContentWrapper>
 
       {!isUpdateView && (

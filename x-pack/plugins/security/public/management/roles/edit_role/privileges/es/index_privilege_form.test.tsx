@@ -259,7 +259,7 @@ describe('field level security', () => {
   });
 
   test('does not query for available fields when a request is already in flight', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const testProps = {
       ...props,

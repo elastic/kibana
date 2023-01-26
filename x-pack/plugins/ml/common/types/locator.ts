@@ -48,6 +48,7 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS
+  | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_MAP
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   | typeof ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB
@@ -63,7 +64,11 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT
   | typeof ML_PAGES.AIOPS
   | typeof ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES
-  | typeof ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
+  | typeof ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT
+  | typeof ML_PAGES.AIOPS_LOG_CATEGORIZATION
+  | typeof ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT
+  | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT
+  | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
   MlGenericUrlPageState | undefined
 >;
 
@@ -269,6 +274,7 @@ export type MlLocatorState =
   | CalendarEditUrlState
   | FilterEditUrlState
   | MlGenericUrlState
+  | NotificationsUrlState
   | TrainedModelsUrlState
   | TrainedModelsNodesUrlState;
 
@@ -284,4 +290,13 @@ export type TrainedModelsUrlState = MLPageState<
 export type TrainedModelsNodesUrlState = MLPageState<
   typeof ML_PAGES.TRAINED_MODELS_NODES,
   TrainedModelsNodesQueryState | undefined
+>;
+
+export interface NotificationsQueryState {
+  level: string;
+}
+
+export type NotificationsUrlState = MLPageState<
+  typeof ML_PAGES.NOTIFICATIONS,
+  NotificationsQueryState | undefined
 >;

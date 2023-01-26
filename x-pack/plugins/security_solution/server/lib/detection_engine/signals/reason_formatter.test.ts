@@ -11,14 +11,14 @@ const mergedDoc = {
   _index: 'index-1',
   _id: 'id-1',
   fields: {
-    'destination.address': ['9.99.99.9'],
+    'destination.ip': ['9.99.99.9'],
     'destination.port': ['6789'],
     'event.category': ['test'],
     'file.name': ['sample'],
     'host.name': ['host'],
     'process.name': ['doingThings.exe'],
     'process.parent.name': ['didThings.exe'],
-    'source.address': ['1.11.11.1'],
+    'source.ip': ['1.11.11.1'],
     'source.port': ['1234'],
     'user.name': ['test-user'],
     '@timestamp': '2021-08-11T02:28:59.101Z',
@@ -121,7 +121,7 @@ describe('reason_formatter', () => {
           ...mergedDoc,
           fields: {
             ...mergedDoc.fields,
-            'destination.address': ['-'],
+            'destination.ip': ['-'],
             'destination.port': ['-'],
           },
         };
@@ -152,7 +152,7 @@ describe('reason_formatter', () => {
           ...mergedDoc,
           fields: {
             ...mergedDoc.fields,
-            'source.address': ['-'],
+            'source.ip': ['-'],
             'source.port': ['-'],
           },
         };

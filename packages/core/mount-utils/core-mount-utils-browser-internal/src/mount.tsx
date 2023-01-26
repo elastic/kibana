@@ -11,7 +11,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
+import './mount_wrapper.scss';
+
 const defaultWrapperClass = 'kbnMountWrapper';
+
 interface MountWrapperComponentProps {
   mount: MountPoint;
   className?: string;

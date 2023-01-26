@@ -15,7 +15,7 @@ import { asErr, asOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { EphemeralTaskLifecycle, EphemeralTaskLifecycleOpts } from './ephemeral_task_lifecycle';
 import { ConcreteTaskInstance, TaskStatus } from './task';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { asTaskPollingCycleEvent, asTaskRunEvent, TaskPersistence } from './task_events';
 import { TaskRunResult } from './task_running';
 import { TaskPoolRunResult } from './task_pool';
@@ -52,6 +52,7 @@ describe('EphemeralTaskLifecycle', () => {
         monitored_stats_running_average_window: 50,
         monitored_stats_health_verbose_log: {
           enabled: true,
+          level: 'debug',
           warn_delayed_task_start_in_seconds: 60,
         },
         monitored_task_execution_thresholds: {
@@ -172,7 +173,7 @@ describe('EphemeralTaskLifecycle', () => {
 
       lifecycleEvent$.next(
         asTaskRunEvent(
-          uuid.v4(),
+          uuidv4(),
           asOk({
             task: mockTask(),
             result: TaskRunResult.Success,
@@ -385,7 +386,7 @@ describe('EphemeralTaskLifecycle', () => {
 
 function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     runAt: new Date(),
     taskType: 'foo',
     schedule: undefined,

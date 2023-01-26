@@ -23,7 +23,12 @@ describe('Discover grid columns', function () {
       isSortEnabled: true,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
-      services: discoverServiceMock,
+      services: {
+        uiSettings: discoverServiceMock.uiSettings,
+        toastNotifications: discoverServiceMock.toastNotifications,
+      },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -134,7 +139,12 @@ describe('Discover grid columns', function () {
       isSortEnabled: true,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
-      services: discoverServiceMock,
+      services: {
+        uiSettings: discoverServiceMock.uiSettings,
+        toastNotifications: discoverServiceMock.toastNotifications,
+      },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -239,7 +249,12 @@ describe('Discover grid columns', function () {
       isSortEnabled: true,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
-      services: discoverServiceMock,
+      services: {
+        uiSettings: discoverServiceMock.uiSettings,
+        toastNotifications: discoverServiceMock.toastNotifications,
+      },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`

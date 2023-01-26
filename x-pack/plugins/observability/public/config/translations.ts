@@ -115,10 +115,11 @@ export const translations = {
     viewInAppButtonText: i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {
       defaultMessage: 'View in app',
     }),
-  },
-  alertsSearchBar: {
-    placeholder: i18n.translate('xpack.observability.alerts.searchBarPlaceholder', {
-      defaultMessage: 'Search alerts (e.g. kibana.alert.evaluation.threshold > 75)',
-    }),
+    alertDetailsButtonText: i18n.translate(
+      'xpack.observability.alertsFlyout.alertsDetailsButtonText',
+      {
+        defaultMessage: 'Alert details',
+      }
+    ),
   },
 };

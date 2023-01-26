@@ -11,29 +11,30 @@ import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
 import { Teletype } from '../../../common/types/process_tree';
 
-export const useStyles = (tty?: Teletype) => {
-  const { euiTheme } = useEuiTheme();
+export const useStyles = (tty?: Teletype, show?: boolean) => {
+  const { euiTheme, euiVars } = useEuiTheme();
   const cached = useMemo(() => {
     const { size, font, colors, border } = euiTheme;
 
     const container: CSSObject = {
       position: 'absolute',
       top: 0,
+      opacity: show ? 1 : 0,
+      transition: 'opacity .2s',
+      pointerEvents: show ? 'auto' : 'none',
       width: '100%',
       height: '100%',
       overflow: 'hidden',
       zIndex: 10,
-      borderRadius: size.s,
-      backgroundColor: colors.ink,
-      '.euiRangeLevel--warning': {
-        backgroundColor: transparentize(colors.warning, 0.8),
-      },
-      '.euiRangeLevel--danger': {
-        backgroundColor: transparentize(colors.danger, 0.8),
-      },
       '.euiRangeTick,.euiRangeLevel': {
         transition: 'left 500ms',
       },
+    };
+
+    const header: CSSObject = {
+      visibility: show ? 'visible' : 'hidden',
+      backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
+      padding: `${size.m} ${size.base}`,
     };
 
     const windowBoundsColor = transparentize(colors.ghost, 0.6);
@@ -65,18 +66,27 @@ export const useStyles = (tty?: Teletype) => {
     }
 
     const scrollPane: CSSObject = {
+      position: 'relative',
+      transform: `translateY(${show ? 0 : '100%'})`,
+      transition: 'transform .2s ease-in-out',
       width: '100%',
-      height: 'calc(100% - 126px)',
-      border: border.thin,
+      height: 'calc(100% - 112px)',
       overflow: 'auto',
+      backgroundColor: colors.ink,
+    };
+
+    const betaBadge: CSSObject = {
+      backgroundColor: `${colors.emptyShade}`,
     };
 
     return {
       container,
+      header,
       terminal,
       scrollPane,
+      betaBadge,
     };
-  }, [tty, euiTheme]);
+  }, [euiTheme, show, euiVars.euiFormBackgroundDisabledColor, tty?.rows, tty?.columns]);
 
   return cached;
 };

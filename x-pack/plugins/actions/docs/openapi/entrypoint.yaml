@@ -1,0 +1,51 @@
+openapi: 3.0.1
+info:
+  title: Connectors
+  description: OpenAPI schema for Connectors endpoints
+  version: '0.1'
+  contact:
+    name: Connectors Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: connectors
+    description: Connector APIs enable you to create and manage connectors.
+servers:
+  - url: 'http://localhost:5601'
+    description: local
+paths:
+   '/s/{spaceId}/api/actions/connector':
+    $ref: 'paths/s@{spaceid}@api@actions@connector.yaml'
+   '/s/{spaceId}/api/actions/connector/{connectorId}':
+    $ref: 'paths/s@{spaceid}@api@actions@connector@{connectorid}.yaml'
+   '/s/{spaceId}/api/actions/connectors':
+    $ref: paths/s@{spaceid}@api@actions@connectors.yaml
+   '/s/{spaceId}/api/actions/connector_types':
+    $ref: paths/s@{spaceid}@api@actions@connector_types.yaml
+#  '/s/{spaceId}/api/actions/connector/{connectorId}/_execute':
+#   $ref: paths/s@{spaceid}@api@actions@connector@{connectorid}@_execute.yaml
+#  '/s/{spaceId}/api/actions/action/{actionId}':
+#   $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}.yaml'
+#  '/s/{spaceId}/api/actions':
+#   $ref: 'paths/s@{spaceid}@api@actions.yaml'
+# '/s/{spaceId}/api/actions/list_action_types':
+#    $ref: 'paths/s@{spaceid}@api@actions@list_action_types.yaml'
+#  '/s/{spaceId}/api/actions/action':
+#    $ref: 'paths/s@{spaceid}@api@actions@action.yaml'
+#  '/s/{spaceId}/api/actions/action/{actionId}':
+#   $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}.yaml'
+#  '/s/{spaceId}/api/actions/action/{actionId}/_execute':
+#   $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}@_execute.yaml'
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: ApiKey
+security:
+  - basicAuth: []
+  - apiKeyAuth: []

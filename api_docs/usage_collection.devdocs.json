@@ -27,6 +27,7 @@
         ],
         "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -50,6 +51,7 @@
             ],
             "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -69,6 +71,7 @@
         ],
         "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -80,7 +83,8 @@
               "\nThe name of the view to be tracked. The appId will be obtained automatically."
             ],
             "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -95,7 +99,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -115,6 +120,7 @@
       ],
       "path": "src/plugins/usage_collection/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "usageCollection",
@@ -129,7 +135,8 @@
             "{ ApplicationUsageTrackingProvider: React.FC<{}>; }"
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "usageCollection",
@@ -145,6 +152,7 @@
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -158,6 +166,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -172,6 +181,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -186,6 +196,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -200,6 +211,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": false
             }
           ],
@@ -220,6 +232,7 @@
       ],
       "path": "src/plugins/usage_collection/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "usageCollection",
@@ -235,6 +248,7 @@
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -248,6 +262,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -262,6 +277,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -276,6 +292,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -290,6 +307,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": false
             }
           ],
@@ -315,6 +333,7 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -326,7 +345,7 @@
               "\nRequest-scoped Elasticsearch client"
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -444,7 +463,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -496,17 +515,15 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
-              "default",
-              "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -1517,7 +1534,8 @@
               "; }"
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -1529,10 +1547,17 @@
               "\nRequest-scoped Saved Objects client"
             ],
             "signature": [
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1558,6 +1583,7 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -1569,10 +1595,17 @@
               "Logger"
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -1584,7 +1617,8 @@
               "The registered type (aka name) of the collector"
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -1616,6 +1650,7 @@
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1635,7 +1670,8 @@
                   }
                 ],
                 "path": "src/plugins/usage_collection/server/collector/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1653,6 +1689,7 @@
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -1670,6 +1707,7 @@
         ],
         "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -1681,7 +1719,8 @@
               "The name of the counter"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -1696,7 +1735,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -1711,7 +1751,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1727,6 +1768,7 @@
         ],
         "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -1750,6 +1792,7 @@
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "usageCollection",
@@ -1771,6 +1814,7 @@
                 ],
                 "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1788,19 +1832,9 @@
         "description": [
           "\nThe attributes stored in the UsageCounters' SavedObjects"
         ],
-        "signature": [
-          {
-            "pluginId": "usageCollection",
-            "scope": "server",
-            "docId": "kibUsageCollectionPluginApi",
-            "section": "def-server.UsageCountersSavedObjectAttributes",
-            "text": "UsageCountersSavedObjectAttributes"
-          },
-          " extends ",
-          "SavedObjectAttributes"
-        ],
         "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -1812,7 +1846,8 @@
               "The domain ID registered in the Usage Counter"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -1824,7 +1859,8 @@
               "The counter name"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -1836,7 +1872,8 @@
               "The counter type"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -1848,7 +1885,8 @@
               "Number of times the event has occurred"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1866,10 +1904,11 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"byte\" | \"float\" | \"integer\""
         ],
-        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1879,7 +1918,7 @@
         "tags": [],
         "label": "CollectorFetchMethod",
         "description": [
-          "\nThe fetch method has the context of the Collector itself\n(this has access to all the properties of the collector like the logger)\nand the the first parameter is {@link CollectorFetchContext}."
+          "\nThe fetch method has the context of the Collector itself\n(this has access to all the properties of the collector like the logger)\nand the first parameter is {@link CollectorFetchContext}."
         ],
         "signature": [
           "(this: ",
@@ -1902,6 +1941,7 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1921,7 +1961,8 @@
               }
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1956,6 +1997,7 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1976,6 +2018,7 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1992,6 +2035,7 @@
         ],
         "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2040,6 +2084,7 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/usage_collector.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2052,7 +2097,13 @@
           "\nThe structure of the SavedObjects of type \"usage-counters\""
         ],
         "signature": [
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "usageCollection",
@@ -2065,6 +2116,7 @@
         ],
         "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2080,6 +2132,7 @@
       ],
       "path": "src/plugins/usage_collection/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "usageCollection",
@@ -2102,6 +2155,7 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -2115,6 +2169,7 @@
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2142,6 +2197,7 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -2155,6 +2211,7 @@
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2190,6 +2247,7 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -2210,6 +2268,7 @@
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2237,6 +2296,7 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -2257,6 +2317,7 @@
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2284,6 +2345,7 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -2297,6 +2359,7 @@
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],

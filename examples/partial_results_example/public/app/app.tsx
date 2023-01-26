@@ -14,8 +14,8 @@ import {
   EuiCodeBlock,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
@@ -37,7 +37,7 @@ export function App() {
 
   useEffect(() => {
     const subscription = expressions
-      ?.execute<null, Datatable>(expression, null)
+      ?.execute<null, Datatable>(expression, null, { partial: true })
       .getData()
       .pipe(pluck('result'))
       .subscribe((value) => setDatatable(value as Datatable));

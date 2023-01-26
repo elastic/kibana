@@ -13,6 +13,12 @@
 export const REPORT_INTERVAL_MS = 86400000;
 
 /**
+ * The buffer time, in milliseconds, to consider the {@link REPORT_INTERVAL_MS} as expired.
+ * Currently, 2 minutes.
+ */
+export const REPORT_INTERVAL_BUFFER_MS = 120000;
+
+/**
  * How often we poll for the opt-in status.
  * Currently, 10 seconds.
  */

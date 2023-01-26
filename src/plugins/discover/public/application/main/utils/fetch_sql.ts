@@ -8,11 +8,12 @@
 import { pluck } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import { Query, AggregateQuery, Filter } from '@kbn/es-query';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { queryStateToExpressionAst } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import { DataTableRecord } from '../../../types';
 
 interface SQLErrorResponse {
@@ -24,23 +25,26 @@ interface SQLErrorResponse {
 
 export function fetchSql(
   query: Query | AggregateQuery,
-  dataViewsService: DataViewsContract,
+  dataView: DataView,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
+  inspectorAdapters: Adapters,
   filters?: Filter[],
   inputQuery?: Query
 ) {
   const timeRange = data.query.timefilter.timefilter.getTime();
-  return queryStateToExpressionAst({
+  return textBasedQueryStateToAstWithValidation({
     filters,
     query,
     time: timeRange,
-    dataViewsService,
+    dataView,
     inputQuery,
   })
     .then((ast) => {
       if (ast) {
-        const execution = expressions.run(ast, null);
+        const execution = expressions.run(ast, null, {
+          inspectorAdapters,
+        });
         let finalData: DataTableRecord[] = [];
         let error: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {

@@ -7,7 +7,7 @@
 import { createHash } from 'crypto';
 import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
-import uuidv5 from 'uuid/v5';
+import { v5 as uuidv5 } from 'uuid';
 
 import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -31,10 +31,8 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
-import type {
-  TimestampOverride,
-  Privilege,
-} from '../../../../common/detection_engine/schemas/common';
+import type { TimestampOverride } from '../../../../common/detection_engine/rule_schema';
+import type { Privilege } from '../../../../common/detection_engine/schemas/common';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
 import type {
   BulkResponseErrorAggregation,
@@ -57,7 +55,7 @@ import type {
   RuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
-} from '../schemas/rule_schemas';
+} from '../rule_schema';
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -384,14 +382,15 @@ export const errorAggregator = (
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
     if (item.create?.error != null && !ignoreStatusCodes.includes(item.create.status)) {
-      if (accum[item.create.error.reason] == null) {
-        accum[item.create.error.reason] = {
+      const reason = item.create.error.reason ?? 'unknown';
+      if (accum[reason] == null) {
+        accum[reason] = {
           count: 1,
           statusCode: item.create.status,
         };
       } else {
-        accum[item.create.error.reason] = {
-          count: accum[item.create.error.reason].count + 1,
+        accum[reason] = {
+          count: accum[reason].count + 1,
           statusCode: item.create.status,
         };
       }
@@ -649,6 +648,7 @@ export const createSearchAfterReturnType = ({
   success,
   warning,
   searchAfterTimes,
+  enrichmentTimes,
   bulkCreateTimes,
   lastLookBackDate,
   createdSignalsCount,
@@ -659,6 +659,7 @@ export const createSearchAfterReturnType = ({
   success?: boolean | undefined;
   warning?: boolean;
   searchAfterTimes?: string[] | undefined;
+  enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
@@ -670,6 +671,7 @@ export const createSearchAfterReturnType = ({
     success: success ?? true,
     warning: warning ?? false,
     searchAfterTimes: searchAfterTimes ?? [],
+    enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
     createdSignalsCount: createdSignalsCount ?? 0,
@@ -715,6 +717,7 @@ export const addToSearchAfterReturn = ({
   current.createdSignalsCount += next.createdItemsCount;
   current.createdSignals.push(...next.createdItems);
   current.bulkCreateTimes.push(next.bulkCreateDuration);
+  current.enrichmentTimes.push(next.enrichmentDuration);
   current.errors = [...new Set([...current.errors, ...next.errors])];
 };
 
@@ -727,6 +730,7 @@ export const mergeReturns = (
       warning: existingWarning,
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
+      enrichmentTimes: existingEnrichmentTimes,
       lastLookBackDate: existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
@@ -738,6 +742,7 @@ export const mergeReturns = (
       success: newSuccess,
       warning: newWarning,
       searchAfterTimes: newSearchAfterTimes,
+      enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
       createdSignalsCount: newCreatedSignalsCount,
@@ -750,6 +755,7 @@ export const mergeReturns = (
       success: existingSuccess && newSuccess,
       warning: existingWarning || newWarning,
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
+      enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
@@ -969,5 +975,16 @@ export const getField = (event: SimpleHit, field: string): SearchTypes | undefin
     return get(event._source, mappedField) as SearchTypes | undefined;
   } else if (isWrappedEventHit(event)) {
     return get(event._source, field) as SearchTypes | undefined;
+  }
+};
+
+export const getUnprocessedExceptionsWarnings = (
+  unprocessedExceptions: ExceptionListItemSchema[]
+): string | undefined => {
+  if (unprocessedExceptions.length > 0) {
+    const exceptionNames = unprocessedExceptions.map((exception) => exception.name);
+    return `The following exceptions won't be applied to rule execution: ${exceptionNames.join(
+      ', '
+    )}`;
   }
 };

@@ -33,6 +33,7 @@ value:
           "full_name": null,
           "username": "elastic"
         },
+        "assignees": [],
         "connector": {
           "id": "none",
           "name": "none",

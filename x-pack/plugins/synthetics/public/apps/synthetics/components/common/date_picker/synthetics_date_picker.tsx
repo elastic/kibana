@@ -21,7 +21,7 @@ const isSyntheticsDefaultDateRange = (dateRangeStart: string, dateRangeEnd: stri
   return dateRangeStart === DATE_RANGE_START && dateRangeEnd === DATE_RANGE_END;
 };
 
-export const SyntheticsDatePicker = () => {
+export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => {
   const [getUrlParams, updateUrl] = useUrlParams();
   const { commonlyUsedRanges } = useContext(SyntheticsSettingsContext);
   const { refreshApp } = useContext(SyntheticsRefreshContext);
@@ -66,6 +66,7 @@ export const SyntheticsDatePicker = () => {
 
   return (
     <EuiSuperDatePicker
+      width={fullWidth ? 'full' : 'auto'}
       start={start}
       end={end}
       commonlyUsedRanges={euiCommonlyUsedRanges}

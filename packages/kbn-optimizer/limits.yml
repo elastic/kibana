@@ -1,137 +1,152 @@
 pageLoadAssetSize:
-  advancedSettings: 27596
   actions: 20000
+  advancedSettings: 27596
   aiops: 10000
   alerting: 106936
   apm: 64385
+  banners: 17946
+  bfetch: 22837
   canvas: 1066647
+  cases: 144442
   charts: 55000
   cloud: 21076
+  cloudChat: 19894
+  cloudDataMigration: 19170
+  cloudDefend: 18697
+  cloudExperiments: 59358
+  cloudFullStory: 18493
+  cloudGainsight: 18710
+  cloudLinks: 17629
+  cloudSecurityPosture: 19109
   console: 46091
+  controls: 40000
   core: 435325
   crossClusterReplication: 65408
+  customBranding: 16693
+  customIntegrations: 22034
   dashboard: 82025
   dashboardEnhanced: 65646
+  data: 454087
+  dataViewEditor: 12000
+  dataViewFieldEditor: 27000
+  dataViewManagement: 5000
+  dataViews: 47000
+  dataVisualizer: 27530
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
+  embeddable: 87309
+  embeddableEnhanced: 22107
   enterpriseSearch: 35741
   esUiShared: 326654
+  eventAnnotation: 20500
+  expressionError: 22127
+  expressionGauge: 25000
+  expressionHeatmap: 27505
+  expressionImage: 19288
+  expressionLegacyMetricVis: 23121
+  expressionMetric: 22238
+  expressionMetricVis: 23121
+  expressionPartitionVis: 26338
+  expressionRepeatImage: 22341
+  expressionRevealImage: 25675
+  expressions: 140958
+  expressionShape: 34008
+  expressionTagcloud: 27505
+  expressionXY: 38500
   features: 21723
+  fieldFormats: 65209
+  files: 22673
+  filesManagement: 18683
+  fileUpload: 25664
+  fleet: 126917
   globalSearch: 29696
   globalSearchBar: 50403
   globalSearchProviders: 25554
   graph: 31504
   grokdebugger: 26779
+  guidedOnboarding: 42965
   home: 30182
+  imageEmbeddable: 12500
   indexLifecycleManagement: 107090
   indexManagement: 140608
   infra: 184320
-  fleet: 126917
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
+  interactiveSetup: 80000
   kibanaOverview: 56279
-  lens: 36000
+  kibanaReact: 74422
+  kibanaUsageCollection: 16463
+  kibanaUtils: 79713
+  kubernetesSecurity: 77234
+  lens: 37000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
   logstash: 53548
   management: 46112
   maps: 90000
+  mapsEms: 26072
   ml: 82187
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
   observability: 95000
+  osquery: 107090
   painlessLab: 179748
+  presentationUtil: 58834
+  profiling: 18628
   remoteClusters: 51327
+  reporting: 57003
   rollup: 97204
+  runtimeFields: 41752
   savedObjects: 108518
+  savedObjectsFinder: 21691
   savedObjectsManagement: 101836
   savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
+  savedSearch: 16225
+  screenshotMode: 17856
+  screenshotting: 22870
   searchprofiler: 67080
   security: 65433
+  securitySolution: 66738
+  sessionView: 77750
+  share: 71239
   snapshotRestore: 79032
   spaces: 57868
+  stackAlerts: 58316
+  stackConnectors: 36314
+  synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586
+  threatIntelligence: 44299
+  timelines: 327300
   transform: 41007
-  triggersActionsUi: 119000
+  triggersActionsUi: 120000
+  uiActions: 35121
+  uiActionsEnhanced: 38494
+  unifiedFieldList: 65500
+  unifiedHistogram: 19928
+  unifiedSearch: 71059
   upgradeAssistant: 81241
+  urlDrilldown: 30063
   urlForwarding: 32579
   usageCollection: 39762
+  ux: 20784
   visDefaultEditor: 50178
+  visTypeGauge: 24113
+  visTypeHeatmap: 25340
   visTypeMarkdown: 30896
+  visTypeMetric: 23332
+  visTypePie: 35583
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
   visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 30000
+  visTypeXy: 46868
   visualizations: 90000
   watcher: 43598
-  runtimeFields: 41752
-  stackAlerts: 29684
-  presentationUtil: 58834
-  osquery: 107090
-  fileUpload: 25664
-  dataVisualizer: 27530
-  banners: 17946
-  mapsEms: 26072
-  timelines: 327300
-  screenshotMode: 17856
-  visTypePie: 35583
-  expressionRevealImage: 25675
-  cases: 144442
-  expressionError: 22127
-  expressionRepeatImage: 22341
-  expressionImage: 19288
-  expressionMetric: 22238
-  expressionShape: 34008
-  interactiveSetup: 80000
-  expressionTagcloud: 27505
-  securitySolution: 273763
-  customIntegrations: 28810
-  expressionMetricVis: 23121
-  expressionLegacyMetricVis: 23121
-  expressionHeatmap: 27505
-  visTypeMetric: 23332
-  bfetch: 22837
-  kibanaUtils: 79713
-  dataViews: 44532
-  expressions: 140958
-  fieldFormats: 65209
-  kibanaReact: 74422
-  share: 71239
-  uiActions: 35121
-  embeddable: 87309
-  embeddableEnhanced: 22107
-  uiActionsEnhanced: 38494
-  urlDrilldown: 30063
-  dataViewEditor: 12000
-  dataViewFieldEditor: 27000
-  dataViewManagement: 5000
-  reporting: 57003
-  visTypeHeatmap: 25340
-  expressionGauge: 25000
-  controls: 40000
-  expressionPartitionVis: 26338
-  savedSearch: 16225
-  ux: 20784
-  sessionView: 77750
-  cloudSecurityPosture: 19109
-  visTypeGauge: 24113
-  unifiedSearch: 71059
-  unifiedFieldList: 65500
-  data: 454087
-  eventAnnotation: 19334
-  screenshotting: 22870
-  synthetics: 40958
-  expressionXY: 36000
-  kibanaUsageCollection: 16463
-  kubernetesSecurity: 77234
-  threatIntelligence: 29195
-  files: 22673

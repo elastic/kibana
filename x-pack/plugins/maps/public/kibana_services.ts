@@ -31,7 +31,7 @@ export const getIsCloud = () => isCloudEnabled;
 
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
-export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
+export const getIndexPatternService = () => pluginsStart.data.dataViews;
 export const getAutocompleteService = () => pluginsStart.unifiedSearch.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
 export const getFileUpload = () => pluginsStart.fileUpload;
@@ -59,14 +59,15 @@ export const getCoreI18n = () => coreStart.i18n;
 export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
+export const getUrlForApp = () => coreStart.application.getUrlForApp;
 export const getNavigateToUrl = () => coreStart.application.navigateToUrl;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
 export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
-export const getUsageCollection = () => pluginsStart.usageCollection;
 export const getApplication = () => coreStart.application;
+export const getUsageCollection = () => pluginsStart.usageCollection;
 export const isScreenshotMode = () => {
   return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
 };

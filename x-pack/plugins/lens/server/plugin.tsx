@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   PluginStart as DataPluginStart,
@@ -21,18 +21,19 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { setupRoutes } from './routes';
-import { getUiSettings } from './ui_settings';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
 import type { CustomVisualizationMigrations } from './migrations/types';
+import { LensAppLocatorDefinition } from '../common/locator/locator';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
   embeddable: EmbeddableSetup;
   expressions: ExpressionsServerSetup;
   data: DataPluginSetup;
+  share?: SharePluginSetup;
 }
 
 export interface PluginStartContract {
@@ -59,16 +60,18 @@ export interface LensServerPluginSetup {
 export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {}> {
   private customVisualizationMigrations: CustomVisualizationMigrations = {};
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor() {}
 
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
       plugins.data.query.filterManager
     );
     setupSavedObjects(core, getFilterMigrations, this.customVisualizationMigrations);
-    setupRoutes(core, this.initializerContext.logger.get());
     setupExpressions(core, plugins.expressions);
-    core.uiSettings.register(getUiSettings());
+
+    if (plugins.share) {
+      plugins.share.url.locators.create(new LensAppLocatorDefinition());
+    }
 
     const lensEmbeddableFactory = makeLensEmbeddableFactory(
       getFilterMigrations,

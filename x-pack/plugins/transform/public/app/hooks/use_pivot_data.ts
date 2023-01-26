@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
 
 import { difference } from 'lodash';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';

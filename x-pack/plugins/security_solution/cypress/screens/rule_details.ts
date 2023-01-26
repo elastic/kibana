@@ -22,6 +22,12 @@ export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
 
 export const CUSTOM_QUERY_DETAILS = 'Custom query';
 
+export const SAVED_QUERY_NAME_DETAILS = 'Saved query name';
+
+export const SAVED_QUERY_DETAILS = /^Saved query$/;
+
+export const SAVED_QUERY_FILTERS_DETAILS = 'Saved query filters';
+
 export const DATA_VIEW_DETAILS = 'Data View';
 
 export const DEFINITION_DETAILS =
@@ -31,11 +37,13 @@ export const DETAILS_DESCRIPTION = '.euiDescriptionList__description';
 
 export const DETAILS_TITLE = '.euiDescriptionList__title';
 
-export const EXCEPTIONS_TAB = '[data-test-subj="navigation-rule_exceptions"]';
+export const EXCEPTIONS_TAB = 'a[data-test-subj="navigation-rule_exceptions"]';
 
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
+
+export const ENDPOINT_EXCEPTIONS_TAB = 'a[data-test-subj="navigation-endpoint_exceptions"]';
 
 export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
 
@@ -51,7 +59,7 @@ export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
 export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';
 
-export const MACHINE_LEARNING_JOB_ID = '[data-test-subj="machineLearningJobId"]';
+export const MACHINE_LEARNING_JOB_ID = '[data-test-subj="machineLearningJob"]';
 
 export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj="machineLearningJobStatus"]';
 
@@ -111,4 +119,15 @@ export const TIMELINE_FIELD = (field: string) => {
 export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');
 
-export const BACK_TO_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';
+export const DEFINE_RULE_PANEL_PROGRESS =
+  '[data-test-subj="defineRule"] [data-test-subj="stepPanelProgress"]';
+
+export const EDIT_RULE_SETTINGS_LINK = '[data-test-subj="editRuleSettingsLink"]';
+
+export const THREAT_TACTIC = '[data-test-subj="threatTacticLink"]';
+
+export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
+
+export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';
+
+export const BACK_TO_RULES_TABLE = '[data-test-subj="breadcrumb"][title="Rules"]';

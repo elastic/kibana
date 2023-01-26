@@ -87,12 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('returns correct container details', () => {
-      const { containerOs } = dataConfig;
-
-      expect(body?.container?.isContainerized).to.be(true);
-      expect(body?.container?.os).to.be(containerOs);
       expect(body?.container?.totalNumberInstances).to.be(1);
-      expect(body?.container?.type).to.be('Kubernetes');
     });
 
     it('returns correct serverless details', () => {

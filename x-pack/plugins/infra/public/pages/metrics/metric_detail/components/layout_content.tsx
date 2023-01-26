@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPageContent } from '@elastic/eui';
+import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 export const LayoutContent = euiStyled(EuiPageContent)`

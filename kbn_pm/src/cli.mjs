@@ -18,8 +18,9 @@
 import { Args } from './lib/args.mjs';
 import { getHelp } from './lib/help.mjs';
 import { createFlagError, isCliError } from './lib/cli_error.mjs';
-import { COMMANDS } from './commands/index.mjs';
+import { getCmd } from './commands/index.mjs';
 import { Log } from './lib/log.mjs';
+import External from './lib/external_packages.js';
 
 const start = Date.now();
 const args = new Args(process.argv.slice(2), process.env.CI ? ['--quiet'] : []);
@@ -31,7 +32,7 @@ const cmdName = args.getCommandName();
  */
 async function tryToGetCiStatsReporter(log) {
   try {
-    const { CiStatsReporter } = await import('@kbn/ci-stats-reporter');
+    const { CiStatsReporter } = External['@kbn/ci-stats-reporter']();
     return CiStatsReporter.fromEnv(log);
   } catch {
     return;
@@ -39,7 +40,7 @@ async function tryToGetCiStatsReporter(log) {
 }
 
 try {
-  const cmd = cmdName ? COMMANDS.find((c) => c.name === cmdName) : undefined;
+  const cmd = getCmd(cmdName);
 
   if (cmdName && !cmd) {
     throw createFlagError(`Invalid command name [${cmdName}]`);

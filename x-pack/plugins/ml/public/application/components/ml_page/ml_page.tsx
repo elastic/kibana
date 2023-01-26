@@ -5,22 +5,31 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useMemo, useState } from 'react';
-import { EuiPageContentBody } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import type { AppMountParameters } from '@kbn/core/public';
-import { KibanaPageTemplate, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import React, { createContext, FC, useEffect, useMemo, useState } from 'react';
 import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
-import { MlPageHeaderRenderer } from '../page_header/page_header';
-import { useSideNavItems } from './side_nav';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import { Subscription } from 'rxjs';
+
+import { EuiPageSection } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { type AppMountParameters } from '@kbn/core/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { DatePickerWrapper } from '@kbn/ml-date-picker';
+
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 import { MlRoute, PageDependencies } from '../../routing/router';
-import { DatePickerWrapper } from '../navigation_menu/date_picker_wrapper';
 import { useActiveRoute } from '../../routing/use_active_route';
 import { useDocTitle } from '../../routing/use_doc_title';
+
+import { MlPageHeaderRenderer } from '../page_header/page_header';
+
+import { useSideNavItems } from './side_nav';
+
+const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
 
 export const MlPageControlsContext = createContext<{
   headerPortal: HtmlPortalNode;
@@ -43,27 +52,64 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   const {
     services: {
       http: { basePath },
+      mlServices: { httpService },
     },
   } = useMlKibana();
 
   const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
   const [isHeaderMounted, setIsHeaderMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const subscriptions = new Subscription();
+
+    subscriptions.add(
+      httpService.getLoadingCount$.subscribe((v) => {
+        setIsLoading(v !== 0);
+      })
+    );
+
+    return function cleanup() {
+      subscriptions.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const routeList = useMemo(
     () =>
       Object.values(routes)
         .map((routeFactory) => routeFactory(navigateToPath, basePath.get()))
         .filter((d) => !d.disabled),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
   const activeRoute = useActiveRoute(routeList);
 
   const rightSideItems = useMemo(() => {
-    return [...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])];
-  }, [activeRoute.enableDatePicker]);
+    return [
+      ...(activeRoute.enableDatePicker
+        ? [<DatePickerWrapper isLoading={isLoading} width="full" />]
+        : []),
+    ];
+  }, [activeRoute.enableDatePicker, isLoading]);
 
   useDocTitle(activeRoute);
+
+  // The deprecated `KibanaPageTemplate` from`'@kbn/kibana-react-plugin/public'`
+  // had a `pageBodyProps` prop where we could pass in the `data-test-subj` for
+  // the `main` element. This is no longer available in the update template
+  // imported from `'@kbn/shared-ux-page-kibana-template'`. The following is a
+  // workaround to add the `data-test-subj` on the `main` element again.
+  useEffect(() => {
+    const mlApp = document.querySelector(ML_APP_SELECTOR) as HTMLElement;
+    if (mlApp && typeof activeRoute?.['data-test-subj'] === 'string') {
+      const mlAppMain = mlApp.querySelector('main') as HTMLElement;
+      if (mlAppMain) {
+        mlAppMain.setAttribute('data-test-subj', activeRoute?.['data-test-subj']);
+      }
+    }
+  }, [activeRoute]);
 
   return (
     <MlPageControlsContext.Provider
@@ -78,11 +124,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         className={'ml-app'}
         data-test-subj={'mlApp'}
         restrictWidth={false}
-        // EUI TODO
-        // The different template options need to be manually recreated by the individual pages.
-        // These classes help enforce the layouts.
-        pageContentProps={{ className: 'kbnAppWrapper' }}
-        pageContentBodyProps={{ className: 'kbnAppWrapper' }}
         solutionNav={{
           name: i18n.translate('xpack.ml.plugin.title', {
             defaultMessage: 'Machine Learning',
@@ -94,9 +135,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
           pageTitle: <MlPageHeaderRenderer />,
           rightSideItems,
           restrictWidth: false,
-        }}
-        pageBodyProps={{
-          'data-test-subj': activeRoute?.['data-test-subj'],
         }}
       >
         <CommonPageWrapper
@@ -125,8 +163,8 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
   return (
     /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
      * avoiding full page reload **/
-    <RedirectAppLinks application={application}>
-      <EuiPageContentBody restrictWidth={false}>
+    <RedirectAppLinks coreStart={{ application }}>
+      <EuiPageSection restrictWidth={false}>
         <Switch>
           {routeList.map((route) => {
             return (
@@ -147,7 +185,7 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
           })}
           <Redirect to="/overview" />
         </Switch>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </RedirectAppLinks>
   );
 });

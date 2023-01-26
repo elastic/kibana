@@ -228,17 +228,7 @@ $controlMinWidth: $euiSize * 14;
       opacity: 0;
     }
     .controlFrame__formControlLayout {
-      background-color: tintOrShade($euiColorSuccess, 90%, 70%);
-      color: transparent !important;
-      box-shadow: none;
-
-      .euiFormLabel {
-        opacity: 0;
-      }
-
-      .controlFrame__control {
-        opacity: 0;
-      }
+      opacity: 0; // hide dragged control, while control is dragged its replaced with ControlClone component
     }
   }
 }

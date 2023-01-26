@@ -11,11 +11,13 @@ import { SearchAggregatedTransactionSetting } from '../../../../common/aggregate
 import {
   TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
-} from '../../../../common/elasticsearch_fieldnames';
+  TRANSACTION_ROOT,
+  PARENT_ID,
+} from '../../../../common/es_fields/apm';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
-export async function getHasAggregatedTransactions({
+export async function getHasTransactionsEvents({
   start,
   end,
   apmEventClient,
@@ -33,7 +35,9 @@ export async function getHasAggregatedTransactions({
         events: [ProcessorEvent.metric],
       },
       body: {
-        size: 1,
+        track_total_hits: 1,
+        terminate_after: 1,
+        size: 0,
         query: {
           bool: {
             filter: [
@@ -44,14 +48,13 @@ export async function getHasAggregatedTransactions({
           },
         },
       },
-      terminate_after: 1,
     }
   );
 
   return response.hits.total.value > 0;
 }
 
-export async function getSearchAggregatedTransactions({
+export async function getSearchTransactionsEvents({
   config,
   start,
   end,
@@ -67,11 +70,11 @@ export async function getSearchAggregatedTransactions({
   switch (config.searchAggregatedTransactions) {
     case SearchAggregatedTransactionSetting.always:
       return kuery
-        ? getHasAggregatedTransactions({ start, end, apmEventClient, kuery })
+        ? getHasTransactionsEvents({ start, end, apmEventClient, kuery })
         : true;
 
     case SearchAggregatedTransactionSetting.auto:
-      return getHasAggregatedTransactions({
+      return getHasTransactionsEvents({
         start,
         end,
         apmEventClient,
@@ -105,4 +108,20 @@ export function getProcessorEventForTransactions(
   return searchAggregatedTransactions
     ? ProcessorEvent.metric
     : ProcessorEvent.transaction;
+}
+
+export function isRootTransaction(searchAggregatedTransactions: boolean) {
+  return searchAggregatedTransactions
+    ? {
+        term: {
+          [TRANSACTION_ROOT]: true,
+        },
+      }
+    : {
+        bool: {
+          must_not: {
+            exists: { field: PARENT_ID },
+          },
+        },
+      };
 }

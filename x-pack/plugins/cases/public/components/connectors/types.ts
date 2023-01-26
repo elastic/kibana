@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui';
-import React from 'react';
+import type { IconType } from '@elastic/eui';
+import type React from 'react';
 
-import {
+import type {
   ActionType as ThirdPartySupportedActions,
   CaseField,
   ConnectorTypeFields,
 } from '../../../common/api';
-import { CaseActionConnector } from '../types';
+import type { CaseActionConnector } from '../types';
 
 export type { ThirdPartyField as AllThirdPartyFields } from '../../../common/api';
 

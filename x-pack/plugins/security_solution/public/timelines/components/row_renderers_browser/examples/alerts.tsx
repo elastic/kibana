@@ -26,7 +26,7 @@ const AlertsExampleComponent: React.FC = () => {
       {alertsRowRenderer.renderRow({
         data: demoEndpointProcessExecutionMalwarePreventionAlert,
         isDraggable: false,
-        timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
+        scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>
   );

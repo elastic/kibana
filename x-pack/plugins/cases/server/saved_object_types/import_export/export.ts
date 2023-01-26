@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   Logger,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsExportTransformContext,
 } from '@kbn/core/server';
-import { CaseUserActionAttributes, CommentAttributes } from '../../../common/api';
+import type { CaseUserActionAttributes, CommentAttributes } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -22,7 +22,7 @@ import {
 } from '../../../common/constants';
 import { defaultSortField } from '../../common/utils';
 import { createCaseError } from '../../common/error';
-import { ESCaseAttributes } from '../../services/cases/types';
+import type { ESCaseAttributes } from '../../services/cases/types';
 
 export async function handleExport({
   context,

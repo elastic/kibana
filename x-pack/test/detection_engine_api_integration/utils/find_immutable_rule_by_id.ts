@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
@@ -24,7 +24,7 @@ export const findImmutableRuleById = async (
   page: number;
   perPage: number;
   total: number;
-  data: FullResponseSchema[];
+  data: RuleResponse[];
 }> => {
   const response = await supertest
     .get(

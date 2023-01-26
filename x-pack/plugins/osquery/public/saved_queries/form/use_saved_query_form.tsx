@@ -10,10 +10,7 @@ import { isArray, isEmpty, map } from 'lodash';
 import type { Draft } from 'immer';
 import produce from 'immer';
 import { useMemo } from 'react';
-import type { ECSMapping } from '../../../common/schemas/common';
-import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
-import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
-import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { useSavedQueries } from '../use_saved_queries';
 
 export interface SavedQuerySOFormData {
@@ -21,6 +18,8 @@ export interface SavedQuerySOFormData {
   description?: string;
   query?: string;
   interval?: string;
+  snapshot?: boolean;
+  removed?: boolean;
   platform?: string;
   version?: string | undefined;
   ecs_mapping?: ECSMapping | undefined;
@@ -31,9 +30,11 @@ export interface SavedQueryFormData {
   description?: string;
   query?: string;
   interval?: number;
+  snapshot?: boolean;
+  removed?: boolean;
   platform?: string;
   version?: string[];
-  ecs_mapping: EcsMappingFormField[];
+  ecs_mapping: ECSMapping | undefined;
 }
 
 interface UseSavedQueryFormProps {
@@ -45,17 +46,11 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   description: payload.description,
   query: payload.query,
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+  snapshot: payload.snapshot ?? true,
+  removed: payload.removed ?? false,
   platform: payload.platform,
   version: payload.version ? [payload.version] : [],
-  ecs_mapping: !isEmpty(payload.ecs_mapping)
-    ? (map(payload.ecs_mapping, (value, key: string) => ({
-        key,
-        result: {
-          type: Object.keys(value)[0],
-          value: Object.values(value)[0],
-        },
-      })) as unknown as EcsMappingFormField[])
-    : [defaultEcsFormData],
+  ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
 });
 
 export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuerySOFormData =>
@@ -72,8 +67,6 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
     if (isArray(draft.platform) && !draft.platform.length) {
       delete draft.platform;
     }
-
-    draft.ecs_mapping = convertECSMappingToObject(payload.ecs_mapping);
 
     if (draft.interval) {
       draft.interval = draft.interval + '';
@@ -96,7 +89,15 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
     serializer: savedQueryDataSerializer,
     idSet,
     ...useHookForm<SavedQueryFormData>({
-      defaultValues: defaultValue ? deserializer(defaultValue) : {},
+      defaultValues: defaultValue
+        ? deserializer(defaultValue)
+        : {
+            id: '',
+            query: '',
+            interval: 3600,
+            ecs_mapping: {},
+            snapshot: true,
+          },
     }),
   };
 };

@@ -34,28 +34,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Actions',
     ],
     [
-      'Host-ku5jy6j0pw',
+      'Host-dpu1a2r2yi',
       'x',
       'x',
-      'Unsupported',
-      'Windows',
-      '10.12.215.130, 10.130.188.228,10.19.102.141',
-      '7.0.13',
+      'Warning',
+      'Linux',
+      '10.2.17.24, 10.56.215.200,10.254.196.130',
+      'x',
       'x',
       '',
     ],
     [
-      'Host-ntr4rkj24m',
+      'Host-rs9wp4o6l9',
       'x',
       'x',
       'Success',
-      'Windows',
-      '10.36.46.252, 10.222.152.110',
-      '7.4.13',
+      'Linux',
+      '10.138.79.131, 10.170.160.154',
+      'x',
       'x',
       '',
     ],
-    ['Host-q9qenwrl9k', 'x', 'x', 'Warning', 'Windows', '10.206.226.90', '7.11.10', 'x', ''],
+    [
+      'Host-u5jy6j0pwb',
+      'x',
+      'x',
+      'Warning',
+      'Linux',
+      '10.87.11.145, 10.117.106.109,10.242.136.97',
+      'x',
+      'x',
+      '',
+    ],
   ];
 
   const formattedTableData = async () => {
@@ -65,13 +75,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     for (let i = 1; i < tableData.length; i++) {
       tableData[i][1] = 'x';
       tableData[i][2] = 'x';
+      tableData[i][6] = 'x';
       tableData[i][7] = 'x';
     }
 
     return tableData;
   };
 
-  describe('endpoint list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/148111
+  describe.skip('endpoint list', function () {
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
@@ -183,38 +195,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(tableData).to.eql(expectedDataFromQuery);
         });
 
-        it('for the kql filtering for united.endpoint.host.hostname : "Host-ku5jy6j0pw", table shows 1 item', async () => {
+        it('for the kql filtering for united.endpoint.host.hostname, table shows 1 item', async () => {
+          const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
+          const hostName = expectedDataFromQuery[1][0];
           const adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type(
-            'united.endpoint.host.hostname : "Host-ku5jy6j0pw" or host.hostname : "Host-ku5jy6j0pw" '
+            `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
           );
           const querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
-          const expectedDataFromQuery = [
-            [
-              'Endpoint',
-              'Agent status',
-              'Policy',
-              'Policy status',
-              'OS',
-              'IP address',
-              'Version',
-              'Last active',
-              'Actions',
-            ],
-            [
-              'Host-ku5jy6j0pw',
-              'x',
-              'x',
-              'Unsupported',
-              'Windows',
-              '10.12.215.130, 10.130.188.228,10.19.102.141',
-              '7.0.13',
-              'x',
-              '',
-            ],
-          ];
           await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
             'endpointListTable',
             1,

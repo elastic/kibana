@@ -7,6 +7,7 @@
  */
 
 import * as esKuery from '@kbn/es-query';
+import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 
 type KueryNode = any;
 
@@ -123,11 +124,6 @@ function getClauseForType(
   };
 }
 
-export interface HasReferenceQueryParams {
-  type: string;
-  id: string;
-}
-
 export type SearchOperator = 'AND' | 'OR';
 
 interface QueryParams {
@@ -139,14 +135,23 @@ interface QueryParams {
   defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
   rootSearchFields?: string[];
-  hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
+  hasReference?: SavedObjectTypeIdTuple | SavedObjectTypeIdTuple[];
   hasReferenceOperator?: SearchOperator;
+  hasNoReference?: SavedObjectTypeIdTuple | SavedObjectTypeIdTuple[];
+  hasNoReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
 }
 
 // A de-duplicated set of namespaces makes for a more efficient query.
 const uniqNamespaces = (namespacesToNormalize?: string[]) =>
   namespacesToNormalize ? Array.from(new Set(namespacesToNormalize)) : undefined;
+
+const toArray = (val: unknown) => {
+  if (typeof val === 'undefined') {
+    return val;
+  }
+  return !Array.isArray(val) ? [val] : val;
+};
 
 /**
  *  Get the "query" related keys for the search body
@@ -162,6 +167,8 @@ export function getQueryParams({
   defaultSearchOperator,
   hasReference,
   hasReferenceOperator,
+  hasNoReference,
+  hasNoReferenceOperator,
   kueryNode,
 }: QueryParams) {
   const types = getTypes(
@@ -169,9 +176,8 @@ export function getQueryParams({
     typeToNamespacesMap ? Array.from(typeToNamespacesMap.keys()) : type
   );
 
-  if (hasReference && !Array.isArray(hasReference)) {
-    hasReference = [hasReference];
-  }
+  hasReference = toArray(hasReference);
+  hasNoReference = toArray(hasNoReference);
 
   const bool: any = {
     filter: [
@@ -181,6 +187,15 @@ export function getQueryParams({
             getReferencesFilter({
               references: hasReference,
               operator: hasReferenceOperator,
+            }),
+          ]
+        : []),
+      ...(hasNoReference?.length
+        ? [
+            getReferencesFilter({
+              references: hasNoReference,
+              operator: hasNoReferenceOperator,
+              must: false,
             }),
           ]
         : []),

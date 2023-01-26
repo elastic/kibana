@@ -29,7 +29,7 @@ module.exports = (_, argv) => {
     externals: {
       module: 'module',
     },
-    mode: 'production',
+    mode: process.env.NODE_ENV || 'development',
     entry: {
       'kbn-ui-shared-deps-npm': [
         // polyfill code
@@ -81,7 +81,10 @@ module.exports = (_, argv) => {
         '@elastic/eui/dist/eui_theme_light.json',
         '@elastic/eui/dist/eui_theme_dark.json',
         '@elastic/numeral',
+        '@emotion/cache',
         '@emotion/react',
+        '@tanstack/react-query',
+        '@tanstack/react-query-devtools',
         'classnames',
         'fflate',
         'history',
@@ -98,11 +101,11 @@ module.exports = (_, argv) => {
         'react-router-dom',
         'react-router',
         'react',
-        'rison-node',
         'rxjs',
         'rxjs/operators',
         'styled-components',
         'tslib',
+        'uuid',
       ],
       'kbn-ui-shared-deps-npm.v8.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
       'kbn-ui-shared-deps-npm.v8.light': ['@elastic/eui/dist/eui_theme_light.css'],

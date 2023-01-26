@@ -21,6 +21,7 @@ import {
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { sort_field } from '../../common/sort_field';
 import { sort_order } from '../../common/sort_order';
+import { search } from '../../common/search';
 
 export const findExceptionListItemSchema = t.intersection([
   t.exact(
@@ -34,6 +35,7 @@ export const findExceptionListItemSchema = t.intersection([
       namespace_type: DefaultNamespaceArray, // defaults to ['single'] if not set during decode
       page: StringToPositiveNumber, // defaults to undefined if not set during decode
       per_page: StringToPositiveNumber, // defaults to undefined if not set during decode
+      search,
       sort_field, // defaults to undefined if not set during decode
       sort_order, // defaults to undefined if not set during decode
     })

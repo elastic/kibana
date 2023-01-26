@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-chrome-browser-mocks",
+  "owner": "@elastic/kibana-core"
+}

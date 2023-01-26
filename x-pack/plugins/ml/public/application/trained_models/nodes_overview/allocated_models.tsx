@@ -5,8 +5,17 @@
  * 2.0.
  */
 import React, { FC } from 'react';
-import { EuiBadge, EuiIcon, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiInMemoryTable,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type {
@@ -27,6 +36,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
   const durationFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DURATION);
+  const euiTheme = useEuiTheme();
 
   const columns: Array<EuiBasicTableColumn<AllocatedModel>> = [
     {
@@ -97,11 +107,36 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       'data-test-subj': 'mlAllocatedModelsTableThroughput',
     },
     {
-      name: i18n.translate(
-        'xpack.ml.trainedModels.nodesList.modelsList.modelAvgInferenceTimeHeader',
-        {
-          defaultMessage: 'Avg inference time',
-        }
+      name: (
+        <EuiToolTip
+          display={'block'}
+          title={
+            <FormattedMessage
+              id="xpack.ml.trainedModels.nodesList.modelsList.modelAvgInferenceTimeTooltipHeader"
+              defaultMessage="Average inference time"
+            />
+          }
+          content={
+            <FormattedMessage
+              id="xpack.ml.trainedModels.nodesList.modelsList.modelAvgInferenceTimeTooltipMessage"
+              defaultMessage="If caching is enabled, fast cache hits are included when calculating the average inference time."
+            />
+          }
+        >
+          <EuiFlexGroup gutterSize={'xs'}>
+            <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+              <span css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.nodesList.modelsList.modelAvgInferenceTimeHeader"
+                  defaultMessage="Avg inference time"
+                />
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} css={{ minWidth: euiTheme.euiTheme.size.m }}>
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiToolTip>
       ),
       width: '100px',
       truncateText: false,
@@ -190,6 +225,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       })}
       onTableChange={() => {}}
       data-test-subj={'mlNodesAllocatedModels'}
+      css={{ overflow: 'auto' }}
     />
   );
 };

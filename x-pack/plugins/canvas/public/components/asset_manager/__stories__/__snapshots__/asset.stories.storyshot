@@ -62,13 +62,14 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero asset-create-image"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Create image element"
-              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -90,7 +91,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero asset-download"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -103,7 +104,8 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
             >
               <button
                 aria-label="Download"
-                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                disabled={false}
                 type="button"
               >
                 <span
@@ -123,7 +125,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -136,7 +138,8 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
             >
               <button
                 aria-label="Copy id to clipboard"
-                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                disabled={false}
                 type="button"
               >
                 <span
@@ -156,13 +159,14 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Delete"
-              className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-danger-hoverStyles"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -248,13 +252,14 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero asset-create-image"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Create image element"
-              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -276,7 +281,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero asset-download"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -289,7 +294,8 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
             >
               <button
                 aria-label="Download"
-                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                disabled={false}
                 type="button"
               >
                 <span
@@ -309,7 +315,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
@@ -322,7 +328,8 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
             >
               <button
                 aria-label="Copy id to clipboard"
-                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                disabled={false}
                 type="button"
               >
                 <span
@@ -342,13 +349,14 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Delete"
-              className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-danger-hoverStyles"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}

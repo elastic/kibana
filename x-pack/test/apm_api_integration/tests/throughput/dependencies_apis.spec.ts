@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { DependencyNode, ServiceNode } from '@kbn/apm-plugin/common/connections';
@@ -99,10 +99,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const JAVA_PROD_RATE = 25;
       before(async () => {
         const serviceGoProdInstance = apm
-          .service('synth-go', 'production', 'go')
+          .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
           .instance('instance-a');
         const serviceJavaInstance = apm
-          .service('synth-java', 'development', 'java')
+          .service({ name: 'synth-java', environment: 'development', agentName: 'java' })
           .instance('instance-c');
 
         await synthtraceEsClient.index([
@@ -111,22 +111,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction('GET /api/product/list')
+                .transaction({ transactionName: 'GET /api/product/list' })
                 .duration(1000)
                 .timestamp(timestamp)
                 .children(
                   serviceGoProdInstance
-                    .span('GET apm-*/_search', 'db', 'elasticsearch')
+                    .span({
+                      spanName: 'GET apm-*/_search',
+                      spanType: 'db',
+                      spanSubtype: 'elasticsearch',
+                    })
                     .duration(1000)
                     .success()
                     .destination('elasticsearch')
                     .timestamp(timestamp),
                   serviceGoProdInstance
-                    .span('custom_operation', 'app')
+                    .span({ spanName: 'custom_operation', spanType: 'app' })
                     .duration(550)
                     .children(
                       serviceGoProdInstance
-                        .span('SELECT FROM products', 'db', 'postgresql')
+                        .span({
+                          spanName: 'SELECT FROM products',
+                          spanType: 'db',
+                          spanSubtype: 'postgresql',
+                        })
                         .duration(500)
                         .success()
                         .destination('postgresql')
@@ -141,18 +149,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(JAVA_PROD_RATE)
             .generator((timestamp) =>
               serviceJavaInstance
-                .transaction('POST /api/product/buy')
+                .transaction({ transactionName: 'POST /api/product/buy' })
                 .duration(1000)
                 .timestamp(timestamp)
                 .children(
                   serviceJavaInstance
-                    .span('GET apm-*/_search', 'db', 'elasticsearch')
+                    .span({
+                      spanName: 'GET apm-*/_search',
+                      spanType: 'db',
+                      spanSubtype: 'elasticsearch',
+                    })
                     .duration(1000)
                     .success()
                     .destination('elasticsearch')
                     .timestamp(timestamp),
                   serviceJavaInstance
-                    .span('custom_operation', 'app')
+                    .span({ spanName: 'custom_operation', spanType: 'app' })
                     .duration(50)
                     .success()
                     .timestamp(timestamp)

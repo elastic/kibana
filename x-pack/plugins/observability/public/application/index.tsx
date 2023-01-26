@@ -19,11 +19,10 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
-import { DatePickerContextProvider } from '../context/date_picker_context';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { PluginContext } from '../context/plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
-import { ObservabilityPublicPluginsStart } from '../plugin';
+import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 
@@ -47,6 +46,7 @@ function App() {
 
 export const renderApp = ({
   core,
+  config,
   plugins,
   appMountParameters,
   observabilityRuleTypeRegistry,
@@ -55,6 +55,7 @@ export const renderApp = ({
   isDev,
 }: {
   core: CoreStart;
+  config: ConfigSchema;
   plugins: ObservabilityPublicPluginsStart;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
@@ -86,6 +87,7 @@ export const renderApp = ({
         >
           <PluginContext.Provider
             value={{
+              config,
               appMountParameters,
               observabilityRuleTypeRegistry,
               ObservabilityPageTemplate,
@@ -95,11 +97,9 @@ export const renderApp = ({
               <EuiThemeProvider darkMode={isDarkMode}>
                 <i18nCore.Context>
                   <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                    <DatePickerContextProvider>
-                      <HasDataContextProvider>
-                        <App />
-                      </HasDataContextProvider>
-                    </DatePickerContextProvider>
+                    <HasDataContextProvider>
+                      <App />
+                    </HasDataContextProvider>
                   </RedirectAppLinks>
                 </i18nCore.Context>
               </EuiThemeProvider>

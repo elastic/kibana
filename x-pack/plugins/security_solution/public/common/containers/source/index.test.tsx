@@ -24,6 +24,7 @@ jest.mock('react-redux', () => {
   };
 });
 jest.mock('../../lib/kibana');
+jest.mock('../../lib/apm/use_track_http_request');
 
 describe('source/index.tsx', () => {
   describe('getAllBrowserFields', () => {

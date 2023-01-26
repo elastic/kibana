@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiIcon, EuiText } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { ALERT_UPSELL } from './translations';
+import { INSIGHTS_UPSELL } from './translations';
+import { useNavigation } from '../../../lib/kibana';
 
 const UpsellContainer = euiStyled.div`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
@@ -22,6 +23,15 @@ const StyledIcon = euiStyled(EuiIcon)`
 `;
 
 export const RelatedAlertsUpsell = React.memo(() => {
+  const { getAppUrl, navigateTo } = useNavigation();
+  const subscriptionUrl = getAppUrl({
+    appId: 'management',
+    path: 'stack/license_management',
+  });
+  const goToSubscription = useCallback(() => {
+    navigateTo({ url: subscriptionUrl });
+  }, [navigateTo, subscriptionUrl]);
+
   return (
     <UpsellContainer>
       <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -30,13 +40,8 @@ export const RelatedAlertsUpsell = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
-            <EuiLink
-              color="subdued"
-              href="https://www.elastic.co/pricing/"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              {ALERT_UPSELL}
+            <EuiLink color="subdued" onClick={goToSubscription} target="_blank">
+              {INSIGHTS_UPSELL}
             </EuiLink>
           </EuiText>
         </EuiFlexItem>

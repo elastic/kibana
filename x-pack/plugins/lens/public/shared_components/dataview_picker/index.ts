@@ -6,4 +6,4 @@
  */
 
 export { ChangeIndexPattern } from './dataview_picker';
-export { fieldExists, fieldContainsData } from './helpers';
+export { fieldContainsData } from './helpers';

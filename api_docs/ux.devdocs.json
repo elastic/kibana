@@ -19,6 +19,7 @@
       ],
       "path": "x-pack/plugins/ux/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }

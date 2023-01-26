@@ -15,7 +15,7 @@ import { createSeverityUserActionBuilder } from './severity';
 import { createStatusUserActionBuilder } from './status';
 import { createTagsUserActionBuilder } from './tags';
 import { createTitleUserActionBuilder } from './title';
-import { UserActionBuilderMap } from './types';
+import type { UserActionBuilderMap } from './types';
 
 export const builderMap: UserActionBuilderMap = {
   connector: createConnectorUserActionBuilder,

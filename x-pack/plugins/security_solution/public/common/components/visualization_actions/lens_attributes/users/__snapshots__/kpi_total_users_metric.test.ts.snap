@@ -1,0 +1,114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kpiTotalUsersMetricLensAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "416b6fad-1923-4f6a-a2df-b223bb287e30": Object {
+            "columnOrder": Array [
+              "3e51b035-872c-4b44-824b-fe069c222e91",
+            ],
+            "columns": Object {
+              "3e51b035-872c-4b44-824b-fe069c222e91": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": " ",
+                "operationType": "unique_count",
+                "scale": "ratio",
+                "sourceField": "user.name",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "user.name",
+          "negate": false,
+          "params": Object {
+            "query": "elastic",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "user.name": "elastic",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "accessor": "3e51b035-872c-4b44-824b-fe069c222e91",
+      "layerId": "416b6fad-1923-4f6a-a2df-b223bb287e30",
+      "layerType": "data",
+    },
+  },
+  "title": "[User] Users - metric",
+  "visualizationType": "lnsLegacyMetric",
+}
+`;

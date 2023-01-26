@@ -11,8 +11,6 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { calculateAggRoot } from './calculate_agg_root';
 
 import type { TableRequestProcessorsFunction } from './types';
-
-// @ts-expect-error not typed yet
 import { createPositiveRate, filter } from '../series/positive_rate';
 
 export const positiveRate: TableRequestProcessorsFunction =

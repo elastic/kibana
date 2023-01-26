@@ -7,8 +7,8 @@
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { SecuritySubPlugin } from '../app/types';
-import { DETECTIONS_TIMELINE_IDS } from '../detections';
-import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
+import { DETECTIONS_TABLE_IDS } from '../detections';
+import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
 import { routes } from './routes';
 
 export class Rules {
@@ -16,8 +16,8 @@ export class Rules {
 
   public start(storage: Storage): SecuritySubPlugin {
     return {
-      storageTimelines: {
-        timelineById: getTimelinesInStorageByIds(storage, DETECTIONS_TIMELINE_IDS),
+      storageDataTables: {
+        tableById: getDataTablesInStorageByIds(storage, DETECTIONS_TABLE_IDS),
       },
       routes,
     };

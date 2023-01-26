@@ -27,7 +27,7 @@ put:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/update_package_policy.yaml
+          $ref: ../components/schemas/package_policy_request.yaml
   responses:
     '200':
       description: OK

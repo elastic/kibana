@@ -34,13 +34,20 @@
             "text": "StorybookMock"
           },
           " extends ",
-          "AbstractStorybookMock",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
           "<",
           "RedirectAppLinksProps",
           ", {}, {}, {}>"
         ],
         "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
@@ -51,6 +58,7 @@
             "description": [],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -62,6 +70,7 @@
             "description": [],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -75,7 +84,8 @@
               "never[]"
             ],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
@@ -91,6 +101,7 @@
             ],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -108,6 +119,7 @@
             ],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -129,6 +141,7 @@
         ],
         "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
@@ -142,6 +155,7 @@
             ],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -163,6 +177,7 @@
         ],
         "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
@@ -176,6 +191,7 @@
             ],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],

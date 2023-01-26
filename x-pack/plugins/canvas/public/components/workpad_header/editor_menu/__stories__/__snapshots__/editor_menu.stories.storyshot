@@ -9,22 +9,17 @@ exports[`Storyshots components/WorkpadHeader/EditorMenu dark mode 1`] = `
     className="euiPopover__anchor css-16vtueo-render"
   >
     <button
-      className="euiButton euiButton--text solutionToolbarButton undefined"
+      className="solutionToolbarButton undefined emotion-euiButtonDisplay-m-m-base-text"
       data-test-subj="canvasEditorMenuButton"
       disabled={false}
       onClick={[Function]}
-      style={
-        Object {
-          "minWidth": undefined,
-        }
-      }
       type="button"
     >
       <span
-        className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+        className="emotion-euiButtonDisplayContent-right"
       >
         <span
-          className="euiButtonContent__icon"
+          className="emotion-euiButtonDisplayContent__icon-m"
           color="inherit"
           data-euiicon-type="arrowDown"
           size="m"
@@ -32,7 +27,7 @@ exports[`Storyshots components/WorkpadHeader/EditorMenu dark mode 1`] = `
           
         </span>
         <span
-          className="euiButton__text"
+          className="eui-textTruncate"
         >
           Select type
         </span>
@@ -51,22 +46,17 @@ exports[`Storyshots components/WorkpadHeader/EditorMenu default 1`] = `
     className="euiPopover__anchor css-16vtueo-render"
   >
     <button
-      className="euiButton euiButton--text solutionToolbarButton undefined"
+      className="solutionToolbarButton undefined emotion-euiButtonDisplay-m-m-base-text"
       data-test-subj="canvasEditorMenuButton"
       disabled={false}
       onClick={[Function]}
-      style={
-        Object {
-          "minWidth": undefined,
-        }
-      }
       type="button"
     >
       <span
-        className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+        className="emotion-euiButtonDisplayContent-right"
       >
         <span
-          className="euiButtonContent__icon"
+          className="emotion-euiButtonDisplayContent__icon-m"
           color="inherit"
           data-euiicon-type="arrowDown"
           size="m"
@@ -74,7 +64,7 @@ exports[`Storyshots components/WorkpadHeader/EditorMenu default 1`] = `
           
         </span>
         <span
-          className="euiButton__text"
+          className="eui-textTruncate"
         >
           Select type
         </span>

@@ -9,14 +9,14 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
     class="euiPopover__anchor css-16vtueo-render"
   >
     <button
-      class="euiButton euiButton--primary euiButton--fill"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
       type="button"
     >
       <span
-        class="euiButtonContent euiButton__content"
+        class="emotion-euiButtonDisplayContent"
       >
         <span
-          class="euiButton__text"
+          class="eui-textTruncate"
         >
           test
         </span>

@@ -121,4 +121,25 @@ describe('FieldsBrowser', () => {
     const result = renderComponent({ isEventViewer, width: FIELD_BROWSER_WIDTH });
     expect(result.getByTestId('show-field-browser')).toBeInTheDocument();
   });
+
+  describe('options.preselectedCategoryIds', () => {
+    it("should render fields list narrowed to preselected category id's", async () => {
+      const agentFieldsCount = Object.keys(mockBrowserFields.agent?.fields || {}).length;
+
+      // Narrowing the selection to 'agent' only
+      const result = renderComponent({ options: { preselectedCategoryIds: ['agent'] } });
+
+      result.getByTestId('show-field-browser').click();
+
+      // Wait for the modal to open
+      await waitFor(() => {
+        expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
+      });
+
+      // Check if there are only 4 fields in the table
+      expect(result.queryByTestId('field-table')?.querySelectorAll('tbody tr')).toHaveLength(
+        agentFieldsCount
+      );
+    });
+  });
 });

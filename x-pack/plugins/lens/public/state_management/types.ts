@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
-import { SavedQuery } from '@kbn/data-plugin/public';
-import { Document } from '../persistence';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
+import type { Filter, Query } from '@kbn/es-query';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import type { MainHistoryLocationState } from '../../common/locator/locator';
+import type { Document } from '../persistence';
 
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
-import { DateRange } from '../../common';
-import { LensAppServices } from '../app_plugin/types';
-import {
+import type { DateRange } from '../../common';
+import type { LensAppServices } from '../app_plugin/types';
+import type {
   DatasourceMap,
   VisualizationMap,
   SharingSavedObjectProps,
@@ -30,10 +31,6 @@ export interface VisualizationState {
 export interface DataViewsState {
   indexPatternRefs: IndexPatternRef[];
   indexPatterns: Record<string, IndexPattern>;
-  existingFields: Record<string, Record<string, boolean>>;
-  isFirstExistenceFetch: boolean;
-  existenceFetchFailed?: boolean;
-  existenceFetchTimeout?: boolean;
 }
 
 export type DatasourceStates = Record<string, { isLoading: boolean; state: unknown }>;
@@ -41,6 +38,7 @@ export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;
   activeData?: TableInspectorAdapter;
+  requestWarnings?: string[];
 }
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;
@@ -82,5 +80,6 @@ export interface LensStoreDeps {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  initialStateFromLocator?: MainHistoryLocationState['payload'];
   embeddableEditorIncomingState?: EmbeddableEditorState;
 }

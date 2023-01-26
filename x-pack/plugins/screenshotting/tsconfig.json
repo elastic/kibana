@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -12,10 +9,20 @@
     "server/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/expressions/tsconfig.json" },
-    { "path": "../../../src/plugins/screenshot_mode/tsconfig.json" },
-    { "path": "../cloud/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    { "path": "../../../src/setup_node_env/tsconfig.json" },
+    "@kbn/expressions-plugin",
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/std",
+    "@kbn/i18n",
+    "@kbn/utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

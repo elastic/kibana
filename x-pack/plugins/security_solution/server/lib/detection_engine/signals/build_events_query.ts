@@ -5,14 +5,13 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { isEmpty } from 'lodash';
+import type { Filter } from '@kbn/es-query';
 import type {
-  FiltersOrUndefined,
-  TimestampOverrideOrUndefined,
+  RuleFilterArray,
   TimestampOverride,
-} from '../../../../common/detection_engine/schemas/common/schemas';
-import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
+} from '../../../../common/detection_engine/rule_schema';
+import { getQueryFilter } from './get_query_filter';
 
 interface BuildEventsSearchQuery {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
@@ -25,8 +24,9 @@ interface BuildEventsSearchQuery {
   sortOrder?: estypes.SortOrder;
   searchAfterSortIds: estypes.SortResults | undefined;
   primaryTimestamp: TimestampOverride;
-  secondaryTimestamp: TimestampOverrideOrUndefined;
+  secondaryTimestamp: TimestampOverride | undefined;
   trackTotalHits?: boolean;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
 }
 
 interface BuildEqlSearchRequestParams {
@@ -35,17 +35,17 @@ interface BuildEqlSearchRequestParams {
   from: string;
   to: string;
   size: number;
-  filters: FiltersOrUndefined;
+  filters: RuleFilterArray | undefined;
   primaryTimestamp: TimestampOverride;
-  secondaryTimestamp: TimestampOverrideOrUndefined;
-  exceptionLists: ExceptionListItemSchema[];
+  secondaryTimestamp: TimestampOverride | undefined;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   eventCategoryOverride?: string;
   timestampField?: string;
   tiebreakerField?: string;
+  exceptionFilter: Filter | undefined;
 }
 
-const buildTimeRangeFilter = ({
+export const buildTimeRangeFilter = ({
   to,
   from,
   primaryTimestamp,
@@ -54,7 +54,7 @@ const buildTimeRangeFilter = ({
   to: string;
   from: string;
   primaryTimestamp: TimestampOverride;
-  secondaryTimestamp: TimestampOverrideOrUndefined;
+  secondaryTimestamp: TimestampOverride | undefined;
 }): estypes.QueryDslQueryContainer => {
   // The primaryTimestamp is always provided and will contain either the timestamp override field or `@timestamp` otherwise.
   // The secondaryTimestamp is `undefined` if
@@ -131,6 +131,7 @@ export const buildEventsSearchQuery = ({
   primaryTimestamp,
   secondaryTimestamp,
   trackTotalHits,
+  additionalFilters,
 }: BuildEventsSearchQuery) => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
@@ -147,7 +148,11 @@ export const buildEventsSearchQuery = ({
     secondaryTimestamp,
   });
 
-  const filterWithTime: estypes.QueryDslQueryContainer[] = [filter, rangeFilter];
+  const filterWithTime: estypes.QueryDslQueryContainer[] = [
+    filter,
+    rangeFilter,
+    ...(additionalFilters ? additionalFilters : []),
+  ];
 
   const sort: estypes.Sort = [];
   sort.push({
@@ -175,12 +180,7 @@ export const buildEventsSearchQuery = ({
     body: {
       query: {
         bool: {
-          filter: [
-            ...filterWithTime,
-            {
-              match_all: {},
-            },
-          ],
+          filter: filterWithTime,
         },
       },
       fields: [
@@ -217,11 +217,11 @@ export const buildEqlSearchRequest = ({
   filters,
   primaryTimestamp,
   secondaryTimestamp,
-  exceptionLists,
   runtimeMappings,
   eventCategoryOverride,
   timestampField,
   tiebreakerField,
+  exceptionFilter,
 }: BuildEqlSearchRequestParams): estypes.EqlSearchRequest => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
@@ -231,7 +231,13 @@ export const buildEqlSearchRequest = ({
     format: 'strict_date_optional_time',
   }));
 
-  const esFilter = getQueryFilter('', 'eql', filters || [], index, exceptionLists);
+  const esFilter = getQueryFilter({
+    query: '',
+    language: 'eql',
+    filters: filters || [],
+    index,
+    exceptionFilter,
+  });
 
   const rangeFilter = buildTimeRangeFilter({
     to,

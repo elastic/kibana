@@ -214,6 +214,7 @@ exports[`Overview renders correctly 1`] = `
   <KibanaPageTemplate
     pageHeader={
       Object {
+        "bottomBorder": true,
         "iconType": "logoKibana",
         "pageTitle": <FormattedMessage
           defaultMessage="Analytics"
@@ -223,7 +224,7 @@ exports[`Overview renders correctly 1`] = `
         "rightSideItems": Array [],
       }
     }
-    template="empty"
+    panelled={false}
   >
     <MockedKibanaPageTemplate />
   </KibanaPageTemplate>
@@ -914,6 +915,7 @@ exports[`Overview renders correctly without features 1`] = `
   <KibanaPageTemplate
     pageHeader={
       Object {
+        "bottomBorder": true,
         "iconType": "logoKibana",
         "pageTitle": <FormattedMessage
           defaultMessage="Analytics"
@@ -923,7 +925,7 @@ exports[`Overview renders correctly without features 1`] = `
         "rightSideItems": Array [],
       }
     }
-    template="empty"
+    panelled={false}
   >
     <MockedKibanaPageTemplate />
   </KibanaPageTemplate>
@@ -1109,6 +1111,7 @@ exports[`Overview renders correctly without solutions 1`] = `
   <KibanaPageTemplate
     pageHeader={
       Object {
+        "bottomBorder": true,
         "iconType": "logoKibana",
         "pageTitle": <FormattedMessage
           defaultMessage="Analytics"
@@ -1118,7 +1121,7 @@ exports[`Overview renders correctly without solutions 1`] = `
         "rightSideItems": Array [],
       }
     }
-    template="empty"
+    panelled={false}
   >
     <MockedKibanaPageTemplate />
   </KibanaPageTemplate>
@@ -1127,10 +1130,10 @@ exports[`Overview renders correctly without solutions 1`] = `
 
 exports[`Overview show loading spinner during loading 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-center-row"
 >
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <span
       aria-label="Loading"

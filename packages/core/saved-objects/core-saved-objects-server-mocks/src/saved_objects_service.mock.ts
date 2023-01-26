@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ServiceStatusLevels } from '@kbn/core-base-common';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
 import type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
@@ -63,7 +63,9 @@ const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObject
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<SavedObjectsServiceSetup> = {
     setClientFactoryProvider: jest.fn(),
-    addClientWrapper: jest.fn(),
+    setEncryptionExtension: jest.fn(),
+    setSecurityExtension: jest.fn(),
+    setSpacesExtension: jest.fn(),
     registerType: jest.fn(),
     getKibanaIndex: jest.fn(),
   };

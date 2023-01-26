@@ -169,6 +169,8 @@ export interface IAnalyticsClient {
    * Reports a telemetry event.
    * @param eventType The event type registered via the `registerEventType` API.
    * @param eventData The properties matching the schema declared in the `registerEventType` API.
+   *
+   * @track-adoption
    */
   reportEvent: <EventTypeData extends object>(
     eventType: EventType,
@@ -198,8 +200,10 @@ export interface IAnalyticsClient {
    */
   optIn: (optInConfig: OptInConfig) => void;
   /**
-   * Registers the context provider to enrich the any reported events.
+   * Registers the context provider to enrich any reported events.
    * @param contextProviderOpts {@link ContextProviderOpts}
+   *
+   * @track-adoption
    */
   registerContextProvider: <Context>(contextProviderOpts: ContextProviderOpts<Context>) => void;
   /**
@@ -212,7 +216,11 @@ export interface IAnalyticsClient {
    */
   readonly telemetryCounter$: Observable<TelemetryCounter>;
   /**
-   * Stops the client.
+   * Forces all shippers to send all their enqueued events and fulfills the returned promise.
    */
-  shutdown: () => void;
+  flush: () => Promise<void>;
+  /**
+   * Stops the client. Flushing any pending events in the process.
+   */
+  shutdown: () => Promise<void>;
 }

@@ -5,6 +5,10 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "addTimeMarker": Array [
+          false,
+        ],
+        "annotations": Array [],
         "emphasizeFitting": Array [
           true,
         ],
@@ -35,13 +39,18 @@ Object {
                   "curveType": Array [
                     "LINEAR",
                   ],
-                  "decorations": Array [],
                   "isHistogram": Array [
                     false,
                   ],
-                  "isHorizontal": Array [],
-                  "isPercentage": Array [],
-                  "isStacked": Array [],
+                  "isHorizontal": Array [
+                    false,
+                  ],
+                  "isPercentage": Array [
+                    false,
+                  ],
+                  "isStacked": Array [
+                    false,
+                  ],
                   "layerId": Array [
                     "first",
                   ],
@@ -93,21 +102,15 @@ Object {
               Object {
                 "arguments": Object {
                   "floatingColumns": Array [],
-                  "horizontalAlignment": Array [],
-                  "isInside": Array [],
                   "isVisible": Array [
                     true,
                   ],
-                  "legendSize": Array [],
-                  "maxLines": Array [],
                   "position": Array [
                     "left",
                   ],
                   "shouldTruncate": Array [
                     true,
                   ],
-                  "showSingleSeries": Array [],
-                  "verticalAlignment": Array [],
                 },
                 "function": "legendConfig",
                 "type": "function",
@@ -116,6 +119,7 @@ Object {
             "type": "expression",
           },
         ],
+        "showTooltip": Array [],
         "valueLabels": Array [
           "hide",
         ],
@@ -162,8 +166,6 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "extent": Array [],
-                  "id": Array [],
                   "labelsOrientation": Array [
                     -90,
                   ],
@@ -218,7 +220,6 @@ Object {
                       "type": "expression",
                     },
                   ],
-                  "id": Array [],
                   "labelsOrientation": Array [
                     -45,
                   ],

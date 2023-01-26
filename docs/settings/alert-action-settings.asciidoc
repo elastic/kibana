@@ -131,7 +131,7 @@ A list of allowed email domains which can be used with the email connector. When
 WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not supported in {kib} 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
 
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.xmatters`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.xmatters`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
@@ -198,6 +198,22 @@ Specifies the time allowed for requests to external resources. Requests that tak
 `<count>[ms,s,m,h,d,w,M,Y]` 
 +
 For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
+
+`xpack.actions.run.maxAttempts` {ess-icon}::
+Specifies the maximum number of times an action can be attempted to run. Can be minimum 1 and maximum 10.
+
+`xpack.actions.run.connectorTypeOverrides` {ess-icon}::
+Overrides the configs under `xpack.actions.run` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
++
+For example:
+[source,yaml]
+--
+xpack.actions.run:
+    maxAttempts: 1
+    connectorTypeOverrides:
+        - id: '.server-log'
+          maxAttempts: 5
+--
 
 [float]
 [[alert-settings]]

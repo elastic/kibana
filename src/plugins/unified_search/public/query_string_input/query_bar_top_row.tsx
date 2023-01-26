@@ -15,6 +15,7 @@ import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfQueryType, isOfAggregateQueryType } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { throttle } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,12 +27,13 @@ import {
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
 } from '@elastic/eui';
-import { IDataPluginServices, TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
-import { useKibana, withKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { IUnifiedSearchPluginServices } from '../types';
 import QueryStringInputUI from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
@@ -41,16 +43,30 @@ import {
   DataViewPickerProps,
   OnSaveTextLanguageQueryProps,
 } from '../dataview_picker';
+
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { TextBasedLanguagesEditor } from './text_based_languages_editor';
 import './query_bar.scss';
 
+export const strings = {
+  getNeedsUpdatingLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
+      defaultMessage: 'Needs updating',
+    }),
+  getRefreshQueryLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refresh', {
+      defaultMessage: 'Refresh query',
+    }),
+  getRunQueryLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
+      defaultMessage: 'Run query',
+    }),
+};
+
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
-
-const QueryStringInput = withKibana(QueryStringInputUI);
 
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
@@ -80,6 +96,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showQueryInput?: boolean;
   showAddFilter?: boolean;
   showDatePicker?: boolean;
+  isDisabled?: boolean;
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
@@ -91,6 +108,13 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
+  /**
+   * Style of the submit button
+   * `iconOnly` - use IconButton
+   * `full` - use SuperUpdateButton
+   * (default) `auto` - `iconOnly` on smaller screens, and `full` on larger screens
+   */
+  submitButtonStyle?: 'auto' | 'iconOnly' | 'full';
   suggestionsSize?: SuggestionsListSize;
   isScreenshotMode?: boolean;
   onTextLangQuerySubmit: (query?: Query | AggregateQuery) => void;
@@ -140,18 +164,23 @@ export const QueryBarTopRow = React.memo(
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [codeEditorIsExpanded, setCodeEditorIsExpanded] = useState<boolean>(false);
+    const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
+      props.submitButtonStyle ?? 'auto';
+    const submitButtonIconOnly =
+      submitButtonStyle === 'auto' ? !isXXLarge : submitButtonStyle === 'iconOnly';
 
     useEffect(() => {
-      function handleResize() {
-        setIsXXLarge(window.innerWidth >= 1440);
-      }
+      if (submitButtonStyle !== 'auto') return;
 
-      window.removeEventListener('resize', handleResize);
+      const handleResize = throttle(() => {
+        setIsXXLarge(window.innerWidth >= 1440);
+      }, 50);
+
       window.addEventListener('resize', handleResize);
       handleResize();
 
       return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [submitButtonStyle]);
 
     const {
       showQueryInput = true,
@@ -163,8 +192,21 @@ export const QueryBarTopRow = React.memo(
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
-    const kibana = useKibana<IDataPluginServices>();
-    const { uiSettings, storage, appName } = kibana.services;
+    const kibana = useKibana<IUnifiedSearchPluginServices>();
+
+    const {
+      uiSettings,
+      storage,
+      appName,
+      data,
+      usageCollection,
+      unifiedSearch,
+      notifications,
+      docLinks,
+      http,
+      dataViews,
+    } = kibana.services;
+
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
@@ -353,6 +395,7 @@ export const QueryBarTopRow = React.memo(
       return (
         <EuiFlexItem className={wrapperClasses}>
           <SuperDatePicker
+            isDisabled={props.isDisabled}
             start={props.dateRangeFrom}
             end={props.dateRangeTo}
             isPaused={props.isRefreshPaused}
@@ -378,19 +421,9 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
-      const buttonLabelUpdate = i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
-        defaultMessage: 'Needs updating',
-      });
-      const buttonLabelRefresh = i18n.translate(
-        'unifiedSearch.queryBarTopRow.submitButton.refresh',
-        {
-          defaultMessage: 'Refresh query',
-        }
-      );
-
-      const buttonLabelRun = i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
-        defaultMessage: 'Run query',
-      });
+      const buttonLabelUpdate = strings.getNeedsUpdatingLabel();
+      const buttonLabelRefresh = strings.getRefreshQueryLabel();
+      const buttonLabelRun = strings.getRunQueryLabel();
 
       const iconDirty = Boolean(isQueryLangSelected) ? 'play' : 'kqlFunction';
       const tooltipDirty = Boolean(isQueryLangSelected) ? buttonLabelRun : buttonLabelUpdate;
@@ -401,14 +434,15 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem grow={false}>
           <EuiSuperUpdateButton
             iconType={props.isDirty ? iconDirty : 'refresh'}
-            iconOnly={!isXXLarge}
+            iconOnly={submitButtonIconOnly}
             aria-label={props.isLoading ? buttonLabelUpdate : buttonLabelRefresh}
-            isDisabled={isDateRangeInvalid}
+            isDisabled={isDateRangeInvalid || props.isDisabled}
             isLoading={props.isLoading}
             onClick={onClickSubmitButton}
             size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
             color={props.isDirty ? 'success' : 'primary'}
             fill={props.isDirty}
+            needsUpdate={props.isDirty}
             data-test-subj="querySubmitButton"
             // @ts-expect-error Need to fix expecting `children` in EUI
             toolTipProps={{
@@ -452,6 +486,7 @@ export const QueryBarTopRow = React.memo(
             onTextLangQuerySubmit={props.onTextLangQuerySubmit}
             textBasedLanguage={textBasedLanguage}
             onSaveTextLanguageQuery={props.onTextBasedSavedAndExit}
+            isDisabled={props.isDisabled}
           />
         </EuiFlexItem>
       );
@@ -467,6 +502,7 @@ export const QueryBarTopRow = React.memo(
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               onFiltersUpdated={props.onFiltersUpdated}
               buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
+              isDisabled={props.isDisabled}
             />
           </EuiFlexItem>
         )
@@ -493,7 +529,7 @@ export const QueryBarTopRow = React.memo(
           {!renderFilterMenuOnly() && renderFilterButtonGroup()}
           {shouldRenderQueryInput() && (
             <EuiFlexItem data-test-subj="unifiedQueryInput">
-              <QueryStringInput
+              <QueryStringInputUI
                 disableAutoFocus={props.disableAutoFocus}
                 indexPatterns={props.indexPatterns!}
                 query={props.query! as Query}
@@ -511,6 +547,19 @@ export const QueryBarTopRow = React.memo(
                 disableLanguageSwitcher={true}
                 prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
                 size={props.suggestionsSize}
+                isDisabled={props.isDisabled}
+                appName={appName}
+                deps={{
+                  unifiedSearch,
+                  data,
+                  storage,
+                  usageCollection,
+                  notifications,
+                  docLinks,
+                  http,
+                  uiSettings,
+                  dataViews,
+                }}
               />
             </EuiFlexItem>
           )}
@@ -535,6 +584,7 @@ export const QueryBarTopRow = React.memo(
                 dateRange: dateRangeRef.current,
               })
             }
+            isDisabled={props.isDisabled}
           />
         )
       );

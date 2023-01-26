@@ -38,6 +38,7 @@ const domains: CrawlerDomain[] = [
     deduplicationEnabled: false,
     deduplicationFields: ['title'],
     availableDeduplicationFields: ['title', 'description'],
+    auth: null,
   },
   {
     id: '4567',
@@ -50,6 +51,7 @@ const domains: CrawlerDomain[] = [
     deduplicationEnabled: false,
     deduplicationFields: ['title'],
     availableDeduplicationFields: ['title', 'description'],
+    auth: null,
   },
 ];
 
@@ -115,7 +117,7 @@ describe('DomainsTable', () => {
       expect(link.dive().text()).toContain('elastic.co');
       expect(link.props()).toEqual(
         expect.objectContaining({
-          to: '/search_indices/index-name/crawler/domains/1234',
+          to: '/search_indices/index-name/domain_management/1234',
         })
       );
     });
@@ -155,7 +157,7 @@ describe('DomainsTable', () => {
             getManageAction().simulate('click');
 
             expect(navigateToUrl).toHaveBeenCalledWith(
-              '/search_indices/index-name/crawler/domains/1234'
+              '/search_indices/index-name/domain_management/1234'
             );
           });
         });

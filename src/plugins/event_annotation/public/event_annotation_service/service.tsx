@@ -6,38 +6,41 @@
  * Side Public License, v 1.
  */
 
+import { partition } from 'lodash';
 import { queryToAst } from '@kbn/data-plugin/common';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { EventAnnotationConfig } from '../../common';
 import { EventAnnotationServiceType } from './types';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   defaultAnnotationLabel,
+  isRangeAnnotationConfig,
   isQueryAnnotationConfig,
 } from './helpers';
-import { EventAnnotationConfig } from '../../common';
-import { RangeEventAnnotationConfig } from '../../common/types';
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
 }
 
-const isRangeAnnotation = (
-  annotation?: EventAnnotationConfig
-): annotation is RangeEventAnnotationConfig => {
-  return Boolean(annotation && annotation?.key.type === 'range');
-};
-
 export function getEventAnnotationService(): EventAnnotationServiceType {
-  return {
-    toExpression: (annotation) => {
-      if (isRangeAnnotation(annotation)) {
-        const { label, isHidden, color, key, outside, id } = annotation;
+  const annotationsToExpression = (annotations: EventAnnotationConfig[]) => {
+    const [queryBasedAnnotations, manualBasedAnnotations] = partition(
+      annotations,
+      isQueryAnnotationConfig
+    );
+
+    const expressions = [];
+
+    for (const annotation of manualBasedAnnotations) {
+      if (isRangeAnnotationConfig(annotation)) {
+        const { label, color, key, outside, id } = annotation;
         const { timestamp: time, endTimestamp: endTime } = key;
-        return {
-          type: 'expression',
+        expressions.push({
+          type: 'expression' as const,
           chain: [
             {
-              type: 'function',
+              type: 'function' as const,
               function: 'manual_range_event_annotation',
               arguments: {
                 id: [id],
@@ -46,57 +49,18 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 label: [label || defaultAnnotationLabel],
                 color: [color || defaultAnnotationRangeColor],
                 outside: [Boolean(outside)],
-                isHidden: [Boolean(isHidden)],
+                isHidden: [Boolean(annotation.isHidden)],
               },
             },
           ],
-        };
-      } else if (isQueryAnnotationConfig(annotation)) {
-        const {
-          id,
-          extraFields,
-          label,
-          isHidden,
-          color,
-          lineStyle,
-          lineWidth,
-          icon,
-          filter,
-          textVisibility,
-          timeField,
-          textField,
-        } = annotation;
-        return {
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: 'query_point_event_annotation',
-              arguments: {
-                id: [id],
-                filter: filter ? [queryToAst(filter)] : [],
-                timeField: [timeField],
-                textField: [textField],
-                label: [label || defaultAnnotationLabel],
-                color: [color || defaultAnnotationColor],
-                lineWidth: [lineWidth || 1],
-                lineStyle: [lineStyle || 'solid'],
-                icon: hasIcon(icon) ? [icon] : ['triangle'],
-                textVisibility: [textVisibility || false],
-                isHidden: [Boolean(isHidden)],
-                extraFields: extraFields || [],
-              },
-            },
-          ],
-        };
+        });
       } else {
-        const { label, isHidden, color, lineStyle, lineWidth, icon, key, textVisibility, id } =
-          annotation;
-        return {
-          type: 'expression',
+        const { label, color, lineStyle, lineWidth, icon, key, textVisibility, id } = annotation;
+        expressions.push({
+          type: 'expression' as const,
           chain: [
             {
-              type: 'function',
+              type: 'function' as const,
               function: 'manual_point_event_annotation',
               arguments: {
                 id: [id],
@@ -107,12 +71,109 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 lineStyle: [lineStyle || 'solid'],
                 icon: hasIcon(icon) ? [icon] : ['triangle'],
                 textVisibility: [textVisibility || false],
-                isHidden: [Boolean(isHidden)],
+                isHidden: [Boolean(annotation.isHidden)],
               },
             },
           ],
-        };
+        });
       }
+    }
+
+    for (const annotation of queryBasedAnnotations) {
+      const {
+        id,
+        label,
+        color,
+        lineStyle,
+        lineWidth,
+        icon,
+        timeField,
+        textVisibility,
+        textField,
+        filter,
+        extraFields,
+      } = annotation;
+      expressions.push({
+        type: 'expression' as const,
+        chain: [
+          {
+            type: 'function' as const,
+            function: 'query_point_event_annotation',
+            arguments: {
+              id: [id],
+              timeField: timeField ? [timeField] : [],
+              label: [label || defaultAnnotationLabel],
+              color: [color || defaultAnnotationColor],
+              lineWidth: [lineWidth || 1],
+              lineStyle: [lineStyle || 'solid'],
+              icon: hasIcon(icon) ? [icon] : ['triangle'],
+              textVisibility: [textVisibility || false],
+              textField: textVisibility && textField ? [textField] : [],
+              filter: filter ? [queryToAst(filter)] : [],
+              extraFields: extraFields || [],
+              isHidden: [Boolean(annotation.isHidden)],
+            },
+          },
+        ],
+      });
+    }
+    return expressions;
+  };
+  return {
+    toExpression: annotationsToExpression,
+    toFetchExpression: ({ interval, groups }) => {
+      if (groups.length === 0) {
+        return [];
+      }
+
+      const groupsExpressions = groups
+        .filter((g) => g.annotations.some((a) => !a.isHidden))
+        .map(({ annotations, indexPatternId, ignoreGlobalFilters }): ExpressionAstExpression => {
+          const indexPatternExpression: ExpressionAstExpression = {
+            type: 'expression',
+            chain: [
+              {
+                type: 'function',
+                function: 'indexPatternLoad',
+                arguments: {
+                  id: [indexPatternId],
+                },
+              },
+            ],
+          };
+          const annotationExpressions = annotationsToExpression(annotations);
+          return {
+            type: 'expression',
+            chain: [
+              {
+                type: 'function',
+                function: 'event_annotation_group',
+                arguments: {
+                  dataView: [indexPatternExpression],
+                  annotations: [...annotationExpressions],
+                  ignoreGlobalFilters: [Boolean(ignoreGlobalFilters)],
+                },
+              },
+            ],
+          };
+        });
+
+      const fetchExpression: ExpressionAstExpression = {
+        type: 'expression',
+        chain: [
+          { type: 'function', function: 'kibana', arguments: {} },
+          {
+            type: 'function',
+            function: 'fetch_event_annotations',
+            arguments: {
+              interval: [interval],
+              groups: [...groupsExpressions],
+            },
+          },
+        ],
+      };
+
+      return [fetchExpression];
     },
   };
 }

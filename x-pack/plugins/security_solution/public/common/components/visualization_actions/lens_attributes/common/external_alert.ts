@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { COUNT, TOP_VALUE } from '../../translations';
 import type { GetLensAttributes, LensAttributes } from '../../types';
 
 export const getExternalAlertLensAttributes: GetLensAttributes = (
@@ -70,7 +71,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
         },
       ],
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             'a3c54471-615f-4ff9-9fda-69b5b2ea3eef': {
               columns: {
@@ -86,7 +87,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
                   },
                 },
                 '0a923af2-c880-4aa3-aa93-a0b9c2801f6d': {
-                  label: 'Count of records',
+                  label: COUNT,
                   dataType: 'number',
                   operationType: 'count',
                   isBucketed: false,
@@ -94,7 +95,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
                   sourceField: '___records___',
                 },
                 '42334c6e-98d9-47a2-b4cb-a445abb44c93': {
-                  label: `Top values of ${stackByField}`, // could be event.category
+                  label: TOP_VALUE(`${stackByField}`), // could be event.category
                   dataType: 'string',
                   operationType: 'terms',
                   scale: 'ordinal',

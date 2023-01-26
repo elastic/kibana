@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AnnotationTooltipFormatter } from '@elastic/charts';
+import { CustomAnnotationTooltip } from '@elastic/charts';
 import {
   AvailableAnnotationIcon,
   ManualPointEventAnnotationArgs,
@@ -16,6 +16,10 @@ import { XYProps } from './expression_functions';
 
 export interface XYChartProps {
   args: XYProps;
+  syncTooltips: boolean;
+  syncCursor: boolean;
+  syncColors: boolean;
+  canNavigateToLens?: boolean;
 }
 
 export interface XYRender {
@@ -24,9 +28,10 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-export interface CollectiveConfig extends Omit<ManualPointEventAnnotationArgs, 'icon'> {
+export interface MergedAnnotation extends Omit<ManualPointEventAnnotationArgs, 'icon'> {
   timebucket: number;
   position: 'bottom';
   icon?: AvailableAnnotationIcon | string;
-  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
+  customTooltip: CustomAnnotationTooltip;
+  isGrouped: boolean;
 }

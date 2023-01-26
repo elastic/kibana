@@ -8,4 +8,4 @@
 export const ROOT_PATH = '/';
 export const COLLECTIONS_PATH = '/collections';
 export const COLLECTION_CREATION_PATH = `${COLLECTIONS_PATH}/new`;
-export const COLLECTION_VIEW_PATH = `${COLLECTIONS_PATH}/:name`;
+export const COLLECTION_VIEW_PATH = `${COLLECTIONS_PATH}/:id/:section`;

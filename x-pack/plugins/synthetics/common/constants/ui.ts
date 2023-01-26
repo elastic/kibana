@@ -7,6 +7,10 @@
 
 export const MONITOR_ROUTE = '/monitor/:monitorId?';
 
+export const MONITOR_HISTORY_ROUTE = '/monitor/:monitorId/history';
+
+export const MONITOR_ERRORS_ROUTE = '/monitor/:monitorId/errors';
+
 export const MONITOR_ADD_ROUTE = '/add-monitor';
 
 export const MONITOR_EDIT_ROUTE = '/edit-monitor/:monitorId';
@@ -21,13 +25,22 @@ export const GETTING_STARTED_ROUTE = '/monitors/getting-started';
 
 export const SETTINGS_ROUTE = '/settings';
 
+export const SYNTHETICS_SETTINGS_ROUTE = '/settings/:tabId';
+
 export const CERTIFICATES_ROUTE = '/certificates';
+
+export const SYNTHETICS_STEP_DETAIL_ROUTE =
+  '/monitor/:monitorId/test-run/:checkGroupId/step/:stepIndex';
 
 export const STEP_DETAIL_ROUTE = '/journey/:checkGroupId/step/:stepIndex';
 
 export const SYNTHETIC_CHECK_STEPS_ROUTE = '/journey/:checkGroupId/steps';
 
+export const TEST_RUN_DETAILS_ROUTE = '/monitor/:monitorId/test-run/:checkGroupId';
+
 export const MAPPING_ERROR_ROUTE = '/mapping-error';
+
+export const ERROR_DETAILS_ROUTE = '/monitor/:monitorId/errors/:errorStateId';
 
 export enum STATUS {
   UP = 'up',

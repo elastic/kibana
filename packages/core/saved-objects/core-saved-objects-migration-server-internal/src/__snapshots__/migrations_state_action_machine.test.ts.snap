@@ -48,6 +48,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -69,6 +74,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "guided-setup-state",
                       },
                     },
                     Object {
@@ -173,6 +183,7 @@ Object {
               "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -223,6 +234,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -244,6 +260,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "guided-setup-state",
                       },
                     },
                     Object {
@@ -352,6 +373,7 @@ Object {
               "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -402,6 +424,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -423,6 +450,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "guided-setup-state",
                       },
                     },
                     Object {
@@ -535,6 +567,7 @@ Object {
               "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -585,6 +618,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -606,6 +644,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "guided-setup-state",
                       },
                     },
                     Object {
@@ -722,6 +765,7 @@ Object {
               "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -810,6 +854,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -831,6 +880,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "guided-setup-state",
                       },
                     },
                     Object {
@@ -946,6 +1000,7 @@ Object {
               ],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -996,6 +1051,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -1017,6 +1077,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "guided-setup-state",
                       },
                     },
                     Object {
@@ -1136,6 +1201,7 @@ Object {
               ],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },

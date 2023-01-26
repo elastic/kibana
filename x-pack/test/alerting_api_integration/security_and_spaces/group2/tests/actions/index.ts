@@ -9,8 +9,8 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
 // eslint-disable-next-line import/no-default-export
-export default function actionsTests({ loadTestFile, getService }: FtrProviderContext) {
-  describe('Actions', () => {
+export default function connectorsTests({ loadTestFile, getService }: FtrProviderContext) {
+  describe('Connectors', () => {
     before(async () => {
       await setupSpacesAndUsers(getService);
     });
@@ -18,22 +18,24 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     after(async () => {
       await tearDown(getService);
     });
-    loadTestFile(require.resolve('./builtin_action_types/cases_webhook'));
-    loadTestFile(require.resolve('./builtin_action_types/email'));
-    loadTestFile(require.resolve('./builtin_action_types/es_index'));
-    loadTestFile(require.resolve('./builtin_action_types/es_index_preconfigured'));
-    loadTestFile(require.resolve('./builtin_action_types/pagerduty'));
-    loadTestFile(require.resolve('./builtin_action_types/swimlane'));
-    loadTestFile(require.resolve('./builtin_action_types/server_log'));
-    loadTestFile(require.resolve('./builtin_action_types/oauth_access_token'));
-    loadTestFile(require.resolve('./builtin_action_types/servicenow_itsm'));
-    loadTestFile(require.resolve('./builtin_action_types/servicenow_sir'));
-    loadTestFile(require.resolve('./builtin_action_types/servicenow_itom'));
-    loadTestFile(require.resolve('./builtin_action_types/jira'));
-    loadTestFile(require.resolve('./builtin_action_types/resilient'));
-    loadTestFile(require.resolve('./builtin_action_types/slack'));
-    loadTestFile(require.resolve('./builtin_action_types/webhook'));
-    loadTestFile(require.resolve('./builtin_action_types/xmatters'));
+    loadTestFile(require.resolve('./connector_types/oauth_access_token'));
+    loadTestFile(require.resolve('./connector_types/cases_webhook'));
+    loadTestFile(require.resolve('./connector_types/jira'));
+    loadTestFile(require.resolve('./connector_types/resilient'));
+    loadTestFile(require.resolve('./connector_types/servicenow_itsm'));
+    loadTestFile(require.resolve('./connector_types/servicenow_sir'));
+    loadTestFile(require.resolve('./connector_types/servicenow_itom'));
+    loadTestFile(require.resolve('./connector_types/swimlane'));
+    loadTestFile(require.resolve('./connector_types/email'));
+    loadTestFile(require.resolve('./connector_types/es_index'));
+    loadTestFile(require.resolve('./connector_types/es_index_preconfigured'));
+    loadTestFile(require.resolve('./connector_types/opsgenie'));
+    loadTestFile(require.resolve('./connector_types/pagerduty'));
+    loadTestFile(require.resolve('./connector_types/server_log'));
+    loadTestFile(require.resolve('./connector_types/slack'));
+    loadTestFile(require.resolve('./connector_types/webhook'));
+    loadTestFile(require.resolve('./connector_types/xmatters'));
+    loadTestFile(require.resolve('./connector_types/tines'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));

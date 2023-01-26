@@ -8,22 +8,23 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
-import { HttpError, Status } from '../../../../../common/types/api';
-import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
-import { FetchAnalyticsCollectionsAPILogic } from '../../api/index/fetch_analytics_collections_api_logic';
+import { Status } from '../../../../../common/types/api';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
+import {
+  FetchAnalyticsCollectionsAPILogic,
+  FetchAnalyticsCollectionsApiLogicResponse,
+} from '../../api/index/fetch_analytics_collections_api_logic';
 
 export interface AnalyticsCollectionsActions {
-  apiError(error: HttpError): HttpError;
-  apiSuccess(collections: AnalyticsCollection[]): AnalyticsCollection[];
   fetchAnalyticsCollections(): void;
-  makeRequest: typeof FetchAnalyticsCollectionsAPILogic.actions.makeRequest;
+  makeRequest: Actions<{}, FetchAnalyticsCollectionsApiLogicResponse>['makeRequest'];
 }
 export interface AnalyticsCollectionsValues {
   analyticsCollections: AnalyticsCollection[];
   data: typeof FetchAnalyticsCollectionsAPILogic.values.data;
   hasNoAnalyticsCollections: boolean;
   isLoading: boolean;
-  status: typeof FetchAnalyticsCollectionsAPILogic.values.status;
+  status: Status;
 }
 
 export const AnalyticsCollectionsLogic = kea<
@@ -33,15 +34,13 @@ export const AnalyticsCollectionsLogic = kea<
     fetchAnalyticsCollections: () => {},
   },
   connect: {
-    actions: [FetchAnalyticsCollectionsAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    actions: [FetchAnalyticsCollectionsAPILogic, ['makeRequest']],
     values: [FetchAnalyticsCollectionsAPILogic, ['data', 'status']],
   },
   listeners: ({ actions }) => ({
-    apiError: (e) => flashAPIErrors(e),
     fetchAnalyticsCollections: () => {
       actions.makeRequest({});
     },
-    makeRequest: () => clearFlashMessages(),
   }),
   path: ['enterprise_search', 'analytics', 'collections'],
   selectors: ({ selectors }) => ({

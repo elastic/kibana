@@ -53,6 +53,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const es = getService('es');
   const common = getPageObject('common');
+  const retry = getService('retry');
 
   const createAttachmentAndNavigate = async (attachment: CommentRequest) => {
     const caseData = await cases.api.createCase({
@@ -79,7 +80,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   /**
    * Attachment types are being registered in
-   * x-pack/test/functional_with_es_ssl/fixtures/plugins/cases/public/plugin.ts
+   * x-pack/test/functional_with_es_ssl/plugins/cases/public/plugin.ts
    */
   describe('Attachment framework', () => {
     describe('External reference attachments', () => {
@@ -107,8 +108,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139300
-    describe.skip('Persistable state attachments', () => {
+    describe('Persistable state attachments', () => {
       const getLensState = (dataViewId: string) => ({
         title: '',
         visualizationType: 'lnsXY',
@@ -145,7 +145,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           query: { query: '', language: 'kuery' },
           filters: [],
           datasourceStates: {
-            indexpattern: {
+            formBased: {
               layers: {
                 '85863a23-73a0-4e11-9774-70f77b9a5898': {
                   columns: {
@@ -205,12 +205,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('renders a persistable attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
         await validateAttachment(CommentType.persistableState, attachmentId);
-        expect(await find.existsByCssSelector('.lnsExpressionRenderer')).toBe(true);
+        await retry.waitFor(
+          'actions accordion to exist',
+          async () => await find.existsByCssSelector('.lnsExpressionRenderer')
+        );
       });
     });
 
     /**
-     * The UI of the cases fixture plugin is in x-pack/test/functional_with_es_ssl/fixtures/plugins/cases/public/application.tsx
+     * The UI of the cases fixture plugin is in x-pack/test/functional_with_es_ssl/plugins/cases/public/application.tsx
      */
     describe('Attachment hooks', () => {
       const TOTAL_OWNERS = ['cases', 'securitySolution', 'observability'];

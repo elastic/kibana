@@ -11,24 +11,33 @@ import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import type { CoreUsageStatsClient } from '../../../core_usage_data';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
-import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
-import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import {
+  coreUsageStatsClientMock,
+  coreUsageDataServiceMock,
+} from '@kbn/core-usage-data-server-mocks';
 import { contextServiceMock, coreMock } from '../../../mocks';
 import {
   registerGetRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
 
 const coreId = Symbol('core');
+
+const testTypes = [
+  { name: 'index-pattern', hide: false },
+  { name: 'hidden-type', hide: true },
+  { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
+];
 
 describe('GET /api/saved_objects/{type}/{id}', () => {
   let server: HttpService;
   let httpSetup: InternalHttpServiceSetup;
   let handlerContext: ReturnType<typeof coreMock.createRequestHandlerContext>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
+  let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
 
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
@@ -42,6 +51,12 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     });
 
     handlerContext = coreMock.createRequestHandlerContext();
+    handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
+      return testTypes
+        .map((typeDesc) => createHiddenTypeVariants(typeDesc))
+        .find((fullTest) => fullTest.name === typename);
+    });
+
     savedObjectsClient = handlerContext.savedObjects.client;
 
     httpSetup.registerRouteHandlerContext<InternalSavedObjectsRequestHandlerContext, 'core'>(
@@ -98,5 +113,12 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
 
     const args = savedObjectsClient.get.mock.calls[0];
     expect(args).toEqual(['index-pattern', 'logstash-*']);
+  });
+
+  it('returns with status 400 when a type is hidden from the http APIs', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/hidden-from-http/hiddenId')
+      .expect(400);
+    expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
   });
 });

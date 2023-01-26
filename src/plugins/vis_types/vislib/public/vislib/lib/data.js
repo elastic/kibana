@@ -49,7 +49,6 @@ export class Data {
     this.createColorLookupFunction = createColorLookupFunction;
     this.data = this.copyDataObj(data);
     this.type = this.getDataType();
-    this._cleanVisData();
     this.labels = this._getLabels(this.data);
     this.color = this.labels
       ? createColorLookupFunction(this.labels, uiState.get('vis.colors'))
@@ -249,19 +248,6 @@ export class Data {
   }
 
   /**
-   * Returns array of chart data objects for pie data objects
-   *
-   * @method pieData
-   * @returns {*} Array of chart data objects
-   */
-  pieData() {
-    if (!this.data.slices) {
-      return this.data.rows ? this.data.rows : this.data.columns;
-    }
-    return [this.data];
-  }
-
-  /**
    * Get attributes off the data, e.g. `tooltipFormatter` or `xAxisFormatter`
    * pulls the value off the first item in the array
    * these values are typically the same between data objects of the same chart
@@ -380,71 +366,6 @@ export class Data {
   }
 
   /**
-   * Clean visualization data from missing/wrong values.
-   * Currently used only to clean remove zero slices from
-   * pie chart.
-   */
-  _cleanVisData() {
-    const visData = this.getVisData();
-    if (this.type === 'slices') {
-      this._cleanPieChartData(visData);
-    }
-  }
-
-  /**
-   * Mutate the current pie chart vis data to remove slices with
-   * zero values.
-   * @param {Array} data
-   */
-  _cleanPieChartData(data) {
-    _.forEach(data, (obj) => {
-      obj.slices = this._removeZeroSlices(obj.slices);
-    });
-  }
-
-  /**
-   * Removes zeros from pie chart data, mutating the passed values.
-   * @param slices
-   * @returns {*}
-   */
-  _removeZeroSlices(slices) {
-    if (!slices.children) {
-      return slices;
-    }
-
-    slices = _.clone(slices);
-    slices.children = slices.children.reduce((children, child) => {
-      if (child.size !== 0) {
-        return [...children, this._removeZeroSlices(child)];
-      }
-      return children;
-    }, []);
-
-    return slices;
-  }
-
-  /**
-   * Returns an array of names ordered by appearance in the nested array
-   * of objects
-   *
-   * @method pieNames
-   * @returns {Array} Array of unique names (strings)
-   */
-  pieNames(data) {
-    const self = this;
-    const names = [];
-
-    _.forEach(data, function (obj) {
-      const columns = obj.raw ? obj.raw.columns : undefined;
-      _.forEach(self.getNames(obj, columns), function (name) {
-        names.push(name);
-      });
-    });
-
-    return _.uniqBy(names, 'label');
-  }
-
-  /**
    * Inject zeros into the data
    *
    * @method injectZeros
@@ -483,28 +404,10 @@ export class Data {
    * @returns {Function} Performs lookup on string and returns hex color
    */
   getColorFunc() {
-    if (this.type === 'slices') {
-      return this.getPieColorFunc();
-    }
     const defaultColors = this.uiState.get('vis.defaultColors');
     const overwriteColors = this.uiState.get('vis.colors');
     const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
     return this.createColorLookupFunction(this.getLabels(), colors);
-  }
-
-  /**
-   * Returns a function that does color lookup on names for pie charts
-   *
-   * @method getPieColorFunc
-   * @returns {Function} Performs lookup on string and returns hex color
-   */
-  getPieColorFunc() {
-    return this.createColorLookupFunction(
-      this.pieNames(this.getVisData()).map(function (d) {
-        return d.label;
-      }),
-      this.uiState.get('vis.colors')
-    );
   }
 
   /**

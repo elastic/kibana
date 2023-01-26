@@ -7,7 +7,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
+
+import { useDispatch } from 'react-redux';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
@@ -18,6 +20,9 @@ import {
   STATUS_LOW_LABEL,
   STATUS_MEDIUM_LABEL,
 } from '../translations';
+import { inputsActions } from '../../../../common/store/inputs';
+import type { DeleteQuery, SetQuery } from '../../../../common/containers/use_global_time/types';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 
 export const severityLabels: Record<Severity, string> = {
   critical: STATUS_CRITICAL_LABEL,
@@ -26,11 +31,38 @@ export const severityLabels: Record<Severity, string> = {
   low: STATUS_LOW_LABEL,
 };
 
-export const getAlertsByStatusQuery = ({ from, to }: { from: string; to: string }) => ({
+export interface EntityFilter {
+  field: string;
+  value: string;
+}
+
+export const getAlertsByStatusQuery = ({
+  additionalFilters = [],
+  from,
+  to,
+  entityFilter,
+}: {
+  from: string;
+  to: string;
+  entityFilter?: EntityFilter;
+  additionalFilters?: ESBoolQuery[];
+}) => ({
   size: 0,
   query: {
     bool: {
-      filter: [{ range: { '@timestamp': { gte: from, lte: to } } }],
+      filter: [
+        ...additionalFilters,
+        { range: { '@timestamp': { gte: from, lte: to } } },
+        ...(entityFilter
+          ? [
+              {
+                term: {
+                  [entityFilter.field]: entityFilter.value,
+                },
+              },
+            ]
+          : []),
+      ],
     },
   },
   aggs: {
@@ -79,6 +111,10 @@ export interface UseAlertsByStatusProps {
   queryId: string;
   signalIndexName: string | null;
   skip?: boolean;
+  entityFilter?: EntityFilter;
+  additionalFilters?: ESBoolQuery[];
+  from: string;
+  to: string;
 }
 
 export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
@@ -88,14 +124,37 @@ export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
 };
 
 export const useAlertsByStatus: UseAlertsByStatus = ({
+  additionalFilters,
+  entityFilter,
   queryId,
   signalIndexName,
   skip = false,
+  to,
+  from,
 }) => {
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const dispatch = useDispatch();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<null | ParsedAlertsData>(null);
+  const setQuery = useCallback(
+    ({ id, inspect, loading, refetch, searchSessionId }: SetQuery) =>
+      dispatch(
+        inputsActions.setQuery({
+          inputId: InputsModelId.global,
+          id,
+          inspect,
+          loading,
+          refetch,
+          searchSessionId,
+        })
+      ),
+    [dispatch]
+  );
 
+  const deleteQuery = useCallback(
+    ({ id }: DeleteQuery) =>
+      dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
+    [dispatch]
+  );
   const {
     data,
     loading: isLoading,
@@ -107,6 +166,8 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     query: getAlertsByStatusQuery({
       from,
       to,
+      entityFilter,
+      additionalFilters,
     }),
     indexName: signalIndexName,
     skip,
@@ -118,9 +179,11 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       getAlertsByStatusQuery({
         from,
         to,
+        entityFilter,
+        additionalFilters,
       })
     );
-  }, [setAlertsQuery, from, to]);
+  }, [setAlertsQuery, from, to, entityFilter, additionalFilters]);
 
   useEffect(() => {
     if (data == null) {

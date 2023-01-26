@@ -7,7 +7,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
-import { render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -21,10 +21,13 @@ import { PLUGIN_ID } from '../../../common/constants';
 import { TypeRegistry } from '../../type_registry';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
+import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
 import { DefaultSort } from './hooks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 
 jest.mock('./hooks/use_fetch_alerts');
+jest.mock('./hooks/use_fetch_browser_fields_capabilities');
 jest.mock('@kbn/kibana-utils-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
@@ -55,6 +58,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
           }),
         },
       },
+      notifications: {
+        toasts: {
+          addDanger: () => {},
+        },
+      },
     },
   }),
 }));
@@ -74,10 +82,12 @@ const alerts = [
   {
     [AlertsField.name]: ['one'],
     [AlertsField.reason]: ['two'],
+    [AlertsField.uuid]: ['1047d115-670d-469e-af7a-86fdd2b2f814'],
   },
   {
     [AlertsField.name]: ['three'],
     [AlertsField.reason]: ['four'],
+    [AlertsField.uuid]: ['bf5f6d63-5afd-48e0-baf6-f28c2b68db46'],
   },
 ] as unknown as EcsFieldsResponse[];
 
@@ -136,6 +146,9 @@ hookUseFetchAlerts.mockImplementation(() => [
     totalAlerts: alerts.length,
   },
 ]);
+
+const hookUseFetchBrowserFieldCapabilities = useFetchBrowserFieldCapabilities as jest.Mock;
+hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [false, {}]);
 
 const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (props) => (
   <IntlProvider locale="en">
@@ -235,6 +248,127 @@ describe('AlertsTableState', () => {
     });
   });
 
+  describe('field browser', () => {
+    const browserFields: BrowserFields = {
+      kibana: {
+        fields: {
+          [AlertsField.uuid]: {
+            category: 'kibana',
+            name: AlertsField.uuid,
+          },
+          [AlertsField.name]: {
+            category: 'kibana',
+            name: AlertsField.name,
+          },
+          [AlertsField.reason]: {
+            category: 'kibana',
+            name: AlertsField.reason,
+          },
+        },
+      },
+    };
+
+    beforeEach(() => {
+      hookUseFetchBrowserFieldCapabilities.mockClear();
+      hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [true, browserFields]);
+    });
+
+    it('should show field browser', () => {
+      const { queryByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+      expect(queryByTestId('show-field-browser')).not.toBe(null);
+    });
+
+    it('should remove an already existing element when selected', async () => {
+      const { getByTestId, queryByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+
+      expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
+      fireEvent.click(getByTestId('show-field-browser'));
+      const fieldCheckbox = getByTestId(`field-${AlertsField.name}-checkbox`);
+      fireEvent.click(fieldCheckbox);
+      fireEvent.click(getByTestId('close'));
+
+      await waitFor(() => {
+        expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).toBe(null);
+      });
+    });
+
+    it('should restore a default element that has been removed previously', async () => {
+      storageMock.mockClear();
+      storageMock.mockImplementation(() => ({
+        get: () => {
+          return {
+            columns: [{ displayAsText: 'Reason', id: 'kibana.alert.reason', schema: undefined }],
+            sort: [],
+            visibleColumns: ['kibana.alert.reason'],
+          };
+        },
+        set: jest.fn(),
+      }));
+      const { getByTestId, queryByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+
+      expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).toBe(null);
+      fireEvent.click(getByTestId('show-field-browser'));
+      const fieldCheckbox = getByTestId(`field-${AlertsField.name}-checkbox`);
+      fireEvent.click(fieldCheckbox);
+      fireEvent.click(getByTestId('close'));
+
+      await waitFor(() => {
+        expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
+        expect(
+          getByTestId('dataGridHeader')
+            .querySelectorAll('.euiDataGridHeaderCell__content')[1]
+            .getAttribute('title')
+        ).toBe('Name');
+      });
+    });
+
+    it('should insert a new field as column when its not a default one', async () => {
+      const { getByTestId, queryByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+
+      expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).toBe(null);
+      fireEvent.click(getByTestId('show-field-browser'));
+      const fieldCheckbox = getByTestId(`field-${AlertsField.uuid}-checkbox`);
+      fireEvent.click(fieldCheckbox);
+      fireEvent.click(getByTestId('close'));
+
+      await waitFor(() => {
+        expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).not.toBe(null);
+        expect(
+          getByTestId('dataGridHeader')
+            .querySelectorAll('.euiDataGridHeaderCell__content')[2]
+            .getAttribute('title')
+        ).toBe(AlertsField.uuid);
+      });
+    });
+
+    describe('when persistent controls are set', () => {
+      let props: AlertsTableStateProps;
+      beforeEach(() => {
+        const getMockWithUsePersistentControls = jest.fn().mockImplementation((plugin: string) => {
+          return {
+            columns,
+            sort: DefaultSort,
+            usePersistentControls: () => ({ right: <span>This is a persistent control</span> }),
+          };
+        });
+        const alertsTableConfigurationRegistryWithPersistentControlsMock = {
+          has: hasMock,
+          get: getMockWithUsePersistentControls,
+        } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+        props = {
+          ...tableProps,
+          alertsTableConfigurationRegistry:
+            alertsTableConfigurationRegistryWithPersistentControlsMock,
+        };
+      });
+
+      it('should show persistent controls if set', () => {
+        const result = render(<AlertsTableWithLocale {...props} />);
+        expect(result.getByText('This is a persistent control')).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('empty state', () => {
     beforeEach(() => {
       refecthMock.mockClear();
@@ -255,33 +389,32 @@ describe('AlertsTableState', () => {
       const result = render(<AlertsTableWithLocale {...tableProps} />);
       expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
     });
-  });
 
-  describe('refresh alerts', () => {
-    beforeEach(() => {
-      refecthMock.mockClear();
-      hookUseFetchAlerts.mockClear();
-      hookUseFetchAlerts.mockImplementation(() => [
-        false,
-        {
-          alerts: [],
-          isInitializing: false,
-          getInspectQuery: jest.fn(),
-          refetch: refecthMock,
-          totalAlerts: 0,
-        },
-      ]);
-    });
+    describe('when persisten controls are set', () => {
+      let props: AlertsTableStateProps;
+      beforeEach(() => {
+        const getMockWithUsePersistentControls = jest.fn().mockImplementation((plugin: string) => {
+          return {
+            columns,
+            sort: DefaultSort,
+            usePersistentControls: () => ({ right: <span>This is a persistent control</span> }),
+          };
+        });
+        const alertsTableConfigurationRegistryWithPersistentControlsMock = {
+          has: hasMock,
+          get: getMockWithUsePersistentControls,
+        } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+        props = {
+          ...tableProps,
+          alertsTableConfigurationRegistry:
+            alertsTableConfigurationRegistryWithPersistentControlsMock,
+        };
+      });
 
-    it('should NOT refetch the alert at initialization', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
-      expect(refecthMock).toBeCalledTimes(0);
-    });
-    it('should refetch the alert when refreshNow is updated', async () => {
-      const result = render(<AlertsTableWithLocale {...tableProps} />);
-      const props = { ...tableProps, refreshNow: 123456789 };
-      result.rerender(<AlertsTableWithLocale {...props} />);
-      expect(refecthMock).toBeCalledTimes(1);
+      it('should show persistent controls if set', () => {
+        const result = render(<AlertsTableWithLocale {...props} />);
+        expect(result.getByText('This is a persistent control')).toBeInTheDocument();
+      });
     });
   });
 });

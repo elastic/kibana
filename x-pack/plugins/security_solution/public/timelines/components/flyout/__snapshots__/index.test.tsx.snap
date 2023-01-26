@@ -18,171 +18,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
       </div>
     </div>
   </div>
-  .c7 {
-  -webkit-transition: background-color 0.7s ease;
-  transition: background-color 0.7s ease;
-  width: 100%;
-  height: 100%;
-}
-
-.c7 .flyout-overlay .euiPanel {
-  background-color: #16171c;
-}
-
-.c7 > div.timeline-drop-area .drop-and-provider-timeline {
-  display: none;
-}
-
-.c7 > div.timeline-drop-area + div {
-  display: none !important;
-}
-
-.c13 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  border-radius: 100%;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  font-size: 9px;
-  height: 34px;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  margin: 0 5px 0 5px;
-  padding: 7px 6px 4px 6px;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  width: 34px;
-}
-
-.c13 .euiBadge__content {
-  position: relative;
-  top: -1px;
-}
-
-.c13 .euiBadge__text {
-  text-overflow: clip;
-}
-
-.c10 {
-  overflow: hidden;
-  margin: 5px 0 5px 0;
-  padding: 3px;
-  white-space: nowrap;
-}
-
-.c12 {
-  height: 20px;
-  margin: 0 5px 0 5px;
-  maxwidth: 85px;
-  minwidth: 85px;
-}
-
-.c11 {
-  background-color: #343741;
-}
-
-.c8 {
-  width: auto;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-align-content: center;
-  -ms-flex-line-pack: center;
-  align-content: center;
-  min-height: 100px;
-}
-
-.c8 + div {
-  display: none !important;
-}
-
-.c9 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-flex-wrap: no-wrap;
-  -ms-flex-wrap: no-wrap;
-  flex-wrap: no-wrap;
-}
-
-.c5 {
-  padding: 2px 0 4px 0;
-}
-
-.is-dragging .c5 .drop-target-data-providers {
-  background: rgba(125,222,216,0.1);
-  border: 0.2rem dashed #7dded8;
-}
-
-.is-dragging .c5 .drop-target-data-providers .timeline-drop-area-empty__text {
-  color: #7dded8;
-}
-
-.is-dragging .c5 .drop-target-data-providers .euiFormHelpText {
-  color: #7dded8;
-}
-
-.c6 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  -webkit-box-pack: start;
-  -webkit-justify-content: flex-start;
-  -ms-flex-pack: start;
-  justify-content: flex-start;
-  padding-bottom: 2px;
-  position: relative;
-  border: 0.2rem dashed #535966;
-  border-radius: 5px;
-  padding: 4px 0;
-  margin: 2px 0 2px 0;
-  max-height: 33vh;
-  min-height: 100px;
-  overflow: auto;
-  resize: vertical;
-  background-color: #16171c;
-}
-
-.c2 {
+  .c2 {
   display: block;
 }
 
@@ -200,16 +36,6 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
   overflow: hidden;
 }
 
-.c4 {
-  border-radius: 0;
-  padding: 0 4px 0 4px;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  z-index: 9000;
-}
-
 <div
     class="timeline-flyout-button-bar"
     data-test-subj="flyoutBottomBar"
@@ -220,10 +46,10 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
       style="background-color: rgb(255, 255, 255); color: rgb(52, 55, 65);"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+        class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class="euiPopover emotion-euiPopover"
@@ -234,7 +60,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
             >
               <button
                 aria-label="Add new timeline or template"
-                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--medium add-timeline-button"
+                class="euiButtonIcon euiButtonIcon--medium add-timeline-button emotion-euiButtonIcon-empty-primary-hoverStyles"
                 data-test-subj="settings-plus-in-circle"
                 type="button"
               >
@@ -249,12 +75,12 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero c0"
+          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
         >
           <button
             aria-label="Open timeline Untitled timeline"
             aria-pressed="false"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushBoth c1 active-timeline-button"
+            class="euiButtonEmpty euiButtonEmpty--small euiButtonEmpty--flushBoth c1 active-timeline-button css-9t7nyf-empty-primary"
             data-test-subj="flyoutOverlay"
             type="button"
           >
@@ -265,42 +91,42 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                 class="euiButtonEmpty__text"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                  class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <span
-                      class="euiToolTipAnchor"
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                     >
                       <div
                         class="euiHealth c2 emotion-euiHealth-s"
                       >
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                          class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row"
                         >
                           <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              color="success"
+                              color="warning"
                               data-euiicon-type="dot"
                             />
                           </div>
                           <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
                           />
                         </div>
                       </div>
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero c3"
+                    class="euiFlexItem c3 emotion-euiFlexItem-growZero"
                   >
                     Untitled timeline
                   </div>
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div />
                   </div>
@@ -308,113 +134,6 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
               </span>
             </span>
           </button>
-        </div>
-      </div>
-    </div>
-    <div
-      class="euiPanel euiPanel--plain c4 emotion-euiPanel-grow-m-plain-hasShadow"
-    >
-      <div
-        aria-label="You are in the timeline query area, which contains groups of data providers that query for events"
-        class="c5 drop-target-data-providers-container"
-      >
-        <div
-          class="c6 drop-target-data-providers"
-          data-test-subj="dataProviders"
-        >
-          <div
-            class="c7"
-            data-rbd-droppable-context-id="123"
-            data-rbd-droppable-id="123"
-            height="100%"
-          >
-            <div
-              class="c8 timeline-drop-area-empty"
-              data-test-subj="empty"
-            >
-              <div
-                class="c9"
-              >
-                <div
-                  class="euiText c10 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
-                >
-                  Drop anything
-                </div>
-                <span
-                  class="c11"
-                >
-                  <span
-                    class="euiBadge euiBadge--iconLeft c12 highlighted-drop-target"
-                    style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
-                    title="highlighted"
-                  >
-                    <span
-                      class="euiBadge__content"
-                    >
-                      <span
-                        class="euiBadge__text"
-                      >
-                        highlighted
-                      </span>
-                    </span>
-                  </span>
-                </span>
-                <div
-                  class="euiText c10 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
-                >
-                  here to build an
-                </div>
-                <span
-                  class="euiBadge euiBadge--hollow euiBadge--iconLeft c13"
-                  data-test-subj="and-or-badge"
-                  title="OR"
-                >
-                  <span
-                    class="euiBadge__content"
-                  >
-                    <span
-                      class="euiBadge__text"
-                    >
-                      OR
-                    </span>
-                  </span>
-                </span>
-                <div
-                  class="euiText c10 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
-                >
-                  query
-                </div>
-              </div>
-              <div
-                class="euiPopover emotion-euiPopover"
-                id="addFieldsPopover"
-              >
-                <div
-                  class="euiPopover__anchor css-16vtueo-render"
-                >
-                  <button
-                    class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
-                    data-test-subj="addField"
-                    type="button"
-                  >
-                    <span
-                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                    >
-                      <span
-                        class="euiButtonEmpty__text"
-                      >
-                        <div
-                          class="euiText emotion-euiText-s"
-                        >
-                          + Add field
-                        </div>
-                      </span>
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -8,7 +8,6 @@
 import { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import styled from 'styled-components';
 import {
   FormulaPublicApi,
   LensEmbeddableInput,
@@ -16,6 +15,9 @@ import {
   XYState,
 } from '@kbn/lens-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
+import styled from 'styled-components';
+import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
+import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
 import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
 import { AllSeries, ReportTypes, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
@@ -28,16 +30,16 @@ import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ActionTypes, useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { observabilityFeatureId } from '../../../../../common';
-import { SingleMetric, SingleMetricOptions } from './single_metric';
 
 export interface ExploratoryEmbeddableProps {
   appId?: 'securitySolutionUI' | 'observability';
   appendTitle?: JSX.Element;
   attributes?: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
-  customHeight?: string | number;
+  gridlinesVisibilitySettings?: XYState['gridlinesVisibilitySettings'];
+  customHeight?: string;
   customLensAttrs?: any; // Takes LensAttributes
-  customTimeRange?: { from: string; to: string }; // requred if rendered with LensAttributes
+  customTimeRange?: { from: string; to: string }; // required if rendered with LensAttributes
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
   isSingleMetric?: boolean;
   legendIsVisible?: boolean;
@@ -48,15 +50,19 @@ export interface ExploratoryEmbeddableProps {
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
   showCalculationMethod?: boolean;
-  singleMetricOptions?: SingleMetricOptions;
   title?: string | JSX.Element;
   withActions?: boolean | ActionTypes[];
   align?: 'left' | 'right' | 'center';
+  sparklineMode?: boolean;
+  noLabel?: boolean;
+  fontSize?: number;
+  lineHeight?: number;
+  dataTestSubj?: string;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
   lens: LensPublicStart;
-  indexPatterns: DataViewState;
+  dataViewState: DataViewState;
   lensFormulaHelper?: FormulaPublicApi;
 }
 
@@ -66,11 +72,11 @@ export default function Embeddable({
   appendTitle,
   attributes = [],
   axisTitlesVisibility,
+  gridlinesVisibilitySettings,
   customHeight,
   customLensAttrs,
   customTimeRange,
-  indexPatterns,
-  isSingleMetric = false,
+  dataViewState,
   legendIsVisible,
   legendPosition,
   lens,
@@ -79,18 +85,22 @@ export default function Embeddable({
   reportConfigMap = {},
   reportType,
   showCalculationMethod = false,
-  singleMetricOptions,
   title,
   withActions = true,
   lensFormulaHelper,
-  align,
   hideTicks,
+  align,
+  noLabel,
+  fontSize = 27,
+  lineHeight = 32,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
   const [isAddToCaseOpen, setAddToCaseOpen] = useState(false);
+
+  const spaceId = useKibanaSpace();
 
   const series = Object.entries(attributes)[0]?.[1];
 
@@ -101,25 +111,58 @@ export default function Embeddable({
     attributes,
     reportType,
     theme,
-    indexPatterns,
-    { ...reportConfigMap, ...obsvReportConfigMap }
+    dataViewState,
+    { ...reportConfigMap, ...obsvReportConfigMap },
+    spaceId.space?.id
   );
 
   let lensAttributes;
-  try {
-    if (reportType === ReportTypes.SINGLE_METRIC) {
-      lensAttributes = new SingleMetricLensAttributes(layerConfigs, reportType, lensFormulaHelper!);
-    } else {
-      lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
-    }
-    // eslint-disable-next-line no-empty
-  } catch (error) {}
+  let attributesJSON = customLensAttrs;
+  if (!customLensAttrs) {
+    try {
+      if (reportType === ReportTypes.SINGLE_METRIC) {
+        lensAttributes = new SingleMetricLensAttributes(
+          layerConfigs,
+          reportType,
+          lensFormulaHelper!
+        );
+        attributesJSON = lensAttributes?.getJSON('lnsLegacyMetric');
+      } else if (reportType === ReportTypes.HEATMAP) {
+        lensAttributes = new HeatMapLensAttributes(layerConfigs, reportType, lensFormulaHelper!);
+        attributesJSON = lensAttributes?.getJSON('lnsHeatmap');
+      } else {
+        lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
+        attributesJSON = lensAttributes?.getJSON();
+      }
+      // eslint-disable-next-line no-empty
+    } catch (error) {}
+  }
 
-  const attributesJSON = customLensAttrs ?? lensAttributes?.getJSON();
   const timeRange = customTimeRange ?? series?.time;
+
+  const actions = useActions({
+    withActions,
+    attributes,
+    reportType,
+    appId,
+    setIsSaveOpen,
+    setAddToCaseOpen,
+    lensAttributes: attributesJSON,
+    timeRange,
+  });
+
+  if (!attributesJSON) {
+    return null;
+  }
+
   if (typeof axisTitlesVisibility !== 'undefined') {
     (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
       axisTitlesVisibility;
+  }
+
+  if (typeof gridlinesVisibilitySettings !== 'undefined') {
+    (attributesJSON.state.visualization as XYState).gridlinesVisibilitySettings =
+      gridlinesVisibilitySettings;
   }
 
   if (typeof legendIsVisible !== 'undefined') {
@@ -137,17 +180,6 @@ export default function Embeddable({
     };
   }
 
-  const actions = useActions({
-    withActions,
-    attributes,
-    reportType,
-    appId,
-    setIsSaveOpen,
-    setAddToCaseOpen,
-    lensAttributes: attributesJSON,
-    timeRange,
-  });
-
   if (!attributesJSON && layerConfigs.length < 1) {
     return null;
   }
@@ -157,59 +189,47 @@ export default function Embeddable({
   }
 
   return (
-    <Wrapper $customHeight={customHeight} align={align}>
-      <EuiFlexGroup alignItems="center" gutterSize="none">
-        {title && (
-          <EuiFlexItem data-test-subj="exploratoryView-title">
-            <EuiTitle size="xs">
-              <h3>{title}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        )}
-        {showCalculationMethod && (
-          <EuiFlexItem grow={false} style={{ minWidth: 150 }}>
-            <OperationTypeComponent
-              operationType={operationType}
-              onChange={(val) => {
-                setOperationType(val);
-              }}
-            />
-          </EuiFlexItem>
-        )}
-        {appendTitle && appendTitle}
-      </EuiFlexGroup>
+    <Wrapper
+      $customHeight={customHeight}
+      align={align}
+      noLabel={noLabel}
+      fontSize={fontSize}
+      lineHeight={lineHeight}
+    >
+      {(title || showCalculationMethod || appendTitle) && (
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          {title && (
+            <EuiFlexItem data-test-subj="exploratoryView-title">
+              <EuiTitle size="xs">
+                <h3>{title}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+          )}
+          {showCalculationMethod && (
+            <EuiFlexItem grow={false} style={{ minWidth: 150 }}>
+              <OperationTypeComponent
+                operationType={operationType}
+                onChange={(val) => {
+                  setOperationType(val);
+                }}
+              />
+            </EuiFlexItem>
+          )}
+          {appendTitle && appendTitle}
+        </EuiFlexGroup>
+      )}
 
-      {isSingleMetric && (
-        <SingleMetric {...singleMetricOptions}>
-          <LensComponent
-            id="exploratoryView-singleMetric"
-            data-test-subj="exploratoryView-singleMetric"
-            style={{ height: '100%' }}
-            timeRange={timeRange}
-            attributes={attributesJSON}
-            onBrushEnd={onBrushEnd}
-            withDefaultActions={Boolean(withActions)}
-            extraActions={actions}
-            viewMode={ViewMode.VIEW}
-            executionContext={{
-              type: 'observability_exploratory_view_embeddable',
-            }}
-          />
-        </SingleMetric>
-      )}
-      {!isSingleMetric && (
-        <LensComponent
-          id="exploratoryView"
-          data-test-subj="exploratoryView"
-          style={{ height: '100%' }}
-          timeRange={timeRange}
-          attributes={attributesJSON}
-          onBrushEnd={onBrushEnd}
-          withDefaultActions={Boolean(withActions)}
-          extraActions={actions}
-          viewMode={ViewMode.VIEW}
-        />
-      )}
+      <LensComponent
+        id="exploratoryView"
+        data-test-subj="exploratoryView"
+        style={{ height: '100%' }}
+        timeRange={timeRange}
+        attributes={{ ...attributesJSON, title: undefined, hidePanelTitles: true, description: '' }}
+        onBrushEnd={onBrushEnd}
+        withDefaultActions={Boolean(withActions)}
+        extraActions={actions}
+        viewMode={ViewMode.VIEW}
+      />
       {isSaveOpen && attributesJSON && (
         <LensSaveModalComponent
           initialInput={attributesJSON as unknown as LensEmbeddableInput}
@@ -234,45 +254,54 @@ export default function Embeddable({
 const Wrapper = styled.div<{
   $customHeight?: string | number;
   align?: 'left' | 'right' | 'center';
+  noLabel?: boolean;
+  fontSize?: number;
+  lineHeight?: number;
 }>`
-  height: 100%;
+  height: ${(props) => (props.$customHeight ? `${props.$customHeight};` : `100%;`)};
+  position: relative;
   &&& {
     > :nth-child(2) {
       height: ${(props) =>
         props.$customHeight ? `${props.$customHeight};` : `calc(100% - 32px);`};
     }
-    .embPanel--editing {
-      border-style: initial !important;
-      :hover {
-        box-shadow: none;
-      }
-    }
-    .embPanel__title {
-      display: none;
-    }
-    .embPanel__optionsMenuPopover {
-      visibility: collapse;
-    }
     .expExpressionRenderer__expression {
-      padding-top: 0;
+      padding: 0 !important;
     }
 
-    &&&:hover {
-      .embPanel__optionsMenuPopover {
-        visibility: visible;
+    .legacyMtrVis {
+      > :first-child {
+        justify-content: ${(props) =>
+          props.align === 'left'
+            ? `flex-start;`
+            : props.align === 'right'
+            ? `flex-end;`
+            : 'center;'};
       }
-    }
-    .legacyMtrVis > :first-child {
-      justify-content: ${(props) =>
-        props.align === 'left' ? `flex-start;` : props.align === 'right' ? `flex-end;` : 'center;'};
+      justify-content: flex-end;
       .legacyMtrVis__container {
-        padding-top: 4px;
-        padding-left: ${(props) => (props.align === 'left' ? `0` : '16px;')};
-        padding-right: ${(props) => (props.align === 'right' ? `0` : '16px;')};
+        padding: 0;
+        > :nth-child(2) {
+          ${({ noLabel }) =>
+            noLabel &&
+            ` display: none;
+        `}
+        }
+      }
+      .legacyMtrVis__value {
+        line-height: ${({ lineHeight }) => lineHeight}px !important;
+        font-size: ${({ fontSize }) => fontSize}px !important;
       }
       > :first-child {
         transform: none !important;
       }
+    }
+
+    .euiLoadingChart {
+      position: absolute;
+      top: 50%;
+      right: 50%;
+      transform: translate(50%, -50%);
     }
   }
 `;

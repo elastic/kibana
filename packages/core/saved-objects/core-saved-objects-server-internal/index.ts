@@ -22,6 +22,7 @@ export { registerBulkCreateRoute } from './src/routes/bulk_create';
 export { registerBulkGetRoute } from './src/routes/bulk_get';
 export { registerBulkResolveRoute } from './src/routes/bulk_resolve';
 export { registerBulkUpdateRoute } from './src/routes/bulk_update';
+export { registerBulkDeleteRoute } from './src/routes/bulk_delete';
 export { registerCreateRoute } from './src/routes/create';
 export { registerDeleteRoute } from './src/routes/delete';
 export { registerExportRoute } from './src/routes/export';

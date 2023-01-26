@@ -1,14 +1,27 @@
 {
-    "id": "visTypePie",
-    "version": "kibana",
-    "ui": true,
-    "server": true,
-    "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection", "expressionPartitionVis"],
-    "requiredBundles": ["visDefaultEditor"],
-    "extraPublicDirs": ["common/index"],
-    "owner": {
-      "name": "Vis Editors",
-      "githubTeam": "kibana-vis-editors"
-    },
-    "description": "Contains the pie chart implementation using the elastic-charts library. The goal is to eventually deprecate the old implementation and keep only this. Until then, the library used is defined by the Legacy charts library advanced setting."
-  }
+  "id": "visTypePie",
+  "version": "kibana",
+  "ui": true,
+  "server": true,
+  "requiredPlugins": [
+    "charts",
+    "data",
+    "expressions",
+    "visualizations",
+    "usageCollection",
+    "expressionPartitionVis",
+    "dataViews"
+  ],
+  "requiredBundles": [
+    "visDefaultEditor",
+    "kibanaUtils"
+  ],
+  "extraPublicDirs": [
+    "common/index"
+  ],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-visualizations"
+  },
+  "description": "Contains the pie chart implementation using the elastic-charts library. The goal is to eventually deprecate the old implementation and keep only this. Until then, the library used is defined by the Legacy charts library advanced setting."
+}

@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "public/**/*",
@@ -12,13 +9,25 @@
     "common/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
-    { "path": "../embeddable/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../ui_actions/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/licensing/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/es-query",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/i18n-react",
+    "@kbn/handlebars",
+    "@kbn/rison",
+    "@kbn/datemath",
+    "@kbn/monaco",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -37,6 +37,7 @@ describe('MonitorListStatusColumn', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 123 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {
@@ -58,6 +59,7 @@ describe('MonitorListStatusColumn', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 123 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {
@@ -79,6 +81,7 @@ describe('MonitorListStatusColumn', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 123 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {
@@ -103,6 +106,7 @@ describe('MonitorListStatusColumn', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 123 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {
@@ -124,6 +128,7 @@ describe('MonitorListStatusColumn', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 123 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {
@@ -145,6 +150,7 @@ describe('MonitorListStatusColumn', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 123 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {
@@ -169,6 +175,7 @@ describe('MonitorListStatusColumn', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 123 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {
@@ -190,6 +197,7 @@ describe('MonitorListStatusColumn', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 123 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {
@@ -211,6 +219,7 @@ describe('MonitorListStatusColumn', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 123 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {

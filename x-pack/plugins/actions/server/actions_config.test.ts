@@ -43,6 +43,15 @@ const defaultActionsConfig: ActionsConfig = {
 };
 
 describe('ensureUriAllowed', () => {
+  test('throws an error when the Uri is an empty string', () => {
+    const config: ActionsConfig = defaultActionsConfig;
+    expect(() =>
+      getActionsConfigurationUtilities(config).ensureUriAllowed('')
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"target url \\"\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+    );
+  });
+
   test('returns true when "any" hostnames are allowed', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
@@ -523,5 +532,40 @@ describe('validateEmailAddresses()', () => {
     expect(message).toMatchInlineSnapshot(
       `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org"`
     );
+  });
+});
+
+describe('getMaxAttempts()', () => {
+  test('returns the maxAttempts defined in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      run: { maxAttempts: 1 },
+    });
+    const maxAttempts = acu.getMaxAttempts({ actionTypeMaxAttempts: 2, actionTypeId: 'slack' });
+    expect(maxAttempts).toEqual(1);
+  });
+
+  test('returns the maxAttempts defined in config for the action type', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      run: { maxAttempts: 1, connectorTypeOverrides: [{ id: 'slack', maxAttempts: 4 }] },
+    });
+    const maxAttempts = acu.getMaxAttempts({ actionTypeMaxAttempts: 2, actionTypeId: 'slack' });
+    expect(maxAttempts).toEqual(4);
+  });
+
+  test('returns the maxAttempts passed by the action type', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const maxAttempts = acu.getMaxAttempts({ actionTypeMaxAttempts: 2, actionTypeId: 'slack' });
+    expect(maxAttempts).toEqual(2);
+  });
+
+  test('returns the default maxAttempts', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const maxAttempts = acu.getMaxAttempts({
+      actionTypeMaxAttempts: undefined,
+      actionTypeId: 'slack',
+    });
+    expect(maxAttempts).toEqual(3);
   });
 });

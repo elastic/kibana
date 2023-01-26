@@ -10,7 +10,8 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { basicCase, basicPush, getUserAction } from '../../containers/mock';
-import { UserActionBuilderArgs } from './types';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
+import type { UserActionBuilderArgs } from './types';
 
 export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const userAction = getUserAction('title', Actions.update);
@@ -63,6 +64,8 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
 
   return {
     userAction,
+    userProfiles: userProfilesMap,
+    currentUserProfile: userProfiles[0],
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
     caseData: basicCase,

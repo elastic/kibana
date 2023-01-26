@@ -65,6 +65,7 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.NAME]: (fields) => fields?.[ConfigKey.NAME]?.value ?? '',
   [ConfigKey.LOCATIONS]: getCommonNormalizer(ConfigKey.LOCATIONS),
   [ConfigKey.ENABLED]: getCommonNormalizer(ConfigKey.ENABLED),
+  [ConfigKey.ALERT_CONFIG]: getCommonNormalizer(ConfigKey.ENABLED),
   [ConfigKey.MONITOR_TYPE]: getCommonNormalizer(ConfigKey.MONITOR_TYPE),
   [ConfigKey.LOCATIONS]: getCommonNormalizer(ConfigKey.LOCATIONS),
   [ConfigKey.SCHEDULE]: (fields) => {
@@ -92,4 +93,10 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.REVISION]: getCommonNormalizer(ConfigKey.REVISION),
   [ConfigKey.MONITOR_SOURCE_TYPE]: getCommonNormalizer(ConfigKey.MONITOR_SOURCE_TYPE),
   [ConfigKey.FORM_MONITOR_TYPE]: getCommonNormalizer(ConfigKey.FORM_MONITOR_TYPE),
+  [ConfigKey.JOURNEY_ID]: getCommonNormalizer(ConfigKey.JOURNEY_ID),
+  [ConfigKey.PROJECT_ID]: getCommonNormalizer(ConfigKey.PROJECT_ID),
+  [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCommonNormalizer(ConfigKey.CUSTOM_HEARTBEAT_ID),
+  [ConfigKey.ORIGINAL_SPACE]: getCommonNormalizer(ConfigKey.ORIGINAL_SPACE),
+  [ConfigKey.CONFIG_HASH]: getCommonNormalizer(ConfigKey.CONFIG_HASH),
+  [ConfigKey.MONITOR_QUERY_ID]: getCommonNormalizer(ConfigKey.MONITOR_QUERY_ID),
 };

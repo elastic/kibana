@@ -1,0 +1,10 @@
+title: Agent component status
+type: string
+enum:
+  - starting
+  - configuring
+  - healthy
+  - degraded
+  - failed
+  - stopping
+  - stopped

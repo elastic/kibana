@@ -32,7 +32,7 @@ export function registerActionStatusRoutes(
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { all: ['canReadSecuritySolution'] },
       endpointContext.logFactory.get('hostIsolationStatus'),
       actionStatusRequestHandler(endpointContext)
     )

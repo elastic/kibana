@@ -11,9 +11,9 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
 import { ConfigSchema } from '../config';
-import { setIndexPatterns, setTheme, setOverlays, setAutocomplete } from './services';
+import { setIndexPatterns, setTheme, setOverlays } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
-import { createSearchBar } from './search_bar';
+import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
 import type {
   UnifiedSearchStartDependencies,
@@ -53,6 +53,7 @@ export class UnifiedSearchPublicPlugin
     );
 
     uiActions.registerAction(createUpdateFilterReferencesAction(query.filterManager));
+    this.usageCollection = usageCollection;
 
     return {
       autocomplete: this.autocomplete.setup(core, {
@@ -70,7 +71,6 @@ export class UnifiedSearchPublicPlugin
     setOverlays(core.overlays);
     setIndexPatterns(dataViews);
     const autocompleteStart = this.autocomplete.start();
-    setAutocomplete(autocompleteStart);
 
     const SearchBar = createSearchBar({
       core,
@@ -78,17 +78,14 @@ export class UnifiedSearchPublicPlugin
       storage: this.storage,
       usageCollection: this.usageCollection,
       isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
+      unifiedSearch: {
+        autocomplete: autocompleteStart,
+      },
     });
 
-    uiActions.addTriggerAction(
-      APPLY_FILTER_TRIGGER,
-      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
-    );
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER);
 
-    uiActions.addTriggerAction(
-      UPDATE_FILTER_REFERENCES_TRIGGER,
-      uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION)
-    );
+    uiActions.attachAction(UPDATE_FILTER_REFERENCES_TRIGGER, UPDATE_FILTER_REFERENCES_ACTION);
 
     return {
       ui: {

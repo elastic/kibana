@@ -42,7 +42,7 @@ const createResult = (result: Result): GlobalSearchResult => {
 const createBatch = (...results: Result[]): GlobalSearchBatchedResults => ({
   results: results.map(createResult),
 });
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('SearchBar', () => {
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;

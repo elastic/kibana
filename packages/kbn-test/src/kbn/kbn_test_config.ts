@@ -9,7 +9,7 @@
 import url from 'url';
 import { kibanaTestUser } from './users';
 
-interface UrlParts {
+export interface UrlParts {
   protocol?: string;
   hostname?: string;
   port?: number;

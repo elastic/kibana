@@ -11,6 +11,7 @@ import type {
   IScopedClusterClient,
   Logger,
   IBasePath,
+  CoreStart,
 } from '@kbn/core/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
@@ -30,16 +31,18 @@ import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
-import { UptimeESClient } from '../../lib';
+import { UptimeEsClient } from '../../lib';
 import type { TelemetryEventsSender } from '../../telemetry/sender';
 import type { UptimeRouter } from '../../../../types';
 import { UptimeConfig } from '../../../../../common/config';
 
+export type UMElasticsearchQueryFnParams<P> = {
+  uptimeEsClient: UptimeEsClient;
+  esClient?: IScopedClusterClient;
+} & P;
+
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: {
-    uptimeEsClient: UptimeESClient;
-    esClient?: IScopedClusterClient;
-  } & P
+  params: UMElasticsearchQueryFnParams<P>
 ) => Promise<R>;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
@@ -57,12 +60,13 @@ export interface UptimeServerSetup {
   savedObjectsClient?: SavedObjectsClientContract;
   authSavedObjectsClient?: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  kibanaVersion: string;
+  stackVersion: string;
   logger: Logger;
   telemetry: TelemetryEventsSender;
-  uptimeEsClient: UptimeESClient;
+  uptimeEsClient: UptimeEsClient;
   basePath: IBasePath;
   isDev?: boolean;
+  coreStart: CoreStart;
 }
 
 export interface UptimeCorePluginsSetup {

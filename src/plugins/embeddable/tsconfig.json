@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     ".storybook/**/*",
@@ -12,12 +9,26 @@
     "public/**/*",
     "server/**/*"
   ],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../inspector/tsconfig.json" },
-    { "path": "../saved_objects/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../ui_actions/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/inspector-plugin",
+    "@kbn/saved-objects-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/i18n-react",
+    "@kbn/storybook",
+    "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/core-theme-browser",
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/std",
+    "@kbn/expressions-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

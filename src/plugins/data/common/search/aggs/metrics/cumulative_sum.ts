@@ -12,12 +12,19 @@ import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
-import { AggConfigSerialized, BaseAggParams } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
-export interface AggParamsCumulativeSum extends BaseAggParams {
+export interface CommonAggParamsCumulativeSum extends BaseAggParams {
   buckets_path?: string;
-  customMetric?: AggConfigSerialized;
   metricAgg?: string;
+}
+
+export interface AggParamsCumulativeSumSerialized extends CommonAggParamsCumulativeSum {
+  customMetric?: AggConfigSerialized;
+}
+
+export interface AggParamsCumulativeSum extends CommonAggParamsCumulativeSum {
+  customMetric?: IAggConfig;
 }
 
 const cumulativeSumLabel = i18n.translate('data.search.aggs.metrics.cumulativeSumLabel', {

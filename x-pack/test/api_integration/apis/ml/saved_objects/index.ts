@@ -18,5 +18,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./sync_jobs'));
     loadTestFile(require.resolve('./sync_trained_models'));
     loadTestFile(require.resolve('./update_jobs_spaces'));
+    loadTestFile(require.resolve('./remove_from_current_space'));
   });
 }

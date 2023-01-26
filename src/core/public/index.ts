@@ -26,30 +26,19 @@
 
 import './index.scss';
 
-import type {
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-} from '@kbn/core-injected-metadata-browser';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { ExecutionContextSetup, ExecutionContextStart } from '@kbn/core-execution-context-browser';
-import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
-
-import type {
+export type { DocLinksStart } from '@kbn/core-doc-links-browser';
+export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
+export type { I18nStart } from '@kbn/core-i18n-browser';
+export type {
   FatalErrorsSetup,
   FatalErrorsStart,
   FatalErrorInfo,
 } from '@kbn/core-fatal-errors-browser';
-import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
-import type { Capabilities } from '@kbn/core-capabilities-common';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
-import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
-import type { ApplicationSetup, ApplicationStart } from '@kbn/core-application-browser';
-import type {
+export type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+export type { Capabilities } from '@kbn/core-capabilities-common';
+export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
+export type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+export type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
@@ -68,22 +57,23 @@ import type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
-  NavType,
   ChromeHelpMenuActions,
-} from './chrome';
-import type {
+} from '@kbn/core-chrome-browser';
+export type {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
-  PluginOpaqueId,
-} from './plugins';
+} from '@kbn/core-plugins-browser';
+export type { PluginOpaqueId } from '@kbn/core-base-common';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
 export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
-export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
-export type { CoreSystem } from './core_system';
-export type { AppCategory } from '../types';
+export {
+  DEFAULT_APP_CATEGORIES,
+  APP_WRAPPER_CLASS,
+  type AppCategory,
+} from '@kbn/core-application-common';
 export type {
   UiSettingsParams,
   PublicUiSettingsParams,
@@ -225,7 +215,7 @@ export type {
 
 export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
 
-export { URL_MAX_LENGTH } from './core_app';
+export { URL_MAX_LENGTH } from '@kbn/core-apps-browser-internal';
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
@@ -234,135 +224,8 @@ export type {
   ExecutionContextStart,
 } from '@kbn/core-execution-context-browser';
 
-/**
- * Core services exposed to the `Plugin` setup lifecycle
- *
- * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
- *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
- * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
- *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
- *
- * @public
- *
- * @internalRemarks We document the properties with \@link tags to improve
- * navigation in the generated docs until there's a fix for
- * https://github.com/Microsoft/web-build-tools/issues/1237
- */
-export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
-  /** {@link AnalyticsServiceSetup} */
-  analytics: AnalyticsServiceSetup;
-  /** {@link ApplicationSetup} */
-  application: ApplicationSetup;
-  /** {@link FatalErrorsSetup} */
-  fatalErrors: FatalErrorsSetup;
-  /** {@link HttpSetup} */
-  http: HttpSetup;
-  /** {@link NotificationsSetup} */
-  notifications: NotificationsSetup;
-  /** {@link IUiSettingsClient} */
-  uiSettings: IUiSettingsClient;
-  /** {@link ExecutionContextSetup} */
-  executionContext: ExecutionContextSetup;
-  /** {@link InjectedMetadataSetup} */
-  injectedMetadata: InjectedMetadataSetup;
-  /** {@link ThemeServiceSetup} */
-  theme: ThemeServiceSetup;
-  /** {@link StartServicesAccessor} */
-  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
-}
+export type { CoreSetup, CoreStart, StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 
-/**
- * Allows plugins to get access to APIs available in start inside async
- * handlers, such as {@link App.mount}. Promise will not resolve until Core
- * and plugin dependencies have completed `start`.
- *
- * @public
- */
-export type StartServicesAccessor<
-  TPluginsStart extends object = object,
-  TStart = unknown
-> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+export type { CoreSystem } from '@kbn/core-root-browser-internal';
 
-/**
- * Core services exposed to the `Plugin` start lifecycle
- *
- * @public
- *
- * @internalRemarks We document the properties with \@link tags to improve
- * navigation in the generated docs until there's a fix for
- * https://github.com/Microsoft/web-build-tools/issues/1237
- */
-export interface CoreStart {
-  /** {@link AnalyticsServiceStart} */
-  analytics: AnalyticsServiceStart;
-  /** {@link ApplicationStart} */
-  application: ApplicationStart;
-  /** {@link ChromeStart} */
-  chrome: ChromeStart;
-  /** {@link DocLinksStart} */
-  docLinks: DocLinksStart;
-  /** {@link ExecutionContextStart} */
-  executionContext: ExecutionContextStart;
-  /** {@link HttpStart} */
-  http: HttpStart;
-  /** {@link SavedObjectsStart} */
-  savedObjects: SavedObjectsStart;
-  /** {@link I18nStart} */
-  i18n: I18nStart;
-  /** {@link NotificationsStart} */
-  notifications: NotificationsStart;
-  /** {@link OverlayStart} */
-  overlays: OverlayStart;
-  /** {@link IUiSettingsClient} */
-  uiSettings: IUiSettingsClient;
-  /** {@link FatalErrorsStart} */
-  fatalErrors: FatalErrorsStart;
-  /** {@link DeprecationsServiceStart} */
-  deprecations: DeprecationsServiceStart;
-  /** {@link ThemeServiceStart} */
-  theme: ThemeServiceStart;
-  /** {@link InjectedMetadataStart} */
-  injectedMetadata: InjectedMetadataStart;
-}
-
-export type {
-  Capabilities,
-  ChromeBadge,
-  ChromeBreadcrumb,
-  ChromeHelpExtension,
-  ChromeHelpMenuActions,
-  ChromeHelpExtensionMenuLink,
-  ChromeHelpExtensionLinkBase,
-  ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
-  ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  ChromeNavControl,
-  ChromeNavControls,
-  ChromeNavLink,
-  ChromeNavLinks,
-  ChromeDocTitle,
-  ChromeRecentlyAccessed,
-  ChromeRecentlyAccessedHistoryItem,
-  ChromeUserBanner,
-  ChromeStart,
-  DocLinksStart,
-  FatalErrorInfo,
-  FatalErrorsSetup,
-  FatalErrorsStart,
-  HttpSetup,
-  HttpStart,
-  I18nStart,
-  NotificationsSetup,
-  NotificationsStart,
-  Plugin,
-  PluginInitializer,
-  PluginInitializerContext,
-  SavedObjectsStart,
-  PluginOpaqueId,
-  IUiSettingsClient,
-  UiSettingsState,
-  NavType,
-};
-
-export { __kbnBootstrap__ } from './kbn_bootstrap';
+export { __kbnBootstrap__ } from '@kbn/core-root-browser-internal';

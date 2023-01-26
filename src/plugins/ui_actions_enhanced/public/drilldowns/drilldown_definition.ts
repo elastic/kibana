@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { LicenseType } from '@kbn/licensing-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import {
+import type { FC } from 'react';
+import type { LicenseType } from '@kbn/licensing-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import type {
   ActionFactoryDefinition,
   BaseActionConfig,
   BaseActionFactoryContext,
+  SerializedAction,
   SerializedEvent,
 } from '../dynamic_actions';
 
@@ -71,22 +73,17 @@ export interface DrilldownDefinition<
   createConfig: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>['createConfig'];
 
   /**
-   * `UiComponent` that collects config for this drilldown. You can create
-   * a React component and transform it `UiComponent` using `uiToReactComponent`
-   * helper from `kibana_utils` plugin.
+   * Component that collects config for this drilldown.
    *
    * ```tsx
    * import React from 'react';
-   * import { uiToReactComponent } from 'src/plugins/kibana_utils';
    * import { CollectConfigProps } from 'src/plugins/kibana_utils/public';
    *
    * type Props = CollectConfigProps<Config>;
    *
-   * const ReactCollectConfig: React.FC<Props> = () => {
+   * export const CollectConfig: React.FC<Props> = () => {
    *   return <div>Collecting config...'</div>;
    * };
-   *
-   * export const CollectConfig = uiToReactComponent(ReactCollectConfig);
    * ```
    */
   CollectConfig: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>['CollectConfig'];
@@ -109,9 +106,18 @@ export interface DrilldownDefinition<
 
   /**
    * Should return an internationalized name of the drilldown, which will be
-   * displayed to the user.
+   * displayed to the user as the name of drilldown factory when configuring a drilldown.
    */
   getDisplayName: () => string;
+
+  /**
+   * Name of the drilldown instance displayed to the user at the moment of
+   * drilldown execution. Should be internationalized.
+   */
+  readonly actionMenuItem?: FC<{
+    config: Omit<SerializedAction<Config>, 'factoryId'>;
+    context: ExecutionContext | ActionExecutionContext<ExecutionContext>;
+  }>;
 
   /**
    * isCompatible during execution

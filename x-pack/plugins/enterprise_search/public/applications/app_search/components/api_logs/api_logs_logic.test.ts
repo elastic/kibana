@@ -119,7 +119,7 @@ describe('ApiLogsLogic', () => {
 
   describe('listeners', () => {
     describe('pollForApiLogs', () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
       const setIntervalSpy = jest.spyOn(global, 'setInterval');
 
       it('starts a poll that calls fetchApiLogs at set intervals', () => {

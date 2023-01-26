@@ -15,14 +15,11 @@ import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
+import { ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { Query, Filter, TimeRange } from '@kbn/es-query';
-import { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
-import {
-  reactToUiComponent,
-  UrlTemplateEditorVariable,
-  KibanaContextProvider,
-} from '@kbn/kibana-react-plugin/public';
+import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
+import { UrlTemplateEditorVariable, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UrlDrilldownGlobalScope,
@@ -32,6 +29,7 @@ import {
   urlDrilldownCompileUrl,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
 import { txtUrlDrilldownDisplayName } from './i18n';
 import { getEventVariableList, getEventScopeValues } from './variables/event_variables';
 import { getContextVariableList, getContextScopeValues } from './variables/context_variables';
@@ -61,7 +59,8 @@ export type UrlTrigger =
   | typeof VALUE_CLICK_TRIGGER
   | typeof SELECT_RANGE_TRIGGER
   | typeof ROW_CLICK_TRIGGER
-  | typeof CONTEXT_MENU_TRIGGER;
+  | typeof CONTEXT_MENU_TRIGGER
+  | typeof IMAGE_CLICK_TRIGGER;
 
 export interface ActionFactoryContext extends BaseActionFactoryContext {
   embeddable?: EmbeddableWithQueryInput;
@@ -82,17 +81,39 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly getDisplayName = () => txtUrlDrilldownDisplayName;
 
+  public readonly actionMenuItem: React.FC<{
+    config: Omit<SerializedAction<UrlDrilldownConfig>, 'factoryId'>;
+    context: ActionContext | ActionExecutionContext<ActionContext>;
+  }> = ({ config, context }) => {
+    const [title, setTitle] = React.useState(config.name);
+    React.useEffect(() => {
+      let unmounted = false;
+      const variables = this.getRuntimeVariables(context);
+      urlDrilldownCompileUrl(title, variables, false)
+        .then((result) => {
+          if (unmounted) return;
+          if (title !== result) setTitle(result);
+        })
+        .catch(() => {});
+      return () => {
+        unmounted = true;
+      };
+    });
+    return <>{title}</>;
+  };
+
   public readonly euiIcon = 'link';
 
   supportedTriggers(): UrlTrigger[] {
-    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, ROW_CLICK_TRIGGER, CONTEXT_MENU_TRIGGER];
+    return [
+      VALUE_CLICK_TRIGGER,
+      SELECT_RANGE_TRIGGER,
+      ROW_CLICK_TRIGGER,
+      CONTEXT_MENU_TRIGGER,
+      IMAGE_CLICK_TRIGGER,
+    ];
   }
-
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({
-    config,
-    onConfig,
-    context,
-  }) => {
+  public readonly CollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig, context }) => {
     const [variables, exampleUrl] = React.useMemo(
       () => [this.getVariableList(context), this.getExampleUrl(context)],
       [context]
@@ -115,8 +136,6 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       </KibanaContextProvider>
     );
   };
-
-  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
     url: {
@@ -206,6 +225,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       case SELECT_RANGE_TRIGGER:
         return 'https://www.example.com/?from={{event.from}}&to={{event.to}}';
       case CONTEXT_MENU_TRIGGER:
+      case IMAGE_CLICK_TRIGGER:
         return 'https://www.example.com/?panel={{context.panel.title}}';
       case ROW_CLICK_TRIGGER:
         return 'https://www.example.com/keys={{event.keys}}&values={{event.values}}';

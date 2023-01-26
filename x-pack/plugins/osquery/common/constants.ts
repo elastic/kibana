@@ -11,3 +11,5 @@ export const OSQUERY_INTEGRATION_NAME = 'osquery_manager';
 export const BASE_PATH = '/app/osquery';
 export const ACTIONS_INDEX = `.logs-${OSQUERY_INTEGRATION_NAME}.actions`;
 export const ACTION_RESPONSES_INDEX = `.logs-${OSQUERY_INTEGRATION_NAME}.action.responses`;
+
+export const DEFAULT_PLATFORM = 'linux,windows,darwin';

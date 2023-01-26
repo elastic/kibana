@@ -1,11 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -13,5 +9,33 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/std",
+    "@kbn/logging",
+    "@kbn/i18n",
+    "@kbn/crypto",
+    "@kbn/config-schema",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-status-common",
+    "@kbn/core-analytics-server",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-execution-context-server-internal",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-client-server-internal",
+    "@kbn/core-test-helpers-deprecations-getters",
+    "@kbn/config",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-analytics-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/repo-info",
+    "@kbn/config-mocks",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-http-server-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

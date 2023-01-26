@@ -31,6 +31,5 @@ export const PanelWithCodeBlock: React.FunctionComponent<PanelWithCodeBlockProps
         </EuiCodeBlock>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
-    <EuiSpacer size="l" />
   </>
 );

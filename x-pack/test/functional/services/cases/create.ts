@@ -6,7 +6,7 @@
  */
 
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CasesCommon } from './common';
 
@@ -16,6 +16,7 @@ export interface CreateCaseParams {
   tag?: string;
   severity?: CaseSeverity;
   owner?: string;
+  assignees?: [];
 }
 
 export function CasesCreateViewServiceProvider(
@@ -49,42 +50,54 @@ export function CasesCreateViewServiceProvider(
      * Doesn't do navigation. Only works if you are already inside a cases app page.
      */
     async createCase({
-      title = 'test-' + uuid.v4(),
-      description = 'desc' + uuid.v4(),
+      title = 'test-' + uuidv4(),
+      description = 'desc' + uuidv4(),
       tag = 'tagme',
       severity = CaseSeverity.LOW,
       owner,
     }: CreateCaseParams) {
-      await this.setCaseTitle(title);
-
-      await this.setCaseTags(tag);
-
-      // case description
-      const descriptionArea = await find.byCssSelector('textarea.euiMarkdownEditorTextArea');
-      await descriptionArea.focus();
-      await descriptionArea.type(description);
+      await this.setTitle(title);
+      await this.setDescription(description);
+      await this.setTags(tag);
 
       if (severity !== CaseSeverity.LOW) {
-        await common.clickAndValidate(
-          'case-severity-selection',
-          `case-severity-selection-${severity}`
-        );
+        await this.setSeverity(severity);
       }
 
       if (owner) {
-        await testSubjects.click(`${owner}RadioButton`);
+        await this.setSolution(owner);
       }
 
-      // save
-      await testSubjects.click('create-case-submit');
+      await this.submitCase();
     },
 
-    async setCaseTitle(title: string) {
+    async setTitle(title: string) {
       await testSubjects.setValue('input', title);
     },
 
-    async setCaseTags(tag: string) {
-      await comboBox.setCustom('comboBoxInput', tag);
+    async setDescription(description: string) {
+      const descriptionArea = await find.byCssSelector('textarea.euiMarkdownEditorTextArea');
+      await descriptionArea.focus();
+      await descriptionArea.type(description);
+    },
+
+    async setTags(tag: string) {
+      await comboBox.setCustom('caseTags', tag);
+    },
+
+    async setSolution(owner: string) {
+      await testSubjects.click(`${owner}RadioButton`);
+    },
+
+    async setSeverity(severity: CaseSeverity) {
+      await common.clickAndValidate(
+        'case-severity-selection',
+        `case-severity-selection-${severity}`
+      );
+    },
+
+    async submitCase() {
+      await testSubjects.click('create-case-submit');
     },
 
     async assertCreateCaseFlyoutVisible(expectVisible = true) {

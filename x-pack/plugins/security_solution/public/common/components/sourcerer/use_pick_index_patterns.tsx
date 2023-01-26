@@ -9,12 +9,13 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import type { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
-import { getSourcererDataView } from '../../containers/sourcerer/api';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { useKibana } from '../../lib/kibana';
+import { getSourcererDataView } from '../../containers/sourcerer/get_sourcerer_data_view';
 
 interface UsePickIndexPatternsProps {
   dataViewId: string | null;
@@ -61,6 +62,9 @@ export const usePickIndexPatterns = ({
   signalIndexName,
 }: UsePickIndexPatternsProps): UsePickIndexPatterns => {
   const dispatch = useDispatch();
+  const {
+    data: { dataViews },
+  } = useKibana().services;
   const isHookAlive = useRef(true);
   const [loadingIndexPatterns, setLoadingIndexPatterns] = useState(false);
   const alertsOptions = useMemo(
@@ -191,19 +195,12 @@ export const usePickIndexPatterns = ({
         try {
           setLoadingIndexPatterns(true);
           setSelectedOptions([]);
-          // TODO We will need to figure out how to pass an abortController, but as right now this hook is
-          // constantly getting destroy and re-init
-          const pickedDataViewData = await getSourcererDataView(newSelectedDataViewId);
+          const dataView = await getSourcererDataView(newSelectedDataViewId, dataViews);
+
           if (isHookAlive.current) {
-            dispatch(
-              sourcererActions.updateSourcererDataViews({
-                dataView: pickedDataViewData,
-              })
-            );
+            dispatch(sourcererActions.setDataView(dataView));
             setSelectedOptions(
-              isOnlyDetectionAlerts
-                ? alertsOptions
-                : patternListToOptions(pickedDataViewData.patternList)
+              isOnlyDetectionAlerts ? alertsOptions : patternListToOptions(dataView.patternList)
             );
           }
         } catch (err) {
@@ -220,6 +217,7 @@ export const usePickIndexPatterns = ({
       getDefaultSelectedOptionsByDataView,
       isOnlyDetectionAlerts,
       kibanaDataViews,
+      dataViews,
     ]
   );
 

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { get, isEqual } from 'lodash';
+import { get } from 'lodash';
 import { ConfigKey, DataStream, FormMonitorType, MonitorFields } from '../types';
-import { DEFAULT_FIELDS, DEFAULT_TLS_FIELDS } from '../constants';
+import { DEFAULT_FIELDS } from '../constants';
 
 export const formatter = (fields: Record<string, any>) => {
   const monitorType = fields[ConfigKey.MONITOR_TYPE] as DataStream;
@@ -15,7 +15,7 @@ export const formatter = (fields: Record<string, any>) => {
   Object.keys(defaults).map((key) => {
     /* split key names on dot to handle dot notation fields,
      * which are changed to nested fields by react-hook-form */
-    monitorFields[key] = get(fields, key.split('.')) || defaults[key as ConfigKey];
+    monitorFields[key] = get(fields, key.split('.')) ?? defaults[key as ConfigKey];
   });
   return monitorFields as MonitorFields;
 };
@@ -46,14 +46,14 @@ export const format = (fields: Record<string, unknown>) => {
     [FormMonitorType.HTTP]: {
       ...formattedFields,
       [ConfigKey.METADATA]: {
-        is_tls_enabled: isCustomTLSEnabled(formattedFields),
+        is_tls_enabled: fields.isTLSEnabled,
       },
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
     },
     [FormMonitorType.TCP]: {
       ...formattedFields,
       [ConfigKey.METADATA]: {
-        is_tls_enabled: isCustomTLSEnabled(formattedFields),
+        is_tls_enabled: fields.isTLSEnabled,
       },
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
     },
@@ -63,12 +63,4 @@ export const format = (fields: Record<string, unknown>) => {
     },
   };
   return formattedMap[fields[ConfigKey.FORM_MONITOR_TYPE] as FormMonitorType];
-};
-
-const isCustomTLSEnabled = (fields: MonitorFields) => {
-  const tlsFields: Record<string, unknown> = {};
-  Object.keys(DEFAULT_TLS_FIELDS).map((key) => {
-    tlsFields[key] = fields[key as keyof MonitorFields];
-  });
-  return !isEqual(tlsFields, DEFAULT_TLS_FIELDS);
 };

@@ -14,7 +14,9 @@ import {
   LayoutDirection,
   Metric,
   MetricElementEvent,
+  MetricWNumber,
   MetricWProgress,
+  MetricWTrend,
   Settings,
 } from '@elastic/charts';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -24,6 +26,8 @@ import { HtmlAttributes } from 'csstype';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
 import { DimensionsVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
+import faker from 'faker';
 
 const mockDeserialize = jest.fn((params) => {
   const converter =
@@ -366,6 +370,40 @@ describe('MetricVisComponent', function () {
         (getConfig(basePriceColumnId, 'horizontal') as MetricWProgress).progressBarDirection
       ).toBe('horizontal');
     });
+
+    it('should configure trendline if provided', () => {
+      const trends = {
+        [DEFAULT_TRENDLINE_NAME]: [
+          { x: 1, y: 2 },
+          { x: 3, y: 4 },
+          { x: 5, y: 6 },
+          { x: 7, y: 8 },
+        ],
+      };
+
+      const tileConfig = shallow(
+        <MetricVis
+          config={{
+            ...config,
+            metric: {
+              ...config.metric,
+              trends,
+            },
+            dimensions: {
+              ...config.dimensions,
+              breakdownBy: undefined,
+            },
+          }}
+          data={table}
+          {...defaultProps}
+        />
+      )
+        .find(Metric)
+        .props().data![0][0]! as MetricWTrend;
+
+      expect(tileConfig.trend).toEqual(trends[DEFAULT_TRENDLINE_NAME]);
+      expect(tileConfig.trendShape).toEqual('area');
+    });
   });
 
   describe('metric grid', () => {
@@ -700,6 +738,74 @@ describe('MetricVisComponent', function () {
         ]
       `);
     });
+    it('should configure trendlines if provided', () => {
+      const trends: Record<string, MetricWTrend['trend']> = {
+        Friday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Wednesday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Saturday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Sunday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Thursday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Other: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        // this one shouldn't show up!
+        [DEFAULT_TRENDLINE_NAME]: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+      };
+
+      const data = shallow(
+        <MetricVis
+          config={{
+            ...config,
+            metric: {
+              ...config.metric,
+              trends,
+            },
+          }}
+          data={table}
+          {...defaultProps}
+        />
+      )
+        .find(Metric)
+        .props().data![0] as MetricWTrend[];
+
+      data?.forEach((tileConfig) => {
+        expect(tileConfig.trend).toEqual(trends[tileConfig.title!]);
+        expect(tileConfig.trendShape).toEqual('area');
+      });
+    });
 
     it('renders with no data', () => {
       const component = shallow(
@@ -764,6 +870,27 @@ describe('MetricVisComponent', function () {
               max-height: 100%;
               max-width: 100%;
               overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
             "
     `);
 
@@ -774,6 +901,27 @@ describe('MetricVisComponent', function () {
               max-height: 100%;
               max-width: 100%;
               overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
             "
     `);
 
@@ -784,6 +932,27 @@ describe('MetricVisComponent', function () {
               max-height: 100%;
               max-width: 100%;
               overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
             "
     `);
   });
@@ -813,6 +982,44 @@ describe('MetricVisComponent', function () {
     component.find(Settings).props().onRenderChange!(true);
 
     expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should convert null values to NaN', () => {
+    const metricId = faker.random.word();
+
+    const tableWNull: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: metricId,
+          name: metricId,
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      rows: [{ [metricId]: null }],
+    };
+
+    const metricConfig = shallow(
+      <MetricVis
+        config={{
+          metric: {
+            progressDirection: 'vertical',
+            maxCols: 5,
+          },
+          dimensions: {
+            metric: metricId,
+          },
+        }}
+        data={tableWNull}
+        {...defaultProps}
+      />
+    )
+      .find(Metric)
+      .props().data![0][0]! as MetricWNumber;
+
+    expect(metricConfig.value).toBeNaN();
   });
 
   describe('filter events', () => {
@@ -861,6 +1068,7 @@ describe('MetricVisComponent', function () {
               table,
               column: 1,
               row: 0,
+              value: 28.984375,
             },
           ],
         },
@@ -885,6 +1093,7 @@ describe('MetricVisComponent', function () {
               table,
               column: 0,
               row: 5,
+              value: '__other__',
             },
           ],
         },
@@ -1124,7 +1333,7 @@ describe('MetricVisComponent', function () {
         value: primaryMetric,
         valueFormatter,
         extra,
-      } = component.find(Metric).props().data?.[0][0]!;
+      } = component.find(Metric).props().data?.[0][0]! as MetricWNumber;
 
       return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
     };

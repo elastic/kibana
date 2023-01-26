@@ -7,7 +7,7 @@
  */
 import Hapi from '@hapi/hapi';
 import { IncomingMessage } from 'http';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 // proxy setup
 const defaultProxyOptions = (hostname: string, port: string) => ({
@@ -122,7 +122,8 @@ export const declarePostMgetRoute = (hapiServer: Hapi.Server, hostname: string, 
         if (
           proxyInterrupt === 'bulkGetMyType' ||
           proxyInterrupt === 'checkConficts' ||
-          proxyInterrupt === 'internalBulkResolve'
+          proxyInterrupt === 'internalBulkResolve' ||
+          proxyInterrupt === 'bulkDeleteMyDocs'
         ) {
           return proxyResponseHandler(h, hostname, port);
         } else {

@@ -100,6 +100,14 @@ export interface AxisSettingsPopoverProps {
    */
   endzonesVisible?: boolean;
   /**
+   * Set current time marker visibility
+   */
+  setCurrentTimeMarkerVisibility?: (checked: boolean) => void;
+  /**
+   * Flag whether current time marker is visible
+   */
+  currentTimeMarkerVisible?: boolean;
+  /**
    * Set scale
    */
   setScale?: (scale: YScaleType) => void;
@@ -222,6 +230,8 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   setOrientation,
   setEndzoneVisibility,
   endzonesVisible,
+  setCurrentTimeMarkerVisibility,
+  currentTimeMarkerVisible,
   extent,
   setExtent,
   hasBarOrAreaOnAxis,
@@ -352,6 +362,26 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             })}
             onChange={() => setEndzoneVisibility(!Boolean(endzonesVisible))}
             checked={Boolean(endzonesVisible)}
+            showLabel={false}
+          />
+        </EuiFormRow>
+      )}
+      {setCurrentTimeMarkerVisibility && (
+        <EuiFormRow
+          display="columnCompressedSwitch"
+          label={i18n.translate('xpack.lens.xyChart.showCurrenTimeMarker', {
+            defaultMessage: 'Show current time marker',
+          })}
+          fullWidth
+        >
+          <EuiSwitch
+            compressed
+            data-test-subj="lnsshowCurrentTimeMarker"
+            label={i18n.translate('xpack.lens.xyChart.showCurrenTimeMarker', {
+              defaultMessage: 'Show current time marker',
+            })}
+            onChange={() => setCurrentTimeMarkerVisibility(!Boolean(currentTimeMarkerVisible))}
+            checked={Boolean(currentTimeMarkerVisible)}
             showLabel={false}
           />
         </EuiFormRow>

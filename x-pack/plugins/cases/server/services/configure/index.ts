@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
@@ -14,9 +14,9 @@ import {
 } from '@kbn/core/server';
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
-import { CasesConfigureAttributes, CasesConfigurePatch } from '../../../common/api';
+import type { CasesConfigureAttributes, CasesConfigurePatch } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
   transformFieldsToESModel,
@@ -24,8 +24,8 @@ import {
   transformESConnectorOrUseDefault,
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
-import { ESCasesConfigureAttributes } from './types';
-import { IndexRefresh } from '../types';
+import type { ESCasesConfigureAttributes } from './types';
+import type { IndexRefresh } from '../types';
 
 interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;

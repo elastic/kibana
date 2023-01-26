@@ -128,24 +128,24 @@ Array [
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList emotion-euiDescriptionList-column-left"
         data-type="column"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
         >
           <strong>
             Lifecycle policy
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
         >
           <a
             class="euiLink emotion-euiLink-primary"
@@ -156,71 +156,71 @@ Array [
           </a>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
         >
           <strong>
             Current action
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
         >
           rollover
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
         >
           <strong>
             Failed step
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
         >
           check-rollover-ready
         </dd>
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList emotion-euiDescriptionList-column-left"
         data-type="column"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
         >
           <strong>
             Current phase
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
         >
           hot
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
         >
           <strong>
             Current action time
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
         >
           2018-12-07 13:02:55
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
         >
           <strong>
             Phase definition
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
         >
           <div
             class="euiPopover emotion-euiPopover"
@@ -255,24 +255,24 @@ Array [
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList emotion-euiDescriptionList-column-left"
         data-type="column"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
         >
           <strong>
             Lifecycle policy
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
         >
           <a
             class="euiLink emotion-euiLink-primary"
@@ -283,59 +283,59 @@ Array [
           </a>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
         >
           <strong>
             Current action
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
         >
           complete
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
         >
           <strong>
             Failed step
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
         >
           -
         </dd>
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList emotion-euiDescriptionList-column-left"
         data-type="column"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
         >
           <strong>
             Current phase
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
         >
           new
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
         >
           <strong>
             Current action time
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
         >
           2018-12-07 13:02:55
         </dd>

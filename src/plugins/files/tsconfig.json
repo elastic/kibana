@@ -1,0 +1,34 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/usage-collection-plugin",
+    "@kbn/security-plugin",
+    "@kbn/config-schema",
+    "@kbn/shared-ux-file-types",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/shared-ux-file-mocks",
+    "@kbn/utility-types-jest",
+    "@kbn/core-application-common",
+    "@kbn/features-plugin",
+    "@kbn/i18n",
+    "@kbn/core-analytics-server",
+    "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/ebt-tools",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/std",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/ecs",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

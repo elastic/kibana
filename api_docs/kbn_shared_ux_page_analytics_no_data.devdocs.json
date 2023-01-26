@@ -29,25 +29,27 @@
           "\nAn entire page that can be displayed when Kibana \"has no data\", specifically for Analytics.  Uses\nservices from a Provider to supply props to a pure component."
         ],
         "signature": [
-          "({ onDataViewCreated }: ",
+          "({ onDataViewCreated, allowAdHocDataView, }: ",
           "AnalyticsNoDataPageProps",
           ") => JSX.Element"
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
             "id": "def-common.AnalyticsNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ onDataViewCreated }",
+            "label": "{\n  onDataViewCreated,\n  allowAdHocDataView,\n}",
             "description": [],
             "signature": [
               "AnalyticsNoDataPageProps"
             ],
             "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -64,25 +66,27 @@
           "\nA pure component of an entire page that can be displayed when Kibana \"has no data\", specifically for Analytics."
         ],
         "signature": [
-          "({ kibanaGuideDocLink, onDataViewCreated }: ",
+          "({ kibanaGuideDocLink, onDataViewCreated, allowAdHocDataView, }: ",
           "Props",
           ") => JSX.Element"
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
             "id": "def-common.AnalyticsNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ kibanaGuideDocLink, onDataViewCreated }",
+            "label": "{\n  kibanaGuideDocLink,\n  onDataViewCreated,\n  allowAdHocDataView,\n}",
             "description": [],
             "signature": [
               "Props"
             ],
             "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -105,6 +109,7 @@
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
@@ -120,6 +125,7 @@
             ],
             "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -142,6 +148,7 @@
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
@@ -157,6 +164,7 @@
             ],
             "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -174,8 +182,9 @@
         "description": [
           "\nProps for the `AnalyticsNoDataPage` component."
         ],
-        "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
@@ -189,8 +198,9 @@
             "signature": [
               "(dataView: unknown) => void"
             ],
-            "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
@@ -202,12 +212,29 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+                "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-common.AnalyticsNoDataPageProps.allowAdHocDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowAdHocDataView",
+            "description": [
+              "if set to true allows creation of an ad-hoc data view from data view editor"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -235,8 +262,9 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -259,8 +287,9 @@
           " & ",
           "NoDataViewsPromptServices"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

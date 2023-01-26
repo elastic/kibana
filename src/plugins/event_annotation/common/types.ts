@@ -22,35 +22,39 @@ import {
 
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
 export type Fill = 'inside' | 'outside' | 'none';
-export type AnnotationType = 'manual';
+export type ManualAnnotationType = 'manual';
+export type QueryAnnotationType = 'query';
 export type KeyType = 'point_in_time' | 'range';
 export type AvailableAnnotationIcon = $Values<typeof AvailableAnnotationIcons>;
-export interface PointStyleProps {
+
+interface StyleSharedProps {
   label: string;
   color?: string;
+  isHidden?: boolean;
+}
+
+export type PointStyleProps = StyleSharedProps & {
   icon?: AvailableAnnotationIcon;
   lineWidth?: number;
   lineStyle?: LineStyle;
   textVisibility?: boolean;
-  isHidden?: boolean;
-}
+};
 
 export type PointInTimeEventAnnotationConfig = {
   id: string;
+  type: ManualAnnotationType;
   key: {
     type: 'point_in_time';
     timestamp: string;
   };
 } & PointStyleProps;
 
-export interface RangeStyleProps {
-  label: string;
-  color?: string;
+export type RangeStyleProps = StyleSharedProps & {
   outside?: boolean;
-  isHidden?: boolean;
-}
+};
 
 export type RangeEventAnnotationConfig = {
+  type: ManualAnnotationType;
   id: string;
   key: {
     type: 'range';
@@ -63,9 +67,10 @@ export type StyleProps = PointStyleProps & RangeStyleProps;
 
 export type QueryPointEventAnnotationConfig = {
   id: string;
+  type: QueryAnnotationType;
   filter: KibanaQueryOutput;
-  timeField: string;
-  textField: string;
+  timeField?: string;
+  textField?: string;
   extraFields?: string[];
   key: {
     type: 'point_in_time';
@@ -76,6 +81,12 @@ export type EventAnnotationConfig =
   | PointInTimeEventAnnotationConfig
   | RangeEventAnnotationConfig
   | QueryPointEventAnnotationConfig;
+
+export interface EventAnnotationGroupConfig {
+  annotations: EventAnnotationConfig[];
+  indexPatternId: string;
+  ignoreGlobalFilters?: boolean;
+}
 
 export type EventAnnotationArgs =
   | ManualPointEventAnnotationArgs

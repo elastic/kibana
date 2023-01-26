@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-// import testSubjSelector from '@kbn/test-subj-selector';
-// import moment from 'moment';
-import querystring from 'querystring';
-import { encode, RisonValue } from 'rison-node';
-import { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position/with_log_position_url_state';
 import { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
+import { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position';
+import querystring from 'querystring';
+import { encode } from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface TabsParams {
@@ -39,7 +37,7 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
 
         for (const key in params) {
           if (params.hasOwnProperty(key)) {
-            const value = params[key] as unknown as RisonValue;
+            const value = params[key];
             parsedParams[key] = encode(value);
           }
         }

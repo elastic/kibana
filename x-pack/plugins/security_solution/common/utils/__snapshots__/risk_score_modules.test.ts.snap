@@ -1,0 +1,736 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Risk Score Modules getCreateLatestTransformOptions - host 1`] = `
+Object {
+  "dest": Object {
+    "index": "ml_host_risk_score_latest_customSpaceId",
+  },
+  "frequency": "1h",
+  "latest": Object {
+    "sort": "@timestamp",
+    "unique_key": Array [
+      "host.name",
+    ],
+  },
+  "source": Object {
+    "index": Array [
+      "ml_host_risk_score_customSpaceId",
+    ],
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "2s",
+      "field": "ingest_timestamp",
+    },
+  },
+}
+`;
+
+exports[`Risk Score Modules getCreateLatestTransformOptions - user 1`] = `
+Object {
+  "dest": Object {
+    "index": "ml_user_risk_score_latest_customSpaceId",
+  },
+  "frequency": "1h",
+  "latest": Object {
+    "sort": "@timestamp",
+    "unique_key": Array [
+      "user.name",
+    ],
+  },
+  "source": Object {
+    "index": Array [
+      "ml_user_risk_score_customSpaceId",
+    ],
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "2s",
+      "field": "ingest_timestamp",
+    },
+  },
+}
+`;
+
+exports[`Risk Score Modules getCreateMLHostPivotTransformOptions 1`] = `
+Object {
+  "dest": Object {
+    "index": "ml_host_risk_score_customSpaceId",
+    "pipeline": "ml_hostriskscore_ingest_pipeline_customSpaceId",
+  },
+  "frequency": "1h",
+  "pivot": Object {
+    "aggregations": Object {
+      "@timestamp": Object {
+        "max": Object {
+          "field": "@timestamp",
+        },
+      },
+      "host.risk": Object {
+        "scripted_metric": Object {
+          "combine_script": "return state",
+          "init_script": Object {
+            "id": "ml_hostriskscore_init_script_customSpaceId",
+          },
+          "map_script": Object {
+            "id": "ml_hostriskscore_map_script_customSpaceId",
+          },
+          "params": Object {
+            "lookback_time": 72,
+            "max_risk": 100,
+            "p": 1.5,
+            "server_multiplier": 1.5,
+            "tactic_base_multiplier": 0.25,
+            "tactic_weights": Object {
+              "TA0001": 1,
+              "TA0002": 2,
+              "TA0003": 3,
+              "TA0004": 4,
+              "TA0005": 4,
+              "TA0006": 4,
+              "TA0007": 4,
+              "TA0008": 5,
+              "TA0009": 6,
+              "TA0010": 7,
+              "TA0011": 6,
+              "TA0040": 8,
+              "TA0042": 1,
+              "TA0043": 1,
+            },
+            "time_decay_constant": 6,
+            "zeta_constant": 2.612,
+          },
+          "reduce_script": Object {
+            "id": "ml_hostriskscore_reduce_script_customSpaceId",
+          },
+        },
+      },
+    },
+    "group_by": Object {
+      "host.name": Object {
+        "terms": Object {
+          "field": "host.name",
+        },
+      },
+    },
+  },
+  "source": Object {
+    "index": Array [
+      ".alerts-security.alerts-customSpaceId",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-5d",
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "120s",
+      "field": "@timestamp",
+    },
+  },
+}
+`;
+
+exports[`Risk Score Modules getCreateMLUserPivotTransformOptions 1`] = `
+Object {
+  "dest": Object {
+    "index": "ml_user_risk_score_customSpaceId",
+    "pipeline": "ml_userriskscore_ingest_pipeline_customSpaceId",
+  },
+  "frequency": "1h",
+  "pivot": Object {
+    "aggregations": Object {
+      "@timestamp": Object {
+        "max": Object {
+          "field": "@timestamp",
+        },
+      },
+      "user.risk": Object {
+        "scripted_metric": Object {
+          "combine_script": "return state",
+          "init_script": "state.rule_risk_stats = new HashMap();",
+          "map_script": Object {
+            "id": "ml_userriskscore_map_script_customSpaceId",
+          },
+          "params": Object {
+            "max_risk": 100,
+            "p": 1.5,
+            "zeta_constant": 2.612,
+          },
+          "reduce_script": Object {
+            "id": "ml_userriskscore_reduce_script_customSpaceId",
+          },
+        },
+      },
+    },
+    "group_by": Object {
+      "user.name": Object {
+        "terms": Object {
+          "field": "user.name",
+        },
+      },
+    },
+  },
+  "source": Object {
+    "index": Array [
+      ".alerts-security.alerts-customSpaceId",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-90d",
+              },
+            },
+          },
+          Object {
+            "match": Object {
+              "signal.status": "open",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "120s",
+      "field": "@timestamp",
+    },
+  },
+}
+`;
+
+exports[`Risk Score Modules getCreateRiskScoreIndicesOptions - host 1`] = `
+Object {
+  "index": "ml_host_risk_score_customSpaceId",
+  "mappings": Object {
+    "properties": Object {
+      "@timestamp": Object {
+        "type": "date",
+      },
+      "host": Object {
+        "properties": Object {
+          "name": Object {
+            "type": "keyword",
+          },
+          "risk": Object {
+            "properties": Object {
+              "calculated_level": Object {
+                "type": "keyword",
+              },
+              "calculated_score_norm": Object {
+                "type": "float",
+              },
+              "multipliers": Object {
+                "type": "keyword",
+              },
+              "rule_risks": Object {
+                "properties": Object {
+                  "rule_id": Object {
+                    "type": "keyword",
+                  },
+                  "rule_name": Object {
+                    "fields": Object {
+                      "keyword": Object {
+                        "type": "keyword",
+                      },
+                    },
+                    "type": "text",
+                  },
+                  "rule_risk": Object {
+                    "type": "float",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      "ingest_timestamp": Object {
+        "type": "date",
+      },
+    },
+  },
+}
+`;
+
+exports[`Risk Score Modules getCreateRiskScoreIndicesOptions - user 1`] = `
+Object {
+  "index": "ml_user_risk_score_customSpaceId",
+  "mappings": Object {
+    "properties": Object {
+      "@timestamp": Object {
+        "type": "date",
+      },
+      "ingest_timestamp": Object {
+        "type": "date",
+      },
+      "user": Object {
+        "properties": Object {
+          "name": Object {
+            "type": "keyword",
+          },
+          "risk": Object {
+            "properties": Object {
+              "calculated_level": Object {
+                "type": "keyword",
+              },
+              "calculated_score_norm": Object {
+                "type": "float",
+              },
+              "multipliers": Object {
+                "type": "keyword",
+              },
+              "rule_risks": Object {
+                "properties": Object {
+                  "rule_id": Object {
+                    "type": "keyword",
+                  },
+                  "rule_name": Object {
+                    "fields": Object {
+                      "keyword": Object {
+                        "type": "keyword",
+                      },
+                    },
+                    "type": "text",
+                  },
+                  "rule_risk": Object {
+                    "type": "float",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`Risk Score Modules getCreateRiskScoreLatestIndicesOptions - host 1`] = `
+Object {
+  "index": "ml_host_risk_score_latest_customSpaceId",
+  "mappings": Object {
+    "properties": Object {
+      "@timestamp": Object {
+        "type": "date",
+      },
+      "host": Object {
+        "properties": Object {
+          "name": Object {
+            "type": "keyword",
+          },
+          "risk": Object {
+            "properties": Object {
+              "calculated_level": Object {
+                "type": "keyword",
+              },
+              "calculated_score_norm": Object {
+                "type": "float",
+              },
+              "multipliers": Object {
+                "type": "keyword",
+              },
+              "rule_risks": Object {
+                "properties": Object {
+                  "rule_id": Object {
+                    "type": "keyword",
+                  },
+                  "rule_name": Object {
+                    "fields": Object {
+                      "keyword": Object {
+                        "type": "keyword",
+                      },
+                    },
+                    "type": "text",
+                  },
+                  "rule_risk": Object {
+                    "type": "float",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      "ingest_timestamp": Object {
+        "type": "date",
+      },
+    },
+  },
+}
+`;
+
+exports[`Risk Score Modules getCreateRiskScoreLatestIndicesOptions - user 1`] = `
+Object {
+  "index": "ml_user_risk_score_latest_customSpaceId",
+  "mappings": Object {
+    "properties": Object {
+      "@timestamp": Object {
+        "type": "date",
+      },
+      "ingest_timestamp": Object {
+        "type": "date",
+      },
+      "user": Object {
+        "properties": Object {
+          "name": Object {
+            "type": "keyword",
+          },
+          "risk": Object {
+            "properties": Object {
+              "calculated_level": Object {
+                "type": "keyword",
+              },
+              "calculated_score_norm": Object {
+                "type": "float",
+              },
+              "multipliers": Object {
+                "type": "keyword",
+              },
+              "rule_risks": Object {
+                "properties": Object {
+                  "rule_id": Object {
+                    "type": "keyword",
+                  },
+                  "rule_name": Object {
+                    "fields": Object {
+                      "keyword": Object {
+                        "type": "keyword",
+                      },
+                    },
+                    "type": "text",
+                  },
+                  "rule_risk": Object {
+                    "type": "float",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`Risk Score Modules getRiskHostCreateInitScriptOptions 1`] = `
+Object {
+  "id": "ml_hostriskscore_init_script_default",
+  "script": Object {
+    "lang": "painless",
+    "source": "state.rule_risk_stats = new HashMap();
+state.host_variant_set = false;
+state.host_variant = new String();
+state.tactic_ids = new HashSet();",
+  },
+}
+`;
+
+exports[`Risk Score Modules getRiskHostCreateLevelScriptOptions 1`] = `
+Object {
+  "id": "ml_hostriskscore_levels_script_default",
+  "script": Object {
+    "lang": "painless",
+    "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
+if (risk_score < 20) {
+    ctx['host']['risk']['calculated_level'] = 'Unknown'
+}
+else if (risk_score >= 20 && risk_score < 40) {
+    ctx['host']['risk']['calculated_level'] = 'Low'
+}
+else if (risk_score >= 40 && risk_score < 70) {
+    ctx['host']['risk']['calculated_level'] = 'Moderate'
+}
+else if (risk_score >= 70 && risk_score < 90) {
+    ctx['host']['risk']['calculated_level'] = 'High'
+}
+else if (risk_score >= 90) {
+    ctx['host']['risk']['calculated_level'] = 'Critical'
+}",
+  },
+}
+`;
+
+exports[`Risk Score Modules getRiskHostCreateMapScriptOptions 1`] = `
+Object {
+  "id": "ml_hostriskscore_map_script_default",
+  "script": Object {
+    "lang": "painless",
+    "source": "// Get the host variant
+if (state.host_variant_set == false) {
+    if (doc.containsKey(\\"host.os.full\\") && doc[\\"host.os.full\\"].size() != 0) {
+        state.host_variant = doc[\\"host.os.full\\"].value;
+        state.host_variant_set = true;
+    }
+}
+// Aggregate all the tactics seen on the host
+if (doc.containsKey(\\"signal.rule.threat.tactic.id\\") && doc[\\"signal.rule.threat.tactic.id\\"].size() != 0) {
+    state.tactic_ids.add(doc[\\"signal.rule.threat.tactic.id\\"].value);
+}
+// Get running sum of time-decayed risk score per rule name per shard
+String rule_name = doc[\\"signal.rule.name\\"].value;
+def stats = state.rule_risk_stats.getOrDefault(rule_name, [0.0,\\"\\",false]);
+int time_diff = (int)((System.currentTimeMillis() - doc[\\"@timestamp\\"].value.toInstant().toEpochMilli()) / (1000.0 * 60.0 * 60.0));
+double risk_derate = Math.min(1, Math.exp((params.lookback_time - time_diff) / params.time_decay_constant));
+stats[0] = Math.max(stats[0], doc[\\"signal.rule.risk_score\\"].value * risk_derate);
+if (stats[2] == false) {
+    stats[1] = doc[\\"kibana.alert.rule.uuid\\"].value;
+    stats[2] = true;
+}
+state.rule_risk_stats.put(rule_name, stats);",
+  },
+}
+`;
+
+exports[`Risk Score Modules getRiskHostCreateReduceScriptOptions 1`] = `
+Object {
+  "id": "ml_hostriskscore_reduce_script_default",
+  "script": Object {
+    "lang": "painless",
+    "source": "// Consolidating time decayed risks and tactics from across all shards
+Map total_risk_stats = new HashMap();
+String host_variant = new String();
+def tactic_ids = new HashSet();
+for (state in states) {
+    for (key in state.rule_risk_stats.keySet()) {
+        def rule_stats = state.rule_risk_stats.get(key);
+        def stats = total_risk_stats.getOrDefault(key, [0.0,\\"\\",false]);
+        stats[0] = Math.max(stats[0], rule_stats[0]);
+        if (stats[2] == false) {
+            stats[1] = rule_stats[1];
+            stats[2] = true;
+        } 
+        total_risk_stats.put(key, stats);
+    }
+    if (host_variant.length() == 0) {
+        host_variant = state.host_variant;
+    }
+    tactic_ids.addAll(state.tactic_ids);
+}
+// Consolidating individual rule risks and arranging them in decreasing order
+List risks = new ArrayList();
+for (key in total_risk_stats.keySet()) {
+    risks.add(total_risk_stats[key][0])
+}
+Collections.sort(risks, Collections.reverseOrder());
+// Calculating total host risk score
+double total_risk = 0.0;
+double risk_cap = params.max_risk * params.zeta_constant;
+for (int i=0;i<risks.length;i++) {
+    total_risk += risks[i] / Math.pow((1+i), params.p);
+}
+// Normalizing the host risk score
+double total_norm_risk = 100 * total_risk / risk_cap;
+if (total_norm_risk < 40) {
+    total_norm_risk =  2.125 * total_norm_risk;
+}
+else if (total_norm_risk >= 40 && total_norm_risk < 50) {
+    total_norm_risk = 85 + (total_norm_risk - 40);
+}
+else {
+    total_norm_risk = 95 + (total_norm_risk - 50) / 10;
+}
+// Calculating multipliers to the host risk score
+double risk_multiplier = 1.0;
+List multipliers = new ArrayList();
+// Add a multiplier if host is a server
+if (host_variant.toLowerCase().contains(\\"server\\")) {
+    risk_multiplier *= params.server_multiplier;
+    multipliers.add(\\"Host is a server\\");
+}
+// Add multipliers based on number and diversity of tactics seen on the host
+for (String tactic : tactic_ids) {
+    multipliers.add(\\"Tactic \\"+tactic);
+    risk_multiplier *= 1 + params.tactic_base_multiplier * params.tactic_weights.getOrDefault(tactic, 0);
+}
+// Calculating final risk
+double final_risk = total_norm_risk;
+if (risk_multiplier > 1.0) {
+    double prior_odds = (total_norm_risk) / (100 - total_norm_risk);
+    double updated_odds = prior_odds * risk_multiplier; 
+    final_risk = 100 * updated_odds / (1 + updated_odds);
+}
+// Adding additional metadata
+List rule_stats = new ArrayList();
+for (key in total_risk_stats.keySet()) {
+    Map temp = new HashMap();
+    temp[\\"rule_name\\"] = key;
+    temp[\\"rule_risk\\"] = total_risk_stats[key][0];
+    temp[\\"rule_id\\"] = total_risk_stats[key][1];
+    rule_stats.add(temp);
+}
+
+return [\\"calculated_score_norm\\": final_risk, \\"rule_risks\\": rule_stats, \\"multipliers\\": multipliers];",
+  },
+}
+`;
+
+exports[`Risk Score Modules getRiskScoreIngestPipelineOptions - host 1`] = `
+Object {
+  "name": "ml_hostriskscore_ingest_pipeline_default",
+  "processors": Array [
+    Object {
+      "set": Object {
+        "field": "ingest_timestamp",
+        "value": "{{_ingest.timestamp}}",
+      },
+    },
+    Object {
+      "fingerprint": Object {
+        "fields": Array [
+          "@timestamp",
+          "_id",
+        ],
+        "method": "SHA-256",
+        "target_field": "_id",
+      },
+    },
+    Object {
+      "script": Object {
+        "id": "ml_hostriskscore_levels_script_default",
+        "params": Object {
+          "risk_score": "host.risk.calculated_score_norm",
+        },
+      },
+    },
+  ],
+}
+`;
+
+exports[`Risk Score Modules getRiskScoreIngestPipelineOptions - user 1`] = `
+Object {
+  "name": "ml_userriskscore_ingest_pipeline_default",
+  "processors": Array [
+    Object {
+      "set": Object {
+        "field": "ingest_timestamp",
+        "value": "{{_ingest.timestamp}}",
+      },
+    },
+    Object {
+      "fingerprint": Object {
+        "fields": Array [
+          "@timestamp",
+          "_id",
+        ],
+        "method": "SHA-256",
+        "target_field": "_id",
+      },
+    },
+    Object {
+      "script": Object {
+        "id": "ml_userriskscore_levels_script_default",
+        "params": Object {
+          "risk_score": "user.risk.calculated_score_norm",
+        },
+      },
+    },
+  ],
+}
+`;
+
+exports[`Risk Score Modules getRiskUserCreateLevelScriptOptions 1`] = `
+Object {
+  "id": "ml_userriskscore_levels_script_default",
+  "script": Object {
+    "lang": "painless",
+    "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
+if (risk_score < 20) {
+  ctx['user']['risk']['calculated_level'] = 'Unknown'
+}
+else if (risk_score >= 20 && risk_score < 40) {
+  ctx['user']['risk']['calculated_level'] = 'Low'
+}
+else if (risk_score >= 40 && risk_score < 70) {
+  ctx['user']['risk']['calculated_level'] = 'Moderate'
+}
+else if (risk_score >= 70 && risk_score < 90) {
+  ctx['user']['risk']['calculated_level'] = 'High'
+}
+else if (risk_score >= 90) {
+  ctx['user']['risk']['calculated_level'] = 'Critical'
+}",
+  },
+}
+`;
+
+exports[`Risk Score Modules getRiskUserCreateMapScriptOptions 1`] = `
+Object {
+  "id": "ml_userriskscore_map_script_default",
+  "script": Object {
+    "lang": "painless",
+    "source": "// Get running sum of risk score per rule name per shard\\\\\\\\
+String rule_name = doc[\\"signal.rule.name\\"].value;
+def stats = state.rule_risk_stats.getOrDefault(rule_name, 0.0);
+stats = doc[\\"signal.rule.risk_score\\"].value;
+state.rule_risk_stats.put(rule_name, stats);",
+  },
+}
+`;
+
+exports[`Risk Score Modules getRiskUserCreateReduceScriptOptions 1`] = `
+Object {
+  "id": "ml_userriskscore_reduce_script_default",
+  "script": Object {
+    "lang": "painless",
+    "source": "// Consolidating time decayed risks from across all shards
+Map total_risk_stats = new HashMap();
+for (state in states) {
+    for (key in state.rule_risk_stats.keySet()) {
+    def rule_stats = state.rule_risk_stats.get(key);
+    def stats = total_risk_stats.getOrDefault(key, 0.0);
+    stats = rule_stats;
+    total_risk_stats.put(key, stats);
+    }
+}
+// Consolidating individual rule risks and arranging them in decreasing order
+List risks = new ArrayList();
+for (key in total_risk_stats.keySet()) {
+    risks.add(total_risk_stats[key])
+}
+Collections.sort(risks, Collections.reverseOrder());
+// Calculating total risk and normalizing it to a range
+double total_risk = 0.0;
+double risk_cap = params.max_risk * params.zeta_constant;
+for (int i=0;i<risks.length;i++) {
+    total_risk += risks[i] / Math.pow((1+i), params.p);
+}
+double total_norm_risk = 100 * total_risk / risk_cap;
+if (total_norm_risk < 40) {
+    total_norm_risk =  2.125 * total_norm_risk;
+}
+else if (total_norm_risk >= 40 && total_norm_risk < 50) {
+    total_norm_risk = 85 + (total_norm_risk - 40);
+}
+else {
+    total_norm_risk = 95 + (total_norm_risk - 50) / 10;
+}
+
+List rule_stats = new ArrayList();
+for (key in total_risk_stats.keySet()) {
+    Map temp = new HashMap();
+    temp[\\"rule_name\\"] = key;
+    temp[\\"rule_risk\\"] = total_risk_stats[key];
+    rule_stats.add(temp);
+}
+
+return [\\"calculated_score_norm\\": total_norm_risk, \\"rule_risks\\": rule_stats];",
+  },
+}
+`;

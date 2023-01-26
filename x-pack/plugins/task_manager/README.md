@@ -1,7 +1,8 @@
 # Kibana task manager
 
 The task manager is a generic system for running background tasks.
-Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-production-considerations.html
+
+Documentation: https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
 
 It supports:
 - Single-run and recurring tasks
@@ -328,6 +329,12 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   runSoon: (taskId: string) =>  {
     // ...
   },
+  bulkEnable: (taskIds: string[], runSoon: boolean = true) => {
+    // ...
+  },
+  bulkDisable: (taskIds: string[]) => {
+    // ...
+  },
   bulkUpdateSchedules: (taskIds: string[], schedule: IntervalSchedule) =>  {
     // ...
   },
@@ -413,6 +420,59 @@ export class Plugin {
       // If running the task has failed, we throw an error with an appropriate message.
       // For example, if the requested task doesnt exist: `Error: failed to run task "91760f10-ba42-de9799" as it does not exist`
       // Or if, for example, the task is already running: `Error: failed to run task "91760f10-ba42-de9799" as it is currently running`
+    }    
+  }
+}
+```
+
+#### bulkDisable
+Using `bulkDisable` you can instruct TaskManger to disable tasks by setting the `enabled` status of specific tasks to `false`.
+
+Example:
+```js
+export class Plugin {
+  constructor() {
+  }
+
+  public setup(core: CoreSetup, plugins: { taskManager }) {
+  }
+
+  public start(core: CoreStart, plugins: { taskManager }) {
+    try {
+      const bulkDisableResults = await taskManager.bulkDisable(
+        ['97c2c4e7-d850-11ec-bf95-895ffd19f959', 'a5ee24d1-dce2-11ec-ab8d-cf74da82133d'],
+      );
+      // If no error is thrown, the bulkDisable has completed successfully.
+      // But some updates of some tasks can be failed, due to OCC 409 conflict for example
+    } catch(err: Error) {
+      // if error is caught, means the whole method requested has failed and tasks weren't updated
+    }    
+  }
+}
+```
+
+#### bulkEnable
+Using `bulkEnable` you can instruct TaskManger to enable tasks by setting the `enabled` status of specific tasks to `true`. Specify the `runSoon` parameter to run the task immediately on enable.
+
+Example:
+```js
+export class Plugin {
+  constructor() {
+  }
+
+  public setup(core: CoreSetup, plugins: { taskManager }) {
+  }
+
+  public start(core: CoreStart, plugins: { taskManager }) {
+    try {
+      const bulkEnableResults = await taskManager.bulkEnable(
+        ['97c2c4e7-d850-11ec-bf95-895ffd19f959', 'a5ee24d1-dce2-11ec-ab8d-cf74da82133d'],
+        true,
+      );
+      // If no error is thrown, the bulkEnable has completed successfully.
+      // But some updates of some tasks can be failed, due to OCC 409 conflict for example
+    } catch(err: Error) {
+      // if error is caught, means the whole method requested has failed and tasks weren't updated
     }    
   }
 }

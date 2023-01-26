@@ -11,6 +11,7 @@
         "description": [],
         "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -24,6 +25,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -33,10 +35,17 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  "HttpSetup"
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-common.HttpSetup",
+                    "text": "HttpSetup"
+                  }
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -62,7 +71,8 @@
               ">"
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -92,6 +102,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -111,6 +122,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -136,6 +148,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -149,6 +162,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -174,6 +188,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -187,6 +202,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -212,6 +228,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -231,6 +248,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -256,6 +274,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -275,6 +294,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -300,6 +320,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -319,6 +340,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -344,6 +366,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -364,6 +387,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -389,6 +413,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -402,6 +427,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -416,6 +442,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -430,6 +457,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -444,6 +472,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -458,6 +487,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -483,6 +513,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -496,6 +527,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -510,6 +542,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -524,6 +557,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -538,6 +572,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -555,6 +590,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -568,6 +604,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -582,11 +619,18 @@
             "description": [],
             "signature": [
               "(objects: SavedObjectTarget[]) => Promise<",
-              "SavedObjectsCollectMultiNamespaceReferencesResponse",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
+              },
               ">"
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -600,6 +644,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -617,6 +662,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -630,6 +676,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -644,6 +691,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -658,6 +706,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -675,6 +724,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -705,6 +755,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -728,6 +779,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -756,6 +808,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -779,6 +832,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -807,6 +861,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -830,6 +885,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -847,6 +903,7 @@
         "description": [],
         "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -857,10 +914,17 @@
             "description": [],
             "signature": [
               "[spaceId: string]:  ",
-              "SavedObjectsImportResponse"
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportResponse",
+                "text": "SavedObjectsImportResponse"
+              }
             ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -876,6 +940,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -896,7 +961,8 @@
               }
             ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -912,6 +978,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -929,6 +996,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -940,7 +1008,8 @@
               "\nThe object's type."
             ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -952,7 +1021,8 @@
               "\nThe object's ID."
             ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -967,7 +1037,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -982,7 +1053,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -997,7 +1069,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1013,6 +1086,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -1024,7 +1098,8 @@
               "\nThe target type of the legacy URL alias."
             ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1036,7 +1111,8 @@
               "\nThe source ID of the legacy URL alias."
             ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1069,6 +1145,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -1091,7 +1168,8 @@
               ", boolean> | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1107,6 +1185,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -1121,7 +1200,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1133,7 +1213,8 @@
               "\nThe ID of the object that is currently shown on the page."
             ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1145,7 +1226,8 @@
               "\nThe ID of the other object that the legacy URL alias points to."
             ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1157,7 +1239,8 @@
               "\n The path within your application to use for the new URL, optionally including `search` and/or `hash` URL components. Do not include\n `/app/my-app` or the current base path."
             ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1173,6 +1256,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -1184,7 +1268,8 @@
               "\nThe path to use for the new URL, optionally including `search` and/or `hash` URL components."
             ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1199,7 +1284,8 @@
               "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1214,7 +1300,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1230,6 +1317,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -1250,7 +1338,8 @@
               }
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1265,7 +1354,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1280,7 +1370,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1295,7 +1386,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1310,7 +1402,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1325,7 +1418,8 @@
               "\"within-space\" | \"outside-space\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1341,6 +1435,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -1354,6 +1449,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1368,6 +1464,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1382,6 +1479,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1401,6 +1499,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -1414,6 +1513,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1433,6 +1533,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1450,6 +1551,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -1461,7 +1563,8 @@
               "\nThe object's type."
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1473,7 +1576,8 @@
               "\nThe object's ID."
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1488,7 +1592,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1503,7 +1608,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1518,7 +1624,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1533,7 +1640,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1549,6 +1657,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -1560,7 +1669,8 @@
               "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1572,7 +1682,8 @@
               "\nDisplay name for this space."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1587,7 +1698,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1602,7 +1714,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1617,7 +1730,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1632,7 +1746,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1647,7 +1762,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1664,7 +1780,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1680,6 +1797,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -1694,7 +1812,8 @@
               "{ id?: string | undefined; name?: string | undefined; description?: string | undefined; color?: string | undefined; initials?: string | undefined; imageUrl?: string | undefined; disabledFeatures?: string[] | undefined; _reserved?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1709,7 +1828,8 @@
               "\"m\" | \"s\" | \"l\" | \"xl\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1724,7 +1844,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1739,7 +1860,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1754,7 +1876,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1770,6 +1893,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -1783,6 +1907,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1802,6 +1927,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -1815,6 +1941,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1833,7 +1960,8 @@
               "React.CSSProperties | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1849,6 +1977,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/space_list/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -1863,7 +1992,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1878,7 +2008,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1893,7 +2024,8 @@
               "\"within-space\" | \"outside-space\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1909,6 +2041,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1925,7 +2058,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1941,6 +2075,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -1961,7 +2096,8 @@
               }
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -1985,6 +2121,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -2004,6 +2141,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2021,10 +2159,10 @@
             "signature": [
               "<Services extends Partial<",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ">>() => ",
@@ -2039,6 +2177,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2056,6 +2195,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -2079,6 +2219,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2092,7 +2233,8 @@
                   "T"
                 ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2118,6 +2260,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2131,7 +2274,8 @@
                   "T"
                 ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2157,6 +2301,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2170,7 +2315,8 @@
                   "T"
                 ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2196,6 +2342,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2209,7 +2356,8 @@
                   "T"
                 ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2235,6 +2383,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2248,7 +2397,8 @@
                   "T"
                 ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2274,6 +2424,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2287,7 +2438,8 @@
                   "T"
                 ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2313,6 +2465,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2326,7 +2479,8 @@
                   "T"
                 ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2344,6 +2498,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/spaces_context/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -2358,7 +2513,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/spaces_context/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2374,6 +2530,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -2396,7 +2553,8 @@
               ">"
             ],
             "path": "x-pack/plugins/spaces/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -2408,7 +2566,8 @@
               "The ID of the active space."
             ],
             "path": "x-pack/plugins/spaces/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2442,6 +2601,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -2456,7 +2616,8 @@
               "true | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -2471,7 +2632,8 @@
               "true | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -2495,6 +2657,7 @@
             ],
             "path": "x-pack/plugins/spaces/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -2514,6 +2677,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2541,6 +2705,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/spaces_context/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -2559,7 +2724,8 @@
               }
             ],
             "path": "x-pack/plugins/spaces/public/spaces_context/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -2580,7 +2746,8 @@
               ">"
             ],
             "path": "x-pack/plugins/spaces/public/spaces_context/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -2593,7 +2760,8 @@
               "Services"
             ],
             "path": "x-pack/plugins/spaces/public/spaces_context/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2615,6 +2783,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2631,6 +2800,7 @@
         ],
         "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -2644,7 +2814,8 @@
               "T"
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2665,6 +2836,7 @@
       ],
       "path": "x-pack/plugins/spaces/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -2679,6 +2851,7 @@
       ],
       "path": "x-pack/plugins/spaces/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "spaces",
@@ -2704,6 +2877,7 @@
           ],
           "path": "x-pack/plugins/spaces/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -2729,6 +2903,7 @@
           ],
           "path": "x-pack/plugins/spaces/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -2751,7 +2926,8 @@
             }
           ],
           "path": "x-pack/plugins/spaces/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -2775,6 +2951,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -2790,6 +2967,7 @@
             ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2806,6 +2984,7 @@
             ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2822,6 +3001,7 @@
             ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2843,6 +3023,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -2866,7 +3047,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -2883,7 +3065,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2916,6 +3099,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -2938,7 +3122,8 @@
               ", boolean> | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2954,6 +3139,7 @@
         ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -2985,6 +3171,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3007,6 +3194,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3034,6 +3222,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3049,6 +3238,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3084,6 +3274,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3105,6 +3296,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3140,6 +3332,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3155,6 +3348,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3177,6 +3371,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3193,11 +3388,18 @@
             ],
             "signature": [
               "(id: string) => ",
-              "ISavedObjectsPointInTimeFinder",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              },
               "<unknown, unknown>"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3213,6 +3415,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3232,6 +3435,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3247,6 +3451,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3274,6 +3479,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3296,6 +3502,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3315,6 +3522,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -3326,7 +3534,8 @@
               "\nThe namespace that the object existed in when it was converted."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -3338,7 +3547,8 @@
               "\nThe type of the object when it was converted."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -3350,7 +3560,8 @@
               "\nThe original ID of the object, before it was converted."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3366,6 +3577,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -3377,7 +3589,8 @@
               "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -3389,7 +3602,8 @@
               "\nDisplay name for this space."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -3404,7 +3618,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -3419,7 +3634,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -3434,7 +3650,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -3449,7 +3666,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -3464,7 +3682,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -3481,7 +3700,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3497,6 +3717,7 @@
         ],
         "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -3509,11 +3730,18 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => string"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3525,11 +3753,18 @@
                   "the request."
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3549,6 +3784,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3564,6 +3800,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3583,6 +3820,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3598,6 +3836,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3617,6 +3856,7 @@
         ],
         "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -3629,7 +3869,13 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "spaces",
@@ -3641,6 +3887,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3652,11 +3899,18 @@
                   "the request."
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3673,11 +3927,18 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => string"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3689,11 +3950,18 @@
                   "the request."
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3710,11 +3978,18 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => boolean"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3726,11 +4001,18 @@
                   "the request."
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3747,7 +4029,13 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => Promise<",
               {
                 "pluginId": "spaces",
@@ -3760,6 +4048,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3771,11 +4060,18 @@
                   "the request."
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3795,6 +4091,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3810,6 +4107,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3829,6 +4127,7 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3844,6 +4143,7 @@
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3869,6 +4169,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3884,14 +4185,33 @@
         ],
         "signature": [
           "(request: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>, savedObjectsStart: ",
-          "SavedObjectsServiceStart",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsServiceStart",
+            "text": "SavedObjectsServiceStart"
+          },
           ") => ",
-          "ISavedObjectsRepository"
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.ISavedObjectsRepository",
+            "text": "ISavedObjectsRepository"
+          }
         ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3902,11 +4222,18 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -3916,10 +4243,17 @@
             "label": "savedObjectsStart",
             "description": [],
             "signature": [
-              "SavedObjectsServiceStart"
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsServiceStart",
+                "text": "SavedObjectsServiceStart"
+              }
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3937,7 +4271,13 @@
         ],
         "signature": [
           "(request: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>, baseClient: ",
           {
             "pluginId": "spaces",
@@ -3957,6 +4297,7 @@
         ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3967,11 +4308,18 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -3990,7 +4338,8 @@
               }
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4008,6 +4357,7 @@
       ],
       "path": "x-pack/plugins/spaces/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "spaces",
@@ -4028,7 +4378,8 @@
             }
           ],
           "path": "x-pack/plugins/spaces/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "spaces",
@@ -4061,7 +4412,8 @@
             ") => void; }"
           ],
           "path": "x-pack/plugins/spaces/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -4078,6 +4430,7 @@
       ],
       "path": "x-pack/plugins/spaces/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "spaces",
@@ -4098,7 +4451,8 @@
             }
           ],
           "path": "x-pack/plugins/spaces/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -4122,6 +4476,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -4137,6 +4492,7 @@
             ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -4153,6 +4509,7 @@
             ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -4169,6 +4526,7 @@
             ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -4193,6 +4551,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -4208,6 +4567,7 @@
             ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -4224,6 +4584,7 @@
             ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -4254,6 +4615,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/is_reserved_space.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -4277,6 +4639,7 @@
             ],
             "path": "x-pack/plugins/spaces/common/is_reserved_space.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -4298,6 +4661,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -4321,7 +4685,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -4338,7 +4703,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4371,6 +4737,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -4393,7 +4760,8 @@
               ", boolean> | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4409,6 +4777,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -4420,7 +4789,8 @@
               "\nThe namespace that the object existed in when it was converted."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -4432,7 +4802,8 @@
               "\nThe type of the object when it was converted."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -4444,7 +4815,8 @@
               "\nThe original ID of the object, before it was converted."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4460,6 +4832,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
@@ -4471,7 +4844,8 @@
               "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -4483,7 +4857,8 @@
               "\nDisplay name for this space."
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -4498,7 +4873,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -4513,7 +4889,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -4528,7 +4905,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -4543,7 +4921,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -4558,7 +4937,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "spaces",
@@ -4575,7 +4955,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4597,6 +4978,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4613,6 +4995,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4629,6 +5012,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4645,6 +5029,7 @@
         ],
         "path": "x-pack/plugins/spaces/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

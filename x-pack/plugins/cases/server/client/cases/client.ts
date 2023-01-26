@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CasePostRequest,
   CasesPatchRequest,
   CasesFindRequest,
@@ -13,10 +13,13 @@ import {
   AllTagsFindRequest,
   AllReportersFindRequest,
   CasesByAlertId,
+  CaseResponse,
+  CasesBulkGetRequestCertainFields,
+  CasesBulkGetResponseCertainFields,
 } from '../../../common/api';
-import { CasesClient } from '../client';
-import { CasesClientInternal } from '../client_internal';
-import {
+import type { CasesClient } from '../client';
+import type { CasesClientInternal } from '../client_internal';
+import type {
   ICasePostRequest,
   ICaseResolveResponse,
   ICaseResponse,
@@ -25,20 +28,15 @@ import {
   ICasesPatchRequest,
   ICasesResponse,
 } from '../typedoc_interfaces';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
+import { bulkGet } from './bulk_get';
 import { create } from './create';
 import { deleteCases } from './delete';
 import { find } from './find';
-import {
-  CasesByAlertIDParams,
-  get,
-  resolve,
-  getCasesByAlertID,
-  GetParams,
-  getReporters,
-  getTags,
-} from './get';
-import { push, PushParams } from './push';
+import type { CasesByAlertIDParams, GetParams } from './get';
+import { get, resolve, getCasesByAlertID, getReporters, getTags } from './get';
+import type { PushParams } from './push';
+import { push } from './push';
 import { update } from './update';
 
 /**
@@ -64,6 +62,12 @@ export interface CasesSubClient {
    * Retrieves a single case resolving the specified ID.
    */
   resolve(params: GetParams): Promise<ICaseResolveResponse>;
+  /**
+   * Retrieves multiple cases with the specified IDs.
+   */
+  bulkGet<Field extends keyof CaseResponse = keyof CaseResponse>(
+    params: CasesBulkGetRequestCertainFields<Field | 'id' | 'version' | 'owner'>
+  ): Promise<CasesBulkGetResponseCertainFields<Field | 'id' | 'version' | 'owner'>>;
   /**
    * Pushes a specific case to an external system.
    */
@@ -107,6 +111,7 @@ export const createCasesSubClient = (
     find: (params: CasesFindRequest) => find(params, clientArgs),
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
+    bulkGet: (params) => bulkGet(params, clientArgs),
     push: (params: PushParams) => push(params, clientArgs, casesClient, casesClientInternal),
     update: (cases: CasesPatchRequest) => update(cases, clientArgs),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),

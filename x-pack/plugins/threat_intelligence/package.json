@@ -3,21 +3,16 @@
   "name": "threat_intelligence",
   "scripts": {
     "cypress": "../../../node_modules/.bin/cypress",
-    "cypress:open": "yarn cypress open --config-file ./cypress/cypress.json",
-    "cypress:open:ccs": "yarn cypress:open --config integrationFolder=./cypress/ccs_integration",
+    "cypress:open": "yarn cypress open --config-file ./cypress/cypress.config.ts",
     "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/threat_intelligence_cypress/visual_config.ts",
-    "cypress:open:upgrade": "yarn cypress:open --config integrationFolder=./cypress/upgrade_integration",
-    "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/integration/**/*.spec.ts'; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:spec": "yarn cypress:run:reporter --browser chrome --spec ${SPEC_LIST:-'./cypress/integration/**/*.spec.ts'}; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:cases": "yarn cypress:run:reporter --browser chrome --spec './cypress/integration/cases/*.spec.ts'; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:firefox": "yarn cypress:run:reporter --browser firefox --spec './cypress/integration/**/*.spec.ts'; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:reporter": "yarn cypress run --config-file ./cypress/cypress.json --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
-    "cypress:run:respops": "yarn cypress:run:reporter --browser chrome --spec ./cypress/integration/detection_alerts/*.spec.ts,./cypress/integration/detection_rules/*.spec.ts,./cypress/integration/exceptions/*.spec.ts; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:ccs": "yarn cypress:run:reporter --browser chrome --config integrationFolder=./cypress/ccs_integration; status=$?; yarn junit:merge && exit $status",
+    "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+    "cypress:run:spec": "yarn cypress:run:reporter --browser chrome --spec ${SPEC_LIST:-'./cypress/e2e/**/*.cy.ts'}; status=$?; yarn junit:merge && exit $status",
+    "cypress:run:cases": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/cases/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+    "cypress:run:firefox": "yarn cypress:run:reporter --browser firefox --spec './cypress/e2e/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+    "cypress:run:reporter": "yarn cypress run --config-file ./cypress/cypress.config.ts --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
+    "cypress:run:respops": "yarn cypress:run:reporter --browser chrome --spec ./cypress/e2e/detection_alerts/*.cy.ts,./cypress/e2e/detection_rules/*.cy.ts,./cypress/e2e/exceptions/*.cy.ts; status=$?; yarn junit:merge && exit $status",
     "cypress:run-as-ci": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/threat_intelligence_cypress/cli_config_parallel.ts",
     "cypress:run-as-ci:firefox": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/threat_intelligence_cypress/config.firefox.ts",
-    "cypress:run:upgrade": "yarn cypress:run:reporter --browser chrome --config integrationFolder=./cypress/upgrade_integration",
-    "cypress:run:upgrade:old": "yarn cypress:run:reporter --browser chrome --config integrationFolder=./cypress/upgrade_integration --spec ./cypress/upgrade_integration/threat_hunting/**/*.spec.ts,./cypress/upgrade_integration/detections/**/custom_query_rule.spec.ts; status=$?; yarn junit:merge && exit $status",
     "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-threat-intelligence/cypress/results/mochawesome*.json > ../../../target/kibana-threat-intelligence/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-threat-intelligence/cypress/results/output.json --reportDir ../../../target/kibana-threat-intelligence/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-threat-intelligence/cypress/results/*.xml ../../../target/junit/"
   }
 }

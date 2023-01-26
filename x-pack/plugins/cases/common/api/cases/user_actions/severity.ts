@@ -7,7 +7,8 @@
 
 import * as rt from 'io-ts';
 import { CaseSeverityRt } from '../case';
-import { ActionTypes, UserActionWithAttributes } from './common';
+import type { UserActionWithAttributes } from './common';
+import { ActionTypes } from './common';
 
 export const SeverityUserActionPayloadRt = rt.type({ severity: CaseSeverityRt });
 

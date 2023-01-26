@@ -32,10 +32,14 @@ import {
   type MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { buildActiveMappings } from './core';
-import { DocumentMigrator, VersionedTransformer } from './core/document_migrator';
+import { DocumentMigrator, type VersionedTransformer } from './core/document_migrator';
 import { createIndexMap } from './core/build_index_map';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
+
+// ensure plugins don't try to convert SO namespaceTypes after 8.0.0
+// see https://github.com/elastic/kibana/issues/147344
+const ALLOWED_CONVERT_VERSION = '8.0.0';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
@@ -45,6 +49,7 @@ export interface KibanaMigratorOptions {
   kibanaVersion: string;
   logger: Logger;
   docLinks: DocLinksServiceStart;
+  waitForMigrationCompletion: boolean;
 }
 
 /**
@@ -65,7 +70,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly activeMappings: IndexMapping;
   private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
   private readonly docLinks: DocLinksServiceStart;
-
+  private readonly waitForMigrationCompletion: boolean;
   public readonly kibanaVersion: string;
 
   /**
@@ -79,6 +84,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     kibanaVersion,
     logger,
     docLinks,
+    waitForMigrationCompletion,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
@@ -90,9 +96,11 @@ export class KibanaMigrator implements IKibanaMigrator {
     this.kibanaVersion = kibanaVersion;
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion: this.kibanaVersion,
+      convertVersion: ALLOWED_CONVERT_VERSION,
       typeRegistry,
       log: this.log,
     });
+    this.waitForMigrationCompletion = waitForMigrationCompletion;
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
@@ -148,6 +156,7 @@ export class KibanaMigrator implements IKibanaMigrator {
           return runResilientMigrator({
             client: this.client,
             kibanaVersion: this.kibanaVersion,
+            waitForMigrationCompletion: this.waitForMigrationCompletion,
             targetMappings: buildActiveMappings(indexMap[index].typeMappings),
             logger: this.log,
             preMigrationScript: indexMap[index].script,

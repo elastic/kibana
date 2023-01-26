@@ -4,13 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { LastUpdatedAt } from '../../detection_response/utils';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import * as i18n from './translations';
 import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useAnomaliesColumns } from './columns';
@@ -21,12 +29,14 @@ import {
   LinkButton,
   useGetSecuritySolutionLinkProps,
 } from '../../../../common/components/links';
-import { HostsTableType } from '../../../../hosts/store/model';
+import { HostsTableType } from '../../../../explore/hosts/store/model';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { SecurityPageName } from '../../../../app/types';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
-import { UsersTableType } from '../../../../users/store/model';
+import { UsersTableType } from '../../../../explore/users/store/model';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
+import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 
 const TABLE_QUERY_ID = 'entityAnalyticsDashboardAnomaliesTable';
 
@@ -37,9 +47,11 @@ const TABLE_SORTING = {
   },
 } as const;
 
+export const ENTITY_ANALYTICS_ANOMALIES_PANEL = 'entity_analytics_anomalies';
+
 export const EntityAnalyticsAnomalies = () => {
   const {
-    services: { ml, http },
+    services: { ml, http, docLinks },
   } = useKibana();
 
   const jobsUrl = useMlHref(ml, http.basePath.get(), {
@@ -49,22 +61,40 @@ export const EntityAnalyticsAnomalies = () => {
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const { deleteQuery, setQuery, from, to } = useGlobalTime(false);
-  const { isLoading, data, refetch } = useNotableAnomaliesSearch({
+  const {
+    isLoading: isSearchLoading,
+    data,
+    refetch,
+  } = useNotableAnomaliesSearch({
     skip: !toggleStatus,
     from,
     to,
   });
-  const columns = useAnomaliesColumns(isLoading);
+  const { isLoading: isEnableDataFeedLoading, enableDatafeed } = useEnableDataFeed();
+
+  const handleJobStateChange = useCallback(
+    async (job: SecurityJob) => {
+      const result = await enableDatafeed(job, job.latestTimestampMs || 0, true);
+      refetch();
+      return result;
+    },
+    [refetch, enableDatafeed]
+  );
+
+  const columns = useAnomaliesColumns(
+    isSearchLoading || isEnableDataFeedLoading,
+    handleJobStateChange
+  );
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   useEffect(() => {
     setUpdatedAt(Date.now());
-  }, [isLoading]); // Update the time when data loads
+  }, [isSearchLoading]); // Update the time when data loads
 
   useQueryInspector({
     refetch,
     queryId: TABLE_QUERY_ID,
-    loading: isLoading,
+    loading: isSearchLoading,
     setQuery,
     deleteQuery,
   });
@@ -85,12 +115,22 @@ export const EntityAnalyticsAnomalies = () => {
     return [onClick, href];
   }, [getSecuritySolutionLinkProps]);
 
+  const installedJobsIds = useMemo(
+    () => data.filter(({ job }) => !!job && job.isInstalled).map(({ job }) => job?.id ?? ''),
+    [data]
+  );
+
+  const incompatibleJobCount = useMemo(
+    () => data.filter(({ job }) => job && !job.isCompatible).length,
+    [data]
+  );
+
   return (
-    <EuiPanel hasBorder data-test-subj="entity_analytics_anomalies">
+    <EuiPanel hasBorder data-test-subj={ENTITY_ANALYTICS_ANOMALIES_PANEL}>
       <HeaderSection
         title={i18n.ANOMALIES_TITLE}
         titleSize="s"
-        subtitle={<LastUpdatedAt isUpdating={isLoading} updatedAt={updatedAt} />}
+        subtitle={<LastUpdatedAt isUpdating={isSearchLoading} updatedAt={updatedAt} />}
         toggleStatus={toggleStatus}
         toggleQuery={setToggleStatus}
       >
@@ -122,15 +162,50 @@ export const EntityAnalyticsAnomalies = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </HeaderSection>
+
       {toggleStatus && (
-        <EuiInMemoryTable
-          responsive={false}
-          items={data}
-          columns={columns}
-          loading={isLoading}
-          id={TABLE_QUERY_ID}
-          sorting={TABLE_SORTING}
-        />
+        <>
+          {incompatibleJobCount > 0 && (
+            <>
+              <EuiCallOut
+                title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
+                data-test-subj="incompatible_jobs_warnings"
+                color="warning"
+                iconType="alert"
+                size="s"
+              >
+                <p>
+                  <FormattedMessage
+                    defaultMessage="We could not find any data, see {mlDocs} for more information on Machine Learning job requirements."
+                    id="xpack.securitySolution.components.mlPopup.moduleNotCompatibleDescription"
+                    values={{
+                      mlDocs: (
+                        <a
+                          href={`${docLinks.links.siem.ml}`}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          {i18n.ANOMALY_DETECTION_DOCS}
+                        </a>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiCallOut>
+
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
+          <EuiInMemoryTable
+            responsive={false}
+            items={data}
+            columns={columns}
+            loading={isSearchLoading}
+            id={TABLE_QUERY_ID}
+            sorting={TABLE_SORTING}
+          />
+        </>
       )}
     </EuiPanel>
   );

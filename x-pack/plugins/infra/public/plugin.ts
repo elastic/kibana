@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import {
+  AppMountParameters,
+  AppUpdater,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters, PluginInitializerContext } from '@kbn/core/public';
-import { from } from 'rxjs';
+import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
+import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
@@ -23,6 +29,7 @@ import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/lo
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { LogViewsService } from './services/log_views';
+import { TelemetryService } from './services/telemetry';
 import {
   InfraClientCoreSetup,
   InfraClientCoreStart,
@@ -37,6 +44,8 @@ import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private logViews: LogViewsService;
+  private telemetry: TelemetryService;
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
     this.config = context.config.get();
@@ -44,6 +53,7 @@ export class Plugin implements InfraClientPluginClass {
       messageFields:
         this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
     });
+    this.telemetry = new TelemetryService();
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
@@ -73,14 +83,27 @@ export class Plugin implements InfraClientPluginClass {
       fetchData: createMetricsFetchData(core.getStartServices),
     });
 
+    const startDep$AndHostViewFlag$ = combineLatest([
+      from(core.getStartServices()),
+      core.uiSettings.get$<boolean>(enableInfrastructureHostsView),
+    ]);
+
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts */
+    const infraEntries = [
+      { label: 'Inventory', app: 'metrics', path: '/inventory' },
+      { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
+    ];
+    const hostInfraEntry = { label: 'Hosts', app: 'metrics', path: '/hosts' };
     pluginsSetup.observability.navigation.registerSections(
-      from(core.getStartServices()).pipe(
+      startDep$AndHostViewFlag$.pipe(
         map(
           ([
-            {
-              application: { capabilities },
-            },
+            [
+              {
+                application: { capabilities },
+              },
+            ],
+            isInfrastructureHostsViewEnabled,
           ]) => [
             ...(capabilities.logs.show
               ? [
@@ -100,11 +123,9 @@ export class Plugin implements InfraClientPluginClass {
                   {
                     label: 'Infrastructure',
                     sortKey: 300,
-                    entries: [
-                      { label: 'Hosts', app: 'metrics', path: '/hosts' },
-                      { label: 'Inventory', app: 'metrics', path: '/inventory' },
-                      { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
-                    ],
+                    entries: isInfrastructureHostsViewEnabled
+                      ? [hostInfraEntry, ...infraEntries]
+                      : infraEntries,
                   },
                 ]
               : []),
@@ -167,6 +188,37 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
+    // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
+    const infraDeepLinks = [
+      {
+        id: 'inventory',
+        title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
+          defaultMessage: 'Inventory',
+        }),
+        path: '/inventory',
+      },
+      {
+        id: 'metrics-explorer',
+        title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+          defaultMessage: 'Metrics Explorer',
+        }),
+        path: '/explorer',
+      },
+      {
+        id: 'settings',
+        title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+          defaultMessage: 'Settings',
+        }),
+        path: '/settings',
+      },
+    ];
+    const hostInfraDeepLink = {
+      id: 'metrics-hosts',
+      title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+        defaultMessage: 'Hosts',
+      }),
+      path: '/hosts',
+    };
     core.application.register({
       id: 'metrics',
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
@@ -176,37 +228,10 @@ export class Plugin implements InfraClientPluginClass {
       order: 8200,
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
-      // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
-      deepLinks: [
-        {
-          id: 'inventory',
-          title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-            defaultMessage: 'Inventory',
-          }),
-          path: '/inventory',
-        },
-        {
-          id: 'metrics-explorer',
-          title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-            defaultMessage: 'Metrics Explorer',
-          }),
-          path: '/explorer',
-        },
-        {
-          id: 'metrics-hosts',
-          title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-            defaultMessage: 'Hosts',
-          }),
-          path: '/hosts',
-        },
-        {
-          id: 'settings',
-          title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-            defaultMessage: 'Settings',
-          }),
-          path: '/settings',
-        },
-      ],
+      updater$: this.appUpdater$,
+      deepLinks: core.uiSettings.get<boolean>(enableInfrastructureHostsView)
+        ? [hostInfraDeepLink, ...infraDeepLinks]
+        : infraDeepLinks,
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, pluginsStart, pluginStart] = await core.getStartServices();
@@ -215,6 +240,19 @@ export class Plugin implements InfraClientPluginClass {
         return renderApp(coreStart, pluginsStart, pluginStart, params);
       },
     });
+
+    startDep$AndHostViewFlag$.subscribe(
+      ([_startServices, isInfrastructureHostsViewEnabled]: [
+        [CoreStart, InfraClientStartDeps, InfraClientStartExports],
+        boolean
+      ]) => {
+        this.appUpdater$.next(() => ({
+          deepLinks: isInfrastructureHostsViewEnabled
+            ? [hostInfraDeepLink, ...infraDeepLinks]
+            : infraDeepLinks,
+        }));
+      }
+    );
 
     /* This exists purely to facilitate URL redirects from the old App ID ("infra"),
     to our new App IDs ("metrics" and "logs"). With version 8.0.0 we can remove this. */
@@ -229,6 +267,9 @@ export class Plugin implements InfraClientPluginClass {
         return renderApp(params);
       },
     });
+
+    // Setup telemetry events
+    this.telemetry.setup({ analytics: core.analytics });
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
@@ -240,8 +281,11 @@ export class Plugin implements InfraClientPluginClass {
       search: plugins.data.search,
     });
 
+    const telemetry = this.telemetry.start();
+
     const startContract: InfraClientStartExports = {
       logViews,
+      telemetry,
       ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),
       HostMetricsTable: createLazyHostMetricsTable(getStartServices),
       PodMetricsTable: createLazyPodMetricsTable(getStartServices),

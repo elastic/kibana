@@ -1,0 +1,203 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kpiNetworkEventsLensAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-eaadfec7-deaa-4aeb-a403-3b4e516416d2",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "861af17d-be25-45a3-a82d-d6e697b76e51",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "09617767-f732-410e-af53-bebcbd0bf4b9",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "eaadfec7-deaa-4aeb-a403-3b4e516416d2": Object {
+            "columnOrder": Array [
+              "370ebd07-5ce0-4f46-a847-0e363c50d037",
+            ],
+            "columns": Object {
+              "370ebd07-5ce0-4f46-a847-0e363c50d037": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "isBucketed": false,
+                "label": " ",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "$state": Object {
+          "store": "appState",
+        },
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "index": "security-solution-default",
+          "key": "source.ip",
+          "negate": false,
+          "type": "exists",
+          "value": "exists",
+        },
+        "query": Object {
+          "exists": Object {
+            "field": "source.ip",
+          },
+        },
+      },
+      Object {
+        "$state": Object {
+          "store": "appState",
+        },
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "index": "security-solution-default",
+          "key": "destination.ip",
+          "negate": false,
+          "type": "exists",
+          "value": "exists",
+        },
+        "query": Object {
+          "exists": Object {
+            "field": "destination.ip",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "source.ip",
+          "negate": false,
+          "params": Object {
+            "query": "192.168.1.1",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "source.ip": "192.168.1.1",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "destination.ip": "192.168.1.1",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\": \\"source.ip\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\": \\"destination.ip\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "source.ip",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "destination.ip",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "accessor": "370ebd07-5ce0-4f46-a847-0e363c50d037",
+      "autoScaleMetricAlignment": "left",
+      "layerId": "eaadfec7-deaa-4aeb-a403-3b4e516416d2",
+      "layerType": "data",
+    },
+  },
+  "title": "[Network] Network events",
+  "visualizationType": "lnsLegacyMetric",
+}
+`;

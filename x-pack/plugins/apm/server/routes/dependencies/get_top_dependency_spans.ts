@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   kqlQuery,
   rangeQuery,
   termQuery,
   termsQuery,
 } from '@kbn/observability-plugin/server';
-import { compact, keyBy } from 'lodash';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { keyBy } from 'lodash';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,
@@ -20,27 +20,30 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DURATION,
+  SPAN_ID,
   SPAN_NAME,
   TRACE_ID,
   TRANSACTION_ID,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { maybe } from '../../../common/utils/maybe';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 const MAX_NUM_SPANS = 1000;
 
 export interface DependencySpan {
   '@timestamp': number;
+  spanId: string;
   spanName: string;
   serviceName: string;
   agentName: AgentName;
   traceId: string;
-  transactionId?: string;
+  transactionId: string;
   transactionType?: string;
   transactionName?: string;
   duration: number;
@@ -48,7 +51,7 @@ export interface DependencySpan {
 }
 
 export async function getTopDependencySpans({
-  setup,
+  apmEventClient,
   dependencyName,
   spanName,
   start,
@@ -58,7 +61,7 @@ export async function getTopDependencySpans({
   sampleRangeFrom,
   sampleRangeTo,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   dependencyName: string;
   spanName: string;
   start: number;
@@ -68,14 +71,13 @@ export async function getTopDependencySpans({
   sampleRangeFrom?: number;
   sampleRangeTo?: number;
 }): Promise<DependencySpan[]> {
-  const { apmEventClient } = setup;
-
   const spans = (
     await apmEventClient.search('get_top_dependency_spans', {
       apm: {
         events: [ProcessorEvent.span],
       },
       body: {
+        track_total_hits: false,
         size: MAX_NUM_SPANS,
         query: {
           bool: {
@@ -85,6 +87,7 @@ export async function getTopDependencySpans({
               ...kqlQuery(kuery),
               ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
               ...termQuery(SPAN_NAME, spanName),
+              { exists: { field: TRANSACTION_ID } },
               ...((sampleRangeFrom ?? 0) >= 0 && (sampleRangeTo ?? 0) > 0
                 ? [
                     {
@@ -101,6 +104,7 @@ export async function getTopDependencySpans({
           },
         },
         _source: [
+          SPAN_ID,
           TRACE_ID,
           TRANSACTION_ID,
           SPAN_NAME,
@@ -115,7 +119,7 @@ export async function getTopDependencySpans({
     })
   ).hits.hits.map((hit) => hit._source);
 
-  const transactionIds = compact(spans.map((span) => span.transaction?.id));
+  const transactionIds = spans.map((span) => span.transaction!.id);
 
   const transactions = (
     await apmEventClient.search('get_transactions_for_dependency_spans', {
@@ -123,6 +127,7 @@ export async function getTopDependencySpans({
         events: [ProcessorEvent.transaction],
       },
       body: {
+        track_total_hits: false,
         size: transactionIds.length,
         query: {
           bool: {
@@ -143,19 +148,18 @@ export async function getTopDependencySpans({
   );
 
   return spans.map((span): DependencySpan => {
-    const transaction = span.transaction
-      ? transactionsById[span.transaction.id]
-      : undefined;
+    const transaction = maybe(transactionsById[span.transaction!.id]);
 
     return {
       '@timestamp': new Date(span['@timestamp']).getTime(),
+      spanId: span.span.id,
       spanName: span.span.name,
       serviceName: span.service.name,
       agentName: span.agent.name,
       duration: span.span.duration.us,
       traceId: span.trace.id,
       outcome: (span.event?.outcome || EventOutcome.unknown) as EventOutcome,
-      transactionId: transaction?.transaction.id,
+      transactionId: span.transaction!.id,
       transactionType: transaction?.transaction.type,
       transactionName: transaction?.transaction.name,
     };

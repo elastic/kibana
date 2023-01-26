@@ -11,7 +11,7 @@ import { calculateAvailability } from '../calculate_availability';
 import { LogstashMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 interface Logstash {
@@ -70,7 +70,7 @@ export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUui
   const type = 'logstash_stats';
   const moduleType = 'logstash';
 
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,
@@ -90,7 +90,7 @@ export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUui
     body: {
       query: createQuery({
         type,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getLogstashDataset(dataset),
         metricset: dataset,
         filters,
         start,

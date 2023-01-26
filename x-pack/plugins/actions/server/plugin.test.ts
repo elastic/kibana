@@ -15,7 +15,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
-import { ActionType, ActionsApiRequestHandlerContext } from './types';
+import { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
 import { ActionsConfig } from './config';
 import {
   ActionsPlugin,
@@ -24,6 +24,10 @@ import {
   PluginSetupContract,
 } from './plugin';
 import { AlertHistoryEsIndexConnectorId } from '../common';
+
+const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
+  return { status: 'ok', actionId: options.actionId };
+};
 
 describe('Actions Plugin', () => {
   describe('setup()', () => {
@@ -298,6 +302,7 @@ describe('Actions Plugin', () => {
         licensing: licensingMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        eventLog: eventLogMock.createStart(),
       };
     });
 
@@ -376,6 +381,7 @@ describe('Actions Plugin', () => {
           licensing: licensingMock.createStart(),
           taskManager: taskManagerMock.createStart(),
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
         };
       }
 
@@ -383,7 +389,15 @@ describe('Actions Plugin', () => {
         setup(getConfig());
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await plugin.setup(coreSetup as any, pluginsSetup);
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          executor,
+        });
+
         const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginStart.preconfiguredActions.length).toEqual(1);
@@ -393,7 +407,16 @@ describe('Actions Plugin', () => {
       it('should handle preconfiguredAlertHistoryEsIndex = true', async () => {
         setup(getConfig({ preconfiguredAlertHistoryEsIndex: true }));
 
-        await plugin.setup(coreSetup, pluginsSetup);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType({
+          id: '.index',
+          name: 'ES Index',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          executor,
+        });
+
         const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginStart.preconfiguredActions.length).toEqual(2);
@@ -470,6 +493,25 @@ describe('Actions Plugin', () => {
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
           'Connector: My action type'
         );
+      });
+    });
+
+    describe('getActionsHealth()', () => {
+      it('should return hasPermanentEncryptionKey false if canEncrypt of encryptedSavedObjects is false', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: false });
+      });
+      it('should return hasPermanentEncryptionKey true if canEncrypt of encryptedSavedObjects is true', async () => {
+        const pluginSetup = await plugin.setup(coreSetup, {
+          ...pluginsSetup,
+          encryptedSavedObjects: {
+            ...pluginsSetup.encryptedSavedObjects,
+            canEncrypt: true,
+          },
+        });
+        expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: true });
       });
     });
   });

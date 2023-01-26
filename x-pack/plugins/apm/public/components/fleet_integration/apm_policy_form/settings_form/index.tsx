@@ -92,7 +92,6 @@ export interface SettingsSection {
   title: string;
   subtitle?: string;
   settings: SettingsRow[];
-  isBeta?: boolean;
   isPlatinumLicence?: boolean;
 }
 

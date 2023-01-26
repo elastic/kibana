@@ -6,15 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 
 import { Spaces } from '../../scenarios';
-import {
-  getUrlPrefix,
-  ObjectRemover,
-  getTestRuleData,
-  getEventLog,
-  ESTestIndexTool,
-} from '../../../common/lib';
+import { getUrlPrefix, ObjectRemover, getTestRuleData, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -115,7 +110,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
       for (const errors of response.body.errors) {
         expect(errors.type).to.equal('actions');
         expect(errors.message).to.equal(
-          `action execution failure: test.throw:${createdConnector.id}: connector that throws - an error occurred while running the action: this action is intended to fail`
+          `action execution failure: test.throw:${createdConnector.id}: connector that throws - an error occurred while running the action: this action is intended to fail; retry: true`
         );
       }
     });

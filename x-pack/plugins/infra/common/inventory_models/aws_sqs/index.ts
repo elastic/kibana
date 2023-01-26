@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 
+export { awsSQSSnapshotMetricTypes } from './metrics';
+
 export const awsSQS: InventoryModel = {
   id: 'awsSQS',
   displayName: i18n.translate('xpack.infra.inventoryModels.awsSQS.displayName', {

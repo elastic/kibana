@@ -18,8 +18,13 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ProcessesEntry,
+  EndpointActionDataParameterTypes,
+  ActionResponseOutput,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
 } from '../types';
-import { ActivityLogItemTypes, RESPONSE_ACTION_COMMANDS } from '../types';
+import { ActivityLogItemTypes } from '../types';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
@@ -74,6 +79,31 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       );
     });
 
+    const command = overrides?.EndpointActions?.data?.command ?? this.randomResponseActionCommand();
+    let output: ActionResponseOutput<ResponseActionGetFileOutputContent> = overrides
+      ?.EndpointActions?.data?.output as ActionResponseOutput<ResponseActionGetFileOutputContent>;
+
+    if (command === 'get-file') {
+      if (!output) {
+        output = {
+          type: 'json',
+          content: {
+            code: 'ra_get-file_success_done',
+            zip_size: 123,
+            contents: [
+              {
+                type: 'file',
+                path: '/some/path/bad_file.txt',
+                size: 1234,
+                file_name: 'bad_file.txt',
+                sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
+              },
+            ],
+          },
+        };
+      }
+    }
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
@@ -83,14 +113,13 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         EndpointActions: {
           action_id: this.seededUUIDv4(),
           completed_at: timeStamp.toISOString(),
-          data: {
-            command: this.randomResponseActionCommand(),
-            comment: '',
-            parameters: undefined,
-          },
           // randomly before a few hours/minutes/seconds later
           started_at: new Date(startedAtTimes[this.randomN(startedAtTimes.length)]).toISOString(),
-          output: undefined,
+          data: {
+            command,
+            comment: '',
+            output,
+          },
         },
         error: undefined,
       },
@@ -106,33 +135,84 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     });
   }
 
-  generateActionDetails(overrides: DeepPartial<ActionDetails> = {}): ActionDetails {
-    const details: ActionDetails = {
-      agents: ['agent-a'],
-      command: 'isolate',
-      completedAt: '2022-04-30T16:08:47.449Z',
-      hosts: { 'agent-a': { name: 'Host-agent-a' } },
-      id: '123',
-      isCompleted: true,
-      isExpired: false,
-      wasSuccessful: true,
-      errors: undefined,
-      startedAt: '2022-04-27T16:08:47.449Z',
-      comment: 'thisisacomment',
-      createdBy: 'auserid',
-      parameters: undefined,
-      outputs: {},
-      agentState: {
-        'agent-a': {
-          errors: undefined,
-          isCompleted: true,
-          completedAt: '2022-04-30T16:08:47.449Z',
-          wasSuccessful: true,
+  generateActionDetails<
+    TOutputType extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  >(
+    overrides: Partial<ActionDetails<TOutputType, TParameters>> = {}
+  ): ActionDetails<TOutputType, TParameters> {
+    const details: ActionDetails = merge(
+      {
+        agents: ['agent-a'],
+        command: 'isolate',
+        completedAt: '2022-04-30T16:08:47.449Z',
+        hosts: { 'agent-a': { name: 'Host-agent-a' } },
+        id: '123',
+        isCompleted: true,
+        isExpired: false,
+        wasSuccessful: true,
+        errors: undefined,
+        startedAt: '2022-04-27T16:08:47.449Z',
+        status: 'successful',
+        comment: 'thisisacomment',
+        createdBy: 'auserid',
+        parameters: undefined,
+        outputs: {},
+        agentState: {
+          'agent-a': {
+            errors: undefined,
+            isCompleted: true,
+            completedAt: '2022-04-30T16:08:47.449Z',
+            wasSuccessful: true,
+          },
         },
       },
-    };
+      overrides
+    );
 
-    return merge(details, overrides);
+    if (details.command === 'get-file') {
+      if (!details.parameters) {
+        (
+          details as ActionDetails<
+            ResponseActionGetFileOutputContent,
+            ResponseActionGetFileParameters
+          >
+        ).parameters = {
+          path: '/some/file.txt',
+        };
+      }
+
+      if (!details.outputs || Object.keys(details.outputs).length === 0) {
+        details.outputs = {
+          [details.agents[0]]: {
+            type: 'json',
+            content: {
+              code: 'ra_get-file_success',
+              path: '/some/file/txt',
+              size: 1234,
+              zip_size: 123,
+            },
+          },
+        };
+      }
+    }
+
+    return details as unknown as ActionDetails<TOutputType, TParameters>;
+  }
+
+  randomGetFileFailureCode(): string {
+    return this.randomChoice([
+      'ra_get-file_error_not-found',
+      'ra_get-file_error_is-directory',
+      'ra_get-file_error_invalid-input',
+      'ra_get-file_error_not-permitted',
+      'ra_get-file_error_too-big',
+      'ra_get-file_error_disk-quota',
+      'ra_get-file_error_processing',
+      'ra_get-file_error_upload-api-unreachable',
+      'ra_get-file_error_upload-timeout',
+      'ra_get-file_error_queue-timeout',
+    ]);
   }
 
   generateActivityLogAction(
@@ -158,7 +238,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         type: ActivityLogItemTypes.RESPONSE,
         item: {
           id: this.seededUUIDv4(),
-          data: this.generateResponse(),
+          data: this.generateResponse({ ...(overrides?.item?.data ?? {}) }),
         },
       },
       overrides
@@ -215,6 +295,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   protected randomResponseActionCommand() {
-    return this.randomChoice(RESPONSE_ACTION_COMMANDS);
+    return this.randomChoice(RESPONSE_ACTION_API_COMMANDS_NAMES);
   }
 }

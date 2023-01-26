@@ -56,6 +56,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
       );
     }
     case 'duration':
+    case 'storageSize':
     case 'text': {
       return (
         <EuiFieldText

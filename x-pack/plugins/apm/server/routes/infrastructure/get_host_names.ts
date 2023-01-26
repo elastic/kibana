@@ -5,106 +5,53 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  CONTAINER_ID,
-  HOST_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { ApmPluginRequestHandlerContext } from '../typings';
-import { getMetricIndices } from '../../lib/helpers/get_metric_indices';
+import { CONTAINER_ID, HOST_NAME } from '../../../common/es_fields/apm';
+import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
-interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
-  buckets: Array<{
-    key: string;
-    key_as_string?: string;
-  }>;
-}
-
-interface InfraPlugin {
-  setup: InfraPluginSetup;
-  start: () => Promise<InfraPluginStart>;
-}
-
-const getHostNames = async ({
-  esClient,
+export async function getContainerHostNames({
   containerIds,
-  index,
+  infraMetricsClient,
   start,
   end,
 }: {
-  esClient: ElasticsearchClient;
   containerIds: string[];
-  index: string;
+  infraMetricsClient: InfraMetricsClient;
   start: number;
   end: number;
-}) => {
-  const response = await esClient.search<unknown, { hostNames: Aggs }>({
-    index: [index],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [CONTAINER_ID]: containerIds,
-              },
+}): Promise<string[]> {
+  if (!containerIds.length) {
+    return [];
+  }
+
+  const response = await infraMetricsClient.search({
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              [CONTAINER_ID]: containerIds,
             },
-            ...rangeQuery(start, end),
-          ],
-        },
-      },
-      aggs: {
-        hostNames: {
-          terms: {
-            field: HOST_NAME,
-            size: 500,
           },
+          ...rangeQuery(start, end),
+        ],
+      },
+    },
+    aggs: {
+      hostNames: {
+        terms: {
+          field: HOST_NAME,
+          size: 500,
         },
       },
     },
   });
 
-  return {
-    hostNames:
-      response.aggregations?.hostNames?.buckets.map(
-        (bucket) => bucket.key as string
-      ) ?? [],
-  };
-};
+  const hostNames = response.aggregations?.hostNames?.buckets.map(
+    (bucket) => bucket.key as string
+  );
 
-export const getContainerHostNames = async ({
-  containerIds,
-  context,
-  infra,
-  start,
-  end,
-}: {
-  containerIds: string[];
-  context: ApmPluginRequestHandlerContext;
-  infra: InfraPlugin;
-  start: number;
-  end: number;
-}): Promise<string[]> => {
-  if (containerIds.length) {
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    const metricIndices = await getMetricIndices({
-      infraPlugin: infra,
-      savedObjectsClient,
-    });
-
-    const containerHostNames = await getHostNames({
-      esClient,
-      containerIds,
-      index: metricIndices,
-      start,
-      end,
-    });
-    return containerHostNames.hostNames;
-  }
-  return [];
-};
+  return hostNames ?? [];
+}

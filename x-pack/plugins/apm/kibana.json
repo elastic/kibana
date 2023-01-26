@@ -19,14 +19,20 @@
     "triggersActionsUi",
     "share",
     "unifiedSearch",
-    "dataViews"
+    "dataViews",
+    "advancedSettings",
+    "unifiedFieldList",
+    "lens",
+    "maps"
   ],
   "optionalPlugins": [
     "actions",
     "alerting",
     "cases",
+    "charts",
     "cloud",
     "fleet",
+    "fieldFormats",
     "home",
     "ml",
     "security",
@@ -46,6 +52,7 @@
     "kibanaUtils",
     "ml",
     "observability",
-    "esUiShared"
+    "esUiShared",
+    "maps"
   ]
 }

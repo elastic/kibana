@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 import { Spaces } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -239,6 +240,79 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       expect(actionsBefore).to.be.greaterThan(0, 'no actions triggered before snooze');
       expect(actionsAfter).to.be.greaterThan(0, 'no actions triggered after snooze');
       expect(actionsDuring).to.be(0);
+    });
+
+    it('should prevent more than 5 schedules from being added to a rule', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: false,
+          })
+        )
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      // Creating 5 snooze schedules, using Promise.all is very flaky, therefore
+      // the schedules are being created 1 at a time
+      await alertUtils
+        .getSnoozeRequest(createdRule.id)
+        .send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuidv4(),
+          },
+        })
+        .expect(204);
+      await alertUtils
+        .getSnoozeRequest(createdRule.id)
+        .send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuidv4(),
+          },
+        })
+        .expect(204);
+      await alertUtils
+        .getSnoozeRequest(createdRule.id)
+        .send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuidv4(),
+          },
+        })
+        .expect(204);
+
+      await alertUtils
+        .getSnoozeRequest(createdRule.id)
+        .send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuidv4(),
+          },
+        })
+        .expect(204);
+
+      await alertUtils
+        .getSnoozeRequest(createdRule.id)
+        .send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuidv4(),
+          },
+        })
+        .expect(204);
+
+      // Adding the 6th snooze schedule, should fail
+      const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        snooze_schedule: {
+          ...SNOOZE_SCHEDULE,
+          id: uuidv4(),
+        },
+      });
+      expect(response.statusCode).to.eql(400);
+      expect(response.body.message).to.eql('Rule cannot have more than 5 snooze schedules');
     });
   });
 

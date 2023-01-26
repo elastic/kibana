@@ -10,8 +10,10 @@ exitCode=0
 results=()
 
 if [[ "$1" == 'jest.config.js' ]]; then
-  # run unit tests in parallel
-  parallelism="-w2"
+  # we used to run jest tests in parallel but started to see a lot of flakiness in libraries like react-dom/test-utils:
+  # https://github.com/elastic/kibana/issues/141477
+  # parallelism="-w2"
+  parallelism="--runInBand"
   TEST_TYPE="unit"
 else
   # run integration tests in-band
@@ -24,13 +26,26 @@ echo "--- downloading jest test run order"
 download_artifact jest_run_order.json .
 configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
 
+echo "+++ ⚠️ WARNING ⚠️"
+echo "
+  console.log(), console.warn(), and console.error() output in jest tests causes a massive amount
+  of noise on CI without any percevable benefit, so they have been disabled. If you want to log
+  output in your test temporarily, you can modify 'packages/kbn-test/src/jest/setup/disable_console_logs.js'
+"
+
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
+
+  cmd="NODE_OPTIONS=\"--max-old-space-size=14336\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+  echo "actual full command is:"
+  echo "$cmd"
+  echo ""
+
   start=$(date +%s)
 
   # prevent non-zero exit code from breaking the loop
   set +e;
-  NODE_OPTIONS="--max-old-space-size=14336" node ./scripts/jest --config="$config" "$parallelism" --coverage=false --passWithNoTests
+  eval "$cmd"
   lastCode=$?
   set -e;
 

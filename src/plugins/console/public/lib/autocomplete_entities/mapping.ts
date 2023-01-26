@@ -121,23 +121,9 @@ export class Mapping implements BaseMapping {
   };
 
   loadMappings = (mappings: IndicesGetMappingResponse) => {
-    const maxMappingSize = Object.keys(mappings).length > 10 * 1024 * 1024;
-    let mappingsResponse;
-    if (maxMappingSize) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `Mapping size is larger than 10MB (${
-          Object.keys(mappings).length / 1024 / 1024
-        } MB). Ignoring...`
-      );
-      mappingsResponse = {};
-    } else {
-      mappingsResponse = mappings;
-    }
-
     this.perIndexTypes = {};
 
-    Object.entries(mappingsResponse).forEach(([index, indexMapping]) => {
+    Object.entries(mappings).forEach(([index, indexMapping]) => {
       const normalizedIndexMappings: Record<string, object[]> = {};
       let transformedMapping: Record<string, any> = indexMapping;
 

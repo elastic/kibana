@@ -22,12 +22,12 @@ import {
 } from './utils';
 import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { createEnrichEventsFunction } from './enrichments';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
   buildReasonMessage,
   bulkCreate,
-  completeRule,
   enrichment = identity,
   eventsTelemetry,
   exceptionsList,
@@ -144,7 +144,14 @@ export const searchAfterAndBulkCreate = async ({
           const enrichedEvents = await enrichment(limitedEvents);
           const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
-          const bulkCreateResult = await bulkCreate(wrappedDocs);
+          const bulkCreateResult = await bulkCreate(
+            wrappedDocs,
+            undefined,
+            createEnrichEventsFunction({
+              services,
+              logger: ruleExecutionLogger,
+            })
+          );
 
           addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
 

@@ -34,6 +34,22 @@ describe(__filename, () => {
                   },
                 },
               },
+              {
+                key: 'node_two',
+                shard: {
+                  by_index: {
+                    buckets: [
+                      {
+                        key: '.ds-metrics-elasticsearch.shard-default-2022.08.16-000001',
+                        last_seen: {
+                          value: 123,
+                          value_as_string: '2022-08-06',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
             ],
           },
         },
@@ -49,6 +65,14 @@ describe(__filename, () => {
                 'metricbeat-8': {
                   index: '.ds-.monitoring-es-8-mb.2022',
                   lastSeen: '2022-01-01',
+                },
+              },
+            },
+            node_two: {
+              shard: {
+                package: {
+                  index: '.ds-metrics-elasticsearch.shard-default-2022.08.16-000001',
+                  lastSeen: '2022-08-06',
                 },
               },
             },

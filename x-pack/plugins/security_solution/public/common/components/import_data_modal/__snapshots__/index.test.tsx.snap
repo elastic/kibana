@@ -3,24 +3,24 @@
 exports[`ImportDataModal renders correctly against snapshot 1`] = `
 Object {
   "asFragment": [Function],
-  "baseElement": <body
-    class="euiBody-hasOverlayMask"
-  >
+  "baseElement": <body>
     <div />
     <div
-      class="euiOverlayMask euiOverlayMask--aboveHeader"
+      class="euiOverlayMask emotion-euiOverlayMask-aboveHeader"
+      data-euiportal="true"
+      data-relative-to-header="above"
     >
       <div
         data-eui="EuiFocusTrap"
       >
         <div
-          class="euiModal"
-          style="max-width: 750px;"
+          class="euiModal emotion-euiModal"
+          style="max-inline-size: 750px;"
           tabindex="0"
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
             type="button"
           >
             <span
@@ -31,124 +31,119 @@ Object {
             />
           </button>
           <div
-            class="euiModal__flex"
+            class="euiModalHeader emotion-euiModalHeader"
+          >
+            <h1
+              class="euiTitle euiModalHeader__title emotion-euiTitle-m"
+            >
+              title
+            </h1>
+          </div>
+          <div
+            class="euiModalBody emotion-euiModalBody"
           >
             <div
-              class="euiModalHeader"
+              class="euiModalBody__overflow emotion-euiModalBody__overflow"
             >
               <div
-                class="euiModalHeader__title"
+                class="euiText emotion-euiText-s"
               >
-                <h1>
-                  title
-                </h1>
+                <h4>
+                  description
+                </h4>
               </div>
-            </div>
-            <div
-              class="euiModalBody"
-            >
               <div
-                class="euiModalBody__overflow"
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <div
+                class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
               >
                 <div
-                  class="euiText emotion-euiText-s"
+                  class="euiFilePicker__wrap"
                 >
-                  <h4>
-                    description
-                  </h4>
-                </div>
-                <div
-                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-                />
-                <div
-                  class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
-                >
+                  <input
+                    accept=".ndjson"
+                    aria-describedby="rule-file-picker-filePicker__prompt"
+                    class="euiFilePicker__input"
+                    data-test-subj="rule-file-picker"
+                    id="rule-file-picker"
+                    type="file"
+                  />
                   <div
-                    class="euiFilePicker__wrap"
+                    class="euiFilePicker__prompt"
+                    id="rule-file-picker-filePicker__prompt"
                   >
-                    <input
-                      accept=".ndjson"
-                      aria-describedby="rule-file-picker-filePicker__prompt"
-                      class="euiFilePicker__input"
-                      data-test-subj="rule-file-picker"
-                      id="rule-file-picker"
-                      type="file"
+                    <span
+                      aria-hidden="true"
+                      class="euiFilePicker__icon"
+                      color="primary"
+                      data-euiicon-type="importAction"
                     />
                     <div
-                      class="euiFilePicker__prompt"
-                      id="rule-file-picker-filePicker__prompt"
+                      class="euiFilePicker__promptText"
                     >
-                      <span
-                        aria-hidden="true"
-                        class="euiFilePicker__icon"
-                        data-euiicon-type="importAction"
-                      />
-                      <div
-                        class="euiFilePicker__promptText"
-                      >
-                        subtitle
-                      </div>
+                      subtitle
                     </div>
                   </div>
                 </div>
-                <div
-                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <div
+                class="euiCheckbox emotion-euiCheckbox"
+              >
+                <input
+                  class="euiCheckbox__input"
+                  data-test-subj="import-data-modal-checkbox-label"
+                  id="import-data-modal-checkbox-label"
+                  type="checkbox"
                 />
                 <div
-                  class="euiCheckbox"
+                  class="euiCheckbox__square"
+                />
+                <label
+                  class="euiCheckbox__label"
+                  for="import-data-modal-checkbox-label"
                 >
-                  <input
-                    class="euiCheckbox__input"
-                    data-test-subj="import-data-modal-checkbox-label"
-                    id="import-data-modal-checkbox-label"
-                    type="checkbox"
-                  />
-                  <div
-                    class="euiCheckbox__square"
-                  />
-                  <label
-                    class="euiCheckbox__label"
-                    for="import-data-modal-checkbox-label"
-                  >
-                    checkBoxLabel
-                  </label>
-                </div>
+                  checkBoxLabel
+                </label>
               </div>
             </div>
-            <div
-              class="euiModalFooter"
+          </div>
+          <div
+            class="euiModalFooter emotion-euiModalFooter"
+          >
+            <button
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty euiButtonEmpty--primary"
-                type="button"
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
               >
                 <span
-                  class="euiButtonContent euiButtonEmpty__content"
+                  class="euiButtonEmpty__text"
                 >
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Cancel
-                  </span>
+                  Cancel
                 </span>
-              </button>
-              <button
-                class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
-                data-test-subj="import-data-modal-button"
-                disabled=""
-                type="button"
+              </span>
+            </button>
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-m-fill-disabled"
+              data-test-subj="import-data-modal-button"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent euiButton__content"
+                  class="eui-textTruncate"
                 >
-                  <span
-                    class="euiButton__text"
-                  >
-                    submitBtnText
-                  </span>
+                  submitBtnText
                 </span>
-              </button>
-            </div>
+              </span>
+            </button>
           </div>
         </div>
       </div>

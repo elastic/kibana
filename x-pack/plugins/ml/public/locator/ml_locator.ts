@@ -6,6 +6,7 @@
  */
 
 import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
+import { formatNotificationsUrl } from './formatters/notifications';
 import {
   DataFrameAnalyticsExplorationUrlState,
   MlLocatorParams,
@@ -80,6 +81,7 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER:
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED:
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS:
+      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_MAP:
       case ML_PAGES.DATA_VISUALIZER:
       case ML_PAGES.DATA_VISUALIZER_FILE:
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
@@ -87,6 +89,10 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.AIOPS:
       case ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES:
       case ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT:
+      case ML_PAGES.AIOPS_LOG_CATEGORIZATION:
+      case ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT:
+      case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION:
+      case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT:
       case ML_PAGES.OVERVIEW:
       case ML_PAGES.SETTINGS:
       case ML_PAGES.FILTER_LISTS_MANAGE:
@@ -101,6 +107,9 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
         break;
       case ML_PAGES.CALENDARS_EDIT:
         path = formatEditCalendarUrl('', params.pageState);
+        break;
+      case ML_PAGES.NOTIFICATIONS:
+        path = formatNotificationsUrl('', params.pageState);
         break;
 
       default:

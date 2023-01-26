@@ -59,6 +59,8 @@ import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
 import { MlNodesPanelProvider } from './ml_nodes_list';
 import { MachineLearningCasesProvider } from './cases';
 import { AnomalyChartsProvider } from './anomaly_charts';
+import { NotificationsProvider } from './notifications';
+import { MlTableServiceProvider } from './common_table_service';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -123,13 +125,15 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const settingsFilterList = MachineLearningSettingsFilterListProvider(context, commonUI);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
   const stackManagementJobs = MachineLearningStackManagementJobsProvider(context);
+  const tableService = MlTableServiceProvider(context);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context, api);
   const alerting = MachineLearningAlertingProvider(context, api, commonUI);
   const swimLane = SwimLaneProvider(context);
   const trainedModels = TrainedModelsProvider(context, commonUI);
-  const trainedModelsTable = TrainedModelsTableProvider(context, commonUI);
+  const trainedModelsTable = TrainedModelsTableProvider(context, commonUI, trainedModels);
   const mlNodesPanel = MlNodesPanelProvider(context);
+  const notifications = NotificationsProvider(context, commonUI, tableService);
 
   const cases = MachineLearningCasesProvider(context, swimLane, anomalyCharts);
 
@@ -171,7 +175,9 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     jobWizardMultiMetric,
     jobWizardPopulation,
     lensVisualizations,
+    mlNodesPanel,
     navigation,
+    notifications,
     overviewPage,
     securityCommon,
     securityUI,
@@ -181,10 +187,10 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     singleMetricViewer,
     stackManagementJobs,
     swimLane,
+    tableService,
     testExecution,
     testResources,
     trainedModels,
     trainedModelsTable,
-    mlNodesPanel,
   };
 }

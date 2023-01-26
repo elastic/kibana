@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function lensApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('UnifiedFieldList', () => {
+    loadTestFile(require.resolve('./existing_fields'));
     loadTestFile(require.resolve('./field_stats'));
   });
 }

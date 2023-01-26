@@ -6,8 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { Field, getUseField } from '../../common/shared_imports';
-
+import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 const CommonUseField = getUseField({ component: Field });
 
 interface Props {
@@ -24,8 +24,6 @@ const TitleComponent: React.FC<Props> = ({ isLoading }) => (
         autoFocus: true,
         fullWidth: true,
         disabled: isLoading,
-        // TODO set a custom test subj
-        // 'data-test-subj': 'caseTitleInput',
       },
     }}
   />

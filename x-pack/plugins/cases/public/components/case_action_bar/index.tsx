@@ -17,19 +17,19 @@ import {
   EuiIconTip,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { Case } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import type { Case } from '../../../common/ui/types';
+import type { CaseStatuses } from '../../../common/api';
 import * as i18n from '../case_view/translations';
 import { Actions } from './actions';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { StatusContextMenu } from './status_context_menu';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import type { OnUpdateFields } from '../case_view/types';
-import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { getStatusDate, getStatusTitle } from './helpers';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -107,7 +107,8 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                   <EuiDescriptionListDescription>
                     <StatusContextMenu
                       currentStatus={caseData.status}
-                      disabled={!permissions.update || isLoading}
+                      disabled={!permissions.update}
+                      isLoading={isLoading}
                       onStatusChanged={onStatusChanged}
                     />
                   </EuiDescriptionListDescription>

@@ -21,10 +21,9 @@ import {
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import { ExpressionLegacyMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
 
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));
@@ -67,7 +66,7 @@ export const getMetricVisRenderer: (
   name: EXPRESSION_METRIC_NAME,
   displayName: 'metric visualization',
   reuseDomNode: true,
-  render: async (domNode, { visData, visConfig }, handlers) => {
+  render: async (domNode, { visData, visConfig, canNavigateToLens }, handlers) => {
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -82,9 +81,12 @@ export const getMetricVisRenderer: (
       const visualizationType = extractVisualizationType(executionContext);
 
       if (containerType && visualizationType) {
-        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+        const events = [
           `render_${visualizationType}_legacy_metric`,
-        ]);
+          canNavigateToLens ? `render_${visualizationType}_legacy_metric_convertable` : undefined,
+        ].filter<string>((event): event is string => Boolean(event));
+
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, events);
       }
 
       handlers.done();

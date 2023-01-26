@@ -25,6 +25,7 @@ export const CategorizationPerPartitionSwitch: FC = () => {
 
   useEffect(() => {
     setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export const CategorizationPerPartitionSwitch: FC = () => {
 
     jobCreator.perPartitionCategorization = enablePerPartitionCategorization;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enablePerPartitionCategorization]);
 
   return (

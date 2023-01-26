@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import {
+  APIClientRequestParamsOf,
+  APIReturnType,
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { meanBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 
 type LatencyChartReturnType =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
@@ -18,31 +22,30 @@ type LatencyChartReturnType =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
-  const archiveName = 'apm_8.0.0';
+  const serviceName = 'synth-go';
+  const start = new Date('2021-01-01T00:00:00.000Z').getTime();
+  const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  const { start, end } = archives_metadata[archiveName];
-
-  async function fetchLatencyCharts({
-    serviceName,
-    query,
-  }: {
-    serviceName: string;
-    query: {
-      start: string;
-      end: string;
-      latencyAggregationType: LatencyAggregationType;
-      transactionType: string;
-      environment: string;
-      kuery: string;
-      offset?: string;
-    };
-  }) {
+  async function fetchLatencyCharts(
+    overrides?: RecursivePartial<
+      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>['params']
+    >
+  ) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/services/{serviceName}/transactions/charts/latency`,
       params: {
-        path: { serviceName },
-        query,
+        path: { serviceName: overrides?.path?.serviceName || serviceName },
+        query: {
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+          latencyAggregationType: LatencyAggregationType.avg,
+          transactionType: 'request',
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          ...overrides?.query,
+        },
       },
     });
   }
@@ -52,20 +55,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await fetchLatencyCharts({
-          serviceName: 'opbeans-node',
-          query: {
-            start,
-            end,
-            latencyAggregationType: LatencyAggregationType.avg,
-            transactionType: 'request',
-            environment: 'testing',
-            kuery: '',
-          },
-        });
-
+        const response = await fetchLatencyCharts();
         expect(response.status).to.be(200);
-
         const latencyChartReturn = response.body as LatencyChartReturnType;
 
         expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(null);
@@ -77,73 +68,90 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Latency with a basic license when data is loaded',
-    { config: 'basic', archives: [archiveName] },
+    { config: 'basic', archives: [] },
     () => {
+      const GO_PROD_RATE = 80;
+      const GO_DEV_RATE = 20;
+      const GO_PROD_DURATION = 1000;
+      const GO_DEV_DURATION = 500;
+      before(async () => {
+        const serviceGoProdInstance = apm
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
+          .instance('instance-a');
+        const serviceGoDevInstance = apm
+          .service({ name: serviceName, environment: 'development', agentName: 'go' })
+          .instance('instance-b');
+
+        await synthtraceEsClient.index([
+          timerange(start, end)
+            .ratePerMinute(GO_PROD_RATE)
+            .generator((timestamp) =>
+              serviceGoProdInstance
+                .transaction({ transactionName: 'GET /api/product/list' })
+                .duration(GO_PROD_DURATION)
+                .timestamp(timestamp)
+            ),
+          timerange(start, end)
+            .ratePerMinute(GO_DEV_RATE)
+            .generator((timestamp) =>
+              serviceGoDevInstance
+                .transaction({ transactionName: 'GET /api/product/:id' })
+                .duration(GO_DEV_DURATION)
+                .timestamp(timestamp)
+            ),
+        ]);
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      const expectedLatencyAvgValueMs =
+        ((GO_PROD_RATE * GO_PROD_DURATION + GO_DEV_RATE * GO_DEV_DURATION) /
+          (GO_PROD_RATE + GO_DEV_RATE)) *
+        1000;
+
       describe('average latency type', () => {
         it('returns average duration and timeseries', async () => {
-          const response = await fetchLatencyCharts({
-            serviceName: 'opbeans-node',
-            query: {
-              start,
-              end,
-              latencyAggregationType: LatencyAggregationType.avg,
-              transactionType: 'request',
-              environment: 'testing',
-              kuery: '',
-            },
-          });
+          const response = await fetchLatencyCharts();
 
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(
+            expectedLatencyAvgValueMs
+          );
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(15);
         });
       });
 
       describe('95th percentile latency type', () => {
         it('returns average duration and timeseries', async () => {
           const response = await fetchLatencyCharts({
-            serviceName: 'opbeans-node',
-            query: {
-              start,
-              end,
-              latencyAggregationType: LatencyAggregationType.p95,
-              transactionType: 'request',
-              environment: 'testing',
-              kuery: '',
-            },
+            query: { latencyAggregationType: LatencyAggregationType.p95 },
           });
 
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(
+            expectedLatencyAvgValueMs
+          );
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(15);
         });
       });
 
       describe('99th percentile latency type', () => {
         it('returns average duration and timeseries', async () => {
           const response = await fetchLatencyCharts({
-            serviceName: 'opbeans-node',
             query: {
-              start,
-              end,
               latencyAggregationType: LatencyAggregationType.p99,
-              transactionType: 'request',
-              environment: 'testing',
-              kuery: '',
             },
           });
 
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
 
-          expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expectSnapshot(latencyChartReturn.currentPeriod.overallAvgDuration).toMatchInline(
-            `53906.6603773585`
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(
+            expectedLatencyAvgValueMs
           );
-
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(15);
         });
       });
 
@@ -152,14 +160,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           response = await fetchLatencyCharts({
-            serviceName: 'opbeans-node',
             query: {
-              latencyAggregationType: LatencyAggregationType.avg,
-              transactionType: 'request',
-              start: moment(end).subtract(15, 'minutes').toISOString(),
-              end,
-              offset: '15m',
-              environment: 'ENVIRONMENT_ALL',
+              start: moment(end).subtract(7, 'minutes').toISOString(),
+              offset: '7m',
               kuery: '',
             },
           });
@@ -175,8 +178,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             latencyChartReturn.previousPeriod.latencyTimeseries.filter(({ y }) => y !== null);
           expect(previousPeriodNonNullDataPoints.length).to.be.greaterThan(0);
 
-          expectSnapshot(currentPeriodNonNullDataPoints).toMatch();
-          expectSnapshot(previousPeriodNonNullDataPoints).toMatch();
+          expect(meanBy(currentPeriodNonNullDataPoints, 'y')).to.eql(expectedLatencyAvgValueMs);
+          expect(meanBy(previousPeriodNonNullDataPoints, 'y')).to.eql(expectedLatencyAvgValueMs);
         });
 
         it('matches x-axis on current period and previous period', () => {
@@ -192,14 +195,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           response = await fetchLatencyCharts({
-            serviceName: 'opbeans-node',
             query: {
-              start,
-              end,
-              latencyAggregationType: LatencyAggregationType.avg,
-              transactionType: 'request',
               environment: 'does-not-exist',
-              kuery: '',
             },
           });
         });
@@ -216,74 +213,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(currentPeriodNonNullDataPoints).to.be.empty();
         });
       });
-    }
-  );
 
-  registry.when(
-    'Transaction latency with a trial license when data is loaded',
-    { config: 'trial', archives: [archiveName] },
-    () => {
-      let response: Awaited<ReturnType<typeof fetchLatencyCharts>>;
+      describe('with production environment', () => {
+        let response: Awaited<ReturnType<typeof fetchLatencyCharts>>;
 
-      const transactionType = 'request';
-
-      describe('without an environment', () => {
         before(async () => {
           response = await fetchLatencyCharts({
-            serviceName: 'opbeans-node',
             query: {
-              start,
-              end,
-              latencyAggregationType: LatencyAggregationType.avg,
-              transactionType,
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-            },
-          });
-        });
-
-        it('returns an ok response', () => {
-          expect(response.status).to.eql(200);
-        });
-      });
-
-      describe('with environment selected', () => {
-        before(async () => {
-          response = await fetchLatencyCharts({
-            serviceName: 'opbeans-node',
-            query: {
-              start,
-              end,
-              latencyAggregationType: LatencyAggregationType.avg,
-              transactionType,
               environment: 'production',
-              kuery: '',
             },
           });
         });
 
-        it('should have a successful response', () => {
-          expect(response.status).to.eql(200);
-        });
-      });
-
-      describe('with all environments selected', () => {
-        before(async () => {
-          response = await fetchLatencyCharts({
-            serviceName: 'opbeans-node',
-            query: {
-              start,
-              end,
-              latencyAggregationType: LatencyAggregationType.avg,
-              transactionType,
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-            },
-          });
-        });
-
-        it('should have a successful response', () => {
-          expect(response.status).to.eql(200);
+        it('returns average duration and timeseries', async () => {
+          const latencyChartReturn = response.body as LatencyChartReturnType;
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(
+            GO_PROD_DURATION * 1000
+          );
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(15);
         });
       });
     }

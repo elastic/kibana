@@ -12,6 +12,7 @@ import { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
+import { KueryNode } from '@kbn/es-query';
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
@@ -111,6 +112,31 @@ export class EventLogClient implements IEventLogClient {
     });
   }
 
+  public async findEventsWithAuthFilter(
+    type: string,
+    ids: string[],
+    authFilter: KueryNode,
+    namespace: string | undefined,
+    options?: Partial<FindOptionsType>
+  ): Promise<QueryEventsBySavedObjectResult> {
+    if (!authFilter) {
+      throw new Error('No authorization filter defined!');
+    }
+
+    const findOptions = queryOptionsSchema.validate(options ?? {});
+
+    return await this.esContext.esAdapter.queryEventsWithAuthFilter({
+      index: this.esContext.esNames.indexPattern,
+      namespace: namespace
+        ? this.spacesService?.spaceIdToNamespace(namespace)
+        : await this.getNamespace(),
+      type,
+      ids,
+      findOptions,
+      authFilter,
+    });
+  }
+
   public async aggregateEventsBySavedObjectIds(
     type: string,
     ids: string[],
@@ -135,6 +161,35 @@ export class EventLogClient implements IEventLogClient {
       ids,
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
       legacyIds,
+    });
+  }
+
+  public async aggregateEventsWithAuthFilter(
+    type: string,
+    authFilter: KueryNode,
+    options?: AggregateOptionsType,
+    namespaces?: Array<string | undefined>,
+    includeSpaceAgnostic?: boolean
+  ) {
+    if (!authFilter) {
+      throw new Error('No authorization filter defined!');
+    }
+
+    const aggs = options?.aggs;
+    if (!aggs) {
+      throw new Error('No aggregation defined!');
+    }
+
+    // validate other query options separately from
+    const aggregateOptions = queryOptionsSchema.validate(omit(options, 'aggs') ?? {});
+
+    return await this.esContext.esAdapter.aggregateEventsWithAuthFilter({
+      index: this.esContext.esNames.indexPattern,
+      namespaces: namespaces ?? [await this.getNamespace()],
+      type,
+      authFilter,
+      aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
+      includeSpaceAgnostic,
     });
   }
 

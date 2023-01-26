@@ -10,7 +10,12 @@ import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from '
 import './context_app.scss';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
+import {
+  EuiText,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPage,
+  EuiSpacer,
+} from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -28,33 +33,61 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
 export interface ContextAppProps {
   dataView: DataView;
   anchorId: string;
+  referrer?: string;
 }
 
-export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
+export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
   const services = useDiscoverServices();
-  const { uiSettings, capabilities, dataViews, navigation, filterManager, core } = services;
+  const { locator, uiSettings, capabilities, dataViews, navigation, filterManager, core } =
+    services;
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
+
+  /**
+   * Context app state
+   */
+  const { appState, globalState, stateContainer } = useContextAppState({
+    services,
+    dataView,
+  });
+  const prevAppState = useRef<AppState>();
+  const prevGlobalState = useRef<GlobalState>({ filters: [] });
+
+  const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
+    capabilities,
+    config: uiSettings,
+    dataView,
+    dataViews,
+    useNewFieldsApi,
+    setAppState: stateContainer.setAppState,
+    columns: appState.columns,
+    sort: appState.sort,
+  });
+
+  useEffect(() => {
+    services.chrome.setBreadcrumbs([
+      ...getRootBreadcrumbs(referrer),
+      {
+        text: i18n.translate('discover.context.breadcrumb', {
+          defaultMessage: 'Surrounding documents',
+        }),
+      },
+    ]);
+  }, [locator, referrer, services.chrome]);
 
   useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'context',
     id: dataView.id || '',
   });
-
-  /**
-   * Context app state
-   */
-  const { appState, globalState, setAppState } = useContextAppState({ services });
-  const prevAppState = useRef<AppState>();
-  const prevGlobalState = useRef<GlobalState>({ filters: [] });
 
   /**
    * Context fetched state
@@ -66,6 +99,7 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
       appState,
       useNewFieldsApi,
     });
+
   /**
    * Reset state when anchor changes
    */
@@ -105,15 +139,6 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
     fetchedState.anchor.id,
   ]);
 
-  const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
-    capabilities,
-    config: uiSettings,
-    dataView,
-    dataViews,
-    state: appState,
-    useNewFieldsApi,
-    setAppState,
-  });
   const rows = useMemo(
     () => [
       ...(fetchedState.predecessors || []),
@@ -140,7 +165,6 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
     return {
       appName: 'context',
       showSearchBar: true,
-      showQueryBar: true,
       showQueryInput: false,
       showFilterBar: true,
       showSaveQuery: false,
@@ -197,7 +221,7 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
                 onSetColumns={onSetColumns}
                 predecessorCount={appState.predecessorCount}
                 successorCount={appState.successorCount}
-                setAppState={setAppState}
+                setAppState={stateContainer.setAppState}
                 addFilter={addFilter as DocViewFilterFn}
                 rows={rows}
                 predecessors={fetchedState.predecessors}
@@ -205,7 +229,6 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
                 anchorStatus={fetchedState.anchorStatus.value}
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
-                onFieldEdited={fetchAllRows}
               />
             </EuiPageContent>
           </EuiPage>

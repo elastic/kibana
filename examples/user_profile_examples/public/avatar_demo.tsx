@@ -39,6 +39,18 @@ export const AvatarDemo: FunctionComponent = () => {
       <UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
+        <h3>Disabled</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <UserAvatar
+        user={userProfile.user}
+        avatar={{ ...userProfile.data.avatar, imageUrl: undefined }}
+        isDisabled
+      />
+      &ensp;
+      <UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} isDisabled />
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
         <h3>Unknown</h3>
       </EuiTitle>
       <EuiSpacer size="s" />

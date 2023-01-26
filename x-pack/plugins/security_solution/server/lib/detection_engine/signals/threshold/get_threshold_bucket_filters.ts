@@ -6,7 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESFilter } from '@kbn/es-types';
 import type { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../types';
 
 /*

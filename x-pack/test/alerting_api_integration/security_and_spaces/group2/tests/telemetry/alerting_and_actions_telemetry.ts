@@ -6,14 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { Spaces, Superuser } from '../../../scenarios';
-import {
-  getUrlPrefix,
-  getEventLog,
-  getTestRuleData,
-  ESTestIndexTool,
-  TaskManagerDoc,
-} from '../../../../common/lib';
+import { getUrlPrefix, getEventLog, getTestRuleData, TaskManagerDoc } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -235,8 +230,9 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       // number of action executions broken down by connector type
       expect(telemetry.count_actions_executions_by_type_per_day['test.throw'] > 0).to.be(true);
 
-      // average execution time - just checking for non-zero as we can't set an exact number
-      expect(telemetry.avg_execution_time_per_day > 0).to.be(true);
+      // average execution time - just checking for a positive number as we can't set an exact number
+      // if the time is less than 1ms it will round down to 0
+      expect(telemetry.avg_execution_time_per_day >= 0).to.be(true);
 
       // average execution time broken down by rule type
       expect(telemetry.avg_execution_time_by_type_per_day['test.throw'] > 0).to.be(true);
@@ -246,6 +242,10 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_actions_executions_failed_by_type_per_day['test.throw'] > 0).to.be(
         true
       );
+
+      expect(
+        telemetry.count_connector_types_by_action_run_outcome_per_day['test.throw'].failure
+      ).to.greaterThan(0);
     }
 
     function verifyAlertingTelemetry(telemetry: any) {
@@ -502,6 +502,35 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(
         telemetry.percentile_num_alerts_by_type_per_day.p99['test__cumulative-firing']
       ).to.be.greaterThan(0);
+
+      // rules grouped by execution status
+      expect(telemetry.count_rules_by_execution_status).to.eql({
+        success: 15,
+        error: 3,
+        warning: 0,
+      });
+      // number of rules that has tags
+      expect(telemetry.count_rules_with_tags).to.be(21);
+      // rules grouped by notify when
+      expect(telemetry.count_rules_by_notify_when).to.eql({
+        on_action_group_change: 0,
+        on_active_alert: 6,
+        on_throttle_interval: 15,
+      });
+      // rules snoozed
+      expect(telemetry.count_rules_snoozed).to.be(0);
+      // rules muted
+      expect(telemetry.count_rules_muted).to.be(0);
+      // rules with muted alerts
+      expect(telemetry.count_rules_with_muted_alerts).to.be(0);
+      // Connector types grouped by consumers
+      expect(telemetry.count_connector_types_by_consumers).to.eql({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        alertsFixture: { test__noop: 9, test__throw: 9, __slack: 3 },
+      });
+
+      expect(telemetry.count_rules_by_execution_status_per_day.failure).to.greaterThan(0);
+      expect(telemetry.count_rules_by_execution_status_per_day.success).to.greaterThan(0);
     }
 
     it('should retrieve telemetry data in the expected format', async () => {
@@ -537,7 +566,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         expect(taskState).not.to.be(undefined);
         actionsTelemetry = JSON.parse(taskState!);
         expect(actionsTelemetry.runs).to.equal(2);
-        expect(actionsTelemetry.count_total).to.equal(19);
+        expect(actionsTelemetry.count_total).to.equal(20);
       });
 
       // request alerting telemetry task to run

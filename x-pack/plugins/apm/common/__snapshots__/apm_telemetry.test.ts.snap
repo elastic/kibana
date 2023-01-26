@@ -845,16 +845,6 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             }
                           }
                         },
-                        "sourcemap": {
-                          "properties": {
-                            "1d": {
-                              "type": "long"
-                            },
-                            "all": {
-                              "type": "long"
-                            }
-                          }
-                        },
                         "onboarding": {
                           "properties": {
                             "1d": {
@@ -1011,13 +1001,6 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             }
                           }
                         },
-                        "sourcemap": {
-                          "properties": {
-                            "ms": {
-                              "type": "long"
-                            }
-                          }
-                        },
                         "onboarding": {
                           "properties": {
                             "ms": {
@@ -1040,6 +1023,72 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                     },
                     "indices": {
                       "properties": {
+                        "metric": {
+                          "properties": {
+                            "shards": {
+                              "properties": {
+                                "total": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "all": {
+                              "properties": {
+                                "total": {
+                                  "properties": {
+                                    "docs": {
+                                      "properties": {
+                                        "count": {
+                                          "type": "long"
+                                        }
+                                      }
+                                    },
+                                    "store": {
+                                      "properties": {
+                                        "size_in_bytes": {
+                                          "type": "long"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "traces": {
+                          "properties": {
+                            "shards": {
+                              "properties": {
+                                "total": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "all": {
+                              "properties": {
+                                "total": {
+                                  "properties": {
+                                    "docs": {
+                                      "properties": {
+                                        "count": {
+                                          "type": "long"
+                                        }
+                                      }
+                                    },
+                                    "store": {
+                                      "properties": {
+                                        "size_in_bytes": {
+                                          "type": "long"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
                         "shards": {
                           "properties": {
                             "total": {
@@ -1075,6 +1124,9 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                       "properties": {
                         "kuery_fields": {
                           "type": "keyword"
+                        },
+                        "total": {
+                          "type": "long"
                         }
                       }
                     },
@@ -1082,6 +1134,12 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                       "properties": {
                         "service_id": {
                           "type": "keyword"
+                        },
+                        "num_service_nodes": {
+                          "type": "long"
+                        },
+                        "num_transaction_types": {
+                          "type": "long"
                         },
                         "timed_out": {
                           "type": "boolean"

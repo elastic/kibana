@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
 import { PackagePolicyVars, SettingsRow } from '../typings';
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
+import { getStorageSizeRt } from '../../../../../common/agent_configuration/runtime_types/storage_size_rt';
 
 export const TAIL_SAMPLING_ENABLED_KEY = 'tail_sampling_enabled';
 
@@ -89,6 +90,30 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
             />
           ),
           required: true,
+        },
+        {
+          key: 'tail_sampling_storage_limit',
+          type: 'storageSize',
+          label: i18n.translate(
+            'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingStorageLimit',
+            {
+              defaultMessage: 'Tail sampling storage limit',
+            }
+          ),
+          rowTitle: i18n.translate(
+            'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingStorageLimitTitle',
+            { defaultMessage: 'Storage limit' }
+          ),
+          rowDescription: i18n.translate(
+            'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingStorageLimitDescription',
+            {
+              defaultMessage:
+                'The amount of storage space allocated for trace events matching tail sampling policies. Caution: Setting this limit higher than the allowed space may cause APM Server to become unhealthy.',
+            }
+          ),
+          labelAppend: OPTIONAL_LABEL,
+          required: false,
+          validation: getStorageSizeRt({ min: '0GB' }),
         },
       ],
     },

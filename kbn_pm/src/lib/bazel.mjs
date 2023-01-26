@@ -7,9 +7,9 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
+import Fsp from 'fs/promises';
 
-import { spawnSync } from './spawn.mjs';
+import { run } from './spawn.mjs';
 import * as Color from './colors.mjs';
 import { createCliError } from './cli_error.mjs';
 import { REPO_ROOT } from './paths.mjs';
@@ -17,6 +17,12 @@ import { cleanPaths } from './clean.mjs';
 import { indent } from './indent.mjs';
 
 const BAZEL_RUNNER_SRC = '../../../packages/kbn-bazel-runner/index.js';
+
+const BAZEL_TARGETS = [
+  '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
+  '//packages/kbn-ui-shared-deps-src:shared_built_assets',
+  '//packages/kbn-monaco:target_workers',
+];
 
 async function getBazelRunner() {
   /* eslint-disable no-unsanitized/method */
@@ -83,7 +89,7 @@ export async function watch(log, opts = undefined) {
     // `.bazel_fix_commands.json` but its not needed at the moment
     '--run_output=false',
     'build',
-    '//packages:build',
+    ...BAZEL_TARGETS,
     '--show_result=1',
     ...(opts?.offline ? ['--config=offline'] : []),
   ];
@@ -125,7 +131,7 @@ export async function expungeCache(log, opts = undefined) {
 export async function cleanDiskCache(log) {
   const args = ['info', 'repository_cache'];
   log.debug(`> bazel ${args.join(' ')}`);
-  const repositoryCachePath = spawnSync('bazel', args);
+  const repositoryCachePath = (await run('bazel', args)).trim();
 
   await cleanPaths(log, [
     Path.resolve(Path.dirname(repositoryCachePath), 'disk-cache'),
@@ -158,21 +164,22 @@ export async function installYarnDeps(log, opts = undefined) {
  * @param {import('./log.mjs').Log} log
  * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
  */
-export async function buildPackages(log, opts = undefined) {
-  await runBazel(log, ['build', '//packages:build', '--show_result=1'], {
+export async function buildWebpackBundles(log, opts = undefined) {
+  await runBazel(log, ['build', ...BAZEL_TARGETS, '--show_result=1'], {
     offline: opts?.offline,
     quiet: opts?.quiet,
   });
 
-  log.success('packages built');
+  log.success('shared bundles built');
 }
 
 /**
  * @param {string} versionFilename
  * @returns
  */
-function readBazelToolsVersionFile(versionFilename) {
-  const version = Fs.readFileSync(Path.resolve(REPO_ROOT, versionFilename), 'utf8').trim();
+async function readBazelToolsVersionFile(versionFilename) {
+  const path = Path.resolve(REPO_ROOT, versionFilename);
+  const version = (await Fsp.readFile(path, 'utf8')).trim();
 
   if (!version) {
     throw new Error(
@@ -186,14 +193,14 @@ function readBazelToolsVersionFile(versionFilename) {
 /**
  * @param {import('./log.mjs').Log} log
  */
-export function tryRemovingBazeliskFromYarnGlobal(log) {
+export async function tryRemovingBazeliskFromYarnGlobal(log) {
   try {
     log.debug('Checking if Bazelisk is installed on the yarn global scope');
-    const stdout = spawnSync('yarn', ['global', 'list']);
+    const stdout = await run('yarn', ['global', 'list']);
 
     if (stdout.includes(`@bazel/bazelisk@`)) {
       log.debug('Bazelisk was found on yarn global scope, removing it');
-      spawnSync('yarn', ['global', 'remove', `@bazel/bazelisk`]);
+      await run('yarn', ['global', 'remove', `@bazel/bazelisk`]);
 
       log.info(`bazelisk was installed on Yarn global packages and is now removed`);
       return true;
@@ -208,16 +215,20 @@ export function tryRemovingBazeliskFromYarnGlobal(log) {
 /**
  * @param {import('./log.mjs').Log} log
  */
-export function isInstalled(log) {
+export async function isInstalled(log) {
   try {
     log.debug('getting bazel version');
-    const stdout = spawnSync('bazel', ['--version']).trim();
-    const bazelVersion = readBazelToolsVersionFile('.bazelversion');
+    const [stdout, bazelVersion] = await Promise.all([
+      run('bazel', ['--version']),
+      readBazelToolsVersionFile('.bazelversion'),
+    ]);
 
-    if (stdout === `bazel ${bazelVersion}`) {
+    const installed = stdout.trim();
+
+    if (installed === `bazel ${bazelVersion}`) {
       return true;
     } else {
-      log.info(`Bazel is installed (${stdout}), but was expecting ${bazelVersion}`);
+      log.info(`Bazel is installed (${installed}), but was expecting ${bazelVersion}`);
       return false;
     }
   } catch {
@@ -228,22 +239,24 @@ export function isInstalled(log) {
 /**
  * @param {import('./log.mjs').Log} log
  */
-export function ensureInstalled(log) {
-  if (isInstalled(log)) {
+export async function ensureInstalled(log) {
+  if (await isInstalled(log)) {
     return;
   }
 
   // Install bazelisk if not installed
   log.debug(`reading bazel tools versions from version files`);
-  const bazeliskVersion = readBazelToolsVersionFile('.bazeliskversion');
-  const bazelVersion = readBazelToolsVersionFile('.bazelversion');
+  const [bazeliskVersion, bazelVersion] = await Promise.all([
+    readBazelToolsVersionFile('.bazeliskversion'),
+    readBazelToolsVersionFile('.bazelversion'),
+  ]);
 
   log.info(`installing Bazel tools`);
 
   log.debug(
     `bazelisk is not installed. Installing @bazel/bazelisk@${bazeliskVersion} and bazel@${bazelVersion}`
   );
-  spawnSync('npm', ['install', '--global', `@bazel/bazelisk@${bazeliskVersion}`], {
+  await run('npm', ['install', '--global', `@bazel/bazelisk@${bazeliskVersion}`], {
     env: {
       USE_BAZEL_VERSION: bazelVersion,
     },

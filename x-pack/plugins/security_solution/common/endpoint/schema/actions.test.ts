@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   EndpointActionListRequestSchema,
@@ -29,32 +29,32 @@ describe('actions schemas', () => {
 
     it('should accept an agent ID if not in an array', () => {
       expect(() => {
-        EndpointActionListRequestSchema.query.validate({ agentIds: uuid.v4() });
+        EndpointActionListRequestSchema.query.validate({ agentIds: uuidv4() });
       }).not.toThrow();
     });
 
     it('should accept an agent ID in an array', () => {
       expect(() => {
-        EndpointActionListRequestSchema.query.validate({ agentIds: [uuid.v4()] });
+        EndpointActionListRequestSchema.query.validate({ agentIds: [uuidv4()] });
       }).not.toThrow();
     });
 
     it('should accept multiple agent IDs in an array', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
-          agentIds: [uuid.v4(), uuid.v4(), uuid.v4()],
+          agentIds: [uuidv4(), uuidv4(), uuidv4()],
         });
       }).not.toThrow();
     });
 
-    it('should limit multiple agent IDs in an array to 50', () => {
+    it('should not limit multiple agent IDs', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
-          agentIds: Array(51)
+          agentIds: Array(255)
             .fill(1)
-            .map(() => uuid.v4()),
+            .map(() => uuidv4()),
         });
-      }).toThrow();
+      }).not.toThrow();
     });
 
     it('should work with all required query params', () => {
@@ -122,7 +122,22 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should work with commands query params with a single action type', () => {
+    it.each(['isolate', 'unisolate', 'kill-process', 'suspend-process', 'running-processes'])(
+      'should work with commands query params with %s action',
+      (command) => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({
+            page: 10,
+            pageSize: 100,
+            startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+            endDate: new Date().toISOString(), // today
+            commands: command,
+          });
+        }).not.toThrow();
+      }
+    );
+
+    it('should work with commands query params with a single action type in a list', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
           page: 10,
@@ -154,6 +169,66 @@ describe('actions schemas', () => {
           startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
           endDate: new Date().toISOString(), // today
           commands: ['isolate', 'unisolate'],
+        });
+      }).not.toThrow();
+    });
+
+    it('should work with at least one `status` filter in a list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed'],
+        });
+      }).not.toThrow();
+    });
+
+    it.each(['failed', 'pending', 'successful'])('should work alone with %s filter', (status) => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: status,
+        });
+      }).not.toThrow();
+    });
+
+    it('should not work with empty list for `status` filter', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: [],
+        });
+      }).toThrow();
+    });
+
+    it('should not work with more than allowed list for `status` filter', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful', 'xyz'],
+        });
+      }).toThrow();
+    });
+
+    it('should not work with any string for `status` filter', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['xyz', 'pqr', 'abc'],
+        });
+      }).toThrow();
+    });
+
+    it('should work with at multiple `status` filter', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
         });
       }).not.toThrow();
     });

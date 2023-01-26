@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+import type { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
 import type {
   ResolvedCase,
@@ -16,31 +16,33 @@ import type {
   ExternalReferenceComment,
   PersistableComment,
 } from '../../common/ui/types';
-import {
-  Actions,
-  ActionTypes,
+import type {
   CaseConnector,
   CaseResponse,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
-  CaseStatuses,
   CaseUserActionResponse,
   CaseUserActionsResponse,
   CommentResponse,
-  CommentType,
-  ConnectorTypes,
   UserAction,
   UserActionTypes,
   UserActionWithResponse,
   CommentUserAction,
+} from '../../common/api';
+import {
+  Actions,
+  ActionTypes,
+  CaseStatuses,
+  CommentType,
+  ConnectorTypes,
   CaseSeverity,
   ExternalReferenceStorageType,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { SnakeToCamelCase } from '../../common/types';
+import type { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
-import {
+import type {
   ExternalReferenceAttachmentType,
   AttachmentViewObject,
   PersistableStateAttachmentType,
@@ -117,7 +119,7 @@ export const alertCommentWithIndices: AlertComment = {
   version: 'WzQ3LDFc',
 };
 
-export const hostIsolationComment: () => Comment = () => {
+export const hostIsolationComment = (overrides?: Record<string, unknown>): Comment => {
   return {
     type: CommentType.actions,
     comment: 'I just isolated the host!',
@@ -139,6 +141,7 @@ export const hostIsolationComment: () => Comment = () => {
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',
+    ...overrides,
   };
 };
 
@@ -228,7 +231,8 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
-  assignees: [],
+  // damaged_raccoon uid
+  assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
 };
 
 export const caseWithAlerts = {
@@ -397,7 +401,14 @@ const basicAction = {
 
 export const cases: Case[] = [
   basicCase,
-  { ...pushedCase, id: '1', totalComment: 0, comments: [] },
+  {
+    ...pushedCase,
+    id: '1',
+    totalComment: 0,
+    comments: [],
+    status: CaseStatuses['in-progress'],
+    severity: CaseSeverity.MEDIUM,
+  },
   { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
@@ -553,16 +564,16 @@ export const pushedCaseSnake = {
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
 };
 
-export const reporters: string[] = ['alexis', 'kim', 'maria', 'steph'];
-export const respReporters = [
-  { username: 'alexis', full_name: null, email: null },
-  { username: 'kim', full_name: null, email: null },
-  { username: 'maria', full_name: null, email: null },
-  { username: 'steph', full_name: null, email: null },
-];
 export const casesSnake: CasesResponse = [
   basicCaseSnake,
-  { ...pushedCaseSnake, id: '1', totalComment: 0, comments: [] },
+  {
+    ...pushedCaseSnake,
+    id: '1',
+    totalComment: 0,
+    comments: [],
+    status: CaseStatuses['in-progress'],
+    severity: CaseSeverity.MEDIUM,
+  },
   { ...pushedCaseSnake, updated_at: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '3', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '4', totalComment: 0, comments: [] },
@@ -688,6 +699,19 @@ export const getUserAction = (
         payload: { title: 'a title' },
         ...overrides,
       };
+    case ActionTypes.assignees:
+      return {
+        ...commonProperties,
+        type: ActionTypes.assignees,
+        payload: {
+          assignees: [
+            // These values map to uids in x-pack/plugins/cases/public/containers/user_profiles/api.mock.ts
+            { uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' },
+            { uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0' },
+          ],
+        },
+        ...overrides,
+      };
 
     default:
       return {
@@ -751,9 +775,9 @@ export const getJiraConnector = (overrides?: Partial<CaseConnector>): CaseConnec
 
 export const jiraFields = { fields: { issueType: '10006', priority: null, parent: null } };
 
-export const getAlertUserAction = (): SnakeToCamelCase<
-  UserActionWithResponse<CommentUserAction>
-> => ({
+export const getAlertUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'alert-action-id',
   commentId: 'alert-comment-id',
@@ -770,11 +794,34 @@ export const getAlertUserAction = (): SnakeToCamelCase<
       },
     },
   },
+  ...overrides,
 });
 
-export const getHostIsolationUserAction = (): SnakeToCamelCase<
-  UserActionWithResponse<CommentUserAction>
-> => ({
+export const getMultipleAlertsUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
+  ...getUserAction(ActionTypes.comment, Actions.create),
+  actionId: 'alert-action-id',
+  commentId: 'alert-comment-id',
+  type: ActionTypes.comment,
+  payload: {
+    comment: {
+      type: CommentType.alert,
+      alertId: ['alert-id-1', 'alert-id-2'],
+      index: ['index-id-1', 'index-id-2'],
+      owner: SECURITY_SOLUTION_OWNER,
+      rule: {
+        id: 'rule-id-1',
+        name: 'Awesome rule',
+      },
+    },
+  },
+  ...overrides,
+});
+
+export const getHostIsolationUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'isolate-action-id',
   type: ActionTypes.comment,
@@ -787,6 +834,7 @@ export const getHostIsolationUserAction = (): SnakeToCamelCase<
       owner: SECURITY_SOLUTION_OWNER,
     },
   },
+  ...overrides,
 });
 
 export const caseUserActions: CaseUserActions[] = [
@@ -835,9 +883,9 @@ export const basicCaseClosed: Case = {
   status: CaseStatuses.closed,
 };
 
-export const getExternalReferenceUserAction = (): SnakeToCamelCase<
-  UserActionWithResponse<CommentUserAction>
-> => ({
+export const getExternalReferenceUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'external-reference-action-id',
   type: ActionTypes.comment,
@@ -852,6 +900,7 @@ export const getExternalReferenceUserAction = (): SnakeToCamelCase<
       owner: SECURITY_SOLUTION_OWNER,
     },
   },
+  ...overrides,
 });
 
 export const getExternalReferenceAttachment = (
@@ -867,9 +916,9 @@ export const getExternalReferenceAttachment = (
   }),
 });
 
-export const getPersistableStateUserAction = (): SnakeToCamelCase<
-  UserActionWithResponse<CommentUserAction>
-> => ({
+export const getPersistableStateUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'persistable-state-action-id',
   type: ActionTypes.comment,
@@ -882,6 +931,7 @@ export const getPersistableStateUserAction = (): SnakeToCamelCase<
       owner: SECURITY_SOLUTION_OWNER,
     },
   },
+  ...overrides,
 });
 
 export const getPersistableStateAttachment = (

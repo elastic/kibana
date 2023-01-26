@@ -8,7 +8,7 @@
 import React from 'react';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { XJsonLang } from '@kbn/monaco';
-import { CspFinding } from '../types';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 
 const offsetHeight = 120;
 

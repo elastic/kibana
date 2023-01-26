@@ -35,7 +35,7 @@ const buildGridContext = (dataView: DataView, rows: EsHitRecord[]): GridContext 
       convertValueToString({
         rowIndex,
         columnId,
-        services: discoverServiceMock,
+        fieldFormats: discoverServiceMock.fieldFormats,
         rows: usedRows,
         dataView,
         options,

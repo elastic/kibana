@@ -12,4 +12,10 @@ export const mockEventViewerResponse = {
     fakeTotalCount: 100,
   },
   events: [],
+  inspect: {
+    dsl: [],
+    response: [],
+  },
+  loadPage: jest.fn(),
+  refetch: jest.fn(),
 };

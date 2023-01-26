@@ -14,76 +14,7 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-notifications-browser-mocks",
-        "id": "def-server.notificationServiceMock",
-        "type": "Object",
-        "tags": [],
-        "label": "notificationServiceMock",
-        "description": [],
-        "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-notifications-browser-mocks",
-            "id": "def-server.notificationServiceMock.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "NotificationsServiceContract",
-              ">"
-            ],
-            "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "@kbn/core-notifications-browser-mocks",
-            "id": "def-server.notificationServiceMock.createSetupContract",
-            "type": "Function",
-            "tags": [],
-            "label": "createSetupContract",
-            "description": [],
-            "signature": [
-              "() => ",
-              "MockedKeys",
-              "<",
-              "NotificationsSetup",
-              ">"
-            ],
-            "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "@kbn/core-notifications-browser-mocks",
-            "id": "def-server.notificationServiceMock.createStartContract",
-            "type": "Function",
-            "tags": [],
-            "label": "createStartContract",
-            "description": [],
-            "signature": [
-              "() => ",
-              "MockedKeys",
-              "<",
-              "NotificationsStart",
-              ">"
-            ],
-            "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   },
   "common": {
     "classes": [],
@@ -91,6 +22,109 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-notifications-browser-mocks",
+        "id": "def-common.notificationServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "notificationServiceMock",
+        "description": [],
+        "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-notifications-browser-mocks",
+            "id": "def-common.notificationServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-common.NotificationsServiceContract",
+                "text": "NotificationsServiceContract"
+              },
+              ">"
+            ],
+            "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-notifications-browser-mocks",
+            "id": "def-common.notificationServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.MockedKeys",
+                "text": "MockedKeys"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.NotificationsSetup",
+                "text": "NotificationsSetup"
+              },
+              ">"
+            ],
+            "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-notifications-browser-mocks",
+            "id": "def-common.notificationServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.MockedKeys",
+                "text": "MockedKeys"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.NotificationsStart",
+                "text": "NotificationsStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

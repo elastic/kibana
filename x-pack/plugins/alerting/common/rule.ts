@@ -32,6 +32,9 @@ export const RuleExecutionStatusValues = [
 ] as const;
 export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
 
+export const RuleLastRunOutcomeValues = ['succeeded', 'warning', 'failed'] as const;
+export type RuleLastRunOutcomes = typeof RuleLastRunOutcomeValues[number];
+
 export enum RuleExecutionStatusErrorReasons {
   Read = 'read',
   Decrypt = 'decrypt',
@@ -47,6 +50,8 @@ export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
   MAX_ALERTS = 'maxAlerts',
 }
+
+export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
 
 export interface RuleExecutionStatus {
   status: RuleExecutionStatuses;
@@ -70,14 +75,32 @@ export interface RuleAction {
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
+  frequency?: {
+    summary: boolean;
+    notifyWhen: RuleNotifyWhenType;
+    throttle: string | null;
+  };
 }
 
 export interface RuleAggregations {
   alertExecutionStatus: { [status: string]: number };
+  ruleLastRunOutcome: { [status: string]: number };
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
   ruleSnoozedStatus: { snoozed: number };
   ruleTags: string[];
+}
+
+export interface RuleLastRun {
+  outcome: RuleLastRunOutcomes;
+  warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
+  outcomeMsg?: string[] | null;
+  alertsCount: {
+    active?: number | null;
+    new?: number | null;
+    recovered?: number | null;
+    ignored?: number | null;
+  };
 }
 
 export interface MappedParamsProperties {
@@ -105,15 +128,18 @@ export interface Rule<Params extends RuleTypeParams = never> {
   updatedAt: Date;
   apiKey: string | null;
   apiKeyOwner: string | null;
-  throttle: string | null;
+  throttle?: string | null;
   muteAll: boolean;
-  notifyWhen: RuleNotifyWhenType | null;
+  notifyWhen?: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   activeSnoozes?: string[];
   isSnoozedUntil?: Date | null;
+  lastRun?: RuleLastRun | null;
+  nextRun?: Date | null;
+  running?: boolean | null;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
@@ -122,6 +148,7 @@ export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = Sanit
 
 export type SanitizedRuleConfig = Pick<
   SanitizedRule,
+  | 'id'
   | 'name'
   | 'tags'
   | 'consumer'
@@ -172,16 +199,34 @@ export interface RuleMonitoringHistory extends SavedObjectAttributes {
   success: boolean;
   timestamp: number;
   duration?: number;
+  outcome?: RuleLastRunOutcomes;
 }
 
-export interface RuleMonitoring extends SavedObjectAttributes {
-  execution: {
+export interface RuleMonitoringCalculatedMetrics extends SavedObjectAttributes {
+  p50?: number;
+  p95?: number;
+  p99?: number;
+  success_ratio: number;
+}
+
+export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
+  duration?: number;
+  total_search_duration_ms?: number | null;
+  total_indexing_duration_ms?: number | null;
+  total_alerts_detected?: number | null;
+  total_alerts_created?: number | null;
+  gap_duration_s?: number | null;
+}
+
+export interface RuleMonitoringLastRun extends SavedObjectAttributes {
+  timestamp: string;
+  metrics: RuleMonitoringLastRunMetrics;
+}
+
+export interface RuleMonitoring {
+  run: {
     history: RuleMonitoringHistory[];
-    calculated_metrics: {
-      p50?: number;
-      p95?: number;
-      p99?: number;
-      success_ratio: number;
-    };
+    calculated_metrics: RuleMonitoringCalculatedMetrics;
+    last_run: RuleMonitoringLastRun;
   };
 }

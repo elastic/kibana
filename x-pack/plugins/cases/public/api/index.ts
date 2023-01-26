@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { Cases, CasesStatus, CasesMetrics } from '../../common/ui';
+import type { HttpStart } from '@kbn/core/public';
+import type { Cases, CasesStatus, CasesMetrics } from '../../common/ui';
 import { CASE_FIND_URL, CASE_METRICS_URL, CASE_STATUS_URL } from '../../common/constants';
-import {
+import type {
   CasesFindRequest,
   CasesFindResponse,
   CasesMetricsRequest,

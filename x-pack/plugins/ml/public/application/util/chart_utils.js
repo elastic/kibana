@@ -7,7 +7,7 @@
 
 import d3 from 'd3';
 import { calculateTextWidth } from './string_utils';
-import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
+import { getAnomalyScoreExplanationImpactValue } from '../../../common/util/anomaly_utils';
 import moment from 'moment';
 import { CHART_TYPE } from '../explorer/explorer_constants';
 import { ML_PAGES } from '../../../common/constants/locator';
@@ -174,12 +174,9 @@ export function getChartType(config) {
   return chartType;
 }
 
-export async function getExploreSeriesLink(mlLocator, series, timefilter) {
+export async function getExploreSeriesLink(mlLocator, series, timeRange) {
   // Open the Single Metric dashboard over the same overall bounds and
   // zoomed in to the same time as the current chart.
-  const bounds = timefilter.getActiveBounds();
-  const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
-  const to = bounds.max.toISOString();
 
   const zoomFrom = moment(series.plotEarliest).toISOString();
   const zoomTo = moment(series.plotLatest).toISOString();
@@ -206,11 +203,7 @@ export async function getExploreSeriesLink(mlLocator, series, timefilter) {
           pause: true,
           value: 0,
         },
-        timeRange: {
-          from: from,
-          to: to,
-          mode: 'absolute',
-        },
+        timeRange,
         zoom: {
           from: zoomFrom,
           to: zoomTo,
@@ -231,17 +224,22 @@ export async function getExploreSeriesLink(mlLocator, series, timefilter) {
 }
 
 export function showMultiBucketAnomalyMarker(point) {
-  // TODO - test threshold with real use cases
-  return (
-    point.multiBucketImpact !== undefined && point.multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM
-  );
+  return point.isMultiBucketAnomaly === true;
 }
 
 export function showMultiBucketAnomalyTooltip(point) {
-  // TODO - test threshold with real use cases
-  return (
-    point.multiBucketImpact !== undefined && point.multiBucketImpact >= MULTI_BUCKET_IMPACT.LOW
-  );
+  return point.isMultiBucketAnomaly === true;
+}
+
+export function getMultiBucketImpactTooltipValue(point) {
+  const numFilledSquares =
+    point.multiBucketImpact !== undefined
+      ? getAnomalyScoreExplanationImpactValue(point.multiBucketImpact)
+      : 0;
+  return new Array(5)
+    .fill('\u25A0 ', 0, numFilledSquares) // Unicode filled square
+    .fill('\u25A1 ', numFilledSquares) // Unicode hollow square
+    .join('');
 }
 
 export function numTicks(axisWidth) {

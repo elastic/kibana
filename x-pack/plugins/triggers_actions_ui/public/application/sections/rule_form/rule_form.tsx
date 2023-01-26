@@ -68,9 +68,7 @@ import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage } from '../../constants';
-import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
-import { RuleNotifyWhen } from './rule_notify_when';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
@@ -100,6 +98,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
   filteredRuleTypes?: string[];
   connectorFeatureId?: string;
+  onChangeMetaData: (metadata: MetaData) => void;
 }
 
 export const RuleForm = ({
@@ -116,6 +115,7 @@ export const RuleForm = ({
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
   connectorFeatureId = AlertingConnectorFeatureId,
+  onChangeMetaData,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -145,12 +145,6 @@ export const RuleForm = ({
       ? getDurationUnitValue(rule.schedule.interval)
       : defaultScheduleIntervalUnit
   );
-  const [ruleThrottle, setRuleThrottle] = useState<number | null>(
-    rule.throttle ? getDurationNumberInItsUnit(rule.throttle) : null
-  );
-  const [ruleThrottleUnit, setRuleThrottleUnit] = useState<string>(
-    rule.throttle ? getDurationUnitValue(rule.throttle) : 'h'
-  );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
 
   const [availableRuleTypes, setAvailableRuleTypes] = useState<
@@ -168,6 +162,7 @@ export const RuleForm = ({
     ruleTypes,
     error: loadRuleTypesError,
     ruleTypeIndex,
+    ruleTypesIsLoading,
   } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
 
   // load rule types
@@ -195,7 +190,7 @@ export const RuleForm = ({
           },
           []
         )
-        .filter((item) => item.ruleType && hasAllPrivilege(rule, item.ruleType))
+        .filter((item) => item.ruleType && hasAllPrivilege(rule.consumer, item.ruleType))
         .filter((item) =>
           rule.consumer === ALERTS_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
@@ -223,7 +218,7 @@ export const RuleForm = ({
     setSolutions(
       new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
     );
-  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule, ruleTypeRegistry]);
+  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule.consumer, ruleTypeRegistry]);
 
   useEffect(() => {
     if (loadRuleTypesError) {
@@ -287,6 +282,13 @@ export const RuleForm = ({
     [dispatch]
   );
 
+  const setActionFrequencyProperty = useCallback(
+    (key: string, value: RuleActionParam, index: number) => {
+      dispatch({ command: { type: 'setRuleActionFrequency' }, payload: { key, value, index } });
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     const searchValue = searchText ? searchText.trim().toLocaleLowerCase() : null;
     setFilteredRuleTypes(
@@ -309,15 +311,6 @@ export const RuleForm = ({
 
   const selectedRuleType = rule?.ruleTypeId ? ruleTypeIndex?.get(rule?.ruleTypeId) : undefined;
   const recoveryActionGroup = selectedRuleType?.recoveryActionGroup?.id;
-  const getDefaultActionParams = useCallback(
-    (actionTypeId: string, actionGroupId: string): Record<string, RuleActionParam> | undefined =>
-      getDefaultsForActionParams(
-        actionTypeId,
-        actionGroupId,
-        actionGroupId === recoveryActionGroup
-      ),
-    [recoveryActionGroup]
-  );
 
   const tagsOptions = rule.tags ? rule.tags.map((label: string) => ({ label })) : [];
 
@@ -393,7 +386,7 @@ export const RuleForm = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule size="full" margin="xs" />
-        <EuiListGroup flush={true} gutterSize="m" size="l" maxWidth={false}>
+        <EuiListGroup flush={true} gutterSize="m" size="m" maxWidth={false}>
           {items
             .sort((a, b) => ruleTypeCompare(a, b))
             .map((item, index) => {
@@ -427,8 +420,8 @@ export const RuleForm = ({
                   isDisabled={!item.checkEnabledResult.isEnabled}
                   onClick={() => {
                     setRuleProperty('ruleTypeId', item.id);
-                    setActions([]);
                     setRuleTypeModel(item.ruleTypeItem);
+                    setActions([]);
                     setRuleProperty('params', {});
                     if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
                       setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
@@ -441,6 +434,58 @@ export const RuleForm = ({
         <EuiSpacer />
       </Fragment>
     ));
+
+  const labelForRuleChecked = [
+    i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkFieldLabel', {
+      defaultMessage: 'Check every',
+    }),
+    <EuiIconTip
+      position="right"
+      type="questionInCircle"
+      content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip', {
+        defaultMessage:
+          'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
+      })}
+    />,
+  ];
+
+  const getHelpTextForInterval = () => {
+    if (!config || !config.minimumScheduleInterval) {
+      return '';
+    }
+
+    // No help text if there is an error
+    if (errors['schedule.interval'].length > 0) {
+      return '';
+    }
+
+    if (config.minimumScheduleInterval.enforce) {
+      // Always show help text if minimum is enforced
+      return i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpText', {
+        defaultMessage: 'Interval must be at least {minimum}.',
+        values: {
+          minimum: formatDuration(config.minimumScheduleInterval.value, true),
+        },
+      });
+    } else if (
+      rule.schedule.interval &&
+      parseDuration(rule.schedule.interval) < parseDuration(config.minimumScheduleInterval.value)
+    ) {
+      // Only show help text if current interval is less than suggested
+      return i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpSuggestionText',
+        {
+          defaultMessage:
+            'Intervals less than {minimum} are not recommended due to performance considerations.',
+          values: {
+            minimum: formatDuration(config.minimumScheduleInterval.value, true),
+          },
+        }
+      );
+    } else {
+      return '';
+    }
+  };
 
   const ruleTypeDetails = (
     <>
@@ -520,7 +565,7 @@ export const RuleForm = ({
             <RuleParamsExpressionComponent
               ruleParams={rule.params}
               ruleInterval={`${ruleInterval ?? 1}${ruleIntervalUnit}`}
-              ruleThrottle={`${ruleThrottle ?? 1}${ruleThrottleUnit}`}
+              ruleThrottle={''}
               alertNotifyWhen={rule.notifyWhen ?? 'onActionGroupChange'}
               errors={errors}
               setRuleParams={setRuleParams}
@@ -532,10 +577,56 @@ export const RuleForm = ({
               data={data}
               dataViews={dataViews}
               unifiedSearch={unifiedSearch}
+              onChangeMetaData={onChangeMetaData}
             />
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
+      <EuiFlexItem>
+        <EuiFormRow
+          fullWidth
+          data-test-subj="intervalFormRow"
+          display="rowCompressed"
+          helpText={getHelpTextForInterval()}
+          isInvalid={errors['schedule.interval'].length > 0}
+          error={errors['schedule.interval']}
+        >
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={2}>
+              <EuiFieldNumber
+                prepend={labelForRuleChecked}
+                fullWidth
+                min={1}
+                isInvalid={errors['schedule.interval'].length > 0}
+                value={ruleInterval || ''}
+                name="interval"
+                data-test-subj="intervalInput"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || INTEGER_REGEX.test(value)) {
+                    const parsedValue = value === '' ? '' : parseInt(value, 10);
+                    setRuleInterval(parsedValue || undefined);
+                    setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
+                  }
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={3}>
+              <EuiSelect
+                fullWidth
+                value={ruleIntervalUnit}
+                options={getTimeOptions(ruleInterval ?? 1)}
+                onChange={(e) => {
+                  setRuleIntervalUnit(e.target.value);
+                  setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
+                }}
+                data-test-subj="intervalInputUnit"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiSpacer size="l" />
       {canShowActions &&
       defaultActionGroupId &&
       ruleTypeModel &&
@@ -549,6 +640,7 @@ export const RuleForm = ({
               <EuiSpacer />
             </>
           ) : null}
+          <EuiSpacer size="m" />
           <ActionForm
             actions={rule.actions}
             setHasActionsDisabled={setHasActionsDisabled}
@@ -571,7 +663,7 @@ export const RuleForm = ({
                   }
                 : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
             )}
-            getDefaultActionParams={getDefaultActionParams}
+            recoveryActionGroup={recoveryActionGroup}
             setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
             setActionGroupIdByIndex={(group: string, index: number) =>
               setActionProperty('group', group, index)
@@ -579,70 +671,17 @@ export const RuleForm = ({
             setActions={setActions}
             setActionParamsProperty={setActionParamsProperty}
             actionTypeRegistry={actionTypeRegistry}
+            setActionFrequencyProperty={setActionFrequencyProperty}
+            minimumThrottleInterval={[ruleInterval, ruleIntervalUnit]}
           />
         </>
       ) : null}
     </>
   );
 
-  const labelForRuleChecked = (
-    <>
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.ruleForm.checkFieldLabel"
-        defaultMessage="Check every"
-      />{' '}
-      <EuiIconTip
-        position="right"
-        type="questionInCircle"
-        content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip', {
-          defaultMessage:
-            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
-        })}
-      />
-    </>
-  );
-
-  const getHelpTextForInterval = () => {
-    if (!config || !config.minimumScheduleInterval) {
-      return '';
-    }
-
-    // No help text if there is an error
-    if (errors['schedule.interval'].length > 0) {
-      return '';
-    }
-
-    if (config.minimumScheduleInterval.enforce) {
-      // Always show help text if minimum is enforced
-      return i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpText', {
-        defaultMessage: 'Interval must be at least {minimum}.',
-        values: {
-          minimum: formatDuration(config.minimumScheduleInterval.value, true),
-        },
-      });
-    } else if (
-      rule.schedule.interval &&
-      parseDuration(rule.schedule.interval) < parseDuration(config.minimumScheduleInterval.value)
-    ) {
-      // Only show help text if current interval is less than suggested
-      return i18n.translate(
-        'xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpSuggestionText',
-        {
-          defaultMessage:
-            'Intervals less than {minimum} are not recommended due to performance considerations.',
-          values: {
-            minimum: formatDuration(config.minimumScheduleInterval.value, true),
-          },
-        }
-      );
-    } else {
-      return '';
-    }
-  };
-
   return (
     <EuiForm>
-      <EuiFlexGrid columns={2}>
+      <EuiFlexGrid columns={1}>
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
@@ -706,74 +745,6 @@ export const RuleForm = ({
               }}
             />
           </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiSpacer size="m" />
-      <EuiFlexGrid columns={2}>
-        <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            data-test-subj="intervalFormRow"
-            display="rowCompressed"
-            helpText={getHelpTextForInterval()}
-            label={labelForRuleChecked}
-            isInvalid={errors['schedule.interval'].length > 0}
-            error={errors['schedule.interval']}
-          >
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <EuiFieldNumber
-                  fullWidth
-                  min={1}
-                  isInvalid={errors['schedule.interval'].length > 0}
-                  value={ruleInterval || ''}
-                  name="interval"
-                  data-test-subj="intervalInput"
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '' || INTEGER_REGEX.test(value)) {
-                      const parsedValue = value === '' ? '' : parseInt(value, 10);
-                      setRuleInterval(parsedValue || undefined);
-                      setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
-                    }
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  fullWidth
-                  value={ruleIntervalUnit}
-                  options={getTimeOptions(ruleInterval ?? 1)}
-                  onChange={(e) => {
-                    setRuleIntervalUnit(e.target.value);
-                    setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
-                  }}
-                  data-test-subj="intervalInputUnit"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <RuleNotifyWhen
-            rule={rule}
-            throttle={ruleThrottle}
-            throttleUnit={ruleThrottleUnit}
-            onNotifyWhenChange={useCallback(
-              (notifyWhen) => {
-                setRuleProperty('notifyWhen', notifyWhen);
-              },
-              [setRuleProperty]
-            )}
-            onThrottleChange={useCallback(
-              (throttle: number | null, throttleUnit: string) => {
-                setRuleThrottle(throttle);
-                setRuleThrottleUnit(throttleUnit);
-                setRuleProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
-              },
-              [setRuleProperty]
-            )}
-          />
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
@@ -855,7 +826,7 @@ export const RuleForm = ({
           ) : null}
           {ruleTypeNodes}
         </>
-      ) : ruleTypeIndex ? (
+      ) : ruleTypeIndex && !ruleTypesIsLoading ? (
         <NoAuthorizedRuleTypes operation={operation} />
       ) : (
         <SectionLoading>
@@ -878,7 +849,7 @@ const NoAuthorizedRuleTypes = ({ operation }: { operation: string }) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.ruleForm.error.noAuthorizedRuleTypesTitle"
-          defaultMessage="You have not been authorized to {operation} any Rule types"
+          defaultMessage="You have not been authorized to {operation} any rule types"
           values={{ operation }}
         />
       </h2>

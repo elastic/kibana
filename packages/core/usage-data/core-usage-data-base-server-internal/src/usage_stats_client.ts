@@ -43,6 +43,8 @@ export interface ICoreUsageStatsClient {
 
   incrementSavedObjectsBulkUpdate(options: BaseIncrementOptions): Promise<void>;
 
+  incrementSavedObjectsBulkDelete(options: BaseIncrementOptions): Promise<void>;
+
   incrementSavedObjectsCreate(options: BaseIncrementOptions): Promise<void>;
 
   incrementSavedObjectsDelete(options: BaseIncrementOptions): Promise<void>;

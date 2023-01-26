@@ -6,19 +6,23 @@
  */
 
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+
 import { getDatatable } from '../common/expressions/datatable/datatable';
 import { datatableColumn } from '../common/expressions/datatable/datatable_column';
 import { mapToColumns } from '../common/expressions/map_to_columns/map_to_columns';
 import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
-import { collapse } from '../common/expressions';
+import { collapse } from '../common/expressions/collapse';
+
+type TimeScaleArguments = Parameters<typeof getTimeScale>;
 
 export const setupExpressions = (
   expressions: ExpressionsSetup,
   formatFactory: Parameters<typeof getDatatable>[0],
-  getDatatableUtilities: Parameters<typeof getTimeScale>[0],
-  getTimeZone: Parameters<typeof getTimeScale>[1]
+  getDatatableUtilities: TimeScaleArguments[0],
+  getTimeZone: TimeScaleArguments[1],
+  getForceNow: TimeScaleArguments[2]
 ) => {
   [
     collapse,
@@ -27,6 +31,6 @@ export const setupExpressions = (
     mapToColumns,
     datatableColumn,
     getDatatable(formatFactory),
-    getTimeScale(getDatatableUtilities, getTimeZone),
+    getTimeScale(getDatatableUtilities, getTimeZone, getForceNow),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
 };

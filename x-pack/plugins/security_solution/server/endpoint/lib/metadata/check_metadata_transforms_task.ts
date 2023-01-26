@@ -256,7 +256,7 @@ export class CheckMetadataTransformsTask {
 
       const packageClient = this.endpointAppContext.service.getInternalFleetServices().packages;
 
-      const { packageInfo, paths } = await packageClient.getRegistryPackage(
+      const { packageInfo, paths } = await packageClient.getPackage(
         FLEET_ENDPOINT_PACKAGE,
         pkgVersion
       );

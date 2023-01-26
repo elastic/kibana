@@ -9,7 +9,7 @@
 import { set } from '@kbn/safer-lodash-set';
 
 import { Keystore } from '.';
-import { getKeystore } from '../../cli_keystore/get_keystore';
+import { getKeystore } from './get_keystore';
 
 export function readKeystore(keystorePath = getKeystore()) {
   const keystore = new Keystore(keystorePath);

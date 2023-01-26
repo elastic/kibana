@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { setUISettings, setPalettesService } from './services';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { setUISettings, setPalettesService, setDataViewsStart } from './services';
 
 import { visTypesDefinitions } from './vis_types';
 
@@ -22,6 +23,11 @@ export interface VisTypeXyPluginStart {}
 export interface VisTypeXyPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+}
+
+/** @internal */
+export interface VisTypeXyPluginStartDependencies {
+  dataViews: DataViewsPublicPluginStart;
 }
 
 type VisTypeXyCoreSetup = CoreSetup<{}, VisTypeXyPluginStart>;
@@ -42,7 +48,8 @@ export class VisTypeXyPlugin
     return {};
   }
 
-  public start() {
+  public start(core: CoreStart, { dataViews }: VisTypeXyPluginStartDependencies) {
+    setDataViewsStart(dataViews);
     return {};
   }
 }

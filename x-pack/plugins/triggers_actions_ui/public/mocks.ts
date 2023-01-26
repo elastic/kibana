@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { ValidatedEmail } from '@kbn/actions-plugin/common';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
-import { RegistrationServices } from './application/components/builtin_action_types';
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionTypeModel,
@@ -35,16 +33,19 @@ import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRulesListLazy } from './common/get_rules_list';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
+import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
+import { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import { getActionFormLazy } from './common/get_action_form';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
 import { getFieldBrowserLazy } from './common/get_field_browser';
-import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
+import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
+import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -87,6 +88,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     getAlertsStateTable: (props: AlertsTableStateProps) => {
       return getAlertsTableStateLazy(props);
     },
+    getAlertsSearchBar: (props: AlertsSearchBarProps) => {
+      return getAlertsSearchBarLazy(props);
+    },
     getAlertsTable: (props: AlertsTableProps) => {
       return getAlertsTableLazy(props);
     },
@@ -117,8 +121,8 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         rulesListProps: {},
       });
     },
-    getRuleAlertsSummary: (props) => {
-      return getRuleAlertsSummaryLazy(props);
+    getAlertSummaryWidget: (props) => {
+      return getAlertSummaryWidgetLazy(props);
     },
     getRuleDefinition: (props) => {
       return getRuleDefinitionLazy({ ...props, actionTypeRegistry, ruleTypeRegistry });
@@ -126,15 +130,12 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     getRuleStatusPanel: (props) => {
       return getRuleStatusPanelLazy(props);
     },
+    getRuleSnoozeModal: (props) => {
+      return getRuleSnoozeModalLazy(props);
+    },
   };
 }
 
 export const triggersActionsUiMock = {
   createStart: createStartMock,
 };
-
-function validateEmailAddresses(addresses: string[]): ValidatedEmail[] {
-  return addresses.map((address) => ({ address, valid: true }));
-}
-
-export const registrationServicesMock: RegistrationServices = { validateEmailAddresses };

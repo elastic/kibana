@@ -32,6 +32,8 @@ interface Arguments {
   metricsAtAllLevels?: boolean;
   partialRows?: boolean;
   timeFields?: string[];
+  probability?: number;
+  samplerSeed?: number;
 }
 
 export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -92,6 +94,21 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
       multi: true,
       help: i18n.translate('data.search.functions.esaggs.timeFields.help', {
         defaultMessage: 'Provide time fields to get the resolved time ranges for the query',
+      }),
+    },
+    probability: {
+      types: ['number'],
+      default: 1,
+      help: i18n.translate('data.search.functions.esaggs.probability.help', {
+        defaultMessage:
+          'The probability that a document will be included in the aggregated data. Uses random sampler.',
+      }),
+    },
+    samplerSeed: {
+      types: ['number'],
+      help: i18n.translate('data.search.functions.esaggs.samplerSeed.help', {
+        defaultMessage:
+          'The seed to generate the random sampling of documents. Uses random sampler.',
       }),
     },
   },

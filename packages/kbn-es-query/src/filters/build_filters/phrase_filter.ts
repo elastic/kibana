@@ -10,6 +10,7 @@ import { get, has, isPlainObject } from 'lodash';
 import type { Filter, FilterMeta } from './types';
 import type { DataViewFieldBase, DataViewBase } from '../../es_query';
 import { getConvertedValueForField } from './get_converted_value_for_field';
+import { hasRangeKeys } from './range_filter';
 
 export type PhraseFilterValue = string | number | boolean;
 
@@ -60,10 +61,12 @@ export const isPhraseFilter = (filter: Filter): filter is PhraseFilter => {
  * @public
  */
 export const isScriptedPhraseFilter = (filter: Filter): filter is ScriptedPhraseFilter =>
-  has(filter, 'query.script.script.params.value');
+  has(filter, 'query.script.script.params.value') &&
+  !hasRangeKeys(filter.query?.script?.script?.params);
 
 /** @internal */
-export const getPhraseFilterField = (filter: PhraseFilter) => {
+export const getPhraseFilterField = (filter: PhraseFilter | ScriptedPhraseFilter) => {
+  if (filter.meta?.field) return filter.meta.field;
   const queryConfig = filter.query.match_phrase ?? filter.query.match ?? {};
   return Object.keys(queryConfig)[0];
 };
@@ -145,7 +148,7 @@ export const buildInlineScriptForPhraseFilter = (scriptedField: DataViewFieldBas
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (scriptedField.lang === 'painless') {
     return (
-      `boolean compare(Supplier s, def v) {return s.get() == v;}` +
+      `boolean compare(Supplier s, def v) {if(s.get() instanceof List){List list = s.get(); for(def k : list){if(k==v){return true;}}return false;}else{return s.get() == v;}}` +
       `compare(() -> { ${scriptedField.script} }, params.value);`
     );
   } else {

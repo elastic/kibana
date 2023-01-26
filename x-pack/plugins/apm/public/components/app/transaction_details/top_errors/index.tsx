@@ -13,12 +13,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getColumns } from '../../../shared/errors_table/get_columns';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
 type ErrorGroupMainStatisticsByTransactionName =
@@ -44,7 +44,10 @@ export function TopErrors() {
   const {
     query,
     path: { serviceName },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const {
     environment,
@@ -81,7 +84,7 @@ export function TopErrors() {
         ).then((response) => {
           return {
             // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
-            requestId: uuid(),
+            requestId: uuidv4(),
             items: response.errorGroups,
           };
         });

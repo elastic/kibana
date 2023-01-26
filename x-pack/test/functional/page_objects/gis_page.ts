@@ -171,7 +171,7 @@ export class GisPageObject extends FtrService {
       }
       await this.testSubjects.click('savedObjectTitle');
     }
-    await this.testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -556,6 +556,7 @@ export class GisPageObject extends FtrService {
     this.log.debug(`Remove layer ${layerName}`);
     await this.openLayerPanel(layerName);
     await this.testSubjects.click(`mapRemoveLayerButton`);
+    await this.common.clickConfirmOnModal();
     await this.waitForLayerDeleted(layerName);
   }
 

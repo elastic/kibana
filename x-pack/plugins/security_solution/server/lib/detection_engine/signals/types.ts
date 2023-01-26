@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type moment from 'moment';
+import type { ESSearchResponse } from '@kbn/es-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   RuleTypeState,
@@ -19,7 +20,6 @@ import type { ListClient } from '@kbn/lists-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import type { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import type {
   BaseHit,
   RuleAlertAction,
@@ -27,13 +27,7 @@ import type {
   EqlSequence,
 } from '../../../../common/detection_engine/types';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
-import type {
-  CompleteRule,
-  QueryRuleParams,
-  ThreatRuleParams,
-  RuleParams,
-  SavedQueryRuleParams,
-} from '../schemas/rule_schemas';
+import type { RuleParams, UnifiedQueryRuleParams } from '../rule_schema';
 import type { GenericBulkCreateResponse } from '../rule_types/factories';
 import type { BuildReasonMessage } from './reason_formatters';
 import type {
@@ -42,6 +36,11 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../common/detection_engine/schemas/alerts';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
+import type { buildGroupByFieldAggregation } from './alert_suppression/build_group_by_field_aggregation';
+import type { RuleResponse } from '../../../../common/detection_engine/rule_schema';
+import type { EnrichEvents } from './enrichments/types';
+import type { BucketHistory } from './alert_suppression/group_and_bulk_create';
+import type { RunOpts } from '../rule_types/types';
 
 export interface ThresholdResult {
   terms?: Array<{
@@ -192,7 +191,7 @@ export interface Signal {
   _meta?: {
     version: number;
   };
-  rule: RulesSchema;
+  rule: RuleResponse;
   /**
    * @deprecated Use "parents" instead of "parent"
    */
@@ -241,7 +240,8 @@ export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSo
 
 export type BulkCreate = <T extends BaseFieldsLatest>(
   docs: Array<WrappedFieldsLatest<T>>,
-  maxAlerts?: number
+  maxAlerts?: number,
+  enrichEvents?: EnrichEvents
 ) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
@@ -256,17 +256,18 @@ export type WrapSequences = (
   buildReasonMessage: BuildReasonMessage
 ) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
 
+export type RuleServices = RuleExecutorServices<
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default'
+>;
 export interface SearchAfterAndBulkCreateParams {
   tuple: {
     to: moment.Moment;
     from: moment.Moment;
     maxSignals: number;
   };
-  completeRule:
-    | CompleteRule<QueryRuleParams>
-    | CompleteRule<SavedQueryRuleParams>
-    | CompleteRule<ThreatRuleParams>;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleServices;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
@@ -285,16 +286,33 @@ export interface SearchAfterAndBulkCreateParams {
   secondaryTimestamp?: string;
 }
 
+export interface GroupAndBulkCreateParams {
+  runOpts: RunOpts<UnifiedQueryRuleParams>;
+  services: RuleServices;
+  spaceId: string;
+  filter: estypes.QueryDslQueryContainer;
+  buildReasonMessage: BuildReasonMessage;
+  bucketHistory?: BucketHistory[];
+  groupByFields: string[];
+}
+
 export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
   warning: boolean;
   searchAfterTimes: string[];
+  enrichmentTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
   warningMessages: string[];
+}
+
+export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateReturnType {
+  state: {
+    suppressionGroupHistory: BucketHistory[];
+  };
 }
 
 export interface MultiAggBucket {
@@ -315,3 +333,12 @@ export interface ThresholdAlertState extends RuleTypeState {
   initialized: boolean;
   signalHistory: ThresholdSignalHistory;
 }
+
+export type EventGroupingMultiBucketAggregationResult = ESSearchResponse<
+  SignalSource,
+  {
+    body: {
+      aggregations: ReturnType<typeof buildGroupByFieldAggregation>;
+    };
+  }
+>;

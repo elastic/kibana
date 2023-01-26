@@ -43,10 +43,19 @@ import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { DiscoverAppLocator } from './locator';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
+import { DiscoverContextAppLocator } from './application/context/services/locator';
+import { DiscoverSingleDocLocator } from './application/doc/locator';
+import { DiscoverAppLocator } from '../common';
 
+/**
+ * Location state of internal Discover history instance
+ */
 export interface HistoryLocationState {
   referrer: string;
 }
@@ -82,14 +91,23 @@ export interface DiscoverServices {
   spaces?: SpacesApi;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   locator: DiscoverAppLocator;
+  contextLocator: DiscoverContextAppLocator;
+  singleDocLocator: DiscoverSingleDocLocator;
   expressions: ExpressionsStart;
+  charts: ChartsPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  lens: LensPublicStart;
 }
 
 export const buildServices = memoize(function (
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext,
-  locator: DiscoverAppLocator
+  locator: DiscoverAppLocator,
+  contextLocator: DiscoverContextAppLocator,
+  singleDocLocator: DiscoverSingleDocLocator
 ): DiscoverServices {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
@@ -127,6 +145,13 @@ export const buildServices = memoize(function (
     dataViewEditor: plugins.dataViewEditor,
     triggersActionsUi: plugins.triggersActionsUi,
     locator,
+    contextLocator,
+    singleDocLocator,
     expressions: plugins.expressions,
+    charts: plugins.charts,
+    savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
+    savedObjectsManagement: plugins.savedObjectsManagement,
+    unifiedSearch: plugins.unifiedSearch,
+    lens: plugins.lens,
   };
 });

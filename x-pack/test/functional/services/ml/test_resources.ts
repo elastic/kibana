@@ -46,15 +46,33 @@ export function MachineLearningTestResourcesProvider(
       await kibanaServer.uiSettings.unset('dateFormat:tz');
     },
 
-    async savedObjectExistsById(id: string, objectType: SavedObjectType): Promise<boolean> {
-      const response = await supertest.get(`/api/saved_objects/${objectType}/${id}`);
+    async disableKibanaAnnouncements() {
+      await kibanaServer.uiSettings.update({ hideAnnouncements: true });
+    },
+
+    async resetKibanaAnnouncements() {
+      await kibanaServer.uiSettings.unset('hideAnnouncements');
+    },
+
+    async savedObjectExistsById(
+      id: string,
+      objectType: SavedObjectType,
+      space?: string
+    ): Promise<boolean> {
+      const response = await supertest.get(
+        `${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`
+      );
       return response.status === 200;
     },
 
-    async savedObjectExistsByTitle(title: string, objectType: SavedObjectType): Promise<boolean> {
-      const id = await this.getSavedObjectIdByTitle(title, objectType);
+    async savedObjectExistsByTitle(
+      title: string,
+      objectType: SavedObjectType,
+      space?: string
+    ): Promise<boolean> {
+      const id = await this.getSavedObjectIdByTitle(title, objectType, space);
       if (id) {
-        return await this.savedObjectExistsById(id, objectType);
+        return await this.savedObjectExistsById(id, objectType, space);
       } else {
         return false;
       }
@@ -62,11 +80,14 @@ export function MachineLearningTestResourcesProvider(
 
     async getSavedObjectIdByTitle(
       title: string,
-      objectType: SavedObjectType
+      objectType: SavedObjectType,
+      space?: string
     ): Promise<string | undefined> {
       log.debug(`Searching for '${objectType}' with title '${title}'...`);
       const { body: findResponse, status } = await supertest
-        .get(`/api/saved_objects/_find?type=${objectType}&per_page=10000`)
+        .get(
+          `${space ? `/s/${space}` : ''}/api/saved_objects/_find?type=${objectType}&per_page=10000`
+        )
         .set(COMMON_REQUEST_HEADERS);
       mlApi.assertResponseStatusCode(200, status, findResponse);
 
@@ -96,8 +117,8 @@ export function MachineLearningTestResourcesProvider(
       return savedObjectIds;
     },
 
-    async getIndexPatternId(title: string): Promise<string | undefined> {
-      return this.getSavedObjectIdByTitle(title, SavedObjectType.INDEX_PATTERN);
+    async getIndexPatternId(title: string, space?: string): Promise<string | undefined> {
+      return this.getSavedObjectIdByTitle(title, SavedObjectType.INDEX_PATTERN, space);
     },
 
     async getSavedSearchId(title: string): Promise<string | undefined> {
@@ -112,7 +133,11 @@ export function MachineLearningTestResourcesProvider(
       return this.getSavedObjectIdByTitle(title, SavedObjectType.DASHBOARD);
     },
 
-    async createIndexPattern(title: string, timeFieldName?: string): Promise<string> {
+    async createIndexPattern(
+      title: string,
+      timeFieldName?: string,
+      space?: string
+    ): Promise<string> {
       log.debug(
         `Creating index pattern with title '${title}'${
           timeFieldName !== undefined ? ` and time field '${timeFieldName}'` : ''
@@ -120,12 +145,12 @@ export function MachineLearningTestResourcesProvider(
       );
 
       const { body: createResponse, status } = await supertest
-        .post(`/api/saved_objects/${SavedObjectType.INDEX_PATTERN}`)
+        .post(`${space ? `/s/${space}` : ''}/api/saved_objects/${SavedObjectType.INDEX_PATTERN}`)
         .set(COMMON_REQUEST_HEADERS)
         .send({ attributes: { title, timeFieldName } });
       mlApi.assertResponseStatusCode(200, status, createResponse);
 
-      await this.assertIndexPatternExistByTitle(title);
+      await this.assertIndexPatternExistByTitle(title, space);
 
       log.debug(` > Created with id '${createResponse.id}'`);
       return createResponse.id;
@@ -144,13 +169,17 @@ export function MachineLearningTestResourcesProvider(
       return createResponse;
     },
 
-    async createIndexPatternIfNeeded(title: string, timeFieldName?: string): Promise<string> {
-      const indexPatternId = await this.getIndexPatternId(title);
+    async createIndexPatternIfNeeded(
+      title: string,
+      timeFieldName?: string,
+      space?: string
+    ): Promise<string> {
+      const indexPatternId = await this.getIndexPatternId(title, space);
       if (indexPatternId !== undefined) {
         log.debug(`Index pattern with title '${title}' already exists. Nothing to create.`);
         return indexPatternId;
       } else {
-        return await this.createIndexPattern(title, timeFieldName);
+        return await this.createIndexPattern(title, timeFieldName, space);
       }
     },
 
@@ -275,7 +304,30 @@ export function MachineLearningTestResourcesProvider(
       );
     },
 
-    async deleteSavedObjectById(id: string, objectType: SavedObjectType, force: boolean = false) {
+    async createSavedSearchFarequoteFilterTwoAndLuceneIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterTwoAndLucene,
+        indexPatternTitle
+      );
+    },
+
+    async createSavedSearchFarequoteFilterTwoAndKueryIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterTwoAndKuery,
+        indexPatternTitle
+      );
+    },
+
+    async deleteSavedObjectById(
+      id: string,
+      objectType: SavedObjectType,
+      force: boolean = false,
+      space?: string
+    ) {
       log.debug(`Deleting ${objectType} with id '${id}'...`);
 
       if ((await this.savedObjectExistsById(id, objectType)) === false) {
@@ -283,31 +335,31 @@ export function MachineLearningTestResourcesProvider(
         return;
       } else {
         const { body, status } = await supertest
-          .delete(`/api/saved_objects/${objectType}/${id}`)
+          .delete(`${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`)
           .set(COMMON_REQUEST_HEADERS)
           .query({ force });
         mlApi.assertResponseStatusCode(200, status, body);
 
-        await this.assertSavedObjectNotExistsById(id, objectType);
+        await this.assertSavedObjectNotExistsById(id, objectType, space);
 
         log.debug(` > Deleted ${objectType} with id '${id}'`);
       }
     },
 
-    async deleteIndexPatternByTitle(title: string) {
+    async deleteIndexPatternByTitle(title: string, space?: string) {
       log.debug(`Deleting index pattern with title '${title}'...`);
 
-      const indexPatternId = await this.getIndexPatternId(title);
+      const indexPatternId = await this.getIndexPatternId(title, space);
       if (indexPatternId === undefined) {
         log.debug(`Index pattern with title '${title}' does not exists. Nothing to delete.`);
         return;
       } else {
-        await this.deleteIndexPatternById(indexPatternId);
+        await this.deleteIndexPatternById(indexPatternId, space);
       }
     },
 
-    async deleteIndexPatternById(id: string) {
-      await this.deleteSavedObjectById(id, SavedObjectType.INDEX_PATTERN);
+    async deleteIndexPatternById(id: string, space?: string) {
+      await this.deleteSavedObjectById(id, SavedObjectType.INDEX_PATTERN, false, space);
     },
 
     async deleteSavedSearchByTitle(title: string) {
@@ -370,12 +422,16 @@ export function MachineLearningTestResourcesProvider(
       }
     },
 
-    async assertSavedObjectExistsByTitle(title: string, objectType: SavedObjectType) {
+    async assertSavedObjectExistsByTitle(
+      title: string,
+      objectType: SavedObjectType,
+      space?: string
+    ) {
       await retry.waitForWithTimeout(
         `${objectType} with title '${title}' to exist`,
         5 * 1000,
         async () => {
-          if ((await this.savedObjectExistsByTitle(title, objectType)) === true) {
+          if ((await this.savedObjectExistsByTitle(title, objectType, space)) === true) {
             return true;
           } else {
             throw new Error(`${objectType} with title '${title}' should exist.`);
@@ -412,12 +468,12 @@ export function MachineLearningTestResourcesProvider(
       );
     },
 
-    async assertSavedObjectNotExistsById(id: string, objectType: SavedObjectType) {
+    async assertSavedObjectNotExistsById(id: string, objectType: SavedObjectType, space?: string) {
       await retry.waitForWithTimeout(
         `${objectType} with id '${id}' not to exist`,
         5 * 1000,
         async () => {
-          if ((await this.savedObjectExistsById(id, objectType)) === false) {
+          if ((await this.savedObjectExistsById(id, objectType, space)) === false) {
             return true;
           } else {
             throw new Error(`${objectType} with id '${id}' should not exist.`);
@@ -426,8 +482,8 @@ export function MachineLearningTestResourcesProvider(
       );
     },
 
-    async assertIndexPatternExistByTitle(title: string) {
-      await this.assertSavedObjectExistsByTitle(title, SavedObjectType.INDEX_PATTERN);
+    async assertIndexPatternExistByTitle(title: string, space?: string) {
+      await this.assertSavedObjectExistsByTitle(title, SavedObjectType.INDEX_PATTERN, space);
     },
 
     async assertIndexPatternExistById(id: string) {
@@ -573,40 +629,6 @@ export function MachineLearningTestResourcesProvider(
 
     async clearAdvancedSettingProperty(propertyName: string) {
       await kibanaServer.uiSettings.unset(propertyName);
-    },
-
-    async installKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
-      log.debug(`Installing Kibana sample data '${sampleDataId}'`);
-
-      const { body, status } = await supertest
-        .post(`/api/sample_data/${sampleDataId}`)
-        .set(COMMON_REQUEST_HEADERS);
-      mlApi.assertResponseStatusCode(200, status, body);
-
-      log.debug(` > Installed`);
-    },
-
-    async removeKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
-      log.debug(`Removing Kibana sample data '${sampleDataId}'`);
-
-      const { body, status } = await supertest
-        .delete(`/api/sample_data/${sampleDataId}`)
-        .set(COMMON_REQUEST_HEADERS);
-      mlApi.assertResponseStatusCode(204, status, body);
-
-      log.debug(` > Removed`);
-    },
-
-    async installAllKibanaSampleData() {
-      await this.installKibanaSampleData('ecommerce');
-      await this.installKibanaSampleData('flights');
-      await this.installKibanaSampleData('logs');
-    },
-
-    async removeAllKibanaSampleData() {
-      await this.removeKibanaSampleData('ecommerce');
-      await this.removeKibanaSampleData('flights');
-      await this.removeKibanaSampleData('logs');
     },
   };
 }

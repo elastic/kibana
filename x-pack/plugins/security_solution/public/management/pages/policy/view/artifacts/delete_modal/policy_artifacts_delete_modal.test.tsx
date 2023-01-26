@@ -12,7 +12,7 @@ import type {
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
@@ -20,7 +20,7 @@ import { PolicyArtifactsDeleteModal } from './policy_artifacts_delete_modal';
 import { exceptionsListAllHttpMocks } from '../../../../../mocks/exceptions_list_http_mocks';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
-import { getDeferred } from '../../../../../components/mocks';
+import { getDeferred } from '../../../../../mocks/utils';
 
 const listType: Array<CreateExceptionListSchema['type']> = [
   'endpoint_events',
@@ -41,7 +41,7 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
   let onCloseMock: () => jest.Mock;
 
   beforeEach(() => {
-    policyId = uuid.v4();
+    policyId = uuidv4();
     mockedContext = createAppRootMockRenderer();
     exception = getExceptionListItemSchemaMock();
     onCloseMock = jest.fn();

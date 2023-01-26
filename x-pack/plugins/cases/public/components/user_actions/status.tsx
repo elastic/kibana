@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { CaseStatuses, StatusUserAction } from '../../../common/api';
-import { UserActionBuilder, UserActionResponse } from './types';
+import { Status } from '@kbn/cases-components';
+import type { CaseStatuses, StatusUserAction } from '../../../common/api';
+import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
-import { Status, statuses } from '../status';
+import { statuses } from '../status';
 import * as i18n from './translations';
 
 const isStatusValid = (status: string): status is CaseStatuses =>
@@ -28,7 +29,7 @@ const getLabelTitle = (userAction: UserActionResponse<StatusUserAction>) => {
       >
         <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <Status type={status} />
+          <Status status={status} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -39,6 +40,7 @@ const getLabelTitle = (userAction: UserActionResponse<StatusUserAction>) => {
 
 export const createStatusUserActionBuilder: UserActionBuilder = ({
   userAction,
+  userProfiles,
   handleOutlineComment,
 }) => ({
   build: () => {
@@ -46,6 +48,7 @@ export const createStatusUserActionBuilder: UserActionBuilder = ({
     const label = getLabelTitle(statusUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
+      userProfiles,
       handleOutlineComment,
       label,
       icon: 'folderClosed',

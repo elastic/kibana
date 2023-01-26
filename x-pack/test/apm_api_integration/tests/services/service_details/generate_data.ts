@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const dataConfig = {
@@ -65,7 +65,9 @@ export async function generateData({
   const { name: serviceRunTimeName, version: serviceRunTimeVersion } = runtime;
   const { name: agentName, version: agentVersion } = agent;
 
-  const instance = apm.service(serviceName, 'production', agentName).instance('instance-a');
+  const instance = apm
+    .service({ name: serviceName, environment: 'production', agentName })
+    .instance('instance-a');
 
   const traceEvents = [
     timerange(start, end)
@@ -74,7 +76,7 @@ export async function generateData({
       .generator((timestamp) =>
         instance
           .containerId('instance-a')
-          .transaction(transaction.name)
+          .transaction({ transactionName: transaction.name })
           .timestamp(timestamp)
           .defaults({
             'cloud.provider': provider,
@@ -101,7 +103,7 @@ export async function generateData({
       .rate(rate)
       .generator((timestamp) =>
         instance
-          .transaction(transaction.name)
+          .transaction({ transactionName: transaction.name })
           .timestamp(timestamp)
           .defaults({
             'cloud.provider': provider,

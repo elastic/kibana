@@ -50,7 +50,7 @@ export const ConfigSchema = schema.object({
         schema.boolean({ defaultValue: false }),
         schema.maybe(schema.never())
       ),
-      disableSandbox: schema.maybe(schema.boolean()), // default value is dynamic in createConfig$
+      disableSandbox: schema.maybe(schema.boolean()), // default value is dynamic in createConfig
       proxy: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
         server: schema.conditional(
@@ -74,16 +74,14 @@ export const ConfigSchema = schema.object({
         defaultValue: moment.duration({ minutes: 1 }),
       }),
       waitForElements: schema.oneOf([schema.number(), schema.duration()], {
-        defaultValue: moment.duration({ seconds: 30 }),
+        defaultValue: moment.duration({ minutes: 1 }),
       }),
       renderComplete: schema.oneOf([schema.number(), schema.duration()], {
-        defaultValue: moment.duration({ seconds: 30 }),
+        defaultValue: moment.duration({ minutes: 2 }),
       }),
     }),
     zoom: schema.number({ defaultValue: 2 }),
-    loadDelay: schema.oneOf([schema.number(), schema.duration()], {
-      defaultValue: moment.duration({ seconds: 3 }),
-    }),
+    loadDelay: schema.maybe(schema.oneOf([schema.number(), schema.duration()])), // deprecated, unused
   }),
   poolSize: schema.number({ defaultValue: 1, min: 1 }),
 });

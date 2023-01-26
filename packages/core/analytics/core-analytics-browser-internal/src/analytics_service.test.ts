@@ -12,6 +12,18 @@ import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser
 import { analyticsClientMock } from './analytics_service.test.mocks';
 import { AnalyticsService } from './analytics_service';
 
+function findRegisteredContextProviderByName(contextProviderName: string) {
+  return analyticsClientMock.registerContextProvider.mock.calls.find(
+    ([{ name }]) => name === contextProviderName
+  )!;
+}
+
+function findRegisteredEventTypeByName(eventTypeName: string) {
+  return analyticsClientMock.registerEventType.mock.calls.find(
+    ([{ eventType }]) => eventType === eventTypeName
+  )!;
+}
+
 describe('AnalyticsService', () => {
   let analyticsService: AnalyticsService;
   beforeEach(() => {
@@ -19,34 +31,39 @@ describe('AnalyticsService', () => {
     analyticsService = new AnalyticsService(coreContextMock.create());
   });
   test('should register some context providers on creation', async () => {
-    expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(3);
+    expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(4);
+    expect(await firstValueFrom(findRegisteredContextProviderByName('build info')[0].context$))
+      .toMatchInlineSnapshot(`
+        Object {
+          "branch": "branch",
+          "buildNum": 100,
+          "buildSha": "buildSha",
+          "isDev": true,
+          "isDistributable": false,
+          "version": "version",
+        }
+      `);
     expect(
-      await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[0][0].context$)
-    ).toMatchInlineSnapshot(`
-            Object {
-              "branch": "branch",
-              "buildNum": 100,
-              "buildSha": "buildSha",
-              "isDev": true,
-              "isDistributable": false,
-              "version": "version",
-            }
-          `);
-    expect(
-      await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[1][0].context$)
+      await firstValueFrom(findRegisteredContextProviderByName('session-id')[0].context$)
     ).toEqual({ session_id: expect.any(String) });
     expect(
-      await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[2][0].context$)
+      await firstValueFrom(findRegisteredContextProviderByName('browser info')[0].context$)
     ).toEqual({
       preferred_language: 'en-US',
       preferred_languages: ['en-US', 'en'],
       user_agent: expect.any(String),
     });
+    expect(
+      await firstValueFrom(findRegisteredContextProviderByName('viewport_size')[0].context$)
+    ).toEqual({
+      viewport_width: 1024,
+      viewport_height: 768,
+    });
   });
 
   test('should register the `performance_metric` and `click` event types on creation', () => {
-    expect(analyticsClientMock.registerEventType).toHaveBeenCalledTimes(2);
-    expect(analyticsClientMock.registerEventType.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(analyticsClientMock.registerEventType).toHaveBeenCalledTimes(3);
+    expect(findRegisteredEventTypeByName('performance_metric')).toMatchInlineSnapshot(`
       Array [
         Object {
           "eventType": "performance_metric",
@@ -144,7 +161,7 @@ describe('AnalyticsService', () => {
         },
       ]
     `);
-    expect(analyticsClientMock.registerEventType.mock.calls[1]).toMatchInlineSnapshot(`
+    expect(findRegisteredEventTypeByName('click')).toMatchInlineSnapshot(`
       Array [
         Object {
           "eventType": "click",
@@ -157,6 +174,27 @@ describe('AnalyticsService', () => {
                 "type": "keyword",
               },
               "type": "array",
+            },
+          },
+        },
+      ]
+    `);
+    expect(findRegisteredEventTypeByName('viewport_resize')).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "eventType": "viewport_resize",
+          "schema": Object {
+            "viewport_height": Object {
+              "_meta": Object {
+                "description": "The value seen as the CSS viewport @media (height)",
+              },
+              "type": "long",
+            },
+            "viewport_width": Object {
+              "_meta": Object {
+                "description": "The value seen as the CSS viewport @media (width)",
+              },
+              "type": "long",
             },
           },
         },
@@ -181,7 +219,7 @@ describe('AnalyticsService', () => {
     const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
     analyticsService.setup({ injectedMetadata });
     expect(
-      await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[3][0].context$)
+      await firstValueFrom(findRegisteredContextProviderByName('elasticsearch info')[0].context$)
     ).toMatchInlineSnapshot(`undefined`);
   });
 
@@ -194,14 +232,14 @@ describe('AnalyticsService', () => {
     });
     analyticsService.setup({ injectedMetadata });
     expect(
-      await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[3][0].context$)
+      await firstValueFrom(findRegisteredContextProviderByName('elasticsearch info')[0].context$)
     ).toMatchInlineSnapshot(`
-                  Object {
-                    "cluster_name": "cluster_name",
-                    "cluster_uuid": "cluster_uuid",
-                    "cluster_version": "version",
-                  }
-              `);
+      Object {
+        "cluster_name": "cluster_name",
+        "cluster_uuid": "cluster_uuid",
+        "cluster_version": "version",
+      }
+    `);
   });
 
   test('setup should expose only the APIs report and opt-in', () => {

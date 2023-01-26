@@ -31,6 +31,7 @@ import {
   referenceLineDecorationConfigFunction,
 } from '../common/expression_functions';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
+import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 
 export interface XYPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -63,6 +64,7 @@ export class ExpressionXyPlugin {
     expressions.registerFunction(xAxisConfigFunction);
     expressions.registerFunction(annotationLayerFunction);
     expressions.registerFunction(extendedAnnotationLayerFunction);
+    expressions.registerFunction(eventAnnotationsResult);
     expressions.registerFunction(referenceLineFunction);
     expressions.registerFunction(referenceLineLayerFunction);
     expressions.registerFunction(xyVisFunction);
@@ -95,6 +97,7 @@ export class ExpressionXyPlugin {
         useLegacyTimeAxis,
         eventAnnotationService,
         timeZone: getTimeZone(core.uiSettings),
+        timeFormat: core.uiSettings.get('dateFormat'),
       };
     };
 

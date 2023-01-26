@@ -5,14 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, memo, useCallback } from 'react';
+import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { SavedObject } from '@kbn/data-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
-import {
-  DataViewAttributes,
-  DataViewSavedObjectConflictError,
-} from '@kbn/data-views-plugin/public';
+import { DataViewListItem } from '@kbn/data-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DataViewSavedObjectConflictError, type DataView } from '@kbn/data-views-plugin/public';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
@@ -24,15 +21,17 @@ import {
   getSavedSearch,
   getSavedSearchFullPathUrl,
 } from '@kbn/saved-search-plugin/public';
-import { getState } from './services/discover_state';
+import { MainHistoryLocationState } from '../../../common/locator';
+import { getDiscoverStateContainer } from './services/discover_state';
 import { loadDataView, resolveDataView } from './utils/resolve_data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getUrlTracker } from '../../kibana_services';
+import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
+import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -58,13 +57,26 @@ export function DiscoverMainRoute(props: Props) {
     dataViewEditor,
   } = services;
   const [error, setError] = useState<Error>();
+  const [loading, setLoading] = useState(true);
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
-  const dataView = savedSearch?.searchSource?.getField('index');
-  const [dataViewList, setDataViewList] = useState<Array<SavedObject<DataViewAttributes>>>([]);
+  const [dataViewList, setDataViewList] = useState<DataViewListItem[]>([]);
   const [hasESData, setHasESData] = useState(false);
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const { id } = useParams<DiscoverLandingParams>();
+
+  /**
+   * Get location state of scoped history only on initial load
+   */
+  const historyLocationState = useMemo(
+    () => getScopedHistory().location.state as MainHistoryLocationState | undefined,
+    []
+  );
+
+  useAlertResultsToast({
+    isAlertResults: historyLocationState?.isAlertResults,
+    toastNotifications,
+  });
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -73,7 +85,7 @@ export function DiscoverMainRoute(props: Props) {
   });
 
   const loadDefaultOrCurrentDataView = useCallback(
-    async (searchSource: ISearchSource) => {
+    async (nextSavedSearch: SavedSearch) => {
       try {
         const hasUserDataViewValue = await data.dataViews.hasData
           .hasUserDataView()
@@ -95,13 +107,27 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const { appStateContainer } = getState({ history, uiSettings: config });
-        const { index } = appStateContainer.getState();
-        const ip = await loadDataView(index || '', data.dataViews, config);
+        const { appState } = getDiscoverStateContainer({
+          history,
+          savedSearch: nextSavedSearch,
+          services,
+        });
+        const { index, query } = appState.getState();
+        const ip = await loadDataView(
+          data.dataViews,
+          config,
+          index,
+          historyLocationState?.dataViewSpec
+        );
 
-        const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
-        const dataViewData = resolveDataView(ip, searchSource, toastNotifications);
-        await data.dataViews.refreshFields(dataViewData);
+        const ipList = ip.list;
+        const isTextBasedQuery = query && isOfAggregateQueryType(query);
+        const dataViewData = resolveDataView(
+          ip,
+          nextSavedSearch.searchSource,
+          toastNotifications,
+          isTextBasedQuery
+        );
         setDataViewList(ipList);
 
         return dataViewData;
@@ -109,85 +135,103 @@ export function DiscoverMainRoute(props: Props) {
         setError(e);
       }
     },
-    [config, data.dataViews, history, isDev, toastNotifications]
+    [
+      config,
+      data.dataViews,
+      history,
+      isDev,
+      historyLocationState?.dataViewSpec,
+      toastNotifications,
+      services,
+    ]
   );
 
-  const loadSavedSearch = useCallback(async () => {
-    try {
-      const currentSavedSearch = await getSavedSearch(id, {
-        search: services.data.search,
-        savedObjectsClient: core.savedObjects.client,
-        spaces: services.spaces,
-      });
+  const loadSavedSearch = useCallback(
+    async (nextDataView?: DataView) => {
+      try {
+        setLoading(true);
+        const currentSavedSearch = await getSavedSearch(id, {
+          search: services.data.search,
+          savedObjectsClient: core.savedObjects.client,
+          spaces: services.spaces,
+          savedObjectsTagging: services.savedObjectsTagging,
+        });
 
-      const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource);
+        const currentDataView = nextDataView
+          ? nextDataView
+          : await loadDefaultOrCurrentDataView(currentSavedSearch);
 
-      if (!currentDataView) {
-        return;
-      }
+        if (!currentDataView) {
+          return;
+        }
 
-      if (!currentSavedSearch.searchSource.getField('index')) {
-        currentSavedSearch.searchSource.setField('index', currentDataView);
-      }
+        if (!currentSavedSearch.searchSource.getField('index')) {
+          currentSavedSearch.searchSource.setField('index', currentDataView);
+        }
 
-      restoreStateFromSavedSearch({
-        savedSearch: currentSavedSearch,
-        timefilter: services.timefilter,
-      });
+        restoreStateFromSavedSearch({
+          savedSearch: currentSavedSearch,
+          timefilter: services.timefilter,
+        });
 
-      setSavedSearch(currentSavedSearch);
+        setSavedSearch(currentSavedSearch);
 
-      if (currentSavedSearch.id) {
-        chrome.recentlyAccessed.add(
-          getSavedSearchFullPathUrl(currentSavedSearch.id),
-          currentSavedSearch.title ?? '',
-          currentSavedSearch.id
-        );
-      }
-    } catch (e) {
-      if (e instanceof DataViewSavedObjectConflictError) {
-        setError(e);
-      } else {
-        redirectWhenMissing({
-          history,
-          navigateToApp: core.application.navigateToApp,
-          basePath,
-          mapping: {
-            search: '/',
-            'index-pattern': {
-              app: 'management',
-              path: `kibana/objects/savedSearches/${id}`,
+        if (currentSavedSearch.id) {
+          chrome.recentlyAccessed.add(
+            getSavedSearchFullPathUrl(currentSavedSearch.id),
+            currentSavedSearch.title ?? '',
+            currentSavedSearch.id
+          );
+        }
+        setLoading(false);
+      } catch (e) {
+        if (e instanceof DataViewSavedObjectConflictError) {
+          setError(e);
+        } else {
+          redirectWhenMissing({
+            history,
+            navigateToApp: core.application.navigateToApp,
+            basePath,
+            mapping: {
+              search: '/',
+              'index-pattern': {
+                app: 'management',
+                path: `kibana/objects/savedSearches/${id}`,
+              },
             },
-          },
-          toastNotifications,
-          onBeforeRedirect() {
-            getUrlTracker().setTrackedUrl('/');
-          },
-          theme: core.theme,
-        })(e);
+            toastNotifications,
+            onBeforeRedirect() {
+              getUrlTracker().setTrackedUrl('/');
+            },
+            theme: core.theme,
+          })(e);
+        }
       }
-    }
-  }, [
-    id,
-    services.data,
-    services.spaces,
-    services.timefilter,
-    core.savedObjects.client,
-    core.application.navigateToApp,
-    core.theme,
-    loadDefaultOrCurrentDataView,
-    chrome.recentlyAccessed,
-    history,
-    basePath,
-    toastNotifications,
-  ]);
+    },
+    [
+      id,
+      services.data,
+      services.spaces,
+      services.timefilter,
+      services.savedObjectsTagging,
+      core.savedObjects.client,
+      core.application.navigateToApp,
+      core.theme,
+      loadDefaultOrCurrentDataView,
+      chrome.recentlyAccessed,
+      history,
+      basePath,
+      toastNotifications,
+    ]
+  );
 
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
       if (nextDataView) {
+        setLoading(true);
         setShowNoDataPage(false);
         setError(undefined);
-        await loadSavedSearch();
+        await loadSavedSearch(nextDataView as DataView);
       }
     },
     [loadSavedSearch]
@@ -224,7 +268,7 @@ export function DiscoverMainRoute(props: Props) {
 
     return (
       <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
+        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} allowAdHocDataView />
       </AnalyticsNoDataPageKibanaProvider>
     );
   }
@@ -233,7 +277,7 @@ export function DiscoverMainRoute(props: Props) {
     return <DiscoverError error={error} />;
   }
 
-  if (!dataView || !savedSearch) {
+  if (loading || !savedSearch) {
     return <LoadingIndicator type="elastic" />;
   }
 

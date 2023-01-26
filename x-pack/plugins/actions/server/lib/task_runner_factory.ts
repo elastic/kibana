@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
-import type { Request } from '@hapi/hapi';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
@@ -18,6 +18,8 @@ import {
   SavedObjectReference,
   IBasePath,
   SavedObject,
+  Headers,
+  FakeRawRequest,
 } from '@kbn/core/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -83,6 +85,7 @@ export class TaskRunnerFactory {
       scheduled: taskInstance.runAt,
       attempts: taskInstance.attempts,
     };
+    const actionExecutionId = uuidv4();
 
     return {
       async run() {
@@ -105,7 +108,7 @@ export class TaskRunnerFactory {
         // Throwing an executor error means we will attempt to retry the task
         // TM will treat a task as a failure if `attempts >= maxAttempts`
         // so we need to handle that here to avoid TM persisting the failed task
-        const isRetryableBasedOnAttempts = taskInfo.attempts < (maxAttempts ?? 1);
+        const isRetryableBasedOnAttempts = taskInfo.attempts < maxAttempts;
         const willRetryMessage = `and will retry`;
         const willNotRetryMessage = `and will not retry`;
 
@@ -121,6 +124,7 @@ export class TaskRunnerFactory {
             executionId,
             consumer,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
+            actionExecutionId,
           });
         } catch (e) {
           logger.error(
@@ -171,7 +175,8 @@ export class TaskRunnerFactory {
             // Once support for legacy alert RBAC is dropped, this can be secured
             await getUnsecuredSavedObjectsClient(request).delete(
               ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-              actionTaskExecutorParams.actionTaskParamsId
+              actionTaskExecutorParams.actionTaskParamsId,
+              { refresh: false }
             );
           } catch (e) {
             // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
@@ -206,6 +211,7 @@ export class TaskRunnerFactory {
           executionId,
           relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
           ...getSourceFromReferences(references),
+          actionExecutionId,
         });
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
@@ -220,26 +226,19 @@ export class TaskRunnerFactory {
 }
 
 function getFakeRequest(apiKey?: string) {
-  const requestHeaders: Record<string, string> = {};
+  const requestHeaders: Headers = {};
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
   }
 
-  // Since we're using API keys and accessing elasticsearch can only be done
-  // via a request, we're faking one with the proper authorization headers.
-  const fakeRequest = CoreKibanaRequest.from({
+  const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
     path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
-  } as unknown as Request);
+  };
+
+  // Since we're using API keys and accessing elasticsearch can only be done
+  // via a request, we're faking one with the proper authorization headers.
+  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
 
   return fakeRequest;
 }

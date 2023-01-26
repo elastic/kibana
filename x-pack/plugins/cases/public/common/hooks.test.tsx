@@ -19,10 +19,13 @@ const useApplicationMock = useApplication as jest.Mock;
 describe('hooks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useApplicationMock.mockReturnValue({ appId: 'management', appTitle: 'Management' });
   });
 
   describe('useIsMainApplication', () => {
+    beforeEach(() => {
+      useApplicationMock.mockReturnValue({ appId: 'management', appTitle: 'Management' });
+    });
+
     it('returns true if it is the main application', () => {
       const { result } = renderHook(() => useIsMainApplication(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -33,6 +36,7 @@ describe('hooks', () => {
 
     it('returns false if it is not the main application', () => {
       useApplicationMock.mockReturnValue({ appId: 'testAppId', appTitle: 'Test app' });
+
       const { result } = renderHook(() => useIsMainApplication(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });

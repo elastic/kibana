@@ -12,8 +12,7 @@ import { Query, Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
-import { useAiOpsKibana } from '../../kibana_context';
-import { getPluginsStart } from '../../kibana_services';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
 interface Props {
   dataView: DataView;
@@ -40,15 +39,15 @@ export const SearchPanel: FC<Props> = ({
   searchQueryLanguage,
   setSearchParams,
 }) => {
-  const { unifiedSearch } = getPluginsStart();
-  const { SearchBar } = unifiedSearch?.ui;
   const {
-    services: {
-      uiSettings,
-      notifications: { toasts },
-      data: { query: queryManager },
+    uiSettings,
+    unifiedSearch: {
+      ui: { SearchBar },
     },
-  } = useAiOpsKibana();
+    notifications: { toasts },
+    data: { query: queryManager },
+  } = useAiopsAppContext();
+
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
     query: searchString || '',
@@ -94,13 +93,8 @@ export const SearchPanel: FC<Props> = ({
   };
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      data-test-subj="aiopsSearchPanel"
-      className={'aiopsSearchPanel__container'}
-      responsive={false}
-    >
-      <EuiFlexItem grow={9} className={'aiopsSearchBar'}>
+    <EuiFlexGroup gutterSize="s" data-test-subj="aiopsSearchPanel" responsive={false}>
+      <EuiFlexItem grow={9}>
         <SearchBar
           dataTestSubj="aiopsQueryInput"
           appName={'aiops'}
@@ -117,8 +111,7 @@ export const SearchPanel: FC<Props> = ({
           })}
           displayStyle={'inPage'}
           isClearable={true}
-          customSubmitButton={<div />}
-          // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
+          showSubmitButton={false}
           onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
         />
       </EuiFlexItem>

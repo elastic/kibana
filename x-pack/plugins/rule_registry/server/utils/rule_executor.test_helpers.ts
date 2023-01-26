@@ -18,6 +18,9 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { Logger } from '@kbn/logging';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
@@ -30,6 +33,7 @@ export const createDefaultAlertExecutorOptions = <
   ruleName = 'ALERT_RULE_NAME',
   params,
   state,
+  logger,
   createdAt = new Date(),
   startedAt = new Date(),
   updatedAt = new Date(),
@@ -39,20 +43,19 @@ export const createDefaultAlertExecutorOptions = <
   ruleName?: string;
   params: Params;
   state: State;
+  logger: Logger;
   createdAt?: Date;
   startedAt?: Date;
   updatedAt?: Date;
   shouldWriteAlerts?: boolean;
 }): RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
-  alertId,
-  createdBy: 'CREATED_BY',
   startedAt,
-  name: ruleName,
   rule: {
+    id: alertId,
     updatedBy: null,
     tags: [],
     name: ruleName,
-    createdBy: null,
+    createdBy: 'CREATED_BY',
     actions: [],
     enabled: true,
     consumer: 'CONSUMER',
@@ -65,7 +68,6 @@ export const createDefaultAlertExecutorOptions = <
     ruleTypeId: 'RULE_TYPE_ID',
     ruleTypeName: 'RULE_TYPE_NAME',
   },
-  tags: [],
   params,
   spaceId: 'SPACE_ID',
   services: {
@@ -77,10 +79,12 @@ export const createDefaultAlertExecutorOptions = <
     shouldWriteAlerts: () => shouldWriteAlerts,
     shouldStopExecution: () => false,
     searchSourceClient: searchSourceCommonMock,
+    share: {} as SharePluginStart,
+    dataViews: dataViewPluginMocks.createStartContract(),
   },
   state,
-  updatedBy: null,
   previousStartedAt: null,
   namespace: undefined,
   executionId: 'b33f65d7-6e8b-4aae-8d20-c93613deb33f',
+  logger,
 });

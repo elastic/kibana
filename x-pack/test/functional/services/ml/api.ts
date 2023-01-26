@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
+import type { TypeOf } from '@kbn/config-schema';
 import fs from 'fs';
 import { Calendar } from '@kbn/ml-plugin/server/models/calendar';
 import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
@@ -17,6 +18,7 @@ import { DataFrameTaskStateType } from '@kbn/ml-plugin/common/types/data_frame_a
 import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import { setupModuleBodySchema } from '@kbn/ml-plugin/server/routes/schemas/modules';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -273,6 +275,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return state;
     },
 
+    async getJobMemoryStatus(jobId: string): Promise<'hard_limit' | 'soft_limit' | 'ok'> {
+      const jobStats = await this.getADJobStats(jobId);
+
+      expect(jobStats.jobs).to.have.length(
+        1,
+        `Expected job stats to have exactly one job (got '${jobStats.length}')`
+      );
+      return jobStats.jobs[0].model_size_stats.memory_status;
+    },
+
     async getADJobStats(jobId: string): Promise<any> {
       log.debug(`Fetching anomaly detection job stats for job ${jobId}...`);
       const { body: jobStats, status } = await esSupertest.get(
@@ -297,6 +309,27 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           throw new Error(`expected job state to be ${expectedJobState} but got ${state}`);
         }
       });
+    },
+
+    async waitForJobMemoryStatus(
+      jobId: string,
+      expectedMemoryStatus: 'hard_limit' | 'soft_limit' | 'ok',
+      timeout: number = 2 * 60 * 1000
+    ) {
+      await retry.waitForWithTimeout(
+        `job memory status to be ${expectedMemoryStatus}`,
+        timeout,
+        async () => {
+          const memoryStatus = await this.getJobMemoryStatus(jobId);
+          if (memoryStatus === expectedMemoryStatus) {
+            return true;
+          } else {
+            throw new Error(
+              `expected job memory status to be ${expectedMemoryStatus} but got ${memoryStatus}`
+            );
+          }
+        }
+      );
     },
 
     async getDatafeedState(datafeedId: string): Promise<DATAFEED_STATE> {
@@ -576,6 +609,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return response;
     },
 
+    async hasNotifications(query: object) {
+      const body = await es.search({
+        index: '.ml-notifications*',
+        body: {
+          size: 10000,
+          query,
+        },
+      });
+
+      return body.hits.hits.length > 0;
+    },
+
     async adJobExist(jobId: string) {
       this.validateJobId(jobId);
       try {
@@ -604,6 +649,24 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           return true;
         } else {
           throw new Error(`expected anomaly detection job '${jobId}' not to exist`);
+        }
+      });
+    },
+
+    async waitForJobNotificationsToIndex(jobId: string, timeout: number = 60 * 1000) {
+      await retry.waitForWithTimeout(`Notifications for '${jobId}' to exist`, timeout, async () => {
+        if (
+          await this.hasNotifications({
+            term: {
+              job_id: {
+                value: jobId,
+              },
+            },
+          })
+        ) {
+          return true;
+        } else {
+          throw new Error(`expected '${jobId}' notifications to exist`);
         }
       });
     },
@@ -797,12 +860,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createAndRunAnomalyDetectionLookbackJob(
       jobConfig: Job,
       datafeedConfig: Datafeed,
-      space?: string
+      options: { space?: string; end?: string } = {}
     ) {
+      const { space = undefined, end = `${Date.now()}` } = options;
       await this.createAnomalyDetectionJob(jobConfig, space);
       await this.createDatafeed(datafeedConfig, space);
       await this.openAnomalyDetectionJob(jobConfig.job_id);
-      await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end: `${Date.now()}` });
+      await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end });
       await this.waitForDatafeedState(datafeedConfig.datafeed_id, DATAFEED_STATE.STOPPED);
       await this.waitForJobState(jobConfig.job_id, JOB_STATE.CLOSED);
     },
@@ -945,6 +1009,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Filter deleted.');
     },
 
+    async assertModelMemoryLimitForJob(jobId: string, expectedMml: string) {
+      const {
+        body: {
+          jobs: [job],
+        },
+      } = await this.getAnomalyDetectionJob(jobId);
+      const mml = job.analysis_limits.model_memory_limit;
+      expect(mml).to.eql(
+        expectedMml,
+        `Expected model memory limit to be  ${expectedMml}, got  ${mml}`
+      );
+    },
+
     async waitForFilterToExist(filterId: string, errorMsg?: string) {
       await retry.waitForWithTimeout(`'${filterId}' to exist`, 5 * 1000, async () => {
         if (await this.getFilter(filterId, 200)) {
@@ -1040,6 +1117,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           throw new Error(errorMsg ?? `annotation '${annotationId}' should not exist`);
         }
       });
+    },
+
+    async assertAnnotationsCount(jobId: string, expectedCount: number) {
+      const annotations = await this.getAnnotations(jobId);
+      expect(annotations.length).to.eql(
+        expectedCount,
+        `expected annotation count of ${expectedCount}, got ${annotations.length}`
+      );
     },
 
     async runDFAJob(dfaId: string) {
@@ -1383,6 +1468,22 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Ingest pipeline deleted');
+    },
+
+    async setupModule(
+      moduleId: string,
+      body: TypeOf<typeof setupModuleBodySchema>,
+      space?: string
+    ) {
+      log.debug(`Setting up module with ID: "${moduleId}"`);
+      const { body: module, status } = await kbnSupertest
+        .post(`${space ? `/s/${space}` : ''}/api/ml/modules/setup/${moduleId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(body);
+      this.assertResponseStatusCode(200, status, module);
+
+      log.debug('Module set up');
+      return module;
     },
   };
 }

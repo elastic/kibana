@@ -30,6 +30,7 @@ describe('interpreter/functions#pieVis', () => {
 
   const visConfig: PieVisConfig = {
     addTooltip: true,
+    metricsToLabels: JSON.stringify({}),
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
     legendSize: LegendSize.SMALL,
@@ -52,15 +53,18 @@ describe('interpreter/functions#pieVis', () => {
       percentDecimals: 2,
       truncate: 100,
       last_level: false,
+      colorOverrides: {},
     },
-    metric: {
-      type: 'vis_dimension',
-      accessor: 0,
-      format: {
-        id: 'number',
-        params: {},
+    metrics: [
+      {
+        type: 'vis_dimension',
+        accessor: 0,
+        format: {
+          id: 'number',
+          params: {},
+        },
       },
-    },
+    ],
     buckets: [
       {
         type: 'vis_dimension',

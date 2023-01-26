@@ -7,7 +7,7 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
           isFlyoutView={false}
           runtimeMappings={Object {}}
           tabType="query"
-          timelineId="test"
+          scopeId="timeline-test"
         />
        1`] = `
 <DetailsPanel
@@ -15,8 +15,8 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
   runtimeMappings={Object {}}
+  scopeId="timeline-test"
   tabType="query"
-  timelineId="test"
 />
 `;
 
@@ -26,8 +26,8 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
   runtimeMappings={Object {}}
+  scopeId="timeline-test"
   tabType="query"
-  timelineId="test"
 />
 `;
 
@@ -41,17 +41,17 @@ Array [
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap c0"
+    class="euiFlexGroup c0 emotion-euiFlexGroup-responsive-wrap-none-spaceBetween-stretch-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     />
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
         aria-label="close"
-        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
         type="button"
       >
         <span
@@ -103,14 +103,14 @@ Array [
     />
   </span>,
   <div
-    class="euiFlyoutFooter"
+    class="euiFlyoutFooter emotion-euiFlyoutFooter"
     data-test-subj="side-panel-flyout-footer"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       />
     </div>
   </div>,
@@ -155,21 +155,21 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     type="button"
   />
   <div
-    class="euiFlyoutHeader"
+    class="euiFlyoutHeader emotion-euiFlyoutHeader"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap c0"
+      class="euiFlexGroup c0 emotion-euiFlexGroup-responsive-wrap-none-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       />
     </div>
   </div>
   <div
-    class="euiFlyoutBody c1"
+    class="euiFlyoutBody c1 emotion-euiFlyoutBody"
   >
     <div
-      class="euiFlyoutBody__overflow"
+      class="euiFlyoutBody__overflow css-18yrfj9-noBanner"
       tabindex="0"
     >
       <div
@@ -215,14 +215,14 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     </div>
   </div>
   <div
-    class="euiFlyoutFooter"
+    class="euiFlyoutFooter emotion-euiFlyoutFooter"
     data-test-subj="side-panel-flyout-footer"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       />
     </div>
   </div>
@@ -313,18 +313,18 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c1"
+    class="euiFlexGroup c1 emotion-euiFlexGroup-l-flexStart-stretch-column"
     data-test-subj="host-overview"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Host ID
         </dt>
@@ -338,7 +338,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           First seen
         </dt>
@@ -353,7 +353,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           />
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Last seen
         </dt>
@@ -370,14 +370,14 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           IP addresses
         </dt>
@@ -391,7 +391,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           MAC addresses
         </dt>
@@ -405,7 +405,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Platform
         </dt>
@@ -421,14 +421,14 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Operating system
         </dt>
@@ -442,7 +442,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Family
         </dt>
@@ -456,7 +456,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Version
         </dt>
@@ -470,7 +470,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Architecture
         </dt>
@@ -486,14 +486,14 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Cloud provider
         </dt>
@@ -507,7 +507,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Region
         </dt>
@@ -521,7 +521,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Instance ID
         </dt>
@@ -535,7 +535,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Machine type
         </dt>
@@ -554,11 +554,11 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       class="c4"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c5"
+        class="euiFlexGroup c5 emotion-euiFlexGroup-s-center-center-column"
         overlay="[object Object]"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
             aria-label="Loading"
@@ -657,17 +657,17 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c1"
+    class="euiFlexGroup c1 emotion-euiFlexGroup-l-flexStart-stretch-column"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Location
         </dt>
@@ -681,7 +681,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Autonomous system
         </dt>
@@ -697,14 +697,14 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           First seen
         </dt>
@@ -719,7 +719,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           />
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Last seen
         </dt>
@@ -736,14 +736,14 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Host ID
         </dt>
@@ -757,7 +757,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Host name
         </dt>
@@ -773,14 +773,14 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           WhoIs
         </dt>
@@ -788,7 +788,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiToolTipAnchor"
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
             <a
               class="euiLink emotion-euiLink-primary"
@@ -813,7 +813,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           Reputation
         </dt>
@@ -826,11 +826,11 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
       class="c4"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c5"
+        class="euiFlexGroup c5 emotion-euiFlexGroup-s-center-center-column"
         overlay="[object Object]"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
             aria-label="Loading"

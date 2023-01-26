@@ -1,0 +1,89 @@
+version: "3"
+
+services:
+  setup:
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    # Adapted from https://github.com/elastic/elasticsearch/blob/main/docs/reference/setup/install/docker/docker-compose.yml
+    command: >
+      bash -c '
+        echo "Setting kibana_system password";
+        until curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" http://elasticsearch:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "All done!";
+      '
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - ../../kbn-dev-utils/certs:/usr/share/elasticsearch/config/certs
+    ports:
+      - ${ES_PORT}:9200
+    environment:
+      node.name: elasticsearch
+      cluster.name: health-gateway-test-cluster
+      discovery.type: single-node
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      bootstrap.memory_lock: true
+      xpack.security.enabled: true
+      xpack.license.self_generated.type: ${LICENSE}
+    mem_limit: ${MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  kbn01:
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    volumes:
+      - ../../kbn-dev-utils/certs:/usr/share/kibana/config/certs
+    ports:
+      - ${KIBANA_01_PORT}:5601
+    environment:
+      SERVERNAME: kbn01
+      NODE_ROLES: '["ui"]'
+      STATUS_ALLOWANONYMOUS: true
+      SERVER_SSL_ENABLED: true
+      SERVER_SSL_KEY: config/certs/kibana.key
+      SERVER_SSL_CERTIFICATE: config/certs/kibana.crt
+      SERVER_SSL_CERTIFICATEAUTHORITIES: config/certs/ca.crt
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: kibana_system
+      ELASTICSEARCH_PASSWORD: ${KIBANA_PASSWORD}
+    mem_limit: ${MEM_LIMIT}
+
+  kbn02:
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    volumes:
+      - ../../kbn-dev-utils/certs:/usr/share/kibana/config/certs
+    ports:
+      - ${KIBANA_02_PORT}:5601
+    environment:
+      SERVERNAME: kbn02
+      NODE_ROLES: '["background_tasks"]'
+      STATUS_ALLOWANONYMOUS: true
+      SERVER_SSL_ENABLED: true
+      SERVER_SSL_KEY: config/certs/kibana.key
+      SERVER_SSL_CERTIFICATE: config/certs/kibana.crt
+      SERVER_SSL_CERTIFICATEAUTHORITIES: config/certs/ca.crt
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: kibana_system
+      ELASTICSEARCH_PASSWORD: ${KIBANA_PASSWORD}
+    mem_limit: ${MEM_LIMIT}
+

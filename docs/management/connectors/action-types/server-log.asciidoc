@@ -13,7 +13,7 @@ This connector writes an entry to the {kib} server log.
 
 Server log connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+Name:: The name of the connector.
 
 [float]
 [[Preconfigured-server-log-configuration]]
@@ -28,7 +28,7 @@ Name::      The name of the connector. The name is used to identify a  connector
 
 [float]
 [[define-serverlog-ui]]
-==== Define connector in Stack Management
+==== Define connector in {stack-manage-app}
 
 Define Server log connector properties.
 

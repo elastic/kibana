@@ -23,10 +23,12 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
   </EuiText>
   <EuiSpacer />
   <EuiButton
+    color="primary"
     fill={true}
     href="http://some-host/bar"
     iconSide="right"
     iconType="popout"
+    size="m"
     target="_blank"
   >
     <FormattedMessage
@@ -61,10 +63,12 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
   </EuiText>
   <EuiSpacer />
   <EuiButton
+    color="primary"
     fill={true}
     href="http://some-host/bar"
     iconSide="right"
     iconType="popout"
+    size="m"
     target="_blank"
   >
     <FormattedMessage
@@ -328,6 +332,7 @@ exports[`LoginPage page renders as expected 1`] = `
       </span>
       <EuiTitle
         className="loginWelcome__title"
+        data-test-subj="loginWelcomeTitle"
         size="m"
       >
         <h1>

@@ -9,4 +9,5 @@
 export * from './src/run';
 export * from './src/run_with_commands';
 export * from './src/flags';
+export * from './src/flags_reader';
 export type { CleanupTask } from './src/cleanup';

@@ -7,12 +7,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCaseViewParams } from '../../common/navigation';
-import { Case } from '../../containers/types';
+import type { Case } from '../../containers/types';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useUpdateComment } from '../../containers/use_update_comment';
-import { AddCommentRefObject } from '../add_comment';
-import { UserActionMarkdownRefObject } from './markdown_form';
-import { UserActionBuilderArgs } from './types';
+import type { AddCommentRefObject } from '../add_comment';
+import type { UserActionMarkdownRefObject } from './markdown_form';
+import type { UserActionBuilderArgs } from './types';
 import { NEW_COMMENT_ID } from './constants';
 import { useDeleteComment } from '../../containers/use_delete_comment';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
@@ -43,7 +43,7 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
     useLensDraftComment();
   const handlerTimeoutId = useRef(0);
   const { isLoadingIds, patchComment } = useUpdateComment();
-  const { deleteComment } = useDeleteComment();
+  const { mutate: deleteComment } = useDeleteComment();
   const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
   const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
   const refreshCaseViewPage = useRefreshCaseViewPage();

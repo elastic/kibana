@@ -54,6 +54,21 @@ export const i18nTexts = {
     readonlyEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.readonlyFieldLabel', {
       defaultMessage: 'Make index read only',
     }),
+    downsampleEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.downsampleFieldLabel', {
+      defaultMessage: 'Enable downsampling',
+    }),
+    downsampleIntervalFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.downsampleIntervalFieldLabel',
+      {
+        defaultMessage: 'Downsampling interval',
+      }
+    ),
+    downsampleIntervalFieldUnitsLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.downsampleIntervalFieldUnitsLabel',
+      {
+        defaultMessage: 'Downsampling interval units',
+      }
+    ),
     maxNumSegmentsFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.forceMerge.numberOfSegmentsLabel',
       {

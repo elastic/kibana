@@ -8,29 +8,29 @@ import React, { useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
-  EuiTextColor,
   type EuiTableFieldDataColumnType,
   type CriteriaWithPagination,
   type Pagination,
   EuiToolTip,
   EuiBasicTableProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { Link, generatePath } from 'react-router-dom';
-import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
+import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
-import { createColumnWithFilters, type OnAddFilter } from '../layout/findings_layout';
+import {
+  createColumnWithFilters,
+  type OnAddFilter,
+  baseFindingsColumns,
+} from '../layout/findings_layout';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
-type Sorting = Required<
-  EuiBasicTableProps<Pick<FindingsByResourcePage, 'failed_findings'>>
->['sorting'];
+type Sorting = Required<EuiBasicTableProps<FindingsByResourcePage>>['sorting'];
 
 interface Props {
   items: FindingsByResourcePage[];
@@ -62,9 +62,9 @@ const FindingsByResourceTableComponent = ({
       findingsByResourceColumns.resource_id,
       createColumnWithFilters(findingsByResourceColumns['resource.sub_type'], { onAddFilter }),
       createColumnWithFilters(findingsByResourceColumns['resource.name'], { onAddFilter }),
-      findingsByResourceColumns['rule.section'],
+      createColumnWithFilters(findingsByResourceColumns['rule.benchmark.name'], { onAddFilter }),
       createColumnWithFilters(findingsByResourceColumns.cluster_id, { onAddFilter }),
-      findingsByResourceColumns.failed_findings,
+      findingsByResourceColumns.compliance_score,
     ],
     [onAddFilter]
   );
@@ -100,45 +100,22 @@ const FindingsByResourceTableComponent = ({
 
 const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
   {
+    ...baseFindingsColumns['resource.id'],
     field: 'resource_id',
-    name: (
-      <ColumnNameWithTooltip
-        columnName={i18n.translate(
-          'xpack.csp.findings.findingsByResourceTable.findingsByResourceTableColumn.resourceIdColumnLabel',
-          { defaultMessage: 'Resource ID' }
-        )}
-        tooltipContent={i18n.translate(
-          'xpack.csp.findings.findingsByResourceTable.findingsByResourceTableColumn.resourceIdColumnTooltipLabel',
-          { defaultMessage: 'Custom Elastic Resource ID' }
-        )}
-      />
-    ),
+    width: '15%',
     render: (resourceId: FindingsByResourcePage['resource_id']) => (
-      <Link to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}>
+      <Link
+        to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}
+        className="eui-textTruncate"
+        title={resourceId}
+      >
         {resourceId}
       </Link>
     ),
   },
-  {
-    field: 'resource.sub_type',
-    truncateText: true,
-    name: (
-      <FormattedMessage
-        id="xpack.csp.findings.findingsByResourceTable.resourceTypeColumnLabel"
-        defaultMessage="Resource Type"
-      />
-    ),
-  },
-  {
-    field: 'resource.name',
-    truncateText: true,
-    name: (
-      <FormattedMessage
-        id="xpack.csp.findings.findingsByResourceTable.resourceNameColumnLabel"
-        defaultMessage="Resource Name"
-      />
-    ),
-  },
+  baseFindingsColumns['resource.sub_type'],
+  baseFindingsColumns['resource.name'],
+  baseFindingsColumns['rule.benchmark.name'],
   {
     field: 'rule.section',
     truncateText: true,
@@ -148,55 +125,32 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
         defaultMessage="CIS Sections"
       />
     ),
-    render: (sections: string[]) => sections.join(', '),
+    render: (sections: string[]) => {
+      const items = sections.join(', ');
+      return (
+        <EuiToolTip content={items} anchorClassName="eui-textTruncate">
+          <>{items}</>
+        </EuiToolTip>
+      );
+    },
   },
+  baseFindingsColumns.cluster_id,
   {
-    field: 'cluster_id',
-    name: (
-      <ColumnNameWithTooltip
-        columnName={i18n.translate(
-          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
-          { defaultMessage: 'Cluster ID' }
-        )}
-        tooltipContent={i18n.translate(
-          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
-          { defaultMessage: 'Kube-System Namespace ID' }
-        )}
-      />
-    ),
-    truncateText: true,
-  },
-  {
-    field: 'failed_findings',
+    field: 'compliance_score',
     width: '150px',
     truncateText: true,
     sortable: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.findingsByResourceTable.failedFindingsColumnLabel"
-        defaultMessage="Failed Findings"
+        id="xpack.csp.findings.findingsByResourceTable.complianceScoreColumnLabel"
+        defaultMessage="Compliance Score"
       />
     ),
-    render: (failedFindings: FindingsByResourcePage['failed_findings']) => (
-      <EuiToolTip
-        content={i18n.translate(
-          'xpack.csp.findings.findingsByResourceTable.failedFindingsToolTip',
-          {
-            defaultMessage: '{failed} out of {total}',
-            values: {
-              failed: failedFindings.count,
-              total: failedFindings.total_findings,
-            },
-          }
-        )}
-      >
-        <>
-          <EuiTextColor color={failedFindings.count === 0 ? '' : 'danger'}>
-            {formatNumber(failedFindings.count)}
-          </EuiTextColor>
-          <span> ({numeral(failedFindings.normalized).format('0%')})</span>
-        </>
-      </EuiToolTip>
+    render: (complianceScore: FindingsByResourcePage['compliance_score'], data) => (
+      <ComplianceScoreBar
+        totalPassed={data.findings.passed_findings}
+        totalFailed={data.findings.failed_findings}
+      />
     ),
     dataType: 'number',
   },

@@ -38,6 +38,13 @@ export interface CoreUsageStats {
   'apiCalls.savedObjectsBulkResolve.namespace.custom.total'?: number;
   'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes'?: number;
   'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsBulkDelete.total'?: number;
+  'apiCalls.savedObjectsBulkDelete.namespace.default.total'?: number;
+  'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsBulkDelete.namespace.custom.total'?: number;
+  'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no'?: number;
   'apiCalls.savedObjectsBulkUpdate.total'?: number;
   'apiCalls.savedObjectsBulkUpdate.namespace.default.total'?: number;
   'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes'?: number;
@@ -246,6 +253,7 @@ export interface CoreConfigUsageData {
       referrerPolicy: string;
       permissionsPolicyConfigured: boolean;
       disableEmbedding: boolean;
+      crossOriginOpenerPolicy: string;
     };
   };
 

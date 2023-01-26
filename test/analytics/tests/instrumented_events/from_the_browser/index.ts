@@ -15,5 +15,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./loaded_kibana'));
     loadTestFile(require.resolve('./loaded_dashboard'));
     loadTestFile(require.resolve('./core_context_providers'));
+    loadTestFile(require.resolve('./viewport_resize'));
   });
 }

@@ -11,14 +11,18 @@ export enum ArchiverMethod {
   UNLOAD = 'unload',
 }
 
-export const runKbnArchiverScript = (method: ArchiverMethod, fileName: string) => {
+export const runKbnArchiverScript = (
+  method: ArchiverMethod,
+  fileName: string,
+  space = 'default'
+) => {
   const {
     ELASTICSEARCH_USERNAME,
     ELASTICSEARCH_PASSWORD,
     hostname: HOSTNAME,
     configport: PORT,
   } = Cypress.env();
-  const script = `node ../../../scripts/kbn_archiver.js --kibana-url http://${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD}@${HOSTNAME}:${PORT} ${method} ./cypress/fixtures/saved_objects/${fileName}.ndjson`;
+  const script = `node ../../../scripts/kbn_archiver.js --space ${space} --kibana-url http://${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD}@${HOSTNAME}:${PORT} ${method} ./cypress/fixtures/saved_objects/${fileName}.ndjson`;
 
   cy.exec(script, { env: { NODE_TLS_REJECT_UNAUTHORIZED: 1 } });
 };

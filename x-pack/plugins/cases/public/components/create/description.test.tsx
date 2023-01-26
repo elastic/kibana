@@ -9,16 +9,24 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import userEvent, { specialChars } from '@testing-library/user-event';
 
-import { useForm, Form, FormHook } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Description } from './description';
-import { schema, FormProps } from './schema';
-import { createAppMockRenderer, AppMockRenderer } from '../../common/mock';
+import type { FormProps } from './schema';
+import { schema } from './schema';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 
 describe('Description', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
+  const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
+  const defaultProps = {
+    draftStorageKey,
+    isLoading: false,
+  };
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
     const { form } = useForm<FormProps>({
@@ -41,7 +49,7 @@ describe('Description', () => {
   it('it renders', async () => {
     const result = appMockRender.render(
       <MockHookWrapperComponent>
-        <Description isLoading={false} />
+        <Description {...defaultProps} />
       </MockHookWrapperComponent>
     );
 
@@ -51,7 +59,7 @@ describe('Description', () => {
   it('it changes the description', async () => {
     const result = appMockRender.render(
       <MockHookWrapperComponent>
-        <Description isLoading={false} />
+        <Description {...defaultProps} />
       </MockHookWrapperComponent>
     );
 

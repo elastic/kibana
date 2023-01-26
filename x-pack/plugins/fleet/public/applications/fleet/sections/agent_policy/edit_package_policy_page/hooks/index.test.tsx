@@ -102,4 +102,50 @@ describe('useHistoryBlock', () => {
       expect(renderer.startServices.application.navigateToUrl).not.toBeCalled();
     });
   });
+
+  describe('with hash params', () => {
+    it('should not block if not edited', () => {
+      const renderer = createFleetTestRendererMock();
+
+      renderer.renderHook(() => useHistoryBlock(false));
+
+      act(() => renderer.mountHistory.push('/test#/hash'));
+
+      const { location } = renderer.mountHistory;
+      expect(location.pathname).toBe('/test');
+      expect(location.hash).toBe('#/hash');
+      expect(renderer.startServices.overlays.openConfirm).not.toBeCalled();
+    });
+
+    it('should block if edited and navigate on confirm', async () => {
+      const renderer = createFleetTestRendererMock();
+
+      renderer.startServices.overlays.openConfirm.mockResolvedValue(true);
+      renderer.renderHook(() => useHistoryBlock(true));
+
+      act(() => renderer.mountHistory.push('/test#/hash'));
+      // needed because we have an async useEffect
+      await act(() => new Promise((resolve) => resolve()));
+
+      expect(renderer.startServices.overlays.openConfirm).toBeCalled();
+      expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
+        '/mock/test#/hash',
+        expect.anything()
+      );
+    });
+
+    it('should block if edited and not navigate on cancel', async () => {
+      const renderer = createFleetTestRendererMock();
+
+      renderer.startServices.overlays.openConfirm.mockResolvedValue(false);
+      renderer.renderHook(() => useHistoryBlock(true));
+
+      act(() => renderer.mountHistory.push('/test#/hash'));
+      // needed because we have an async useEffect
+      await act(() => new Promise((resolve) => resolve()));
+
+      expect(renderer.startServices.overlays.openConfirm).toBeCalled();
+      expect(renderer.startServices.application.navigateToUrl).not.toBeCalled();
+    });
+  });
 });

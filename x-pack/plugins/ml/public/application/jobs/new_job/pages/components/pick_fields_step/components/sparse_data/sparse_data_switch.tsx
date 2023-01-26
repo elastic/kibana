@@ -20,6 +20,7 @@ export const SparseDataSwitch: FC = () => {
   useEffect(() => {
     jobCreator.sparseData = sparseData;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sparseData]);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export const SparseDataSwitch: FC = () => {
     if (isCountOrSum === false && sparseData === true) {
       setSparseData(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   function toggleSparseData() {

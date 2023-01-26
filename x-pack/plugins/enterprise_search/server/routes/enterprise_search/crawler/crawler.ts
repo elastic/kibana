@@ -8,10 +8,14 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
+
 import { ErrorCode } from '../../../../common/types/error_codes';
+import { addConnector } from '../../../lib/connectors/add_connector';
+import { deleteConnectorById } from '../../../lib/connectors/delete_connector';
 import { fetchConnectorByIndexName } from '../../../lib/connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../../../lib/crawler/fetch_crawlers';
-
+import { deleteIndex } from '../../../lib/indices/delete_index';
 import { RouteDependencies } from '../../../plugin';
 import { createError } from '../../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../../utils/elasticsearch_error_handler';
@@ -34,12 +38,18 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
+      const connParams = {
+        delete_existing_connector: true,
+        index_name: request.body.index_name,
+        is_native: true,
+        language: request.body.language,
+        service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+      };
       const { client } = (await context.core).elasticsearch;
 
       const indexExists = await client.asCurrentUser.indices.exists({
         index: request.body.index_name,
       });
-
       if (indexExists) {
         return createError({
           errorCode: ErrorCode.INDEX_ALREADY_EXISTS,
@@ -55,7 +65,6 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       }
 
       const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
-
       if (crawler) {
         return createError({
           errorCode: ErrorCode.CRAWLER_ALREADY_EXISTS,
@@ -71,7 +80,6 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       }
 
       const connector = await fetchConnectorByIndexName(client, request.body.index_name);
-
       if (connector) {
         return createError({
           errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
@@ -86,9 +94,26 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         });
       }
 
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/api/ent/v1/internal/indices',
-      })(context, request, response);
+      try {
+        await addConnector(client, connParams);
+        const res = await enterpriseSearchRequestHandler.createRequest({
+          path: '/api/ent/v1/internal/indices',
+        })(context, request, response);
+
+        if (res.status !== 200) {
+          throw new Error(res.payload.message);
+        }
+        return res;
+      } catch (error) {
+        // clean up connector index if it was created
+        const createdConnector = await fetchConnectorByIndexName(client, request.body.index_name);
+        if (createdConnector) {
+          await deleteConnectorById(client, createdConnector.id);
+          await deleteIndex(client, createdConnector.index_name);
+        }
+
+        throw error;
+      }
     })
   );
 
@@ -235,6 +260,16 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
       validate: {
         body: schema.object({
+          auth: schema.maybe(
+            schema.nullable(
+              schema.object({
+                header: schema.maybe(schema.string()),
+                password: schema.maybe(schema.string()),
+                type: schema.string(),
+                username: schema.maybe(schema.string()),
+              })
+            )
+          ),
           crawl_rules: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -328,6 +363,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         body: schema.object({
           frequency: schema.number(),
           unit: schema.string(),
+          use_connector_schedule: schema.boolean(),
         }),
         params: schema.object({
           indexName: schema.string(),

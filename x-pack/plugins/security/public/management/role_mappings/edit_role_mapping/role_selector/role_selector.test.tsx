@@ -143,4 +143,69 @@ describe('RoleSelector', () => {
       role_templates: [],
     });
   });
+
+  describe('can render a readonly view', () => {
+    it('in "roles" mode', async () => {
+      const props = {
+        roleMapping: {
+          roles: [] as string[],
+          role_templates: [
+            {
+              template: { source: '' },
+            },
+          ],
+        } as RoleMapping,
+        canUseStoredScripts: true,
+        canUseInlineScripts: true,
+        onChange: jest.fn(),
+        mode: 'roles',
+        rolesAPIClient: rolesAPI,
+        readOnly: true,
+      } as RoleSelector['props'];
+
+      const wrapper = mountWithIntl(<RoleSelector {...props} />);
+
+      // Roles combo is disabled
+      const { disabled: rolesComboDisabled } = wrapper
+        .find('RoleComboBox[data-test-subj="roleMappingFormRolesCombo"]')
+        .props();
+      expect(rolesComboDisabled).toEqual(true);
+    });
+
+    it('in "templates" mode', async () => {
+      const props = {
+        roleMapping: {
+          roles: [] as string[],
+          role_templates: [
+            {
+              template: { source: 'foo_role' },
+            },
+          ],
+        } as RoleMapping,
+        canUseStoredScripts: true,
+        canUseInlineScripts: true,
+        onChange: jest.fn(),
+        mode: 'templates',
+        rolesAPIClient: rolesAPI,
+        readOnly: true,
+      } as RoleSelector['props'];
+
+      const wrapper = mountWithIntl(<RoleSelector {...props} />);
+
+      // Any/all role template editors are read-only
+      const templateEditors = wrapper.find(
+        'RoleTemplateEditor[data-test-subj="roleMappingFormRoleTemplateEditor"]'
+      );
+      expect(templateEditors).not.toHaveLength(0);
+      templateEditors.map((templateEditor) => {
+        expect(templateEditor.props().readOnly).toBeTruthy();
+      });
+
+      // No add template button
+      const addTemplateButtons = wrapper.find(
+        'EuiButtonEmpty[data-test-subj="addRoleTemplateButton"]'
+      );
+      expect(addTemplateButtons).toHaveLength(0);
+    });
+  });
 });

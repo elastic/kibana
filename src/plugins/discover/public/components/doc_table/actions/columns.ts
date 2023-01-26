@@ -9,14 +9,8 @@ import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import { DataViewsContract } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
-import {
-  AppState as DiscoverState,
-  GetStateReturn as DiscoverGetStateReturn,
-} from '../../../application/main/services/discover_state';
-import {
-  AppState as ContextState,
-  GetStateReturn as ContextGetStateReturn,
-} from '../../../application/context/services/context_state';
+import { DiscoverStateContainer as DiscoverGetStateReturn } from '../../../application/main/services/discover_state';
+import { GetStateReturn as ContextGetStateReturn } from '../../../application/context/services/context_state';
 import { popularizeField } from '../../../utils/popularize_field';
 
 /**
@@ -68,7 +62,8 @@ export function getStateColumnActions({
   dataViews,
   useNewFieldsApi,
   setAppState,
-  state,
+  columns,
+  sort,
 }: {
   capabilities: Capabilities;
   config: IUiSettingsClient;
@@ -76,39 +71,36 @@ export function getStateColumnActions({
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
-  state: DiscoverState | ContextState;
+  columns?: string[];
+  sort: string[][] | undefined;
 }) {
   function onAddColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
-    const columns = addColumn(state.columns || [], columnName, useNewFieldsApi);
+    const nextColumns = addColumn(columns || [], columnName, useNewFieldsApi);
     const defaultOrder = config.get(SORT_DEFAULT_ORDER_SETTING);
-    const sort =
-      columnName === '_score' && !state.sort?.length ? [['_score', defaultOrder]] : state.sort;
-    setAppState({ columns, sort });
+    const nextSort = columnName === '_score' && !sort?.length ? [['_score', defaultOrder]] : sort;
+    setAppState({ columns: nextColumns, sort: nextSort });
   }
 
   function onRemoveColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
-    const columns = removeColumn(state.columns || [], columnName, useNewFieldsApi);
+    const nextColumns = removeColumn(columns || [], columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
-    const sort =
-      state.sort && state.sort.length
-        ? state.sort.filter((subArr) => subArr[0] !== columnName)
-        : [];
-    setAppState({ columns, sort });
+    const nextSort = sort && sort.length ? sort.filter((subArr) => subArr[0] !== columnName) : [];
+    setAppState({ columns: nextColumns, sort: nextSort });
   }
 
   function onMoveColumn(columnName: string, newIndex: number) {
-    const columns = moveColumn(state.columns || [], columnName, newIndex);
-    setAppState({ columns });
+    const nextColumns = moveColumn(columns || [], columnName, newIndex);
+    setAppState({ columns: nextColumns });
   }
 
-  function onSetColumns(columns: string[], hideTimeColumn: boolean) {
-    // The next line should gone when classic table will be removed
+  function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
+    // The next line should be gone when classic table will be removed
     const actualColumns =
-      !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === columns[0]
-        ? columns.slice(1)
-        : columns;
+      !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === nextColumns[0]
+        ? (nextColumns || []).slice(1)
+        : nextColumns;
 
     setAppState({ columns: actualColumns });
   }

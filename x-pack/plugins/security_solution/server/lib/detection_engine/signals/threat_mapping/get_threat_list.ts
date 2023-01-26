@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
+import { getQueryFilter } from '../get_query_filter';
 import type {
   GetThreatListOptions,
   ThreatListCountOptions,
@@ -20,9 +20,10 @@ import type {
  */
 export const INDICATOR_PER_PAGE = 1000;
 
+const MAX_NUMBER_OF_THREATS = 10 * 1000;
+
 export const getThreatList = async ({
   esClient,
-  exceptionItems,
   index,
   language,
   perPage,
@@ -35,18 +36,19 @@ export const getThreatList = async ({
   reassignPitId,
   runtimeMappings,
   listClient,
+  exceptionFilter,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
-  const queryFilter = getQueryFilter(
+  const queryFilter = getQueryFilter({
     query,
-    language ?? 'kuery',
-    threatFilters,
+    language: language ?? 'kuery',
+    filters: threatFilters,
     index,
-    exceptionItems
-  );
+    exceptionFilter,
+  });
 
   ruleExecutionLogger.debug(
     `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
@@ -96,15 +98,15 @@ export const getThreatListCount = async ({
   language,
   threatFilters,
   index,
-  exceptionItems,
+  exceptionFilter,
 }: ThreatListCountOptions): Promise<number> => {
-  const queryFilter = getQueryFilter(
+  const queryFilter = getQueryFilter({
     query,
-    language ?? 'kuery',
-    threatFilters,
+    language: language ?? 'kuery',
+    filters: threatFilters,
     index,
-    exceptionItems
-  );
+    exceptionFilter,
+  });
   const response = await esClient.count({
     body: {
       query: queryFilter,
@@ -123,7 +125,9 @@ export const getAllThreatListHits = async (
 
   allThreatListHits = allThreatListHits.concat(threatList.hits.hits);
 
-  while (threatList.hits.hits.length !== 0) {
+  // to prevent loading in memory large number of results, that could lead to out of memory Kibana crash,
+  // number of indicators is limited to MAX_NUMBER_OF_THREATS
+  while (threatList.hits.hits.length !== 0 && allThreatListHits.length < MAX_NUMBER_OF_THREATS) {
     threatList = await getThreatList({
       ...params,
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,

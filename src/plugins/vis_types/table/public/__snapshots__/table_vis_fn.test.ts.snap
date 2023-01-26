@@ -25,6 +25,7 @@ Object {
   "as": "table_vis",
   "type": "render",
   "value": Object {
+    "canNavigateToLens": undefined,
     "visConfig": Object {
       "autoFitRowToContent": false,
       "buckets": Array [],

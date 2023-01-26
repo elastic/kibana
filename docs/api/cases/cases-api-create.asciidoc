@@ -6,6 +6,12 @@
 
 Creates a case.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `POST <kibana host>:<port>/api/cases`
@@ -28,6 +34,18 @@ default space is used.
 [role="child_attributes"]
 === {api-request-body-title}
 
+`assignees`::
+(Optional, array of objects) Array containing users that are assigned to the case.
++
+.Properties of assignee objects
+[%collapsible%open]
+=====
+`uid`:: 
+(Required, string) A unique identifier for the user profile. These identifiers
+can be found by using the
+{ref}/security-api-suggest-user-profile.html[suggest user profile API].
+=====
+
 `connector`::
 (Required, object) An object that contains the connector configuration.
 +
@@ -45,10 +63,10 @@ specify `null` as its value.
 For {ibm-r} connectors, specify:
 
 `issueTypes`:::
-(Required, array of numbers) The type of the incident.
+(Required, array of strings) The type of the incident.
 
 `severityCode`:::
-(Required, number) The severity code of the incident.
+(Required, string) The severity code of the incident.
 
 For {jira} connectors, specify:
 
@@ -201,6 +219,7 @@ the case identifier, version, and creation time. For example:
   "totalAlerts": 0,
   "title": "Case title 1",
   "tags": [ "tag 1" ],
+  "assignees": [],
   "settings": {
     "syncAlerts": true
   },

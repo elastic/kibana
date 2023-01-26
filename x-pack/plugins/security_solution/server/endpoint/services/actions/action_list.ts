@@ -10,6 +10,7 @@ import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
+import type { ResponseActionStatus } from '../../../../common/endpoint/service/response_actions/constants';
 
 import { getActions, getActionResponses } from '../../utils/action_list_helpers';
 
@@ -19,8 +20,10 @@ import {
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
   getAgentHostNamesWithIds,
+  getActionStatus,
 } from './utils';
 import type { EndpointMetadataService } from '../metadata';
+import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 interface OptionalFilterParams {
   commands?: string[];
@@ -33,6 +36,67 @@ interface OptionalFilterParams {
   /** Will filter out the action requests so that only those show `expiration` date is greater than now */
   unExpiredOnly?: boolean;
 }
+
+/**
+ * Similar to #getActionList but takes statuses filter options
+ * Retrieve a list of all (at most 10k) Actions from index (`ActionDetails`)
+ * filter out action details based on statuses filter options
+ */
+export const getActionListByStatus = async ({
+  commands,
+  elasticAgentIds,
+  esClient,
+  endDate,
+  logger,
+  metadataService,
+  page: _page,
+  pageSize,
+  startDate,
+  statuses,
+  userIds,
+  unExpiredOnly = false,
+}: OptionalFilterParams & {
+  statuses: ResponseActionStatus[];
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  metadataService: EndpointMetadataService;
+}): Promise<ActionListApiResponse> => {
+  const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
+  const page = _page ?? 1;
+
+  const { actionDetails: allActionDetails } = await getActionDetailsList({
+    commands,
+    elasticAgentIds,
+    esClient,
+    endDate,
+    from: 0,
+    logger,
+    metadataService,
+    size: ACTIONS_SEARCH_PAGE_SIZE,
+    startDate,
+    userIds,
+    unExpiredOnly,
+  });
+
+  // filter out search results based on status filter options
+  const actionDetailsByStatus = allActionDetails.filter((detail) =>
+    statuses.includes(detail.status)
+  );
+
+  return {
+    page,
+    pageSize: size,
+    startDate,
+    endDate,
+    elasticAgentIds,
+    userIds,
+    commands,
+    statuses,
+    // for size 20 -> page 1: (0, 20), page 2: (20, 40) ...etc
+    data: actionDetailsByStatus.slice((page - 1) * size, size * page),
+    total: actionDetailsByStatus.length,
+  };
+};
 
 /**
  * Retrieve a list of Actions (`ActionDetails`)
@@ -81,6 +145,7 @@ export const getActionList = async ({
     elasticAgentIds,
     userIds,
     commands,
+    statuses: undefined,
     data: actionDetails,
     total: totalRecords,
   };
@@ -140,8 +205,10 @@ const getActionDetailsList = async ({
     throw err;
   }
 
-  // return empty details array
-  if (!actionRequests?.body?.hits?.hits) return { actionDetails: [], totalRecords: 0 };
+  if (!actionRequests?.body?.hits?.hits) {
+    // return empty details array
+    return { actionDetails: [], totalRecords: 0 };
+  }
 
   // format endpoint actions into { type, item } structure
   const formattedActionRequests = formatEndpointActionResults(actionRequests?.body?.hits?.hits);
@@ -184,7 +251,7 @@ const getActionDetailsList = async ({
   });
 
   // compute action details list for each action id
-  const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
+  const actionDetails: ActionListApiResponse['data'] = normalizedActionRequests.map((action) => {
     // pick only those responses that match the current action id
     const matchedResponses = categorizedResponses.filter((categorizedResponse) =>
       categorizedResponse.type === 'response'
@@ -198,14 +265,20 @@ const getActionDetailsList = async ({
       matchedResponses
     );
 
+    const { isExpired, status } = getActionStatus({
+      expirationDate: action.expiration,
+      isCompleted,
+      wasSuccessful,
+    });
+
     // NOTE: `outputs` is not returned in this service because including it on a list of data
     // could result in a very large response unnecessarily. In the future, we might include
     // an option to optionally include it.
-    return {
+    const actionRecord: ActionListApiResponse['data'][number] = {
       id: action.id,
       agents: action.agents,
       hosts: action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
-        acc[id] = { name: agentsHostInfo[id] };
+        acc[id] = { name: agentsHostInfo[id] ?? '' };
         return acc;
       }, {}),
       command: action.command,
@@ -215,11 +288,14 @@ const getActionDetailsList = async ({
       wasSuccessful,
       errors,
       agentState,
-      isExpired: !isCompleted && action.expiration < new Date().toISOString(),
+      isExpired,
+      status,
       createdBy: action.createdBy,
       comment: action.comment,
       parameters: action.parameters,
     };
+
+    return actionRecord;
   });
 
   return { actionDetails, totalRecords };

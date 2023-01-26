@@ -9,7 +9,7 @@ import React from 'react';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { render, data as dataMock } from '../../../../utils/test_helper';
 import { CoreStart } from '@kbn/core/public';
-import { ObservabilityPublicPluginsStart } from '../../../../plugin';
+import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { APMSection } from '.';
 import { response } from './mock_data/apm.mock';
 import * as hasDataHook from '../../../../hooks/use_has_data';
@@ -43,10 +43,21 @@ describe('APMSection', () => {
       from: '2020-10-08T06:00:00.000Z',
       to: '2020-10-08T07:00:00.000Z',
     });
+    const config = {
+      unsafe: {
+        alertDetails: {
+          apm: { enabled: false },
+          logs: { enabled: false },
+          metrics: { enabled: false },
+          uptime: { enabled: false },
+        },
+      },
+    } as ConfigSchema;
 
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       appMountParameters: {} as AppMountParameters,
       core: {} as CoreStart,
+      config,
       plugins: {} as ObservabilityPublicPluginsStart,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       ObservabilityPageTemplate: KibanaPageTemplate,

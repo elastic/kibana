@@ -11,12 +11,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinks } from '@kbn/doc-links';
 import { EuiLink } from '@elastic/eui';
 
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
 import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { TrustedAppsApiClient } from '../service';
 import { TrustedAppsForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
+import { TrustedAppsArtifactsDocsLink } from './components/artifacts_docs_link';
 
 const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.trustedApps.pageTitle', {
@@ -24,7 +26,7 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.trustedApps.pageAboutInfo', {
     defaultMessage:
-      'Trusted applications improve performance or alleviate conflicts with other applications running on your hosts.',
+      'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications may still generate alerts in some cases.',
   }),
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.trustedApps.pageAddButtonTitle', {
     defaultMessage: 'Add trusted application',
@@ -87,12 +89,18 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       defaultMessage: '"{itemName}" has been removed from trusted applications.',
       values: { itemName },
     }),
+  emptyStateTitleNoEntries: i18n.translate(
+    'xpack.securitySolution.trustedApps.emptyStateTitleNoEntries',
+    {
+      defaultMessage: 'There are no trusted applications to display.',
+    }
+  ),
   emptyStateTitle: i18n.translate('xpack.securitySolution.trustedApps.emptyStateTitle', {
     defaultMessage: 'Add your first trusted application',
   }),
   emptyStateInfo: i18n.translate('xpack.securitySolution.trustedApps.emptyStateInfo', {
     defaultMessage:
-      'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts.',
+      'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications may still generate alerts in some cases.',
   }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.trustedApps.emptyStatePrimaryButtonLabel',
@@ -107,6 +115,7 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
 };
 
 export const TrustedAppsList = memo(() => {
+  const { canWriteTrustedApplications } = useUserPrivileges().endpointPrivileges;
   const http = useHttp();
   const trustedAppsApiClient = TrustedAppsApiClient.getInstance(http);
 
@@ -117,6 +126,10 @@ export const TrustedAppsList = memo(() => {
       labels={TRUSTED_APPS_PAGE_LABELS}
       data-test-subj="trustedAppsListPage"
       searchableFields={SEARCHABLE_FIELDS}
+      secondaryPageInfo={<TrustedAppsArtifactsDocsLink />}
+      allowCardDeleteAction={canWriteTrustedApplications}
+      allowCardEditAction={canWriteTrustedApplications}
+      allowCardCreateAction={canWriteTrustedApplications}
     />
   );
 });

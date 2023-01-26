@@ -24,13 +24,12 @@ import {
 import { IExecutionErrors } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
-import { RefineSearchPrompt } from '../refine_search_prompt';
-import { Rule } from '../../../../types';
+import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
-import { RuleEventLogListCellRenderer } from './rule_event_log_list_cell_renderer';
+import { EventLogListCellRenderer } from '../../common/components/event_log';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -61,14 +60,16 @@ const updateButtonProps = {
 const MAX_RESULTS = 1000;
 
 export type RuleErrorLogProps = {
-  rule: Rule;
+  ruleId: string;
   runId?: string;
   refreshToken?: number;
+  spaceId?: string;
+  logFromDifferentSpace?: boolean;
   requestRefresh?: () => Promise<void>;
 } & Pick<RuleApis, 'loadActionErrorLog'>;
 
 export const RuleErrorLog = (props: RuleErrorLogProps) => {
-  const { rule, runId, loadActionErrorLog, refreshToken } = props;
+  const { ruleId, runId, loadActionErrorLog, refreshToken, spaceId, logFromDifferentSpace } = props;
 
   const { uiSettings, notifications } = useKibana().services;
 
@@ -131,7 +132,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     setIsLoading(true);
     try {
       const result = await loadActionErrorLog({
-        id: rule.id,
+        id: ruleId,
         runId,
         message: searchText,
         dateStart: getParsedDate(dateStart),
@@ -139,6 +140,8 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
         page: pagination.pageIndex,
         perPage: pagination.pageSize,
         sort: formattedSort,
+        namespace: spaceId,
+        withAuth: logFromDifferentSpace,
       });
       setLogs(result.errors);
       setPagination({
@@ -200,7 +203,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
           }
         ),
         render: (date: string) => (
-          <RuleEventLogListCellRenderer columnId="timestamp" value={date} dateFormat={dateFormat} />
+          <EventLogListCellRenderer columnId="timestamp" value={date} dateFormat={dateFormat} />
         ),
         sortable: true,
         width: '250px',

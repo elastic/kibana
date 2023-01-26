@@ -24,7 +24,6 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) 
     () => (props) => <MarkdownLink {...props} disableLinks={disableLinks} />,
     [disableLinks]
   );
-
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);
   // This line of code is TS-compatible and it will break if [1][1] change in the future.

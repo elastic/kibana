@@ -99,9 +99,9 @@ describe('Security Dashboards Table hooks', () => {
     it('should return a memoized value when rerendered', async () => {
       const { result, rerender } = await renderUseSecurityDashboardsTableItems();
 
-      const result1 = result.current;
+      const result1 = result.current.items;
       act(() => rerender());
-      const result2 = result.current;
+      const result2 = result.current.items;
 
       expect(result1).toBe(result2);
     });
@@ -110,7 +110,7 @@ describe('Security Dashboards Table hooks', () => {
       const { result } = await renderUseSecurityDashboardsTableItems();
 
       const [dashboard1, dashboard2] = DASHBOARDS_RESPONSE;
-      expect(result.current).toStrictEqual([
+      expect(result.current.items).toStrictEqual([
         {
           ...dashboard1,
           title: dashboard1.attributes.title,
@@ -148,7 +148,7 @@ describe('Security Dashboards Table hooks', () => {
     });
 
     it('returns a memoized value', async () => {
-      const { result, rerender } = await renderUseSecurityDashboardsTableItems();
+      const { result, rerender } = renderUseDashboardsTableColumns();
 
       const result1 = result.current;
       act(() => rerender());
@@ -163,7 +163,7 @@ describe('Security Dashboards Table hooks', () => {
     const { result: columnsResult } = renderUseDashboardsTableColumns();
 
     const result = render(
-      <EuiBasicTable items={itemsResult.current} columns={columnsResult.current} />,
+      <EuiBasicTable items={itemsResult.current.items} columns={columnsResult.current} />,
       {
         wrapper: TestProviders,
       }

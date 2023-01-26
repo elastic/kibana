@@ -13,21 +13,21 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Action, UiActionsStart, ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { Trigger, ViewMode } from '../types';
 import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
-import { createEditModeAction } from '../test_samples/actions';
 import {
-  ContactCardEmbeddableFactory,
-  CONTACT_CARD_EMBEDDABLE,
-} from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { HelloWorldContainer } from '../test_samples/embeddables/hello_world_container';
-import {
+  createEditModeActionDefinition,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../test_samples/embeddables/contact_card/contact_card_embeddable';
+  ContactCardEmbeddableFactory,
+  ContactCardEmbeddableReactFactory,
+  CONTACT_CARD_EMBEDDABLE,
+  CONTACT_CARD_EMBEDDABLE_REACT,
+  HelloWorldContainer,
+} from '../test_samples';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';
@@ -38,21 +38,26 @@ const triggerRegistry = new Map<string, Trigger>();
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 
-const editModeAction = createEditModeAction();
+const editModeAction = createEditModeActionDefinition();
 const trigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
 };
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+const embeddableReactFactory = new ContactCardEmbeddableReactFactory(
+  (() => null) as any,
+  {} as any
+);
 const applicationMock = applicationServiceMock.createStartContract();
 const theme = themeServiceMock.createStartContract();
 
-actionRegistry.set(editModeAction.id, editModeAction);
+actionRegistry.set(editModeAction.id, new ActionInternal(editModeAction));
 triggerRegistry.set(trigger.id, trigger);
 setup.registerEmbeddableFactory(embeddableFactory.type, embeddableFactory);
+setup.registerEmbeddableFactory(embeddableReactFactory.type, embeddableReactFactory);
 
 const start = doStart();
 const getEmbeddableFactory = start.getEmbeddableFactory;
-test('HelloWorldContainer initializes embeddables', async (done) => {
+test('HelloWorldContainer initializes embeddables', (done) => {
   const container = new HelloWorldContainer(
     {
       id: '123',
@@ -198,7 +203,7 @@ describe('HelloWorldContainer in error state', () => {
       </I18nProvider>
     );
 
-    jest.spyOn(embeddable, 'renderError');
+    jest.spyOn(embeddable, 'catchError');
   });
 
   test('renders a custom error', () => {
@@ -207,9 +212,9 @@ describe('HelloWorldContainer in error state', () => {
 
     const embeddableError = findTestSubject(component, 'embeddableError');
 
-    expect(embeddable.renderError).toHaveBeenCalledWith(
-      expect.any(HTMLElement),
-      new Error('something')
+    expect(embeddable.catchError).toHaveBeenCalledWith(
+      new Error('something'),
+      expect.any(HTMLElement)
     );
     expect(embeddableError).toHaveProperty('length', 1);
     expect(embeddableError.text()).toBe('something');
@@ -218,24 +223,25 @@ describe('HelloWorldContainer in error state', () => {
   test('renders a custom fatal error', () => {
     embeddable.triggerError(new Error('something'), true);
     component.update();
+    component.mount();
 
     const embeddableError = findTestSubject(component, 'embeddableError');
 
-    expect(embeddable.renderError).toHaveBeenCalledWith(
-      expect.any(HTMLElement),
-      new Error('something')
+    expect(embeddable.catchError).toHaveBeenCalledWith(
+      new Error('something'),
+      expect.any(HTMLElement)
     );
     expect(embeddableError).toHaveProperty('length', 1);
     expect(embeddableError.text()).toBe('something');
   });
 
   test('destroys previous error', () => {
-    const { renderError } = embeddable as Required<typeof embeddable>;
-    let destroyError: jest.MockedFunction<ReturnType<typeof renderError>>;
+    const { catchError } = embeddable as Required<typeof embeddable>;
+    let destroyError: jest.MockedFunction<ReturnType<typeof catchError>>;
 
-    (embeddable.renderError as jest.MockedFunction<typeof renderError>).mockImplementationOnce(
+    (embeddable.catchError as jest.MockedFunction<typeof catchError>).mockImplementationOnce(
       (...args) => {
-        destroyError = jest.fn(renderError(...args));
+        destroyError = jest.fn(catchError(...args));
 
         return destroyError;
       }
@@ -253,7 +259,7 @@ describe('HelloWorldContainer in error state', () => {
   });
 
   test('renders a default error', async () => {
-    embeddable.renderError = undefined;
+    embeddable.catchError = undefined;
     embeddable.triggerError(new Error('something'));
     component.update();
 
@@ -261,6 +267,17 @@ describe('HelloWorldContainer in error state', () => {
 
     expect(embeddableError).toHaveProperty('length', 1);
     expect(embeddableError.children.length).toBeGreaterThan(0);
+  });
+
+  test('renders a React node', () => {
+    (embeddable.catchError as jest.Mock).mockReturnValueOnce(<div>Something</div>);
+    embeddable.triggerError(new Error('something'));
+    component.update();
+
+    const embeddableError = findTestSubject(component, 'embeddableError');
+
+    expect(embeddableError).toHaveProperty('length', 1);
+    expect(embeddableError.text()).toBe('Something');
   });
 });
 
@@ -733,4 +750,38 @@ test('Should work in minimal way rendering only the inspector action', async () 
   expect(findTestSubject(component, `embeddablePanelAction-openInspector`).length).toBe(1);
   const action = findTestSubject(component, `embeddablePanelAction-ACTION_CUSTOMIZE_PANEL`);
   expect(action.length).toBe(0);
+});
+
+test('Renders an embeddable returning a React node', async () => {
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE_REACT, {
+    firstName: 'Bran',
+    lastName: 'Stark',
+  });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
+        notifications={{} as any}
+        overlays={{} as any}
+        application={applicationMock}
+        SavedObjectFinder={() => null}
+        theme={theme}
+      />
+    </I18nProvider>
+  );
+
+  expect(component.find('.embPanel__titleText').text()).toBe('Hello Bran Stark');
 });

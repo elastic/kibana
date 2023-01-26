@@ -82,6 +82,8 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   const dispatch = useConsoleStateDispatch();
   const { docLinks } = useKibana().services;
 
+  const allowedCommands = commands.filter((command) => command.helpHidden !== true);
+
   const footerMessage = useMemo(() => {
     return (
       <EuiDescriptionList
@@ -122,7 +124,8 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         type: 'updateInputTextEnteredState',
         payload: () => {
           return {
-            textEntered: text,
+            leftOfCursorText: text,
+            rightOfCursorText: '',
           };
         },
       });
@@ -133,7 +136,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   );
 
   const commandsByGroups = useMemo(() => {
-    return Object.values(groupBy(commands, 'helpGroupLabel')).reduce<CommandDefinition[][]>(
+    return Object.values(groupBy(allowedCommands, 'helpGroupLabel')).reduce<CommandDefinition[][]>(
       (acc, current) => {
         if (current[0].helpGroupPosition !== undefined) {
           // If it already exists just move it to the end
@@ -149,7 +152,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       },
       []
     );
-  }, [commands]);
+  }, [allowedCommands]);
 
   const getTableItems = useCallback(
     (
@@ -198,6 +201,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                   />
                 </EuiFlexItem>
                 {command.helpGroupLabel !== HELP_GROUPS.supporting.label &&
+                  command.helpHidden !== true &&
                   command.RenderComponent && (
                     <EuiFlexItem grow={false}>
                       <EuiToolTip

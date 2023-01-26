@@ -11,7 +11,7 @@ export const ZOOM_IN = i18n.translate('xpack.sessionView.zoomIn', {
 });
 
 export const ZOOM_FIT = i18n.translate('xpack.sessionView.zoomFit', {
-  defaultMessage: 'Zoom fit',
+  defaultMessage: 'Fit screen',
 });
 
 export const ZOOM_OUT = i18n.translate('xpack.sessionView.zoomOut', {

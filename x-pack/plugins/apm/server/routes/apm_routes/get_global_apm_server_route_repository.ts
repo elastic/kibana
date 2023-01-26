@@ -10,12 +10,13 @@ import type {
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
 import { PickByValue } from 'utility-types';
+import { agentExplorerRouteRepository } from '../agent_explorer/route';
 import { agentKeysRouteRepository } from '../agent_keys/route';
 import { alertsChartPreviewRouteRepository } from '../alerts/route';
-import { dependencisRouteRepository } from '../dependencies/route';
 import { correlationsRouteRepository } from '../correlations/route';
 import { dataViewRouteRepository } from '../data_view/route';
 import { debugTelemetryRoute } from '../debug_telemetry/route';
+import { dependencisRouteRepository } from '../dependencies/route';
 import { environmentsRouteRepository } from '../environments/route';
 import { errorsRouteRepository } from '../errors/route';
 import { eventMetadataRouteRepository } from '../event_metadata/route';
@@ -25,17 +26,19 @@ import { historicalDataRouteRepository } from '../historical_data/route';
 import { infrastructureRouteRepository } from '../infrastructure/route';
 import { latencyDistributionRouteRepository } from '../latency_distribution/route';
 import { metricsRouteRepository } from '../metrics/route';
+import { mobileRouteRepository } from '../mobile/route';
 import { observabilityOverviewRouteRepository } from '../observability_overview/route';
 import { serviceRouteRepository } from '../services/route';
 import { serviceGroupRouteRepository } from '../service_groups/route';
 import { serviceMapRouteRepository } from '../service_map/route';
-import { serviceNodeRouteRepository } from '../service_nodes/route';
 import { agentConfigurationRouteRepository } from '../settings/agent_configuration/route';
 import { anomalyDetectionRouteRepository } from '../settings/anomaly_detection/route';
 import { apmIndicesRouteRepository } from '../settings/apm_indices/route';
 import { customLinkRouteRepository } from '../settings/custom_link/route';
+import { labsRouteRepository } from '../settings/labs/route';
 import { sourceMapsRouteRepository } from '../source_maps/route';
 import { spanLinksRouteRepository } from '../span_links/route';
+import { storageExplorerRouteRepository } from '../storage_explorer/route';
 import { suggestionsRouteRepository } from '../suggestions/route';
 import { timeRangeMetadataRoute } from '../time_range_metadata/route';
 import { traceRouteRepository } from '../traces/route';
@@ -50,7 +53,6 @@ function getTypedGlobalApmServerRouteRepository() {
     ...metricsRouteRepository,
     ...observabilityOverviewRouteRepository,
     ...serviceMapRouteRepository,
-    ...serviceNodeRouteRepository,
     ...serviceRouteRepository,
     ...serviceGroupRouteRepository,
     ...suggestionsRouteRepository,
@@ -69,10 +71,14 @@ function getTypedGlobalApmServerRouteRepository() {
     ...historicalDataRouteRepository,
     ...eventMetadataRouteRepository,
     ...agentKeysRouteRepository,
+    ...storageExplorerRouteRepository,
     ...spanLinksRouteRepository,
     ...infrastructureRouteRepository,
     ...debugTelemetryRoute,
     ...timeRangeMetadataRoute,
+    ...labsRouteRepository,
+    ...agentExplorerRouteRepository,
+    ...mobileRouteRepository,
   };
 
   return repository;

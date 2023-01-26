@@ -6,7 +6,7 @@
  */
 
 import type { Logger, SavedObjectReference } from '@kbn/core/server';
-import type { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../rule_schema';
 import { isMachineLearningParams } from '../utils';
 import { injectExceptionsReferences } from './inject_exceptions_list';
 import { injectDataViewReferences } from './inject_data_view';

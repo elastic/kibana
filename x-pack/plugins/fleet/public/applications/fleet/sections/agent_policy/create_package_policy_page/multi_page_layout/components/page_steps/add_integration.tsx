@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
@@ -19,15 +19,16 @@ import { isVerificationError } from '../../../../../../../../services';
 import type { MultiPageStepLayoutProps } from '../../types';
 import type { PackagePolicyFormState } from '../../../types';
 import type { NewPackagePolicy } from '../../../../../../types';
-import { sendCreatePackagePolicy, useStartServices } from '../../../../../../hooks';
+import { sendCreatePackagePolicy, useStartServices, useUIExtension } from '../../../../../../hooks';
 import type { RequestError } from '../../../../../../hooks';
-import { Error } from '../../../../../../components';
+import { Error, ExtensionWrapper } from '../../../../../../components';
 import { sendGeneratePackagePolicy } from '../../hooks';
 import { CreatePackagePolicyBottomBar, StandaloneModeWarningCallout } from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
 import { validatePackagePolicy, validationHasErrors } from '../../../services';
 import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
+import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
 
 const ExpandableAdvancedSettings: React.FC = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -147,7 +148,11 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     force?: boolean;
   }) => {
     setFormState('LOADING');
-    const result = await sendCreatePackagePolicy({ ...newPackagePolicy, force });
+    const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(newPackagePolicy);
+    const result = await sendCreatePackagePolicy({
+      ...policy,
+      force: forceCreateNeeded || force,
+    });
     setFormState('SUBMITTED');
     return result;
   };
@@ -212,6 +217,55 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     getBasePolicy();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const extensionView = useUIExtension(packageInfo.name ?? '', 'package-policy-create-multi-step');
+  const addIntegrationExtensionView = useMemo(() => {
+    return (
+      extensionView && (
+        <ExtensionWrapper>
+          <extensionView.Component />
+        </ExtensionWrapper>
+      )
+    );
+  }, [extensionView]);
+
+  const content = useMemo(() => {
+    if (packageInfo.name !== 'endpoint') {
+      return (
+        <>
+          <EuiSpacer size={'l'} />
+          <StepConfigurePackagePolicy
+            packageInfo={packageInfo}
+            showOnlyIntegration={integrationInfo?.name}
+            packagePolicy={packagePolicy}
+            updatePackagePolicy={updatePackagePolicy}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
+            noTopRule={true}
+          />
+          {validationResults && (
+            <ExpandableAdvancedSettings>
+              <StepDefinePackagePolicy
+                packageInfo={packageInfo}
+                packagePolicy={packagePolicy}
+                updatePackagePolicy={updatePackagePolicy}
+                validationResults={validationResults!}
+                submitAttempted={formState === 'INVALID'}
+                noAdvancedToggle={true}
+              />
+            </ExpandableAdvancedSettings>
+          )}
+        </>
+      );
+    }
+  }, [
+    formState,
+    integrationInfo?.name,
+    packageInfo,
+    packagePolicy,
+    updatePackagePolicy,
+    validationResults,
+  ]);
+
   if (!agentPolicy) {
     return (
       <AddIntegrationError
@@ -228,28 +282,8 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   return (
     <>
       {isManaged ? null : <StandaloneModeWarningCallout setIsManaged={setIsManaged} />}
-      <EuiSpacer size={'l'} />
-      <StepConfigurePackagePolicy
-        packageInfo={packageInfo}
-        showOnlyIntegration={integrationInfo?.name}
-        packagePolicy={packagePolicy}
-        updatePackagePolicy={updatePackagePolicy}
-        validationResults={validationResults!}
-        submitAttempted={formState === 'INVALID'}
-        noTopRule={true}
-      />
-      {validationResults && (
-        <ExpandableAdvancedSettings>
-          <StepDefinePackagePolicy
-            packageInfo={packageInfo}
-            packagePolicy={packagePolicy}
-            updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-            noAdvancedToggle={true}
-          />
-        </ExpandableAdvancedSettings>
-      )}
+      {content}
+      {addIntegrationExtensionView}
       <NotObscuredByBottomBar />
       <CreatePackagePolicyBottomBar
         cancelClickHandler={isManaged ? onBack : () => setIsManaged(true)}

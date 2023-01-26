@@ -13,16 +13,28 @@ import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/a
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../infra_types';
 import {
+  alertDetailUrlActionVariableDescription,
   alertStateActionVariableDescription,
+  cloudActionVariableDescription,
+  containerActionVariableDescription,
   groupActionVariableDescription,
+  groupByKeysActionVariableDescription,
+  hostActionVariableDescription,
+  labelsActionVariableDescription,
   metricActionVariableDescription,
+  orchestratorActionVariableDescription,
   reasonActionVariableDescription,
+  tagsActionVariableDescription,
   thresholdActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
   viewInAppUrlActionVariableDescription,
 } from '../common/messages';
-import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
+import {
+  getAlertDetailsPageEnabledForApp,
+  oneOfLiterals,
+  validateIsStringElasticsearchJSONFilter,
+} from '../common/utils';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -41,6 +53,8 @@ export async function registerMetricThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
 ) {
+  const config = libs.getAlertDetailsConfig();
+
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),
@@ -93,6 +107,10 @@ export async function registerMetricThresholdRuleType(
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
+        { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
+        ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
+          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          : []),
         { name: 'alertState', description: alertStateActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
@@ -100,8 +118,15 @@ export async function registerMetricThresholdRuleType(
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
         { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
+        { name: 'cloud', description: cloudActionVariableDescription },
+        { name: 'host', description: hostActionVariableDescription },
+        { name: 'container', description: containerActionVariableDescription },
+        { name: 'orchestrator', description: orchestratorActionVariableDescription },
+        { name: 'labels', description: labelsActionVariableDescription },
+        { name: 'tags', description: tagsActionVariableDescription },
       ],
     },
     producer: 'infrastructure',
+    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
   });
 }

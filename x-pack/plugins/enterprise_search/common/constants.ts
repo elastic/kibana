@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { IngestPipelineParams } from './types/connectors';
+
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: 'enterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.overview.productName', {
@@ -42,7 +44,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
 export const ANALYTICS_PLUGIN = {
   ID: 'enterpriseSearchAnalytics',
   NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
-    defaultMessage: 'Analytics',
+    defaultMessage: 'Behavioral Analytics',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.analytics.productDescription', {
     defaultMessage:
@@ -95,6 +97,32 @@ export const WORKPLACE_SEARCH_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
 };
 
+export const SEARCH_EXPERIENCES_PLUGIN = {
+  ID: 'searchExperiences',
+  NAME: i18n.translate('xpack.enterpriseSearch.searchExperiences.productName', {
+    defaultMessage: 'Enterprise Search',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.searchExperiences.navTitle', {
+    defaultMessage: 'Search experiences',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.searchExperiences.productDescription', {
+    defaultMessage: 'Build an intuitive, engaging search experience without reinventing the wheel.',
+  }),
+  URL: '/app/enterprise_search/search_experiences',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  GITHUB_URL: 'https://github.com/elastic/search-ui/',
+  DOCUMENTATION_URL: 'https://docs.elastic.co/search-ui/',
+  ELASTICSEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/elasticsearch',
+  APP_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/app-search',
+  WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
+};
+
+export const ENGINES_PLUGIN = {
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.engines.navTitle', {
+    defaultMessage: 'Engines',
+  }),
+};
+
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
 
 export const JSON_HEADER = {
@@ -109,6 +137,7 @@ export const ENTERPRISE_SEARCH_KIBANA_COOKIE = '_enterprise_search';
 
 export const ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID = 'ent-search-logs';
 export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';
+export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-logs';
 
 export const APP_SEARCH_URL = '/app/enterprise_search/app_search';
 export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/enterprise_search/elasticsearch';
@@ -117,3 +146,11 @@ export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
 export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;
 
 export const ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE = 'elastic-crawler';
+
+export const DEFAULT_PIPELINE_NAME = 'ent-search-generic-ingestion';
+export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
+  extract_binary_content: true,
+  name: DEFAULT_PIPELINE_NAME,
+  reduce_whitespace: true,
+  run_ml_inference: false,
+};

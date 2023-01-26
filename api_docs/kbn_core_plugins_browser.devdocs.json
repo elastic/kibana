@@ -1,0 +1,357 @@
+{
+  "id": "@kbn/core-plugins-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-plugins-browser",
+        "id": "def-common.Plugin",
+        "type": "Interface",
+        "tags": [],
+        "label": "Plugin",
+        "description": [
+          "\nThe interface that should be returned by a `PluginInitializer`.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
+          "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
+        ],
+        "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-browser",
+            "id": "def-common.Plugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<TPluginsStart, TStart>, plugins: TPluginsSetup) => TSetup"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-plugins-browser",
+                "id": "def-common.Plugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<TPluginsStart, TStart>"
+                ],
+                "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-plugins-browser",
+                "id": "def-common.Plugin.setup.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "TPluginsSetup"
+                ],
+                "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-browser",
+            "id": "def-common.Plugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
+              ", plugins: TPluginsStart) => TStart"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-plugins-browser",
+                "id": "def-common.Plugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-plugins-browser",
+                "id": "def-common.Plugin.start.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "TPluginsStart"
+                ],
+                "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-browser",
+            "id": "def-common.Plugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-browser",
+        "id": "def-common.PluginInitializerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginInitializerContext",
+        "description": [
+          "\nThe available core services passed to a `PluginInitializer`\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.PluginInitializerContext",
+            "text": "PluginInitializerContext"
+          },
+          "<ConfigSchema>"
+        ],
+        "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-browser",
+            "id": "def-common.PluginInitializerContext.opaqueId",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "opaqueId",
+            "description": [
+              "\nA symbol used to identify this plugin in the system. Needed when registering handlers or context providers."
+            ],
+            "signature": [
+              "symbol"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-browser",
+            "id": "def-common.PluginInitializerContext.env",
+            "type": "Object",
+            "tags": [],
+            "label": "env",
+            "description": [],
+            "signature": [
+              "{ mode: Readonly<",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "common",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-common.EnvironmentMode",
+                "text": "EnvironmentMode"
+              },
+              ">; packageInfo: Readonly<",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "common",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-common.PackageInfo",
+                "text": "PackageInfo"
+              },
+              ">; }"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-browser",
+            "id": "def-common.PluginInitializerContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.LoggerFactory",
+                "text": "LoggerFactory"
+              }
+            ],
+            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-browser",
+            "id": "def-common.PluginInitializerContext.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "{ get: <T extends object = ConfigSchema>() => T; }"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-plugins-browser",
+        "id": "def-common.PluginInitializer",
+        "type": "Type",
+        "tags": [],
+        "label": "PluginInitializer",
+        "description": [
+          "\nThe `plugin` export at the root of a plugin's `public` directory should conform\nto this interface.\n"
+        ],
+        "signature": [
+          "(core: ",
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.PluginInitializerContext",
+            "text": "PluginInitializerContext"
+          },
+          "<object>) => ",
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
+          "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
+        ],
+        "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-browser",
+            "id": "def-common.PluginInitializer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-browser",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsBrowserPluginApi",
+                "section": "def-common.PluginInitializerContext",
+                "text": "PluginInitializerContext"
+              },
+              "<object>"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

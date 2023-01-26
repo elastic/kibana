@@ -307,6 +307,8 @@ export interface DataState {
     data: SafeResolverEvent | null;
   };
 
+  readonly detectedBounds?: TimeFilters;
+
   readonly tree?: {
     /**
      * The parameters passed from the resolver properties
@@ -670,8 +672,8 @@ export interface IsometricTaxiLayout {
  * Defines the type for bounding a search by a time box.
  */
 export interface TimeRange {
-  from: string;
-  to: string;
+  from: string | number;
+  to: string | number;
 }
 
 /**
@@ -690,7 +692,7 @@ export interface DataAccessLayer {
     indexPatterns,
   }: {
     entityID: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<ResolverRelatedEvents>;
 
@@ -708,7 +710,7 @@ export interface DataAccessLayer {
     entityID: string;
     category: string;
     after?: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<ResolverPaginatedEvents>;
 
@@ -723,7 +725,7 @@ export interface DataAccessLayer {
     limit,
   }: {
     ids: string[];
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
     limit: number;
   }): Promise<SafeResolverEvent[]>;
@@ -745,7 +747,7 @@ export interface DataAccessLayer {
     eventTimestamp: string;
     eventID?: string | number;
     winlogRecordID: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<SafeResolverEvent | null>;
 
@@ -762,7 +764,7 @@ export interface DataAccessLayer {
   }: {
     dataId: string;
     schema: ResolverSchema;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indices: string[];
     ancestors: number;
     descendants: number;

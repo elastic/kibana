@@ -5,60 +5,57 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { flow } from 'lodash';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import { uniqBy, isEmpty } from 'lodash';
+import type { UserProfile } from '@kbn/security-plugin/common';
+import type { IBasePath } from '@kbn/core-http-browser';
+import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
-import {
+import type {
   ActionConnector,
   CaseFullExternalService,
   CaseResponse,
   CaseUserActionsResponse,
   CommentResponse,
-  CommentResponseAlertsType,
-  CommentType,
-  ConnectorMappingsAttributes,
-  CommentAttributes,
-  CommentRequestUserType,
-  CommentRequestAlertType,
-  CommentRequestActionsType,
-  ActionTypes,
-  CaseStatuses,
   User,
   CaseAttributes,
+  CaseAssignees,
+  ConnectorMappingsAttributes,
+  CaseField,
+  ThirdPartyField,
 } from '../../../common/api';
-import { CasesClientGetAlertsResponse } from '../alerts/types';
-import {
-  BasicParams,
-  EntityInformation,
-  ExternalServiceComment,
-  ExternalServiceParams,
-  Incident,
-  MapIncident,
-  PipedField,
-  PrepareFieldsForTransformArgs,
-  PushToServiceApiParams,
-  Transformer,
-  TransformerArgs,
-  TransformFieldsArgs,
-} from './types';
+import { CommentType, ActionTypes, CaseStatuses } from '../../../common/api';
+import type { CasesClientGetAlertsResponse } from '../alerts/types';
+import type { ExternalServiceComment, ExternalServiceIncident } from './types';
 import { getAlertIds } from '../utils';
-import { CasesConnectorsMap } from '../../connectors';
+import type { CasesConnectorsMap } from '../../connectors';
+import { getCaseViewPath } from '../../common/utils';
+import * as i18n from './translations';
 
 interface CreateIncidentArgs {
-  actionsClient: ActionsClient;
   theCase: CaseResponse;
   userActions: CaseUserActionsResponse;
   connector: ActionConnector;
-  mappings: ConnectorMappingsAttributes[];
   alerts: CasesClientGetAlertsResponse;
   casesConnectors: CasesConnectorsMap;
+  spaceId: string;
+  userProfiles?: Map<string, UserProfile>;
+  publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
+
+export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undefined => {
+  if (assignees == null) {
+    return;
+  }
+
+  return uniqBy(assignees, 'uid');
+};
+
+type LatestPushInfo = { index: number; pushedInfo: CaseFullExternalService } | null;
 
 export const getLatestPushInfo = (
   connectorId: string,
   userActions: CaseUserActionsResponse
-): { index: number; pushedInfo: CaseFullExternalService } | null => {
+): LatestPushInfo => {
   for (const [index, action] of [...userActions].reverse().entries()) {
     if (isPushedUserAction(action) && connectorId === action.payload.externalService.connector_id) {
       try {
@@ -129,19 +126,35 @@ const getAlertsInfo = (
   };
 };
 
-const addAlertMessage = (
-  caseId: string,
-  caseComments: CaseResponse['comments'],
-  comments: ExternalServiceComment[]
-): ExternalServiceComment[] => {
-  const { totalAlerts, hasUnpushedAlertComments } = getAlertsInfo(caseComments);
+const addAlertMessage = (params: {
+  theCase: CaseResponse;
+  externalServiceComments: ExternalServiceComment[];
+  spaceId: string;
+  publicBaseUrl?: IBasePath['publicBaseUrl'];
+}): ExternalServiceComment[] => {
+  const { theCase, externalServiceComments, spaceId, publicBaseUrl } = params;
+  const { totalAlerts, hasUnpushedAlertComments } = getAlertsInfo(theCase.comments);
 
-  const newComments = [...comments];
+  const newComments = [...externalServiceComments];
 
   if (hasUnpushedAlertComments) {
+    let comment = `Elastic Alerts attached to the case: ${totalAlerts}`;
+
+    if (publicBaseUrl) {
+      const alertsTableUrl = getCaseViewPath({
+        publicBaseUrl,
+        spaceId,
+        caseId: theCase.id,
+        owner: theCase.owner,
+        tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+      });
+
+      comment = `${comment}\n\n${i18n.VIEW_ALERTS_IN_KIBANA}\n${i18n.ALERTS_URL(alertsTableUrl)}`;
+    }
+
     newComments.push({
-      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
-      commentId: `${caseId}-total-alerts`,
+      comment,
+      commentId: `${theCase.id}-total-alerts`,
     });
   }
 
@@ -149,65 +162,87 @@ const addAlertMessage = (
 };
 
 export const createIncident = async ({
-  actionsClient,
   theCase,
   userActions,
   connector,
-  mappings,
   alerts,
   casesConnectors,
-}: CreateIncidentArgs): Promise<MapIncident> => {
-  const {
-    comments: caseComments,
-    title,
-    description,
-    created_at: createdAt,
-    created_by: createdBy,
-    updated_at: updatedAt,
-    updated_by: updatedBy,
-  } = theCase;
-
-  const params = { title, description, createdAt, createdBy, updatedAt, updatedBy };
+  userProfiles,
+  spaceId,
+  publicBaseUrl,
+}: CreateIncidentArgs): Promise<ExternalServiceIncident> => {
   const latestPushInfo = getLatestPushInfo(connector.id, userActions);
   const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
-  const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
-  let currentIncident: ExternalServiceParams | undefined;
 
   const externalServiceFields =
     casesConnectors.get(connector.actionTypeId)?.format(theCase, alerts) ?? {};
 
-  let incident: Partial<PushToServiceApiParams['incident']> = { ...externalServiceFields };
+  const connectorMappings = casesConnectors.get(connector.actionTypeId)?.getMapping() ?? [];
+  const descriptionWithKibanaInformation = addKibanaInformationToDescription(
+    theCase,
+    spaceId,
+    userProfiles,
+    publicBaseUrl
+  );
 
-  if (externalId) {
-    try {
-      currentIncident = (await actionsClient.execute({
-        actionId: connector.id,
-        params: {
-          subAction: 'getIncident',
-          subActionParams: { externalId },
-        },
-      })) as unknown as ExternalServiceParams | undefined;
-    } catch (ex) {
-      throw new Error(
-        `Retrieving Incident by id ${externalId} from ${connector.actionTypeId} failed with exception: ${ex}`
-      );
+  const comments = formatComments({
+    userActions,
+    latestPushInfo,
+    theCase,
+    userProfiles,
+    spaceId,
+    publicBaseUrl,
+  });
+
+  const mappedIncident = mapCaseFieldsToExternalSystemFields(
+    { title: theCase.title, description: descriptionWithKibanaInformation },
+    connectorMappings
+  );
+
+  const incident = {
+    ...mappedIncident,
+    ...externalServiceFields,
+    externalId,
+  };
+  return { incident, comments };
+};
+
+export const mapCaseFieldsToExternalSystemFields = (
+  caseFields: Record<Exclude<CaseField, 'comments' | 'tags'>, unknown>,
+  mapping: ConnectorMappingsAttributes[]
+): Record<ThirdPartyField, unknown> => {
+  const mappedCaseFields: Record<ThirdPartyField, unknown> = {};
+
+  for (const caseFieldKey of Object.keys(caseFields) as Array<
+    Exclude<CaseField, 'comments' | 'tags'>
+  >) {
+    const mapDefinition = mapping.find(
+      (mappingEntry) => mappingEntry.source === caseFieldKey && mappingEntry.target !== 'not_mapped'
+    );
+
+    if (mapDefinition) {
+      mappedCaseFields[mapDefinition.target] = caseFields[caseFieldKey];
     }
   }
 
-  const fields = prepareFieldsForTransformation({
-    defaultPipes,
-    mappings,
-    params,
-  });
+  return mappedCaseFields;
+};
 
-  const transformedFields = transformFields<BasicParams, ExternalServiceParams, Incident>({
-    params,
-    fields,
-    currentIncident,
-  });
-
-  incident = { ...incident, ...transformedFields, externalId };
-
+export const formatComments = ({
+  userActions,
+  latestPushInfo,
+  theCase,
+  spaceId,
+  userProfiles,
+  publicBaseUrl,
+}: {
+  theCase: CaseResponse;
+  latestPushInfo: LatestPushInfo;
+  userActions: CaseUserActionsResponse;
+  spaceId: string;
+  userProfiles?: Map<string, UserProfile>;
+  publicBaseUrl?: IBasePath['publicBaseUrl'];
+}): ExternalServiceComment[] => {
   const commentsIdsToBeUpdated = new Set(
     userActions
       .slice(latestPushInfo?.index ?? 0)
@@ -215,7 +250,7 @@ export const createIncident = async ({
       .map((action) => action.comment_id)
   );
 
-  const commentsToBeUpdated = caseComments?.filter(
+  const commentsToBeUpdated = theCase.comments?.filter(
     (comment) =>
       // We push only user's comments
       (comment.type === CommentType.user || comment.type === CommentType.actions) &&
@@ -225,188 +260,110 @@ export const createIncident = async ({
   let comments: ExternalServiceComment[] = [];
 
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
-    const commentsMapping = mappings.find((m) => m.source === 'comments');
-    if (commentsMapping?.action_type !== 'nothing') {
-      comments = transformComments(commentsToBeUpdated, ['informationAdded']);
+    comments = addKibanaInformationToComments(commentsToBeUpdated, userProfiles);
+  }
+
+  comments = addAlertMessage({
+    theCase,
+    externalServiceComments: comments,
+    spaceId,
+    publicBaseUrl,
+  });
+  return comments;
+};
+
+export const addKibanaInformationToDescription = (
+  theCase: CaseResponse,
+  spaceId: string,
+  userProfiles?: Map<string, UserProfile>,
+  publicBaseUrl?: IBasePath['publicBaseUrl']
+) => {
+  const addedBy = i18n.ADDED_BY(
+    getEntity(
+      {
+        createdBy: theCase.created_by,
+        updatedBy: theCase.updated_by,
+      },
+      userProfiles
+    )
+  );
+
+  const descriptionWithKibanaInformation = `${theCase.description}\n\n${addedBy}.`;
+
+  if (!publicBaseUrl) {
+    return descriptionWithKibanaInformation;
+  }
+
+  const caseUrl = getCaseViewPath({
+    publicBaseUrl,
+    spaceId,
+    caseId: theCase.id,
+    owner: theCase.owner,
+  });
+
+  return `${descriptionWithKibanaInformation}\n${i18n.VIEW_IN_KIBANA}.\n${i18n.CASE_URL(caseUrl)}`;
+};
+
+const addKibanaInformationToComments = (
+  comments: CaseResponse['comments'] = [],
+  userProfiles?: Map<string, UserProfile>
+): ExternalServiceComment[] =>
+  comments.map((theComment) => {
+    const addedBy = i18n.ADDED_BY(
+      getEntity(
+        {
+          createdBy: theComment.created_by,
+          updatedBy: theComment.updated_by,
+        },
+        userProfiles
+      )
+    );
+
+    return {
+      comment: `${getCommentContent(theComment)}\n\n${addedBy}.`,
+      commentId: theComment.id,
+    };
+  });
+
+export const getEntity = (
+  entity: { createdBy: CaseResponse['created_by']; updatedBy: CaseResponse['updated_by'] },
+  userProfiles?: Map<string, UserProfile>
+): string => {
+  return (
+    getDisplayName(entity.updatedBy, userProfiles) ??
+    getDisplayName(entity.createdBy, userProfiles) ??
+    i18n.UNKNOWN
+  );
+};
+
+const getDisplayName = (
+  user: User | null | undefined,
+  userProfiles?: Map<string, UserProfile>
+): string | undefined => {
+  if (user == null) {
+    return;
+  }
+
+  if (user.profile_uid != null) {
+    const updatedByProfile = userProfiles?.get(user.profile_uid);
+
+    if (updatedByProfile != null) {
+      return (
+        validOrUndefined(updatedByProfile.user.full_name) ??
+        validOrUndefined(updatedByProfile.user.username)
+      );
     }
   }
 
-  comments = addAlertMessage(theCase.id, caseComments, comments);
-
-  return { incident, comments };
+  return validOrUndefined(user.full_name) ?? validOrUndefined(user.username) ?? i18n.UNKNOWN;
 };
 
-export const getEntity = (entity: EntityInformation): string =>
-  (entity.updatedBy != null
-    ? entity.updatedBy.full_name
-      ? entity.updatedBy.full_name
-      : entity.updatedBy.username
-    : entity.createdBy != null
-    ? entity.createdBy.full_name
-      ? entity.createdBy.full_name
-      : entity.createdBy.username
-    : '') ?? '';
-
-export const FIELD_INFORMATION = (
-  mode: string,
-  date: string | undefined,
-  user: string | undefined
-) => {
-  switch (mode) {
-    case 'create':
-      return i18n.translate('xpack.cases.connectors.cases.externalIncidentCreated', {
-        values: { date, user },
-        defaultMessage: '(created at {date} by {user})',
-      });
-    case 'update':
-      return i18n.translate('xpack.cases.connectors.cases.externalIncidentUpdated', {
-        values: { date, user },
-        defaultMessage: '(updated at {date} by {user})',
-      });
-    case 'add':
-      return i18n.translate('xpack.cases.connectors.cases.externalIncidentAdded', {
-        values: { date, user },
-        defaultMessage: '(added at {date} by {user})',
-      });
-    default:
-      return i18n.translate('xpack.cases.connectors.cases.externalIncidentDefault', {
-        values: { date, user },
-        defaultMessage: '(created at {date} by {user})',
-      });
+const validOrUndefined = (value: string | undefined | null): string | undefined => {
+  if (value == null || isEmpty(value)) {
+    return;
   }
-};
 
-export const transformers: Record<string, Transformer> = {
-  informationCreated: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => ({
-    value: `${value} ${FIELD_INFORMATION('create', date, user)}`,
-    ...rest,
-  }),
-  informationUpdated: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => ({
-    value: `${value} ${FIELD_INFORMATION('update', date, user)}`,
-    ...rest,
-  }),
-  informationAdded: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => ({
-    value: `${value} ${FIELD_INFORMATION('add', date, user)}`,
-    ...rest,
-  }),
-  append: ({ value, previousValue, ...rest }: TransformerArgs): TransformerArgs => ({
-    value: previousValue ? `${previousValue} \r\n${value}` : `${value}`,
-    ...rest,
-  }),
-};
-
-export const prepareFieldsForTransformation = ({
-  defaultPipes,
-  mappings,
-  params,
-}: PrepareFieldsForTransformArgs): PipedField[] =>
-  mappings.reduce(
-    (acc: PipedField[], mapping) =>
-      mapping != null &&
-      mapping.target != null &&
-      mapping.target !== 'not_mapped' &&
-      mapping.action_type !== 'nothing' &&
-      mapping.source !== 'comments'
-        ? [
-            ...acc,
-            {
-              key: mapping.target,
-              value: params[mapping.source] ?? '',
-              actionType: mapping.action_type,
-              pipes:
-                // Do not transform titles
-                mapping.source !== 'title'
-                  ? mapping.action_type === 'append'
-                    ? [...defaultPipes, 'append']
-                    : defaultPipes
-                  : [],
-            },
-          ]
-        : acc,
-    []
-  );
-
-export const transformFields = <
-  P extends EntityInformation,
-  S extends Record<string, unknown>,
-  R extends {}
->({
-  params,
-  fields,
-  currentIncident,
-}: TransformFieldsArgs<P, S>): R => {
-  return fields.reduce((prev, cur) => {
-    const transform = flow(...cur.pipes.map((p) => transformers[p]));
-    return {
-      ...prev,
-      [cur.key]: transform({
-        value: cur.value,
-        date: params.updatedAt ?? params.createdAt,
-        user: getEntity(params),
-        previousValue: currentIncident ? currentIncident[cur.key] : '',
-      }).value,
-    };
-  }, {} as R);
-};
-
-export const transformComments = (
-  comments: CaseResponse['comments'] = [],
-  pipes: string[]
-): ExternalServiceComment[] =>
-  comments.map((c) => ({
-    comment: flow(...pipes.map((p) => transformers[p]))({
-      value: getCommentContent(c),
-      date: c.updated_at ?? c.created_at,
-      user: getEntity({
-        createdAt: c.created_at,
-        createdBy: c.created_by,
-        updatedAt: c.updated_at,
-        updatedBy: c.updated_by,
-      }),
-    }).value,
-    commentId: c.id,
-  }));
-
-export const isCommentAlertType = (
-  comment: CommentResponse
-): comment is CommentResponseAlertsType => comment.type === CommentType.alert;
-
-export const getCommentContextFromAttributes = (
-  attributes: CommentAttributes
-): CommentRequestUserType | CommentRequestAlertType | CommentRequestActionsType => {
-  const owner = attributes.owner;
-  switch (attributes.type) {
-    case CommentType.user:
-      return {
-        type: CommentType.user,
-        comment: attributes.comment,
-        owner,
-      };
-    case CommentType.alert:
-      return {
-        type: attributes.type,
-        alertId: attributes.alertId,
-        index: attributes.index,
-        rule: attributes.rule,
-        owner,
-      };
-    case CommentType.actions:
-      return {
-        type: attributes.type,
-        comment: attributes.comment,
-        actions: {
-          targets: attributes.actions.targets,
-          type: attributes.actions.type,
-        },
-        owner,
-      };
-    default:
-      return {
-        type: CommentType.user,
-        comment: '',
-        owner,
-      };
-  }
+  return value;
 };
 
 export const getClosedInfoForUpdate = ({

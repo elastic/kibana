@@ -6,39 +6,30 @@
  */
 
 import './index.scss';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiDatePicker,
-  EuiFormRow,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiButtonGroup,
-  EuiFormLabel,
-  EuiFormControlLayout,
-  EuiText,
-  transparentize,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import moment from 'moment';
-import {
-  EventAnnotationConfig,
-  PointInTimeEventAnnotationConfig,
-  RangeEventAnnotationConfig,
-} from '@kbn/event-annotation-plugin/common/types';
-import { pick } from 'lodash';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { search } from '@kbn/data-plugin/public';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
+  isQueryAnnotationConfig,
   isRangeAnnotationConfig,
-  isManualPointAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
-import Color from 'color';
-import { getDataLayers } from '../../visualization_helpers';
+import {
+  EventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
+  QueryPointEventAnnotationConfig,
+} from '@kbn/event-annotation-plugin/common';
+import moment from 'moment';
+import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
+import {
+  FieldOption,
+  FieldOptionValue,
+  FieldPicker,
+} from '../../../../shared_components/field_picker';
 import { FormatFactory } from '../../../../../common';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../../utils';
 import {
   DimensionEditorSection,
   NameInput,
@@ -51,78 +42,12 @@ import { IconSelectSetting, TextDecorationSetting } from '../shared/marker_decor
 import { LineStyleSettings } from '../shared/line_style_settings';
 import { updateLayer } from '..';
 import { annotationsIconSet } from './icon_set';
-import type { FramePublicAPI, VisualizationDimensionEditorProps } from '../../../../types';
-import { State, XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from '../../types';
-
-export const toRangeAnnotationColor = (color = defaultAnnotationColor) => {
-  return new Color(transparentize(color, 0.1)).hexa();
-};
-
-export const toLineAnnotationColor = (color = defaultAnnotationRangeColor) => {
-  return new Color(transparentize(color, 1)).hex();
-};
-
-export const getEndTimestamp = (
-  datatableUtilities: DatatableUtilitiesService,
-  startTime: string,
-  { activeData, dateRange }: FramePublicAPI,
-  dataLayers: XYDataLayerConfig[]
-) => {
-  const startTimeNumber = moment(startTime).valueOf();
-  const dateRangeFraction =
-    (moment(dateRange.toDate).valueOf() - moment(dateRange.fromDate).valueOf()) * 0.1;
-  const fallbackValue = moment(startTimeNumber + dateRangeFraction).toISOString();
-  const dataLayersId = dataLayers.map(({ layerId }) => layerId);
-  if (
-    !dataLayersId.length ||
-    !activeData ||
-    Object.entries(activeData)
-      .filter(([key]) => dataLayersId.includes(key))
-      .every(([, { rows }]) => !rows || !rows.length)
-  ) {
-    return fallbackValue;
-  }
-  const xColumn = activeData?.[dataLayersId[0]].columns.find(
-    (column) => column.id === dataLayers[0].xAccessor
-  );
-  if (!xColumn) {
-    return fallbackValue;
-  }
-
-  const dateInterval = datatableUtilities.getDateHistogramMeta(xColumn)?.interval;
-  if (!dateInterval) return fallbackValue;
-  const intervalDuration = search.aggs.parseInterval(dateInterval);
-  if (!intervalDuration) return fallbackValue;
-  return moment(startTimeNumber + 3 * intervalDuration.as('milliseconds')).toISOString();
-};
-
-const sanitizeProperties = (annotation: EventAnnotationConfig) => {
-  if (isRangeAnnotationConfig(annotation)) {
-    const rangeAnnotation: RangeEventAnnotationConfig = pick(annotation, [
-      'label',
-      'key',
-      'id',
-      'isHidden',
-      'color',
-      'outside',
-    ]);
-    return rangeAnnotation;
-  } else if (isManualPointAnnotationConfig(annotation)) {
-    const lineAnnotation: PointInTimeEventAnnotationConfig = pick(annotation, [
-      'id',
-      'label',
-      'key',
-      'isHidden',
-      'lineStyle',
-      'lineWidth',
-      'color',
-      'icon',
-      'textVisibility',
-    ]);
-    return lineAnnotation;
-  }
-  return annotation; // todo: sanitize for the query annotations here
-};
+import type { VisualizationDimensionEditorProps } from '../../../../types';
+import type { State, XYState, XYAnnotationLayerConfig } from '../../types';
+import { ConfigPanelManualAnnotation } from './manual_annotation_panel';
+import { ConfigPanelQueryAnnotation } from './query_annotation_panel';
+import { TooltipSection } from './tooltip_annotation_panel';
+import { sanitizeProperties, toLineAnnotationColor } from './helpers';
 
 export const AnnotationsPanel = (
   props: VisualizationDimensionEditorProps<State> & {
@@ -133,6 +58,7 @@ export const AnnotationsPanel = (
 ) => {
   const { state, setState, layerId, accessor, frame } = props;
   const isHorizontal = isHorizontalChart(state.layers);
+  const { hasFieldData } = useExistingFieldsReader();
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: state,
@@ -146,19 +72,24 @@ export const AnnotationsPanel = (
 
   const currentAnnotation = localLayer.annotations?.find((c) => c.id === accessor);
 
+  const isQueryBased = isQueryAnnotationConfig(currentAnnotation);
   const isRange = isRangeAnnotationConfig(currentAnnotation);
-  const isManualPoint = isManualPointAnnotationConfig(currentAnnotation);
+  const [queryInputShouldOpen, setQueryInputShouldOpen] = React.useState(false);
+  useEffect(() => {
+    setQueryInputShouldOpen(!isQueryBased);
+  }, [isQueryBased]);
 
   const setAnnotations = useCallback(
-    (annotation) => {
+    <T extends EventAnnotationConfig>(annotation: Partial<T> | undefined) => {
       if (annotation == null) {
         return;
       }
       const newConfigs = [...(localLayer.annotations || [])];
       const existingIndex = newConfigs.findIndex((c) => c.id === accessor);
       if (existingIndex !== -1) {
+        const existingConfig = newConfigs[existingIndex];
         newConfigs[existingIndex] = sanitizeProperties({
-          ...newConfigs[existingIndex],
+          ...existingConfig,
           ...annotation,
         });
       } else {
@@ -178,99 +109,97 @@ export const AnnotationsPanel = (
           defaultMessage: 'Placement',
         })}
       >
-        {isRange ? (
-          <>
-            <ConfigPanelRangeDatePicker
-              dataTestSubj="lns-xyAnnotation-fromTime"
-              prependLabel={i18n.translate('xpack.lens.xyChart.annotationDate.from', {
-                defaultMessage: 'From',
-              })}
-              value={moment(currentAnnotation?.key.timestamp)}
-              onChange={(date) => {
-                if (date) {
-                  const currentEndTime = moment(currentAnnotation?.key.endTimestamp).valueOf();
-                  if (currentEndTime < date.valueOf()) {
-                    const currentStartTime = moment(currentAnnotation?.key.timestamp).valueOf();
-                    const dif = currentEndTime - currentStartTime;
-                    setAnnotations({
-                      key: {
-                        ...(currentAnnotation?.key || { type: 'range' }),
-                        timestamp: date.toISOString(),
-                        endTimestamp: moment(date.valueOf() + dif).toISOString(),
-                      },
-                    });
-                  } else {
-                    setAnnotations({
-                      key: {
-                        ...(currentAnnotation?.key || { type: 'range' }),
-                        timestamp: date.toISOString(),
-                      },
-                    });
-                  }
-                }
-              }}
-              label={i18n.translate('xpack.lens.xyChart.annotationDate', {
-                defaultMessage: 'Annotation date',
-              })}
-            />
-            <ConfigPanelRangeDatePicker
-              dataTestSubj="lns-xyAnnotation-toTime"
-              prependLabel={i18n.translate('xpack.lens.xyChart.annotationDate.to', {
-                defaultMessage: 'To',
-              })}
-              value={moment(currentAnnotation?.key.endTimestamp)}
-              onChange={(date) => {
-                if (date) {
-                  const currentStartTime = moment(currentAnnotation?.key.timestamp).valueOf();
-                  if (currentStartTime > date.valueOf()) {
-                    const currentEndTime = moment(currentAnnotation?.key.endTimestamp).valueOf();
-                    const dif = currentEndTime - currentStartTime;
-                    setAnnotations({
-                      key: {
-                        ...(currentAnnotation?.key || { type: 'range' }),
-                        endTimestamp: date.toISOString(),
-                        timestamp: moment(date.valueOf() - dif).toISOString(),
-                      },
-                    });
-                  } else {
-                    setAnnotations({
-                      key: {
-                        ...(currentAnnotation?.key || { type: 'range' }),
-                        endTimestamp: date.toISOString(),
-                      },
-                    });
-                  }
-                }
-              }}
-            />
-          </>
-        ) : isManualPoint ? (
-          <ConfigPanelRangeDatePicker
-            dataTestSubj="lns-xyAnnotation-time"
-            label={i18n.translate('xpack.lens.xyChart.annotationDate', {
-              defaultMessage: 'Annotation date',
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.xyChart.annotationDate.placementType', {
+            defaultMessage: 'Placement type',
+          })}
+          display="rowCompressed"
+          fullWidth
+        >
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.lens.xyChart.annotationDate.placementType', {
+              defaultMessage: 'Placement type',
             })}
-            value={moment(currentAnnotation?.key.timestamp)}
-            onChange={(date) => {
-              if (date) {
-                setAnnotations({
-                  key: {
-                    ...(currentAnnotation?.key || { type: 'point_in_time' }),
-                    timestamp: date.toISOString(),
-                  },
+            data-test-subj="lns-xyAnnotation-placementType"
+            name="placementType"
+            buttonSize="compressed"
+            options={[
+              {
+                id: `lens_xyChart_annotation_manual`,
+                label: i18n.translate('xpack.lens.xyChart.annotation.manual', {
+                  defaultMessage: 'Static date',
+                }),
+                'data-test-subj': 'lnsXY_annotation_manual',
+              },
+              {
+                id: `lens_xyChart_annotation_query`,
+                label: i18n.translate('xpack.lens.xyChart.annotation.query', {
+                  defaultMessage: 'Custom query',
+                }),
+                'data-test-subj': 'lnsXY_annotation_query',
+              },
+            ]}
+            idSelected={`lens_xyChart_annotation_${currentAnnotation?.type}`}
+            onChange={(id) => {
+              const typeFromId = id.replace(
+                'lens_xyChart_annotation_',
+                ''
+              ) as EventAnnotationConfig['type'];
+              if (currentAnnotation?.type === typeFromId) {
+                return;
+              }
+              if (typeFromId === 'query') {
+                const currentIndexPattern =
+                  frame.dataViews.indexPatterns[localLayer.indexPatternId];
+                // If coming from a range type, it requires some additional resets
+                const additionalRangeResets = isRangeAnnotationConfig(currentAnnotation)
+                  ? {
+                      label:
+                        currentAnnotation.label === defaultRangeAnnotationLabel
+                          ? defaultAnnotationLabel
+                          : currentAnnotation.label,
+                      color: toLineAnnotationColor(currentAnnotation.color),
+                    }
+                  : {};
+                return setAnnotations({
+                  type: typeFromId,
+                  timeField:
+                    (currentIndexPattern.timeFieldName ||
+                      // fallback to the first avaiable date field in the dataView
+                      currentIndexPattern.fields.find(({ type: fieldType }) => fieldType === 'date')
+                        ?.displayName) ??
+                    '',
+                  key: { type: 'point_in_time' },
+                  ...additionalRangeResets,
                 });
               }
+              // From query to manual annotation
+              return setAnnotations<PointInTimeEventAnnotationConfig>({
+                type: typeFromId,
+                key: { type: 'point_in_time', timestamp: moment().toISOString() },
+              });
             }}
+            isFullWidth
           />
-        ) : null}
-
-        <ConfigPanelApplyAsRangeSwitch
-          annotation={currentAnnotation}
-          datatableUtilities={props.datatableUtilities}
-          onChange={setAnnotations}
-          frame={frame}
-          state={state}
-        />
+        </EuiFormRow>
+        {isQueryBased ? (
+          <ConfigPanelQueryAnnotation
+            annotation={currentAnnotation}
+            onChange={setAnnotations}
+            frame={frame}
+            state={state}
+            layer={localLayer}
+            queryInputShouldOpen={queryInputShouldOpen}
+          />
+        ) : (
+          <ConfigPanelManualAnnotation
+            annotation={currentAnnotation}
+            onChange={setAnnotations}
+            datatableUtilities={props.datatableUtilities}
+            frame={frame}
+            state={state}
+          />
+        )}
       </DimensionEditorSection>
       <DimensionEditorSection
         title={i18n.translate('xpack.lens.xyChart.appearance', {
@@ -285,33 +214,87 @@ export const AnnotationsPanel = (
           }}
         />
         {!isRange && (
-          <IconSelectSetting
-            setConfig={setAnnotations}
-            defaultIcon="triangle"
-            currentConfig={{
-              axisMode: 'bottom',
-              ...currentAnnotation,
-            }}
-            customIconSet={annotationsIconSet}
-          />
-        )}
-        {!isRange && (
-          <TextDecorationSetting
-            setConfig={setAnnotations}
-            currentConfig={{
-              axisMode: 'bottom',
-              ...currentAnnotation,
-            }}
-          />
-        )}
-        {!isRange && (
-          <LineStyleSettings
-            isHorizontal={isHorizontal}
-            setConfig={setAnnotations}
-            currentConfig={currentAnnotation}
-          />
-        )}
+          <>
+            <IconSelectSetting
+              setConfig={setAnnotations}
+              defaultIcon="triangle"
+              currentConfig={{
+                axisMode: 'bottom',
+                ...currentAnnotation,
+              }}
+              customIconSet={annotationsIconSet}
+            />
+            <TextDecorationSetting
+              setConfig={setAnnotations}
+              currentConfig={{
+                axisMode: 'bottom',
+                ...currentAnnotation,
+              }}
+              isQueryBased={isQueryBased}
+            >
+              {(textDecorationSelected) => {
+                if (textDecorationSelected !== 'field') {
+                  return null;
+                }
+                const currentIndexPattern =
+                  frame.dataViews.indexPatterns[localLayer.indexPatternId];
+                const options = currentIndexPattern.fields
+                  .filter(({ displayName, type }) => displayName && type !== 'document')
+                  .map(
+                    (field) =>
+                      ({
+                        label: field.displayName,
+                        value: {
+                          type: 'field',
+                          field: field.name,
+                          dataType: field.type,
+                        },
+                        exists: hasFieldData(currentIndexPattern.id, field.name),
+                        compatible: true,
+                        'data-test-subj': `lnsXY-annotation-fieldOption-${field.name}`,
+                      } as FieldOption<FieldOptionValue>)
+                  );
+                const selectedField = (currentAnnotation as QueryPointEventAnnotationConfig)
+                  .textField;
 
+                const fieldIsValid = selectedField
+                  ? Boolean(currentIndexPattern.getFieldByName(selectedField))
+                  : true;
+                return (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <FieldPicker
+                      selectedOptions={
+                        selectedField
+                          ? [
+                              {
+                                label: selectedField,
+                                value: { type: 'field', field: selectedField },
+                              },
+                            ]
+                          : []
+                      }
+                      options={options}
+                      onChoose={function (choice: FieldOptionValue | undefined): void {
+                        if (choice) {
+                          setAnnotations({ textField: choice.field, textVisibility: true });
+                        }
+                      }}
+                      fieldIsInvalid={!fieldIsValid}
+                      data-test-subj="lnsXY-annotation-query-based-text-decoration-field-picker"
+                      autoFocus={!selectedField}
+                    />
+                  </>
+                );
+              }}
+            </TextDecorationSetting>
+            <LineStyleSettings
+              isHorizontal={isHorizontal}
+              setConfig={setAnnotations}
+              currentConfig={currentAnnotation}
+            />
+          </>
+        )}
         {isRange && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.xyChart.fillStyle', {
@@ -367,162 +350,60 @@ export const AnnotationsPanel = (
             defaultMessage: 'Color',
           })}
         />
-        <ConfigPanelHideSwitch
+        <ConfigPanelGenericSwitch
+          label={i18n.translate('xpack.lens.xyChart.annotation.hide', {
+            defaultMessage: 'Hide annotation',
+          })}
+          data-test-subj="lns-annotations-hide-annotation"
           value={Boolean(currentAnnotation?.isHidden)}
           onChange={(ev) => setAnnotations({ isHidden: ev.target.checked })}
         />
       </DimensionEditorSection>
+      {isQueryBased && currentAnnotation && (
+        <DimensionEditorSection
+          title={i18n.translate('xpack.lens.xyChart.tooltip', {
+            defaultMessage: 'Tooltip',
+          })}
+        >
+          <EuiFormRow
+            display="rowCompressed"
+            className="lnsRowCompressedMargin"
+            fullWidth
+            label={i18n.translate('xpack.lens.xyChart.annotation.tooltip', {
+              defaultMessage: 'Show additional fields',
+            })}
+          >
+            <TooltipSection
+              currentConfig={currentAnnotation}
+              setConfig={setAnnotations}
+              indexPattern={frame.dataViews.indexPatterns[localLayer.indexPatternId]}
+            />
+          </EuiFormRow>
+        </DimensionEditorSection>
+      )}
     </>
   );
 };
 
-const ConfigPanelApplyAsRangeSwitch = ({
-  annotation,
-  datatableUtilities,
-  onChange,
-  frame,
-  state,
-}: {
-  annotation?: EventAnnotationConfig;
-  datatableUtilities: DatatableUtilitiesService;
-  onChange: (annotations: Partial<EventAnnotationConfig> | undefined) => void;
-  frame: FramePublicAPI;
-  state: XYState;
-}) => {
-  const isRange = isRangeAnnotationConfig(annotation);
-  const isManualPoint = isManualPointAnnotationConfig(annotation);
-  return (
-    <EuiFormRow display="columnCompressed" className="lnsRowCompressedMargin">
-      <EuiSwitch
-        data-test-subj="lns-xyAnnotation-rangeSwitch"
-        label={
-          <EuiText size="xs">
-            {i18n.translate('xpack.lens.xyChart.applyAsRange', {
-              defaultMessage: 'Apply as range',
-            })}
-          </EuiText>
-        }
-        checked={isRange}
-        onChange={() => {
-          if (isRange) {
-            const newPointAnnotation: PointInTimeEventAnnotationConfig = {
-              key: {
-                type: 'point_in_time',
-                timestamp: annotation.key.timestamp,
-              },
-              id: annotation.id,
-              label:
-                annotation.label === defaultRangeAnnotationLabel
-                  ? defaultAnnotationLabel
-                  : annotation.label,
-              color: toLineAnnotationColor(annotation.color),
-              isHidden: annotation.isHidden,
-            };
-            onChange(newPointAnnotation);
-          } else if (isManualPoint) {
-            const fromTimestamp = moment(annotation?.key?.timestamp);
-            const dataLayers = getDataLayers(state.layers);
-            const newRangeAnnotation: RangeEventAnnotationConfig = {
-              key: {
-                type: 'range',
-                timestamp: annotation.key.timestamp,
-                endTimestamp: getEndTimestamp(
-                  datatableUtilities,
-                  fromTimestamp.toISOString(),
-                  frame,
-                  dataLayers
-                ),
-              },
-              id: annotation.id,
-              label:
-                annotation.label === defaultAnnotationLabel
-                  ? defaultRangeAnnotationLabel
-                  : annotation.label,
-              color: toRangeAnnotationColor(annotation.color),
-              isHidden: annotation.isHidden,
-            };
-            onChange(newRangeAnnotation);
-          }
-        }}
-        compressed
-      />
-    </EuiFormRow>
-  );
-};
-
-const ConfigPanelRangeDatePicker = ({
-  value,
+const ConfigPanelGenericSwitch = ({
   label,
-  prependLabel,
-  onChange,
-  dataTestSubj = 'lnsXY_annotation_date_picker',
-}: {
-  value: moment.Moment;
-  prependLabel?: string;
-  label?: string;
-  onChange: (val: moment.Moment | null) => void;
-  dataTestSubj?: string;
-}) => {
-  return (
-    <EuiFormRow display="rowCompressed" fullWidth label={label} className="lnsRowCompressedMargin">
-      {prependLabel ? (
-        <EuiFormControlLayout
-          fullWidth
-          className="lnsConfigPanelNoPadding"
-          prepend={
-            <EuiFormLabel className="lnsConfigPanelDate__label">{prependLabel}</EuiFormLabel>
-          }
-        >
-          <EuiDatePicker
-            calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-            fullWidth
-            showTimeSelect
-            selected={value}
-            onChange={onChange}
-            dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
-            data-test-subj={dataTestSubj}
-          />
-        </EuiFormControlLayout>
-      ) : (
-        <EuiDatePicker
-          calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-          fullWidth
-          showTimeSelect
-          selected={value}
-          onChange={onChange}
-          dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
-          data-test-subj={dataTestSubj}
-        />
-      )}
-    </EuiFormRow>
-  );
-};
-
-const ConfigPanelHideSwitch = ({
+  ['data-test-subj']: dataTestSubj,
   value,
   onChange,
 }: {
+  label: string;
+  'data-test-subj': string;
   value: boolean;
   onChange: (event: EuiSwitchEvent) => void;
-}) => {
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.lens.xyChart.annotation.name', {
-        defaultMessage: 'Hide annotation',
-      })}
-      display="columnCompressedSwitch"
-      fullWidth
-    >
-      <EuiSwitch
-        compressed
-        label={i18n.translate('xpack.lens.xyChart.annotation.name', {
-          defaultMessage: 'Hide annotation',
-        })}
-        showLabel={false}
-        data-test-subj="lns-annotations-hide-annotation"
-        checked={value}
-        onChange={onChange}
-      />
-    </EuiFormRow>
-  );
-};
+}) => (
+  <EuiFormRow label={label} display="columnCompressedSwitch" fullWidth>
+    <EuiSwitch
+      compressed
+      label={label}
+      showLabel={false}
+      data-test-subj={dataTestSubj}
+      checked={value}
+      onChange={onChange}
+    />
+  </EuiFormRow>
+);

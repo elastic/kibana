@@ -7,7 +7,6 @@
 
 import React, { FC, memo } from 'react';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { MULTI_BUCKET_IMPACT } from '../../../../../common/constants/multi_bucket_impact';
 import {
   getSeverityColor,
   getFormattedSeverityScore,
@@ -19,21 +18,19 @@ interface SeverityCellProps {
    */
   score: number;
   /**
-   * Multi-bucket impact score from –5 to 5.
-   * Anomalies with a multi-bucket impact value of greater than or equal
-   * to 2 are indicated with a plus shaped symbol in the cell.
+   * Flag to indicate whether the anomaly should be displayed in the cell as a
+   * multi-bucket anomaly with a plus-shaped symbol.
    */
-  multiBucketImpact: number;
+  isMultiBucketAnomaly: boolean;
 }
 
 /**
  * Renders anomaly severity score with single or multi-bucket impact marker.
  */
-export const SeverityCell: FC<SeverityCellProps> = memo(({ score, multiBucketImpact }) => {
+export const SeverityCell: FC<SeverityCellProps> = memo(({ score, isMultiBucketAnomaly }) => {
   const severity = getFormattedSeverityScore(score);
   const color = getSeverityColor(score);
-  const isMultiBucket = multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM;
-  return isMultiBucket ? (
+  return isMultiBucketAnomaly ? (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <svg width="16" height="16" viewBox="-2 -2 20 20" fill={color}>

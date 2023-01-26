@@ -46,8 +46,9 @@ const actWithTimeout = (action: Function, timer: number = 1) =>
         }, timer)
       )
   );
-
+const chartStartContract = chartPluginMock.createStartContract();
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
+const chartsActiveCursorService = chartStartContract.activeCursor;
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
 const formatService = fieldFormatsServiceMock.createStartContract();
 const args: HeatmapArguments = {
@@ -114,6 +115,7 @@ describe('HeatmapComponent', function () {
     wrapperProps = {
       data,
       chartsThemeService,
+      chartsActiveCursorService,
       args,
       uiState,
       onClickValue: jest.fn(),
@@ -122,6 +124,8 @@ describe('HeatmapComponent', function () {
       paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
       interactive: true,
+      syncTooltips: false,
+      syncCursor: true,
       renderComplete: jest.fn(),
     };
   });

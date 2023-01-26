@@ -8,6 +8,10 @@
 import * as rt from 'io-ts';
 import { UserRT } from '../../user';
 
+/**
+ * These values are used in a number of places including to define the accepted values in the
+ * user_actions/_find api. These values should not be removed only new values can be added.
+ */
 export const ActionTypes = {
   assignees: 'assignees',
   comment: 'comment',
@@ -23,7 +27,7 @@ export const ActionTypes = {
   delete_case: 'delete_case',
 } as const;
 
-export type ActionTypeKeys = keyof typeof ActionTypes;
+type ActionTypeKeys = keyof typeof ActionTypes;
 export type ActionTypeValues = typeof ActionTypes[ActionTypeKeys];
 
 export const Actions = {
@@ -34,13 +38,6 @@ export const Actions = {
   push_to_service: 'push_to_service',
 } as const;
 
-export type ActionOperationKeys = keyof typeof Actions;
-export type ActionOperationValues = typeof Actions[ActionOperationKeys];
-
-/* To the next developer, if you add/removed fields here
- * make sure to check this file (x-pack/plugins/cases/server/services/user_actions/helpers.ts) too
- */
-export const ActionTypesRt = rt.keyof(ActionTypes);
 export const ActionsRt = rt.keyof(Actions);
 
 export const UserActionCommonAttributesRt = rt.type({
@@ -50,6 +47,10 @@ export const UserActionCommonAttributesRt = rt.type({
   action: ActionsRt,
 });
 
+/**
+ * This should only be used for the getAll route and it should be removed when the route is removed
+ * @deprecated use CaseUserActionInjectedIdsRt instead
+ */
 export const CaseUserActionSavedObjectIdsRt = rt.type({
   action_id: rt.string,
   case_id: rt.string,
@@ -58,3 +59,16 @@ export const CaseUserActionSavedObjectIdsRt = rt.type({
 
 export type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonAttributesRt>;
 export type UserActionWithResponse<T> = T & rt.TypeOf<typeof CaseUserActionSavedObjectIdsRt>;
+
+/**
+ * This should be used for all user action types going forward it will be renamed to CaseUserActionSavedObjectIdsRt
+ * Once the UI is switched to using the new user actions _find API
+ */
+export const CaseUserActionInjectedIdsRt = rt.type({
+  comment_id: rt.union([rt.string, rt.null]),
+});
+
+/**
+ * Temporary type until CaseUserActionInjectedIdsRt replaces CaseUserActionSavedObjectIdsRt
+ */
+export type UserActionWithResponseInjection<T> = T & rt.TypeOf<typeof CaseUserActionInjectedIdsRt>;

@@ -52,7 +52,8 @@ exports[`WithSolutionNav renders wrapped component 1`] = `
   }
   pageSideBarProps={
     Object {
-      "className": "kbnSolutionNav__sidebar",
+      "className": "css-c34ez9",
+      "minWidth": undefined,
       "paddingSize": "none",
     }
   }
@@ -111,7 +112,8 @@ exports[`WithSolutionNav with children 1`] = `
   }
   pageSideBarProps={
     Object {
-      "className": "kbnSolutionNav__sidebar",
+      "className": "css-c34ez9",
+      "minWidth": undefined,
       "paddingSize": "none",
     }
   }

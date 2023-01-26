@@ -6,11 +6,12 @@
  */
 import React from 'react';
 import {
-  EuiBadge,
+  EuiBottomBar,
   EuiButtonIcon,
   EuiSpacer,
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
+  EuiText,
   EuiTitle,
   EuiToolTip,
   PropsOf,
@@ -19,7 +20,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Serializable } from '@kbn/utility-types';
-import { getPrimaryRuleTags } from '../../../common/utils/get_primary_rule_tags';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
@@ -76,7 +78,7 @@ const baseColumns = [
       />
     ),
     truncateText: true,
-    width: '10%',
+    width: '150px',
     sortable: true,
     render: (filename: string) => (
       <EuiToolTip position="top" content={filename} anchorClassName="eui-textTruncate">
@@ -89,7 +91,7 @@ const baseColumns = [
     name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel', {
       defaultMessage: 'Result',
     }),
-    width: '110px',
+    width: '120px',
     sortable: true,
     render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
       <CspEvaluationBadge type={type} />
@@ -103,6 +105,7 @@ const baseColumns = [
     ),
     sortable: true,
     truncateText: true,
+    width: '10%',
   },
   {
     field: 'resource.name',
@@ -112,13 +115,51 @@ const baseColumns = [
     ),
     sortable: true,
     truncateText: true,
+    render: (name: string) => (
+      <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
+        <>{name}</>
+      </EuiToolTip>
+    ),
   },
   {
     field: 'rule.name',
-    name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.ruleColumnLabel', {
-      defaultMessage: 'Rule',
-    }),
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNameColumnLabel',
+      { defaultMessage: 'Rule Name' }
+    ),
     sortable: true,
+    render: (name: string) => (
+      <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
+        <>{name}</>
+      </EuiToolTip>
+    ),
+  },
+  {
+    field: 'rule.benchmark.rule_number',
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNumberColumnLabel',
+      {
+        defaultMessage: 'Rule Number',
+      }
+    ),
+    width: '120px',
+  },
+  {
+    field: 'rule.benchmark.name',
+    name: (
+      <ColumnNameWithTooltip
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnLabel',
+          { defaultMessage: 'Applicable Benchmark' }
+        )}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnTooltipLabel',
+          { defaultMessage: 'The benchmark(s) rules used to evaluate this resource came from' }
+        )}
+      />
+    ),
+    sortable: true,
+    truncateText: true,
   },
   {
     field: 'rule.section',
@@ -128,20 +169,11 @@ const baseColumns = [
     ),
     sortable: true,
     truncateText: true,
-  },
-  {
-    field: 'rule.tags',
-    name: i18n.translate(
-      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleTagsColumnLabel',
-      { defaultMessage: 'Rule Tags' }
+    render: (section: string) => (
+      <EuiToolTip content={section} anchorClassName="eui-textTruncate">
+        <>{section}</>
+      </EuiToolTip>
     ),
-    width: '200px',
-    sortable: false,
-    truncateText: true,
-    render: (tags: string[]) => {
-      const { benchmark, version } = getPrimaryRuleTags(tags);
-      return [benchmark, version].map((tag) => <EuiBadge>{tag}</EuiBadge>);
-    },
   },
   {
     field: 'cluster_id',
@@ -149,21 +181,26 @@ const baseColumns = [
       <ColumnNameWithTooltip
         columnName={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
-          { defaultMessage: 'Cluster ID' }
+          { defaultMessage: 'Belongs To' }
         )}
         tooltipContent={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
-          { defaultMessage: 'Kube-System Namespace ID' }
+          { defaultMessage: 'Kubernetes Cluster ID or Cloud Account Name' }
         )}
       />
     ),
-    width: '10%',
-    truncateText: true,
     sortable: true,
+    truncateText: true,
+    render: (section: string) => (
+      <EuiToolTip content={section} anchorClassName="eui-textTruncate">
+        <>{section}</>
+      </EuiToolTip>
+    ),
   },
   {
     field: '@timestamp',
-    width: '150px',
+    align: 'right',
+    width: '10%',
     name: i18n.translate(
       'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
       { defaultMessage: 'Last Checked' }
@@ -219,7 +256,9 @@ const FilterableCell: React.FC<{
       }
     `}
   >
-    <div className="__filter_value eui-textTruncate">{children}</div>
+    <div className="__filter_value eui-textTruncate" data-test-subj="filter_cell_value">
+      {children}
+    </div>
     <div
       className="__filter_buttons"
       css={css`
@@ -250,4 +289,21 @@ const FilterableCell: React.FC<{
       />
     </div>
   </div>
+);
+
+export const LimitedResultsBar = () => (
+  <>
+    <EuiSpacer size="xxl" />
+    <EuiBottomBar data-test-subj="test-bottom-bar">
+      <EuiText textAlign="center">
+        <FormattedMessage
+          id="xpack.csp.findings..bottomBarLabel"
+          defaultMessage="These are the first {maxItems} findings matching your search, refine your search to see others."
+          values={{
+            maxItems: MAX_FINDINGS_TO_LOAD,
+          }}
+        />
+      </EuiText>
+    </EuiBottomBar>
+  </>
 );

@@ -49,5 +49,4 @@ export const API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD = `/public/canvas/${SHAREABLE_
 export const CANVAS_EMBEDDABLE_CLASSNAME = `canvasEmbeddable`;
 export const CONTEXT_MENU_TOP_BORDER_CLASSNAME = 'canvasContextMenu--topBorder';
 export const API_ROUTE_FUNCTIONS = `${API_ROUTE}/fns`;
-export const ESSQL_SEARCH_STRATEGY = 'essql';
 export const HEADER_BANNER_HEIGHT = 32; // This value is also declared in `/src/core/public/_variables.scss`

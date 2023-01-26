@@ -22,6 +22,8 @@ export interface Services {
   hasESData: () => Promise<boolean>;
   /** True if Kibana instance contains user-created data view, false otherwise. */
   hasUserDataView: () => Promise<boolean>;
+  /** if set to true allows creation of an ad-hoc data view from data view editor */
+  allowAdHocDataView?: boolean;
 }
 
 /**
@@ -53,4 +55,6 @@ export interface KibanaNoDataPageProps {
   onDataViewCreated: (dataView: unknown) => void;
   /** `NoDataPage` configuration; see `NoDataPageProps`. */
   noDataConfig: NoDataPageProps;
+  /** if set to true allows creation of an ad-hoc dataview from data view editor */
+  allowAdHocDataView?: boolean;
 }

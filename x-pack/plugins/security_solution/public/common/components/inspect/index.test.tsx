@@ -47,7 +47,13 @@ describe('Inspect Button', () => {
     beforeEach(() => {
       const myState = cloneDeep(state);
       myState.inputs = upsertQuery(newQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+
+        kibanaObservable,
+        storage
+      );
     });
     test('Eui Empty Button', () => {
       const wrapper = mount(

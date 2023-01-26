@@ -12,11 +12,10 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
   getPageObjects,
 }: FtrProviderContext) {
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
-  const retry = getService('retry');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
-  describe.skip('Overview Page', function () {
+  describe('Overview Page', function () {
     this.tags('skipFirefox');
 
     before(async () => {
@@ -31,16 +30,22 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
       await PageObjects.upgradeAssistant.navigateToPage();
     });
 
-    it('shows coming soon prompt', async () => {
-      await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
-        return testSubjects.exists('comingSoonPrompt');
-      });
+    it('Should render overview page', async () => {
+      await testSubjects.exists('overview');
     });
 
-    it('Should render all steps', async () => {
-      testSubjects.exists('backupStep-incomplete');
-      testSubjects.exists('fixIssuesStep-incomplete');
-      testSubjects.exists('upgradeStep');
+    it('Should render overview upgrade steps', async () => {
+      // step 1
+      await testSubjects.exists('backupStep-incomplete');
+      // step 2: migrateSystemIndicesStep only enabled during x.last versions
+      await testSubjects.missingOrFail('migrateSystemIndicesStep-incomplete');
+      await testSubjects.missingOrFail('migrateSystemIndicesStep-complete');
+      // step 3
+      await testSubjects.exists('fixIssuesStep-incomplete');
+      // step 4
+      await testSubjects.exists('logsStep-incomplete');
+      // step 5
+      await testSubjects.exists('upgradeStep');
     });
   });
 }

@@ -63,9 +63,23 @@ export enum CrawlType {
   Partial = 'partial',
 }
 
+export interface BasicCrawlerAuth {
+  password: string;
+  type: 'basic';
+  username: string;
+}
+
+export interface RawCrawlerAuth {
+  header: string;
+  type: 'raw';
+}
+
+export type CrawlerAuth = BasicCrawlerAuth | RawCrawlerAuth | null;
+
 // Server
 
 export interface CrawlerDomainFromServer {
+  auth: CrawlerAuth;
   available_deduplication_fields: string[];
   crawl_rules: CrawlRule[];
   created_on: string;
@@ -89,6 +103,7 @@ export interface CrawlerDataFromServer {
   domains: CrawlerDomainFromServer[];
   events: CrawlEventFromServer[];
   most_recent_crawl_request: CrawlRequestFromServer | null;
+  user_agent: string;
 }
 
 export interface CrawlerDomainValidationResultFromServer {
@@ -146,9 +161,16 @@ export interface DomainConfigFromServer {
   sitemap_urls: string[];
 }
 
+export interface CrawlScheduleFromServer {
+  frequency: number;
+  unit: CrawlUnits;
+  use_connector_schedule: boolean;
+}
+
 // Client
 
 export interface CrawlerDomain {
+  auth: CrawlerAuth;
   availableDeduplicationFields: string[];
   crawlRules: CrawlRule[];
   createdOn: string;
@@ -172,6 +194,7 @@ export interface CrawlerData {
   domains: CrawlerDomain[];
   events: CrawlEvent[];
   mostRecentCrawlRequest: CrawlRequest | null;
+  userAgent: string;
 }
 
 export interface CrawlerDomainValidationStep {
@@ -235,6 +258,7 @@ export type CrawlEvent = CrawlRequest & {
 export interface CrawlSchedule {
   frequency: number;
   unit: CrawlUnits;
+  useConnectorSchedule: boolean;
 }
 
 export interface DomainConfig {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { PersistableStateAttachmentState } from '../../attachment_framework/types';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { PersistableStateAttachmentState } from '../../attachment_framework/types';
 
 const getMigrateFunction = (
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry

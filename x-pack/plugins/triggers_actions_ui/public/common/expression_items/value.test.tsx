@@ -35,7 +35,6 @@ describe('value expression', () => {
       describedByIds={Array []}
       display="row"
       error={Array []}
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={false}
@@ -71,7 +70,6 @@ describe('value expression', () => {
           "value is not valid",
         ]
       }
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={true}

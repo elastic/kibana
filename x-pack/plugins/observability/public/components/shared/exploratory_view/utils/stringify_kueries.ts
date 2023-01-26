@@ -20,7 +20,7 @@ const buildOrCondition = (values: string[]) => {
   return `(${values.join(' or ')})`;
 };
 
-function addSlashes(str: string) {
+function addSlashes(str: string | number) {
   return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
 }
 

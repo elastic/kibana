@@ -7,10 +7,10 @@
  */
 
 import _, { get } from 'lodash';
-import { Subscription } from 'rxjs';
+import { Subscription, ReplaySubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
@@ -18,6 +18,7 @@ import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { Warnings } from '@kbn/charts-plugin/public';
 import {
   Adapters,
   AttributeService,
@@ -28,7 +29,6 @@ import {
   IContainer,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
-  ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import {
   ExpressionAstExpression,
@@ -76,6 +76,7 @@ export interface VisualizeInput extends EmbeddableInput {
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
+  timeslice?: [number, number];
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -108,12 +109,14 @@ export class VisualizeEmbeddable
   private searchSessionId?: string;
   private syncColors?: boolean;
   private syncTooltips?: boolean;
+  private syncCursor?: boolean;
   private embeddableTitle?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression?: ExpressionAstExpression;
   private vis: Vis;
   private domNode: any;
+  private warningDomNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
@@ -123,6 +126,10 @@ export class VisualizeEmbeddable
     VisualizeByValueInput,
     VisualizeByReferenceInput
   >;
+  private expressionVariables: Record<string, unknown> | undefined;
+  private readonly expressionVariablesSubject = new ReplaySubject<
+    Record<string, unknown> | undefined
+  >(1);
 
   constructor(
     timefilter: TimefilterContract,
@@ -151,6 +158,7 @@ export class VisualizeEmbeddable
     this.timefilter = timefilter;
     this.syncColors = this.input.syncColors;
     this.syncTooltips = this.input.syncTooltips;
+    this.syncCursor = this.input.syncCursor;
     this.searchSessionId = this.input.searchSessionId;
     this.query = this.input.query;
     this.embeddableTitle = this.getTitle();
@@ -279,8 +287,16 @@ export class VisualizeEmbeddable
     let dirty = false;
 
     // Check if timerange has changed
-    if (!_.isEqual(this.input.timeRange, this.timeRange)) {
-      this.timeRange = _.cloneDeep(this.input.timeRange);
+    const nextTimeRange =
+      this.input.timeslice !== undefined
+        ? {
+            from: new Date(this.input.timeslice[0]).toISOString(),
+            to: new Date(this.input.timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : this.input.timeRange;
+    if (!_.isEqual(nextTimeRange, this.timeRange)) {
+      this.timeRange = _.cloneDeep(nextTimeRange);
       dirty = true;
     }
 
@@ -311,6 +327,11 @@ export class VisualizeEmbeddable
       dirty = true;
     }
 
+    if (this.syncCursor !== this.input.syncCursor) {
+      this.syncCursor = this.input.syncCursor;
+      dirty = true;
+    }
+
     if (this.embeddableTitle !== this.getTitle()) {
       this.embeddableTitle = this.getTitle();
       dirty = true;
@@ -321,6 +342,31 @@ export class VisualizeEmbeddable
     }
 
     return dirty;
+  }
+
+  private handleWarnings() {
+    const warnings: React.ReactNode[] = [];
+    if (this.getInspectorAdapters()?.requests) {
+      this.deps
+        .start()
+        .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
+          if (
+            warning.type === 'shard_failure' &&
+            warning.reason.type === 'unsupported_aggregation_on_downsampled_index'
+          ) {
+            warnings.push(warning.reason.reason || warning.message);
+            return true;
+          }
+          if (this.vis.type.suppressWarnings?.()) {
+            // if the vis type wishes to supress all warnings, return true so the default logic won't pick it up
+            return true;
+          }
+        });
+    }
+
+    if (this.warningDomNode) {
+      render(<Warnings warnings={warnings || []} />, this.warningDomNode);
+    }
   }
 
   // this is a hack to make editor still work, will be removed once we clean up editor
@@ -338,6 +384,7 @@ export class VisualizeEmbeddable
   };
 
   onContainerData = () => {
+    this.handleWarnings();
     this.updateOutput({
       ...this.getOutput(),
       loading: false,
@@ -357,6 +404,25 @@ export class VisualizeEmbeddable
       this.abortController.abort();
     }
     this.renderComplete.dispatchError();
+
+    if (isFallbackDataView(this.vis.data.indexPattern)) {
+      error = new Error(
+        i18n.translate('visualizations.missedDataView.errorMessage', {
+          defaultMessage: `Could not find the {type}: {id}`,
+          values: {
+            id: this.vis.data.indexPattern.id ?? '-',
+            type: this.vis.data.savedSearchId
+              ? i18n.translate('visualizations.noSearch.label', {
+                  defaultMessage: 'search',
+                })
+              : i18n.translate('visualizations.noDataView.label', {
+                  defaultMessage: 'data view',
+                }),
+          },
+        })
+      );
+    }
+
     this.updateOutput({
       ...this.getOutput(),
       rendered: true,
@@ -376,6 +442,11 @@ export class VisualizeEmbeddable
     const div = document.createElement('div');
     div.className = `visualize panel-content panel-content--fullWidth`;
     domNode.appendChild(div);
+
+    const warningDiv = document.createElement('div');
+    warningDiv.className = 'visPanel__warnings';
+    domNode.appendChild(warningDiv);
+    this.warningDomNode = warningDiv;
 
     this.domNode = div;
     super.render(this.domNode);
@@ -454,7 +525,7 @@ export class VisualizeEmbeddable
         const { error } = this.getOutput();
 
         if (error) {
-          this.renderError(this.domNode, error);
+          render(this.renderError(error), this.domNode);
         }
       })
     );
@@ -462,25 +533,21 @@ export class VisualizeEmbeddable
     await this.updateHandler();
   }
 
-  public renderError(domNode: HTMLElement, error: ErrorLike | string) {
+  private renderError(error: ErrorLike | string) {
     if (isFallbackDataView(this.vis.data.indexPattern)) {
-      render(
+      return (
         <VisualizationMissedSavedObjectError
-          viewMode={this.input.viewMode ?? ViewMode.VIEW}
           renderMode={this.input.renderMode ?? 'view'}
           savedObjectMeta={{
-            savedObjectId: this.vis.data.indexPattern.id,
             savedObjectType: this.vis.data.savedSearchId ? 'search' : DATA_VIEW_SAVED_OBJECT_TYPE,
           }}
           application={getApplication()}
-        />,
-        domNode
+          message={typeof error === 'string' ? error : error.message}
+        />
       );
-    } else {
-      render(<VisualizationError error={error} />, domNode);
     }
 
-    return () => unmountComponentAtNode(domNode);
+    return <VisualizationError error={error} />;
   }
 
   public destroy() {
@@ -518,18 +585,28 @@ export class VisualizeEmbeddable
   private async updateHandler() {
     const context = this.getExecutionContext();
 
+    this.expressionVariables = await this.vis.type.getExpressionVariables?.(
+      this.vis,
+      this.timefilter
+    );
+
+    this.expressionVariablesSubject.next(this.expressionVariables);
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,
+        disableShardWarnings: true,
       },
       variables: {
         embeddableTitle: this.getTitle(),
+        ...this.expressionVariables,
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
       syncTooltips: this.input.syncTooltips,
+      syncCursor: this.input.syncCursor,
       uiState: this.vis.uiState,
       interactive: !this.input.disableTriggers,
       inspectorAdapters: this.inspectorAdapters,
@@ -569,6 +646,14 @@ export class VisualizeEmbeddable
 
   public supportedTriggers(): string[] {
     return this.vis.type.getSupportedTriggers?.(this.vis.params) ?? [];
+  }
+
+  public getExpressionVariables$() {
+    return this.expressionVariablesSubject.asObservable();
+  }
+
+  public getExpressionVariables() {
+    return this.expressionVariables;
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {

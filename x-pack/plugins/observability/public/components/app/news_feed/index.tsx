@@ -31,7 +31,7 @@ export function NewsFeed({ items }: Props) {
     // The news feed is manually added/edited, to prevent any errors caused by typos or missing fields,
     // wraps the component with EuiErrorBoundary to avoid breaking the entire page.
     <EuiErrorBoundary>
-      <EuiFlexGrid direction="column" gutterSize="s">
+      <EuiFlexGrid direction="row" gutterSize="s" alignItems="start">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h4>
@@ -58,7 +58,7 @@ function NewsItem({ item }: { item: INewsItem }) {
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiFlexGrid direction="column" gutterSize="s">
+      <EuiFlexGrid direction="row" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h4>{item.title.en}</h4>

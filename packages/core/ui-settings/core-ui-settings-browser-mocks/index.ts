@@ -7,3 +7,4 @@
  */
 
 export { uiSettingsServiceMock } from './src/ui_settings_service.mock';
+export { settingsServiceMock } from './src/settings_service.mock';

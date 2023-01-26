@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getFileDataIndexName, getFileMetadataIndexName } from '../../common';
+
 import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
@@ -194,3 +196,7 @@ on_failure:
       field: error.message
       value:
         - 'failed in Fleet agent final_pipeline: {{ _ingest.on_failure_message }}'`;
+
+// Fleet Agent indexes for storing files
+export const FILE_STORAGE_METADATA_AGENT_INDEX = getFileMetadataIndexName('agent');
+export const FILE_STORAGE_DATA_AGENT_INDEX = getFileDataIndexName('agent');

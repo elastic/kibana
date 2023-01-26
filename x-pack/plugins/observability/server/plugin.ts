@@ -11,10 +11,22 @@ import {
   Plugin,
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
+  Logger,
 } from '@kbn/core/server';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { createUICapabilities } from '@kbn/cases-plugin/common';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
+import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+
+import {
+  kubernetesGuideId,
+  kubernetesGuideConfig,
+} from '../common/guided_onboarding/kubernetes_guide_config';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -25,23 +37,31 @@ import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId } from '../common';
+import { slo } from './saved_objects';
+import { OBSERVABILITY_FEATURE_ID, RULE_REGISTRATION_CONTEXT } from './common/constants';
+import { registerRuleTypes } from './lib/rules/register_rule_types';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   features: FeaturesSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  spaces: SpacesPluginStart;
+  alerting: PluginSetupContract;
+  guidedOnboarding: GuidedOnboardingPluginSetup;
 }
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
+  private logger: Logger;
+
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
+    this.logger = initContext.logger.get();
   }
 
   public setup(core: CoreSetup, plugins: PluginSetup) {
-    const config = this.initContext.config.get<ObservabilityConfig>();
-
     const casesCapabilities = createUICapabilities();
+    const config = this.initContext.config.get<ObservabilityConfig>();
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
@@ -71,7 +91,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           ui: casesCapabilities.all,
         },
         read: {
-          api: ['bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
@@ -135,21 +155,48 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
-    const start = () => core.getStartServices().then(([coreStart]) => coreStart);
-
     const { ruleDataService } = plugins.ruleRegistry;
+
+    if (config.unsafe.slo.enabled) {
+      core.savedObjects.registerType(slo);
+
+      const ruleDataClient = ruleDataService.initializeIndex({
+        feature: OBSERVABILITY_FEATURE_ID,
+        registrationContext: RULE_REGISTRATION_CONTEXT,
+        dataset: Dataset.alerts,
+        componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+        componentTemplates: [
+          {
+            name: 'mappings',
+            mappings: mappingFromFieldMap(experimentalRuleFieldMap, 'strict'),
+          },
+        ],
+      });
+
+      registerRuleTypes(plugins.alerting, this.logger, ruleDataClient);
+    }
+
+    const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
     registerRoutes({
       core: {
         setup: core,
         start,
       },
-      logger: this.initContext.logger.get(),
+      logger: this.logger,
       repository: getGlobalObservabilityServerRouteRepository(config),
       ruleDataService,
     });
 
+    /**
+     * Register a config for the observability guide
+     */
+    plugins.guidedOnboarding.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+
     return {
+      getAlertDetailsConfig() {
+        return config.unsafe.alertDetails;
+      },
       getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);

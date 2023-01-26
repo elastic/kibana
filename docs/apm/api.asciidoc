@@ -762,7 +762,7 @@ POST /_security/role/apm_agent_key_user
   "cluster": ["manage_own_api_key"],
   "applications": [{
     "application": "apm",
-    "privileges": ["event:write", "sourcemap:write", "config_agent:read"],
+    "privileges": ["event:write", "config_agent:read"],
     "resources": ["*"]
   }]
 }
@@ -785,7 +785,6 @@ POST /_security/role/apm_agent_key_user
 
   - `event:write`. Required for ingesting agent events.
   - `config_agent:read`. Required for agents to read agent configuration remotely.
-  - `sourcemap:write`. Required for uploading sourcemaps.
 
 [[apm-agent-key-create-example]]
 ===== Example
@@ -795,7 +794,7 @@ POST /_security/role/apm_agent_key_user
 POST /api/apm/agent_keys
 {
     "name": "apm-key",
-    "privileges": ["event:write", "config_agent:read", "sourcemap:write"]
+    "privileges": ["event:write", "config_agent:read"]
 }
 --------------------------------------------------
 

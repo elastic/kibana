@@ -1,0 +1,181 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`guide card footer snapshots should render the footer when the guide has been completed 1`] = `
+<Fragment>
+  <EuiProgress
+    label="Completed"
+    labelProps={
+      Object {
+        "css": Object {
+          "map": undefined,
+          "name": "x46p4t",
+          "next": undefined,
+          "styles": "
+  text-align: 'left';
+",
+          "toString": [Function],
+        },
+      }
+    }
+    max={2}
+    size="s"
+    value={1}
+    valueText="1/2 steps"
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <EuiFlexGroup
+    justifyContent="center"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        data-test-subj="onboarding--guideCard--view--search"
+        fill={true}
+        isLoading={false}
+        onClick={[Function]}
+        size="m"
+      >
+        View guide
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`guide card footer snapshots should render the footer when the guide has not started yet 1`] = `
+<EuiFlexGroup
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiButton
+      color="primary"
+      data-test-subj="onboarding--guideCard--view--search"
+      fill={true}
+      isLoading={false}
+      onClick={[Function]}
+      size="m"
+    >
+      View guide
+    </EuiButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`guide card footer snapshots should render the footer when the guide is in progress 1`] = `
+<Fragment>
+  <EuiProgress
+    label="In progress"
+    labelProps={
+      Object {
+        "css": Object {
+          "map": undefined,
+          "name": "x46p4t",
+          "next": undefined,
+          "styles": "
+  text-align: 'left';
+",
+          "toString": [Function],
+        },
+      }
+    }
+    max={2}
+    size="s"
+    value={1}
+    valueText="1/2 steps"
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <EuiFlexGroup
+    justifyContent="center"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        data-test-subj="onboarding--guideCard--continue--search"
+        fill={true}
+        isLoading={false}
+        onClick={[Function]}
+        size="m"
+      >
+        Continue
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`guide card footer snapshots should render the footer when the guide is ready to complete 1`] = `
+<Fragment>
+  <EuiProgress
+    label="In progress"
+    labelProps={
+      Object {
+        "css": Object {
+          "map": undefined,
+          "name": "x46p4t",
+          "next": undefined,
+          "styles": "
+  text-align: 'left';
+",
+          "toString": [Function],
+        },
+      }
+    }
+    max={2}
+    size="s"
+    value={1}
+    valueText="1/2 steps"
+  />
+  <EuiSpacer
+    size="l"
+  />
+  <EuiFlexGroup
+    justifyContent="center"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        data-test-subj="onboarding--guideCard--continue--search"
+        fill={true}
+        isLoading={false}
+        onClick={[Function]}
+        size="m"
+      >
+        Continue
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`guide card footer snapshots should render the footer when the guided onboarding has not started yet 1`] = `
+<EuiFlexGroup
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiButton
+      color="primary"
+      data-test-subj="onboarding--guideCard--view--search"
+      fill={true}
+      isLoading={false}
+      onClick={[Function]}
+      size="m"
+    >
+      View guide
+    </EuiButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

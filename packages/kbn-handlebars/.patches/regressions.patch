@@ -1,4 +1,4 @@
-1,2c1,11
+1,2c1,12
 < describe('Regressions', function() {
 <   it('GH-94: Cannot read property of undefined', function() {
 ---
@@ -9,17 +9,18 @@
 >  * See `packages/kbn-handlebars/LICENSE` for more information.
 >  */
 > 
+> import Handlebars from '../..';
 > import { expectTemplate } from '../__jest__/test_bench';
 > 
 > describe('Regressions', () => {
 >   it('GH-94: Cannot read property of undefined', () => {
-9,10c18,19
+9,10c19,20
 <               name: 'Charles Darwin'
 <             }
 ---
 >               name: 'Charles Darwin',
 >             },
-13,15c22,24
+13,15c23,25
 <             title: 'Lazarillo de Tormes'
 <           }
 <         ]
@@ -27,9 +28,9 @@
 >             title: 'Lazarillo de Tormes',
 >           },
 >         ],
-17d25
+17d26
 <       .withMessage('Renders without an undefined property error')
-21,43c29,34
+21,43c30,35
 <   it("GH-150: Inverted sections print when they shouldn't", function() {
 <     var string = '{{^set}}not set{{/set}} :: {{#set}}set{{/set}}';
 < 
@@ -60,47 +61,47 @@
 >     expectTemplate(string).withInput({ set: undefined }).toCompileTo('not set :: ');
 >     expectTemplate(string).withInput({ set: false }).toCompileTo('not set :: ');
 >     expectTemplate(string).withInput({ set: true }).toCompileTo(' :: set');
-46c37
+46c38
 <   it('GH-158: Using array index twice, breaks the template', function() {
 ---
 >   it('GH-158: Using array index twice, breaks the template', () => {
-49d39
+49d40
 <       .withMessage('it works as expected')
-53,54c43,44
+53,54c44,45
 <   it("bug reported by @fat where lambdas weren't being properly resolved", function() {
 <     var string =
 ---
 >   it("bug reported by @fat where lambdas weren't being properly resolved", () => {
 >     const string =
-69,70c59,60
+69,70c60,61
 <     var data = {
 <       thing: function() {
 ---
 >     const data = {
 >       thing() {
-76c66
+76c67
 <         { className: 'three', word: '@sayrer' }
 ---
 >         { className: 'three', word: '@sayrer' },
-78c68
+78c69
 <       hasThings: function() {
 ---
 >       hasThings() {
-80c70
+80c71
 <       }
 ---
 >       },
-83c73
+83c74
 <     var output =
 ---
 >     const output =
-92,94c82
+92,94c83
 <     expectTemplate(string)
 <       .withInput(data)
 <       .toCompileTo(output);
 ---
 >     expectTemplate(string).withInput(data).toCompileTo(output);
-97,100c85,86
+97,100c86,87
 <   it('GH-408: Multiple loops fail', function() {
 <     expectTemplate(
 <       '{{#.}}{{name}}{{/.}}{{#.}}{{name}}{{/.}}{{#.}}{{name}}{{/.}}'
@@ -108,37 +109,37 @@
 ---
 >   it('GH-408: Multiple loops fail', () => {
 >     expectTemplate('{{#.}}{{name}}{{/.}}{{#.}}{{name}}{{/.}}{{#.}}{{name}}{{/.}}')
-103c89
+103c90
 <         { name: 'Jane Doe', location: { city: 'New York' } }
 ---
 >         { name: 'Jane Doe', location: { city: 'New York' } },
-105d90
+105d91
 <       .withMessage('It should output multiple times')
-109,110c94,95
+109,110c95,96
 <   it('GS-428: Nested if else rendering', function() {
 <     var succeedingTemplate =
 ---
 >   it('GS-428: Nested if else rendering', () => {
 >     const succeedingTemplate =
-112c97
+112c98
 <     var failingTemplate =
 ---
 >     const failingTemplate =
-115,116c100,101
+115,116c101,102
 <     var helpers = {
 <       blk: function(block) {
 ---
 >     const helpers = {
 >       blk(block: Handlebars.HelperOptions) {
-119c104
+119c105
 <       inverse: function(block) {
 ---
 >       inverse(block: Handlebars.HelperOptions) {
-121c106
+121c107
 <       }
 ---
 >       },
-124,130c109,110
+124,130c110,111
 <     expectTemplate(succeedingTemplate)
 <       .withHelpers(helpers)
 <       .toCompileTo('   Expected  ');
@@ -149,7 +150,7 @@
 ---
 >     expectTemplate(succeedingTemplate).withHelpers(helpers).toCompileTo('   Expected  ');
 >     expectTemplate(failingTemplate).withHelpers(helpers).toCompileTo('  Expected  ');
-133,136c113,114
+133,136c114,115
 <   it('GH-458: Scoped this identifier', function() {
 <     expectTemplate('{{./foo}}')
 <       .withInput({ foo: 'bar' })
@@ -157,25 +158,25 @@
 ---
 >   it('GH-458: Scoped this identifier', () => {
 >     expectTemplate('{{./foo}}').withInput({ foo: 'bar' }).toCompileTo('bar');
-139c117
+139c118
 <   it('GH-375: Unicode line terminators', function() {
 ---
 >   it('GH-375: Unicode line terminators', () => {
-143c121
+143c122
 <   it('GH-534: Object prototype aliases', function() {
 ---
 >   it('GH-534: Object prototype aliases', () => {
-144a123
+144a124
 >     // @ts-expect-error
-147,149c126
+147,149c127
 <     expectTemplate('{{foo}}')
 <       .withInput({ foo: 'bar' })
 <       .toCompileTo('bar');
 ---
 >     expectTemplate('{{foo}}').withInput({ foo: 'bar' }).toCompileTo('bar');
-150a128
+150a129
 >     // @ts-expect-error
-155,157c133,135
+155,157c134,136
 <   it('GH-437: Matching escaping', function() {
 <     expectTemplate('{{{a}}').toThrow(Error, /Parse error on/);
 <     expectTemplate('{{a}}}').toThrow(Error, /Parse error on/);
@@ -183,7 +184,7 @@
 >   it('GH-437: Matching escaping', () => {
 >     expectTemplate('{{{a}}').toThrow(/Parse error on/);
 >     expectTemplate('{{a}}}').toThrow(/Parse error on/);
-160,166c138,140
+160,166c139,141
 <   it('GH-676: Using array in escaping mustache fails', function() {
 <     var data = { arr: [1, 2] };
 < 
@@ -195,30 +196,30 @@
 >   it('GH-676: Using array in escaping mustache fails', () => {
 >     const data = { arr: [1, 2] };
 >     expectTemplate('{{arr}}').withInput(data).toCompileTo(data.arr.toString());
-169c143
+169c144
 <   it('Mustache man page', function() {
 ---
 >   it('Mustache man page', () => {
-177c151
+177c152
 <         in_ca: true
 ---
 >         in_ca: true,
-179,182c153
+179,182c154
 <       .withMessage('the hello world mustache example works')
 <       .toCompileTo(
 <         'Hello Chris. You have just won $10000! Well, $6000, after taxes.'
 <       );
 ---
 >       .toCompileTo('Hello Chris. You have just won $10000! Well, $6000, after taxes.');
-185c156
+185c157
 <   it('GH-731: zero context rendering', function() {
 ---
 >   it('GH-731: zero context rendering', () => {
-189c160
+189c161
 <         bar: 'OK'
 ---
 >         bar: 'OK',
-194,197c165,166
+194,197c166,167
 <   it('GH-820: zero pathed rendering', function() {
 <     expectTemplate('{{foo.bar}}')
 <       .withInput({ foo: 0 })
@@ -226,37 +227,37 @@
 ---
 >   it('GH-820: zero pathed rendering', () => {
 >     expectTemplate('{{foo.bar}}').withInput({ foo: 0 }).toCompileTo('');
-200c169
+200c170
 <   it('GH-837: undefined values for helpers', function() {
 ---
 >   it('GH-837: undefined values for helpers', () => {
-203c172
+203c173
 <         str: function(value) {
 ---
 >         str(value) {
-205c174
+205c175
 <         }
 ---
 >         },
-210c179
+210c180
 <   it('GH-926: Depths and de-dupe', function() {
 ---
 >   it('GH-926: Depths and de-dupe', () => {
-217c186
+217c187
 <         notData: [1]
 ---
 >         notData: [1],
-222c191
+222c192
 <   it('GH-1021: Each empty string key', function() {
 ---
 >   it('GH-1021: Each empty string key', () => {
-228,229c197,198
+228,229c198,199
 <           value: 10000
 <         }
 ---
 >           value: 10000,
 >         },
-234,248c203,204
+234,248c204,205
 <   it('GH-1054: Should handle simple safe string responses', function() {
 <     expectTemplate('{{#wrap}}{{>partial}}{{/wrap}}')
 <       .withHelpers({
@@ -275,27 +276,27 @@
 ---
 >   it('GH-1065: Sparse arrays', () => {
 >     const array = [];
-252c208
+252c209
 <       .withInput({ array: array })
 ---
 >       .withInput({ array })
-256c212
+256c213
 <   it('GH-1093: Undefined helper context', function() {
 ---
 >   it('GH-1093: Undefined helper context', () => {
-260c216
+260c217
 <         helper: function() {
 ---
 >         helper(this: any) {
-263c219
+263c220
 <           for (var name in this) {
 ---
 >           for (const name in this) {
-270c226
+270c227
 <         }
 ---
 >         },
-275,306c231
+275,306c232
 <   it('should support multiple levels of inline partials', function() {
 <     expectTemplate(
 <       '{{#> layout}}{{#*inline "subcontent"}}subcontent{{/inline}}{{/layout}}'
@@ -330,15 +331,15 @@
 <   it('GH-1135 : Context handling within each iteration', function() {
 ---
 >   it('GH-1135 : Context handling within each iteration', () => {
-315c240
+315c241
 <         myif: function(conditional, options) {
 ---
->         myif(conditional, options) {
-321c246
+>         myif(conditional, options: Handlebars.HelperOptions) {
+321c247
 <         }
 ---
 >         },
-326,343c251,252
+326,343c252,253
 <   it('GH-1186: Support block params for existing programs', function() {
 <     expectTemplate(
 <       '{{#*inline "test"}}{{> @partial-block }}{{/inline}}' +
@@ -360,13 +361,13 @@
 ---
 >   it('GH-1319: "unless" breaks when "each" value equals "null"', () => {
 >     expectTemplate('{{#each list}}{{#unless ./prop}}parent={{../value}} {{/unless}}{{/each}}')
-346c255
+346c256
 <         list: [null, 'a']
 ---
 >         list: [null, 'a'],
-348d256
+348d257
 <       .withMessage('')
-352,457c260
+352,457c261
 <   it('GH-1341: 4.0.7 release breaks {{#if @partial-block}} usage', function() {
 <     expectTemplate('template {{>partial}} template')
 <       .withPartials({
@@ -475,15 +476,15 @@
 <   it('should allow hash with protected array names', function() {
 ---
 >   it('should allow hash with protected array names', () => {
-461c264
+461c265
 <         helpa: function(options) {
 ---
->         helpa(options) {
-463c266
+>         helpa(options: Handlebars.HelperOptions) {
+463c267
 <         }
 ---
 >         },
-468,496c271,272
+468,496c272,273
 <   describe('GH-1598: Performance degradation for partials since v4.3.0', function() {
 <     // Do not run test for runs without compiler
 <     if (!Handlebars.compile) {

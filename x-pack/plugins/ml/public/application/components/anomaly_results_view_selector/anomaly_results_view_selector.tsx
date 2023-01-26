@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useEffect, useMemo, useRef } from 'react';
 
 import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { useUrlState } from '@kbn/ml-url-state';
 
 import type { ExplorerJob } from '../../explorer/explorer_utils';
-import { useUrlState } from '../../util/url_state';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { ML_PAGES } from '../../../../common/constants/locator';
 
@@ -25,6 +25,7 @@ interface Props {
  * Component for rendering a set of buttons for switching between the Anomaly Detection results views.
  */
 export const AnomalyResultsViewSelector: FC<Props> = ({ viewId, selectedJobs }) => {
+  const mounted = useRef(false);
   const locator = useMlLocator()!;
   const navigateToPath = useNavigateToPath();
 
@@ -65,19 +66,30 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId, selectedJobs }) 
         'data-test-subj': 'mlAnomalyResultsViewSelectorExplorer',
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isSingleMetricViewerDisabled, selectedJobs?.length]
   );
 
   const [globalState] = useUrlState('_g');
 
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   const onChangeView = async (newViewId: Props['viewId']) => {
-    const url = await locator.getUrl({
-      page: newViewId,
-      pageState: {
-        globalState,
-      },
-    });
-    await navigateToPath(url);
+    // Avoid calling and triggering a React state update on a possibly unmounted component
+    if (mounted.current) {
+      const url = await locator.getUrl({
+        page: newViewId,
+        pageState: {
+          globalState,
+        },
+      });
+      await navigateToPath(url);
+    }
   };
 
   return (

@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/ci-stats-reporter",
-        "id": "def-server.CiStatsReporter",
+        "id": "def-common.CiStatsReporter",
         "type": "Class",
         "tags": [],
         "label": "CiStatsReporter",
@@ -21,10 +29,11 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsReporter.fromEnv",
+            "id": "def-common.CiStatsReporter.fromEnv",
             "type": "Function",
             "tags": [],
             "label": "fromEnv",
@@ -33,31 +42,45 @@
             ],
             "signature": [
               "(log: ",
-              "SomeDevLog",
+              {
+                "pluginId": "@kbn/some-dev-log",
+                "scope": "common",
+                "docId": "kibKbnSomeDevLogPluginApi",
+                "section": "def-common.SomeDevLog",
+                "text": "SomeDevLog"
+              },
               ") => ",
               {
                 "pluginId": "@kbn/ci-stats-reporter",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCiStatsReporterPluginApi",
-                "section": "def-server.CiStatsReporter",
+                "section": "def-common.CiStatsReporter",
                 "text": "CiStatsReporter"
               }
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
-                "id": "def-server.CiStatsReporter.fromEnv.$1",
+                "id": "def-common.CiStatsReporter.fromEnv.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "SomeDevLog"
+                  {
+                    "pluginId": "@kbn/some-dev-log",
+                    "scope": "common",
+                    "docId": "kibKbnSomeDevLogPluginApi",
+                    "section": "def-common.SomeDevLog",
+                    "text": "SomeDevLog"
+                  }
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -65,7 +88,7 @@
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsReporter.Unnamed",
+            "id": "def-common.CiStatsReporter.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -75,34 +98,49 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
-                "id": "def-server.CiStatsReporter.Unnamed.$1",
+                "id": "def-common.CiStatsReporter.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Config",
+                  {
+                    "pluginId": "@kbn/ci-stats-core",
+                    "scope": "common",
+                    "docId": "kibKbnCiStatsCorePluginApi",
+                    "section": "def-common.Config",
+                    "text": "Config"
+                  },
                   " | undefined"
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
-                "id": "def-server.CiStatsReporter.Unnamed.$2",
+                "id": "def-common.CiStatsReporter.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "SomeDevLog"
+                  {
+                    "pluginId": "@kbn/some-dev-log",
+                    "scope": "common",
+                    "docId": "kibKbnSomeDevLogPluginApi",
+                    "section": "def-common.SomeDevLog",
+                    "text": "SomeDevLog"
+                  }
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -110,7 +148,7 @@
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsReporter.isEnabled",
+            "id": "def-common.CiStatsReporter.isEnabled",
             "type": "Function",
             "tags": [],
             "label": "isEnabled",
@@ -122,12 +160,13 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsReporter.hasBuildConfig",
+            "id": "def-common.CiStatsReporter.hasBuildConfig",
             "type": "Function",
             "tags": [],
             "label": "hasBuildConfig",
@@ -139,12 +178,13 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsReporter.timings",
+            "id": "def-common.CiStatsReporter.timings",
             "type": "Function",
             "tags": [],
             "label": "timings",
@@ -155,19 +195,20 @@
               "(options: ",
               {
                 "pluginId": "@kbn/ci-stats-reporter",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCiStatsReporterPluginApi",
-                "section": "def-server.TimingsOptions",
+                "section": "def-common.TimingsOptions",
                 "text": "TimingsOptions"
               },
               ") => Promise<boolean | undefined>"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
-                "id": "def-server.CiStatsReporter.timings.$1",
+                "id": "def-common.CiStatsReporter.timings.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -175,14 +216,15 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/ci-stats-reporter",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCiStatsReporterPluginApi",
-                    "section": "def-server.TimingsOptions",
+                    "section": "def-common.TimingsOptions",
                     "text": "TimingsOptions"
                   }
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -190,7 +232,7 @@
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsReporter.metrics",
+            "id": "def-common.CiStatsReporter.metrics",
             "type": "Function",
             "tags": [],
             "label": "metrics",
@@ -201,27 +243,28 @@
               "(metrics: ",
               {
                 "pluginId": "@kbn/ci-stats-reporter",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCiStatsReporterPluginApi",
-                "section": "def-server.CiStatsMetric",
+                "section": "def-common.CiStatsMetric",
                 "text": "CiStatsMetric"
               },
               "[], options?: ",
               {
                 "pluginId": "@kbn/ci-stats-reporter",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCiStatsReporterPluginApi",
-                "section": "def-server.MetricsOptions",
+                "section": "def-common.MetricsOptions",
                 "text": "MetricsOptions"
               },
               " | undefined) => Promise<boolean | undefined>"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
-                "id": "def-server.CiStatsReporter.metrics.$1",
+                "id": "def-common.CiStatsReporter.metrics.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "metrics",
@@ -229,20 +272,21 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/ci-stats-reporter",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCiStatsReporterPluginApi",
-                    "section": "def-server.CiStatsMetric",
+                    "section": "def-common.CiStatsMetric",
                     "text": "CiStatsMetric"
                   },
                   "[]"
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
-                "id": "def-server.CiStatsReporter.metrics.$2",
+                "id": "def-common.CiStatsReporter.metrics.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -250,15 +294,16 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/ci-stats-reporter",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCiStatsReporterPluginApi",
-                    "section": "def-server.MetricsOptions",
+                    "section": "def-common.MetricsOptions",
                     "text": "MetricsOptions"
                   },
                   " | undefined"
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -266,7 +311,7 @@
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsReporter.reportTests",
+            "id": "def-common.CiStatsReporter.reportTests",
             "type": "Function",
             "tags": [],
             "label": "reportTests",
@@ -277,19 +322,20 @@
               "({ group, testRuns }: ",
               {
                 "pluginId": "@kbn/ci-stats-reporter",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCiStatsReporterPluginApi",
-                "section": "def-server.CiStatsReportTestsOptions",
+                "section": "def-common.CiStatsReportTestsOptions",
                 "text": "CiStatsReportTestsOptions"
               },
               ") => Promise<void>"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
-                "id": "def-server.CiStatsReporter.reportTests.$1",
+                "id": "def-common.CiStatsReporter.reportTests.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ group, testRuns }",
@@ -297,14 +343,15 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/ci-stats-reporter",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCiStatsReporterPluginApi",
-                    "section": "def-server.CiStatsReportTestsOptions",
+                    "section": "def-common.CiStatsReportTestsOptions",
                     "text": "CiStatsReportTestsOptions"
                   }
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -312,7 +359,7 @@
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsReporter.reportPerformanceMetrics",
+            "id": "def-common.CiStatsReporter.reportPerformanceMetrics",
             "type": "Function",
             "tags": [],
             "label": "reportPerformanceMetrics",
@@ -324,10 +371,11 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
-                "id": "def-server.CiStatsReporter.reportPerformanceMetrics.$1",
+                "id": "def-common.CiStatsReporter.reportPerformanceMetrics.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "metrics",
@@ -337,6 +385,7 @@
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -349,36 +398,50 @@
     "functions": [
       {
         "parentPluginId": "@kbn/ci-stats-reporter",
-        "id": "def-server.getTimeReporter",
+        "id": "def-common.getTimeReporter",
         "type": "Function",
         "tags": [],
         "label": "getTimeReporter",
         "description": [],
         "signature": [
           "(log: ",
-          "ToolingLog",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
           ", group: string) => (startTime: number, id: string, meta: Record<string, any>) => Promise<void>"
         ],
         "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.getTimeReporter.$1",
+            "id": "def-common.getTimeReporter.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
             ],
             "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.getTimeReporter.$2",
+            "id": "def-common.getTimeReporter.$2",
             "type": "string",
             "tags": [],
             "label": "group",
@@ -388,6 +451,7 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -398,7 +462,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/ci-stats-reporter",
-        "id": "def-server.CiStatsMetric",
+        "id": "def-common.CiStatsMetric",
         "type": "Interface",
         "tags": [],
         "label": "CiStatsMetric",
@@ -407,10 +471,11 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsMetric.group",
+            "id": "def-common.CiStatsMetric.group",
             "type": "string",
             "tags": [],
             "label": "group",
@@ -418,11 +483,12 @@
               "Top-level categorization for the metric, e.g. \"page load bundle size\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsMetric.id",
+            "id": "def-common.CiStatsMetric.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -430,11 +496,12 @@
               "Specific sub-set of the \"group\", e.g. \"dashboard\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsMetric.value",
+            "id": "def-common.CiStatsMetric.value",
             "type": "number",
             "tags": [],
             "label": "value",
@@ -442,11 +509,12 @@
               "integer value recorded as the value of this metric"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsMetric.limit",
+            "id": "def-common.CiStatsMetric.limit",
             "type": "number",
             "tags": [],
             "label": "limit",
@@ -457,26 +525,28 @@
               "number | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsMetric.limitConfigPath",
+            "id": "def-common.CiStatsMetric.limitConfigPath",
             "type": "string",
             "tags": [],
             "label": "limitConfigPath",
             "description": [
-              "\npath, relative to the repo, where the config file contianing limits\nis kept. Linked from PR comments instructing contributors how to fix\ntheir PRs."
+              "\npath, relative to the repo, where the config file containing limits\nis kept. Linked from PR comments instructing contributors how to fix\ntheir PRs."
             ],
             "signature": [
               "string | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsMetric.meta",
+            "id": "def-common.CiStatsMetric.meta",
             "type": "Object",
             "tags": [],
             "label": "meta",
@@ -484,18 +554,25 @@
               "Arbitrary key-value pairs which can be used for additional filtering/reporting"
             ],
             "signature": [
-              "CiStatsMetadata",
+              {
+                "pluginId": "@kbn/ci-stats-core",
+                "scope": "common",
+                "docId": "kibKbnCiStatsCorePluginApi",
+                "section": "def-common.CiStatsMetadata",
+                "text": "CiStatsMetadata"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ci-stats-reporter",
-        "id": "def-server.CiStatsReportTestsOptions",
+        "id": "def-common.CiStatsReportTestsOptions",
         "type": "Interface",
         "tags": [],
         "label": "CiStatsReportTestsOptions",
@@ -504,10 +581,11 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsReportTestsOptions.group",
+            "id": "def-common.CiStatsReportTestsOptions.group",
             "type": "Object",
             "tags": [],
             "label": "group",
@@ -517,18 +595,19 @@
             "signature": [
               {
                 "pluginId": "@kbn/ci-stats-reporter",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCiStatsReporterPluginApi",
-                "section": "def-server.CiStatsTestGroupInfo",
+                "section": "def-common.CiStatsTestGroupInfo",
                 "text": "CiStatsTestGroupInfo"
               }
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsReportTestsOptions.testRuns",
+            "id": "def-common.CiStatsReportTestsOptions.testRuns",
             "type": "Array",
             "tags": [],
             "label": "testRuns",
@@ -538,32 +617,34 @@
             "signature": [
               {
                 "pluginId": "@kbn/ci-stats-reporter",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCiStatsReporterPluginApi",
-                "section": "def-server.CiStatsTestRun",
+                "section": "def-common.CiStatsTestRun",
                 "text": "CiStatsTestRun"
               },
               "[]"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ci-stats-reporter",
-        "id": "def-server.CiStatsTestGroupInfo",
+        "id": "def-common.CiStatsTestGroupInfo",
         "type": "Interface",
         "tags": [],
         "label": "CiStatsTestGroupInfo",
         "description": [],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestGroupInfo.startTime",
+            "id": "def-common.CiStatsTestGroupInfo.startTime",
             "type": "string",
             "tags": [],
             "label": "startTime",
@@ -571,11 +652,12 @@
               "\nISO-8601 formatted datetime representing when the group of tests started running"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestGroupInfo.durationMs",
+            "id": "def-common.CiStatsTestGroupInfo.durationMs",
             "type": "number",
             "tags": [],
             "label": "durationMs",
@@ -583,11 +665,12 @@
               "\nThe number of miliseconds that the tests ran for"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestGroupInfo.type",
+            "id": "def-common.CiStatsTestGroupInfo.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -595,11 +678,12 @@
               "\nThe type of tests run in this group, any value is valid but test groups are groupped by type in the UI so use something consistent"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestGroupInfo.name",
+            "id": "def-common.CiStatsTestGroupInfo.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -607,11 +691,12 @@
               "\nThe name of this specific group (within the \"type\")"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestGroupInfo.result",
+            "id": "def-common.CiStatsTestGroupInfo.result",
             "type": "CompoundType",
             "tags": [],
             "label": "result",
@@ -619,14 +704,15 @@
               "\nOverall result of this test group"
             ],
             "signature": [
-              "\"fail\" | \"pass\" | \"skip\""
+              "\"skip\" | \"fail\" | \"pass\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestGroupInfo.meta",
+            "id": "def-common.CiStatsTestGroupInfo.meta",
             "type": "Object",
             "tags": [],
             "label": "meta",
@@ -634,27 +720,35 @@
               "\nArbitrary metadata associated with this group. We currently look for a ciGroup metadata property for highlighting that when appropriate"
             ],
             "signature": [
-              "CiStatsMetadata"
+              {
+                "pluginId": "@kbn/ci-stats-core",
+                "scope": "common",
+                "docId": "kibKbnCiStatsCorePluginApi",
+                "section": "def-common.CiStatsMetadata",
+                "text": "CiStatsMetadata"
+              }
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ci-stats-reporter",
-        "id": "def-server.CiStatsTestRun",
+        "id": "def-common.CiStatsTestRun",
         "type": "Interface",
         "tags": [],
         "label": "CiStatsTestRun",
         "description": [],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestRun.startTime",
+            "id": "def-common.CiStatsTestRun.startTime",
             "type": "string",
             "tags": [],
             "label": "startTime",
@@ -662,11 +756,12 @@
               "\nISO-8601 formatted datetime representing when the tests started running"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestRun.durationMs",
+            "id": "def-common.CiStatsTestRun.durationMs",
             "type": "number",
             "tags": [],
             "label": "durationMs",
@@ -674,11 +769,12 @@
               "\nDuration of the tests in milliseconds"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestRun.seq",
+            "id": "def-common.CiStatsTestRun.seq",
             "type": "number",
             "tags": [],
             "label": "seq",
@@ -686,11 +782,12 @@
               "\nA sequence number, this is used to order the tests in a specific test run"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestRun.type",
+            "id": "def-common.CiStatsTestRun.type",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
@@ -701,11 +798,12 @@
               "\"after all hook\" | \"after each hook\" | \"before all hook\" | \"before each hook\" | \"test\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestRun.result",
+            "id": "def-common.CiStatsTestRun.result",
             "type": "CompoundType",
             "tags": [],
             "label": "result",
@@ -713,14 +811,15 @@
               "\n\"fail\", \"pass\" or \"skip\", the result of the tests"
             ],
             "signature": [
-              "\"fail\" | \"pass\" | \"skip\""
+              "\"skip\" | \"fail\" | \"pass\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestRun.suites",
+            "id": "def-common.CiStatsTestRun.suites",
             "type": "Array",
             "tags": [],
             "label": "suites",
@@ -731,11 +830,12 @@
               "string[]"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestRun.name",
+            "id": "def-common.CiStatsTestRun.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -743,11 +843,12 @@
               "\nThe name of this specific test run"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestRun.file",
+            "id": "def-common.CiStatsTestRun.file",
             "type": "string",
             "tags": [],
             "label": "file",
@@ -755,11 +856,12 @@
               "\nRelative path from the root of the repo contianing this test"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestRun.error",
+            "id": "def-common.CiStatsTestRun.error",
             "type": "string",
             "tags": [],
             "label": "error",
@@ -770,11 +872,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestRun.stdout",
+            "id": "def-common.CiStatsTestRun.stdout",
             "type": "string",
             "tags": [],
             "label": "stdout",
@@ -785,11 +888,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTestRun.screenshots",
+            "id": "def-common.CiStatsTestRun.screenshots",
             "type": "Array",
             "tags": [],
             "label": "screenshots",
@@ -800,14 +904,15 @@
               "{ name: string; base64Png: string; }[] | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ci-stats-reporter",
-        "id": "def-server.CiStatsTiming",
+        "id": "def-common.CiStatsTiming",
         "type": "Interface",
         "tags": [],
         "label": "CiStatsTiming",
@@ -816,10 +921,11 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTiming.group",
+            "id": "def-common.CiStatsTiming.group",
             "type": "string",
             "tags": [],
             "label": "group",
@@ -827,11 +933,12 @@
               "Top-level categorization for the timing, e.g. \"scripts/foo\", process type, etc."
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTiming.id",
+            "id": "def-common.CiStatsTiming.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -839,11 +946,12 @@
               "Specific timing (witin the \"group\" being tracked) e.g. \"total\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTiming.ms",
+            "id": "def-common.CiStatsTiming.ms",
             "type": "number",
             "tags": [],
             "label": "ms",
@@ -851,11 +959,12 @@
               "time in milliseconds which should be recorded"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.CiStatsTiming.meta",
+            "id": "def-common.CiStatsTiming.meta",
             "type": "Object",
             "tags": [],
             "label": "meta",
@@ -863,18 +972,25 @@
               "hash of key-value pairs which will be stored with the timing for additional filtering and reporting"
             ],
             "signature": [
-              "CiStatsMetadata",
+              {
+                "pluginId": "@kbn/ci-stats-core",
+                "scope": "common",
+                "docId": "kibKbnCiStatsCorePluginApi",
+                "section": "def-common.CiStatsMetadata",
+                "text": "CiStatsMetadata"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ci-stats-reporter",
-        "id": "def-server.MetricsOptions",
+        "id": "def-common.MetricsOptions",
         "type": "Interface",
         "tags": [],
         "label": "MetricsOptions",
@@ -883,10 +999,11 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.MetricsOptions.defaultMeta",
+            "id": "def-common.MetricsOptions.defaultMeta",
             "type": "Object",
             "tags": [],
             "label": "defaultMeta",
@@ -894,18 +1011,25 @@
               "Default metadata to add to each metric"
             ],
             "signature": [
-              "CiStatsMetadata",
+              {
+                "pluginId": "@kbn/ci-stats-core",
+                "scope": "common",
+                "docId": "kibKbnCiStatsCorePluginApi",
+                "section": "def-common.CiStatsMetadata",
+                "text": "CiStatsMetadata"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ci-stats-reporter",
-        "id": "def-server.TimingsOptions",
+        "id": "def-common.TimingsOptions",
         "type": "Interface",
         "tags": [],
         "label": "TimingsOptions",
@@ -914,10 +1038,11 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.TimingsOptions.timings",
+            "id": "def-common.TimingsOptions.timings",
             "type": "Array",
             "tags": [],
             "label": "timings",
@@ -927,19 +1052,20 @@
             "signature": [
               {
                 "pluginId": "@kbn/ci-stats-reporter",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCiStatsReporterPluginApi",
-                "section": "def-server.CiStatsTiming",
+                "section": "def-common.CiStatsTiming",
                 "text": "CiStatsTiming"
               },
               "[]"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.TimingsOptions.upstreamBranch",
+            "id": "def-common.TimingsOptions.upstreamBranch",
             "type": "string",
             "tags": [],
             "label": "upstreamBranch",
@@ -950,11 +1076,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
-            "id": "def-server.TimingsOptions.kibanaUuid",
+            "id": "def-common.TimingsOptions.kibanaUuid",
             "type": "CompoundType",
             "tags": [],
             "label": "kibanaUuid",
@@ -965,7 +1092,8 @@
               "string | null | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -975,21 +1103,22 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ci-stats-reporter",
-        "id": "def-server.CiStatsTestResult",
+        "id": "def-common.CiStatsTestResult",
         "type": "Type",
         "tags": [],
         "label": "CiStatsTestResult",
         "description": [],
         "signature": [
-          "\"fail\" | \"pass\" | \"skip\""
+          "\"skip\" | \"fail\" | \"pass\""
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ci-stats-reporter",
-        "id": "def-server.CiStatsTestType",
+        "id": "def-common.CiStatsTestType",
         "type": "Type",
         "tags": [],
         "label": "CiStatsTestType",
@@ -999,17 +1128,10 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

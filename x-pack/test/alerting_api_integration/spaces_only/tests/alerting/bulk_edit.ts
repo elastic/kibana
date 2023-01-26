@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../scenarios';
 import {
@@ -16,6 +17,18 @@ import {
   createWaitForExecutionCount,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+
+const getSnoozeSchedule = () => {
+  return {
+    id: uuidv4(),
+    duration: 28800000,
+    rRule: {
+      dtstart: '2022-09-19T11:49:59.329Z',
+      count: 1,
+      tzid: 'America/Vancouver',
+    },
+  };
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
@@ -254,6 +267,212 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         type: 'alert',
         id: createdRule.id,
       });
+    });
+
+    it('should bulk snooze rule with snoozeSchedule operation', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ enabled: false }));
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: {
+              duration: 28800000,
+              rRule: {
+                dtstart: '2022-09-19T11:49:59.329Z',
+                count: 1,
+                tzid: 'America/Vancouver',
+              },
+            },
+          },
+        ],
+      };
+
+      const bulkSnoozeResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkSnoozeResponse.body.errors).to.have.length(0);
+      expect(bulkSnoozeResponse.body.rules).to.have.length(1);
+      expect(bulkSnoozeResponse.body.rules[0].snooze_schedule.length).to.eql(1);
+      expect(bulkSnoozeResponse.body.rules[0].snooze_schedule[0].duration).to.eql(28800000);
+
+      const bulkUnsnoozeResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...payload,
+          operations: [
+            {
+              operation: 'delete',
+              field: 'snoozeSchedule',
+            },
+          ],
+        });
+
+      expect(bulkUnsnoozeResponse.body.errors).to.have.length(0);
+      expect(bulkUnsnoozeResponse.body.rules).to.have.length(1);
+      expect(bulkUnsnoozeResponse.body.rules[0].snooze_schedule).empty();
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdRule.id,
+      });
+    });
+
+    it('should bulk snooze schedule rule with snoozeSchedule operation', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ enabled: false }));
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+        ],
+      };
+
+      const bulkSnoozeResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkSnoozeResponse.body.errors).to.have.length(0);
+      expect(bulkSnoozeResponse.body.rules).to.have.length(1);
+      expect(bulkSnoozeResponse.body.rules[0].snooze_schedule.length).to.eql(5);
+
+      // Try adding more than 5 schedules
+      const bulkSnoozeError = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...payload,
+          operations: [
+            {
+              operation: 'set',
+              field: 'snoozeSchedule',
+              value: getSnoozeSchedule(),
+            },
+          ],
+        });
+
+      expect(bulkSnoozeError.body.errors).to.have.length(1);
+      expect(bulkSnoozeError.body.rules).to.have.length(0);
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdRule.id,
+      });
+    });
+
+    it('should ignore bulk snooze and snooze schedule rule for SIEM rules', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ enabled: false, consumer: 'siem' }));
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+        ],
+      };
+
+      const bulkSnoozeResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkSnoozeResponse.body.errors).to.have.length(0);
+      expect(bulkSnoozeResponse.body.rules).to.have.length(1);
+      expect(bulkSnoozeResponse.body.rules[0].snooze_schedule).empty();
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdRule.id,
+      });
+    });
+
+    it('should bulk update API key with apiKey operation', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: false,
+          })
+        );
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'set',
+            field: 'apiKey',
+          },
+        ],
+      };
+
+      const bulkApiKeyResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkApiKeyResponse.body.errors).to.have.length(0);
+      expect(bulkApiKeyResponse.body.rules).to.have.length(1);
+      expect(bulkApiKeyResponse.body.rules[0].api_key_owner).to.eql(null);
     });
 
     it(`shouldn't bulk edit rule from another space`, async () => {

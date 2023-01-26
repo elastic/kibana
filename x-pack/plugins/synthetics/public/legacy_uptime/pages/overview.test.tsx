@@ -8,22 +8,14 @@
 import React from 'react';
 import { OverviewPageComponent } from './overview';
 import { render } from '../lib/helper/rtl_helpers';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
+import { SIMPLE_SEARCH_PLACEHOLDER } from '../components/overview/query_bar/translations';
 
 describe('MonitorPage', () => {
-  beforeEach(() => {
-    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
-    setAutocomplete(autocompleteStart.autocomplete);
-  });
-
   it('renders expected elements for valid props', async () => {
     const { findByText, findByPlaceholderText } = render(<OverviewPageComponent />);
 
     expect(await findByText('No uptime monitors found')).toBeInTheDocument();
 
-    expect(
-      await findByPlaceholderText('Search by monitor ID, name, or url (E.g. http:// )')
-    ).toBeInTheDocument();
+    expect(await findByPlaceholderText(SIMPLE_SEARCH_PLACEHOLDER)).toBeInTheDocument();
   });
 });

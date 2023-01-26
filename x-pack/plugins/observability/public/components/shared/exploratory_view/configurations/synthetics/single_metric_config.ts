@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { SYNTHETICS_STEP_NAME } from '../constants/field_names/synthetics';
+import { i18n } from '@kbn/i18n';
+import { LegacyMetricState } from '@kbn/lens-plugin/common';
+import { euiPaletteForStatus } from '@elastic/eui';
+import {
+  SYNTHETICS_STEP_DURATION,
+  SYNTHETICS_STEP_NAME,
+} from '../constants/field_names/synthetics';
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, FORMULA_COLUMN } from '../constants';
+import { FieldLabels, FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { buildExistsFilter } from '../utils';
 
 export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
@@ -28,7 +34,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
     ],
     reportType: 'single-metric',
-    baseFilters: [...buildExistsFilter('summary.up', dataView)],
+    baseFilters: [],
     metricOptions: [
       {
         id: 'monitor_availability',
@@ -64,8 +70,109 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           },
           titlePosition: 'bottom',
         },
+        columnFilter: { language: 'kuery', query: 'summary.up: *' },
+      },
+      {
+        id: 'monitor_duration',
+        field: 'monitor.duration.us',
+        label: i18n.translate('xpack.observability.expView.avgDuration', {
+          defaultMessage: 'Avg. Duration',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+        columnFilter: { language: 'kuery', query: 'summary.up: *' },
+      },
+      {
+        id: 'step_duration',
+        field: SYNTHETICS_STEP_DURATION,
+        label: i18n.translate('xpack.observability.expView.stepDuration', {
+          defaultMessage: 'Total step duration',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+          textAlign: 'center',
+        },
+      },
+      {
+        id: 'monitor_total_runs',
+        label: i18n.translate('xpack.observability.expView.totalRuns', {
+          defaultMessage: 'Total Runs',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+        columnType: FORMULA_COLUMN,
+        formula: "unique_count(monitor.check_group, kql='summary: *')",
+        format: 'number',
+      },
+      {
+        id: 'monitor_complete',
+        label: i18n.translate('xpack.observability.expView.complete', {
+          defaultMessage: 'Complete',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+        columnType: FORMULA_COLUMN,
+        formula: 'unique_count(monitor.check_group, kql=\'monitor.status: "up"\')',
+        format: 'number',
+      },
+      {
+        id: 'monitor_errors',
+        label: i18n.translate('xpack.observability.expView.errors', {
+          defaultMessage: 'Errors',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+          colorMode: 'Labels',
+          palette: getColorPalette('danger'),
+        },
+        columnType: FORMULA_COLUMN,
+        formula: 'unique_count(state.id, kql=\'monitor.status: "down"\')',
+        format: 'number',
+      },
+      {
+        id: 'monitor_failed_tests',
+        label: i18n.translate('xpack.observability.expView.failedTests', {
+          defaultMessage: 'Failed tests',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+        field: RECORDS_FIELD,
+        format: 'number',
+        columnFilter: { language: 'kuery', query: 'summary.down > 0' },
       },
     ],
     labels: FieldLabels,
   };
 }
+
+export const getColorPalette = (
+  color: 'danger' | 'warning' | 'success' | string
+): LegacyMetricState['palette'] => {
+  const statusPalette = euiPaletteForStatus(5);
+
+  let valueColor = color ?? statusPalette[3];
+  if (color === 'danger') {
+    valueColor = statusPalette[3];
+  }
+
+  return {
+    name: 'custom',
+    type: 'palette',
+    params: {
+      steps: 3,
+      name: 'custom',
+      reverse: false,
+      rangeType: 'number',
+      rangeMin: 0,
+      progression: 'fixed',
+      stops: [{ color: valueColor, stop: 100 }],
+      colorStops: [{ color: valueColor, stop: 0 }],
+      continuity: 'above',
+      maxSteps: 5,
+    },
+  };
+};

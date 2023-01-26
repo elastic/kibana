@@ -11,6 +11,32 @@ import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert, PublicAlert } from './alert';
 import { processAlerts } from '../lib';
 
+export interface AlertFactory<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> {
+  create: (id: string) => PublicAlert<State, Context, ActionGroupIds>;
+  alertLimit: {
+    getValue: () => number;
+    setLimitReached: (reached: boolean) => void;
+    checkLimitUsage: () => void;
+  };
+  hasReachedAlertLimit: () => boolean;
+  done: () => AlertFactoryDoneUtils<State, Context, ActionGroupIds>;
+}
+
+export type PublicAlertFactory<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> = Pick<AlertFactory<State, Context, ActionGroupIds>, 'create' | 'done'> & {
+  alertLimit: Pick<
+    AlertFactory<State, Context, ActionGroupIds>['alertLimit'],
+    'getValue' | 'setLimitReached'
+  >;
+};
+
 export interface AlertFactoryDoneUtils<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
@@ -26,6 +52,7 @@ export interface CreateAlertFactoryOpts<
   alerts: Record<string, Alert<State, Context>>;
   logger: Logger;
   maxAlerts: number;
+  autoRecoverAlerts: boolean;
   canSetRecoveryContext?: boolean;
 }
 
@@ -37,8 +64,9 @@ export function createAlertFactory<
   alerts,
   logger,
   maxAlerts,
+  autoRecoverAlerts,
   canSetRecoveryContext = false,
-}: CreateAlertFactoryOpts<State, Context>) {
+}: CreateAlertFactoryOpts<State, Context>): AlertFactory<State, Context, ActionGroupIds> {
   // Keep track of which alerts we started with so we can determine which have recovered
   const originalAlerts = cloneDeep(alerts);
 
@@ -47,6 +75,12 @@ export function createAlertFactory<
 
   // Whether the number of alerts reported has reached max allowed
   let hasReachedAlertLimit = false;
+
+  // Whether rule type has asked for the alert limit
+  let hasRequestedAlertLimit = false;
+
+  // Whether rule type has reported back if alert limit was reached
+  let hasReportedLimitReached = false;
 
   let isDone = false;
   return {
@@ -66,6 +100,25 @@ export function createAlertFactory<
 
       return alerts[id];
     },
+    // namespace alert limit services for rule type executors to use
+    alertLimit: {
+      getValue: (): number => {
+        hasRequestedAlertLimit = true;
+        return maxAlerts;
+      },
+      setLimitReached: (reached: boolean) => {
+        hasReportedLimitReached = true;
+        hasReachedAlertLimit = reached;
+      },
+      checkLimitUsage: () => {
+        // If the rule type has requested the value but never reported back, throw an error
+        if (hasRequestedAlertLimit && !hasReportedLimitReached) {
+          throw new Error(
+            `Rule has not reported whether alert limit has been reached after requesting limit value!`
+          );
+        }
+      },
+    },
     hasReachedAlertLimit: (): boolean => hasReachedAlertLimit,
     done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => {
       isDone = true;
@@ -77,20 +130,50 @@ export function createAlertFactory<
             );
             return [];
           }
+          if (!autoRecoverAlerts) {
+            logger.debug(
+              `Set autoRecoverAlerts to true on rule type to get access to recovered alerts.`
+            );
+            return [];
+          }
 
-          const { recoveredAlerts } = processAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
-            {
-              alerts,
-              existingAlerts: originalAlerts,
-              hasReachedAlertLimit,
-              alertLimit: maxAlerts,
-            }
-          );
-          return Object.keys(recoveredAlerts ?? {}).map(
-            (alertId: string) => recoveredAlerts[alertId]
+          const { currentRecoveredAlerts } = processAlerts<
+            State,
+            Context,
+            ActionGroupIds,
+            ActionGroupIds
+          >({
+            alerts,
+            existingAlerts: originalAlerts,
+            previouslyRecoveredAlerts: {},
+            hasReachedAlertLimit,
+            alertLimit: maxAlerts,
+            autoRecoverAlerts,
+            // setFlapping is false, as we only want to use this function to get the recovered alerts
+            setFlapping: false,
+          });
+          return Object.keys(currentRecoveredAlerts ?? {}).map(
+            (alertId: string) => currentRecoveredAlerts[alertId]
           );
         },
       };
     },
+  };
+}
+
+export function getPublicAlertFactory<
+  State extends AlertInstanceState = AlertInstanceState,
+  Context extends AlertInstanceContext = AlertInstanceContext,
+  ActionGroupIds extends string = string
+>(
+  alertFactory: AlertFactory<State, Context, ActionGroupIds>
+): PublicAlertFactory<State, Context, ActionGroupIds> {
+  return {
+    create: (...args): PublicAlert<State, Context, ActionGroupIds> => alertFactory.create(...args),
+    alertLimit: {
+      getValue: (): number => alertFactory.alertLimit.getValue(),
+      setLimitReached: (...args): void => alertFactory.alertLimit.setLimitReached(...args),
+    },
+    done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => alertFactory.done(),
   };
 }

@@ -22,6 +22,7 @@ import {
   EuiTitle,
   htmlIdGenerator,
   useIsWithinBreakpoints,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -100,7 +101,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
 }) => {
   const isSmallerBreakpoint = useIsWithinBreakpoints(mobileBreakpoints);
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-  const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
+  const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
 
   // This is used for both the `EuiSideNav` and `EuiFlyout` toggling
   const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);

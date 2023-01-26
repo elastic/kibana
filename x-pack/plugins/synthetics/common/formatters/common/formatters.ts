@@ -16,6 +16,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.ENABLED]: null,
+  [ConfigKey.ALERT_CONFIG]: null,
   [ConfigKey.CONFIG_ID]: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(
@@ -28,6 +29,12 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.REVISION]: null,
   [ConfigKey.MONITOR_SOURCE_TYPE]: null,
   [ConfigKey.FORM_MONITOR_TYPE]: null,
+  [ConfigKey.JOURNEY_ID]: null,
+  [ConfigKey.PROJECT_ID]: null,
+  [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
+  [ConfigKey.ORIGINAL_SPACE]: null,
+  [ConfigKey.CONFIG_HASH]: null,
+  [ConfigKey.MONITOR_QUERY_ID]: null,
 };
 
 export const arrayToJsonFormatter = (value: string[] = []) =>

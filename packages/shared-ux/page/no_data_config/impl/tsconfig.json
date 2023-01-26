@@ -1,11 +1,7 @@
 {
-  "extends": "../../../../../tsconfig.bazel.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
@@ -16,5 +12,15 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-page-solution-nav",
+    "@kbn/shared-ux-page-no-data",
+    "@kbn/shared-ux-page-no-data-config-types",
+    "@kbn/shared-ux-page-no-data-config-mocks",
+    "@kbn/test-jest-helpers",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

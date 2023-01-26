@@ -36,7 +36,13 @@
             "text": "StorybookMock"
           },
           " extends ",
-          "AbstractStorybookMock",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
           "<",
           "ExitFullScreenButtonProps",
           ", ",
@@ -45,6 +51,7 @@
         ],
         "path": "packages/shared-ux/button/exit_full_screen/mocks/src/storybook.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
@@ -55,6 +62,7 @@
             "description": [],
             "path": "packages/shared-ux/button/exit_full_screen/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
@@ -65,6 +73,7 @@
                 "description": [],
                 "path": "packages/shared-ux/button/exit_full_screen/mocks/src/storybook.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
@@ -74,7 +83,8 @@
                     "label": "control",
                     "description": [],
                     "path": "packages/shared-ux/button/exit_full_screen/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
@@ -84,7 +94,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "packages/shared-ux/button/exit_full_screen/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -99,6 +110,7 @@
             "description": [],
             "path": "packages/shared-ux/button/exit_full_screen/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -112,7 +124,8 @@
               "never[]"
             ],
             "path": "packages/shared-ux/button/exit_full_screen/mocks/src/storybook.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
@@ -135,6 +148,7 @@
             ],
             "path": "packages/shared-ux/button/exit_full_screen/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
@@ -155,6 +169,7 @@
                 ],
                 "path": "packages/shared-ux/button/exit_full_screen/mocks/src/storybook.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -173,6 +188,7 @@
             ],
             "path": "packages/shared-ux/button/exit_full_screen/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -196,6 +212,7 @@
         ],
         "path": "packages/shared-ux/button/exit_full_screen/mocks/src/jest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -215,6 +232,7 @@
         ],
         "path": "packages/shared-ux/button/exit_full_screen/mocks/src/jest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -237,6 +255,7 @@
         ],
         "path": "packages/shared-ux/button/exit_full_screen/mocks/src/storybook.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

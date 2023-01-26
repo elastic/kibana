@@ -9,12 +9,18 @@ import type {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
+  ExceptionListSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   ListId,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+
+import {
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+  INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
+} from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
@@ -43,7 +49,7 @@ export class ExceptionsListApiClient {
   }
 
   /**
-   * PrivateStatic method that creates the list and don't throw if list already exists.
+   * PrivateStatic method that creates the list.
    * This method is being used when initializing an instance only once.
    */
   private async createExceptionList(): Promise<void> {
@@ -55,19 +61,14 @@ export class ExceptionsListApiClient {
       new Promise<void>((resolve, reject) => {
         const asyncFunction = async () => {
           try {
-            await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
+            await this.http.post<ExceptionListSchema>(INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL, {
               body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
             });
 
             resolve();
           } catch (err) {
-            // Ignore 409 errors. List already created
-            if (err.response?.status !== 409) {
-              ExceptionsListApiClient.wasListCreated.delete(this.listId);
-              reject(err);
-            }
-
-            resolve();
+            ExceptionsListApiClient.wasListCreated.delete(this.listId);
+            reject(err);
           }
         };
         asyncFunction();
@@ -91,6 +92,10 @@ export class ExceptionsListApiClient {
 
   public isHttp(coreHttp: HttpStart): boolean {
     return this.http === coreHttp;
+  }
+
+  protected getHttp(): HttpStart {
+    return this.http;
   }
 
   /**

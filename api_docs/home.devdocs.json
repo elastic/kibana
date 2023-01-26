@@ -11,6 +11,7 @@
         "description": [],
         "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -40,6 +41,7 @@
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -52,11 +54,18 @@
             "description": [],
             "signature": [
               "({ capabilities }: { capabilities: ",
-              "Capabilities",
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              },
               "; }) => void"
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "home",
@@ -67,6 +76,7 @@
                 "description": [],
                 "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "home",
@@ -76,10 +86,17 @@
                     "label": "capabilities",
                     "description": [],
                     "signature": [
-                      "Capabilities"
+                      {
+                        "pluginId": "@kbn/core-capabilities-common",
+                        "scope": "common",
+                        "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                        "section": "def-common.Capabilities",
+                        "text": "Capabilities"
+                      }
                     ],
                     "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -106,6 +123,7 @@
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -129,6 +147,7 @@
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -144,6 +163,7 @@
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "home",
@@ -157,6 +177,7 @@
                 ],
                 "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -180,10 +201,11 @@
           "\nConvert instruction variant id into display text.\n"
         ],
         "signature": [
-          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\") => string"
+          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\") => any"
         ],
         "path": "src/plugins/home/common/instruction_variant.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -197,6 +219,7 @@
             ],
             "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -216,6 +239,7 @@
         "description": [],
         "path": "src/plugins/home/public/services/add_data/add_data_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -225,7 +249,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/home/public/services/add_data/add_data_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -235,7 +260,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/home/public/services/add_data/add_data_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -249,6 +275,7 @@
             ],
             "path": "src/plugins/home/public/services/add_data/add_data_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -262,7 +289,8 @@
                   "P & { children?: React.ReactNode; }"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "home",
@@ -275,7 +303,8 @@
                   "any"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -291,6 +320,7 @@
         "description": [],
         "path": "src/plugins/home/public/services/environment/environment.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -302,7 +332,8 @@
               "\nFlag whether the home app should advertise cloud features"
             ],
             "path": "src/plugins/home/public/services/environment/environment.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -314,7 +345,8 @@
               "\nFlag whether the home app should advertise apm features"
             ],
             "path": "src/plugins/home/public/services/environment/environment.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -326,7 +358,8 @@
               "\nFlag whether the home app should advertise ml features"
             ],
             "path": "src/plugins/home/public/services/environment/environment.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -340,6 +373,7 @@
         "description": [],
         "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -351,7 +385,8 @@
               "Unique string identifier for this feature."
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -363,7 +398,8 @@
               "Title of feature displayed to the user."
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -378,7 +414,8 @@
               "\"data\" | \"other\" | \"admin\""
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -393,7 +430,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -405,7 +443,8 @@
               "One-line description of feature displayed to the user."
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -420,7 +459,8 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -432,7 +472,8 @@
               "URL path to link to this future. Should not include the basePath."
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -444,7 +485,8 @@
               "Whether or not this link should be shown on the front page of Kibana."
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -459,7 +501,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -475,6 +518,7 @@
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -491,7 +535,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -505,6 +550,7 @@
         "description": [],
         "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -516,7 +562,8 @@
               "Unique string identifier for this solution."
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -528,7 +575,8 @@
               "Title of solution displayed to the user."
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -540,7 +588,8 @@
               "One-line description of the solution displayed to the user."
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -555,7 +604,8 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -567,7 +617,8 @@
               "URL path to link to this future. Should not include the basePath."
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -579,7 +630,8 @@
               "An ordinal used to sort solutions relative to one another for display on the home page"
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -593,6 +645,7 @@
         "description": [],
         "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -608,6 +661,7 @@
             ],
             "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "home",
@@ -621,6 +675,7 @@
                 ],
                 "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -648,6 +703,7 @@
             ],
             "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "home",
@@ -667,6 +723,7 @@
                 ],
                 "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -698,6 +755,7 @@
         ],
         "path": "src/plugins/home/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -712,6 +770,7 @@
         ],
         "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -742,6 +801,7 @@
         ],
         "path": "src/plugins/home/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -756,6 +816,7 @@
         ],
         "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -769,7 +830,8 @@
               "P & { children?: React.ReactNode; }"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -782,7 +844,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -799,6 +862,7 @@
         ],
         "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -812,7 +876,8 @@
               "P & { children?: React.ReactNode; }"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -825,7 +890,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -858,6 +924,7 @@
         ],
         "path": "src/plugins/home/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -872,6 +939,7 @@
         ],
         "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -886,6 +954,7 @@
         ],
         "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -901,6 +970,7 @@
         "description": [],
         "path": "src/plugins/home/common/instruction_variant.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -910,7 +980,8 @@
             "label": "ESC",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -920,7 +991,8 @@
             "label": "OSX",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -930,7 +1002,8 @@
             "label": "DEB",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -940,7 +1013,8 @@
             "label": "RPM",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -950,7 +1024,8 @@
             "label": "DOCKER",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -960,7 +1035,8 @@
             "label": "WINDOWS",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -970,7 +1046,8 @@
             "label": "NODE",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -980,7 +1057,8 @@
             "label": "DJANGO",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -990,7 +1068,8 @@
             "label": "FLASK",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1000,7 +1079,8 @@
             "label": "RAILS",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1010,7 +1090,8 @@
             "label": "RACK",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1020,7 +1101,8 @@
             "label": "JS",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1030,7 +1112,8 @@
             "label": "GO",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1040,7 +1123,8 @@
             "label": "JAVA",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1050,7 +1134,8 @@
             "label": "DOTNET",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1060,7 +1145,8 @@
             "label": "LINUX",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1070,7 +1156,8 @@
             "label": "PHP",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1080,7 +1167,8 @@
             "label": "FLEET",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1090,7 +1178,8 @@
             "label": "OPEN_TELEMETRY",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1105,6 +1194,7 @@
       "description": [],
       "path": "src/plugins/home/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "home",
@@ -1133,7 +1223,8 @@
             ") => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
           ],
           "path": "src/plugins/home/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "home",
@@ -1154,7 +1245,8 @@
             ") => void; }"
           ],
           "path": "src/plugins/home/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "home",
@@ -1183,7 +1275,8 @@
             ") => void; }"
           ],
           "path": "src/plugins/home/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "home",
@@ -1202,7 +1295,8 @@
             }
           ],
           "path": "src/plugins/home/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "home",
@@ -1229,11 +1323,8 @@
           "path": "src/plugins/home/public/plugin.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
+          "trackAdoption": false,
           "references": [
-            {
-              "plugin": "cloud",
-              "path": "x-pack/plugins/cloud/public/plugin.tsx"
-            },
             {
               "plugin": "apm",
               "path": "x-pack/plugins/apm/public/plugin.ts"
@@ -1253,6 +1344,7 @@
       "description": [],
       "path": "src/plugins/home/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "home",
@@ -1271,7 +1363,8 @@
             }
           ],
           "path": "src/plugins/home/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -1293,6 +1386,7 @@
         ],
         "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -1314,7 +1408,8 @@
               " | null"
             ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1330,6 +1425,7 @@
             ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "home",
@@ -1343,6 +1439,7 @@
                 ],
                 "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1358,7 +1455,8 @@
               "\nThe label for this app link."
             ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1370,7 +1468,8 @@
               "\nThe icon for this app link."
             ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1385,7 +1484,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1399,6 +1499,7 @@
         "description": [],
         "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -1408,7 +1509,8 @@
             "label": "sampleDataId",
             "description": [],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1418,7 +1520,8 @@
             "label": "dashboardId",
             "description": [],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1428,7 +1531,8 @@
             "label": "oldEmbeddableId",
             "description": [],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1438,7 +1542,8 @@
             "label": "embeddableId",
             "description": [],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1457,7 +1562,8 @@
               }
             ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1470,7 +1576,8 @@
               "object"
             ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1486,6 +1593,7 @@
         ],
         "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -1497,7 +1605,8 @@
               "The type of the sample object."
             ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1509,7 +1618,8 @@
               "The ID of the sample object."
             ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1523,6 +1633,7 @@
         "description": [],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -1532,7 +1643,8 @@
             "label": "kibanaBranch",
             "description": [],
             "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1545,7 +1657,8 @@
               "[key: string]:  unknown"
             ],
             "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1561,6 +1674,7 @@
         "description": [],
         "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1572,6 +1686,7 @@
         "description": [],
         "path": "src/plugins/home/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1588,6 +1703,7 @@
         ],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1602,6 +1718,7 @@
         ],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1616,6 +1733,7 @@
         ],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1627,9 +1745,21 @@
         "description": [],
         "signature": [
           "{ getSampleDatasets: () => ",
-          "Writable",
-          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; description: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { name: string; description: string; id: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{ isDataStream?: boolean | undefined; } & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
           {
             "pluginId": "home",
@@ -1650,6 +1780,7 @@
         ],
         "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1661,11 +1792,18 @@
         "description": [],
         "signature": [
           "() => ",
-          "Writable",
-          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; description: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { name: string; description: string; id: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{ isDataStream?: boolean | undefined; } & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
         ],
         "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -1682,6 +1820,7 @@
         ],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1695,7 +1834,8 @@
               "any[]"
             ],
             "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1716,10 +1856,11 @@
             "section": "def-server.TutorialContext",
             "text": "TutorialContext"
           },
-          ") => Readonly<{ isBeta?: boolean | undefined; savedObjects?: any[] | undefined; euiIconType?: string | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; artifacts?: Readonly<{ application?: Readonly<{} & { path: string; label: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; savedObjectsInstallMsg?: string | undefined; customStatusCheckName?: string | undefined; integrationBrowserCategories?: string[] | undefined; eprPackageOverlap?: string | undefined; } & { id: string; name: string; category: \"other\" | \"security\" | \"metrics\" | \"logging\"; shortDescription: string; longDescription: string; onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
+          ") => Readonly<{ isBeta?: boolean | undefined; savedObjects?: any[] | undefined; euiIconType?: string | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; artifacts?: Readonly<{ application?: Readonly<{} & { path: string; label: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; savedObjectsInstallMsg?: string | undefined; customStatusCheckName?: string | undefined; integrationBrowserCategories?: string[] | undefined; eprPackageOverlap?: string | undefined; } & { name: string; category: \"metrics\" | \"other\" | \"security\" | \"logging\"; id: string; shortDescription: string; longDescription: string; onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
         ],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1739,7 +1880,8 @@
               }
             ],
             "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1752,10 +1894,11 @@
         "label": "TutorialSchema",
         "description": [],
         "signature": [
-          "{ readonly isBeta?: boolean | undefined; readonly savedObjects?: any[] | undefined; readonly euiIconType?: string | undefined; readonly previewImagePath?: string | undefined; readonly moduleName?: string | undefined; readonly completionTimeMinutes?: number | undefined; readonly elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly artifacts?: Readonly<{ application?: Readonly<{} & { path: string; label: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; readonly savedObjectsInstallMsg?: string | undefined; readonly customStatusCheckName?: string | undefined; readonly integrationBrowserCategories?: string[] | undefined; readonly eprPackageOverlap?: string | undefined; readonly id: string; readonly name: string; readonly category: \"other\" | \"security\" | \"metrics\" | \"logging\"; readonly shortDescription: string; readonly longDescription: string; readonly onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }"
+          "{ readonly isBeta?: boolean | undefined; readonly savedObjects?: any[] | undefined; readonly euiIconType?: string | undefined; readonly previewImagePath?: string | undefined; readonly moduleName?: string | undefined; readonly completionTimeMinutes?: number | undefined; readonly elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly artifacts?: Readonly<{ application?: Readonly<{} & { path: string; label: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; readonly savedObjectsInstallMsg?: string | undefined; readonly customStatusCheckName?: string | undefined; readonly integrationBrowserCategories?: string[] | undefined; readonly eprPackageOverlap?: string | undefined; readonly name: string; readonly category: \"metrics\" | \"other\" | \"security\" | \"logging\"; readonly id: string; readonly shortDescription: string; readonly longDescription: string; readonly onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; success?: string | undefined; text?: string | undefined; title?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }"
         ],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1769,6 +1912,7 @@
         "description": [],
         "path": "src/plugins/home/common/instruction_variant.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "home",
@@ -1778,7 +1922,8 @@
             "label": "ESC",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1788,7 +1933,8 @@
             "label": "OSX",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1798,7 +1944,8 @@
             "label": "DEB",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1808,7 +1955,8 @@
             "label": "RPM",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1818,7 +1966,8 @@
             "label": "DOCKER",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1828,7 +1977,8 @@
             "label": "WINDOWS",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1838,7 +1988,8 @@
             "label": "NODE",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1848,7 +1999,8 @@
             "label": "DJANGO",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1858,7 +2010,8 @@
             "label": "FLASK",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1868,7 +2021,8 @@
             "label": "RAILS",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1878,7 +2032,8 @@
             "label": "RACK",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1888,7 +2043,8 @@
             "label": "JS",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1898,7 +2054,8 @@
             "label": "GO",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1908,7 +2065,8 @@
             "label": "JAVA",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1918,7 +2076,8 @@
             "label": "DOTNET",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1928,7 +2087,8 @@
             "label": "LINUX",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1938,7 +2098,8 @@
             "label": "PHP",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1948,7 +2109,8 @@
             "label": "FLEET",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "home",
@@ -1958,7 +2120,8 @@
             "label": "OPEN_TELEMETRY",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1973,6 +2136,7 @@
       "description": [],
       "path": "src/plugins/home/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "home",
@@ -2009,7 +2173,8 @@
             ") => void; }"
           ],
           "path": "src/plugins/home/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "home",
@@ -2020,9 +2185,21 @@
           "description": [],
           "signature": [
             "{ getSampleDatasets: () => ",
-            "Writable",
-            "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; description: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
-            "SavedObject",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.Writable",
+              "text": "Writable"
+            },
+            "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { name: string; description: string; id: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{ isDataStream?: boolean | undefined; } & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+            {
+              "pluginId": "@kbn/core-saved-objects-common",
+              "scope": "common",
+              "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+              "section": "def-common.SavedObject",
+              "text": "SavedObject"
+            },
             "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
             {
               "pluginId": "home",
@@ -2042,7 +2219,8 @@
             ") => void; }"
           ],
           "path": "src/plugins/home/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -2057,6 +2235,7 @@
       "description": [],
       "path": "src/plugins/home/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "home",
@@ -2069,7 +2248,8 @@
             "{}"
           ],
           "path": "src/plugins/home/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "home",
@@ -2082,7 +2262,8 @@
             "{}"
           ],
           "path": "src/plugins/home/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

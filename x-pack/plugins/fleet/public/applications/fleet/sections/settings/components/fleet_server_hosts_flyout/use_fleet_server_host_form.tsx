@@ -4,16 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useState } from 'react';
+// copy this one
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { sendPutSettings, useComboInput, useStartServices } from '../../../../hooks';
+import {
+  sendPostFleetServerHost,
+  sendPutFleetServerHost,
+  useComboInput,
+  useInput,
+  useStartServices,
+  useSwitchInput,
+  validateInputs,
+} from '../../../../hooks';
 import { isDiffPathProtocol } from '../../../../../../../common/services';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
-import { getAgentAndPolicyCount } from '../../services/agent_and_policies_count';
+import type { FleetServerHost } from '../../../../types';
 
 const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
 
@@ -24,46 +32,14 @@ const ConfirmTitle = () => (
   />
 );
 
-interface ConfirmDescriptionProps {
-  agentCount: number;
-  agentPolicyCount: number;
-}
-
-const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
-  agentCount,
-  agentPolicyCount,
-}) => (
+const ConfirmDescription: React.FunctionComponent = ({}) => (
   <FormattedMessage
     id="xpack.fleet.settings.fleetServerHostsFlyout.confirmModalText"
-    defaultMessage="This action will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
-    values={{
-      agents: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.fleetServerHostsFlyout.agentsCount"
-            defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-            values={{
-              agentCount,
-            }}
-          />
-        </strong>
-      ),
-      policies: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.fleetServerHostsFlyout.agentPolicyCount"
-            defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
-            values={{
-              agentPolicyCount,
-            }}
-          />
-        </strong>
-      ),
-    }}
+    defaultMessage="This action will update agent policies enrolled in this Fleet Server. This action can not be undone. Are you sure you wish to continue?"
   />
 );
 
-function validateFleetServerHosts(value: string[]) {
+export function validateFleetServerHosts(value: string[]) {
   if (value.length === 0) {
     return [
       {
@@ -87,7 +63,7 @@ function validateFleetServerHosts(value: string[]) {
     } else if (!val.match(URL_REGEX)) {
       res.push({
         message: i18n.translate('xpack.fleet.settings.fleetServerHostsError', {
-          defaultMessage: 'Invalid URL',
+          defaultMessage: 'Invalid URL (must be an https URL)',
         }),
         index: idx,
       });
@@ -127,71 +103,117 @@ function validateFleetServerHosts(value: string[]) {
   }
 }
 
+export function validateName(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.fleetServerHost.nameIsRequiredErrorMessage', {
+        defaultMessage: 'Name is required',
+      }),
+    ];
+  }
+}
+
 export function useFleetServerHostsForm(
-  fleetServerHostsDefaultValue: string[],
+  fleetServerHost: FleetServerHost | undefined,
   onSuccess: () => void
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const { notifications } = useStartServices();
   const { confirm } = useConfirmModal();
+  const isPreconfigured = fleetServerHost?.is_preconfigured ?? false;
 
-  const fleetServerHostsInput = useComboInput(
-    'fleetServerHostsInput',
-    fleetServerHostsDefaultValue,
-    validateFleetServerHosts
+  const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isPreconfigured);
+  const isDefaultInput = useSwitchInput(
+    fleetServerHost?.is_default ?? false,
+    isPreconfigured || fleetServerHost?.is_default
   );
 
-  const fleetServerHostsInputValidate = fleetServerHostsInput.validate;
-  const validate = useCallback(
-    () => fleetServerHostsInputValidate(),
-    [fleetServerHostsInputValidate]
+  const hostUrlsInput = useComboInput(
+    'hostUrls',
+    fleetServerHost?.host_urls || [],
+    validateFleetServerHosts,
+    isPreconfigured
   );
+  const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isPreconfigured);
+
+  const inputs = useMemo(
+    () => ({
+      nameInput,
+      isDefaultInput,
+      hostUrlsInput,
+      proxyIdInput,
+    }),
+    [nameInput, isDefaultInput, hostUrlsInput, proxyIdInput]
+  );
+
+  const validate = useCallback(() => validateInputs(inputs), [inputs]);
 
   const submit = useCallback(async () => {
     try {
       if (!validate()) {
         return;
       }
-      const { agentCount, agentPolicyCount } = await getAgentAndPolicyCount();
-      if (
-        !(await confirm(
-          <ConfirmTitle />,
-          <ConfirmDescription agentCount={agentCount} agentPolicyCount={agentPolicyCount} />
-        ))
-      ) {
+      if (!(await confirm(<ConfirmTitle />, <ConfirmDescription />))) {
         return;
       }
       setIsLoading(true);
-      const settingsResponse = await sendPutSettings({
-        fleet_server_hosts: fleetServerHostsInput.value,
-      });
-      if (settingsResponse.error) {
-        throw settingsResponse.error;
+      const data = {
+        name: nameInput.value,
+        host_urls: hostUrlsInput.value,
+        is_default: isDefaultInput.value,
+        proxy_id: proxyIdInput.value !== '' ? proxyIdInput.value : null,
+      };
+      if (fleetServerHost) {
+        const res = await sendPutFleetServerHost(fleetServerHost.id, data);
+        if (res.error) {
+          throw res.error;
+        }
+      } else {
+        const res = await sendPostFleetServerHost(data);
+        if (res.error) {
+          throw res.error;
+        }
       }
       notifications.toasts.addSuccess(
         i18n.translate('xpack.fleet.settings.fleetServerHostsFlyout.successToastTitle', {
-          defaultMessage: 'Settings saved',
+          defaultMessage: 'Fleet Server host saved',
         })
       );
       setIsLoading(false);
-      onSuccess();
+      await onSuccess();
     } catch (error) {
       setIsLoading(false);
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.fleet.settings.fleetServerHostsFlyout.errorToastTitle', {
-          defaultMessage: 'An error happened while saving settings',
+          defaultMessage: 'An error happened while saving Fleet Server host',
         }),
       });
     }
-  }, [fleetServerHostsInput.value, validate, notifications, confirm, onSuccess]);
+  }, [
+    fleetServerHost,
+    nameInput.value,
+    hostUrlsInput.value,
+    isDefaultInput.value,
+    proxyIdInput.value,
+    validate,
+    notifications,
+    confirm,
+    onSuccess,
+  ]);
 
   const isDisabled =
-    isLoading || !fleetServerHostsInput.hasChanged || fleetServerHostsInput.props.isInvalid;
+    isLoading ||
+    (!hostUrlsInput.hasChanged &&
+      !isDefaultInput.hasChanged &&
+      !nameInput.hasChanged &&
+      !proxyIdInput.hasChanged) ||
+    hostUrlsInput.props.isInvalid ||
+    nameInput.props.isInvalid;
 
   return {
     isLoading,
     isDisabled,
     submit,
-    fleetServerHostsInput,
+    inputs,
   };
 }

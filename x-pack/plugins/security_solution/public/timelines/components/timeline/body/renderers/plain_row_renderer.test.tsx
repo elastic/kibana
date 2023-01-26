@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { TimelineId } from '../../../../../../common/types';
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import type { Ecs } from '../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData } from '../../../../../common/mock';
 import { plainRowRenderer } from './plain_row_renderer';
 
@@ -23,7 +24,7 @@ describe('plain_row_renderer', () => {
     const children = plainRowRenderer.renderRow({
       data: mockDatum,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = shallow(<span>{children}</span>);
     expect(wrapper).toMatchSnapshot();
@@ -37,7 +38,7 @@ describe('plain_row_renderer', () => {
     const children = plainRowRenderer.renderRow({
       data: mockDatum,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(<span>{children}</span>);
     expect(wrapper.text()).toEqual('');

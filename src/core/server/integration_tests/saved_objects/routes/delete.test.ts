@@ -7,11 +7,13 @@
  */
 
 import supertest from 'supertest';
-import { savedObjectsClientMock } from '../../../mocks';
-import { CoreUsageStatsClient } from '../../../core_usage_data';
-import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
-import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { setupServer } from './test_utils';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import {
+  coreUsageStatsClientMock,
+  coreUsageDataServiceMock,
+} from '@kbn/core-usage-data-server-mocks';
+import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import {
   registerDeleteRoute,
   type InternalSavedObjectsRequestHandlerContext,
@@ -19,17 +21,28 @@ import {
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
+const testTypes = [
+  { name: 'index-pattern', hide: false },
+  { name: 'hidden-type', hide: true },
+  { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
+];
+
 describe('DELETE /api/saved_objects/{type}/{id}', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
+  let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.getClient();
     handlerContext.savedObjects.getClient = jest.fn().mockImplementation(() => savedObjectsClient);
+    handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
+      return testTypes
+        .map((typeDesc) => createHiddenTypeVariants(typeDesc))
+        .find((fullTest) => fullTest.name === typename);
+    });
 
     const router =
       httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
@@ -75,5 +88,20 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*', {
       force: true,
     });
+  });
+
+  it('returns with status 400 if a type is hidden from the HTTP APIs', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .delete('/api/saved_objects/hidden-from-http/hiddenId')
+      .expect(400);
+    expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
+  });
+
+  it('returns with status 400 if a type is hidden from the HTTP APIs with `force` option', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .delete('/api/saved_objects/hidden-from-http/hiddenId')
+      .query({ force: true })
+      .expect(400);
+    expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
   });
 });

@@ -6,36 +6,67 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseResponse, CasesByAlertId } from '@kbn/cases-plugin/common/api';
+import {
+  AttachmentTotals,
+  CaseResponse,
+  CasesByAlertId,
+  RelatedCaseInfo,
+} from '@kbn/cases-plugin/common/api';
+import { xorWith, isEqual } from 'lodash';
+
+type AttachmentTotalsKeys = keyof AttachmentTotals;
+
+export interface TestCaseWithTotals {
+  caseInfo: CaseResponse;
+  totals?: Partial<AttachmentTotals>;
+}
 
 /**
  * Ensure that the result of the alerts API request matches with the cases created for the test.
  */
 export function validateCasesFromAlertIDResponse(
   casesFromAPIResponse: CasesByAlertId,
-  createdCasesForTest: CaseResponse[]
+  createdCasesForTest: TestCaseWithTotals[]
 ) {
-  const idToTitle = new Map<string, string>(
-    createdCasesForTest.map((caseInfo) => [caseInfo.id, caseInfo.title])
+  const idToResponse = new Map<string, RelatedCaseInfo>(
+    casesFromAPIResponse.map((response) => [response.id, response])
   );
 
-  for (const apiResCase of casesFromAPIResponse) {
-    // check that the title in the api response matches the title in the map from the created cases
-    expect(apiResCase.title).to.be(idToTitle.get(apiResCase.id));
+  expect(idToResponse.size).to.be(createdCasesForTest.length);
+
+  // only iterate over the test cases not the api response values
+  for (const expectedTestInfo of createdCasesForTest) {
+    expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.title).to.be(
+      expectedTestInfo.caseInfo.title
+    );
+    expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.description).to.be(
+      expectedTestInfo.caseInfo.description
+    );
+    expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.status).to.be(
+      expectedTestInfo.caseInfo.status
+    );
+    expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.createdAt).to.be(
+      expectedTestInfo.caseInfo.created_at
+    );
+
+    // only check the totals that are defined in the test case
+    for (const totalKey of Object.keys(expectedTestInfo.totals ?? {}) as AttachmentTotalsKeys[]) {
+      expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.totals[totalKey]).to.be(
+        expectedTestInfo.totals?.[totalKey]
+      );
+    }
   }
 }
-
 /**
  * Compares two arrays to determine if they are sort of equal. This function returns true if the arrays contain the same
  * elements but the ordering does not matter.
  */
-export function arraysToEqual(array1?: object[], array2?: object[]) {
+export function arraysToEqual<T>(array1?: T[], array2?: T[]) {
   if (!array1 || !array2 || array1.length !== array2.length) {
     return false;
   }
 
-  const array1AsSet = new Set(array1);
-  return array2.every((item) => array1AsSet.has(item));
+  return xorWith(array1, array2, isEqual).length === 0;
 }
 
 /**

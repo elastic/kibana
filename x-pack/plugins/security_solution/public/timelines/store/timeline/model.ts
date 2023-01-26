@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-import type { TGridModelForTimeline } from '@kbn/timelines-plugin/public';
-import type { EqlOptionsSelected } from '../../../../common/search_strategy/timeline';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../../common/types';
+import type {
+  EqlOptionsSelected,
+  TimelineNonEcsData,
+} from '../../../../common/search_strategy/timeline';
 import type {
   TimelineEventsType,
   TimelineType,
   TimelineStatus,
   TimelineTabs,
   ScrollToTopEvent,
+  SortColumnTimeline,
+  ColumnHeaderOptions,
+  DataProvider,
+  RowRendererId,
+  SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
-import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
 export type KqlMode = 'filter' | 'search';
-export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
-export type TimelineModel = TGridModelForTimeline & {
+export interface TimelineModel {
   /** The selected tab to displayed in the timeline */
   activeTab: TimelineTabs;
   prevActiveTab: TimelineTabs;
@@ -76,7 +84,54 @@ export type TimelineModel = TGridModelForTimeline & {
   isSaving: boolean;
   version: string | null;
   initialized?: boolean;
-};
+  savedObjectId: string | null;
+  /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
+  sort: SortColumnTimeline[];
+  /** The columns displayed in the data table */
+  columns: ColumnHeaderOptions[];
+  defaultColumns: ColumnHeaderOptions[];
+  /** The sources of the event data shown in the data table */
+  dataProviders: DataProvider[];
+  /** Kibana data view id **/
+  dataViewId: string | null; // null if legacy pre-8.0 data table
+  /** Events to not be rendered **/
+  deletedEventIds: string[];
+  documentType: string;
+  excludedRowRendererIds: RowRendererId[];
+  filterManager?: FilterManager;
+  footerText?: string | React.ReactNode;
+  loadingText?: string | React.ReactNode;
+  queryFields: string[];
+  /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
+  expandedDetail: ExpandedDetailTimeline;
+  /** When non-empty, display a graph view for this event */
+  graphEventId?: string;
+  indexNames: string[];
+  /** The number of items to show in a single page of results */
+  itemsPerPage: number;
+  /** Displays a series of choices that when selected, become the value of `itemsPerPage` */
+  itemsPerPageOptions: number[];
+  /** the KQL query in the KQL bar */
+  kqlQuery: {
+    // TODO convert to nodebuilder
+    filterQuery: SerializedFilterQuery | null;
+  };
+  /** Events to be rendered as loading **/
+  loadingEventIds: string[];
+  /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  /** Uniquely identifies the timeline */
+  id: string;
+  filters?: Filter[];
+  selectedEventIds: Record<string, TimelineNonEcsData[]>;
+  /** If selectAll checkbox in header is checked **/
+  isSelectAllChecked: boolean;
+  isLoading: boolean;
+  selectAll: boolean;
+}
 
 export type SubsetTimelineModel = Readonly<
   Pick<
@@ -121,14 +176,14 @@ export type SubsetTimelineModel = Readonly<
     | 'selectedEventIds'
     | 'sessionViewConfig'
     | 'show'
-    | 'showCheckboxes'
     | 'sort'
     | 'isSaving'
     | 'isLoading'
     | 'savedObjectId'
-    | 'unit'
     | 'version'
     | 'status'
+    | 'filters'
+    | 'filterManager'
   >
 >;
 

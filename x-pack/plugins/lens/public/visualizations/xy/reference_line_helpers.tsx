@@ -9,8 +9,8 @@ import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { IconChartBarReferenceLine } from '@kbn/chart-icons';
-import { layerTypes } from '../../../common';
-import type { DatasourceLayers, FramePublicAPI, Visualization } from '../../types';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { DatasourceLayers, FramePublicAPI, Visualization, AccessorConfig } from '../../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
 import type {
@@ -314,7 +314,7 @@ export const getReferenceSupportedLayer = (
     : undefined;
 
   return {
-    type: layerTypes.REFERENCELINE,
+    type: LayerTypes.REFERENCELINE,
     label: i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabel', {
       defaultMessage: 'Reference lines',
     }),
@@ -379,10 +379,15 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   };
 };
 
-export const getSingleColorConfig = (id: string, color = defaultReferenceLineColor) => ({
+export const getSingleColorConfig = (
+  id: string,
+  color = defaultReferenceLineColor,
+  icon?: string
+): AccessorConfig => ({
   columnId: id,
-  triggerIcon: 'color' as const,
+  triggerIconType: icon && icon !== 'empty' ? 'custom' : 'color',
   color,
+  customIcon: icon,
 });
 
 export const getReferenceLineAccessorColorConfig = (layer: XYReferenceLineLayerConfig) => {
@@ -458,10 +463,12 @@ export const getReferenceConfiguration = ({
           values: { groupLabel: getAxisName(label, { isHorizontal }) },
         }
       ),
-      accessors: config.map(({ forAccessor, color }) => getSingleColorConfig(forAccessor, color)),
+      accessors: config.map(({ forAccessor, color, icon }) =>
+        getSingleColorConfig(forAccessor, color, icon)
+      ),
       filterOperations: isNumericMetric,
       supportsMoreColumns: true,
-      required: false,
+      requiredMinDimensionCount: 0,
       enableDimensionEditor: true,
       supportStaticValue: true,
       paramEditorCustomProps: {

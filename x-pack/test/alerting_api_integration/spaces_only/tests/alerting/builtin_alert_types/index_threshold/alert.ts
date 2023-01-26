@@ -7,14 +7,11 @@
 
 import expect from '@kbn/expect';
 
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import {
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
-  getUrlPrefix,
-  ObjectRemover,
-} from '../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../common/lib';
 import { createEsDocumentsWithGroups } from '../lib/create_test_data';
 import { createDataStream, deleteDataStream } from '../lib/create_test_data';
 
@@ -55,9 +52,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
       endDate = new Date(endDateMillis).toISOString();
 
-      // write documents from now to the future end date in 3 groups
-      await createEsDocumentsInGroups(3);
-
       await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
     });
 
@@ -72,6 +66,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     // never fire; the tests ensure the ones that should fire, do fire, and
     // those that shouldn't fire, do not fire.
     it('runs correctly: count all < >', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+
       await createRule({
         name: 'never fire',
         aggType: 'count',
@@ -106,6 +103,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: count grouped <= =>', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+
       await createRule({
         name: 'never fire',
         aggType: 'count',
@@ -150,6 +150,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: sum all between', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+
       await createRule({
         name: 'never fire',
         aggType: 'sum',
@@ -184,14 +187,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: avg all', async () => {
-      // this never fires because of bad fields error
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+
       await createRule({
         name: 'never fire',
-        timeField: 'source', // bad field for time
         aggType: 'avg',
-        aggField: 'source', // bad field for agg
+        aggField: 'testedValue',
         groupBy: 'all',
-        thresholdComparator: '>',
+        thresholdComparator: '<',
         threshold: [0],
       });
 
@@ -200,6 +204,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         aggType: 'avg',
         aggField: 'testedValue',
         groupBy: 'all',
+        timeWindowSize: RULE_INTERVAL_SECONDS * 10,
         thresholdComparator: '>=',
         threshold: [0],
       });
@@ -214,12 +219,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(name).to.be('always fire');
 
         const messagePattern =
-          /alert 'always fire' is active for group \'all documents\':\n\n- Value: .*\n- Conditions Met: avg\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+          /alert 'always fire' is active for group \'all documents\':\n\n- Value: .*\n- Conditions Met: avg\(testedValue\) is greater than or equal to 0 over 30s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
     });
 
     it('runs correctly: max grouped', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+
       await createRule({
         name: 'never fire',
         aggType: 'max',
@@ -265,7 +273,51 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(inGroup2).to.be.greaterThan(0);
     });
 
+    it('runs correctly: max grouped on float', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+      await createRule({
+        name: 'never fire',
+        aggType: 'max',
+        aggField: 'testedValueFloat',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 2,
+        thresholdComparator: '<',
+        threshold: [3.235423],
+      });
+
+      await createRule({
+        name: 'always fire',
+        aggType: 'max',
+        aggField: 'testedValueFloat',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 2, // two actions will fire each interval
+        thresholdComparator: '>=',
+        threshold: [200.2354364],
+      });
+
+      // create some more documents in the first group
+      await createEsDocumentsInGroups(1);
+
+      const docs = await waitForDocs(4);
+
+      for (const doc of docs) {
+        const { name, message } = doc._source.params;
+
+        expect(name).to.be('always fire');
+
+        const messagePattern =
+          /alert 'always fire' is active for group \'group-\d\':\n\n- Value: 234.2534637451172\n- Conditions Met: max\(testedValueFloat\) is greater than or equal to 200.2354364 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
+      }
+    });
+
     it('runs correctly: max grouped on unsigned long', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+
       await createRule({
         name: 'never fire',
         aggType: 'max',
@@ -305,6 +357,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: min grouped', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+
       await createRule({
         name: 'never fire',
         aggType: 'min',
@@ -351,6 +406,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly and populates recovery context', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+
       // This rule should be active initially when the number of documents is below the threshold
       // and then recover when we add more documents.
       await createRule({
@@ -399,6 +457,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly over a data stream: count all < >', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+
       await createRule({
         name: 'never fire',
         aggType: 'count',
@@ -438,6 +499,72 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       }
     });
 
+    it('runs correctly: filters by Kuery', async () => {
+      // add documents that have timestamp as "now"
+      await createEsDocumentsWithGroups({
+        es,
+        esTestIndexTool,
+        endDate: new Date().toISOString(),
+        intervals: 5,
+        intervalMillis: 5000,
+        groups: 3,
+        indexName: ES_TEST_INDEX_NAME,
+      });
+
+      await createRule({
+        name: 'always fire',
+        aggType: 'count',
+        groupBy: 'all',
+        thresholdComparator: '>',
+        timeWindowSize: 3000,
+        threshold: [-1],
+        filterKuery: 'group: group-0',
+      });
+
+      const docs = await waitForDocs(1);
+      const doc = docs[0];
+      const { message } = doc._source.params;
+
+      expect(message).to.contain('Value: 5');
+    });
+
+    it('runs and gracefully handles ES errors', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+
+      // this never fires because of bad fields error
+      const ruleId = await createRule({
+        name: 'never fire',
+        timeField: 'source', // bad field for time
+        aggType: 'avg',
+        aggField: 'source', // bad field for agg
+        groupBy: 'all',
+        thresholdComparator: '>',
+        threshold: [0],
+      });
+
+      // create some more documents in the first group
+      await createEsDocumentsInGroups(1);
+
+      // get the events we're expecting
+      const events = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 2 }]]),
+        });
+      });
+
+      for (const event of events) {
+        expect(event?.rule?.name).to.eql('never fire');
+        expect(event?.kibana?.alerting?.outcome).to.eql('success');
+        expect(event?.message).to.eql(`rule executed: .index-threshold:${ruleId}: 'never fire'`);
+      }
+    });
+
     async function createEsDocumentsInGroups(
       groups: number,
       indexName: string = ES_TEST_INDEX_NAME
@@ -474,6 +601,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       threshold: number[];
       notifyWhen?: string;
       indexName?: string;
+      filterKuery?: string;
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -545,6 +673,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             timeWindowUnit: 's',
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
+            filterKuery: params.filterKuery,
           },
         });
 

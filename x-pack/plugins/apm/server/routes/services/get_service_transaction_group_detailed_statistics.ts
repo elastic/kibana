@@ -12,7 +12,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
@@ -28,16 +28,16 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../lib/helpers/latency_aggregation_type';
-import { Setup } from '../../lib/helpers/setup_request';
 import { calculateFailedTransactionRate } from '../../lib/helpers/transaction_error_rate';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServiceTransactionGroupDetailedStatistics({
   environment,
   kuery,
   serviceName,
   transactionNames,
-  setup,
+  apmEventClient,
   numBuckets,
   searchAggregatedTransactions,
   transactionType,
@@ -50,7 +50,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
   kuery: string;
   serviceName: string;
   transactionNames: string[];
-  setup: Setup;
+  apmEventClient: APMEventClient;
   numBuckets: number;
   searchAggregatedTransactions: boolean;
   transactionType: string;
@@ -67,8 +67,6 @@ export async function getServiceTransactionGroupDetailedStatistics({
     impact: number;
   }>
 > {
-  const { apmEventClient } = setup;
-
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -93,6 +91,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
         ],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
@@ -184,7 +183,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
 export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   serviceName,
   transactionNames,
-  setup,
+  apmEventClient,
   numBuckets,
   searchAggregatedTransactions,
   transactionType,
@@ -197,7 +196,7 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
 }: {
   serviceName: string;
   transactionNames: string[];
-  setup: Setup;
+  apmEventClient: APMEventClient;
   numBuckets: number;
   searchAggregatedTransactions: boolean;
   transactionType: string;
@@ -209,7 +208,7 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   offset?: string;
 }) {
   const commonProps = {
-    setup,
+    apmEventClient,
     serviceName,
     transactionNames,
     searchAggregatedTransactions,

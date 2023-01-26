@@ -8,15 +8,17 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { REPO_ROOT } from '@kbn/utils';
-import { exec, mkdirp, copyAll, Task } from '../lib';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { exec, Task } from '../lib';
 
 export const BuildKibanaExamplePlugins: Task = {
   description: 'Building distributable versions of Kibana example plugins',
-  async run(config, log) {
+  async run(config, log, build) {
+    const pluginsDir = build.resolvePath('plugins');
     const args = [
       Path.resolve(REPO_ROOT, 'scripts/plugin_helpers'),
       'build',
+      '--skip-archive',
       `--kibana-version=${config.getBuildVersion()}`,
     ];
 
@@ -42,15 +44,12 @@ export const BuildKibanaExamplePlugins: Task = {
           cwd: examplePlugin,
           level: 'info',
         });
+        log.info('Copying build to distribution');
+        const pluginBuild = Path.resolve(examplePlugin, 'build', 'kibana');
+        Fs.cpSync(pluginBuild, pluginsDir, { recursive: true });
       } catch (e) {
         log.info(`Skipping ${examplePlugin}, no kibana.json`);
       }
     }
-
-    const pluginsDir = config.resolveFromTarget('example_plugins');
-    await mkdirp(pluginsDir);
-    await copyAll(REPO_ROOT, pluginsDir, {
-      select: ['examples/*/build/*.zip', 'x-pack/examples/*/build/*.zip'],
-    });
   },
 };

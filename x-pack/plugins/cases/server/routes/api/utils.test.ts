@@ -7,7 +7,7 @@
 
 import { isBoom, boomify } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { HTTPError } from '../../common/error';
+import type { HTTPError } from '../../common/error';
 import { extractWarningValueFromWarningHeader, logDeprecatedEndpoint, wrapError } from './utils';
 
 describe('Utils', () => {

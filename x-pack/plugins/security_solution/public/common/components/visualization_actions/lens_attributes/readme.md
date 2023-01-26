@@ -1,6 +1,6 @@
 
 # Steps to generate Lens attributes:
-All the files in the folder were exported from Lens. These Lens attributes allow the charts implemented by Security Solution (Not with Lens Embeddable) on Host and Network pages to share across the app.
+All the files in the folder were exported from Lens. These Lens attributes allow the charts to be opened in Lens and rendering KPIs on Hosts, Network, and users page.
 
 
 Here are the steps of how to generate them:
@@ -16,4 +16,8 @@ Here are the steps of how to generate them:
     - references
 
     Note: `id` under `references` will eventually be replaced according to selected data view id on Security Solution's page
+
+5. Add `state.visualization.autoScaleMetricAlignment: left` if the visualizationType is `lnsLegacyMetric` and it has no icon and description on the UI. (example: kpi_dns_queries)
+
+6. Put references.id as `{dataViewId}` if the reference type is `index-pattern`. The dataViewId will be replaced by dataViewId from sourcerer.
 

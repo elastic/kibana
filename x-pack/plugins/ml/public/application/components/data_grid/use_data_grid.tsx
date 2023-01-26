@@ -80,6 +80,7 @@ export const useDataGrid = (
 
   useEffect(() => {
     setVisibleColumns(defaultVisibleColumns);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultVisibleColumns.join()]);
 
   const [invalidSortingColumnns, setInvalidSortingColumnns] = useState<string[]>([]);
@@ -137,6 +138,7 @@ export const useDataGrid = (
       // If both columns are visible sort by their visible sorting order.
       return visibleColumns.indexOf(a.id) - visibleColumns.indexOf(b.id);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columns, columnCharts, chartsVisible, JSON.stringify(visibleColumns)]);
 
   // Initialize the mini histogram charts toggle button.

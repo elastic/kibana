@@ -9,7 +9,7 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "security"],
   "requiredPlugins": ["features", "licensing", "taskManager"],
-  "optionalPlugins": ["dataViews", "home", "management", "usageCollection", "spaces", "share"],
+  "optionalPlugins": ["cloud", "dataViews", "home", "management", "usageCollection", "spaces", "share"],
   "server": true,
   "ui": true,
   "enabledOnAnonymousPages": true,

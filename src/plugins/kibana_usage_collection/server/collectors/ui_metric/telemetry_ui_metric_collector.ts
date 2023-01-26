@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  ISavedObjectsRepository,
-  SavedObjectAttributes,
-  SavedObjectsServiceSetup,
-} from '@kbn/core/server';
+import { ISavedObjectsRepository, SavedObjectsServiceSetup } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { uiMetricSchema } from './schema';
 
-interface UIMetricsSavedObjects extends SavedObjectAttributes {
+interface UIMetricsSavedObjects {
   count: number;
 }
 

@@ -26,9 +26,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { PackageClient } from '@kbn/fleet-plugin/server';
-import { createMockPackageService } from '@kbn/fleet-plugin/server/mocks';
-import { AGENT_ACTIONS_INDEX, ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
@@ -36,13 +34,13 @@ import { LicenseService } from '../../../../common/license';
 import {
   ISOLATE_HOST_ROUTE_V2,
   UNISOLATE_HOST_ROUTE_V2,
-  metadataTransformPrefix,
   ENDPOINT_ACTIONS_INDEX,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
+  GET_FILE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   ActionDetails,
@@ -65,6 +63,8 @@ import {
 import { legacyMetadataSearchResponseMock } from '../metadata/support/test_support';
 import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
+import { CaseStatuses } from '@kbn/cases-components';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;
@@ -108,31 +108,6 @@ describe('Response actions', () => {
       const startContract = createMockEndpointAppContextServiceStartContract();
       endpointAppContextService = new EndpointAppContextService();
       const mockSavedObjectClient = savedObjectsClientMock.create();
-      const mockPackageService = createMockPackageService();
-      const mockedPackageClient = mockPackageService.asInternalUser as jest.Mocked<PackageClient>;
-      mockedPackageClient.getInstallation.mockResolvedValue({
-        installed_kibana: [],
-        package_assets: [],
-        es_index_patterns: {},
-        name: '',
-        version: '',
-        install_status: 'installed',
-        install_version: '',
-        install_started_at: '',
-        install_source: 'registry',
-        installed_es: [
-          {
-            id: 'logs-endpoint.events.security',
-            type: ElasticsearchAssetType.indexTemplate,
-          },
-          {
-            id: `${metadataTransformPrefix}-0.16.0-dev.0`,
-            type: ElasticsearchAssetType.transform,
-          },
-        ],
-        keep_policies_up_to_date: false,
-        verification_status: 'unknown',
-      });
 
       licenseEmitter = new Subject();
       licenseService = new LicenseService();
@@ -142,7 +117,6 @@ describe('Response actions', () => {
       endpointAppContextService.start({
         ...startContract,
         licenseService,
-        packageService: mockPackageService,
       });
 
       // add the host isolation route handlers to routerMock
@@ -171,10 +145,9 @@ describe('Response actions', () => {
 
         const ctx = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
 
-        ctx.securitySolution.endpointAuthz = {
-          ...ctx.securitySolution.endpointAuthz,
-          ...authz,
-        };
+        ctx.securitySolution.getEndpointAuthz.mockResolvedValue(
+          getEndpointAuthzInitialStateMock(authz)
+        );
 
         // mock _index_template
         ctx.core.elasticsearch.client.asInternalUser.indices.existsIndexTemplate.mockResponseImplementationOnce(
@@ -196,7 +169,7 @@ describe('Response actions', () => {
         ctx.core.elasticsearch.client.asInternalUser.index.mockResponseImplementation(
           () => withIdxResp
         );
-        ctx.core.elasticsearch.client.asCurrentUser.search.mockResponseImplementation(() => {
+        ctx.core.elasticsearch.client.asInternalUser.search.mockResponseImplementation(() => {
           return {
             body: legacyMetadataSearchResponseMock(searchResponse),
           };
@@ -412,6 +385,17 @@ describe('Response actions', () => {
       expect(actionDoc.data.command).toEqual('running-processes');
     });
 
+    it('sends the get-file command payload from the get file route', async () => {
+      const ctx = await callRoute(GET_FILE_ROUTE, {
+        body: { endpoint_ids: ['XYZ'], parameters: { path: '/one/two/three' } },
+      });
+      const actionDoc: EndpointAction = (
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
+      expect(actionDoc.data.command).toEqual('get-file');
+    });
+
     describe('With endpoint data streams', () => {
       it('handles unisolation', async () => {
         const ctx = await callRoute(
@@ -553,6 +537,33 @@ describe('Response actions', () => {
         expect(responseBody.action).toBeUndefined();
       });
 
+      it('handles get-file', async () => {
+        const ctx = await callRoute(
+          GET_FILE_ROUTE,
+          {
+            body: { endpoint_ids: ['XYZ'], parameters: { path: '/one/two/three' } },
+          },
+          { endpointDsExists: true }
+        );
+        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
+        const actionDocs: [
+          { index: string; body?: LogsEndpointAction },
+          { index: string; body?: EndpointAction }
+        ] = [
+          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
+          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
+        ];
+
+        expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
+        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
+        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('get-file');
+        expect(actionDocs[1].body!.data.command).toEqual('get-file');
+
+        expect(mockResponse.ok).toBeCalled();
+        const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
+        expect(responseBody.action).toBeUndefined();
+      });
+
       it('handles errors', async () => {
         const ErrMessage = 'Uh oh!';
         await callRoute(
@@ -655,6 +666,13 @@ describe('Response actions', () => {
             {
               id: `case-${counter++}`,
               title: 'case',
+              createdAt: '2022-10-31T11:49:48.806Z',
+              description: 'a description',
+              status: CaseStatuses.open,
+              totals: {
+                userComments: 1,
+                alerts: 1,
+              },
             },
           ];
         });

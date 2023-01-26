@@ -1,0 +1,18 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/i18n",
+    "@kbn/saved-objects-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

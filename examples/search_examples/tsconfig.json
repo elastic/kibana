@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -11,16 +11,25 @@
     "server/**/*.ts",
     "../../typings/**/*",
   ],
-  "exclude": [],
-  "references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../../src/plugins/data/tsconfig.json" },
-    { "path": "../../src/plugins/data_views/tsconfig.json" },
-    { "path": "../../src/plugins/inspector/tsconfig.json" },
-    { "path": "../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../src/plugins/navigation/tsconfig.json" },
-    { "path": "../../src/plugins/share/tsconfig.json" },
-    { "path": "../developer_examples/tsconfig.json" },
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/share-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/i18n-react",
+    "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/i18n",
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/config-schema",
   ]
 }

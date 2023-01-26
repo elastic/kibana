@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiText,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -41,6 +42,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
   const [jobIds, setJobIds] = useState<string[]>([]);
   const [jobs, setJobs] = useState<MlSummaryJob[]>([]);
   const [hasManagedJob, setHasManagedJob] = useState(false);
+  const [deleteUserAnnotations, setDeleteUserAnnotations] = useState(false);
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -51,6 +53,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
         unsetShowFunction();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const showModal = useCallback((tempJobs: MlSummaryJob[]) => {
@@ -60,6 +63,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
 
     setModalVisible(true);
     setResetting(false);
+    setDeleteUserAnnotations(false);
   }, []);
 
   const closeModal = useCallback(() => {
@@ -68,12 +72,12 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
 
   const resetJob = useCallback(async () => {
     setResetting(true);
-    await resetJobs(jobIds);
+    await resetJobs(jobIds, deleteUserAnnotations);
     closeModal();
     setTimeout(() => {
       refreshJobs();
     }, RESETTING_JOBS_REFRESH_INTERVAL_MS);
-  }, [jobIds, refreshJobs]);
+  }, [closeModal, deleteUserAnnotations, jobIds, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;
@@ -83,14 +87,16 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
     <EuiModal data-test-subj="mlResetJobConfirmModal" onClose={closeModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="xpack.ml.jobsList.resetJobModal.resetJobsTitle"
-            defaultMessage="Reset {jobsCount, plural, one {{jobId}} other {# jobs}}?"
-            values={{
-              jobsCount: jobIds.length,
-              jobId: jobIds[0],
-            }}
-          />
+          <h1>
+            <FormattedMessage
+              id="xpack.ml.jobsList.resetJobModal.resetJobsTitle"
+              defaultMessage="Reset {jobsCount, plural, one {{jobId}} other {# jobs}}?"
+              values={{
+                jobsCount: jobIds.length,
+                jobId: jobIds[0],
+              }}
+            />
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
@@ -121,6 +127,14 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
               values={{
                 jobsCount: jobIds.length,
               }}
+            />
+            <EuiSpacer />
+            <EuiSwitch
+              label={i18n.translate('xpack.ml.jobsList.resetJobModal.deleteUserAnnotations', {
+                defaultMessage: 'Delete annotations.',
+              })}
+              checked={deleteUserAnnotations}
+              onChange={(e) => setDeleteUserAnnotations(e.target.checked)}
             />
           </EuiText>
         </>

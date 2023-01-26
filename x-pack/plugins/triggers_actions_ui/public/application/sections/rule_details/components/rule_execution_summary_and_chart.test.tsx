@@ -44,7 +44,7 @@ describe('rule_execution_summary_and_chart', () => {
   it('becomes a stateless component when "fetchRuleSummary" is false', async () => {
     const wrapper = mountWithIntl(
       <RuleExecutionSummaryAndChart
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary()}
         numberOfExecutions={60}
@@ -100,7 +100,7 @@ describe('rule_execution_summary_and_chart', () => {
   it('becomes a container component when "fetchRuleSummary" is true', async () => {
     const wrapper = mountWithIntl(
       <RuleExecutionSummaryAndChart
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         fetchRuleSummary={true}
         loadRuleSummary={loadRuleSummaryMock}
@@ -154,7 +154,7 @@ describe('rule_execution_summary_and_chart', () => {
 
     const wrapper = mountWithIntl(
       <RuleExecutionSummaryAndChart
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         fetchRuleSummary={true}
         loadRuleSummary={loadRuleSummaryMock}

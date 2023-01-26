@@ -7,7 +7,7 @@
  */
 
 import './table.scss';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +23,7 @@ import {
   EuiTablePagination,
   EuiSelectableMessage,
   EuiI18n,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,7 +35,7 @@ import { usePager } from '../../../../hooks/use_pager';
 import { FieldName } from '../../../../components/field_name/field_name';
 import { SHOW_MULTIFIELDS } from '../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../doc_views_types';
-import { getFieldsToShow } from '../../../../utils/get_fields_to_show';
+import { getShouldShowFieldHandler } from '../../../../utils/get_should_show_field_handler';
 import { getIgnoredReason } from '../../../../utils/get_ignored_reason';
 import { formatFieldValue } from '../../../../utils/format_value';
 import { isNestedFieldParent } from '../../../../application/main/utils/nested_fields';
@@ -108,6 +109,8 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
+  const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
+
   const { storage, uiSettings, fieldFormats } = useDiscoverServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
@@ -119,7 +122,10 @@ export const DocViewerTable = ({
   );
 
   const flattened = hit.flattened;
-  const fieldsToShow = getFieldsToShow(Object.keys(flattened), dataView, showMultiFields);
+  const shouldShowFieldHandler = useMemo(
+    () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
+    [flattened, dataView, showMultiFields]
+  );
 
   const searchPlaceholder = i18n.translate('discover.docView.table.searchPlaceHolder', {
     defaultMessage: 'Search field names',
@@ -226,7 +232,7 @@ export const DocViewerTable = ({
     })
     .reduce<ItemsEntry>(
       (acc, curFieldName) => {
-        if (!fieldsToShow.includes(curFieldName)) {
+        if (!shouldShowFieldHandler(curFieldName)) {
           return acc;
         }
 
@@ -235,7 +241,7 @@ export const DocViewerTable = ({
         } else {
           const fieldMapping = mapping(curFieldName);
           const displayName = fieldMapping?.displayName ?? curFieldName;
-          if (displayName.includes(searchText)) {
+          if (displayName.toLowerCase().includes(searchText.toLowerCase())) {
             // filter only unpinned fields
             acc.restItems.push(fieldToItem(curFieldName));
           }
@@ -266,7 +272,12 @@ export const DocViewerTable = ({
 
   const headers = [
     !isSingleDocView && (
-      <EuiTableHeaderCell align="left" width={62} isSorted={false}>
+      <EuiTableHeaderCell
+        key="header-cell-actions"
+        align="left"
+        width={showActionsInsideTableCell ? 150 : 62}
+        isSorted={false}
+      >
         <EuiText size="xs">
           <strong>
             <FormattedMessage
@@ -277,14 +288,14 @@ export const DocViewerTable = ({
         </EuiText>
       </EuiTableHeaderCell>
     ),
-    <EuiTableHeaderCell align="left" width="30%" isSorted={false}>
+    <EuiTableHeaderCell key="header-cell-name" align="left" width="30%" isSorted={false}>
       <EuiText size="xs">
         <strong>
           <FormattedMessage id="discover.fieldChooser.discoverField.name" defaultMessage="Field" />
         </strong>
       </EuiText>
     </EuiTableHeaderCell>,
-    <EuiTableHeaderCell align="left" isSorted={false}>
+    <EuiTableHeaderCell key="header-cell-value" align="left" isSorted={false}>
       <EuiText size="xs">
         <strong>
           <FormattedMessage id="discover.fieldChooser.discoverField.value" defaultMessage="Value" />
@@ -295,10 +306,11 @@ export const DocViewerTable = ({
 
   const renderRows = useCallback(
     (items: FieldRecord[]) => {
+      const highlight = searchText?.toLowerCase();
       return items.map(
         ({
           action: { flattenedField, onFilter },
-          field: { field, fieldMapping, displayName, fieldType, scripted, pinned },
+          field: { field, fieldMapping, fieldType, scripted, pinned },
           value: { formattedValue, ignored },
         }: FieldRecord) => {
           return (
@@ -306,13 +318,14 @@ export const DocViewerTable = ({
               {!isSingleDocView && (
                 <EuiTableRowCell
                   key={field + '-actions'}
-                  align="center"
-                  width={62}
+                  align={showActionsInsideTableCell ? 'left' : 'center'}
+                  width={showActionsInsideTableCell ? undefined : 62}
                   className="kbnDocViewer__tableActionsCell"
                   textOnly={false}
                   mobileOptions={MOBILE_OPTIONS}
                 >
                   <TableActions
+                    mode={showActionsInsideTableCell ? 'inline' : 'as_popover'}
                     field={field}
                     pinned={pinned}
                     fieldMapping={fieldMapping}
@@ -333,10 +346,11 @@ export const DocViewerTable = ({
                 mobileOptions={MOBILE_OPTIONS}
               >
                 <FieldName
-                  fieldName={displayName}
+                  fieldName={field}
                   fieldType={fieldType}
                   fieldMapping={fieldMapping}
                   scripted={scripted}
+                  highlight={highlight}
                 />
               </EuiTableRowCell>
               <EuiTableRowCell
@@ -358,7 +372,7 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, isSingleDocView]
+    [onToggleColumn, onTogglePinned, isSingleDocView, showActionsInsideTableCell, searchText]
   );
 
   const rowElements = [

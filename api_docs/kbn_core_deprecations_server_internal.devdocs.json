@@ -11,20 +11,29 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-deprecations-server-internal",
-        "id": "def-server.InternalDeprecationsServiceStart",
+        "id": "def-common.InternalDeprecationsServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "InternalDeprecationsServiceStart",
         "description": [],
         "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server-internal",
-            "id": "def-server.InternalDeprecationsServiceStart.asScopedToClient",
+            "id": "def-common.InternalDeprecationsServiceStart.asScopedToClient",
             "type": "Function",
             "tags": [],
             "label": "asScopedToClient",
@@ -33,41 +42,74 @@
             ],
             "signature": [
               "(esClient: ",
-              "IScopedClusterClient",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              },
               ", savedObjectsClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ") => ",
-              "DeprecationsClient"
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-common.DeprecationsClient",
+                "text": "DeprecationsClient"
+              }
             ],
             "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-server-internal",
-                "id": "def-server.InternalDeprecationsServiceStart.asScopedToClient.$1",
+                "id": "def-common.InternalDeprecationsServiceStart.asScopedToClient.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "IScopedClusterClient"
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-common.IScopedClusterClient",
+                    "text": "IScopedClusterClient"
+                  }
                 ],
                 "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-deprecations-server-internal",
-                "id": "def-server.InternalDeprecationsServiceStart.asScopedToClient.$2",
+                "id": "def-common.InternalDeprecationsServiceStart.asScopedToClient.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -77,14 +119,6 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

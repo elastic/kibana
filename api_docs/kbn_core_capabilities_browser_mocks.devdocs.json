@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-browser-mocks",
@@ -42,13 +43,20 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "PublicMethodsOf",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
               "<",
               "CapabilitiesService",
               ">>"
             ],
             "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -66,6 +74,7 @@
             ],
             "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

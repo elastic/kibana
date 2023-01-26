@@ -8,6 +8,7 @@
 import type { Field } from '../../fields/field';
 
 const DEFAULT_SCALING_FACTOR = 1000;
+const DEFAULT_IGNORE_ABOVE = 1024;
 
 interface Properties {
   [key: string]: any;
@@ -33,9 +34,6 @@ export function scaledFloat(field: Field): Properties {
   const fieldProps = getDefaultProperties(field);
   fieldProps.type = 'scaled_float';
   fieldProps.scaling_factor = field.scaling_factor || DEFAULT_SCALING_FACTOR;
-  if (field.metric_type) {
-    fieldProps.time_series_metric = field.metric_type;
-  }
 
   return fieldProps;
 }
@@ -43,6 +41,30 @@ export function scaledFloat(field: Field): Properties {
 export function histogram(field: Field): Properties {
   const fieldProps = getDefaultProperties(field);
   fieldProps.type = 'histogram';
+
+  return fieldProps;
+}
+
+export function keyword(field: Field): Properties {
+  const fieldProps = getDefaultProperties(field);
+  fieldProps.type = 'keyword';
+
+  if (field.ignore_above) {
+    fieldProps.ignore_above = field.ignore_above;
+  } else {
+    fieldProps.ignore_above = DEFAULT_IGNORE_ABOVE;
+  }
+  if (field.normalizer) {
+    fieldProps.normalizer = field.normalizer;
+  }
+  if (field.dimension) {
+    fieldProps.time_series_dimension = field.dimension;
+    delete fieldProps.ignore_above;
+  }
+
+  if (field.index === false || field.doc_values === false) {
+    delete fieldProps.ignore_above;
+  }
 
   return fieldProps;
 }

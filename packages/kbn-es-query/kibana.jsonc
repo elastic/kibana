@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/es-query",
+  "owner": "@elastic/kibana-data-discovery"
+}

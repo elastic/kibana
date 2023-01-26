@@ -13,6 +13,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import { ExpressionHeatmapPluginStart } from '../plugin';
 import {
   EXPRESSION_HEATMAP_NAME,
@@ -27,8 +28,6 @@ import {
   getUISettings,
 } from '../services';
 import { getTimeZone } from '../utils/get_timezone';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
 
 interface ExpressioHeatmapRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionHeatmapPluginStart>;
@@ -61,9 +60,14 @@ export const heatmapRenderer: (
       const visualizationType = extractVisualizationType(executionContext);
 
       if (containerType && visualizationType) {
-        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+        const events = [
           `render_${visualizationType}_${EXPRESSION_HEATMAP_NAME}`,
-        ]);
+          config.canNavigateToLens
+            ? `render_${visualizationType}_${EXPRESSION_HEATMAP_NAME}_convertable`
+            : undefined,
+        ].filter<string>((event): event is string => Boolean(event));
+
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, events);
       }
 
       handlers.done();
@@ -88,6 +92,9 @@ export const heatmapRenderer: (
             renderComplete={renderComplete}
             uiState={handlers.uiState as PersistedState}
             interactive={isInteractive()}
+            chartsActiveCursorService={plugins.charts.activeCursor}
+            syncTooltips={config.syncTooltips}
+            syncCursor={config.syncCursor}
           />
         </div>
       </KibanaThemeProvider>,

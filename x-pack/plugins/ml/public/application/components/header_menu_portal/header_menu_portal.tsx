@@ -41,6 +41,7 @@ export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portalNode, setHeaderActionMenu, services.theme.theme$]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;

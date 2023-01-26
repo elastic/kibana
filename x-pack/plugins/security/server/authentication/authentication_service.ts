@@ -62,7 +62,9 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     APIKeys,
     | 'areAPIKeysEnabled'
     | 'create'
+    | 'update'
     | 'invalidate'
+    | 'validate'
     | 'grantAsInternalUser'
     | 'invalidateAsInternalUser'
   >;
@@ -81,6 +83,7 @@ export interface AuthenticationServiceStart {
     | 'areAPIKeysEnabled'
     | 'create'
     | 'invalidate'
+    | 'validate'
     | 'grantAsInternalUser'
     | 'invalidateAsInternalUser'
   >;
@@ -335,7 +338,10 @@ export class AuthenticationService {
       loggers,
       clusterClient,
       basePath: http.basePath,
-      config: { authc: config.authc },
+      config: {
+        authc: config.authc,
+        accessAgreement: config.accessAgreement,
+      },
       getCurrentUser,
       featureUsageService,
       userProfileService,
@@ -349,8 +355,10 @@ export class AuthenticationService {
       apiKeys: {
         areAPIKeysEnabled: apiKeys.areAPIKeysEnabled.bind(apiKeys),
         create: apiKeys.create.bind(apiKeys),
+        update: apiKeys.update.bind(apiKeys),
         grantAsInternalUser: apiKeys.grantAsInternalUser.bind(apiKeys),
         invalidate: apiKeys.invalidate.bind(apiKeys),
+        validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
       },
 

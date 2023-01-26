@@ -21,6 +21,7 @@ import { SearchUIForm } from './components/search_ui_form';
 import { SearchUIGraphic } from './components/search_ui_graphic';
 import { SEARCH_UI_TITLE } from './i18n';
 import { SearchUILogic } from './search_ui_logic';
+import './search_ui.scss';
 
 export const SearchUI: React.FC = () => {
   const { loadFieldData } = useActions(SearchUILogic);
@@ -76,7 +77,7 @@ export const SearchUI: React.FC = () => {
           <EuiSpacer />
           <SearchUIForm />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem className="searchUIGraphicContainer">
           <SearchUIGraphic />
         </EuiFlexItem>
       </EuiFlexGroup>

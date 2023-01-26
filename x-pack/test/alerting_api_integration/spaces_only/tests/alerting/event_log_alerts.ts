@@ -93,7 +93,9 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
         start?: string;
         durationToDate?: string;
       } = {};
+      const flapping = [];
       for (let i = 0; i < instanceEvents.length; ++i) {
+        flapping.push(instanceEvents[i]?.kibana?.alert?.flapping);
         switch (instanceEvents[i]?.event?.action) {
           case 'new-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
@@ -130,6 +132,9 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             break;
         }
       }
+      expect(flapping).to.eql(
+        new Array(instanceEvents.length - 4).fill(false).concat([true, true, true, true])
+      );
     });
   });
 }

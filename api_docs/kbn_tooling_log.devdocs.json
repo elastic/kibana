@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.ToolingLog",
+        "id": "def-common.ToolingLog",
         "type": "Class",
         "tags": [],
         "label": "ToolingLog",
@@ -20,20 +28,27 @@
         "signature": [
           {
             "pluginId": "@kbn/tooling-log",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnToolingLogPluginApi",
-            "section": "def-server.ToolingLog",
+            "section": "def-common.ToolingLog",
             "text": "ToolingLog"
           },
           " implements ",
-          "SomeDevLog"
+          {
+            "pluginId": "@kbn/some-dev-log",
+            "scope": "common",
+            "docId": "kibKbnSomeDevLogPluginApi",
+            "section": "def-common.SomeDevLog",
+            "text": "SomeDevLog"
+          }
         ],
         "path": "packages/kbn-tooling-log/src/tooling_log.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.Unnamed",
+            "id": "def-common.ToolingLog.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -43,10 +58,11 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.Unnamed.$1",
+                "id": "def-common.ToolingLog.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "writerConfig",
@@ -54,20 +70,21 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.ToolingLogTextWriterConfig",
+                    "section": "def-common.ToolingLogTextWriterConfig",
                     "text": "ToolingLogTextWriterConfig"
                   },
                   " | undefined"
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.Unnamed.$2",
+                "id": "def-common.ToolingLog.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -75,15 +92,16 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.ToolingLogOptions",
+                    "section": "def-common.ToolingLogOptions",
                     "text": "ToolingLogOptions"
                   },
                   " | undefined"
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -91,7 +109,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.getIndent",
+            "id": "def-common.ToolingLog.getIndent",
             "type": "Function",
             "tags": [],
             "label": "getIndent",
@@ -103,12 +121,13 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.indent",
+            "id": "def-common.ToolingLog.indent",
             "type": "Function",
             "tags": [],
             "label": "indent",
@@ -118,10 +137,11 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.indent.$1",
+                "id": "def-common.ToolingLog.indent.$1",
                 "type": "number",
                 "tags": [],
                 "label": "delta",
@@ -131,11 +151,12 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.indent.$2",
+                "id": "def-common.ToolingLog.indent.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "block",
@@ -145,6 +166,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -152,7 +174,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.verbose",
+            "id": "def-common.ToolingLog.verbose",
             "type": "Function",
             "tags": [],
             "label": "verbose",
@@ -162,10 +184,11 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.verbose.$1",
+                "id": "def-common.ToolingLog.verbose.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "args",
@@ -175,6 +198,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -182,7 +206,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.debug",
+            "id": "def-common.ToolingLog.debug",
             "type": "Function",
             "tags": [],
             "label": "debug",
@@ -192,10 +216,11 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.debug.$1",
+                "id": "def-common.ToolingLog.debug.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "args",
@@ -205,6 +230,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -212,7 +238,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.info",
+            "id": "def-common.ToolingLog.info",
             "type": "Function",
             "tags": [],
             "label": "info",
@@ -222,10 +248,11 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.info.$1",
+                "id": "def-common.ToolingLog.info.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "args",
@@ -235,6 +262,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -242,7 +270,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.success",
+            "id": "def-common.ToolingLog.success",
             "type": "Function",
             "tags": [],
             "label": "success",
@@ -252,10 +280,11 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.success.$1",
+                "id": "def-common.ToolingLog.success.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "args",
@@ -265,6 +294,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -272,7 +302,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.warning",
+            "id": "def-common.ToolingLog.warning",
             "type": "Function",
             "tags": [],
             "label": "warning",
@@ -282,10 +312,11 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.warning.$1",
+                "id": "def-common.ToolingLog.warning.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "args",
@@ -295,6 +326,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -302,7 +334,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.error",
+            "id": "def-common.ToolingLog.error",
             "type": "Function",
             "tags": [],
             "label": "error",
@@ -312,10 +344,11 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.error.$1",
+                "id": "def-common.ToolingLog.error.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -325,6 +358,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -332,7 +366,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.write",
+            "id": "def-common.ToolingLog.write",
             "type": "Function",
             "tags": [],
             "label": "write",
@@ -342,10 +376,11 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.write.$1",
+                "id": "def-common.ToolingLog.write.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "args",
@@ -355,6 +390,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -362,7 +398,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.getWriters",
+            "id": "def-common.ToolingLog.getWriters",
             "type": "Function",
             "tags": [],
             "label": "getWriters",
@@ -371,21 +407,22 @@
               "() => ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.Writer",
+                "section": "def-common.Writer",
                 "text": "Writer"
               },
               "[]"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.setWriters",
+            "id": "def-common.ToolingLog.setWriters",
             "type": "Function",
             "tags": [],
             "label": "setWriters",
@@ -394,19 +431,20 @@
               "(writers: ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.Writer",
+                "section": "def-common.Writer",
                 "text": "Writer"
               },
               "[]) => void"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.setWriters.$1",
+                "id": "def-common.ToolingLog.setWriters.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "writers",
@@ -414,15 +452,16 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.Writer",
+                    "section": "def-common.Writer",
                     "text": "Writer"
                   },
                   "[]"
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -430,7 +469,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.getWritten$",
+            "id": "def-common.ToolingLog.getWritten$",
             "type": "Function",
             "tags": [],
             "label": "getWritten$",
@@ -441,21 +480,22 @@
               "<",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.Message",
+                "section": "def-common.Message",
                 "text": "Message"
               },
               ">"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLog.withType",
+            "id": "def-common.ToolingLog.withType",
             "type": "Function",
             "tags": [],
             "label": "withType",
@@ -466,18 +506,19 @@
               "(type: string) => ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               }
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLog.withType.$1",
+                "id": "def-common.ToolingLog.withType.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -489,6 +530,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -499,7 +541,7 @@
       },
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.ToolingLogCollectingWriter",
+        "id": "def-common.ToolingLogCollectingWriter",
         "type": "Class",
         "tags": [],
         "label": "ToolingLogCollectingWriter",
@@ -507,26 +549,27 @@
         "signature": [
           {
             "pluginId": "@kbn/tooling-log",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnToolingLogPluginApi",
-            "section": "def-server.ToolingLogCollectingWriter",
+            "section": "def-common.ToolingLogCollectingWriter",
             "text": "ToolingLogCollectingWriter"
           },
           " extends ",
           {
             "pluginId": "@kbn/tooling-log",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnToolingLogPluginApi",
-            "section": "def-server.ToolingLogTextWriter",
+            "section": "def-common.ToolingLogTextWriter",
             "text": "ToolingLogTextWriter"
           }
         ],
         "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogCollectingWriter.messages",
+            "id": "def-common.ToolingLogCollectingWriter.messages",
             "type": "Array",
             "tags": [],
             "label": "messages",
@@ -535,11 +578,12 @@
               "string[]"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogCollectingWriter.Unnamed",
+            "id": "def-common.ToolingLogCollectingWriter.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -549,10 +593,11 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLogCollectingWriter.Unnamed.$1",
+                "id": "def-common.ToolingLogCollectingWriter.Unnamed.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "level",
@@ -562,6 +607,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -569,7 +615,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogCollectingWriter.write",
+            "id": "def-common.ToolingLogCollectingWriter.write",
             "type": "Function",
             "tags": [],
             "label": "write",
@@ -580,19 +626,20 @@
               "(msg: ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.Message",
+                "section": "def-common.Message",
                 "text": "Message"
               },
               ") => boolean"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLogCollectingWriter.write.$1",
+                "id": "def-common.ToolingLogCollectingWriter.write.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "msg",
@@ -600,14 +647,15 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.Message",
+                    "section": "def-common.Message",
                     "text": "Message"
                   }
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -618,7 +666,7 @@
       },
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.ToolingLogTextWriter",
+        "id": "def-common.ToolingLogTextWriter",
         "type": "Class",
         "tags": [],
         "label": "ToolingLogTextWriter",
@@ -626,26 +674,27 @@
         "signature": [
           {
             "pluginId": "@kbn/tooling-log",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnToolingLogPluginApi",
-            "section": "def-server.ToolingLogTextWriter",
+            "section": "def-common.ToolingLogTextWriter",
             "text": "ToolingLogTextWriter"
           },
           " implements ",
           {
             "pluginId": "@kbn/tooling-log",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnToolingLogPluginApi",
-            "section": "def-server.Writer",
+            "section": "def-common.Writer",
             "text": "Writer"
           }
         ],
         "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogTextWriter.level",
+            "id": "def-common.ToolingLogTextWriter.level",
             "type": "Object",
             "tags": [],
             "label": "level",
@@ -654,11 +703,12 @@
               "{ name: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; warning: boolean; success: boolean; info: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogTextWriter.writeTo",
+            "id": "def-common.ToolingLogTextWriter.writeTo",
             "type": "Object",
             "tags": [],
             "label": "writeTo",
@@ -667,11 +717,12 @@
               "{ write(msg: string): void; }"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogTextWriter.Unnamed",
+            "id": "def-common.ToolingLogTextWriter.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -681,10 +732,11 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLogTextWriter.Unnamed.$1",
+                "id": "def-common.ToolingLogTextWriter.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "config",
@@ -692,14 +744,15 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.ToolingLogTextWriterConfig",
+                    "section": "def-common.ToolingLogTextWriterConfig",
                     "text": "ToolingLogTextWriterConfig"
                   }
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -707,7 +760,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogTextWriter.write",
+            "id": "def-common.ToolingLogTextWriter.write",
             "type": "Function",
             "tags": [],
             "label": "write",
@@ -716,19 +769,20 @@
               "(msg: ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.Message",
+                "section": "def-common.Message",
                 "text": "Message"
               },
               ") => boolean"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLogTextWriter.write.$1",
+                "id": "def-common.ToolingLogTextWriter.write.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "msg",
@@ -736,14 +790,15 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.Message",
+                    "section": "def-common.Message",
                     "text": "Message"
                   }
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -751,7 +806,7 @@
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogTextWriter.write",
+            "id": "def-common.ToolingLogTextWriter.write",
             "type": "Function",
             "tags": [],
             "label": "write",
@@ -760,19 +815,20 @@
               "(writeTo: { write(msg: string): void; }, prefix: string, msg: ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.Message",
+                "section": "def-common.Message",
                 "text": "Message"
               },
               ") => void"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLogTextWriter.write.$1",
+                "id": "def-common.ToolingLogTextWriter.write.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "writeTo",
@@ -782,11 +838,12 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLogTextWriter.write.$2",
+                "id": "def-common.ToolingLogTextWriter.write.$2",
                 "type": "string",
                 "tags": [],
                 "label": "prefix",
@@ -796,11 +853,12 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.ToolingLogTextWriter.write.$3",
+                "id": "def-common.ToolingLogTextWriter.write.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "msg",
@@ -808,14 +866,15 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.Message",
+                    "section": "def-common.Message",
                     "text": "Message"
                   }
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -828,7 +887,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.getLogLevelFlagsHelp",
+        "id": "def-common.getLogLevelFlagsHelp",
         "type": "Function",
         "tags": [],
         "label": "getLogLevelFlagsHelp",
@@ -838,10 +897,11 @@
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.getLogLevelFlagsHelp.$1",
+            "id": "def-common.getLogLevelFlagsHelp.$1",
             "type": "string",
             "tags": [],
             "label": "defaultLogLevel",
@@ -851,6 +911,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/log_levels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -859,7 +920,7 @@
       },
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.parseLogLevel",
+        "id": "def-common.parseLogLevel",
         "type": "Function",
         "tags": [],
         "label": "parseLogLevel",
@@ -869,10 +930,11 @@
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.parseLogLevel.$1",
+            "id": "def-common.parseLogLevel.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "name",
@@ -882,6 +944,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/log_levels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -890,7 +953,7 @@
       },
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.pickLevelFromFlags",
+        "id": "def-common.pickLevelFromFlags",
         "type": "Function",
         "tags": [],
         "label": "pickLevelFromFlags",
@@ -900,10 +963,11 @@
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.pickLevelFromFlags.$1",
+            "id": "def-common.pickLevelFromFlags.$1",
             "type": "Object",
             "tags": [],
             "label": "flags",
@@ -913,21 +977,23 @@
             ],
             "path": "packages/kbn-tooling-log/src/log_levels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.pickLevelFromFlags.$2",
+            "id": "def-common.pickLevelFromFlags.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
             "description": [],
             "path": "packages/kbn-tooling-log/src/log_levels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.pickLevelFromFlags.$2.default",
+                "id": "def-common.pickLevelFromFlags.$2.default",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "default",
@@ -936,7 +1002,8 @@
                   "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined"
                 ],
                 "path": "packages/kbn-tooling-log/src/log_levels.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -948,7 +1015,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.Message",
+        "id": "def-common.Message",
         "type": "Interface",
         "tags": [],
         "label": "Message",
@@ -957,10 +1024,11 @@
         ],
         "path": "packages/kbn-tooling-log/src/message.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.Message.type",
+            "id": "def-common.Message.type",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
@@ -971,11 +1039,12 @@
               "\"error\" | \"warning\" | \"success\" | \"write\" | \"info\" | \"debug\" | \"verbose\""
             ],
             "path": "packages/kbn-tooling-log/src/message.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.Message.indent",
+            "id": "def-common.Message.indent",
             "type": "number",
             "tags": [],
             "label": "indent",
@@ -983,11 +1052,12 @@
               "indentation intended when message written to a text log"
             ],
             "path": "packages/kbn-tooling-log/src/message.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.Message.source",
+            "id": "def-common.Message.source",
             "type": "string",
             "tags": [],
             "label": "source",
@@ -998,11 +1068,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-tooling-log/src/message.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.Message.args",
+            "id": "def-common.Message.args",
             "type": "Array",
             "tags": [],
             "label": "args",
@@ -1013,24 +1084,26 @@
               "any[]"
             ],
             "path": "packages/kbn-tooling-log/src/message.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.ToolingLogOptions",
+        "id": "def-common.ToolingLogOptions",
         "type": "Interface",
         "tags": [],
         "label": "ToolingLogOptions",
         "description": [],
         "path": "packages/kbn-tooling-log/src/tooling_log.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogOptions.type",
+            "id": "def-common.ToolingLogOptions.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -1041,11 +1114,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogOptions.parent",
+            "id": "def-common.ToolingLogOptions.parent",
             "type": "Object",
             "tags": [],
             "label": "parent",
@@ -1055,32 +1129,34 @@
             "signature": [
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               },
               " | undefined"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.ToolingLogTextWriterConfig",
+        "id": "def-common.ToolingLogTextWriterConfig",
         "type": "Interface",
         "tags": [],
         "label": "ToolingLogTextWriterConfig",
         "description": [],
         "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogTextWriterConfig.level",
+            "id": "def-common.ToolingLogTextWriterConfig.level",
             "type": "CompoundType",
             "tags": [],
             "label": "level",
@@ -1091,11 +1167,12 @@
               "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogTextWriterConfig.ignoreSources",
+            "id": "def-common.ToolingLogTextWriterConfig.ignoreSources",
             "type": "Array",
             "tags": [],
             "label": "ignoreSources",
@@ -1106,11 +1183,12 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.ToolingLogTextWriterConfig.writeTo",
+            "id": "def-common.ToolingLogTextWriterConfig.writeTo",
             "type": "Object",
             "tags": [],
             "label": "writeTo",
@@ -1121,14 +1199,15 @@
               "{ write(s: string): void; }"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.Writer",
+        "id": "def-common.Writer",
         "type": "Interface",
         "tags": [],
         "label": "Writer",
@@ -1137,10 +1216,11 @@
         ],
         "path": "packages/kbn-tooling-log/src/writer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
-            "id": "def-server.Writer.write",
+            "id": "def-common.Writer.write",
             "type": "Function",
             "tags": [],
             "label": "write",
@@ -1151,19 +1231,20 @@
               "(msg: ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.Message",
+                "section": "def-common.Message",
                 "text": "Message"
               },
               ") => boolean"
             ],
             "path": "packages/kbn-tooling-log/src/writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
-                "id": "def-server.Writer.write.$1",
+                "id": "def-common.Writer.write.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "msg",
@@ -1173,14 +1254,15 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.Message",
+                    "section": "def-common.Message",
                     "text": "Message"
                   }
                 ],
                 "path": "packages/kbn-tooling-log/src/writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1194,7 +1276,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.DEFAULT_LOG_LEVEL",
+        "id": "def-common.DEFAULT_LOG_LEVEL",
         "type": "string",
         "tags": [],
         "label": "DEFAULT_LOG_LEVEL",
@@ -1204,11 +1286,12 @@
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.LOG_LEVEL_FLAGS",
+        "id": "def-common.LOG_LEVEL_FLAGS",
         "type": "Array",
         "tags": [],
         "label": "LOG_LEVEL_FLAGS",
@@ -1218,11 +1301,12 @@
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.LogLevel",
+        "id": "def-common.LogLevel",
         "type": "Type",
         "tags": [],
         "label": "LogLevel",
@@ -1232,11 +1316,12 @@
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/tooling-log",
-        "id": "def-server.ParsedLogLevel",
+        "id": "def-common.ParsedLogLevel",
         "type": "Type",
         "tags": [],
         "label": "ParsedLogLevel",
@@ -1246,17 +1331,10 @@
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

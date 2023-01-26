@@ -7,30 +7,40 @@
 
 import { useMemo } from 'react';
 import { SecurityPageName } from '../../../../common/constants';
-import { HostsTableType } from '../../../hosts/store/model';
-import { NetworkRouteType } from '../../../network/pages/navigation/types';
+import { HostsTableType } from '../../../explore/hosts/store/model';
+import { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import type { LensAttributes, GetLensAttributes } from './types';
+import type { LensAttributes, GetLensAttributes, ExtraOptions } from './types';
 import {
-  getHostDetailsPageFilter,
-  filterNetworkExternalAlertData,
+  getDetailsPageFilter,
+  sourceOrDestinationIpExistsFilter,
   hostNameExistsFilter,
   getIndexFilters,
+  getNetworkDetailsPageFilter,
 } from './utils';
 
 export const useLensAttributes = ({
-  lensAttributes,
+  applyGlobalQueriesAndFilters = true,
+  extraOptions,
   getLensAttributes,
+  lensAttributes,
+  scopeId = SourcererScopeName.default,
   stackByField,
+  title,
 }: {
-  lensAttributes?: LensAttributes | null;
+  applyGlobalQueriesAndFilters?: boolean;
+  extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
+  lensAttributes?: LensAttributes | null;
+  scopeId?: SourcererScopeName;
   stackByField?: string;
+  title?: string;
 }): LensAttributes | null => {
-  const { selectedPatterns, dataViewId } = useSourcererDataView();
+  const { selectedPatterns, dataViewId, indicesExist } = useSourcererDataView(scopeId);
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -46,58 +56,79 @@ export const useLensAttributes = ({
     }
 
     if (pageName === SecurityPageName.network && tabName === NetworkRouteType.events) {
-      return filterNetworkExternalAlertData;
+      return sourceOrDestinationIpExistsFilter;
     }
 
     return [];
   }, [pageName, tabName]);
 
   const pageFilters = useMemo(() => {
-    if (pageName === SecurityPageName.hosts && detailName != null) {
-      return getHostDetailsPageFilter(detailName);
+    if (
+      [SecurityPageName.hosts, SecurityPageName.users].indexOf(pageName) >= 0 &&
+      detailName != null
+    ) {
+      return getDetailsPageFilter(pageName, detailName);
     }
+
+    if (SecurityPageName.network === pageName) {
+      return getNetworkDetailsPageFilter(detailName);
+    }
+
     return [];
   }, [detailName, pageName]);
 
-  const indexFilters = useMemo(() => getIndexFilters(selectedPatterns), [selectedPatterns]);
+  const attrs: LensAttributes = useMemo(
+    () =>
+      lensAttributes ??
+      ((getLensAttributes &&
+        stackByField &&
+        getLensAttributes(stackByField, extraOptions)) as LensAttributes),
+    [extraOptions, getLensAttributes, lensAttributes, stackByField]
+  );
+
+  const hasAdHocDataViews = Object.values(attrs?.state?.adHocDataViews ?? {}).length > 0;
 
   const lensAttrsWithInjectedData = useMemo(() => {
     if (lensAttributes == null && (getLensAttributes == null || stackByField == null)) {
       return null;
     }
-    const attrs: LensAttributes =
-      lensAttributes ??
-      ((getLensAttributes && stackByField && getLensAttributes(stackByField)) as LensAttributes);
 
+    const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
     return {
       ...attrs,
+      ...(title != null ? { title } : {}),
       state: {
         ...attrs.state,
-        query,
+        ...(applyGlobalQueriesAndFilters ? { query } : {}),
         filters: [
           ...attrs.state.filters,
-          ...filters,
+          ...(applyGlobalQueriesAndFilters ? filters : []),
           ...pageFilters,
           ...tabsFilters,
           ...indexFilters,
         ],
       },
-      references: attrs.references.map((ref: { id: string; name: string; type: string }) => ({
+      references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
         ...ref,
         id: dataViewId,
       })),
     } as LensAttributes;
   }, [
-    lensAttributes,
-    getLensAttributes,
-    stackByField,
-    query,
-    filters,
-    pageFilters,
-    tabsFilters,
-    indexFilters,
+    applyGlobalQueriesAndFilters,
+    attrs,
     dataViewId,
+    filters,
+    getLensAttributes,
+    hasAdHocDataViews,
+    lensAttributes,
+    pageFilters,
+    query,
+    selectedPatterns,
+    stackByField,
+    tabsFilters,
+    title,
   ]);
-
-  return lensAttrsWithInjectedData;
+  return hasAdHocDataViews || (!hasAdHocDataViews && indicesExist)
+    ? lensAttrsWithInjectedData
+    : null;
 };

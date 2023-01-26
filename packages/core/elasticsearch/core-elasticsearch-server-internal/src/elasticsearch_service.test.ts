@@ -21,7 +21,7 @@ import { MockClusterClient, isScriptingEnabledMock } from './elasticsearch_servi
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { first, concatMap } from 'rxjs/operators';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -135,6 +135,20 @@ describe('#preboot', () => {
       );
     });
 
+    it('creates a ClusterClient using the internal AgentManager as AgentFactoryProvider ', async () => {
+      const prebootContract = await elasticsearchService.preboot();
+      const customConfig = { keepAlive: true };
+      const clusterClient = prebootContract.createClient('custom-type', customConfig);
+
+      expect(clusterClient).toBe(mockClusterClientInstance);
+
+      expect(MockClusterClient).toHaveBeenCalledTimes(1);
+      expect(MockClusterClient.mock.calls[0][0]).toEqual(
+        // eslint-disable-next-line dot-notation
+        expect.objectContaining({ agentFactoryProvider: elasticsearchService['agentManager'] })
+      );
+    });
+
     it('creates a new client on each call', async () => {
       const prebootContract = await elasticsearchService.preboot();
 
@@ -185,6 +199,11 @@ describe('#setup', () => {
     await expect(setupContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
       ElasticsearchConfig
     );
+  });
+
+  it('returns an AgentStore as part of the contract', async () => {
+    const setupContract = await elasticsearchService.setup(setupDeps);
+    expect(typeof setupContract.agentStore.getAgents).toEqual('function');
   });
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {

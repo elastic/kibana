@@ -21,17 +21,20 @@ export const selectResolvedDateRange = (state: LensState) => state.lens.resolved
 export const selectAdHocDataViews = (state: LensState) =>
   Object.fromEntries(
     Object.values(state.lens.dataViews.indexPatterns)
-      .filter((indexPattern) => indexPattern.spec)
+      .filter((indexPattern) => !indexPattern.isPersisted)
       .map((indexPattern) => [indexPattern.id, indexPattern.spec!])
   );
 export const selectVisualization = (state: LensState) => state.lens.visualization;
 export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
 export const selectStagedActiveData = (state: LensState) =>
   state.lens.stagedPreview?.activeData || state.lens.activeData;
+export const selectStagedRequestWarnings = (state: LensState) =>
+  state.lens.stagedPreview?.requestWarnings || state.lens.requestWarnings;
 export const selectAutoApplyEnabled = (state: LensState) => !state.lens.autoApplyDisabled;
 export const selectChangesApplied = (state: LensState) =>
   !state.lens.autoApplyDisabled || Boolean(state.lens.changesApplied);
 export const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
+export const selectVisualizationState = (state: LensState) => state.lens.visualization;
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
 export const selectDataViews = (state: LensState) => state.lens.dataViews;
@@ -61,6 +64,7 @@ export const selectExecutionContextSearch = createSelector(selectExecutionContex
     to: res.dateRange.toDate,
   },
   filters: res.filters,
+  disableShardWarnings: true,
 }));
 
 const selectInjectedDependencies = (_state: LensState, dependencies: unknown) => dependencies;
@@ -94,7 +98,9 @@ export const selectSavedObjectFormat = createSelector(
     { datasourceMap, visualizationMap, extractFilterReferences }
   ) => {
     const activeVisualization =
-      visualization.state && visualization.activeId && visualizationMap[visualization.activeId];
+      visualization.state && visualization.activeId
+        ? visualizationMap[visualization.activeId]
+        : null;
     const activeDatasource =
       datasourceStates && activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
         ? datasourceMap[activeDatasourceId]
@@ -129,6 +135,20 @@ export const selectSavedObjectFormat = createSelector(
       });
     });
 
+    let persistibleVisualizationState = visualization.state;
+    if (activeVisualization.getPersistableState) {
+      const { state: persistableState, savedObjectReferences } =
+        activeVisualization.getPersistableState(visualization.state);
+      persistibleVisualizationState = persistableState;
+      savedObjectReferences.forEach((r) => {
+        if (r.type === 'index-pattern' && adHocDataViews[r.id]) {
+          internalReferences.push(r);
+        } else {
+          references.push(r);
+        }
+      });
+    }
+
     const persistableAdHocDataViews = Object.fromEntries(
       Object.entries(adHocDataViews).map(([id, dataView]) => {
         const { references: dataViewReferences, state } =
@@ -159,7 +179,7 @@ export const selectSavedObjectFormat = createSelector(
       type: 'lens',
       references,
       state: {
-        visualization: visualization.state,
+        visualization: persistibleVisualizationState,
         query,
         filters: [...persistableFilters, ...adHocFilters],
         datasourceStates: persistibleDatasourceStates,
@@ -217,4 +237,9 @@ export const selectFramePublicAPI = createSelector(
       dataViews,
     };
   }
+);
+
+export const selectFrameDatasourceAPI = createSelector(
+  [selectFramePublicAPI, selectExecutionContext],
+  (framePublicAPI, context) => ({ ...context, ...framePublicAPI })
 );

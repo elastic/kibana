@@ -9,9 +9,16 @@ export type { ToolbarPopoverProps } from './toolbar_popover';
 export { ToolbarPopover } from './toolbar_popover';
 export { LegendSettingsPopover } from './legend_settings_popover';
 export { PalettePicker } from './palette_picker';
-export { FieldPicker, LensFieldIcon, TruncatedLabel } from './field_picker';
+export { FieldPicker, TruncatedLabel } from './field_picker';
 export type { FieldOption, FieldOptionValue } from './field_picker';
-export { ChangeIndexPattern, fieldExists, fieldContainsData } from './dataview_picker';
+export { ChangeIndexPattern, fieldContainsData } from './dataview_picker';
+export { QueryInput, isQueryValid, validateQuery } from './query_input';
+export {
+  NewBucketButton,
+  DraggableBucketContainer,
+  DragDropBuckets,
+  FieldsBucketContainer,
+} from './drag_drop_bucket';
 export { RangeInputField } from './range_input_field';
 export {
   BucketAxisBoundsControl,
@@ -30,5 +37,6 @@ export { NameInput } from './name_input';
 export { ValueLabelsSettings } from './value_labels_settings';
 export { AxisTitleSettings } from './axis_title_settings';
 export { DimensionEditorSection } from './dimension_section';
+export { FilterQueryInput } from './filter_query_input';
 export * from './static_header';
 export * from './vis_label';

@@ -52,6 +52,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
         unsetShowFunction();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const showModal = useCallback((jobs: MlSummaryJob[]) => {
@@ -87,7 +88,9 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
     return (
       <EuiModal data-test-subj="mlStopDatafeedsConfirmModal" onClose={closeModal}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            <h1>{title}</h1>
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <ManagedJobsWarningCallout

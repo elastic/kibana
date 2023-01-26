@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useReducer } from 'react';
-import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPageHeader,
@@ -15,28 +14,28 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiCallOut,
   EuiSpacer,
   EuiButtonEmpty,
   EuiButton,
-  EuiIconTip,
   EuiIcon,
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
+import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { updateAPIKey, deleteRules } from '../../../lib/rule_api';
-import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
+import { bulkUpdateAPIKey } from '../../../lib/rule_api';
+import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { RuleActionsPopover } from './rule_actions_popover';
 import {
   hasAllPrivilege,
   hasExecuteActionsCapability,
   hasManageApiKeysCapability,
 } from '../../../lib/capabilities';
-import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
+import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import {
   Rule,
@@ -52,7 +51,7 @@ import {
 import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
 import { RuleEdit } from '../../rule_form';
-import { routeToRuleDetails, routeToRules } from '../../../constants';
+import { routeToRules } from '../../../constants';
 import {
   rulesErrorReasonTranslationsMapping,
   rulesWarningReasonTranslationsMapping,
@@ -61,6 +60,14 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { runRule } from '../../../lib/run_rule';
+import {
+  getConfirmDeletionButtonText,
+  getConfirmDeletionModalText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
+} from '../../rules_list/translations';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -68,7 +75,10 @@ export type RuleDetailsProps = {
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
   refreshToken?: number;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
+} & Pick<
+  BulkOperationsComponentOpts,
+  'bulkDisableRules' | 'bulkEnableRules' | 'bulkDeleteRules' | 'snoozeRule' | 'unsnoozeRule'
+>;
 
 const ruleDetailStyle = {
   minWidth: 0,
@@ -78,8 +88,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
   actionTypes,
-  disableRule,
-  enableRule,
+  bulkDisableRules,
+  bulkEnableRules,
+  bulkDeleteRules,
   snoozeRule,
   unsnoozeRule,
   requestRefresh,
@@ -116,10 +127,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([
-      getAlertingSectionBreadcrumb('rules'),
-      getRuleDetailsBreadcrumb(rule.id, rule.name),
-    ]);
+    setBreadcrumbs([getAlertingSectionBreadcrumb('rules', true), { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -148,11 +156,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const canSaveRule =
-    hasAllPrivilege(rule, ruleType) &&
+    hasAllPrivilege(rule.consumer, ruleType) &&
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
 
-  const actionTypesByTypeId = keyBy(actionTypes, 'id');
   const hasEditButton =
     // can the user save the rule
     canSaveRule &&
@@ -161,9 +168,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
-  const ruleActions = rule.actions;
-  const uniqueActions = Array.from(new Set(ruleActions.map((item: any) => item.actionTypeId)));
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const onRunRule = async (id: string) => {
+    await runRule(http, toasts, id);
+  };
 
   // Check whether interval is below configured minium
   useEffect(() => {
@@ -213,7 +221,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   }, [rule.schedule.interval, config.minimumScheduleInterval, toasts, hasEditButton]);
 
   const setRule = async () => {
-    history.push(routeToRuleDetails.replace(`:ruleId`, rule.id));
+    history.push(getRuleDetailsRoute(rule.id));
   };
 
   const goToRulesList = () => {
@@ -266,35 +274,47 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     </>
   ) : null;
 
+  const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
+  const { showToast } = useBulkOperationToast({});
+
+  const onDeleteConfirm = async () => {
+    setIsDeleteModalVisibility(false);
+    const { errors, total } = await bulkDeleteRules({
+      ids: rulesToDelete,
+    });
+    showToast({ action: 'DELETE', errors, total });
+    setRulesToDelete([]);
+    goToRulesList();
+  };
+  const onDeleteCancel = () => {
+    setIsDeleteModalVisibility(false);
+    setRulesToDelete([]);
+  };
+
   return (
     <>
-      <DeleteModalConfirmation
-        onDeleted={async () => {
-          setRulesToDelete([]);
-          goToRulesList();
-        }}
-        onErrors={async () => {
-          // Refresh the rule from the server, it may have been deleted
-          await requestRefresh();
-          setRulesToDelete([]);
-        }}
-        onCancel={() => {
-          setRulesToDelete([]);
-        }}
-        apiDeleteCall={deleteRules}
-        idsToDelete={rulesToDelete}
-        singleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
-          defaultMessage: 'rule',
-        })}
-        multipleTitle=""
-        setIsLoadingState={() => {}}
-      />
+      {isDeleteModalFlyoutVisible && (
+        <RulesDeleteModalConfirmation
+          onConfirm={onDeleteConfirm}
+          onCancel={onDeleteCancel}
+          confirmButtonText={getConfirmDeletionButtonText(
+            rulesToDelete.length,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+          confirmModalText={getConfirmDeletionModalText(
+            rulesToDelete.length,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+        />
+      )}
       <UpdateApiKeyModalConfirmation
         onCancel={() => {
           setRulesToUpdateAPIKey([]);
         }}
         idsToUpdate={rulesToUpdateAPIKey}
-        apiUpdateApiKeyCall={updateAPIKey}
+        apiUpdateApiKeyCall={bulkUpdateAPIKey}
         setIsLoadingState={() => {}}
         onUpdated={async () => {
           setRulesToUpdateAPIKey([]);
@@ -351,46 +371,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              {uniqueActions && uniqueActions.length ? (
-                <EuiFlexGroup responsive={false} gutterSize="xs">
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsTex"
-                        defaultMessage="Actions"
-                      />{' '}
-                      {hasActionsWithBrokenConnector && (
-                        <EuiIconTip
-                          data-test-subj="actionWithBrokenConnector"
-                          type="alert"
-                          color="danger"
-                          content={i18n.translate(
-                            'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsWarningTooltip',
-                            {
-                              defaultMessage:
-                                'Unable to load one of the connectors associated with this rule. Edit the rule to select a new connector.',
-                            }
-                          )}
-                          position="right"
-                        />
-                      )}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFlexGroup gutterSize="xs">
-                      {uniqueActions.map((action, index) => (
-                        <EuiFlexItem key={index} grow={false}>
-                          <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
-                            {actionTypesByTypeId[action].name ?? action}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : null}
-            </EuiFlexItem>
           </EuiFlexGroup>
         }
         rightSideItems={[
@@ -398,6 +378,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             canSaveRule={canSaveRule}
             rule={rule}
             onDelete={(ruleId) => {
+              setIsDeleteModalVisibility(true);
               setRulesToDelete([ruleId]);
             }}
             onApiKeyUpdate={(ruleId) => {
@@ -405,12 +386,13 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             }}
             onEnableDisable={async (enable) => {
               if (enable) {
-                await enableRule(rule);
+                await bulkEnableRules({ ids: [rule.id] });
               } else {
-                await disableRule(rule);
+                await bulkDisableRules({ ids: [rule.id] });
               }
               requestRefresh();
             }}
+            onRunRule={onRunRule}
           />,
           editButton,
           <EuiButtonEmpty

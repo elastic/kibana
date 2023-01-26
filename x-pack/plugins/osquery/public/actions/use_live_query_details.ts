@@ -8,20 +8,30 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
+import { filter } from 'lodash';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { useKibana } from '../common/lib/kibana';
 import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
-
-export interface LiveQueryDetailsArgs {
-  actionDetails: Record<string, string>;
-  id: string;
-}
 
 interface UseLiveQueryDetails {
   actionId?: string;
   isLive?: boolean;
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
+  queryIds?: string[];
+}
+
+export interface PackQueriesQuery {
+  action_id: string;
+  id: string;
+  query: string;
+  agents: string[];
+  ecs_mapping?: ECSMapping;
+  version?: string;
+  platform?: string;
+  saved_query_id?: string;
+  expiration?: string;
 }
 
 export interface LiveQueryDetailsItem {
@@ -38,17 +48,7 @@ export interface LiveQueryDetailsItem {
   pack_name?: string;
   pack_prebuilt?: boolean;
   status?: string;
-  queries?: Array<{
-    action_id: string;
-    id: string;
-    query: string;
-    agents: string[];
-    ecs_mapping?: unknown;
-    version?: string;
-    platform?: string;
-    saved_query_id?: string;
-    expiration?: string;
-  }>;
+  queries?: PackQueriesQuery[];
 }
 
 export const useLiveQueryDetails = ({
@@ -56,12 +56,13 @@ export const useLiveQueryDetails = ({
   filterQuery,
   isLive = false,
   skip = false,
+  queryIds, // enable finding out specific queries only, eg. in cases
 }: UseLiveQueryDetails) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useQuery<{ data: LiveQueryDetailsItem }, Error, LiveQueryDetailsItem>(
-    ['liveQueries', { actionId, filterQuery }],
+    ['liveQueries', { actionId, filterQuery, queryIds }],
     () => http.get(`/api/osquery/live_queries/${actionId}`),
     {
       enabled: !skip && !!actionId,
@@ -73,7 +74,17 @@ export const useLiveQueryDetails = ({
             defaultMessage: 'Error while fetching action details',
           }),
         }),
-      select: (response) => response.data,
+      select: (response) => {
+        if (queryIds) {
+          const filteredQueries = filter(response.data.queries, (query) =>
+            queryIds.includes(query.action_id)
+          );
+
+          return { ...response.data, queries: filteredQueries };
+        }
+
+        return response.data;
+      },
       refetchOnWindowFocus: false,
       retryDelay: 5000,
     }

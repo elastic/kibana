@@ -26,11 +26,18 @@
             "text": "FormatEditorProps"
           },
           "<P>, ",
-          "FormatEditorState",
+          {
+            "pluginId": "dataViewFieldEditor",
+            "scope": "public",
+            "docId": "kibDataViewFieldEditorPluginApi",
+            "section": "def-public.FormatEditorState",
+            "text": "FormatEditorState"
+          },
           " & S, any>"
         ],
         "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -40,7 +47,8 @@
             "label": "formatId",
             "description": [],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -50,11 +58,18 @@
             "label": "state",
             "description": [],
             "signature": [
-              "FormatEditorState",
+              {
+                "pluginId": "dataViewFieldEditor",
+                "scope": "public",
+                "docId": "kibDataViewFieldEditorPluginApi",
+                "section": "def-public.FormatEditorState",
+                "text": "FormatEditorState"
+              },
               " & S"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -73,13 +88,26 @@
                 "text": "FormatEditorProps"
               },
               "<{}>, state: ",
-              "FormatEditorState",
-              ") => { error: string | undefined; samples: ",
-              "Sample",
+              {
+                "pluginId": "dataViewFieldEditor",
+                "scope": "public",
+                "docId": "kibDataViewFieldEditorPluginApi",
+                "section": "def-public.FormatEditorState",
+                "text": "FormatEditorState"
+              },
+              ") => { error: any; samples: ",
+              {
+                "pluginId": "dataViewFieldEditor",
+                "scope": "public",
+                "docId": "kibDataViewFieldEditorPluginApi",
+                "section": "def-public.Sample",
+                "text": "Sample"
+              },
               "[]; }"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataViewFieldEditor",
@@ -100,6 +128,7 @@
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -110,10 +139,17 @@
                 "label": "state",
                 "description": [],
                 "signature": [
-                  "FormatEditorState"
+                  {
+                    "pluginId": "dataViewFieldEditor",
+                    "scope": "public",
+                    "docId": "kibDataViewFieldEditorPluginApi",
+                    "section": "def-public.FormatEditorState",
+                    "text": "FormatEditorState"
+                  }
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -131,6 +167,7 @@
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataViewFieldEditor",
@@ -144,6 +181,7 @@
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -161,7 +199,66 @@
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViewFieldEditor",
+        "id": "def-public.DeleteCompositeSubfield",
+        "type": "Class",
+        "tags": [],
+        "label": "DeleteCompositeSubfield",
+        "description": [
+          "\nError throw when there's an attempt to directly delete a composite subfield"
+        ],
+        "signature": [
+          {
+            "pluginId": "dataViewFieldEditor",
+            "scope": "public",
+            "docId": "kibDataViewFieldEditorPluginApi",
+            "section": "def-public.DeleteCompositeSubfield",
+            "text": "DeleteCompositeSubfield"
+          },
+          " extends Error"
+        ],
+        "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.DeleteCompositeSubfield.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViewFieldEditor",
+                "id": "def-public.DeleteCompositeSubfield.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -179,8 +276,26 @@
         "description": [
           "\nThe data model for the field editor"
         ],
+        "signature": [
+          {
+            "pluginId": "dataViewFieldEditor",
+            "scope": "public",
+            "docId": "kibDataViewFieldEditorPluginApi",
+            "section": "def-public.Field",
+            "text": "Field"
+          },
+          " extends ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeField",
+            "text": "RuntimeField"
+          }
+        ],
         "path": "src/plugins/data_view_field_editor/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -192,91 +307,24 @@
               "\nname / path used for the field"
             ],
             "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.Field.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nES type"
-            ],
-            "signature": [
-              "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"geo_point\" | \"long\" | \"double\" | \"composite\""
-            ],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.Field.script",
-            "type": "Object",
-            "tags": [],
-            "label": "script",
-            "description": [
-              "\nsource of the runtime field script"
-            ],
-            "signature": [
-              "{ source: string; } | undefined"
-            ],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.Field.customLabel",
+            "id": "def-public.Field.parentName",
             "type": "string",
             "tags": [],
-            "label": "customLabel",
+            "label": "parentName",
             "description": [
-              "\ncustom label for display"
+              "\nName of parent field. Used for composite subfields"
             ],
             "signature": [
               "string | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.Field.popularity",
-            "type": "number",
-            "tags": [],
-            "label": "popularity",
-            "description": [
-              "\ncustom popularity"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.Field.format",
-            "type": "Object",
-            "tags": [],
-            "label": "format",
-            "description": [
-              "\nconfiguration of the field format"
-            ],
-            "signature": [
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.SerializedFieldFormat",
-                "text": "SerializedFieldFormat"
-              },
-              "<{}, ",
-              "SerializableRecord",
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -302,6 +350,7 @@
         ],
         "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -311,7 +360,8 @@
             "label": "fieldType",
             "description": [],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -330,7 +380,8 @@
               }
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -343,7 +394,8 @@
               "{ type?: string | undefined; } & P"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -354,11 +406,18 @@
             "description": [],
             "signature": [
               "(newParams: ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ") => void"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataViewFieldEditor",
@@ -368,10 +427,17 @@
                 "label": "newParams",
                 "description": [],
                 "signature": [
-                  "SerializableRecord"
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.SerializableRecord",
+                    "text": "SerializableRecord"
+                  }
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -389,6 +455,7 @@
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -402,9 +469,60 @@
                   "string | undefined"
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/field_format_editor.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViewFieldEditor",
+        "id": "def-public.FormatEditorState",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormatEditorState",
+        "description": [],
+        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/format_editor.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.FormatEditorState.EditorComponent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "EditorComponent",
+            "description": [],
+            "signature": [
+              "React.LazyExoticComponent<",
+              {
+                "pluginId": "dataViewFieldEditor",
+                "scope": "public",
+                "docId": "kibDataViewFieldEditorPluginApi",
+                "section": "def-public.FieldFormatEditor",
+                "text": "FieldFormatEditor"
+              },
+              "<{}>> | null"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/format_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.FormatEditorState.fieldFormatId",
+            "type": "string",
+            "tags": [],
+            "label": "fieldFormatId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/format_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -415,9 +533,12 @@
         "type": "Interface",
         "tags": [],
         "label": "OpenFieldDeleteModalOptions",
-        "description": [],
+        "description": [
+          "\nOptions for opening the field editor"
+        ],
         "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -425,7 +546,9 @@
             "type": "Object",
             "tags": [],
             "label": "ctx",
-            "description": [],
+            "description": [
+              "\nConfig for the delete modal"
+            ],
             "signature": [
               "{ dataView: ",
               {
@@ -438,7 +561,8 @@
               "; }"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -446,12 +570,15 @@
             "type": "Function",
             "tags": [],
             "label": "onDelete",
-            "description": [],
+            "description": [
+              "\nCallback fired when fields are deleted"
+            ],
             "signature": [
               "((fieldNames: string[]) => void) | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataViewFieldEditor",
@@ -459,12 +586,15 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fieldNames",
-                "description": [],
+                "description": [
+                  "- the names of the deleted fields"
+                ],
                 "signature": [
                   "string[]"
                 ],
                 "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -476,12 +606,15 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fieldName",
-            "description": [],
+            "description": [
+              "\nNames of the fields to be deleted"
+            ],
             "signature": [
               "string | string[]"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -497,6 +630,7 @@
         ],
         "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -519,7 +653,8 @@
               "; }"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -539,18 +674,21 @@
                 "section": "def-common.DataViewField",
                 "text": "DataViewField"
               },
-              ") => void) | undefined"
+              "[]) => void) | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataViewFieldEditor",
                 "id": "def-public.OpenFieldEditorOptions.onSave.$1",
-                "type": "Object",
+                "type": "Array",
                 "tags": [],
                 "label": "field",
-                "description": [],
+                "description": [
+                  "- the fields that were saved"
+                ],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -558,10 +696,12 @@
                     "docId": "kibDataViewsPluginApi",
                     "section": "def-common.DataViewField",
                     "text": "DataViewField"
-                  }
+                  },
+                  "[]"
                 ],
                 "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -580,7 +720,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -602,7 +743,151 @@
               " | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViewFieldEditor",
+        "id": "def-public.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [],
+        "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.Props.children",
+            "type": "Function",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "(deleteFieldHandler: DeleteFieldFunc) => React.ReactNode"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViewFieldEditor",
+                "id": "def-public.Props.children.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "deleteFieldHandler",
+                "description": [],
+                "signature": [
+                  "DeleteFieldFunc"
+                ],
+                "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.Props.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "\nData view of fields to be deleted"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.Props.onDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "onDelete",
+            "description": [
+              "\nCallback fired when fields are deleted"
+            ],
+            "signature": [
+              "((fieldNames: string[]) => void) | undefined"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViewFieldEditor",
+                "id": "def-public.Props.onDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "fieldNames",
+                "description": [
+                  "- the names of the deleted fields"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViewFieldEditor",
+        "id": "def-public.Sample",
+        "type": "Interface",
+        "tags": [],
+        "label": "Sample",
+        "description": [],
+        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.Sample.input",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "object | React.ReactText | React.ReactText[] | Record<string, React.ReactText[]>"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.Sample.output",
+            "type": "string",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -632,6 +917,7 @@
         ],
         "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -656,6 +942,7 @@
         ],
         "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -673,6 +960,7 @@
       ],
       "path": "src/plugins/data_view_field_editor/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "dataViewFieldEditor",
@@ -693,7 +981,8 @@
             "<{}>) => void; }"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -710,6 +999,7 @@
       ],
       "path": "src/plugins/data_view_field_editor/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "dataViewFieldEditor",
@@ -718,7 +1008,7 @@
           "tags": [],
           "label": "openEditor",
           "description": [
-            "\nmethod to open the data view field editor fly-out"
+            "\nMethod to open the data view field editor fly-out"
           ],
           "signature": [
             "(options: ",
@@ -733,6 +1023,7 @@
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "dataViewFieldEditor",
@@ -752,6 +1043,7 @@
               ],
               "path": "src/plugins/data_view_field_editor/public/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -763,7 +1055,9 @@
           "type": "Function",
           "tags": [],
           "label": "openDeleteModal",
-          "description": [],
+          "description": [
+            "\nMethod to open the data view field delete fly-out"
+          ],
           "signature": [
             "(options: ",
             {
@@ -777,6 +1071,7 @@
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "dataViewFieldEditor",
@@ -784,7 +1079,9 @@
               "type": "Object",
               "tags": [],
               "label": "options",
-              "description": [],
+              "description": [
+                "Configuration options for the fly-out"
+              ],
               "signature": [
                 {
                   "pluginId": "dataViewFieldEditor",
@@ -796,6 +1093,7 @@
               ],
               "path": "src/plugins/data_view_field_editor/public/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -828,7 +1126,8 @@
             "<P> | undefined; }"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "dataViewFieldEditor",
@@ -836,12 +1135,15 @@
           "type": "Object",
           "tags": [],
           "label": "userPermissions",
-          "description": [],
+          "description": [
+            "\nConvenience method for user permissions checks"
+          ],
           "signature": [
             "{ editIndexPattern: () => boolean; }"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "dataViewFieldEditor",
@@ -849,14 +1151,23 @@
           "type": "Function",
           "tags": [],
           "label": "DeleteRuntimeFieldProvider",
-          "description": [],
+          "description": [
+            "\nContext provider for delete runtime field modal"
+          ],
           "signature": [
             "React.FunctionComponent<",
-            "Props",
+            {
+              "pluginId": "dataViewFieldEditor",
+              "scope": "public",
+              "docId": "kibDataViewFieldEditorPluginApi",
+              "section": "def-public.Props",
+              "text": "Props"
+            },
             ">"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -870,7 +1181,8 @@
                 "P & { children?: React.ReactNode; }"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             },
             {
               "parentPluginId": "dataViewFieldEditor",
@@ -883,7 +1195,8 @@
                 "any"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }

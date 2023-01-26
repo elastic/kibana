@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { omit, uniq } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -70,9 +70,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Top dependency spans when data is loaded',
     { config: 'basic', archives: [] },
     () => {
-      const javaInstance = apm.service('java', 'production', 'java').instance('instance-a');
+      const javaInstance = apm
+        .service({ name: 'java', environment: 'production', agentName: 'java' })
+        .instance('instance-a');
 
-      const goInstance = apm.service('go', 'development', 'go').instance('instance-a');
+      const goInstance = apm
+        .service({ name: 'go', environment: 'development', agentName: 'go' })
+        .instance('instance-a');
 
       before(async () => {
         await synthtraceEsClient.index([
@@ -81,40 +85,48 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(1)
             .generator((timestamp) => [
               javaInstance
-                .span('without transaction', 'db', 'elasticsearch')
+                .span({
+                  spanName: 'without transaction',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
                 .destination('elasticsearch')
                 .duration(200)
                 .timestamp(timestamp),
               javaInstance
-                .transaction('GET /api/my-endpoint')
+                .transaction({ transactionName: 'GET /api/my-endpoint' })
                 .duration(100)
                 .timestamp(timestamp)
                 .children(
                   javaInstance
-                    .span('/_search', 'db', 'elasticsearch')
+                    .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
                     .destination('elasticsearch')
                     .duration(100)
                     .success()
                     .timestamp(timestamp)
                 ),
               goInstance
-                .transaction('GET /api/my-other-endpoint')
+                .transaction({ transactionName: 'GET /api/my-other-endpoint' })
                 .duration(100)
                 .timestamp(timestamp)
                 .children(
                   goInstance
-                    .span('/_search', 'db', 'elasticsearch')
+                    .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
                     .destination('elasticsearch')
                     .duration(50)
                     .timestamp(timestamp)
                 ),
               goInstance
-                .transaction('GET /api/my-other-endpoint')
+                .transaction({ transactionName: 'GET /api/my-other-endpoint' })
                 .duration(100)
                 .timestamp(timestamp)
                 .children(
                   goInstance
-                    .span('/_search', 'db', 'fake-elasticsearch')
+                    .span({
+                      spanName: '/_search',
+                      spanType: 'db',
+                      spanSubtype: 'fake-elasticsearch',
+                    })
                     .destination('fake-elasticsearch')
                     .duration(50)
                     .timestamp(timestamp)
@@ -143,7 +155,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(javaSpans.length + goSpans.length).to.eql(spans.length);
 
-          expect(omit(javaSpans[0], 'traceId', 'transactionId')).to.eql({
+          expect(omit(javaSpans[0], 'spanId', 'traceId', 'transactionId')).to.eql({
             '@timestamp': 1609459200000,
             agentName: 'java',
             duration: 100000,
@@ -154,7 +166,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             outcome: 'success',
           });
 
-          expect(omit(goSpans[0], 'traceId', 'transactionId')).to.eql({
+          expect(omit(goSpans[0], 'spanId', 'traceId', 'transactionId')).to.eql({
             '@timestamp': 1609459200000,
             agentName: 'go',
             duration: 50000,
@@ -208,34 +220,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(javaSpans.length).to.be(0);
           expect(goSpans.length).to.be.greaterThan(0);
           expect(goSpans.length).to.eql(spans.length);
-        });
-      });
-
-      describe('when requesting spans without a transaction', () => {
-        it('should return the spans without transaction metadata', async () => {
-          const response = await callApi({
-            dependencyName: 'elasticsearch',
-            spanName: 'without transaction',
-          });
-
-          const { spans } = response.body;
-
-          const spanNames = uniq(spans.map((span) => span.spanName));
-
-          expect(spanNames).to.eql(['without transaction']);
-
-          expect(omit(spans[0], 'traceId')).to.eql({
-            '@timestamp': 1609459200000,
-            agentName: 'java',
-            duration: 200000,
-            serviceName: 'java',
-            spanName: 'without transaction',
-            outcome: 'unknown',
-          });
-
-          expect(spans[0].transactionType).not.to.be.ok();
-          expect(spans[0].transactionId).not.to.be.ok();
-          expect(spans[0].transactionName).not.to.be.ok();
         });
       });
 

@@ -16,3 +16,5 @@ export * from './enrollment_api_key';
 export * from './settings';
 export * from './preconfiguration';
 export * from './download_sources';
+export * from './fleet_server_policy_config';
+export * from './fleet_proxy';

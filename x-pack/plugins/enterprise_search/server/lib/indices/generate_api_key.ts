@@ -16,7 +16,7 @@ export const generateApiKey = async (client: IScopedClusterClient, indexName: st
     name: `${indexName}-connector`,
     role_descriptors: {
       [`${toAlphanumeric(indexName)}-connector-role`]: {
-        cluster: [],
+        cluster: ['monitor'],
         index: [
           {
             names: [indexName, `${CONNECTORS_INDEX}*`],

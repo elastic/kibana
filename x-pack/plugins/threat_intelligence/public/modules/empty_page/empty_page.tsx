@@ -7,11 +7,10 @@
 
 import React, { VFC } from 'react';
 
-import { EuiEmptyPrompt, EuiImage, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
-import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
+import { useIntegrationsPageLink, useTIDocumentationLink } from '../../hooks';
 import illustration from './integrations_light.svg';
 import { SecuritySolutionPluginTemplateWrapper } from '../../containers/security_solution_plugin_template_wrapper';
 
@@ -24,7 +23,7 @@ export const EmptyPage: VFC = () => {
   const documentationLink = useTIDocumentationLink();
 
   return (
-    <SecuritySolutionPluginTemplateWrapper template="noData">
+    <SecuritySolutionPluginTemplateWrapper isEmptyState>
       <EuiEmptyPrompt
         icon={
           <EuiImage

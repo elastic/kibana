@@ -22,6 +22,7 @@ import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../lib/i18n_month_
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
 import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
 import { useKibana } from '../../../../common/lib/kibana';
+import { isRuleSnoozed } from '../../../lib';
 
 export const SNOOZE_SUCCESS_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeSuccess',
@@ -63,11 +64,6 @@ const openSnoozePanelAriaLabel = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.openSnoozePanel',
   { defaultMessage: 'Open snooze panel' }
 );
-
-export const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boolean }) =>
-  Boolean(
-    (rule.isSnoozedUntil && new Date(rule.isSnoozedUntil).getTime() > Date.now()) || rule.muteAll
-  );
 
 const getNextRuleSnoozeSchedule = (rule: { snoozeSchedule?: RuleSnooze }) => {
   if (!rule.snoozeSchedule) return null;

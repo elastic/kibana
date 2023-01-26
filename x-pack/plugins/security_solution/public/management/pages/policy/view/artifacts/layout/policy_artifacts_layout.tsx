@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiButton,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
@@ -32,7 +32,6 @@ import { PolicyArtifactsFlyout } from '../flyout';
 import type { PolicyArtifactsPageLabels } from '../translations';
 import { policyArtifactsPageLabels } from '../translations';
 import { PolicyArtifactsDeleteModal } from '../delete_modal';
-import type { EventFiltersPageLocation } from '../../../../event_filters/types';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface PolicyArtifactsLayoutProps {
@@ -41,12 +40,10 @@ interface PolicyArtifactsLayoutProps {
   labels: PolicyArtifactsPageLabels;
   getExceptionsListApiClient: () => ExceptionsListApiClient;
   searchableFields: readonly string[];
-  getArtifactPath: (
-    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
-  ) => string;
+  getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
   getPolicyArtifactsPath: (policyId: string) => string;
-  /** A boolean to check extra privileges for restricted actions, true when it's allowed, false when not */
-  externalPrivileges?: boolean;
+  /** A boolean to check if has write artifact privilege or not */
+  canWriteArtifact?: boolean;
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
   ({
@@ -56,7 +53,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     searchableFields,
     getArtifactPath,
     getPolicyArtifactsPath,
-    externalPrivileges = true,
+    canWriteArtifact = false,
   }) => {
     const exceptionsListApiClient = useMemo(
       () => getExceptionsListApiClient(),
@@ -164,6 +161,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               policyName={policyItem.name}
               listId={exceptionsListApiClient.listId}
               labels={labels}
+              canWriteArtifact={canWriteArtifact}
               getPolicyArtifactsPath={getPolicyArtifactsPath}
               getArtifactPath={getArtifactPath}
             />
@@ -172,6 +170,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               policyId={policyItem.id}
               policyName={policyItem.name}
               labels={labels}
+              canWriteArtifact={canWriteArtifact}
               getPolicyArtifactsPath={getPolicyArtifactsPath}
               getArtifactPath={getArtifactPath}
             />
@@ -195,10 +194,10 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             </EuiText>
           </EuiPageHeaderSection>
           <EuiPageHeaderSection>
-            {canCreateArtifactsByPolicy && externalPrivileges && assignToPolicyButton}
+            {canCreateArtifactsByPolicy && canWriteArtifact && assignToPolicyButton}
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        {canCreateArtifactsByPolicy && externalPrivileges && urlParams.show === 'list' && (
+        {canCreateArtifactsByPolicy && canWriteArtifact && urlParams.show === 'list' && (
           <PolicyArtifactsFlyout
             policyItem={policyItem}
             apiClient={exceptionsListApiClient}
@@ -231,7 +230,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             searchableFields={[...searchableFields]}
             labels={labels}
             onDeleteActionCallback={handleOnDeleteActionCallback}
-            externalPrivileges={externalPrivileges}
+            canWriteArtifact={canWriteArtifact}
             getPolicyArtifactsPath={getPolicyArtifactsPath}
             getArtifactPath={getArtifactPath}
           />

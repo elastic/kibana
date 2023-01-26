@@ -14,4 +14,3 @@ export type { LogMeta } from './src/log_meta';
 export type { LoggerFactory } from './src/logger_factory';
 export type { Layout } from './src/layout';
 export type { Appender, DisposableAppender } from './src/appenders';
-export type { Ecs, EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from './src/ecs';

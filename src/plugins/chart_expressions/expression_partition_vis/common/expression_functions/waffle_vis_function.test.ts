@@ -35,6 +35,7 @@ describe('interpreter/functions#waffleVis', () => {
   const visConfig: WaffleVisConfig = {
     addTooltip: true,
     showValuesInLegend: true,
+    metricsToLabels: JSON.stringify({}),
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
     truncateLegend: true,
@@ -52,15 +53,18 @@ describe('interpreter/functions#waffleVis', () => {
       percentDecimals: 2,
       truncate: 100,
       last_level: false,
+      colorOverrides: {},
     },
-    metric: {
-      type: 'vis_dimension',
-      accessor: 0,
-      format: {
-        id: 'number',
-        params: {},
+    metrics: [
+      {
+        type: 'vis_dimension',
+        accessor: 0,
+        format: {
+          id: 'number',
+          params: {},
+        },
       },
-    },
+    ],
     bucket: {
       type: 'vis_dimension',
       accessor: 1,

@@ -17,6 +17,7 @@ export const getCloud = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
     organizationUrl: 'https://organization.url',
     profileUrl: 'https://profile.url',
     snapshotsUrl: 'https://snapshots.url',
+    registerCloudService: () => {},
   };
 
   return cloud;

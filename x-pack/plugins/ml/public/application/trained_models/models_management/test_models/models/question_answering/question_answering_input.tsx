@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
@@ -13,18 +13,14 @@ import { EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { TextInput } from '../text_input';
 import { QuestionAnsweringInference } from './question_answering_inference';
-import { RUNNING_STATE } from '../inference_base';
+import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 
 const QuestionInput: FC<{
   inferrer: QuestionAnsweringInference;
 }> = ({ inferrer }) => {
-  const [questionText, setQuestionText] = useState('');
+  const questionText = useObservable(inferrer.getQuestionText$(), inferrer.getQuestionText());
+  const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
 
-  useEffect(() => {
-    inferrer.questionText$.next(questionText);
-  }, [questionText]);
-
-  const runningState = useObservable(inferrer.runningState$);
   return (
     <EuiFormRow
       fullWidth
@@ -40,7 +36,7 @@ const QuestionInput: FC<{
         disabled={runningState === RUNNING_STATE.RUNNING}
         fullWidth
         onChange={(e) => {
-          setQuestionText(e.target.value);
+          inferrer.setQuestionText(e.target.value);
         }}
       />
     </EuiFormRow>
@@ -52,8 +48,13 @@ export const getQuestionAnsweringInput = (
   placeholder?: string
 ) => (
   <>
-    <TextInput placeholder={placeholder} inferrer={inferrer} />
-    <EuiSpacer />
+    {inferrer.getInputType() === INPUT_TYPE.TEXT ? (
+      <>
+        <TextInput placeholder={placeholder} inferrer={inferrer} />
+        <EuiSpacer />
+      </>
+    ) : null}
+
     <QuestionInput inferrer={inferrer} />
   </>
 );

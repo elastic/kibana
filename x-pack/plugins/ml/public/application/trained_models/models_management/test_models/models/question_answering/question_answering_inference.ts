@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { InferenceBase, InferResponse } from '../inference_base';
+import { estypes } from '@elastic/elasticsearch';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
+import type { InferResponse } from '../inference_base';
 import { getQuestionAnsweringInput } from './question_answering_input';
 import { getQuestionAnsweringOutputComponent } from './question_answering_output';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 
 export interface RawQuestionAnsweringResponse {
   inference_results: Array<{
@@ -54,49 +57,60 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
         'Provide a question and test how well the model extracts an answer from your input text.',
     }),
   ];
-
   public questionText$ = new BehaviorSubject<string>('');
 
-  public async infer() {
-    try {
-      this.setRunning();
-      const inputText = this.inputText$.getValue();
-      const questionText = this.questionText$.value;
-      const numTopClassesConfig = this.getNumTopClassesConfig()?.inference_config;
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
 
-      const payload = {
-        docs: [{ [this.inputField]: inputText }],
-        inference_config: {
-          [this.inferenceType]: {
-            question: questionText,
-            ...(numTopClassesConfig
-              ? {
-                  num_top_classes: numTopClassesConfig[this.inferenceType].num_top_classes,
-                }
-              : {}),
-          },
-        },
-      };
-      const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
-        payload,
-        '30s'
-      )) as unknown as RawQuestionAnsweringResponse;
+    this.initialize(
+      [this.questionText$.pipe(map((questionText) => questionText !== ''))],
+      [this.questionText$]
+    );
+  }
 
-      const processedResponse: QuestionAnsweringResponse = processResponse(
-        resp,
-        this.model,
-        inputText
-      );
+  public async inferText() {
+    return this.runInfer<RawQuestionAnsweringResponse>(
+      () => {
+        const question = this.questionText$.value;
+        return this.getInferenceConfig({
+          ...this.getNumTopClassesConfig(),
+          question,
+        });
+      },
+      (resp, inputText) => {
+        return processResponse(resp, inputText);
+      }
+    );
+  }
 
-      this.inferenceResult$.next(processedResponse);
-      this.setFinished();
+  protected async inferIndex() {
+    return this.runPipelineSimulate((doc) => {
+      const pretendRawRequest = { inference_results: [doc._source[this.inferenceType]] };
+      const inputText = doc._source[this.getInputField()];
 
-      return processedResponse;
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+      return processResponse(pretendRawRequest, inputText);
+    });
+  }
+
+  protected getProcessors() {
+    const question = this.questionText$.value;
+    return this.getBasicProcessors({ ...this.getNumTopClassesConfig(), question });
+  }
+
+  public setQuestionText(text: string) {
+    this.questionText$.next(text);
+  }
+
+  public getQuestionText$() {
+    return this.questionText$.asObservable();
+  }
+
+  public getQuestionText() {
+    return this.questionText$.getValue();
   }
 
   public getInputComponent(): JSX.Element {
@@ -114,11 +128,7 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
   }
 }
 
-function processResponse(
-  resp: RawQuestionAnsweringResponse,
-  model: estypes.MlTrainedModelConfig,
-  inputText: string
-) {
+function processResponse(resp: RawQuestionAnsweringResponse, inputText: string) {
   const {
     inference_results: [inferenceResults],
   } = resp;

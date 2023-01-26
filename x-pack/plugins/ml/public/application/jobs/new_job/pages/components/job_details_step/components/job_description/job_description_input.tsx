@@ -17,6 +17,7 @@ export const JobDescriptionInput: FC = () => {
   useEffect(() => {
     jobCreator.description = jobDescription;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobDescription]);
 
   return (

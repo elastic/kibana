@@ -28,10 +28,12 @@ const exportObjects = [
 ];
 
 import supertest from 'supertest';
-import { CoreUsageStatsClient } from '../../../../core_usage_data';
-import { coreUsageStatsClientMock } from '../../../../core_usage_data/core_usage_stats_client.mock';
-import { coreUsageDataServiceMock } from '../../../../core_usage_data/core_usage_data_service.mock';
-import { setupServer } from '../test_utils';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import {
+  coreUsageStatsClientMock,
+  coreUsageDataServiceMock,
+} from '@kbn/core-usage-data-server-mocks';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import {
@@ -40,7 +42,7 @@ import {
 } from '@kbn/core-saved-objects-server-internal';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
-let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
+let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
 
 describe('POST /api/dashboards/export', () => {
   let server: SetupServerReturn['server'];

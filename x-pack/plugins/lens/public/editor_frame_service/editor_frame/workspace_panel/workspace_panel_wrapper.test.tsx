@@ -18,6 +18,7 @@ import {
   selectTriggerApplyChanges,
 } from '../../../state_management';
 import { enableAutoApply, setChangesApplied } from '../../../state_management/lens_slice';
+import { LensInspector } from '../../../lens_inspector_service';
 
 describe('workspace_panel_wrapper', () => {
   let mockVisualization: jest.Mocked<Visualization>;
@@ -39,6 +40,8 @@ describe('workspace_panel_wrapper', () => {
         datasourceMap={{}}
         datasourceStates={{}}
         isFullscreen={false}
+        lensInspector={{} as unknown as LensInspector}
+        getUserMessages={() => []}
       >
         <MyChild />
       </WorkspacePanelWrapper>
@@ -60,6 +63,8 @@ describe('workspace_panel_wrapper', () => {
         datasourceMap={{}}
         datasourceStates={{}}
         isFullscreen={false}
+        lensInspector={{} as unknown as LensInspector}
+        getUserMessages={() => []}
       />
     );
 
@@ -114,6 +119,8 @@ describe('workspace_panel_wrapper', () => {
           datasourceMap={{}}
           datasourceStates={{}}
           isFullscreen={false}
+          lensInspector={{} as unknown as LensInspector}
+          getUserMessages={() => []}
         >
           <div />
         </WorkspacePanelWrapper>

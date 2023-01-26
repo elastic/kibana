@@ -8,7 +8,8 @@
 import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
 import { useGetActionLicense } from './use_get_action_license';
-import { AppMockRenderer, createAppMockRenderer } from '../common/mock';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');

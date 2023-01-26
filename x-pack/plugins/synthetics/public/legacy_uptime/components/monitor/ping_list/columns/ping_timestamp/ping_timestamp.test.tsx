@@ -13,8 +13,8 @@ import { render } from '../../../../../lib/helper/rtl_helpers';
 import * as observabilityPublic from '@kbn/observability-plugin/public';
 import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
 import moment from 'moment';
-import '../../../../../lib/__mocks__/use_composite_image.mock';
-import { mockRef } from '../../../../../lib/__mocks__/screenshot_ref.mock';
+import '../../../../../lib/__mocks__/legacy_use_composite_image.mock';
+import { mockRef } from '../../../../../lib/__mocks__/legacy_screenshot_ref.mock';
 
 jest.mock('@kbn/observability-plugin/public');
 

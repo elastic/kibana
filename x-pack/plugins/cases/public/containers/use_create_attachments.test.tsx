@@ -9,7 +9,8 @@ import { renderHook, act } from '@testing-library/react-hooks';
 
 import { CommentType } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { useCreateAttachments, UseCreateAttachments } from './use_create_attachments';
+import type { UseCreateAttachments } from './use_create_attachments';
+import { useCreateAttachments } from './use_create_attachments';
 import { basicCaseId } from './mock';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';

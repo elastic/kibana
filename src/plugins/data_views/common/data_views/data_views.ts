@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '..';
 import { SavedObjectsClientCommon } from '../types';
 
@@ -140,25 +140,37 @@ export interface DataViewsServicePublicMethods {
    * Create data view based on the provided spec.
    * @param spec - Data view spec.
    * @param skipFetchFields - If true, do not fetch fields.
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  create: (spec: DataViewSpec, skipFetchFields?: boolean) => Promise<DataView>;
+  create: (
+    spec: DataViewSpec,
+    skipFetchFields?: boolean,
+    displayErrors?: boolean
+  ) => Promise<DataView>;
   /**
    * Create and save data view based on provided spec.
    * @param spec - Data view spec.
    * @param override - If true, save over existing data view
    * @param skipFetchFields - If true, do not fetch fields.
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   createAndSave: (
     spec: DataViewSpec,
     override?: boolean,
-    skipFetchFields?: boolean
+    skipFetchFields?: boolean,
+    displayErrors?: boolean
   ) => Promise<DataView>;
   /**
    * Save data view
    * @param dataView - Data view instance to save.
    * @param override - If true, save over existing data view
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  createSavedObject: (indexPattern: DataView, override?: boolean) => Promise<DataView>;
+  createSavedObject: (
+    indexPattern: DataView,
+    override?: boolean,
+    displayErrors?: boolean
+  ) => Promise<DataView>;
   /**
    * Delete data view
    * @param indexPatternId - Id of the data view to delete.
@@ -180,8 +192,9 @@ export interface DataViewsServicePublicMethods {
   /**
    * Get data view by id.
    * @param id - Id of the data view to get.
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  get: (id: string) => Promise<DataView>;
+  get: (id: string, displayErrors?: boolean, refreshFields?: boolean) => Promise<DataView>;
   /**
    * Get populated data view saved object cache.
    */
@@ -192,16 +205,18 @@ export interface DataViewsServicePublicMethods {
   getCanSave: () => Promise<boolean>;
   /**
    * Get default data view as data view instance.
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  getDefault: () => Promise<DataView | null>;
+  getDefault: (displayErrors?: boolean) => Promise<DataView | null>;
   /**
    * Get default data view id.
    */
   getDefaultId: () => Promise<string | null>;
   /**
    * Get default data view, if it doesn't exist, choose and save new default data view and return it.
+   * @param refreshFields - refresh field list when true
    */
-  getDefaultDataView: () => Promise<DataView | null>;
+  getDefaultDataView: (refreshFields?: boolean) => Promise<DataView | null>;
   /**
    * Get fields for data view
    * @param dataView - Data view instance or spec
@@ -240,10 +255,11 @@ export interface DataViewsServicePublicMethods {
    * Refresh fields for data view instance
    * @params dataView - Data view instance
    */
-  refreshFields: (indexPattern: DataView) => Promise<void>;
+  refreshFields: (indexPattern: DataView, displayErrors?: boolean) => Promise<void>;
   /**
    * Converts data view saved object to spec
    * @params savedObject - Data view saved object
+   * @params displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   savedObjectToSpec: (savedObject: SavedObject<DataViewAttributes>) => DataViewSpec;
   /**
@@ -257,11 +273,13 @@ export interface DataViewsServicePublicMethods {
    * @param indexPattern - data view instance
    * @param saveAttempts - number of times to try saving
    * @oaram ignoreErrors - if true, do not throw error on failure
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   updateSavedObject: (
     indexPattern: DataView,
     saveAttempts?: number,
-    ignoreErrors?: boolean
+    ignoreErrors?: boolean,
+    displayErrors?: boolean
   ) => Promise<DataView | void | Error>;
 }
 
@@ -435,11 +453,12 @@ export class DataViewsService {
 
   /**
    * Get default index pattern
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  getDefault = async () => {
+  getDefault = async (displayErrors: boolean = true) => {
     const defaultIndexPatternId = await this.getDefaultId();
     if (defaultIndexPatternId) {
-      return await this.get(defaultIndexPatternId);
+      return await this.get(defaultIndexPatternId, displayErrors);
     }
 
     return null;
@@ -479,12 +498,8 @@ export class DataViewsService {
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
     const { fields } = await this.apiClient.getFieldsForWildcard({
-      pattern: options.pattern,
+      ...options,
       metaFields,
-      type: options.type,
-      rollupIndex: options.rollupIndex,
-      allowNoIndex: options.allowNoIndex,
-      filter: options.filter,
     });
     return fields;
   };
@@ -512,7 +527,7 @@ export class DataViewsService {
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
       allowNoIndex: dataView.allowNoIndex,
-      pattern: dataView.title as string,
+      pattern: dataView.getIndexPattern(),
       metaFields,
     });
   };
@@ -525,38 +540,47 @@ export class DataViewsService {
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
-      filter: options.filter,
+      indexFilter: options.indexFilter,
     });
+  };
+
+  private refreshFieldsFn = async (indexPattern: DataView) => {
+    const { fields, indices } = await this.getFieldsAndIndicesForDataView(indexPattern);
+    fields.forEach((field) => (field.isMapped = true));
+    const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
+    const fieldAttrs = indexPattern.getFieldAttrs();
+    const fieldsWithSavedAttrs = Object.values(
+      this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
+    );
+    const runtimeFieldsMap = this.getRuntimeFields(
+      indexPattern.getRuntimeMappings() as Record<string, RuntimeFieldSpec>,
+      indexPattern.getFieldAttrs()
+    );
+    const runtimeFieldsArray = Object.values(runtimeFieldsMap).filter(
+      (runtimeField) =>
+        !fieldsWithSavedAttrs.find((mappedField) => mappedField.name === runtimeField.name)
+    );
+    indexPattern.fields.replaceAll([...runtimeFieldsArray, ...fieldsWithSavedAttrs]);
+    indexPattern.matchedIndices = indices;
   };
 
   /**
    * Refresh field list for a given index pattern.
    * @param indexPattern
+   * @param displayErrors  - If set false, API consumer is responsible for displaying and handling errors.
    */
-  refreshFields = async (indexPattern: DataView) => {
+  refreshFields = async (dataView: DataView, displayErrors: boolean = true) => {
+    if (!displayErrors) {
+      return this.refreshFieldsFn(dataView);
+    }
+
     try {
-      const { fields, indices } = await this.getFieldsAndIndicesForDataView(indexPattern);
-      fields.forEach((field) => (field.isMapped = true));
-      const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
-      const fieldAttrs = indexPattern.getFieldAttrs();
-      const fieldsWithSavedAttrs = Object.values(
-        this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
-      );
-      const runtimeFieldsMap = this.getRuntimeFields(
-        indexPattern.getRuntimeMappings() as Record<string, RuntimeFieldSpec>,
-        indexPattern.getFieldAttrs()
-      );
-      const runtimeFieldsArray = Object.values(runtimeFieldsMap).filter(
-        (runtimeField) =>
-          !fieldsWithSavedAttrs.find((mappedField) => mappedField.name === runtimeField.name)
-      );
-      indexPattern.fields.replaceAll([...runtimeFieldsArray, ...fieldsWithSavedAttrs]);
-      indexPattern.matchedIndices = indices;
+      await this.refreshFieldsFn(dataView);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification(
           { title: err.message, color: 'danger', iconType: 'alert' },
-          `refreshFields:${indexPattern.title}`
+          `refreshFields:${dataView.getIndexPattern()}`
         );
       }
 
@@ -565,10 +589,10 @@ export class DataViewsService {
         {
           title: i18n.translate('dataViews.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id: indexPattern.id, title: indexPattern.title },
+            values: { id: dataView.id, title: dataView.getIndexPattern() },
           }),
         },
-        indexPattern.title
+        dataView.getIndexPattern()
       );
     }
   };
@@ -696,7 +720,10 @@ export class DataViewsService {
     };
   };
 
-  private getSavedObjectAndInit = async (id: string): Promise<DataView> => {
+  private getSavedObjectAndInit = async (
+    id: string,
+    displayErrors: boolean = true
+  ): Promise<DataView> => {
     const savedObject = await this.savedObjectsClient.get<DataViewAttributes>(
       DATA_VIEW_SAVED_OBJECT_TYPE,
       id
@@ -706,71 +733,95 @@ export class DataViewsService {
       throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
     }
 
-    return this.initFromSavedObject(savedObject);
+    return this.initFromSavedObject(savedObject, displayErrors);
+  };
+
+  private initFromSavedObjectLoadFields = async ({
+    savedObjectId,
+    spec,
+  }: {
+    savedObjectId: string;
+    spec: DataViewSpec;
+  }) => {
+    const { title, type, typeMeta, runtimeFieldMap } = spec;
+    const { fields, indices } = await this.refreshFieldSpecMap(
+      spec.fields || {},
+      savedObjectId,
+      spec.title as string,
+      {
+        pattern: title as string,
+        metaFields: await this.config.get(META_FIELDS),
+        type,
+        rollupIndex: typeMeta?.params?.rollup_index,
+        allowNoIndex: spec.allowNoIndex,
+      },
+      spec.fieldAttrs
+    );
+
+    const runtimeFieldSpecs = this.getRuntimeFields(runtimeFieldMap, spec.fieldAttrs);
+    // mapped fields overwrite runtime fields
+    return { fields: { ...runtimeFieldSpecs, ...fields }, indices: indices || [] };
   };
 
   private initFromSavedObject = async (
-    savedObject: SavedObject<DataViewAttributes>
+    savedObject: SavedObject<DataViewAttributes>,
+    displayErrors: boolean = true
   ): Promise<DataView> => {
     const spec = this.savedObjectToSpec(savedObject);
-    const { title, type, typeMeta, runtimeFieldMap } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
 
-    let matchedIndices: string[] = [];
+    let fields: Record<string, FieldSpec> = {};
+    let indices: string[] = [];
 
-    try {
-      const { fields, indices } = await this.refreshFieldSpecMap(
-        spec.fields || {},
-        savedObject.id,
-        spec.title as string,
-        {
-          pattern: title as string,
-          metaFields: await this.config.get(META_FIELDS),
-          type,
-          rollupIndex: typeMeta?.params?.rollup_index,
-          allowNoIndex: spec.allowNoIndex,
-        },
-        spec.fieldAttrs
-      );
-
-      spec.fields = fields;
-      matchedIndices = indices || [];
-
-      const runtimeFieldSpecs = this.getRuntimeFields(runtimeFieldMap, spec.fieldAttrs);
-      // mapped fields overwrite runtime fields
-      spec.fields = { ...runtimeFieldSpecs, ...spec.fields };
-    } catch (err) {
-      if (err instanceof DataViewMissingIndices) {
-        this.onNotification(
-          {
-            title: err.message,
-            color: 'danger',
-            iconType: 'alert',
-          },
-          `initFromSavedObject:${title}`
-        );
-      } else {
-        this.onError(
-          err,
-          {
-            title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-              defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-              values: { id: savedObject.id, title },
-            }),
-          },
-          title || ''
-        );
+    if (!displayErrors) {
+      const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
+        savedObjectId: savedObject.id,
+        spec,
+      });
+      fields = fieldsAndIndices.fields;
+      indices = fieldsAndIndices.indices;
+    } else {
+      try {
+        const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
+          savedObjectId: savedObject.id,
+          spec,
+        });
+        fields = fieldsAndIndices.fields;
+        indices = fieldsAndIndices.indices;
+      } catch (err) {
+        if (err instanceof DataViewMissingIndices) {
+          this.onNotification(
+            {
+              title: err.message,
+              color: 'danger',
+              iconType: 'alert',
+            },
+            `initFromSavedObject:${spec.title}`
+          );
+        } else {
+          this.onError(
+            err,
+            {
+              title: i18n.translate('dataViews.fetchFieldErrorTitle', {
+                defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+                values: { id: savedObject.id, title: spec.title },
+              }),
+            },
+            spec.title || ''
+          );
+        }
       }
     }
 
+    spec.fields = fields;
     spec.fieldFormats = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
 
-    const indexPattern = await this.create(spec, true);
-    indexPattern.matchedIndices = matchedIndices;
+    const indexPattern = await this.createFromSpec(spec, true, displayErrors);
+    indexPattern.matchedIndices = indices;
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
   };
@@ -784,7 +835,8 @@ export class DataViewsService {
     const addRuntimeFieldToSpecFields = (
       name: string,
       fieldType: RuntimeType,
-      runtimeField: RuntimeFieldSpec
+      runtimeField: RuntimeFieldSpec,
+      parentName?: string
     ) => {
       spec[name] = {
         name,
@@ -797,6 +849,10 @@ export class DataViewsService {
         customLabel: fieldAttrs?.[name]?.customLabel,
         count: fieldAttrs?.[name]?.count,
       };
+
+      if (parentName) {
+        spec[name].parentName = parentName;
+      }
     };
 
     // CREATE RUNTIME FIELDS
@@ -804,7 +860,7 @@ export class DataViewsService {
       // For composite runtime field we add the subFields, **not** the composite
       if (runtimeField.type === 'composite') {
         Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
-          addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField);
+          addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField, name);
         });
       } else {
         addRuntimeFieldToSpecFields(name, runtimeField.type, runtimeField);
@@ -817,10 +873,24 @@ export class DataViewsService {
   /**
    * Get an index pattern by id, cache optimized.
    * @param id
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
+   * @param refreshFields - If set true, will fetch fields from the index pattern
    */
-  get = async (id: string): Promise<DataView> => {
+  get = async (
+    id: string,
+    displayErrors: boolean = true,
+    refreshFields = false
+  ): Promise<DataView> => {
+    const dataViewFromCache = this.dataViewCache.get(id)?.then(async (dataView) => {
+      if (dataView && refreshFields) {
+        await this.refreshFields(dataView);
+      }
+      return dataView;
+    });
+
     const indexPatternPromise =
-      this.dataViewCache.get(id) || this.dataViewCache.set(id, this.getSavedObjectAndInit(id));
+      dataViewFromCache ||
+      this.dataViewCache.set(id, this.getSavedObjectAndInit(id, displayErrors));
 
     // don't cache failed requests
     indexPatternPromise.catch(() => {
@@ -834,23 +904,25 @@ export class DataViewsService {
    * Create a new data view instance.
    * @param spec data view spec
    * @param skipFetchFields if true, will not fetch fields
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    * @returns DataView
    */
-  async create(
+  private async createFromSpec(
     { id, name, title, ...restOfSpec }: DataViewSpec,
-    skipFetchFields = false
+    skipFetchFields = false,
+    displayErrors = true
   ): Promise<DataView> {
     const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 
     const spec = {
-      id: id ?? uuid.v4(),
+      id: id ?? uuidv4(),
       title,
       name: name || title,
       ...restOfSpec,
     };
 
-    const indexPattern = new DataView({
+    const dataView = new DataView({
       spec,
       fieldFormats: this.fieldFormats,
       shortDotsEnable,
@@ -858,12 +930,38 @@ export class DataViewsService {
     });
 
     if (!skipFetchFields) {
-      await this.refreshFields(indexPattern);
+      await this.refreshFields(dataView, displayErrors);
     }
 
-    this.dataViewCache.set(indexPattern.id!, Promise.resolve(indexPattern));
+    return dataView;
+  }
 
-    return indexPattern;
+  /**
+   * Create data view instance.
+   * @param spec data view spec
+   * @param skipFetchFields if true, will not fetch fields
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
+   * @returns DataView
+   */
+  async create(
+    spec: DataViewSpec,
+    skipFetchFields = false,
+    displayErrors = true
+  ): Promise<DataView> {
+    const doCreate = () => this.createFromSpec(spec, skipFetchFields, displayErrors);
+
+    if (spec.id) {
+      const cachedDataView = this.dataViewCache.get(spec.id);
+
+      if (cachedDataView) {
+        return cachedDataView;
+      }
+
+      return this.dataViewCache.set(spec.id, doCreate());
+    }
+
+    const dataView = await doCreate();
+    return this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
   }
 
   /**
@@ -871,11 +969,17 @@ export class DataViewsService {
    * @param spec data view spec
    * @param override Overwrite if existing index pattern exists.
    * @param skipFetchFields Whether to skip field refresh step.
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
 
-  async createAndSave(spec: DataViewSpec, override = false, skipFetchFields = false) {
-    const indexPattern = await this.create(spec, skipFetchFields);
-    const createdIndexPattern = await this.createSavedObject(indexPattern, override);
+  async createAndSave(
+    spec: DataViewSpec,
+    override = false,
+    skipFetchFields = false,
+    displayErrors = true
+  ) {
+    const indexPattern = await this.createFromSpec(spec, skipFetchFields, displayErrors);
+    const createdIndexPattern = await this.createSavedObject(indexPattern, override, displayErrors);
     await this.setDefault(createdIndexPattern.id!);
     return createdIndexPattern!;
   }
@@ -884,9 +988,10 @@ export class DataViewsService {
    * Save a new data view.
    * @param dataView data view instance
    * @param override Overwrite if existing index pattern exists
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
 
-  async createSavedObject(dataView: DataView, override = false) {
+  async createSavedObject(dataView: DataView, override = false, displayErrors = true) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
@@ -909,7 +1014,7 @@ export class DataViewsService {
       }
     )) as SavedObject<DataViewAttributes>;
 
-    const createdIndexPattern = await this.initFromSavedObject(response);
+    const createdIndexPattern = await this.initFromSavedObject(response, displayErrors);
     if (this.savedObjectsCache) {
       this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
     }
@@ -921,12 +1026,14 @@ export class DataViewsService {
    * @param indexPattern
    * @param saveAttempts
    * @param ignoreErrors
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
 
   async updateSavedObject(
     indexPattern: DataView,
     saveAttempts: number = 0,
-    ignoreErrors: boolean = false
+    ignoreErrors: boolean = false,
+    displayErrors: boolean = true
   ): Promise<DataView | void | Error> {
     if (!indexPattern.id) return;
     if (!(await this.getCanSave())) {
@@ -950,14 +1057,14 @@ export class DataViewsService {
       .update(DATA_VIEW_SAVED_OBJECT_TYPE, indexPattern.id, body, {
         version: indexPattern.version,
       })
-      .then((resp) => {
-        indexPattern.id = resp.id;
-        indexPattern.version = resp.version;
+      .then((response) => {
+        indexPattern.id = response.id;
+        indexPattern.version = response.version;
         return indexPattern;
       })
       .catch(async (err) => {
-        if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
-          const samePattern = await this.get(indexPattern.id as string);
+        if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
+          const samePattern = await this.get(indexPattern.id as string, displayErrors);
           // What keys changed from now and what the server returned
           const updatedBody = samePattern.getAsSavedObjectBody();
 
@@ -993,10 +1100,12 @@ export class DataViewsService {
                 'Unable to write data view! Refresh the page to get the most up to date changes for this data view.',
             });
 
-            this.onNotification(
-              { title, color: 'danger' },
-              `updateSavedObject:${indexPattern.title}`
-            );
+            if (displayErrors) {
+              this.onNotification(
+                { title, color: 'danger' },
+                `updateSavedObject:${indexPattern.getIndexPattern()}`
+              );
+            }
             throw err;
           }
 
@@ -1011,7 +1120,7 @@ export class DataViewsService {
           this.dataViewCache.clear(indexPattern.id!);
 
           // Try the save again
-          return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors);
+          return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors, displayErrors);
         }
         throw err;
       });
@@ -1035,9 +1144,10 @@ export class DataViewsService {
    * another data view is selected as default and returned.
    * If no possible data view found to become a default returns null.
    *
+   * @param {boolean} refreshFields - if true, will refresh the fields of the default data view
    * @returns default data view
    */
-  async getDefaultDataView(): Promise<DataView | null> {
+  async getDefaultDataView(refreshFields?: boolean): Promise<DataView | null> {
     const patterns = await this.getIdsWithTitle();
     let defaultId: string | undefined = await this.config.get('defaultIndex');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
@@ -1058,7 +1168,7 @@ export class DataViewsService {
     }
 
     if (defaultId) {
-      return this.get(defaultId);
+      return this.get(defaultId, undefined, refreshFields);
     } else {
       return null;
     }

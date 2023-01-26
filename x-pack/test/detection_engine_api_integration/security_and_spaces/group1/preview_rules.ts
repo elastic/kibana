@@ -20,8 +20,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
 
-  describe('create_rules', () => {
-    describe('creating rules', () => {
+  describe('preview_rules', () => {
+    describe('previewing rules', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });

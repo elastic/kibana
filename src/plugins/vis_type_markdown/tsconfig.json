@@ -1,21 +1,24 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "public/**/*",
     "server/**/*",
     "*.ts"
   ],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../expressions/tsconfig.json" },
-    { "path": "../visualizations/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../vis_default_editor/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/expressions-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/vis-default-editor-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

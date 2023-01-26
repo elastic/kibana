@@ -28,20 +28,107 @@ interface IndexDefinition {
 }
 
 const connectorMappingsProperties: Record<string, MappingProperty> = {
-  api_key_id: {
-    type: 'keyword',
-  },
-  configuration: {
-    type: 'object',
-  },
+  api_key_id: { type: 'keyword' },
+  configuration: { type: 'object' },
+  description: { type: 'text' },
   error: { type: 'keyword' },
+  features: {
+    properties: {
+      filtering_advanced_config: { type: 'boolean' },
+      filtering_rules: { type: 'boolean' },
+    },
+  },
+  filtering: {
+    properties: {
+      active: {
+        properties: {
+          advanced_snippet: {
+            properties: {
+              created_at: { type: 'date' },
+              updated_at: { type: 'date' },
+              value: { type: 'object' },
+            },
+          },
+          rules: {
+            properties: {
+              created_at: { type: 'date' },
+              field: { type: 'keyword' },
+              id: { type: 'keyword' },
+              order: { type: 'short' },
+              policy: { type: 'keyword' },
+              rule: { type: 'keyword' },
+              updated_at: { type: 'date' },
+              value: { type: 'keyword' },
+            },
+          },
+          validation: {
+            properties: {
+              errors: {
+                properties: {
+                  ids: { type: 'keyword' },
+                  messages: { type: 'text' },
+                },
+              },
+              state: { type: 'keyword' },
+            },
+          },
+        },
+      },
+      domain: { type: 'keyword' },
+      draft: {
+        properties: {
+          advanced_snippet: {
+            properties: {
+              created_at: { type: 'date' },
+              updated_at: { type: 'date' },
+              value: { type: 'object' },
+            },
+          },
+          rules: {
+            properties: {
+              created_at: { type: 'date' },
+              field: { type: 'keyword' },
+              id: { type: 'keyword' },
+              order: { type: 'short' },
+              policy: { type: 'keyword' },
+              rule: { type: 'keyword' },
+              updated_at: { type: 'date' },
+              value: { type: 'keyword' },
+            },
+          },
+          validation: {
+            properties: {
+              errors: {
+                properties: {
+                  ids: { type: 'keyword' },
+                  messages: { type: 'text' },
+                },
+              },
+              state: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    },
+  },
   index_name: { type: 'keyword' },
+  is_native: { type: 'boolean' },
   language: { type: 'keyword' },
+  last_deleted_document_count: { type: 'long' },
+  last_indexed_document_count: { type: 'long' },
   last_seen: { type: 'date' },
   last_sync_error: { type: 'keyword' },
   last_sync_status: { type: 'keyword' },
   last_synced: { type: 'date' },
   name: { type: 'keyword' },
+  pipeline: {
+    properties: {
+      extract_binary_content: { type: 'boolean' },
+      name: { type: 'keyword' },
+      reduce_whitespace: { type: 'boolean' },
+      run_ml_inference: { type: 'boolean' },
+    },
+  },
   scheduling: {
     properties: {
       enabled: { type: 'boolean' },
@@ -59,12 +146,27 @@ const defaultSettings: IndicesIndexSettings = {
   number_of_replicas: 0,
 };
 
+export interface DefaultConnectorsPipelineMeta {
+  default_extract_binary_content: boolean;
+  default_name: string;
+  default_reduce_whitespace: boolean;
+  default_run_ml_inference: boolean;
+}
+
+export const defaultConnectorsPipelineMeta: DefaultConnectorsPipelineMeta = {
+  default_extract_binary_content: true,
+  default_name: 'ent-search-generic-ingestion',
+  default_reduce_whitespace: true,
+  default_run_ml_inference: true,
+};
+
 const indices: IndexDefinition[] = [
   {
     aliases: ['.elastic-connectors'],
     mappings: {
       _meta: {
-        version: '1',
+        pipeline: defaultConnectorsPipelineMeta,
+        version: 1,
       },
       properties: connectorMappingsProperties,
     },
@@ -75,23 +177,70 @@ const indices: IndexDefinition[] = [
     aliases: ['.elastic-connectors-sync-jobs'],
     mappings: {
       _meta: {
-        version: '1',
+        version: 1,
       },
       properties: {
+        cancelation_requested_at: { type: 'date' },
+        canceled_at: { type: 'date' },
         completed_at: { type: 'date' },
-        connector: { properties: connectorMappingsProperties },
-        connector_id: {
-          type: 'keyword',
+        connector: {
+          properties: {
+            configuration: { type: 'object' },
+            filtering: {
+              properties: {
+                advanced_snippet: {
+                  properties: {
+                    created_at: { type: 'date' },
+                    updated_at: { type: 'date' },
+                    value: { type: 'object' },
+                  },
+                },
+                domain: { type: 'keyword' },
+                rules: {
+                  properties: {
+                    created_at: { type: 'date' },
+                    field: { type: 'keyword' },
+                    id: { type: 'keyword' },
+                    order: { type: 'short' },
+                    policy: { type: 'keyword' },
+                    rule: { type: 'keyword' },
+                    updated_at: { type: 'date' },
+                    value: { type: 'keyword' },
+                  },
+                },
+                warnings: {
+                  properties: {
+                    ids: { type: 'keyword' },
+                    messages: { type: 'text' },
+                  },
+                },
+              },
+            },
+            id: { type: 'keyword' },
+            index_name: { type: 'keyword' },
+            language: { type: 'keyword' },
+            pipeline: {
+              properties: {
+                extract_binary_content: { type: 'boolean' },
+                name: { type: 'keyword' },
+                reduce_whitespace: { type: 'boolean' },
+                run_ml_inference: { type: 'boolean' },
+              },
+            },
+            service_type: { type: 'keyword' },
+          },
         },
         created_at: { type: 'date' },
         deleted_document_count: { type: 'integer' },
-        error: {
-          type: 'keyword',
-        },
+        error: { type: 'keyword' },
         indexed_document_count: { type: 'integer' },
-        status: {
-          type: 'keyword',
-        },
+        indexed_document_volume: { type: 'integer' },
+        last_seen: { type: 'date' },
+        metadata: { type: 'object' },
+        started_at: { type: 'date' },
+        status: { type: 'keyword' },
+        total_document_count: { type: 'integer' },
+        trigger_method: { type: 'keyword' },
         worker_hostname: { type: 'keyword' },
       },
     },

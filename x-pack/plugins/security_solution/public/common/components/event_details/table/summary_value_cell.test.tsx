@@ -49,7 +49,7 @@ const enrichedHostIpData: AlertSummaryRow['description'] = {
   eventId,
   fieldFromBrowserField: { ...hostIpFieldFromBrowserField },
   isDraggable: false,
-  timelineId: TimelineId.test,
+  scopeId: TimelineId.test,
   values: [...hostIpValues],
 };
 
@@ -71,7 +71,7 @@ const enrichedAgentStatusData: AlertSummaryRow['description'] = {
   },
   eventId,
   values: [],
-  timelineId: TimelineId.test,
+  scopeId: TimelineId.test,
 };
 
 describe('SummaryValueCell', () => {
@@ -90,7 +90,7 @@ describe('SummaryValueCell', () => {
     test('When in the timeline flyout with timelineId active', async () => {
       render(
         <TestProviders>
-          <SummaryValueCell {...enrichedHostIpData} timelineId={TimelineId.active} />
+          <SummaryValueCell {...enrichedHostIpData} scopeId={TimelineId.active} />
         </TestProviders>
       );
       hostIpValues.forEach((ipValue) => expect(screen.getByText(ipValue)).toBeInTheDocument());

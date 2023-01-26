@@ -6,7 +6,7 @@
 
 The {sn-itom} connector uses the
 https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[event API]
-to create {sn} events.
+to create {sn} events. You can use the connector for rule actions.
 
 [float]
 [[servicenow-itom-connector-prerequisites]]
@@ -54,7 +54,7 @@ include::servicenow.asciidoc[tag=servicenow-endpoint]
 
 {sn-itom} connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** connector listing, and in the connector list when configuring an action.
+Name::      The name of the connector.
 Is OAuth::  The type of authentication to use.
 URL::       {sn} instance URL.
 Username::  Username for HTTP Basic authentication.
@@ -125,7 +125,7 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[define-servicenow-itom-ui]]
-=== Define connector in Stack Management
+=== Define connector in {stack-manage-app}
 
 Define {sn-itom} connector properties. Choose whether to use OAuth for authentication.
 

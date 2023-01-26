@@ -22,6 +22,10 @@ export function useRunOnceErrors({
 }) {
   const [locationErrors, setLocationErrors] = useState<ServiceLocationErrors>([]);
   const [runOnceServiceError, setRunOnceServiceError] = useState<Error | null>(null);
+  const publicLocations = useMemo(
+    () => (locations ?? []).filter((loc) => loc.isServiceManaged),
+    [locations]
+  );
 
   useEffect(() => {
     setLocationErrors([]);
@@ -43,16 +47,16 @@ export function useRunOnceErrors({
   }, [serviceError]);
 
   const locationsById: Record<string, Locations[number]> = useMemo(
-    () => (locations as Locations).reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
-    [locations]
+    () => (publicLocations as Locations).reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
+    [publicLocations]
   );
 
   const expectPings =
-    locations.length - (locationErrors ?? []).filter(({ locationId }) => !!locationId).length;
+    publicLocations.length - (locationErrors ?? []).filter(({ locationId }) => !!locationId).length;
 
   const hasBlockingError =
     !!runOnceServiceError ||
-    (locationErrors?.length && locationErrors?.length === locations.length);
+    (locationErrors?.length && locationErrors?.length === publicLocations.length);
 
   const errorMessages = useMemo(() => {
     if (hasBlockingError) {

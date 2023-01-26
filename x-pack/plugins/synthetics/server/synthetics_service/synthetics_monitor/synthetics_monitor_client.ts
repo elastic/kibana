@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  KibanaRequest,
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { normalizeSecrets } from '../utils';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsPrivateLocation } from '../private_location/synthetics_private_location';
 import { SyntheticsService } from '../synthetics_service';
@@ -14,7 +21,12 @@ import {
   MonitorFields,
   SyntheticsMonitorWithId,
   HeartbeatConfig,
+  PrivateLocation,
+  EncryptedSyntheticsMonitor,
+  SyntheticsMonitorWithSecrets,
+  MonitorServiceLocation,
 } from '../../../common/runtime_types';
+import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 
 export class SyntheticsMonitorClient {
   public syntheticsService: SyntheticsService;
@@ -26,61 +38,167 @@ export class SyntheticsMonitorClient {
     this.privateLocationAPI = new SyntheticsPrivateLocation(server);
   }
 
-  async addMonitor(
-    monitor: MonitorFields,
-    id: string,
+  async addMonitors(
+    monitors: Array<{ monitor: MonitorFields; id: string }>,
     request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract,
+    allPrivateLocations: PrivateLocation[],
+    spaceId: string
   ) {
-    await this.syntheticsService.setupIndexTemplates();
+    const privateConfigs: HeartbeatConfig[] = [];
+    const publicConfigs: HeartbeatConfig[] = [];
 
-    const config = formatHeartbeatRequest({
-      monitor,
-      monitorId: id,
-      customHeartbeatId: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID],
-    });
+    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
 
-    const { privateLocations, publicLocations } = this.parseLocations(config);
+    for (const monitorObj of monitors) {
+      const { monitor, id } = monitorObj;
+      const config = formatHeartbeatRequest({
+        monitor,
+        monitorId: id,
+        heartbeatId: monitor[ConfigKey.MONITOR_QUERY_ID],
+        params: paramsBySpace[spaceId],
+      });
 
-    if (privateLocations.length > 0) {
-      await this.privateLocationAPI.createMonitor(config, request, savedObjectsClient);
+      const { privateLocations, publicLocations } = this.parseLocations(config);
+      if (privateLocations.length > 0) {
+        privateConfigs.push(config);
+      }
+
+      if (publicLocations.length > 0) {
+        publicConfigs.push(config);
+      }
     }
 
-    if (publicLocations.length > 0) {
-      return await this.syntheticsService.addConfig(config);
+    let newPolicies;
+
+    if (privateConfigs.length > 0) {
+      newPolicies = await this.privateLocationAPI.createMonitors(
+        privateConfigs,
+        request,
+        savedObjectsClient,
+        allPrivateLocations,
+        spaceId
+      );
     }
+
+    let syncErrors;
+
+    if (publicConfigs.length > 0) {
+      syncErrors = await this.syntheticsService.addConfig(publicConfigs);
+    }
+
+    return { newPolicies, syncErrors };
   }
 
-  async editMonitor(
-    editedMonitor: MonitorFields,
-    id: string,
+  async editMonitors(
+    monitors: Array<{
+      monitor: MonitorFields;
+      id: string;
+      previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
+      decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
+    }>,
     request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract,
+    allPrivateLocations: PrivateLocation[],
+    spaceId: string
   ) {
-    const editedConfig = formatHeartbeatRequest({
-      monitor: editedMonitor,
-      monitorId: id,
-      customHeartbeatId: (editedMonitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
-    });
+    const privateConfigs: HeartbeatConfig[] = [];
+    const publicConfigs: HeartbeatConfig[] = [];
+    const deletedPublicConfigs: HeartbeatConfig[] = [];
 
-    const { publicLocations } = this.parseLocations(editedConfig);
+    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
 
-    await this.privateLocationAPI.editMonitor(editedConfig, request, savedObjectsClient);
+    for (const editedMonitor of monitors) {
+      const editedConfig = formatHeartbeatRequest({
+        monitor: editedMonitor.monitor,
+        monitorId: editedMonitor.id,
+        heartbeatId: (editedMonitor.monitor as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
+        params: paramsBySpace[spaceId],
+      });
+      const { publicLocations, privateLocations } = this.parseLocations(editedConfig);
+      if (publicLocations.length > 0) {
+        publicConfigs.push(editedConfig);
+      }
 
-    if (publicLocations.length > 0) {
-      return await this.syntheticsService.editConfig(editedConfig);
+      const deletedPublicConfig = this.hasDeletedPublicLocations(
+        publicLocations,
+        editedMonitor.decryptedPreviousMonitor
+      );
+
+      if (deletedPublicConfig) {
+        deletedPublicConfigs.push(deletedPublicConfig);
+      }
+
+      if (privateLocations.length > 0 || this.hasPrivateLocations(editedMonitor.previousMonitor)) {
+        privateConfigs.push(editedConfig);
+      }
     }
 
-    await this.syntheticsService.editConfig(editedConfig);
+    await this.privateLocationAPI.editMonitors(
+      privateConfigs,
+      request,
+      savedObjectsClient,
+      allPrivateLocations,
+      spaceId
+    );
+
+    if (deletedPublicConfigs.length > 0) {
+      await this.syntheticsService.deleteConfigs(deletedPublicConfigs);
+    }
+
+    if (publicConfigs.length > 0) {
+      return await this.syntheticsService.editConfig(publicConfigs);
+    }
+  }
+  async deleteMonitors(
+    monitors: SyntheticsMonitorWithId[],
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract,
+    spaceId: string
+  ) {
+    const privateDeletePromise = this.privateLocationAPI.deleteMonitors(
+      monitors as SyntheticsMonitorWithId[],
+      request,
+      savedObjectsClient,
+      spaceId
+    );
+
+    const publicDeletePromise = this.syntheticsService.deleteConfigs(
+      monitors as SyntheticsMonitorWithId[]
+    );
+    const [pubicResponse] = await Promise.all([publicDeletePromise, privateDeletePromise]);
+
+    return pubicResponse;
   }
 
-  async deleteMonitor(
-    monitor: SyntheticsMonitorWithId,
-    request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract
+  hasPrivateLocations(previousMonitor: SavedObject<EncryptedSyntheticsMonitor>) {
+    const { locations } = previousMonitor.attributes;
+
+    return locations.some((loc) => !loc.isServiceManaged);
+  }
+
+  hasDeletedPublicLocations(
+    updatedLocations: MonitorServiceLocation[],
+    decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>
   ) {
-    await this.privateLocationAPI.deleteMonitor(monitor, request, savedObjectsClient);
-    return await this.syntheticsService.deleteConfigs([monitor]);
+    const { locations } = decryptedPreviousMonitor.attributes;
+
+    const prevPublicLocations = locations.filter((loc) => loc.isServiceManaged);
+
+    const missingPublicLocations = prevPublicLocations.filter((prevLoc) => {
+      return !updatedLocations.some((updatedLoc) => updatedLoc.id === prevLoc.id);
+    });
+    if (missingPublicLocations.length > 0) {
+      const { attributes: normalizedPreviousMonitor } = normalizeSecrets(decryptedPreviousMonitor);
+      normalizedPreviousMonitor.locations = missingPublicLocations;
+
+      return formatHeartbeatRequest({
+        monitor: normalizedPreviousMonitor,
+        monitorId: normalizedPreviousMonitor.id,
+        heartbeatId: (normalizedPreviousMonitor as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
+        params: {},
+      });
+    }
   }
 
   parseLocations(config: HeartbeatConfig) {
@@ -90,5 +208,118 @@ export class SyntheticsMonitorClient {
     const publicLocations = locations.filter((loc) => loc.isServiceManaged);
 
     return { privateLocations, publicLocations };
+  }
+
+  async syncGlobalParams({
+    request,
+    spaceId,
+    savedObjectsClient,
+    allPrivateLocations,
+    encryptedSavedObjects,
+  }: {
+    spaceId: string;
+    request: KibanaRequest;
+    allPrivateLocations: PrivateLocation[];
+    savedObjectsClient: SavedObjectsClientContract;
+    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  }) {
+    const privateConfigs: HeartbeatConfig[] = [];
+    const publicConfigs: HeartbeatConfig[] = [];
+
+    const monitors = await this.getAllMonitorConfigs({ encryptedSavedObjects, spaceId });
+
+    for (const monitor of monitors) {
+      const { publicLocations, privateLocations } = this.parseLocations(monitor);
+      if (publicLocations.length > 0) {
+        publicConfigs.push(monitor);
+      }
+
+      if (privateLocations.length > 0) {
+        privateConfigs.push(monitor);
+      }
+    }
+    if (privateConfigs.length > 0) {
+      await this.privateLocationAPI.editMonitors(
+        privateConfigs,
+        request,
+        savedObjectsClient,
+        allPrivateLocations,
+        spaceId
+      );
+    }
+
+    if (publicConfigs.length > 0) {
+      return await this.syntheticsService.editConfig(publicConfigs, false);
+    }
+  }
+
+  async getAllMonitorConfigs({
+    spaceId,
+    encryptedSavedObjects,
+  }: {
+    spaceId: string;
+    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  }) {
+    const paramsBySpacePromise = this.syntheticsService.getSyntheticsParams({ spaceId });
+
+    const monitorsPromise = this.getAllMonitors({ encryptedSavedObjects, spaceId });
+
+    const [paramsBySpace, monitors] = await Promise.all([paramsBySpacePromise, monitorsPromise]);
+
+    return this.mixParamsWithMonitors(spaceId, monitors, paramsBySpace);
+  }
+
+  async getAllMonitors({
+    spaceId,
+    encryptedSavedObjects,
+  }: {
+    spaceId: string;
+    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  }) {
+    const encryptedClient = encryptedSavedObjects.getClient();
+
+    const monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecrets>> = [];
+
+    const finder =
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+        {
+          type: syntheticsMonitorType,
+          perPage: 1000,
+          namespaces: [spaceId],
+        }
+      );
+
+    for await (const response of finder.find()) {
+      response.saved_objects.forEach((monitor) => {
+        monitors.push(monitor);
+      });
+    }
+
+    // no need to wait here
+    finder.close();
+
+    return monitors;
+  }
+
+  mixParamsWithMonitors(
+    spaceId: string,
+    monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecrets>>,
+    paramsBySpace: Record<string, Record<string, string>>
+  ) {
+    const heartbeatConfigs: HeartbeatConfig[] = [];
+
+    for (const monitor of monitors) {
+      const attributes = monitor.attributes as unknown as MonitorFields;
+      heartbeatConfigs.push(
+        formatHeartbeatRequest({
+          monitor: normalizeSecrets(monitor).attributes,
+          monitorId: monitor.id,
+          heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
+          params: paramsBySpace[spaceId],
+        })
+      );
+    }
+
+    return heartbeatConfigs;
   }
 }

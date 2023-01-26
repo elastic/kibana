@@ -1,10 +1,7 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "./target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -12,6 +9,24 @@
   },
   "include": [
     "src/**/*",
-    "**/*.ts"
+    "**/*.ts",
+    "src/painless/autocomplete_definitions/boolean_script_field_script_field.json",
+    "src/painless/autocomplete_definitions/common.json",
+    "src/painless/autocomplete_definitions/date_script_field.json",
+    "src/painless/autocomplete_definitions/double_script_field_script_field.json",
+    "src/painless/autocomplete_definitions/filter.json",
+    "src/painless/autocomplete_definitions/ip_script_field_script_field.json",
+    "src/painless/autocomplete_definitions/long_script_field_script_field.json",
+    "src/painless/autocomplete_definitions/processor_conditional.json",
+    "src/painless/autocomplete_definitions/score.json",
+    "src/painless/autocomplete_definitions/string_script_field_script_field.json",
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/repo-info",
+    "@kbn/ui-theme",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

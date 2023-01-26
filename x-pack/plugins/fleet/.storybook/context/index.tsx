@@ -15,6 +15,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { CoreScopedHistory } from '@kbn/core/public';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
+import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
@@ -27,13 +28,14 @@ import { setCustomIntegrations } from '../../public/services/custom_integrations
 import { getApplication } from './application';
 import { getChrome } from './chrome';
 import { getHttp } from './http';
-import { getUiSettings } from './ui_settings';
+import { getUiSettings, getSettings } from './ui_settings';
 import { getNotifications } from './notifications';
 import { stubbedStartServices } from './stubs';
 import { getDocLinks } from './doc_links';
 import { getCloud } from './cloud';
 import { getShare } from './share';
 import { getExecutionContext } from './execution_context';
+import { getCustomBranding } from './custom_branding';
 
 // TODO: clintandrewhall - this is not ideal, or complete.  The root context of Fleet applications
 // requires full start contracts of its dependencies.  As a result, we have to mock all of those contracts
@@ -72,7 +74,9 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
       },
       customIntegrations: {
         ContextProvider: getStorybookContextProvider(),
+        languageClientsUiComponents: {},
       },
+      customBranding: getCustomBranding(),
       docLinks: getDocLinks(),
       http: getHttp(),
       i18n: {
@@ -80,12 +84,10 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
           return <I18nProvider>{children}</I18nProvider>;
         },
       },
-      injectedMetadata: {
-        getInjectedVar: () => null,
-      },
       notifications: getNotifications(),
       share: getShare(),
       uiSettings: getUiSettings(),
+      settings: getSettings(),
       theme: {
         theme$: EMPTY,
       },
@@ -109,6 +111,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
           writeIntegrationPolicies: true,
         },
       },
+      guidedOnboarding: guidedOnboardingMock.createStart(),
     }),
     [isCloudEnabled]
   );

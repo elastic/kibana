@@ -239,7 +239,7 @@ describe('GroupsLogic', () => {
       };
 
       beforeAll(() => {
-        jest.useFakeTimers();
+        jest.useFakeTimers({ legacyFakeTimers: true });
       });
 
       afterAll(() => {

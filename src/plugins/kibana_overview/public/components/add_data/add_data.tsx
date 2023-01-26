@@ -13,7 +13,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks, useKibana } from '@kbn/kibana-react-plugin/public';
 import { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
-// @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';
 import { METRIC_TYPE, trackUiMetric } from '../../lib/ui_metric';
 

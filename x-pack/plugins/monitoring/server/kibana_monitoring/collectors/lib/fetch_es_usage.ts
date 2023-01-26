@@ -32,13 +32,13 @@ export async function fetchESUsage(
 ): Promise<StackProductUsage> {
   const params: estypes.SearchRequest = {
     index,
-    size: 1,
     ignore_unavailable: true,
     filter_path: [
       'hits.hits._source.cluster_stats.nodes.count.total',
       'aggregations.indices.buckets',
     ],
     body: {
+      size: 1,
       sort: [
         {
           timestamp: {

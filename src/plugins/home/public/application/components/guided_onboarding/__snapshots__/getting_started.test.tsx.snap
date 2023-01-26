@@ -1,10 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`getting started should render getting started component 1`] = `
-<KibanaPageTemplate
-  template="centeredBody"
+<_KibanaPageTemplate
+  grow={true}
+  panelled={false}
 >
-  <div
+  <_EuiPageSection
+    alignment="center"
     css={
       Object {
         "map": undefined,
@@ -16,6 +18,7 @@ exports[`getting started should render getting started component 1`] = `
         "toString": [Function],
       }
     }
+    data-test-subj="onboarding--landing-page"
   >
     <EuiTitle
       className="eui-textCenter"
@@ -29,12 +32,11 @@ exports[`getting started should render getting started component 1`] = `
       size="s"
     />
     <EuiText
-      color="subdued"
-      size="s"
+      size="m"
       textAlign="center"
     >
       <p>
-        Select a starting point for a quick tour of how Elastic can help you do even more with your data.
+        Select a guide to help you make the most of your data.
       </p>
     </EuiText>
     <EuiSpacer
@@ -44,22 +46,49 @@ exports[`getting started should render getting started component 1`] = `
       size="xxl"
     />
     <EuiFlexGrid
-      columns={3}
-      gutterSize="xl"
+      columns={4}
+      gutterSize="l"
     >
-      <EuiFlexItem>
-        <UseCaseCard
+      <EuiFlexItem
+        key="guideCard-search"
+      >
+        <GuideCard
+          activateGuide={[Function]}
+          addBasePath={[Function]}
+          guides={Array []}
+          isDarkTheme={false}
           useCase="search"
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <UseCaseCard
-          useCase="observability"
+      <EuiFlexItem
+        key="guideCard-kubernetes"
+      >
+        <GuideCard
+          activateGuide={[Function]}
+          addBasePath={[Function]}
+          guides={Array []}
+          isDarkTheme={false}
+          useCase="kubernetes"
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <UseCaseCard
-          useCase="security"
+      <EuiFlexItem
+        key="linkCard-infrastructure"
+      >
+        <InfrastructureLinkCard
+          addBasePath={[Function]}
+          isDarkTheme={false}
+          navigateToApp={[MockFunction]}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        key="guideCard-siem"
+      >
+        <GuideCard
+          activateGuide={[Function]}
+          addBasePath={[Function]}
+          guides={Array []}
+          isDarkTheme={false}
+          useCase="siem"
         />
       </EuiFlexItem>
     </EuiFlexGrid>
@@ -70,12 +99,12 @@ exports[`getting started should render getting started component 1`] = `
       className="eui-textCenter"
     >
       <EuiLink
-        data-test-subj="onboarding--skipUseCaseTourLink"
+        data-test-subj="onboarding--skipGuideLink"
         onClick={[Function]}
       >
-        No thanks, I’ll explore on my own.
+        I’d like to do something else (skip)
       </EuiLink>
     </div>
-  </div>
-</KibanaPageTemplate>
+  </_EuiPageSection>
+</_KibanaPageTemplate>
 `;

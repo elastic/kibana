@@ -10,10 +10,99 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.Semaphore",
+        "type": "Class",
+        "tags": [],
+        "label": "Semaphore",
+        "description": [],
+        "path": "packages/kbn-std/src/semaphore.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.Semaphore.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-std/src/semaphore.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/std",
+                "id": "def-common.Semaphore.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "capacity",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-std/src/semaphore.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.Semaphore.acquire",
+            "type": "Function",
+            "tags": [],
+            "label": "acquire",
+            "description": [],
+            "signature": [
+              "<T>() => ",
+              "OperatorFunction",
+              "<T, T>"
+            ],
+            "path": "packages/kbn-std/src/semaphore.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.Semaphore.release",
+            "type": "Function",
+            "tags": [],
+            "label": "release",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-std/src/semaphore.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.assertNever",
+        "id": "def-common.assertNever",
         "type": "Function",
         "tags": [],
         "label": "assertNever",
@@ -25,10 +114,11 @@
         ],
         "path": "packages/kbn-std/src/assert_never.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.assertNever.$1",
+            "id": "def-common.assertNever.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "x",
@@ -38,6 +128,7 @@
             ],
             "path": "packages/kbn-std/src/assert_never.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -46,7 +137,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncForEach",
+        "id": "def-common.asyncForEach",
         "type": "Function",
         "tags": [],
         "label": "asyncForEach",
@@ -62,10 +153,11 @@
         ],
         "path": "packages/kbn-std/src/iteration/for_each.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEach.$1",
+            "id": "def-common.asyncForEach.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -78,11 +170,12 @@
             ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEach.$2",
+            "id": "def-common.asyncForEach.$2",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -95,6 +188,7 @@
             ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -103,7 +197,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncForEachWithLimit",
+        "id": "def-common.asyncForEachWithLimit",
         "type": "Function",
         "tags": [],
         "label": "asyncForEachWithLimit",
@@ -119,10 +213,11 @@
         ],
         "path": "packages/kbn-std/src/iteration/for_each.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEachWithLimit.$1",
+            "id": "def-common.asyncForEachWithLimit.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -135,11 +230,12 @@
             ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEachWithLimit.$2",
+            "id": "def-common.asyncForEachWithLimit.$2",
             "type": "number",
             "tags": [],
             "label": "limit",
@@ -151,11 +247,12 @@
             ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEachWithLimit.$3",
+            "id": "def-common.asyncForEachWithLimit.$3",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -168,6 +265,7 @@
             ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -176,7 +274,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncMap",
+        "id": "def-common.asyncMap",
         "type": "Function",
         "tags": [],
         "label": "asyncMap",
@@ -192,10 +290,11 @@
         ],
         "path": "packages/kbn-std/src/iteration/map.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMap.$1",
+            "id": "def-common.asyncMap.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -208,11 +307,12 @@
             ],
             "path": "packages/kbn-std/src/iteration/map.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMap.$2",
+            "id": "def-common.asyncMap.$2",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -225,6 +325,7 @@
             ],
             "path": "packages/kbn-std/src/iteration/map.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -233,7 +334,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncMapWithLimit",
+        "id": "def-common.asyncMapWithLimit",
         "type": "Function",
         "tags": [],
         "label": "asyncMapWithLimit",
@@ -249,10 +350,11 @@
         ],
         "path": "packages/kbn-std/src/iteration/map.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMapWithLimit.$1",
+            "id": "def-common.asyncMapWithLimit.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -265,11 +367,12 @@
             ],
             "path": "packages/kbn-std/src/iteration/map.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMapWithLimit.$2",
+            "id": "def-common.asyncMapWithLimit.$2",
             "type": "number",
             "tags": [],
             "label": "limit",
@@ -281,11 +384,12 @@
             ],
             "path": "packages/kbn-std/src/iteration/map.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMapWithLimit.$3",
+            "id": "def-common.asyncMapWithLimit.$3",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -298,6 +402,7 @@
             ],
             "path": "packages/kbn-std/src/iteration/map.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -306,7 +411,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.deepFreeze",
+        "id": "def-common.deepFreeze",
         "type": "Function",
         "tags": [],
         "label": "deepFreeze",
@@ -315,15 +420,22 @@
         ],
         "signature": [
           "(object: T) => ",
-          "RecursiveReadonly",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursiveReadonly",
+            "text": "RecursiveReadonly"
+          },
           "<T>"
         ],
         "path": "packages/kbn-std/src/deep_freeze.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.deepFreeze.$1",
+            "id": "def-common.deepFreeze.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "object",
@@ -333,6 +445,7 @@
             ],
             "path": "packages/kbn-std/src/deep_freeze.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -341,7 +454,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.ensureNoUnsafeProperties",
+        "id": "def-common.ensureNoUnsafeProperties",
         "type": "Function",
         "tags": [],
         "label": "ensureNoUnsafeProperties",
@@ -351,10 +464,11 @@
         ],
         "path": "packages/kbn-std/src/ensure_no_unsafe_properties.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.ensureNoUnsafeProperties.$1",
+            "id": "def-common.ensureNoUnsafeProperties.$1",
             "type": "Any",
             "tags": [],
             "label": "obj",
@@ -364,6 +478,7 @@
             ],
             "path": "packages/kbn-std/src/ensure_no_unsafe_properties.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -372,7 +487,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -384,10 +499,11 @@
         ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -397,11 +513,12 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -411,6 +528,7 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -419,7 +537,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -429,10 +547,11 @@
         ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -442,11 +561,12 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -456,6 +576,7 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -464,7 +585,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -474,10 +595,11 @@
         ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -487,11 +609,12 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -501,6 +624,7 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -509,7 +633,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -519,10 +643,11 @@
         ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -532,11 +657,12 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -546,6 +672,7 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -554,7 +681,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -564,10 +691,11 @@
         ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -577,11 +705,12 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "path",
@@ -591,6 +720,7 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -599,7 +729,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -609,10 +739,11 @@
         ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -622,11 +753,12 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "path",
@@ -636,6 +768,7 @@
             ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -644,7 +777,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.getFlattenedObject",
+        "id": "def-common.getFlattenedObject",
         "type": "Function",
         "tags": [],
         "label": "getFlattenedObject",
@@ -656,10 +789,11 @@
         ],
         "path": "packages/kbn-std/src/get_flattened_object.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.getFlattenedObject.$1",
+            "id": "def-common.getFlattenedObject.$1",
             "type": "Object",
             "tags": [],
             "label": "rootValue",
@@ -669,6 +803,7 @@
             ],
             "path": "packages/kbn-std/src/get_flattened_object.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -677,7 +812,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.getUrlOrigin",
+        "id": "def-common.getUrlOrigin",
         "type": "Function",
         "tags": [],
         "label": "getUrlOrigin",
@@ -689,10 +824,11 @@
         ],
         "path": "packages/kbn-std/src/url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.getUrlOrigin.$1",
+            "id": "def-common.getUrlOrigin.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -702,6 +838,7 @@
             ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -710,7 +847,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.isPromise",
+        "id": "def-common.isPromise",
         "type": "Function",
         "tags": [],
         "label": "isPromise",
@@ -720,10 +857,11 @@
         ],
         "path": "packages/kbn-std/src/promise.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.isPromise.$1",
+            "id": "def-common.isPromise.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "maybePromise",
@@ -733,6 +871,7 @@
             ],
             "path": "packages/kbn-std/src/promise.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -741,7 +880,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.isRelativeUrl",
+        "id": "def-common.isRelativeUrl",
         "type": "Function",
         "tags": [],
         "label": "isRelativeUrl",
@@ -753,10 +892,11 @@
         ],
         "path": "packages/kbn-std/src/url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.isRelativeUrl.$1",
+            "id": "def-common.isRelativeUrl.$1",
             "type": "string",
             "tags": [],
             "label": "candidatePath",
@@ -766,6 +906,7 @@
             ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -774,7 +915,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.map$",
+        "id": "def-common.map$",
         "type": "Function",
         "tags": [],
         "label": "map$",
@@ -792,10 +933,11 @@
         ],
         "path": "packages/kbn-std/src/iteration/observable.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.map$.$1",
+            "id": "def-common.map$.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -808,11 +950,12 @@
             ],
             "path": "packages/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.map$.$2",
+            "id": "def-common.map$.$2",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -825,6 +968,7 @@
             ],
             "path": "packages/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -833,7 +977,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.mapToObject",
+        "id": "def-common.mapToObject",
         "type": "Function",
         "tags": [],
         "label": "mapToObject",
@@ -843,10 +987,11 @@
         ],
         "path": "packages/kbn-std/src/map_to_object.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapToObject.$1",
+            "id": "def-common.mapToObject.$1",
             "type": "Object",
             "tags": [],
             "label": "map",
@@ -856,6 +1001,7 @@
             ],
             "path": "packages/kbn-std/src/map_to_object.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -864,7 +1010,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.mapWithLimit$",
+        "id": "def-common.mapWithLimit$",
         "type": "Function",
         "tags": [],
         "label": "mapWithLimit$",
@@ -882,10 +1028,11 @@
         ],
         "path": "packages/kbn-std/src/iteration/observable.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapWithLimit$.$1",
+            "id": "def-common.mapWithLimit$.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -898,11 +1045,12 @@
             ],
             "path": "packages/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapWithLimit$.$2",
+            "id": "def-common.mapWithLimit$.$2",
             "type": "number",
             "tags": [],
             "label": "limit",
@@ -914,11 +1062,12 @@
             ],
             "path": "packages/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapWithLimit$.$3",
+            "id": "def-common.mapWithLimit$.$3",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -931,6 +1080,7 @@
             ],
             "path": "packages/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -939,7 +1089,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -951,10 +1101,11 @@
         ],
         "path": "packages/kbn-std/src/merge.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "baseObj",
@@ -964,11 +1115,12 @@
             ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "source1",
@@ -978,6 +1130,7 @@
             ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -986,7 +1139,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -996,10 +1149,11 @@
         ],
         "path": "packages/kbn-std/src/merge.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "baseObj",
@@ -1009,11 +1163,12 @@
             ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj",
@@ -1023,11 +1178,12 @@
             ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$3",
+            "id": "def-common.merge.$3",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj2",
@@ -1037,6 +1193,7 @@
             ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1045,7 +1202,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -1055,10 +1212,11 @@
         ],
         "path": "packages/kbn-std/src/merge.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "baseObj",
@@ -1068,11 +1226,12 @@
             ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj",
@@ -1082,11 +1241,12 @@
             ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$3",
+            "id": "def-common.merge.$3",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj2",
@@ -1096,6 +1256,7 @@
             ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1104,7 +1265,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -1114,10 +1275,11 @@
         ],
         "path": "packages/kbn-std/src/merge.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Object",
             "tags": [],
             "label": "baseObj",
@@ -1127,11 +1289,12 @@
             ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Array",
             "tags": [],
             "label": "sources",
@@ -1141,6 +1304,7 @@
             ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1149,7 +1313,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.modifyUrl",
+        "id": "def-common.modifyUrl",
         "type": "Function",
         "tags": [],
         "label": "modifyUrl",
@@ -1160,27 +1324,28 @@
           "(url: string, urlModifier: (urlParts: ",
           {
             "pluginId": "@kbn/std",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnStdPluginApi",
-            "section": "def-server.URLMeaningfulParts",
+            "section": "def-common.URLMeaningfulParts",
             "text": "URLMeaningfulParts"
           },
           ") => void | Partial<",
           {
             "pluginId": "@kbn/std",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnStdPluginApi",
-            "section": "def-server.URLMeaningfulParts",
+            "section": "def-common.URLMeaningfulParts",
             "text": "URLMeaningfulParts"
           },
           ">) => string"
         ],
         "path": "packages/kbn-std/src/url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.modifyUrl.$1",
+            "id": "def-common.modifyUrl.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -1192,11 +1357,12 @@
             ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.modifyUrl.$2",
+            "id": "def-common.modifyUrl.$2",
             "type": "Function",
             "tags": [],
             "label": "urlModifier",
@@ -1207,23 +1373,24 @@
               "(urlParts: ",
               {
                 "pluginId": "@kbn/std",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnStdPluginApi",
-                "section": "def-server.URLMeaningfulParts",
+                "section": "def-common.URLMeaningfulParts",
                 "text": "URLMeaningfulParts"
               },
               ") => void | Partial<",
               {
                 "pluginId": "@kbn/std",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnStdPluginApi",
-                "section": "def-server.URLMeaningfulParts",
+                "section": "def-common.URLMeaningfulParts",
                 "text": "URLMeaningfulParts"
               },
               ">"
             ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1234,7 +1401,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.pick",
+        "id": "def-common.pick",
         "type": "Function",
         "tags": [],
         "label": "pick",
@@ -1244,10 +1411,11 @@
         ],
         "path": "packages/kbn-std/src/pick.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.pick.$1",
+            "id": "def-common.pick.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -1257,11 +1425,12 @@
             ],
             "path": "packages/kbn-std/src/pick.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.pick.$2",
+            "id": "def-common.pick.$2",
             "type": "Object",
             "tags": [],
             "label": "keys",
@@ -1271,6 +1440,7 @@
             ],
             "path": "packages/kbn-std/src/pick.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1279,7 +1449,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.unset",
+        "id": "def-common.unset",
         "type": "Function",
         "tags": [],
         "label": "unset",
@@ -1291,10 +1461,11 @@
         ],
         "path": "packages/kbn-std/src/unset.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.unset.$1",
+            "id": "def-common.unset.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -1304,11 +1475,12 @@
             ],
             "path": "packages/kbn-std/src/unset.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.unset.$2",
+            "id": "def-common.unset.$2",
             "type": "string",
             "tags": [],
             "label": "atPath",
@@ -1318,6 +1490,7 @@
             ],
             "path": "packages/kbn-std/src/unset.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1326,7 +1499,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.withTimeout",
+        "id": "def-common.withTimeout",
         "type": "Function",
         "tags": [],
         "label": "withTimeout",
@@ -1336,20 +1509,22 @@
         ],
         "path": "packages/kbn-std/src/promise.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.withTimeout.$1",
+            "id": "def-common.withTimeout.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  promise,\n  timeoutMs,\n}",
             "description": [],
             "path": "packages/kbn-std/src/promise.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/std",
-                "id": "def-server.withTimeout.$1.promise",
+                "id": "def-common.withTimeout.$1.promise",
                 "type": "Object",
                 "tags": [],
                 "label": "promise",
@@ -1358,17 +1533,19 @@
                   "Promise<T>"
                 ],
                 "path": "packages/kbn-std/src/promise.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/std",
-                "id": "def-server.withTimeout.$1.timeoutMs",
+                "id": "def-common.withTimeout.$1.timeoutMs",
                 "type": "number",
                 "tags": [],
                 "label": "timeoutMs",
                 "description": [],
                 "path": "packages/kbn-std/src/promise.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1380,7 +1557,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.URLMeaningfulParts",
+        "id": "def-common.URLMeaningfulParts",
         "type": "Interface",
         "tags": [],
         "label": "URLMeaningfulParts",
@@ -1389,10 +1566,11 @@
         ],
         "path": "packages/kbn-std/src/url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.auth",
+            "id": "def-common.URLMeaningfulParts.auth",
             "type": "CompoundType",
             "tags": [],
             "label": "auth",
@@ -1401,11 +1579,12 @@
               "string | null | undefined"
             ],
             "path": "packages/kbn-std/src/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.hash",
+            "id": "def-common.URLMeaningfulParts.hash",
             "type": "CompoundType",
             "tags": [],
             "label": "hash",
@@ -1414,11 +1593,12 @@
               "string | null | undefined"
             ],
             "path": "packages/kbn-std/src/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.hostname",
+            "id": "def-common.URLMeaningfulParts.hostname",
             "type": "CompoundType",
             "tags": [],
             "label": "hostname",
@@ -1427,11 +1607,12 @@
               "string | null | undefined"
             ],
             "path": "packages/kbn-std/src/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.pathname",
+            "id": "def-common.URLMeaningfulParts.pathname",
             "type": "CompoundType",
             "tags": [],
             "label": "pathname",
@@ -1440,11 +1621,12 @@
               "string | null | undefined"
             ],
             "path": "packages/kbn-std/src/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.protocol",
+            "id": "def-common.URLMeaningfulParts.protocol",
             "type": "CompoundType",
             "tags": [],
             "label": "protocol",
@@ -1453,11 +1635,12 @@
               "string | null | undefined"
             ],
             "path": "packages/kbn-std/src/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.slashes",
+            "id": "def-common.URLMeaningfulParts.slashes",
             "type": "CompoundType",
             "tags": [],
             "label": "slashes",
@@ -1466,11 +1649,12 @@
               "boolean | null | undefined"
             ],
             "path": "packages/kbn-std/src/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.port",
+            "id": "def-common.URLMeaningfulParts.port",
             "type": "CompoundType",
             "tags": [],
             "label": "port",
@@ -1479,11 +1663,12 @@
               "string | null | undefined"
             ],
             "path": "packages/kbn-std/src/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.query",
+            "id": "def-common.URLMeaningfulParts.query",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -1493,7 +1678,8 @@
               "<string>"
             ],
             "path": "packages/kbn-std/src/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1503,7 +1689,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.Freezable",
+        "id": "def-common.Freezable",
         "type": "Type",
         "tags": [],
         "label": "Freezable",
@@ -1513,17 +1699,10 @@
         ],
         "path": "packages/kbn-std/src/deep_freeze.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

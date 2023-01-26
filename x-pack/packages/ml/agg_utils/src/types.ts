@@ -5,22 +5,7 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-
-// TODO Temporary type definition until we can import from `@kbn/core`.
-// Copied from src/core/server/elasticsearch/client/types.ts
-// as these types aren't part of any package yet. Once they are, remove this completely
-
-/**
- * Client used to query the elasticsearch cluster.
- * @deprecated At some point use the one from src/core/server/elasticsearch/client/types.ts when it is made into a package. If it never is, then keep using this one.
- * @public
- */
-export type ElasticsearchClient = Omit<
-  Client,
-  'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
->;
 
 interface FieldAggCardinality {
   field: string;
@@ -77,10 +62,13 @@ export interface HistogramField {
 export interface ChangePoint extends FieldValuePair {
   doc_count: number;
   bg_count: number;
+  total_doc_count: number;
+  total_bg_count: number;
   score: number;
   pValue: number | null;
   normalizedScore: number;
   histogram?: ChangePointHistogramItem[];
+  unique?: boolean;
 }
 
 /**
@@ -98,4 +86,27 @@ export interface ChangePointHistogramItem {
  */
 export interface ChangePointHistogram extends FieldValuePair {
   histogram: ChangePointHistogramItem[];
+}
+
+/**
+ * Change point histogram data for a group of field/value pairs.
+ */
+export interface ChangePointGroupHistogram {
+  id: string;
+  histogram: ChangePointHistogramItem[];
+}
+
+interface ChangePointGroupItem extends FieldValuePair {
+  duplicate?: boolean;
+}
+
+/**
+ * Tree leaves
+ */
+export interface ChangePointGroup {
+  id: string;
+  group: ChangePointGroupItem[];
+  docCount: number;
+  pValue: number | null;
+  histogram?: ChangePointHistogramItem[];
 }

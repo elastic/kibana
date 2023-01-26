@@ -14,6 +14,7 @@ import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
+import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -21,6 +22,7 @@ let ruleTypeRegistryParams: ConstructorOptions;
 
 const taskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
+const alertsService = alertsServiceMock.create();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -451,6 +453,55 @@ describe('Create Lifecycle', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(`"Rule type \\"test\\" is already registered."`);
     });
+
+    test('should initialize alerts as data resources if AlertsService is defined and alert definition is registered', () => {
+      const registry = new RuleTypeRegistry({ ...ruleTypeRegistryParams, alertsService });
+      registry.register({
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        producer: 'alerts',
+        alerts: {
+          context: 'test',
+          fieldMap: { field: { type: 'keyword', required: false } },
+        },
+      });
+
+      expect(alertsService.register).toHaveBeenCalledWith({
+        context: 'test',
+        fieldMap: { field: { type: 'keyword', required: false } },
+      });
+    });
+
+    test('should not initialize alerts as data resources if no alert definition is registered', () => {
+      const registry = new RuleTypeRegistry({ ...ruleTypeRegistryParams, alertsService });
+      registry.register({
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        producer: 'alerts',
+      });
+
+      expect(alertsService.register).not.toHaveBeenCalled();
+    });
   });
 
   describe('get()', () => {
@@ -611,6 +662,37 @@ describe('Create Lifecycle', () => {
     });
   });
 
+  describe('getAllTypes()', () => {
+    test('should return empty when nothing is registered', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      const result = registry.getAllTypes();
+      expect(result).toEqual([]);
+    });
+
+    test('should return list of registered type ids', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        doesSetRecoveryContext: false,
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        producer: 'alerts',
+      });
+      const result = registry.getAllTypes();
+      expect(result).toEqual(['test']);
+    });
+  });
+
   describe('ensureRuleTypeEnabled', () => {
     let ruleTypeRegistry: RuleTypeRegistry;
 
@@ -654,15 +736,17 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
   id: ActionGroupIds,
   context: string,
   state: string
-): RuleType<never, never, never, never, never, ActionGroupIds> {
-  const baseAlert: RuleType<never, never, never, never, never, ActionGroupIds> = {
+): RuleType<never, never, {}, never, never, ActionGroupIds> {
+  const baseAlert: RuleType<never, never, {}, never, never, ActionGroupIds> = {
     id,
     name: `${id}-name`,
     actionGroups: [],
     defaultActionGroupId: id,
     isExportable: true,
     minimumLicenseRequired: 'basic',
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'alerts',
   };
 

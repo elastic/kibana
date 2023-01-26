@@ -17,12 +17,13 @@ import {
   transformUpdateResponseToExternalModel,
 } from './transform';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { ConnectorTypes } from '../../../common/api';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
+import { ESCaseSeverity, ESCaseStatus } from './types';
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {
@@ -197,6 +198,49 @@ describe('case transforms', () => {
         }
       `);
     });
+
+    it.each([
+      [ESCaseSeverity.LOW, CaseSeverity.LOW],
+      [ESCaseSeverity.MEDIUM, CaseSeverity.MEDIUM],
+      [ESCaseSeverity.HIGH, CaseSeverity.HIGH],
+      [ESCaseSeverity.CRITICAL, CaseSeverity.CRITICAL],
+    ])(
+      'properly converts "%s" severity to corresponding external value "%s"',
+      (internalSeverityValue, expectedSeverityValue) => {
+        const transformedResponse = transformUpdateResponseToExternalModel({
+          type: 'a',
+          id: '1',
+          attributes: {
+            severity: internalSeverityValue,
+          },
+          references: undefined,
+        });
+
+        expect(transformedResponse.attributes).toHaveProperty('severity');
+        expect(transformedResponse.attributes.severity).toBe(expectedSeverityValue);
+      }
+    );
+
+    it.each([
+      [ESCaseStatus.OPEN, CaseStatuses.open],
+      [ESCaseStatus.IN_PROGRESS, CaseStatuses['in-progress']],
+      [ESCaseStatus.CLOSED, CaseStatuses.closed],
+    ])(
+      'properly converts "%s" status to corresponding ES Value "%s"',
+      (internalStatusValue, expectedStatusValue) => {
+        const transformedAttributes = transformUpdateResponseToExternalModel({
+          type: 'a',
+          id: '1',
+          attributes: {
+            status: internalStatusValue,
+          },
+          references: undefined,
+        });
+
+        expect(transformedAttributes.attributes).toHaveProperty('status');
+        expect(transformedAttributes.attributes.status).toBe(expectedStatusValue);
+      }
+    );
   });
 
   describe('transformAttributesToESModel', () => {
@@ -341,6 +385,51 @@ describe('case transforms', () => {
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
       expect(transformedAttributes.referenceHandler.build()).toEqual([]);
     });
+
+    it.each([
+      [CaseSeverity.LOW, ESCaseSeverity.LOW],
+      [CaseSeverity.MEDIUM, ESCaseSeverity.MEDIUM],
+      [CaseSeverity.HIGH, ESCaseSeverity.HIGH],
+      [CaseSeverity.CRITICAL, ESCaseSeverity.CRITICAL],
+    ])(
+      'properly converts "%s" severity to corresponding ES Value "%s"',
+      (externalSeverityValue, expectedSeverityValue) => {
+        const transformedAttributes = transformAttributesToESModel({
+          severity: externalSeverityValue,
+        });
+
+        expect(transformedAttributes.attributes).toHaveProperty('severity');
+        expect(transformedAttributes.attributes.severity).toBe(expectedSeverityValue);
+      }
+    );
+
+    it('does not return the severity when it is undefined', () => {
+      expect(transformAttributesToESModel({ severity: undefined }).attributes).not.toHaveProperty(
+        'severity'
+      );
+    });
+
+    it.each([
+      [CaseStatuses.open, ESCaseStatus.OPEN],
+      [CaseStatuses['in-progress'], ESCaseStatus.IN_PROGRESS],
+      [CaseStatuses.closed, ESCaseStatus.CLOSED],
+    ])(
+      'properly converts "%s" status to corresponding ES Value "%s"',
+      (externalStatusValue, expectedStatusValue) => {
+        const transformedAttributes = transformAttributesToESModel({
+          status: externalStatusValue,
+        });
+
+        expect(transformedAttributes.attributes).toHaveProperty('status');
+        expect(transformedAttributes.attributes.status).toBe(expectedStatusValue);
+      }
+    );
+
+    it('does not return the status when it is undefined', () => {
+      expect(transformAttributesToESModel({ status: undefined }).attributes).not.toHaveProperty(
+        'status'
+      );
+    });
   });
 
   describe('transformSavedObjectToExternalModel', () => {
@@ -409,6 +498,61 @@ describe('case transforms', () => {
           },
         }
       `);
+    });
+
+    it.each([
+      [ESCaseSeverity.LOW, CaseSeverity.LOW],
+      [ESCaseSeverity.MEDIUM, CaseSeverity.MEDIUM],
+      [ESCaseSeverity.HIGH, CaseSeverity.HIGH],
+      [ESCaseSeverity.CRITICAL, CaseSeverity.CRITICAL],
+    ])(
+      'properly converts "%s" severity to corresponding external value "%s"',
+      (internalSeverityValue, expectedSeverityValue) => {
+        const caseSO = createCaseSavedObjectResponse({
+          overrides: { severity: internalSeverityValue },
+        });
+
+        expect(caseSO.attributes).toHaveProperty('severity');
+        expect(caseSO.attributes.severity).toBe(internalSeverityValue);
+
+        const transformedSO = transformSavedObjectToExternalModel(caseSO);
+
+        expect(transformedSO.attributes).toHaveProperty('severity');
+        expect(transformedSO.attributes.severity).toBe(expectedSeverityValue);
+      }
+    );
+
+    it('does not return the severity when it is undefined', () => {
+      expect(transformAttributesToESModel({ severity: undefined }).attributes).not.toHaveProperty(
+        'severity'
+      );
+    });
+
+    it.each([
+      [ESCaseStatus.OPEN, CaseStatuses.open],
+      [ESCaseStatus.IN_PROGRESS, CaseStatuses['in-progress']],
+      [ESCaseStatus.CLOSED, CaseStatuses.closed],
+    ])(
+      'properly converts "%s" status to corresponding external value "%s"',
+      (internalStatusValue, expectedStatusValue) => {
+        const caseSO = createCaseSavedObjectResponse({
+          overrides: { status: internalStatusValue },
+        });
+
+        expect(caseSO.attributes).toHaveProperty('status');
+        expect(caseSO.attributes.status).toBe(internalStatusValue);
+
+        const transformedSO = transformSavedObjectToExternalModel(caseSO);
+
+        expect(transformedSO.attributes).toHaveProperty('status');
+        expect(transformedSO.attributes.status).toBe(expectedStatusValue);
+      }
+    );
+
+    it('does not return the status when it is undefined', () => {
+      expect(transformAttributesToESModel({ status: undefined }).attributes).not.toHaveProperty(
+        'status'
+      );
     });
   });
 });

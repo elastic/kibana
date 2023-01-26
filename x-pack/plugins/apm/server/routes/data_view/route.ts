@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { createStaticDataView } from './create_static_data_view';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import {
+  CreateDataViewResponse,
+  createStaticDataView,
+} from './create_static_data_view';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const staticDataViewRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/data_view/static',
   options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<{ dataView: DataView | undefined }> => {
-    const setup = await setupRequest(resources);
-    const { context, plugins, request, config } = resources;
-
+  handler: async (resources): CreateDataViewResponse => {
+    const { context, plugins, request } = resources;
+    const apmEventClient = await getApmEventClient(resources);
     const coreContext = await context.core;
+
     const dataViewStart = await plugins.dataViews.start();
     const dataViewService = await dataViewStart.dataViewsServiceFactory(
       coreContext.savedObjects.client,
@@ -28,13 +30,13 @@ const staticDataViewRoute = createApmServerRoute({
       true
     );
 
-    const dataView = await createStaticDataView({
+    const res = await createStaticDataView({
       dataViewService,
-      config,
-      setup,
+      resources,
+      apmEventClient,
     });
 
-    return { dataView };
+    return res;
   },
 });
 

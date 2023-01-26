@@ -23,6 +23,7 @@
         ],
         "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "infra",
@@ -42,6 +43,7 @@
             ],
             "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -69,6 +71,7 @@
         ],
         "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "infra",
@@ -81,7 +84,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -97,6 +101,7 @@
         "description": [],
         "path": "x-pack/plugins/infra/public/lib/lib.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -113,6 +118,7 @@
         ],
         "path": "x-pack/plugins/infra/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -126,6 +132,7 @@
         "description": [],
         "path": "x-pack/plugins/infra/common/formatters/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "infra",
@@ -139,6 +146,7 @@
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -149,7 +157,8 @@
                 "label": "val",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/number.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -167,6 +176,7 @@
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -177,7 +187,8 @@
                 "label": "bytes",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -195,6 +206,7 @@
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -205,7 +217,8 @@
                 "label": "bytes",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -223,6 +236,7 @@
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -233,7 +247,8 @@
                 "label": "bytes",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -249,6 +264,7 @@
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -259,7 +275,8 @@
                 "label": "val",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/percent.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -275,6 +292,7 @@
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -285,7 +303,8 @@
                 "label": "val",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/high_precision.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -302,6 +321,7 @@
       "description": [],
       "path": "x-pack/plugins/infra/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "infra",
@@ -314,7 +334,22 @@
             "LogViewsServiceStart"
           ],
           "path": "x-pack/plugins/infra/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.telemetry",
+          "type": "Object",
+          "tags": [],
+          "label": "telemetry",
+          "description": [],
+          "signature": [
+            "ITelemetryClient"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "infra",
@@ -332,6 +367,7 @@
           ],
           "path": "x-pack/plugins/infra/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "infra",
@@ -348,6 +384,7 @@
               ],
               "path": "x-pack/plugins/infra/public/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -369,6 +406,7 @@
           ],
           "path": "x-pack/plugins/infra/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "infra",
@@ -385,6 +423,7 @@
               ],
               "path": "x-pack/plugins/infra/public/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -406,6 +445,7 @@
           ],
           "path": "x-pack/plugins/infra/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "infra",
@@ -422,6 +462,7 @@
               ],
               "path": "x-pack/plugins/infra/public/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -445,6 +486,7 @@
         "description": [],
         "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "infra",
@@ -457,7 +499,8 @@
               "{ inventory_threshold: { group_by_page_size: number; }; metric_threshold: { group_by_page_size: number; }; }"
             ],
             "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "infra",
@@ -470,7 +513,8 @@
               "{ compositeSize: number; }"
             ],
             "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "infra",
@@ -483,7 +527,8 @@
               "{ default?: { fields?: { message?: string[] | undefined; } | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -505,6 +550,7 @@
         ],
         "path": "x-pack/plugins/infra/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -518,6 +564,7 @@
       "description": [],
       "path": "x-pack/plugins/infra/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "infra",
@@ -533,6 +580,7 @@
           ],
           "path": "x-pack/plugins/infra/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "infra",
@@ -546,6 +594,7 @@
               ],
               "path": "x-pack/plugins/infra/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -560,6 +609,7 @@
               ],
               "path": "x-pack/plugins/infra/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -576,7 +626,8 @@
             "LogViewsServiceSetup"
           ],
           "path": "x-pack/plugins/infra/server/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -591,6 +642,7 @@
       "description": [],
       "path": "x-pack/plugins/infra/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "infra",
@@ -603,7 +655,8 @@
             "LogViewsServiceStart"
           ],
           "path": "x-pack/plugins/infra/server/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "infra",
@@ -614,11 +667,18 @@
           "description": [],
           "signature": [
             "(savedObjectsClient: ",
-            "SavedObjectsClientContract",
+            {
+              "pluginId": "@kbn/core-saved-objects-api-server",
+              "scope": "common",
+              "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+              "section": "def-common.SavedObjectsClientContract",
+              "text": "SavedObjectsClientContract"
+            },
             ", sourceId?: string | undefined) => Promise<string>"
           ],
           "path": "x-pack/plugins/infra/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "infra",
@@ -628,10 +688,17 @@
               "label": "savedObjectsClient",
               "description": [],
               "signature": [
-                "SavedObjectsClientContract"
+                {
+                  "pluginId": "@kbn/core-saved-objects-api-server",
+                  "scope": "common",
+                  "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                  "section": "def-common.SavedObjectsClientContract",
+                  "text": "SavedObjectsClientContract"
+                }
               ],
               "path": "x-pack/plugins/infra/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -646,6 +713,7 @@
               ],
               "path": "x-pack/plugins/infra/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": false
             }
           ],

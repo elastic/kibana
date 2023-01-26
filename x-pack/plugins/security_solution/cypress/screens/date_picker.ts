@@ -30,8 +30,5 @@ export const SHOW_DATES_BUTTON = '[data-test-subj="superDatePickerShowDatesButto
 
 export const DATE_PICKER_SHOW_DATE_POPOVER_BUTTON = `${GLOBAL_FILTERS_CONTAINER} ${SHOW_DATES_BUTTON}`;
 
-export const DATE_PICKER_RELATIVE_DATE_INPUT_UNIT_SELECTOR =
-  '[data-test-subj="superDatePickerRelativeDateInputUnitSelector"]';
-
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE =
   '[data-test-subj="timeline-date-picker-container"] [data-test-subj="superDatePickerstartDatePopoverButton"]';

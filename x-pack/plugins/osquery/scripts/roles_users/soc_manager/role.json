@@ -15,12 +15,17 @@
   "kibana": [
     {
       "feature": {
-        "discover": ["read"],
+        "discover": ["all"],
         "infrastructure": ["read"],
+        "indexPatterns": ["all"],
+        "observabilityCases": ["all"],
+        "securitySolutionCases": ["all"],
         "ml": ["all"],
         "siem": ["all"],
+        "savedObjectsManagement": ["all"],
         "osquery": ["all"],
-        "visualize": ["read"]
+        "visualize": ["read"],
+        "actions": ["all"]
       },
       "spaces": ["*"]
     }

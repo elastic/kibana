@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-node-server",
-        "id": "def-server.NodeInfo",
+        "id": "def-common.NodeInfo",
         "type": "Interface",
         "tags": [],
         "label": "NodeInfo",
@@ -23,10 +31,11 @@
         ],
         "path": "packages/core/node/core-node-server/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server",
-            "id": "def-server.NodeInfo.roles",
+            "id": "def-common.NodeInfo.roles",
             "type": "Object",
             "tags": [],
             "label": "roles",
@@ -36,21 +45,22 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-node-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreNodeServerPluginApi",
-                "section": "def-server.NodeRoles",
+                "section": "def-common.NodeRoles",
                 "text": "NodeRoles"
               }
             ],
             "path": "packages/core/node/core-node-server/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-node-server",
-        "id": "def-server.NodeRoles",
+        "id": "def-common.NodeRoles",
         "type": "Interface",
         "tags": [],
         "label": "NodeRoles",
@@ -59,10 +69,11 @@
         ],
         "path": "packages/core/node/core-node-server/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server",
-            "id": "def-server.NodeRoles.backgroundTasks",
+            "id": "def-common.NodeRoles.backgroundTasks",
             "type": "boolean",
             "tags": [],
             "label": "backgroundTasks",
@@ -70,11 +81,12 @@
               "\nThe backgroundTasks role includes operations which don't involve\nresponding to incoming http traffic from the UI."
             ],
             "path": "packages/core/node/core-node-server/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-node-server",
-            "id": "def-server.NodeRoles.ui",
+            "id": "def-common.NodeRoles.ui",
             "type": "boolean",
             "tags": [],
             "label": "ui",
@@ -82,20 +94,13 @@
               "\nThe ui role covers any operations that need to occur in order\nto handle http traffic from the browser."
             ],
             "path": "packages/core/node/core-node-server/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

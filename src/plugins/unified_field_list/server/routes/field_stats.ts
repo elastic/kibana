@@ -57,7 +57,7 @@ export async function initFieldStatsRoute(setup: CoreSetup<PluginStart>) {
           throw new Error(`Field {fieldName} not found in data view ${dataView.title}`);
         }
 
-        const searchHandler: SearchHandler = async (aggs) => {
+        const searchHandler: SearchHandler = async (body) => {
           const result = await requestClient.search(
             buildSearchParams({
               dataViewPattern: dataView.title,
@@ -66,7 +66,7 @@ export async function initFieldStatsRoute(setup: CoreSetup<PluginStart>) {
               toDate,
               dslQuery,
               runtimeMappings: dataView.getRuntimeMappings(),
-              aggs,
+              ...body,
             })
           );
           return result;
@@ -74,6 +74,7 @@ export async function initFieldStatsRoute(setup: CoreSetup<PluginStart>) {
 
         const stats = await fetchAndCalculateFieldStats({
           searchHandler,
+          dataView,
           field,
           fromDate,
           toDate,

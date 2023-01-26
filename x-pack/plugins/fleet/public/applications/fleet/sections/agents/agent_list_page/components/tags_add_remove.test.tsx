@@ -226,6 +226,30 @@ describe('TagsAddRemove', () => {
     );
   });
 
+  it('should add to selected tags on add if action not completed immediately', async () => {
+    mockBulkUpdateTags.mockImplementation((agents, tagsToAdd, tagsToRemove, onSuccess) => {
+      onSuccess(false);
+    });
+    const result = renderComponent(undefined, '');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag2'));
+
+    expect(result.getByTitle('tag2').getAttribute('aria-checked')).toEqual('true');
+  });
+
+  it('should remove from selected tags on remove if action not completed immediately', async () => {
+    mockBulkUpdateTags.mockImplementation((agents, tagsToAdd, tagsToRemove, onSuccess) => {
+      onSuccess(false);
+    });
+    const result = renderComponent(undefined, '');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag1'));
+
+    expect(result.getByTitle('tag1').getAttribute('aria-checked')).toEqual('false');
+  });
+
   it('should add new tag when not found in search and button clicked - bulk selection', () => {
     const result = renderComponent(undefined, 'query');
     const searchInput = result.getByRole('combobox');
@@ -246,6 +270,77 @@ describe('TagsAddRemove', () => {
     );
   });
 
+  it('should add new tag twice quickly when not found in search and button clicked - bulk selection', () => {
+    mockBulkUpdateTags.mockImplementation((agents, tagsToAdd, tagsToRemove, onSuccess) =>
+      onSuccess(false)
+    );
+
+    const result = renderComponent(undefined, 'query');
+    const searchInput = result.getByRole('combobox');
+
+    fireEvent.input(searchInput, {
+      target: { value: 'newTag' },
+    });
+
+    fireEvent.click(result.getAllByText('Create a new tag "newTag"')[0].closest('button')!);
+
+    fireEvent.input(searchInput, {
+      target: { value: 'newTag2' },
+    });
+
+    fireEvent.click(result.getAllByText('Create a new tag "newTag2"')[0].closest('button')!);
+
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      'query',
+      ['newTag'],
+      [],
+      expect.anything(),
+      'Tag created',
+      'Tag creation failed'
+    );
+
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      'query',
+      ['newTag2'],
+      [],
+      expect.anything(),
+      'Tag created',
+      'Tag creation failed'
+    );
+  });
+
+  it('should remove tags twice quickly on bulk selection', () => {
+    selectedTags = ['tag1', 'tag2'];
+    mockBulkUpdateTags.mockImplementation((agents, tagsToAdd, tagsToRemove, onSuccess) =>
+      onSuccess(false)
+    );
+
+    const result = renderComponent(undefined, '');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag1'));
+
+    fireEvent.click(getTag('tag2'));
+
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      '',
+      [],
+      ['tag1'],
+      expect.anything(),
+      undefined,
+      undefined
+    );
+
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      '',
+      [],
+      ['tag2'],
+      expect.anything(),
+      undefined,
+      undefined
+    );
+  });
+
   it('should make tag options button visible on mouse enter', async () => {
     const result = renderComponent('agent1');
 
@@ -256,5 +351,40 @@ describe('TagsAddRemove', () => {
     fireEvent.mouseLeave(result.getByText('tag1').closest('.euiFlexGroup')!);
 
     expect(result.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('should remove from selected and all tags on delete if action not completed immediately', async () => {
+    mockBulkUpdateTags.mockImplementation((agents, tagsToAdd, tagsToRemove, onSuccess) => {
+      onSuccess(false);
+    });
+    const result = renderComponent('agent1');
+    fireEvent.mouseEnter(result.getByText('tag1').closest('.euiFlexGroup')!);
+
+    fireEvent.click(result.getByRole('button'));
+
+    fireEvent.click(result.getByText('Delete tag').closest('button')!);
+
+    expect(result.queryByTitle('tag1')).toBeNull();
+  });
+
+  it('should update selected and all tags on rename if action not completed immediately', async () => {
+    mockBulkUpdateTags.mockImplementation((agents, tagsToAdd, tagsToRemove, onSuccess) => {
+      onSuccess(false);
+    });
+    const result = renderComponent('agent1');
+    fireEvent.mouseEnter(result.getByText('tag1').closest('.euiFlexGroup')!);
+
+    fireEvent.click(result.getByRole('button'));
+
+    const input = result.getByDisplayValue('tag1');
+    fireEvent.input(input, {
+      target: { value: 'newName' },
+    });
+    fireEvent.keyDown(input, {
+      key: 'Enter',
+    });
+
+    expect(result.queryByTitle('tag1')).toBeNull();
+    expect(result.getByText('newName')).toBeInTheDocument();
   });
 });

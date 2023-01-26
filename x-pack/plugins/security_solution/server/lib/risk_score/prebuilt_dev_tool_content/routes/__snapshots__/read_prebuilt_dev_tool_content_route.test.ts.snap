@@ -1,0 +1,173 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`readPrebuiltDevToolContentRoute should read content from "enable_host_risk_score" template 1`] = `
+"# Click the run button of each step to enable the module
+# Upload scripts
+# 1. Script to assign risk level based on risk score
+PUT _scripts/ml_hostriskscore_levels_script_default
+{
+  \\"script\\": {
+    \\"lang\\": \\"painless\\",
+    \\"source\\": \\"double risk_score = (def)ctx.getByPath(params.risk_score);\\\\nif (risk_score < 20) {\\\\n    ctx['host']['risk']['calculated_level'] = 'Unknown'\\\\n}\\\\nelse if (risk_score >= 20 && risk_score < 40) {\\\\n    ctx['host']['risk']['calculated_level'] = 'Low'\\\\n}\\\\nelse if (risk_score >= 40 && risk_score < 70) {\\\\n    ctx['host']['risk']['calculated_level'] = 'Moderate'\\\\n}\\\\nelse if (risk_score >= 70 && risk_score < 90) {\\\\n    ctx['host']['risk']['calculated_level'] = 'High'\\\\n}\\\\nelse if (risk_score >= 90) {\\\\n    ctx['host']['risk']['calculated_level'] = 'Critical'\\\\n}\\"
+  }
+}
+
+# 2. Script to setup initial state for the Host Risk Score scripted metric aggregation
+PUT _scripts/ml_hostriskscore_init_script_default
+{
+  \\"script\\": {
+    \\"lang\\": \\"painless\\",
+    \\"source\\": \\"state.rule_risk_stats = new HashMap();\\\\nstate.host_variant_set = false;\\\\nstate.host_variant = new String();\\\\nstate.tactic_ids = new HashSet();\\"
+  }
+}
+
+# 3. Map script for the Host Risk Score transform
+PUT _scripts/ml_hostriskscore_map_script_default
+{
+  \\"script\\": {
+    \\"lang\\": \\"painless\\",
+    \\"source\\": \\"// Get the host variant\\\\nif (state.host_variant_set == false) {\\\\n    if (doc.containsKey(\\\\\\"host.os.full\\\\\\") && doc[\\\\\\"host.os.full\\\\\\"].size() != 0) {\\\\n        state.host_variant = doc[\\\\\\"host.os.full\\\\\\"].value;\\\\n        state.host_variant_set = true;\\\\n    }\\\\n}\\\\n// Aggregate all the tactics seen on the host\\\\nif (doc.containsKey(\\\\\\"signal.rule.threat.tactic.id\\\\\\") && doc[\\\\\\"signal.rule.threat.tactic.id\\\\\\"].size() != 0) {\\\\n    state.tactic_ids.add(doc[\\\\\\"signal.rule.threat.tactic.id\\\\\\"].value);\\\\n}\\\\n// Get running sum of time-decayed risk score per rule name per shard\\\\nString rule_name = doc[\\\\\\"signal.rule.name\\\\\\"].value;\\\\ndef stats = state.rule_risk_stats.getOrDefault(rule_name, [0.0,\\\\\\"\\\\\\",false]);\\\\nint time_diff = (int)((System.currentTimeMillis() - doc[\\\\\\"@timestamp\\\\\\"].value.toInstant().toEpochMilli()) / (1000.0 * 60.0 * 60.0));\\\\ndouble risk_derate = Math.min(1, Math.exp((params.lookback_time - time_diff) / params.time_decay_constant));\\\\nstats[0] = Math.max(stats[0], doc[\\\\\\"signal.rule.risk_score\\\\\\"].value * risk_derate);\\\\nif (stats[2] == false) {\\\\n    stats[1] = doc[\\\\\\"kibana.alert.rule.uuid\\\\\\"].value;\\\\n    stats[2] = true;\\\\n}\\\\nstate.rule_risk_stats.put(rule_name, stats);\\"
+  }
+}
+
+# 4. Reduce script for the Host Risk Score transform
+PUT _scripts/ml_hostriskscore_reduce_script_default
+{
+  \\"script\\": {
+    \\"lang\\": \\"painless\\",
+    \\"source\\": \\"// Consolidating time decayed risks and tactics from across all shards\\\\nMap total_risk_stats = new HashMap();\\\\nString host_variant = new String();\\\\ndef tactic_ids = new HashSet();\\\\nfor (state in states) {\\\\n    for (key in state.rule_risk_stats.keySet()) {\\\\n        def rule_stats = state.rule_risk_stats.get(key);\\\\n        def stats = total_risk_stats.getOrDefault(key, [0.0,\\\\\\"\\\\\\",false]);\\\\n        stats[0] = Math.max(stats[0], rule_stats[0]);\\\\n        if (stats[2] == false) {\\\\n            stats[1] = rule_stats[1];\\\\n            stats[2] = true;\\\\n        } \\\\n        total_risk_stats.put(key, stats);\\\\n    }\\\\n    if (host_variant.length() == 0) {\\\\n        host_variant = state.host_variant;\\\\n    }\\\\n    tactic_ids.addAll(state.tactic_ids);\\\\n}\\\\n// Consolidating individual rule risks and arranging them in decreasing order\\\\nList risks = new ArrayList();\\\\nfor (key in total_risk_stats.keySet()) {\\\\n    risks.add(total_risk_stats[key][0])\\\\n}\\\\nCollections.sort(risks, Collections.reverseOrder());\\\\n// Calculating total host risk score\\\\ndouble total_risk = 0.0;\\\\ndouble risk_cap = params.max_risk * params.zeta_constant;\\\\nfor (int i=0;i<risks.length;i++) {\\\\n    total_risk += risks[i] / Math.pow((1+i), params.p);\\\\n}\\\\n// Normalizing the host risk score\\\\ndouble total_norm_risk = 100 * total_risk / risk_cap;\\\\nif (total_norm_risk < 40) {\\\\n    total_norm_risk =  2.125 * total_norm_risk;\\\\n}\\\\nelse if (total_norm_risk >= 40 && total_norm_risk < 50) {\\\\n    total_norm_risk = 85 + (total_norm_risk - 40);\\\\n}\\\\nelse {\\\\n    total_norm_risk = 95 + (total_norm_risk - 50) / 10;\\\\n}\\\\n// Calculating multipliers to the host risk score\\\\ndouble risk_multiplier = 1.0;\\\\nList multipliers = new ArrayList();\\\\n// Add a multiplier if host is a server\\\\nif (host_variant.toLowerCase().contains(\\\\\\"server\\\\\\")) {\\\\n    risk_multiplier *= params.server_multiplier;\\\\n    multipliers.add(\\\\\\"Host is a server\\\\\\");\\\\n}\\\\n// Add multipliers based on number and diversity of tactics seen on the host\\\\nfor (String tactic : tactic_ids) {\\\\n    multipliers.add(\\\\\\"Tactic \\\\\\"+tactic);\\\\n    risk_multiplier *= 1 + params.tactic_base_multiplier * params.tactic_weights.getOrDefault(tactic, 0);\\\\n}\\\\n// Calculating final risk\\\\ndouble final_risk = total_norm_risk;\\\\nif (risk_multiplier > 1.0) {\\\\n    double prior_odds = (total_norm_risk) / (100 - total_norm_risk);\\\\n    double updated_odds = prior_odds * risk_multiplier; \\\\n    final_risk = 100 * updated_odds / (1 + updated_odds);\\\\n}\\\\n// Adding additional metadata\\\\nList rule_stats = new ArrayList();\\\\nfor (key in total_risk_stats.keySet()) {\\\\n    Map temp = new HashMap();\\\\n    temp[\\\\\\"rule_name\\\\\\"] = key;\\\\n    temp[\\\\\\"rule_risk\\\\\\"] = total_risk_stats[key][0];\\\\n    temp[\\\\\\"rule_id\\\\\\"] = total_risk_stats[key][1];\\\\n    rule_stats.add(temp);\\\\n}\\\\n\\\\nreturn [\\\\\\"calculated_score_norm\\\\\\": final_risk, \\\\\\"rule_risks\\\\\\": rule_stats, \\\\\\"multipliers\\\\\\": multipliers];\\"
+  }
+}
+
+# 5. Upload the ingest pipeline
+# Ingest pipeline to add ingest timestamp and risk level to documents
+PUT _ingest/pipeline/ml_hostriskscore_ingest_pipeline_default
+{
+  \\"processors\\": [{\\"set\\":{\\"field\\":\\"ingest_timestamp\\",\\"value\\":\\"{{_ingest.timestamp}}\\"}},{\\"fingerprint\\":{\\"fields\\":[\\"@timestamp\\",\\"_id\\"],\\"method\\":\\"SHA-256\\",\\"target_field\\":\\"_id\\"}},{\\"script\\":{\\"id\\":\\"ml_hostriskscore_levels_script_default\\",\\"params\\":{\\"risk_score\\":\\"host.risk.calculated_score_norm\\"}}}]
+}
+
+# 6. Create mappings for the destination index of the Host Risk Score pivot transform
+PUT ml_host_risk_score_default
+{
+  \\"mappings\\": {\\"properties\\":{\\"host\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"keyword\\"},\\"risk\\":{\\"properties\\":{\\"calculated_score_norm\\":{\\"type\\":\\"float\\"},\\"calculated_level\\":{\\"type\\":\\"keyword\\"},\\"multipliers\\":{\\"type\\":\\"keyword\\"},\\"rule_risks\\":{\\"properties\\":{\\"rule_name\\":{\\"type\\":\\"text\\",\\"fields\\":{\\"keyword\\":{\\"type\\":\\"keyword\\"}}},\\"rule_risk\\":{\\"type\\":\\"float\\"},\\"rule_id\\":{\\"type\\":\\"keyword\\"}}}}}}},\\"ingest_timestamp\\":{\\"type\\":\\"date\\"},\\"@timestamp\\":{\\"type\\":\\"date\\"}}}
+}
+
+# 7. Upload the Host Risk Score pivot transform
+# This transform runs hourly and calculates a risk score and risk level for hosts in a Kibana space
+PUT _transform/ml_hostriskscore_pivot_transform_default
+{\\"dest\\":{\\"index\\":\\"ml_host_risk_score_default\\",\\"pipeline\\":\\"ml_hostriskscore_ingest_pipeline_default\\"},\\"frequency\\":\\"1h\\",\\"pivot\\":{\\"aggregations\\":{\\"@timestamp\\":{\\"max\\":{\\"field\\":\\"@timestamp\\"}},\\"host.risk\\":{\\"scripted_metric\\":{\\"combine_script\\":\\"return state\\",\\"init_script\\":{\\"id\\":\\"ml_hostriskscore_init_script_default\\"},\\"map_script\\":{\\"id\\":\\"ml_hostriskscore_map_script_default\\"},\\"params\\":{\\"lookback_time\\":72,\\"max_risk\\":100,\\"p\\":1.5,\\"server_multiplier\\":1.5,\\"tactic_base_multiplier\\":0.25,\\"tactic_weights\\":{\\"TA0001\\":1,\\"TA0002\\":2,\\"TA0003\\":3,\\"TA0004\\":4,\\"TA0005\\":4,\\"TA0006\\":4,\\"TA0007\\":4,\\"TA0008\\":5,\\"TA0009\\":6,\\"TA0010\\":7,\\"TA0011\\":6,\\"TA0040\\":8,\\"TA0042\\":1,\\"TA0043\\":1},\\"time_decay_constant\\":6,\\"zeta_constant\\":2.612},\\"reduce_script\\":{\\"id\\":\\"ml_hostriskscore_reduce_script_default\\"}}}},\\"group_by\\":{\\"host.name\\":{\\"terms\\":{\\"field\\":\\"host.name\\"}}}},\\"source\\":{\\"index\\":[\\".alerts-security.alerts-default\\"],\\"query\\":{\\"bool\\":{\\"filter\\":[{\\"range\\":{\\"@timestamp\\":{\\"gte\\":\\"now-5d\\"}}}]}}},\\"sync\\":{\\"time\\":{\\"delay\\":\\"120s\\",\\"field\\":\\"@timestamp\\"}}}
+
+
+# 8. Start the pivot transform
+POST _transform/ml_hostriskscore_pivot_transform_default/_start
+
+# 9. Create mappings for the destination index of the Host Risk Score latest transform
+PUT ml_host_risk_score_latest_default
+{
+  \\"mappings\\": {\\"properties\\":{\\"host\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"keyword\\"},\\"risk\\":{\\"properties\\":{\\"calculated_score_norm\\":{\\"type\\":\\"float\\"},\\"calculated_level\\":{\\"type\\":\\"keyword\\"},\\"multipliers\\":{\\"type\\":\\"keyword\\"},\\"rule_risks\\":{\\"properties\\":{\\"rule_name\\":{\\"type\\":\\"text\\",\\"fields\\":{\\"keyword\\":{\\"type\\":\\"keyword\\"}}},\\"rule_risk\\":{\\"type\\":\\"float\\"},\\"rule_id\\":{\\"type\\":\\"keyword\\"}}}}}}},\\"ingest_timestamp\\":{\\"type\\":\\"date\\"},\\"@timestamp\\":{\\"type\\":\\"date\\"}}}
+}
+
+# 10. Upload the latest transform
+# This transform gets the latest risk information about hosts in a Kibana space
+PUT _transform/ml_hostriskscore_latest_transform_default
+{\\"dest\\":{\\"index\\":\\"ml_host_risk_score_latest_default\\"},\\"frequency\\":\\"1h\\",\\"latest\\":{\\"sort\\":\\"@timestamp\\",\\"unique_key\\":[\\"host.name\\"]},\\"source\\":{\\"index\\":[\\"ml_host_risk_score_default\\"]},\\"sync\\":{\\"time\\":{\\"delay\\":\\"2s\\",\\"field\\":\\"ingest_timestamp\\"}}}
+
+# 11. Start the latest transform
+POST _transform/ml_hostriskscore_latest_transform_default/_start
+
+# Hint: If you don't see data after running any of the transforms, stop and restart the transforms
+# Stop the pivot transform
+POST _transform/ml_hostriskscore_pivot_transform_default/_stop
+
+# Start the pivot transform
+POST _transform/ml_hostriskscore_pivot_transform_default/_start
+
+# Stop the latest transform
+POST _transform/ml_hostriskscore_latest_transform_default/_stop
+
+# Start the latest transform
+POST _transform/ml_hostriskscore_latest_transform_default/_start
+"
+`;
+
+exports[`readPrebuiltDevToolContentRoute should read content from "enable_user_risk_score" template 1`] = `
+"# Click the run button of each step to enable the module
+# Upload scripts
+# 1. Script to assign risk level based on risk score
+PUT _scripts/ml_userriskscore_levels_script_default
+{
+  \\"script\\": {
+    \\"lang\\": \\"painless\\",
+    \\"source\\": \\"double risk_score = (def)ctx.getByPath(params.risk_score);\\\\nif (risk_score < 20) {\\\\n  ctx['user']['risk']['calculated_level'] = 'Unknown'\\\\n}\\\\nelse if (risk_score >= 20 && risk_score < 40) {\\\\n  ctx['user']['risk']['calculated_level'] = 'Low'\\\\n}\\\\nelse if (risk_score >= 40 && risk_score < 70) {\\\\n  ctx['user']['risk']['calculated_level'] = 'Moderate'\\\\n}\\\\nelse if (risk_score >= 70 && risk_score < 90) {\\\\n  ctx['user']['risk']['calculated_level'] = 'High'\\\\n}\\\\nelse if (risk_score >= 90) {\\\\n  ctx['user']['risk']['calculated_level'] = 'Critical'\\\\n}\\"
+  }
+}
+
+# 2. Map script for the User Risk Score transform
+PUT _scripts/ml_userriskscore_map_script_default
+{
+  \\"script\\": {
+    \\"lang\\": \\"painless\\",
+    \\"source\\": \\"// Get running sum of risk score per rule name per shard\\\\\\\\\\\\\\\\\\\\nString rule_name = doc[\\\\\\"signal.rule.name\\\\\\"].value;\\\\ndef stats = state.rule_risk_stats.getOrDefault(rule_name, 0.0);\\\\nstats = doc[\\\\\\"signal.rule.risk_score\\\\\\"].value;\\\\nstate.rule_risk_stats.put(rule_name, stats);\\"
+  }
+}
+
+# 3. Reduce script for the User Risk Score transform
+PUT _scripts/ml_userriskscore_reduce_script_default
+{
+  \\"script\\": {
+    \\"lang\\": \\"painless\\",
+    \\"source\\": \\"// Consolidating time decayed risks from across all shards\\\\nMap total_risk_stats = new HashMap();\\\\nfor (state in states) {\\\\n    for (key in state.rule_risk_stats.keySet()) {\\\\n    def rule_stats = state.rule_risk_stats.get(key);\\\\n    def stats = total_risk_stats.getOrDefault(key, 0.0);\\\\n    stats = rule_stats;\\\\n    total_risk_stats.put(key, stats);\\\\n    }\\\\n}\\\\n// Consolidating individual rule risks and arranging them in decreasing order\\\\nList risks = new ArrayList();\\\\nfor (key in total_risk_stats.keySet()) {\\\\n    risks.add(total_risk_stats[key])\\\\n}\\\\nCollections.sort(risks, Collections.reverseOrder());\\\\n// Calculating total risk and normalizing it to a range\\\\ndouble total_risk = 0.0;\\\\ndouble risk_cap = params.max_risk * params.zeta_constant;\\\\nfor (int i=0;i<risks.length;i++) {\\\\n    total_risk += risks[i] / Math.pow((1+i), params.p);\\\\n}\\\\ndouble total_norm_risk = 100 * total_risk / risk_cap;\\\\nif (total_norm_risk < 40) {\\\\n    total_norm_risk =  2.125 * total_norm_risk;\\\\n}\\\\nelse if (total_norm_risk >= 40 && total_norm_risk < 50) {\\\\n    total_norm_risk = 85 + (total_norm_risk - 40);\\\\n}\\\\nelse {\\\\n    total_norm_risk = 95 + (total_norm_risk - 50) / 10;\\\\n}\\\\n\\\\nList rule_stats = new ArrayList();\\\\nfor (key in total_risk_stats.keySet()) {\\\\n    Map temp = new HashMap();\\\\n    temp[\\\\\\"rule_name\\\\\\"] = key;\\\\n    temp[\\\\\\"rule_risk\\\\\\"] = total_risk_stats[key];\\\\n    rule_stats.add(temp);\\\\n}\\\\n\\\\nreturn [\\\\\\"calculated_score_norm\\\\\\": total_norm_risk, \\\\\\"rule_risks\\\\\\": rule_stats];\\"
+  }
+}
+
+# 4. Upload ingest pipeline
+# Ingest pipeline to add ingest timestamp and risk level to documents
+PUT _ingest/pipeline/ml_userriskscore_ingest_pipeline_default
+{
+  \\"processors\\": [{\\"set\\":{\\"field\\":\\"ingest_timestamp\\",\\"value\\":\\"{{_ingest.timestamp}}\\"}},{\\"fingerprint\\":{\\"fields\\":[\\"@timestamp\\",\\"_id\\"],\\"method\\":\\"SHA-256\\",\\"target_field\\":\\"_id\\"}},{\\"script\\":{\\"id\\":\\"ml_userriskscore_levels_script_default\\",\\"params\\":{\\"risk_score\\":\\"user.risk.calculated_score_norm\\"}}}]
+}
+
+# 5. Create mappings for the destination index of the User Risk Score pivot transform
+PUT ml_user_risk_score_default
+{
+  \\"mappings\\": {\\"properties\\":{\\"user\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"keyword\\"},\\"risk\\":{\\"properties\\":{\\"calculated_score_norm\\":{\\"type\\":\\"float\\"},\\"calculated_level\\":{\\"type\\":\\"keyword\\"},\\"multipliers\\":{\\"type\\":\\"keyword\\"},\\"rule_risks\\":{\\"properties\\":{\\"rule_name\\":{\\"type\\":\\"text\\",\\"fields\\":{\\"keyword\\":{\\"type\\":\\"keyword\\"}}},\\"rule_risk\\":{\\"type\\":\\"float\\"},\\"rule_id\\":{\\"type\\":\\"keyword\\"}}}}}}},\\"ingest_timestamp\\":{\\"type\\":\\"date\\"},\\"@timestamp\\":{\\"type\\":\\"date\\"}}}
+}
+
+# 6. Upload the User Risk Score pivot transform
+# This transform runs hourly and calculates a risk score and risk level for users in a Kibana space
+PUT _transform/ml_userriskscore_pivot_transform_default
+{\\"dest\\":{\\"index\\":\\"ml_user_risk_score_default\\",\\"pipeline\\":\\"ml_userriskscore_ingest_pipeline_default\\"},\\"frequency\\":\\"1h\\",\\"pivot\\":{\\"aggregations\\":{\\"@timestamp\\":{\\"max\\":{\\"field\\":\\"@timestamp\\"}},\\"user.risk\\":{\\"scripted_metric\\":{\\"combine_script\\":\\"return state\\",\\"init_script\\":\\"state.rule_risk_stats = new HashMap();\\",\\"map_script\\":{\\"id\\":\\"ml_userriskscore_map_script_default\\"},\\"params\\":{\\"max_risk\\":100,\\"p\\":1.5,\\"zeta_constant\\":2.612},\\"reduce_script\\":{\\"id\\":\\"ml_userriskscore_reduce_script_default\\"}}}},\\"group_by\\":{\\"user.name\\":{\\"terms\\":{\\"field\\":\\"user.name\\"}}}},\\"source\\":{\\"index\\":[\\".alerts-security.alerts-default\\"],\\"query\\":{\\"bool\\":{\\"filter\\":[{\\"range\\":{\\"@timestamp\\":{\\"gte\\":\\"now-90d\\"}}},{\\"match\\":{\\"signal.status\\":\\"open\\"}}]}}},\\"sync\\":{\\"time\\":{\\"delay\\":\\"120s\\",\\"field\\":\\"@timestamp\\"}}}
+
+
+# 7. start the pivot transform
+POST _transform/ml_userriskscore_pivot_transform_default/_start
+
+# 8. Create mappings for the destination index of the User Risk Score latest transform
+PUT ml_user_risk_score_latest_default
+{
+  \\"mappings\\": {\\"properties\\":{\\"user\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"keyword\\"},\\"risk\\":{\\"properties\\":{\\"calculated_score_norm\\":{\\"type\\":\\"float\\"},\\"calculated_level\\":{\\"type\\":\\"keyword\\"},\\"multipliers\\":{\\"type\\":\\"keyword\\"},\\"rule_risks\\":{\\"properties\\":{\\"rule_name\\":{\\"type\\":\\"text\\",\\"fields\\":{\\"keyword\\":{\\"type\\":\\"keyword\\"}}},\\"rule_risk\\":{\\"type\\":\\"float\\"},\\"rule_id\\":{\\"type\\":\\"keyword\\"}}}}}}},\\"ingest_timestamp\\":{\\"type\\":\\"date\\"},\\"@timestamp\\":{\\"type\\":\\"date\\"}}}
+}
+
+# 9. Upload the latest transform
+# This transform gets the latest risk information about users in a Kibana space
+PUT _transform/ml_userriskscore_latest_transform_default
+{\\"dest\\":{\\"index\\":\\"ml_user_risk_score_latest_default\\"},\\"frequency\\":\\"1h\\",\\"latest\\":{\\"sort\\":\\"@timestamp\\",\\"unique_key\\":[\\"user.name\\"]},\\"source\\":{\\"index\\":[\\"ml_user_risk_score_default\\"]},\\"sync\\":{\\"time\\":{\\"delay\\":\\"2s\\",\\"field\\":\\"ingest_timestamp\\"}}}
+
+
+# 10. Start the latest transform
+POST _transform/ml_userriskscore_latest_transform_default/_start
+
+# Hint: If you don't see data after running any of the transforms, stop and restart the transforms
+# Stop the pivot transform
+POST _transform/ml_userriskscore_pivot_transform_default/_stop
+
+# Start the pivot transform
+POST _transform/ml_userriskscore_pivot_transform_default/_start
+
+# Stop the latest transform
+POST _transform/ml_userriskscore_latest_transform_default/_stop
+
+# Start the latest transform
+POST _transform/ml_userriskscore_latest_transform_default/_start
+"
+`;

@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiCommentList,
-  EuiCommentProps,
-} from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCommentList } from '@elastic/eui';
 
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment } from '../add_comment';
-import { UserActionAvatar } from './avatar';
-import { UserActionUsername } from './username';
 import { useCaseViewParams } from '../../common/navigation';
 import { builderMap } from './builder';
 import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
@@ -28,6 +20,9 @@ import { getDescriptionUserAction } from './description';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { UserToolTip } from '../user_profiles/user_tooltip';
+import { Username } from '../user_profiles/username';
+import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
@@ -39,6 +34,12 @@ const MyEuiCommentList = styled(EuiCommentList)`
       outline: solid 5px ${theme.eui.euiColorVis1_behindText};
       margin: 0.5em;
       transition: 0.8s;
+    }
+
+    & .draftFooter {
+      & .euiCommentEvent__body {
+        padding: 0;
+      }
     }
 
     & .euiComment.isEdit {
@@ -58,7 +59,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
 
     & .comment-alert .euiCommentEvent {
       background-color: ${theme.eui.euiColorLightestShade};
-      border: ${theme.eui.euiFlyoutBorder};
+      border: ${theme.eui.euiBorderThin};
       padding: ${theme.eui.euiSizeS};
       border-radius: ${theme.eui.euiSizeXS};
     }
@@ -67,7 +68,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
       flex-grow: 1;
     }
 
-    & .comment-action.empty-comment [class*="euiCommentEvent-regular] {
+    & .comment-action.empty-comment [class*="euiCommentEvent-regular"] {
       box-shadow: none;
       .euiCommentEvent__header {
         padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS};
@@ -81,6 +82,8 @@ export const UserActions = React.memo(
   ({
     caseServices,
     caseUserActions,
+    userProfiles,
+    currentUserProfile,
     data: caseData,
     getRuleDetailsHref,
     actionsNavigation,
@@ -94,9 +97,11 @@ export const UserActions = React.memo(
   }: UserActionTreeProps) => {
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
-    const currentUser = useCurrentUser();
-    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
-      useCasesContext();
+    const {
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      appId,
+    } = useCasesContext();
 
     const alertIdsWithoutRuleInfo = useMemo(
       () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -145,6 +150,8 @@ export const UserActions = React.memo(
     const descriptionCommentListObj: EuiCommentProps = useMemo(
       () =>
         getDescriptionUserAction({
+          appId,
+          userProfiles,
           caseData,
           commentRefs,
           manageMarkdownEditIds,
@@ -154,6 +161,8 @@ export const UserActions = React.memo(
           handleManageQuote,
         }),
       [
+        appId,
+        userProfiles,
         caseData,
         commentRefs,
         manageMarkdownEditIds,
@@ -179,10 +188,13 @@ export const UserActions = React.memo(
             }
 
             const userActionBuilder = builder({
+              appId,
               caseData,
               externalReferenceAttachmentTypeRegistry,
               persistableStateAttachmentTypeRegistry,
               userAction,
+              userProfiles,
+              currentUserProfile,
               caseServices,
               comments: caseData.comments,
               index,
@@ -207,7 +219,10 @@ export const UserActions = React.memo(
           [descriptionCommentListObj]
         ),
       [
+        appId,
         caseUserActions,
+        userProfiles,
+        currentUserProfile,
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
         descriptionCommentListObj,
@@ -237,15 +252,12 @@ export const UserActions = React.memo(
       ? [
           {
             username: (
-              <UserActionUsername
-                username={currentUser?.username}
-                fullName={currentUser?.fullName}
-              />
+              <UserToolTip userInfo={currentUserProfile}>
+                <Username userInfo={currentUserProfile} />
+              </UserToolTip>
             ),
             'data-test-subj': 'add-comment',
-            timelineAvatar: (
-              <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
-            ),
+            timelineAvatar: <HoverableAvatar userInfo={currentUserProfile} />,
             className: 'isEdit',
             children: MarkdownNewComment,
           },

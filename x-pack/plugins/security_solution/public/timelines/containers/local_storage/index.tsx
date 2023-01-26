@@ -7,14 +7,63 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { TimelinesStorage } from './types';
+import type { ColumnHeaderOptions, TableIdLiteral } from '../../../../common/types';
+import type { DataTablesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
-import type { TimelineModel } from '../../store/timeline/model';
-import type { ColumnHeaderOptions, TimelineIdLiteral } from '../../../../common/types/timeline';
+import type { DataTableModel } from '../../../common/store/data_table/model';
 
-export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
-const EMPTY_TIMELINE = {} as {
-  [K in TimelineIdLiteral]: TimelineModel;
+export const LOCAL_STORAGE_TABLE_KEY = 'securityDataTable';
+const LOCAL_STORAGE_TIMELINE_KEY_LEGACY = 'timelines';
+const EMPTY_TABLE = {} as {
+  [K in TableIdLiteral]: DataTableModel;
+};
+
+/**
+ * Migrates the values of the data table from the legacy timelines key to the securityDataTable key
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: any) => {
+  if (!legacyTimelineTables) {
+    return EMPTY_TABLE;
+  }
+
+  return Object.keys(legacyTimelineTables).reduce((acc, timelineTableId) => {
+    const timelineModel = legacyTimelineTables[timelineTableId];
+    return {
+      ...acc,
+      [timelineTableId]: {
+        defaultColumns: timelineModel.defaultColumns,
+        dataViewId: timelineModel.dataViewId,
+        excludedRowRendererIds: timelineModel.excludedRowRendererIds,
+        filters: timelineModel.filters,
+        indexNames: timelineModel.indexNames,
+        loadingEventIds: timelineModel.loadingEventIds,
+        isSelectAllChecked: timelineModel.isSelectAllChecked,
+        itemsPerPage: timelineModel.itemsPerPage,
+        itemsPerPageOptions: timelineModel.itemsPerPageOptions,
+        showCheckboxes: timelineModel.showCheckboxes,
+        graphEventId: timelineModel.graphEventId,
+        sessionViewConfig: timelineModel.sessionViewConfig,
+        selectAll: timelineModel.selectAll,
+        id: timelineModel.id,
+        title: timelineModel.title,
+        initialized: timelineModel.initialized,
+        updated: timelineModel.updated,
+        sort: timelineModel.sort,
+        selectedEventIds: timelineModel.selectedEventIds,
+        deletedEventIds: timelineModel.deletedEventIds,
+        expandedDetail: timelineModel.expandedDetail,
+        totalCount: timelineModel.totalCount || 0,
+        ...(Array.isArray(timelineModel.columns)
+          ? {
+              columns: timelineModel.columns
+                .map(migrateColumnWidthToInitialWidth)
+                .map(migrateColumnLabelToDisplayAsText),
+            }
+          : {}),
+      },
+    };
+  }, {} as { [K in TableIdLiteral]: DataTableModel });
 };
 
 /**
@@ -25,10 +74,11 @@ export const migrateColumnWidthToInitialWidth = (
   column: ColumnHeaderOptions & { width?: number }
 ) => ({
   ...column,
-  initialWidth:
-    Number.isInteger(column.width) && !Number.isInteger(column.initialWidth)
-      ? column.width
-      : column.initialWidth,
+  ...(Number.isInteger(column.width) && !Number.isInteger(column.initialWidth)
+    ? { initialWidth: column.width }
+    : column.initialWidth
+    ? { initialWidth: column.initialWidth }
+    : {}),
 });
 
 /**
@@ -39,20 +89,28 @@ export const migrateColumnLabelToDisplayAsText = (
   column: ColumnHeaderOptions & { label?: string }
 ) => ({
   ...column,
-  displayAsText:
-    !isEmpty(column.label) && column.displayAsText == null ? column.label : column.displayAsText,
+  ...(!isEmpty(column.label) && column.displayAsText == null
+    ? { displayAsText: column.label }
+    : column.displayAsText
+    ? { displayAsText: column.displayAsText }
+    : {}),
 });
 
-export const getTimelinesInStorageByIds = (storage: Storage, timelineIds: TimelineIdLiteral[]) => {
-  const allTimelines = storage.get(LOCAL_STORAGE_TIMELINE_KEY);
+export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdLiteral[]) => {
+  let allDataTables = storage.get(LOCAL_STORAGE_TABLE_KEY);
+  const legacyTimelineTables = storage.get(LOCAL_STORAGE_TIMELINE_KEY_LEGACY);
 
-  if (!allTimelines) {
-    return EMPTY_TIMELINE;
+  if (!allDataTables) {
+    if (legacyTimelineTables) {
+      allDataTables = migrateLegacyTimelinesToSecurityDataTable(legacyTimelineTables);
+    } else {
+      return EMPTY_TABLE;
+    }
   }
 
-  return timelineIds.reduce((acc, timelineId) => {
-    const timelineModel = allTimelines[timelineId];
-    if (!timelineModel) {
+  return tableIds.reduce((acc, tableId) => {
+    const tableModel = allDataTables[tableId];
+    if (!tableModel) {
       return {
         ...acc,
       };
@@ -60,67 +118,59 @@ export const getTimelinesInStorageByIds = (storage: Storage, timelineIds: Timeli
 
     return {
       ...acc,
-      [timelineId]: {
-        ...timelineModel,
-        ...(timelineModel.sort != null && !Array.isArray(timelineModel.sort)
-          ? { sort: [timelineModel.sort] }
-          : {}),
-        ...(Array.isArray(timelineModel.columns)
-          ? {
-              columns: timelineModel.columns
-                .map(migrateColumnWidthToInitialWidth)
-                .map(migrateColumnLabelToDisplayAsText),
-            }
+      [tableId]: {
+        ...tableModel,
+        ...(tableModel.sort != null && !Array.isArray(tableModel.sort)
+          ? { sort: [tableModel.sort] }
           : {}),
       },
     };
-  }, {} as { [K in TimelineIdLiteral]: TimelineModel });
+  }, {} as { [K in TableIdLiteral]: DataTableModel });
 };
 
-export const getAllTimelinesInStorage = (storage: Storage) =>
-  storage.get(LOCAL_STORAGE_TIMELINE_KEY) ?? {};
+export const getAllDataTablesInStorage = (storage: Storage) => {
+  let allDataTables = storage.get(LOCAL_STORAGE_TABLE_KEY);
+  const legacyTimelineTables = storage.get(LOCAL_STORAGE_TIMELINE_KEY_LEGACY);
+  if (!allDataTables) {
+    if (legacyTimelineTables) {
+      allDataTables = migrateLegacyTimelinesToSecurityDataTable(legacyTimelineTables);
+    } else {
+      return EMPTY_TABLE;
+    }
+  }
+  return allDataTables;
+};
 
-export const addTimelineInStorage = (
-  storage: Storage,
-  id: TimelineIdLiteral,
-  timeline: TimelineModel
-) => {
-  const timelineToStore = cleanStorageTimeline(timeline);
-  const timelines = getAllTimelinesInStorage(storage);
-  storage.set(LOCAL_STORAGE_TIMELINE_KEY, {
-    ...timelines,
-    [id]: timelineToStore,
+export const addTableInStorage = (storage: Storage, id: TableIdLiteral, table: DataTableModel) => {
+  const tableToStore = getSerializingTableToStore(table);
+  const tables = getAllDataTablesInStorage(storage);
+  storage.set(LOCAL_STORAGE_TABLE_KEY, {
+    ...tables,
+    [id]: tableToStore,
   });
 };
 
-const cleanStorageTimeline = (timeline: TimelineModel) => {
+const getSerializingTableToStore = (table: DataTableModel) => {
   // discard unneeded fields to make sure the object serialization works
-  const {
-    documentType,
-    filterManager,
-    isLoading,
-    loadingText,
-    queryFields,
-    selectAll,
-    unit,
-    ...timelineToStore
-  } = timeline;
-  return timelineToStore;
+  const { isLoading, loadingText, queryFields, unit, ...tableToStore } = table;
+  return tableToStore;
 };
 
-export const useTimelinesStorage = (): TimelinesStorage => {
+export const useDataTablesStorage = (): DataTablesStorage => {
   const { storage } = useKibana().services;
 
-  const getAllTimelines: TimelinesStorage['getAllTimelines'] = () =>
-    getAllTimelinesInStorage(storage);
+  const getAllDataTables: DataTablesStorage['getAllDataTables'] = () =>
+    getAllDataTablesInStorage(storage);
 
-  const getTimelineById: TimelinesStorage['getTimelineById'] = (id: TimelineIdLiteral) =>
-    getTimelinesInStorageByIds(storage, [id])[id] ?? null;
+  const getDataTablesById: DataTablesStorage['getDataTablesById'] = (id: TableIdLiteral) =>
+    getDataTablesInStorageByIds(storage, [id])[id] ?? null;
 
-  const addTimeline: TimelinesStorage['addTimeline'] = (id, timeline) =>
-    addTimelineInStorage(storage, id, timeline);
+  const addDataTable: DataTablesStorage['addDataTable'] = (
+    id: TableIdLiteral,
+    table: DataTableModel
+  ) => addTableInStorage(storage, id, table);
 
-  return { getAllTimelines, getTimelineById, addTimeline };
+  return { getAllDataTables, getDataTablesById, addDataTable };
 };
 
-export type { TimelinesStorage };
+export type { DataTablesStorage };

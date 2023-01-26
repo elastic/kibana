@@ -8,10 +8,12 @@
 
 import supertest from 'supertest';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { CoreUsageStatsClient } from '../../../core_usage_data';
-import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
-import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { setupServer } from './test_utils';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import {
+  coreUsageStatsClientMock,
+  coreUsageDataServiceMock,
+} from '@kbn/core-usage-data-server-mocks';
+import { setupServer, createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
 import {
   registerCreateRoute,
   type InternalSavedObjectsRequestHandlerContext,
@@ -19,12 +21,17 @@ import {
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
+const testTypes = [
+  { name: 'index-pattern', hide: false },
+  { name: 'hidden-type', hide: true },
+  { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
+];
 describe('POST /api/saved_objects/{type}', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
+  let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
 
   const clientResponse = {
     id: 'logstash-*',
@@ -46,6 +53,12 @@ describe('POST /api/saved_objects/{type}', () => {
     coreUsageStatsClient.incrementSavedObjectsCreate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     registerCreateRoute(router, { coreUsageData });
+
+    handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
+      return testTypes
+        .map((typeDesc) => createHiddenTypeVariants(typeDesc))
+        .find((fullTest) => fullTest.name === typename);
+    });
 
     await server.start();
   });
@@ -118,5 +131,18 @@ describe('POST /api/saved_objects/{type}', () => {
       { title: 'Testing' },
       { overwrite: false, id: 'logstash-*' },
     ]);
+  });
+
+  it('returns with status 400 if the type is hidden from the HTTP APIs', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/hidden-from-http')
+      .send({
+        attributes: {
+          properties: {},
+        },
+      })
+      .expect(400);
+
+    expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
   });
 });

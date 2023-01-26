@@ -57,6 +57,11 @@ export const CRAWLER_DOMAIN_CONFIG_FROM_SERVER: DomainConfigFromServer = {
 };
 
 export const CRAWLER_DOMAIN_FROM_SERVER: CrawlerDomainFromServer = {
+  auth: {
+    type: 'basic',
+    username: 'username',
+    password: 'password',
+  },
   available_deduplication_fields: ['title', 'url'],
   crawl_rules: [CRAWL_RULE],
   created_on: '1657234422',
@@ -84,6 +89,11 @@ export const CRAWLER_DOMAIN_CONFIG: DomainConfig = {
 };
 
 export const CRAWLER_DOMAIN: CrawlerDomain = {
+  auth: {
+    type: 'basic',
+    username: 'username',
+    password: 'password',
+  },
   availableDeduplicationFields: ['title', 'url'],
   crawlRules: [CRAWL_RULE],
   createdOn: '1657234422',

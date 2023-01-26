@@ -28,6 +28,7 @@
         ],
         "path": "src/plugins/field_formats/public/lib/converters/date.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -46,17 +47,22 @@
               }
             ],
             "path": "src/plugins/field_formats/public/lib/converters/date.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-public.DateFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/public/lib/converters/date.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -66,10 +72,17 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/public/lib/converters/date.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -80,13 +93,26 @@
             "description": [],
             "signature": [
               "() => { pattern: ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "; timezone: ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "; }"
             ],
             "path": "src/plugins/field_formats/public/lib/converters/date.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -102,6 +128,7 @@
             ],
             "path": "src/plugins/field_formats/public/lib/converters/date.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -115,6 +142,7 @@
                 ],
                 "path": "src/plugins/field_formats/public/lib/converters/date.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -143,6 +171,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -161,17 +190,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-public.DateNanosFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -181,10 +215,17 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -197,7 +238,8 @@
               "Function"
             ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -207,7 +249,8 @@
             "label": "memoizedPattern",
             "description": [],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -217,7 +260,8 @@
             "label": "timeZone",
             "description": [],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -228,15 +272,34 @@
             "description": [],
             "signature": [
               "() => { pattern: ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "; fallbackPattern: ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "; timezone: ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "; }"
             ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -252,6 +315,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -265,6 +329,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -287,7 +352,7 @@
       "label": "FieldFormatsSetup",
       "description": [],
       "signature": [
-        "{ register: (fieldFormats: ",
+        "{ has: (id: string) => boolean; register: (fieldFormats: ",
         {
           "pluginId": "fieldFormats",
           "scope": "common",
@@ -295,10 +360,11 @@
           "section": "def-common.FieldFormatInstanceType",
           "text": "FieldFormatInstanceType"
         },
-        "[]) => void; has: (id: string) => boolean; }"
+        "[]) => void; }"
       ],
       "path": "src/plugins/field_formats/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -330,6 +396,7 @@
       ],
       "path": "src/plugins/field_formats/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -362,6 +429,7 @@
         ],
         "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -380,17 +448,22 @@
               }
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-server.DateFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -400,10 +473,17 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -417,6 +497,7 @@
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -427,7 +508,13 @@
                 "description": [],
                 "signature": [
                   "(",
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   " & ",
                   {
                     "pluginId": "fieldFormats",
@@ -440,6 +527,7 @@
                 ],
                 "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -458,11 +546,18 @@
                     "text": "FieldFormatsGetConfigFn"
                   },
                   "<",
-                  "Serializable",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
+                  },
                   "> | undefined"
                 ],
                 "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -477,13 +572,26 @@
             "description": [],
             "signature": [
               "() => { pattern: ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "; timezone: ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "; }"
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -507,6 +615,7 @@
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -520,6 +629,7 @@
                 ],
                 "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -541,6 +651,7 @@
                 ],
                 "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -563,6 +674,7 @@
         ],
         "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -584,6 +696,7 @@
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -597,6 +710,7 @@
                 ],
                 "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -618,6 +732,7 @@
                 ],
                 "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -641,6 +756,7 @@
       "description": [],
       "path": "src/plugins/field_formats/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "fieldFormats",
@@ -664,6 +780,7 @@
           ],
           "path": "src/plugins/field_formats/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "fieldFormats",
@@ -685,6 +802,7 @@
               ],
               "path": "src/plugins/field_formats/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -703,6 +821,7 @@
       "description": [],
       "path": "src/plugins/field_formats/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "fieldFormats",
@@ -716,10 +835,10 @@
           "signature": [
             "(uiSettings: ",
             {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCorePluginApi",
-              "section": "def-server.IUiSettingsClient",
+              "pluginId": "@kbn/core-ui-settings-server",
+              "scope": "common",
+              "docId": "kibKbnCoreUiSettingsServerPluginApi",
+              "section": "def-common.IUiSettingsClient",
               "text": "IUiSettingsClient"
             },
             ") => Promise<",
@@ -734,6 +853,7 @@
           ],
           "path": "src/plugins/field_formats/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "fieldFormats",
@@ -746,15 +866,16 @@
               ],
               "signature": [
                 {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCorePluginApi",
-                  "section": "def-server.IUiSettingsClient",
+                  "pluginId": "@kbn/core-ui-settings-server",
+                  "scope": "common",
+                  "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                  "section": "def-common.IUiSettingsClient",
                   "text": "IUiSettingsClient"
                 }
               ],
               "path": "src/plugins/field_formats/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -793,6 +914,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/boolean.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -811,17 +933,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/boolean.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.BoolFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/boolean.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -831,11 +958,18 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "[]"
             ],
             "path": "src/plugins/field_formats/common/converters/boolean.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -857,6 +991,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/boolean.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -870,6 +1005,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/boolean.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -891,6 +1027,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/boolean.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -919,6 +1056,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/bytes.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -937,17 +1075,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/bytes.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.BytesFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/bytes.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -966,17 +1109,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/bytes.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.BytesFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/bytes.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -986,7 +1134,8 @@
             "label": "allowsNumericalAggregations",
             "description": [],
             "path": "src/plugins/field_formats/common/converters/bytes.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1017,6 +1166,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/color.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -1035,17 +1185,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.ColorFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1055,11 +1210,18 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "[]"
             ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1073,6 +1235,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1088,6 +1251,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -1101,6 +1265,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/color.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1126,6 +1291,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -1139,6 +1305,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/color.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1160,6 +1327,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/color.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1194,6 +1362,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/duration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -1212,17 +1381,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.DurationFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1232,10 +1406,17 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1245,10 +1426,11 @@
             "label": "inputFormats",
             "description": [],
             "signature": [
-              "{ text: string; kind: string; }[]"
+              "{ text: any; kind: string; }[]"
             ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1258,10 +1440,11 @@
             "label": "outputFormats",
             "description": [],
             "signature": [
-              "({ text: string; method: string; shortText?: undefined; } | { text: string; shortText: string; method: string; })[]"
+              "({ text: any; method: string; shortText?: undefined; } | { text: any; shortText: any; method: string; })[]"
             ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1271,7 +1454,8 @@
             "label": "allowsNumericalAggregations",
             "description": [],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1285,6 +1469,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1300,6 +1485,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1315,6 +1501,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1330,6 +1517,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -1343,6 +1531,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/duration.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1360,6 +1549,7 @@
         "description": [],
         "path": "src/plugins/field_formats/common/field_format.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -1372,7 +1562,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/field_formats/common/field_format.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1387,7 +1578,8 @@
               "\nHidden field formats can only be accessed directly by id,\nThey won't appear in field format editor UI,\nBut they can be accessed and used from code internally.\n"
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1400,7 +1592,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/field_formats/common/field_format.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1416,7 +1609,8 @@
               "string | string[]"
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1439,7 +1633,8 @@
               " | undefined"
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1462,7 +1657,8 @@
               " | undefined"
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1485,7 +1681,8 @@
               " | undefined"
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1508,7 +1705,8 @@
               }
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1521,7 +1719,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1531,7 +1730,13 @@
             "label": "_params",
             "description": [],
             "signature": [
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               " & ",
               {
                 "pluginId": "fieldFormats",
@@ -1542,7 +1747,8 @@
               }
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1560,11 +1766,18 @@
                 "text": "FieldFormatsGetConfigFn"
               },
               "<",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "> | undefined"
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -1578,6 +1791,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -1587,7 +1801,13 @@
                 "label": "_params",
                 "description": [],
                 "signature": [
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   " & ",
                   {
                     "pluginId": "fieldFormats",
@@ -1599,6 +1819,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1617,11 +1838,18 @@
                     "text": "FieldFormatsGetConfigFn"
                   },
                   "<",
-                  "Serializable",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
+                  },
                   "> | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1667,6 +1895,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -1680,6 +1909,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1702,6 +1932,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1731,6 +1962,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1769,6 +2001,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -1788,6 +2021,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1808,10 +2042,17 @@
             ],
             "signature": [
               "() => ",
-              "SerializableRecord"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              }
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "- parameter defaults"
@@ -1833,6 +2074,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -1848,6 +2090,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1868,7 +2111,13 @@
             ],
             "signature": [
               "() => ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               " & ",
               {
                 "pluginId": "fieldFormats",
@@ -1880,6 +2129,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1896,7 +2146,13 @@
             ],
             "signature": [
               "() => { id: string; params: (",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               " & ",
               {
                 "pluginId": "fieldFormats",
@@ -1909,6 +2165,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1939,6 +2196,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -1958,6 +2216,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1982,6 +2241,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2004,6 +2264,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2017,6 +2278,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2034,6 +2296,7 @@
         "description": [],
         "path": "src/plugins/field_formats/common/field_formats_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -2054,7 +2317,8 @@
               ">"
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -2065,6 +2329,7 @@
             "description": [],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -2076,6 +2341,7 @@
             "description": [],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -2094,11 +2360,18 @@
                 "text": "FieldFormatsGetConfigFn"
               },
               "<",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "> | undefined"
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -2117,7 +2390,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               "> | undefined) => ",
               {
                 "pluginId": "fieldFormats",
@@ -2129,6 +2408,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2146,11 +2426,18 @@
                     "text": "SerializedFieldFormat"
                   },
                   "<{}, ",
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   "> | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2173,7 +2460,13 @@
                 "text": "FieldFormatsGetConfigFn"
               },
               "<",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               ">, metaParamsOptions?: ",
               {
                 "pluginId": "fieldFormats",
@@ -2194,6 +2487,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2211,11 +2505,18 @@
                     "text": "FieldFormatsGetConfigFn"
                   },
                   "<",
-                  "Serializable",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
+                  },
                   ">"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2236,6 +2537,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2257,6 +2559,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2275,9 +2578,21 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
               {
                 "pluginId": "fieldFormats",
@@ -2289,6 +2604,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2300,10 +2616,17 @@
                   "- the field type"
                 ],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2316,11 +2639,18 @@
                   "- Array of ES data types"
                 ],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2350,6 +2680,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2365,6 +2696,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2390,6 +2722,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2403,6 +2736,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2421,9 +2755,21 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
               {
                 "pluginId": "fieldFormats",
@@ -2436,6 +2782,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2445,10 +2792,17 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2461,11 +2815,18 @@
                   "- Array of ES data types"
                 ],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2484,13 +2845,26 @@
             ],
             "signature": [
               "(esTypes: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               " | undefined"
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2502,11 +2876,18 @@
                   "- Array of ES data types"
                 ],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2525,16 +2906,41 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               " | ",
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2544,10 +2950,17 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2558,11 +2971,18 @@
                 "label": "esTypes",
                 "description": [],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2581,7 +3001,13 @@
             ],
             "signature": [
               "(formatId: string, params?: ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -2593,6 +3019,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2606,6 +3033,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2616,10 +3044,17 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "SerializableRecord"
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.SerializableRecord",
+                    "text": "SerializableRecord"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2638,11 +3073,29 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined, params?: ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -2654,6 +3107,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2663,10 +3117,17 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2677,11 +3138,18 @@
                 "label": "esTypes",
                 "description": [],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -2692,10 +3160,17 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "SerializableRecord"
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.SerializableRecord",
+                    "text": "SerializableRecord"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2714,13 +3189,26 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => string"
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2730,10 +3218,17 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2744,11 +3239,18 @@
                 "label": "esTypes",
                 "description": [],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2767,7 +3269,13 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -2780,6 +3288,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2789,10 +3298,17 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2811,11 +3327,29 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined, params?: ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -2827,6 +3361,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2836,10 +3371,17 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2850,11 +3392,18 @@
                 "label": "esTypes",
                 "description": [],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "common",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-common.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -2865,10 +3414,17 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "SerializableRecord"
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.SerializableRecord",
+                    "text": "SerializableRecord"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2894,6 +3450,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2915,6 +3472,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2940,6 +3498,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2960,6 +3519,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2979,6 +3539,7 @@
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -2992,6 +3553,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3026,6 +3588,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/geo_point.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -3044,17 +3607,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/geo_point.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.GeoPointFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/geo_point.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3064,11 +3632,18 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "[]"
             ],
             "path": "src/plugins/field_formats/common/converters/geo_point.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3078,10 +3653,11 @@
             "label": "transformOptions",
             "description": [],
             "signature": [
-              "{ kind: string; text: string; }[]"
+              "{ kind: string; text: any; }[]"
             ],
             "path": "src/plugins/field_formats/common/converters/geo_point.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3095,6 +3671,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/geo_point.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3118,6 +3695,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/geo_point.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -3131,6 +3709,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/geo_point.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3152,6 +3731,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/geo_point.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3186,6 +3766,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/histogram.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -3204,7 +3785,8 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3214,20 +3796,31 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.HistogramFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3246,17 +3839,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.HistogramFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3266,7 +3864,8 @@
             "label": "allowsNumericalAggregations",
             "description": [],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3280,6 +3879,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3303,6 +3903,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -3316,6 +3917,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/histogram.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3337,6 +3939,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/histogram.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3371,6 +3974,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/ip.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -3389,17 +3993,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/ip.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.IpFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/ip.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3409,10 +4018,17 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/ip.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3426,6 +4042,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/ip.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -3439,6 +4056,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/ip.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3467,6 +4085,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/number.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -3485,17 +4104,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/number.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.NumberFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/number.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3514,17 +4138,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/number.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.NumberFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/number.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3534,7 +4163,8 @@
             "label": "allowsNumericalAggregations",
             "description": [],
             "path": "src/plugins/field_formats/common/converters/number.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3559,6 +4189,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/percent.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -3577,17 +4208,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.PercentFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3606,17 +4242,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.PercentFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3626,7 +4267,8 @@
             "label": "allowsNumericalAggregations",
             "description": [],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3637,11 +4279,18 @@
             "description": [],
             "signature": [
               "() => { pattern: ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "; fractional: boolean; }"
             ],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3657,6 +4306,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -3670,6 +4320,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/percent.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3704,6 +4355,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/relative_date.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -3722,17 +4374,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/relative_date.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.RelativeDateFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/relative_date.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3742,10 +4399,17 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/relative_date.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3759,6 +4423,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/relative_date.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -3772,6 +4437,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/relative_date.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3806,6 +4472,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -3824,17 +4491,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.StaticLookupFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3844,11 +4516,18 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "[]"
             ],
             "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3862,6 +4541,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3877,6 +4557,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -3890,6 +4571,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3924,6 +4606,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/string.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -3942,17 +4625,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.StringFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3962,11 +4650,18 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "[]"
             ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3976,10 +4671,11 @@
             "label": "transformOptions",
             "description": [],
             "signature": [
-              "({ kind: boolean; text: string; } | { kind: string; text: string; })[]"
+              "({ kind: boolean; text: any; } | { kind: string; text: any; })[]"
             ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -3993,6 +4689,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -4012,10 +4709,11 @@
                 "section": "def-common.TextContextTypeOptions",
                 "text": "TextContextTypeOptions"
               },
-              " | undefined) => string"
+              " | undefined) => any"
             ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -4029,6 +4727,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/string.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4050,6 +4749,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/string.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4075,6 +4775,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -4088,6 +4789,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/string.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4109,6 +4811,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/string.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4143,6 +4846,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/truncate.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -4161,17 +4865,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/truncate.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.TruncateFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/truncate.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -4181,10 +4890,17 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/truncate.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -4198,6 +4914,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/truncate.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -4211,6 +4928,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/truncate.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4245,6 +4963,7 @@
         ],
         "path": "src/plugins/field_formats/common/converters/url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -4263,17 +4982,22 @@
               }
             ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.UrlFormat.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -4283,11 +5007,18 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "[]"
             ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -4297,10 +5028,11 @@
             "label": "urlTypes",
             "description": [],
             "signature": [
-              "{ kind: string; text: string; }[]"
+              "{ kind: string; text: any; }[]"
             ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -4314,6 +5046,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -4323,7 +5056,13 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   " & ",
                   {
                     "pluginId": "fieldFormats",
@@ -4335,6 +5074,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/url.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4352,6 +5092,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -4367,6 +5108,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -4380,6 +5122,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/url.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4405,6 +5148,7 @@
             ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -4418,6 +5162,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/url.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4439,6 +5184,7 @@
                 ],
                 "path": "src/plugins/field_formats/common/converters/url.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4461,6 +5207,7 @@
         ],
         "path": "src/plugins/field_formats/common/utils/highlight/highlight_request.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -4474,6 +5221,7 @@
             ],
             "path": "src/plugins/field_formats/common/utils/highlight/highlight_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -4491,6 +5239,7 @@
         "description": [],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -4512,6 +5261,7 @@
             ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -4525,7 +5275,8 @@
                   "any"
                 ],
                 "path": "src/plugins/field_formats/common/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "fieldFormats",
@@ -4545,7 +5296,8 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -4569,6 +5321,7 @@
             ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -4582,7 +5335,8 @@
                   "any"
                 ],
                 "path": "src/plugins/field_formats/common/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "fieldFormats",
@@ -4602,7 +5356,8 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -4620,6 +5375,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -4632,7 +5388,8 @@
               "{ origin: string; pathname?: string | undefined; basePath?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4648,6 +5405,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -4660,7 +5418,8 @@
               "{ name: string; } | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -4673,7 +5432,8 @@
               "{ highlight?: Record<string, string[]> | undefined; } | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -4686,7 +5446,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4702,6 +5463,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -4714,7 +5476,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -4727,7 +5490,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4743,6 +5507,7 @@
         "description": [],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -4766,6 +5531,7 @@
         ],
         "path": "src/plugins/field_formats/common/constants/base_formatters.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4777,11 +5543,18 @@
         "description": [],
         "signature": [
           "{ id: string; params: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           "; es?: boolean | undefined; }"
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4812,6 +5585,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -4830,6 +5604,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4843,7 +5618,13 @@
         ],
         "signature": [
           "(new (params?: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           " | undefined, getConfig?: ",
           {
             "pluginId": "fieldFormats",
@@ -4853,7 +5634,13 @@
             "text": "FieldFormatsGetConfigFn"
           },
           "<",
-          "Serializable",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Serializable",
+            "text": "Serializable"
+          },
           "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -4866,6 +5653,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4878,11 +5666,18 @@
           "\nParams provided when creating a formatter.\nParams are vary per formatter\n\nTODO: support strict typing for params depending on format type\nhttps://github.com/elastic/kibana/issues/108158"
         ],
         "signature": [
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           " & P"
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4897,6 +5692,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4913,6 +5709,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -4923,7 +5720,8 @@
             "label": "key",
             "description": [],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -4936,7 +5734,8 @@
               "T | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4949,7 +5748,7 @@
         "label": "FieldFormatsStartCommon",
         "description": [],
         "signature": [
-          "{ deserialize: ",
+          "{ has: (id: string) => boolean; deserialize: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -4958,9 +5757,21 @@
             "text": "FormatFactory"
           },
           "; getDefaultConfig: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -4986,9 +5797,21 @@
             "text": "FieldFormatInstanceType"
           },
           " | undefined; getDefaultType: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -4998,19 +5821,61 @@
             "text": "FieldFormatInstanceType"
           },
           " | undefined; getTypeNameByEsTypes: (esTypes: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           " | undefined; getDefaultTypeName: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           " | ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           "; getInstance: (formatId: string, params?: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5020,11 +5885,29 @@
             "text": "FieldFormat"
           },
           "; getDefaultInstancePlain: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined, params?: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5034,11 +5917,29 @@
             "text": "FieldFormat"
           },
           "; getDefaultInstanceCacheResolver: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => string; getByFieldType: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5048,11 +5949,29 @@
             "text": "FieldFormatInstanceType"
           },
           "[]; getDefaultInstance: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined, params?: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5069,10 +5988,11 @@
             "section": "def-common.FieldFormatConfig",
             "text": "FieldFormatConfig"
           },
-          ">) => void; has: (id: string) => boolean; }"
+          ">) => void; }"
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5110,6 +6030,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -5138,7 +6059,8 @@
               "<P>> | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5155,6 +6077,7 @@
         ],
         "path": "src/plugins/field_formats/common/content_types/html_content_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5179,6 +6102,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -5192,7 +6116,8 @@
               "any"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -5212,7 +6137,8 @@
               " | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5235,6 +6161,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5254,7 +6181,13 @@
             "text": "FieldFormatsGetConfigFn"
           },
           "<",
-          "Serializable",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Serializable",
+            "text": "Serializable"
+          },
           ">, metaParamsOptions?: ",
           {
             "pluginId": "fieldFormats",
@@ -5271,7 +6204,7 @@
             "section": "def-common.FieldFormatInstanceType",
             "text": "FieldFormatInstanceType"
           },
-          "[]) => void; deserialize: ",
+          "[]) => void; has: (id: string) => boolean; deserialize: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -5288,9 +6221,21 @@
             "text": "FieldFormatInstanceType"
           },
           "[]) => void; getDefaultConfig: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -5316,9 +6261,21 @@
             "text": "FieldFormatInstanceType"
           },
           " | undefined; getDefaultType: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -5328,19 +6285,61 @@
             "text": "FieldFormatInstanceType"
           },
           " | undefined; getTypeNameByEsTypes: (esTypes: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           " | undefined; getDefaultTypeName: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           " | ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           "; getInstance: (formatId: string, params?: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5350,11 +6349,29 @@
             "text": "FieldFormat"
           },
           "; getDefaultInstancePlain: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined, params?: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5364,11 +6381,29 @@
             "text": "FieldFormat"
           },
           "; getDefaultInstanceCacheResolver: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => string; getByFieldType: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5378,11 +6413,29 @@
             "text": "FieldFormatInstanceType"
           },
           "[]; getDefaultInstance: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined, params?: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5399,10 +6452,11 @@
             "section": "def-common.FieldFormatConfig",
             "text": "FieldFormatConfig"
           },
-          ">) => void; has: (id: string) => boolean; }"
+          ">) => void; }"
         ],
         "path": "src/plugins/field_formats/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5419,6 +6473,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5433,6 +6488,7 @@
         ],
         "path": "src/plugins/field_formats/common/content_types/text_content_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5457,6 +6513,7 @@
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -5470,7 +6527,8 @@
               "any"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -5490,7 +6548,8 @@
               " | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5506,6 +6565,7 @@
         "description": [],
         "path": "src/plugins/field_formats/common/constants/color_default.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fieldFormats",
@@ -5515,7 +6575,8 @@
             "label": "range",
             "description": [],
             "path": "src/plugins/field_formats/common/constants/color_default.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -5525,7 +6586,8 @@
             "label": "regex",
             "description": [],
             "path": "src/plugins/field_formats/common/constants/color_default.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -5535,7 +6597,8 @@
             "label": "text",
             "description": [],
             "path": "src/plugins/field_formats/common/constants/color_default.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fieldFormats",
@@ -5545,7 +6608,8 @@
             "label": "background",
             "description": [],
             "path": "src/plugins/field_formats/common/constants/color_default.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5562,6 +6626,7 @@
         ],
         "path": "src/plugins/field_formats/common/constants/ui_settings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

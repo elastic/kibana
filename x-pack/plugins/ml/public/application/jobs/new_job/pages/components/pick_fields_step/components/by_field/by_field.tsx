@@ -23,12 +23,14 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
   const allCategoryFields = useMemo(
     () =>
       [...newJobCapsService.categoryFields, ...runtimeCategoryFields].sort((a, b) =>
         a.name.localeCompare(b.name)
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -46,11 +48,13 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
       jobCreator.addInfluencer(byField.name);
     }
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [byField]);
 
   useEffect(() => {
     const bf = jobCreator.getByField(detectorIndex);
     setByField(bf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (
@@ -85,6 +89,7 @@ function useFilteredCategoryFields(
     } else {
       setFields(allCategoryFields);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return fields;

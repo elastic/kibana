@@ -35,14 +35,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_logs');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_security_endpoint');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_siem_auditbeat');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_siem_packetbeat');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_siem_winlogbeat');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_security_auditbeat');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_security_packetbeat');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_security_winlogbeat');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/bm_classification');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_metricbeat');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_siem_cloudtrail');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_security_cloudtrail');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_metrics_ui');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_apache_data_stream');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_nginx_data_stream');
@@ -67,5 +67,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./system'));
     loadTestFile(require.resolve('./trained_models'));
+    loadTestFile(require.resolve('./notifications'));
   });
 }

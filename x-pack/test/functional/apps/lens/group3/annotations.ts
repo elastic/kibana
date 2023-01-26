@@ -72,11 +72,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).click();
       expect(
         await find.existsByCssSelector(
-          '[data-test-subj="lnsXY_textVisibility_name"][class$="isSelected"]'
+          '[data-test-subj="lnsXY_textVisibility_name"][class*="euiButtonGroupButton-isSelected"]'
         )
       ).to.be(true);
       await PageObjects.lens.closeDimensionEditor();
-      await testSubjects.existOrFail('xyVisAnnotationText');
+      await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
+    });
+
+    it('should add query annotation layer and allow edition', async () => {
+      await PageObjects.lens.removeLayer(1);
+      await PageObjects.lens.createLayer('annotations');
+
+      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      expect(
+        await (
+          await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
+        ).getVisibleText()
+      ).to.eql('Event');
+      await testSubjects.click('lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
+      await testSubjects.click('lnsXY_annotation_query');
+      await PageObjects.lens.configureQueryAnnotation({
+        queryString: '*',
+        timeField: 'utc_time',
+        textDecoration: { type: 'name' },
+        extraFields: ['clientip'],
+      });
+      await PageObjects.lens.closeDimensionEditor();
+
       await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
     });
   });

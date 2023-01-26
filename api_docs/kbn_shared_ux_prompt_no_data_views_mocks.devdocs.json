@@ -34,7 +34,13 @@
             "text": "StorybookMock"
           },
           " extends ",
-          "AbstractStorybookMock",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
           "<",
           "NoDataViewsPromptProps",
           ", ",
@@ -43,6 +49,7 @@
         ],
         "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -53,6 +60,7 @@
             "description": [],
             "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -64,6 +72,7 @@
             "description": [],
             "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -74,6 +83,7 @@
                 "description": [],
                 "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -83,7 +93,8 @@
                     "label": "control",
                     "description": [],
                     "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -93,7 +104,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -106,6 +118,7 @@
                 "description": [],
                 "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -118,7 +131,8 @@
                       "(string | undefined)[]"
                     ],
                     "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -129,6 +143,7 @@
                     "description": [],
                     "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -138,7 +153,8 @@
                         "label": "type",
                         "description": [],
                         "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
-                        "deprecated": false
+                        "deprecated": false,
+                        "trackAdoption": false
                       }
                     ]
                   }
@@ -157,7 +173,8 @@
               "never[]"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -173,6 +190,7 @@
             ],
             "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -197,6 +215,7 @@
             ],
             "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -216,6 +235,7 @@
                 ],
                 "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -243,6 +263,7 @@
         ],
         "path": "packages/shared-ux/prompt/no_data_views/mocks/src/jest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -258,6 +279,7 @@
             ],
             "path": "packages/shared-ux/prompt/no_data_views/mocks/src/jest.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -280,6 +302,7 @@
         ],
         "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

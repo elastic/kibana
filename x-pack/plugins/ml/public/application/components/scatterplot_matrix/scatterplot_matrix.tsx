@@ -29,7 +29,6 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorMessage } from '../../../../common';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
-import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
 import { getCombinedRuntimeMappings } from '../data_grid';
 
 import { useMlApiContext } from '../../contexts/kibana';
@@ -81,13 +80,25 @@ const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, toolti
   </>
 );
 
+function filterChartableItems(items: estypes.SearchHit[], resultsField?: string) {
+  return (
+    items
+      .map((d) =>
+        getProcessedFields(d.fields ?? {}, (key: string) =>
+          key.startsWith(`${resultsField}.feature_importance`)
+        )
+      )
+      .filter((d) => !Object.keys(d).some((field) => Array.isArray(d[field]))) ?? []
+  );
+}
+
 export interface ScatterplotMatrixProps {
   fields: string[];
   index: string;
   resultsField?: string;
   color?: string;
   legendType?: LegendType;
-  searchQuery?: ResultsSearchQuery;
+  searchQuery?: estypes.QueryDslQueryContainer;
   runtimeMappings?: RuntimeMappings;
   indexPattern?: DataView;
 }
@@ -128,7 +139,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
 
   // contains the fetched documents and columns to be passed on to the Vega spec.
   const [splom, setSplom] = useState<
-    { items: any[]; columns: string[]; messages: string[] } | undefined
+    { items: any[]; backgroundItems: any[]; columns: string[]; messages: string[] } | undefined
   >();
 
   // formats the array of field names for EuiComboBox
@@ -165,7 +176,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
 
   useEffect(() => {
     if (fields.length === 0) {
-      setSplom({ columns: [], items: [], messages: [] });
+      setSplom({ columns: [], items: [], backgroundItems: [], messages: [] });
       setIsLoading(false);
       return;
     }
@@ -184,7 +195,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           ...(includeOutlierScoreField ? [outlierScoreField] : []),
         ];
 
-        const query = randomizeQuery
+        const foregroundQuery = randomizeQuery
           ? {
               function_score: {
                 query: searchQuery,
@@ -193,33 +204,65 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             }
           : searchQuery;
 
+        let backgroundQuery;
+        // If it's not the default query then we do a background search excluding the current query
+        if (
+          searchQuery &&
+          ((searchQuery.match_all && Object.keys(searchQuery.match_all).length > 0) ||
+            (searchQuery.bool && Object.keys(searchQuery.bool).length > 0))
+        ) {
+          backgroundQuery = randomizeQuery
+            ? {
+                function_score: {
+                  query: { bool: { must_not: [searchQuery] } },
+                  random_score: { seed: 10, field: '_seq_no' },
+                },
+              }
+            : { bool: { must_not: [searchQuery] } };
+        }
+
         const combinedRuntimeMappings =
           indexPattern && getCombinedRuntimeMappings(indexPattern, runtimeMappings);
 
-        const resp: estypes.SearchResponse = await esSearch({
-          index,
-          body: {
-            fields: queryFields,
-            _source: false,
-            query,
-            from: 0,
-            size: fetchSize,
-            ...(isRuntimeMappings(combinedRuntimeMappings)
-              ? { runtime_mappings: combinedRuntimeMappings }
-              : {}),
-          },
-        });
+        const body = {
+          fields: queryFields,
+          _source: false,
+          query: foregroundQuery,
+          from: 0,
+          size: fetchSize,
+          ...(isRuntimeMappings(combinedRuntimeMappings)
+            ? { runtime_mappings: combinedRuntimeMappings }
+            : {}),
+        };
+
+        const promises = [
+          esSearch({
+            index,
+            body,
+          }),
+        ];
+
+        if (backgroundQuery) {
+          promises.push(
+            esSearch({
+              index,
+              body: { ...body, query: backgroundQuery },
+            })
+          );
+        }
+
+        const [foregroundResp, backgroundResp] = await Promise.all<estypes.SearchResponse>(
+          promises
+        );
 
         if (!options.didCancel) {
-          const items = resp.hits.hits
-            .map((d) =>
-              getProcessedFields(d.fields ?? {}, (key: string) =>
-                key.startsWith(`${resultsField}.feature_importance`)
-              )
-            )
-            .filter((d) => !Object.keys(d).some((field) => Array.isArray(d[field])));
+          const items = filterChartableItems(foregroundResp.hits.hits, resultsField);
+          const backgroundItems = filterChartableItems(
+            backgroundResp?.hits.hits ?? [],
+            resultsField
+          );
 
-          const originalDocsCount = resp.hits.hits.length;
+          const originalDocsCount = foregroundResp.hits.hits.length;
           const filteredDocsCount = originalDocsCount - items.length;
 
           if (originalDocsCount === filteredDocsCount) {
@@ -229,7 +272,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                   'All fetched documents included fields with arrays of values and cannot be visualized.',
               })
             );
-          } else if (resp.hits.hits.length !== items.length) {
+          } else if (foregroundResp.hits.hits.length !== items.length) {
             messages.push(
               i18n.translate('xpack.ml.splom.arrayFieldsWarningMessage', {
                 defaultMessage:
@@ -242,12 +285,17 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             );
           }
 
-          setSplom({ columns: fields, items, messages });
+          setSplom({ columns: fields, items, backgroundItems, messages });
           setIsLoading(false);
         }
       } catch (e) {
         setIsLoading(false);
-        setSplom({ columns: [], items: [], messages: [extractErrorMessage(e)] });
+        setSplom({
+          columns: [],
+          items: [],
+          backgroundItems: [],
+          messages: [extractErrorMessage(e)],
+        });
       }
     }
 
@@ -257,6 +305,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       options.didCancel = true;
     };
     // stringify the fields array and search, otherwise the comparator will trigger on new but identical instances.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchSize, JSON.stringify({ fields, searchQuery }), index, randomizeQuery, resultsField]);
 
   const vegaSpec = useMemo(() => {
@@ -264,10 +313,11 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       return;
     }
 
-    const { items, columns } = splom;
+    const { items, backgroundItems, columns } = splom;
 
     return getScatterplotMatrixVegaLiteSpec(
       items,
+      backgroundItems,
       columns,
       euiTheme,
       resultsField,
@@ -275,6 +325,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       legendType,
       dynamicSize
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resultsField, splom, color, legendType, dynamicSize]);
 
   return (
@@ -407,7 +458,25 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             </>
           )}
 
-          {splom.items.length > 0 && <VegaChart vegaSpec={vegaSpec} />}
+          {splom.items.length > 0 && (
+            <>
+              <VegaChart vegaSpec={vegaSpec} />
+              {splom.backgroundItems.length ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiFormRow
+                    fullWidth
+                    helpText={i18n.translate('xpack.ml.splom.backgroundLayerHelpText', {
+                      defaultMessage:
+                        "If the data points match your filter, they're shown in color; otherwise, they're blurred gray.",
+                    })}
+                  >
+                    <></>
+                  </EuiFormRow>
+                </>
+              ) : null}
+            </>
+          )}
         </div>
       )}
     </>

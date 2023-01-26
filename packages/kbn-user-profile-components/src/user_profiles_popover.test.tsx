@@ -8,10 +8,11 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+import { UserProfile } from './user_profile';
 
 import { UserProfilesPopover } from './user_profiles_popover';
 
-const userProfiles = [
+const userProfiles: UserProfile[] = [
   {
     uid: 'u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0',
     enabled: true,

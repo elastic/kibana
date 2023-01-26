@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target_node/src/plugin_list/generate_plugin_list.js
+  You can update the template within packages/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts
 
 ////
 
@@ -71,7 +71,7 @@ as uiSettings within the code.
 
 |{kib-repo}blob/{branch}/src/plugins/data_views/README.mdx[dataViews]
 |The data views API provides a consistent method of structuring and formatting documents
-and field lists across the various Kibana apps. Its typically used in conjunction with
+and field lists across the various Kibana apps. It's typically used in conjunction with
 <DocLink id="kibDevTutorialDataSearchAndSessions" section="high-level-search" text="SearchSource" /> for composing queries.
 
 
@@ -176,8 +176,29 @@ for use in their own application.
 |Index pattern fields formatters
 
 
+|{kib-repo}blob/{branch}/src/plugins/files/README.md[files]
+|The files service provides functionality to manage, retrieve, share files in Kibana.
+
+
+|{kib-repo}blob/{branch}/src/plugins/files_management/README.md[filesManagement]
+|Minimal interface for admins to manage files in Kibana.
+
+
+|{kib-repo}blob/{branch}/src/plugins/ftr_apis/README.md[ftrApis]
+|This plugin exposes a set of APIs used internally during functional tests by the FTR.
+
+
+|{kib-repo}blob/{branch}/src/plugins/guided_onboarding/README.md[guidedOnboarding]
+|This plugin contains the code for the Guided Onboarding project. Guided onboarding consists of guides for Solutions (Enterprise Search, Observability, Security) that can be completed as a checklist of steps. The guides help users to ingest their data and to navigate to the correct Solutions pages.
+
+
 |{kib-repo}blob/{branch}/src/plugins/home/README.md[home]
 |Moves the legacy ui/registry/feature_catalogue module for registering "features" that should be shown in the home page's feature catalogue to a service within a "home" plugin. The feature catalogue refered to here should not be confused with the "feature" plugin for registering features used to derive UI capabilities for feature controls.
+
+
+|{kib-repo}blob/{branch}/src/plugins/image_embeddable/README.md[imageEmbeddable]
+|This plugin contains image embeddable. Image embeddable allows to embed images into the dashboard.
+Images can be added either by URL or by uploading the image file via file service.
 
 
 |{kib-repo}blob/{branch}/src/plugins/input_control_vis/README.md[inputControlVis]
@@ -235,6 +256,10 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 
 |{kib-repo}blob/{branch}/src/plugins/saved_objects/README.md[savedObjects]
 |NOTE: This plugin is deprecated and will be removed in 8.0. See https://github.com/elastic/kibana/issues/46435 for more information.
+
+
+|{kib-repo}blob/{branch}/src/plugins/saved_objects_finder/README.md[savedObjectsFinder]
+|The savedObjectsFinder plugin exposes a UI for finding saved objects on the client side.
 
 
 |{kib-repo}blob/{branch}/src/plugins/saved_objects_management/README.md[savedObjectsManagement]
@@ -301,6 +326,10 @@ In general this plugin provides:
 
 |{kib-repo}blob/{branch}/src/plugins/unified_field_list/README.md[unifiedFieldList]
 |This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
+
+
+|{kib-repo}blob/{branch}/src/plugins/unified_histogram/README.md[unifiedHistogram]
+|The unifiedHistogram plugin provides UI components to create a layout including a resizable histogram and a main display.
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
@@ -416,12 +445,45 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The cloud plugin adds Cloud-specific features to Kibana.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat/README.md[cloudChat]
+|Integrates with DriftChat in order to provide live support to our Elastic Cloud users. This plugin should only run on Elastic Cloud.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
+|Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_defend/README.md[cloudDefend]
+|This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
+|The Cloud Experiments Service provides the necessary APIs to implement A/B testing scenarios, fetching the variations in configuration and reporting back metrics to track conversion rates of the experiments.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_full_story/README.md[cloudFullStory]
+|Integrates with FullStory in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_gain_sight/README.md[cloudGainsight]
+|Integrates with Gainsight in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_links/README.md[cloudLinks]
+|Adds all the links to the Elastic Cloud console.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_security_posture/README.md[cloudSecurityPosture]
 |Cloud Posture automates the identification and remediation of risks across cloud infrastructures
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cross_cluster_replication/README.md[crossClusterReplication]
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/custom_branding/README.md[customBranding]
+|This is a plugin to configure custom branding.
+This plugin is currently under active development; do not use.
 
 
 |<<dashboard-enhanced-plugin>>
@@ -457,10 +519,6 @@ activities.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/files/README.md[files]
-|File upload, download, sharing, and serving over HTTP implementation in Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
@@ -557,6 +615,10 @@ Elastic.
 |This plugin allows for other plugins to add data to Kibana stack monitoring documents.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/notifications/README.md[notifications]
+|The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
@@ -567,6 +629,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/painless_lab/README.md[painlessLab]
 |This plugin helps users learn how to use the Painless scripting language.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/profiling/README.md[profiling]
+|undefined
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/remote_clusters/README.md[remoteClusters]
@@ -633,6 +699,10 @@ the alertTypes by the Stack in the alerting plugin, register associated HTTP
 routes, etc.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/stack_connectors/README.md[stackConnectors]
+|The stack_connectors plugin provides connector types shipped with Kibana, built on top of the framework provided in the actions plugin.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/synthetics/README.md[synthetics]
 |The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
 in their infrastructure.
@@ -640,7 +710,6 @@ in their infrastructure.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/task_manager/README.md[taskManager]
 |The task manager is a generic system for running background tasks.
-Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-production-considerations.html
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/telemetry_collection_xpack/README.md[telemetryCollectionXpack]
@@ -670,7 +739,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
-|Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. It will only be enabled on the last minor before the next major release. This is controlled via the config: xpack.upgrade_assistant.readonly (#101296).
+|Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]

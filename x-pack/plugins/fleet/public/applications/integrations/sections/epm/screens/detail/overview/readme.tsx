@@ -8,6 +8,7 @@
 import { EuiLoadingContent, EuiText } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { useLinks, sendGetFileByPath } from '../../../../../hooks';
 
@@ -44,7 +45,11 @@ export function Readme({
     <Fragment>
       {markdown !== undefined ? (
         <EuiText grow={true}>
-          <ReactMarkdown transformImageUri={handleImageUri} components={markdownRenderers}>
+          <ReactMarkdown
+            transformImageUri={handleImageUri}
+            components={markdownRenderers}
+            remarkPlugins={[remarkGfm]}
+          >
             {markdown}
           </ReactMarkdown>
         </EuiText>

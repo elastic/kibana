@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-/**
- * TODO: Replace these with kbn packaged versions once we have those available to us.
- * At the moment imports from runtime plugins into packages are not supported.
- * import type { Headers } from '@kbn/core/server';
- */
-type Headers = Record<string, string | string[] | undefined>;
+import type { Headers } from '@kbn/core-http-server';
 
 function containsGzip(s: string) {
   return s

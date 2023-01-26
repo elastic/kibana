@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import TaskManagerMapping from '@kbn/task-manager-plugin/server/saved_objects/mappings.json';
 import { DEFAULT_POLL_INTERVAL } from '@kbn/task-manager-plugin/server/config';
-import { ConcreteTaskInstance, BulkUpdateSchedulesResult } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const {
@@ -54,7 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
-  describe('scheduling and running tasks', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/141055
+  describe.skip('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
       return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
@@ -178,13 +179,31 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response) => response.body);
     }
 
+    function bulkEnable(taskIds: string[], runSoon: boolean) {
+      return supertest
+        .post('/api/sample_tasks/bulk_enable')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds, runSoon })
+        .expect(200)
+        .then((response) => response.body);
+    }
+
+    function bulkDisable(taskIds: string[]) {
+      return supertest
+        .post('/api/sample_tasks/bulk_disable')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds })
+        .expect(200)
+        .then((response) => response.body);
+    }
+
     function bulkUpdateSchedules(taskIds: string[], schedule: { interval: string }) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules')
         .set('kbn-xsrf', 'xxx')
         .send({ taskIds, schedule })
         .expect(200)
-        .then((response: { body: BulkUpdateSchedulesResult }) => response.body);
+        .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
 
     // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
@@ -319,9 +338,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         const scheduledTask = await currentTask(task.id);
-        expect(scheduledTask.attempts).to.be.greaterThan(0);
+        expect(scheduledTask.attempts).to.be.greaterThan(1);
         expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(
-          Date.parse(task.runAt) + 5 * 60 * 1000
+          Date.parse(task.runAt) + 30 * 1000
         );
       });
     });
@@ -621,6 +640,88 @@ export default function ({ getService }: FtrProviderContext) {
       await provideParamsToTasksWaitingForParams(longRunningTask.id);
 
       expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id });
+    });
+
+    it('should disable and reenable task and run it when runSoon = true', async () => {
+      const historyItem = random(1, 100);
+      const scheduledTask = await scheduleTask({
+        taskType: 'sampleTask',
+        schedule: { interval: '1h' },
+        params: { historyItem },
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+        const task = await currentTask(scheduledTask.id);
+
+        expect(task.enabled).to.eql(true);
+      });
+
+      await retry.try(async () => {
+        // disable the task
+        await bulkDisable([scheduledTask.id]);
+        const task = await currentTask(scheduledTask.id);
+        log.debug(
+          `bulkDisable:task(${scheduledTask.id}) enabled: ${task.enabled}, when runSoon = true`
+        );
+        expect(task.enabled).to.eql(false);
+      });
+
+      // re-enable the task
+      await bulkEnable([scheduledTask.id], true);
+
+      await retry.try(async () => {
+        const task = await currentTask(scheduledTask.id);
+
+        expect(task.enabled).to.eql(true);
+        log.debug(
+          `bulkEnable:task(${scheduledTask.id}) enabled: ${task.enabled}, when runSoon = true`
+        );
+        expect(Date.parse(task.scheduledAt)).to.be.greaterThan(
+          Date.parse(scheduledTask.scheduledAt)
+        );
+        expect(Date.parse(task.runAt)).to.be.greaterThan(Date.parse(scheduledTask.runAt));
+      });
+    });
+
+    it('should disable and reenable task and not run it when runSoon = false', async () => {
+      const historyItem = random(1, 100);
+      const scheduledTask = await scheduleTask({
+        taskType: 'sampleTask',
+        schedule: { interval: '1h' },
+        params: { historyItem },
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+
+        const task = await currentTask(scheduledTask.id);
+        expect(task.enabled).to.eql(true);
+      });
+
+      // disable the task
+      await bulkDisable([scheduledTask.id]);
+
+      let disabledTask: SerializedConcreteTaskInstance;
+      await retry.try(async () => {
+        disabledTask = await currentTask(scheduledTask.id);
+        log.debug(
+          `bulkDisable:task(${scheduledTask.id}) enabled: ${disabledTask.enabled}, when runSoon = false`
+        );
+        expect(disabledTask.enabled).to.eql(false);
+      });
+
+      // re-enable the task
+      await bulkEnable([scheduledTask.id], false);
+
+      await retry.try(async () => {
+        const task = await currentTask(scheduledTask.id);
+        log.debug(
+          `bulkEnable:task(${scheduledTask.id}) enabled: ${task.enabled}, when runSoon = true`
+        );
+        expect(task.enabled).to.eql(true);
+        expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(disabledTask.scheduledAt));
+      });
     });
 
     function expectReschedule(

@@ -13,7 +13,7 @@ import {
   EuiSelect,
   EuiText,
   EuiSpacer,
-  EuiPageTemplate,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiPanel,
   EuiCallOut,
 } from '@elastic/eui';
@@ -148,7 +148,7 @@ function getBaseAttributes(
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: finalDataLayer,
           },
@@ -311,8 +311,8 @@ function getLensAttributesPartition(
   const pieConfig: PieVisualizationState = {
     layers: [
       {
-        groups: ['col1'],
-        metric: 'col2',
+        primaryGroups: ['col1'],
+        metrics: ['col2'],
         layerId: 'layer1',
         layerType: 'data',
         numberDisplay: 'percent',

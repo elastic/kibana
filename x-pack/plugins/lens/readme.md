@@ -31,7 +31,7 @@ When adding visualizations to a solution page, there are multiple ways to approa
    * Limited data processing options - if the Lens UI doesn't support it, it can't be used
    * Limited visualization options - if Lens can't do it, it's not possible
 * #### **Using custom data fetching and rendering**
-  In case the disadvantages of using the Lens embeddable heavily affect your use case, it sometimes makes sense to roll your own data fetching and rendering by using the underlying APIs of search service and `elastic-charts` directly. This allows a high degree of flexibility when it comes to data processing, efficiently querying data for multiple charts in a single query and adjusting small details in how charts are rendered. However, do not choose these option lightly as maintenance as well as initial development effort will most likely be much higher than by using the Lens embeddable directly. In this case, almost always an "Open in Lens" button can still be offered to the user to drill down and further explore the data by generating a Lens configuration which is similar to the displayed visualization given the possibilities of Lens. Keep in mind that for the "Open in Lens" flow, the most important property isn't perfect fidelity of the chart but retaining the mental context of the user when switching so they don't have to start over. It's also possible to mix this approach with Lens embeddables on a single page.  **Note**: In this situation, please let the VisEditors team know what features you are missing / why you chose not to use Lens.
+  In case the disadvantages of using the Lens embeddable heavily affect your use case, it sometimes makes sense to roll your own data fetching and rendering by using the underlying APIs of search service and `elastic-charts` directly. This allows a high degree of flexibility when it comes to data processing, efficiently querying data for multiple charts in a single query and adjusting small details in how charts are rendered. However, do not choose these option lightly as maintenance as well as initial development effort will most likely be much higher than by using the Lens embeddable directly. In this case, almost always an "Open in Lens" button can still be offered to the user to drill down and further explore the data by generating a Lens configuration which is similar to the displayed visualization given the possibilities of Lens. Keep in mind that for the "Open in Lens" flow, the most important property isn't perfect fidelity of the chart but retaining the mental context of the user when switching so they don't have to start over. It's also possible to mix this approach with Lens embeddables on a single page.  **Note**: In this situation, please let the Visualizations team know what features you are missing / why you chose not to use Lens.
 
   Pros:
    * Full flexibility in data fetching optimization and chart rendering
@@ -82,7 +82,7 @@ References (`references`) are regular saved object references forming a graph of
 
 ### Datasource state
 
-The data source state (`state.datasourceStates.indexPattern.layers`) contains the configuration state of the data fetching and processing part of Lens. It's not specific to a certain representation (xy, pie, gauge, ...), but instead it defines a data table per layer made out of columns with various properties. This data table is passed over to the visualization state which maps it to various dimensions of the specific visualization. Layer and columns have unique ids which are shared amongst visualization and datasource - it's important to make sure they are always in sync. The keys of the `state.datasourceStates.indexPattern.layers` object are the layer ids. Lens editor chooses uuids for these, but when programmatically generating Lens attributes, any string can be used for them. The `layers[<layer id>].columns` object is constructed in a similar way (keys represent the column ids). The `operationType` property defines the type of the column, other properties depend on the specific operation. Types for individual parts of the datasource state are provided (check the `lens/public` export, e.g. there's the `MaxIndexPatternColumn` for a column of operation type `max`)
+The data source state (`state.datasourceStates.formBased.layers`) contains the configuration state of the data fetching and processing part of Lens. It's not specific to a certain representation (xy, pie, gauge, ...), but instead it defines a data table per layer made out of columns with various properties. This data table is passed over to the visualization state which maps it to various dimensions of the specific visualization. Layer and columns have unique ids which are shared amongst visualization and datasource - it's important to make sure they are always in sync. The keys of the `state.datasourceStates.formBased.layers` object are the layer ids. Lens editor chooses uuids for these, but when programmatically generating Lens attributes, any string can be used for them. The `layers[<layer id>].columns` object is constructed in a similar way (keys represent the column ids). The `operationType` property defines the type of the column, other properties depend on the specific operation. Types for individual parts of the datasource state are provided (check the `lens/public` export, e.g. there's the `MaxIndexPatternColumn` for a column of operation type `max`)
 
 ### Visualization state
 
@@ -98,7 +98,7 @@ The `EmbeddableComponent` also takes a set of callbacks to react to user interac
 
 ## Handling data views
 
-Currently it's necessary to have a data view saved object to use the Lens embeddable. Use the data view service to find an existing data view for a given index pattern or create a new one if it doesn't exist yet:
+In most cases it makes sense to have a data view saved object to use the Lens embeddable. Use the data view service to find an existing data view for a given index pattern or create a new one if it doesn't exist yet:
 ```ts
 let dataView = (await dataViews.find('my-pattern-*', 1))[0];
 if (!dataView) {
@@ -109,6 +109,47 @@ if (!dataView) {
 }
 const dataViewIdForLens = dataView.id;
 ```
+
+### Ad-hoc data views
+
+In some cases a globally accessible data view is not desirable:
+* You need some special runtime fields which only make sense in the context of that one visualization and you don't want to "pollute" the global data view for all consumers
+* It's a "one-off" visualization which is built on data that's not normally used and having a global data view object for it would be weird
+* You want to allow a read-only user to work with data and no data view exists yet - the user isn't allowed to create data views but they are allowed to access the data
+
+In these situations ad-hoc data views are useful - these are data views which are stored as part of the Lens visualization itself, so they do not show up in other contexts. In the UI you can create these by opening the data view picker, selecting "Create a data view" and then using the "Use without saving" button.
+
+Ad-hoc data views are part of the Lens attributes stored in `state.adHocDataViews`. Each data view is defined by its JSON-serializable `DataViewSpec` object. If a layer is using an ad hoc data view, the reference goes into the `state.internalReferences` array instead of the external `references` array.
+
+Example:
+```json
+"state": {
+  // ...
+  "internalReferences": [
+    {
+      "type": "index-pattern",
+      "id": "adhoc-1",
+      "name": "indexpattern-datasource-layer-layer1"
+    }
+  ],
+  "adHocDataViews": {
+    "adhoc-1": {
+      "id": "adhoc-1",
+      "title": "my-pattern*",
+      "timeFieldName": "@timestamp",
+      "sourceFilters": [],
+      "fieldFormats": {},
+      "runtimeFieldMap": {},
+      "fieldAttrs": {},
+      "allowNoIndex": false,
+      "name": "My ad-hoc data view"
+    }
+  }
+}
+```
+
+**Important!** To prevent conflicts, it's important to not re-use ad-hoc data view ids for different specs. If you change the spec in some way, make sure to also change its id. This even applies across multiple embeddables, sessions, etc. Ideally, the id will be globally unique. You can use the `uuid` package to generate a new unique id every time when you are changing the spec in some way. However, make sure to also not change the id on every single render either, as this will have a substantial performance impact.
+
 ## Refreshing a Lens embeddable
 
 The Lens embeddable is handling data fetching internally, this means as soon as the props change, it will trigger a new request if necessary. However, in some situations it's necessary to trigger a refresh even if the configuration of the chart doesn't change at all. Refreshing is managed using search sessions is Lens. To trigger a refresh without changing the actual configuration of a Lens embeddable, follow these steps:
@@ -117,6 +158,14 @@ The Lens embeddable is handling data fetching internally, this means as soon as 
 * Pass the current session id to the Lens embeddable component via the `searchSessionId` property
 * When refreshing, simply call `session.start` again and update your state - Lens will discard the existing cache and re-fetch even if the query doesn't change at all
 * When unmounting your app, call `session.clear` to end the current session
+
+## Performance considerations
+
+As the Lens embeddable is doing data fetching and processing internally as soon as props are passed to it, it's beneficial to make sure it's not rendered with new props if that's avoidable. Lens is aborting in-flight search requests as soon as the chart configuration changes based on props, but there's still non-trivial work kicked off in multiple parts of the stack. To avoid this, make sure to keep these things in mind:
+* Changing the reference of the `attributes` prop will cause the Lens vis to re-initialize from scratch. Try to keep it stable as long as possible, e.g. by using `useMemo` instead of re-constructing it on the fly on every render
+* Pass time range and filters in via the dedicated props instead of part of the `attributes` to avoid re-initalization. Changing time range or filters might kick off another search request so it makes sense to keep this stable as well, but this can also be controlled somewhat by the session id (see section above)
+* The chart will adjust itself automatically to layout changes, no need to trigger another re-render in this situation
+
 
 ## Getting data tables and requests/responses
 
@@ -149,6 +198,9 @@ Run all tests from the `x-pack` root directory
 - API Functional tests:
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`
+- Performance journeys:
+  - Run `node scripts/functional_tests_server.js --config x-pack/test/performance/journeys/data_stress_test_lens/config.ts`
+  - Run `node scripts/functional_test_runner --config x-pack/test/performance/journeys/data_stress_test_lens/config.ts`
 
 ## Developing tips
 

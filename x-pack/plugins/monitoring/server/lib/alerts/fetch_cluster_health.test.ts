@@ -55,13 +55,18 @@ describe('fetchClusterHealth', () => {
   });
   it('should call ES with correct query', async () => {
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    await fetchClusterHealth(esClient, [
-      { clusterUuid: '1', clusterName: 'foo1' },
-      { clusterUuid: '2', clusterName: 'foo2' },
-    ]);
+    await fetchClusterHealth(
+      esClient,
+      [
+        { clusterUuid: '1', clusterName: 'foo1' },
+        { clusterUuid: '2', clusterName: 'foo2' },
+      ],
+      undefined,
+      '1h'
+    );
     expect(esClient.search).toHaveBeenCalledWith({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.cluster_stats-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*',
       filter_path: [
         'hits.hits._source.cluster_state.status',
         'hits.hits._source.elasticsearch.cluster.stats.status',
@@ -81,12 +86,16 @@ describe('fetchClusterHealth', () => {
                   should: [
                     { term: { type: 'cluster_stats' } },
                     { term: { 'metricset.name': 'cluster_stats' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
+                    {
+                      term: {
+                        'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
+                      },
+                    },
                   ],
                   minimum_should_match: 1,
                 },
               },
-              { range: { timestamp: { gte: 'now-2m' } } },
+              { range: { timestamp: { gte: 'now-1h' } } },
             ],
           },
         },
@@ -108,6 +117,8 @@ describe('fetchClusterHealth', () => {
     await fetchClusterHealth(esClient, [{ clusterUuid: '1', clusterName: 'foo1' }]);
 
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
+    );
   });
 });

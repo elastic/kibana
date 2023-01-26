@@ -138,7 +138,7 @@ export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
             style={xcode}
             PreTag={Line}
             CodeTag={Code}
-            customStyle={{ padding: null, overflowX: null }}
+            customStyle={{ padding: undefined, overflowX: undefined }}
           >
             {line}
           </SyntaxHighlighter>

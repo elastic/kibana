@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
-import { act, RenderResult, waitFor, within } from '@testing-library/react';
+import type { Screen } from '@testing-library/react';
+import { waitFor, within, screen, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { CaseSeverity, CommentType, ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
@@ -34,17 +34,18 @@ import {
   useGetChoicesResponse,
 } from './mock';
 import { FormContext } from './form_context';
-import { CreateCaseFormFields, CreateCaseFormFieldsProps } from './form';
+import type { CreateCaseFormFieldsProps } from './form';
+import { CreateCaseFormFields } from './form';
 import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { Choice } from '../connectors/servicenow/types';
 import userEvent from '@testing-library/user-event';
 import { connectorsMock } from '../../common/mock/connectors';
-import { CaseAttachments } from '../../types';
+import type { CaseAttachments } from '../../types';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
-
-const sampleId = 'case-id';
+import { waitForComponentToUpdate } from '../../common/test_utils';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { useLicense } from '../../common/use_license';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
@@ -60,6 +61,8 @@ jest.mock('../connectors/jira/use_get_single_issue');
 jest.mock('../connectors/jira/use_get_issues');
 jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../../common/lib/kibana');
+jest.mock('../../containers/user_profiles/api');
+jest.mock('../../common/use_license');
 
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
@@ -74,6 +77,9 @@ const useGetChoicesMock = useGetChoices as jest.Mock;
 const postCase = jest.fn();
 const pushCaseToExternalService = jest.fn();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useLicenseMock = useLicense as jest.Mock;
+
+const sampleId = 'case-id';
 
 const defaultPostCase = {
   isLoading: false,
@@ -85,6 +91,8 @@ const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
   connectors: [],
   withSteps: true,
+  owner: ['securitySolution'],
+  draftStorageKey: 'cases.kibana.createCase.description.markdownEditor',
 };
 
 const defaultPostPushToService = {
@@ -93,41 +101,42 @@ const defaultPostPushToService = {
   pushCaseToExternalService,
 };
 
-const fillForm = (wrapper: ReactWrapper) => {
-  wrapper
-    .find(`[data-test-subj="caseTitle"] input`)
-    .first()
-    .simulate('change', { target: { value: sampleData.title } });
-
-  wrapper
-    .find(`[data-test-subj="caseDescription"] textarea`)
-    .first()
-    .simulate('change', { target: { value: sampleData.description } });
-
-  act(() => {
-    (
-      wrapper.find(EuiComboBox).props() as unknown as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }
-    ).onChange(sampleTags.map((tag) => ({ label: tag })));
-  });
+const sampleDataWithoutTags = {
+  ...sampleData,
+  tags: [],
 };
 
-const fillFormReactTestingLib = async (renderResult: RenderResult) => {
-  const titleInput = within(renderResult.getByTestId('caseTitle')).getByTestId('input');
-  userEvent.type(titleInput, sampleData.title);
+const fillFormReactTestingLib = async ({
+  renderer,
+  withTags = false,
+}: {
+  renderer: Screen;
+  withTags?: boolean;
+}) => {
+  const titleInput = within(renderer.getByTestId('caseTitle')).getByTestId('input');
 
-  const descriptionInput = renderResult.container.querySelector(
-    `[data-test-subj="caseDescription"] textarea`
+  userEvent.paste(titleInput, sampleDataWithoutTags.title);
+
+  const descriptionInput = within(renderer.getByTestId('caseDescription')).getByTestId(
+    'euiMarkdownEditorTextArea'
   );
-  if (descriptionInput) {
-    userEvent.type(descriptionInput, sampleData.description);
+
+  userEvent.paste(descriptionInput, sampleDataWithoutTags.description);
+
+  if (withTags) {
+    const caseTags = renderer.getByTestId('caseTags');
+
+    for (const tag of sampleTags) {
+      const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
+      userEvent.type(tagsInput, `${tag}{enter}`);
+    }
   }
-  const caseTags = renderResult.getByTestId('caseTags');
-  for (let i = 0; i < sampleTags.length; i++) {
-    const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
-    userEvent.type(tagsInput, `${sampleTags[i]}{enter}`);
-  }
+};
+
+const waitForFormToRender = async (renderer: Screen) => {
+  await waitFor(() => {
+    expect(renderer.getByTestId('caseTitle')).toBeTruthy();
+  });
 };
 
 describe('Create case', () => {
@@ -135,13 +144,12 @@ describe('Create case', () => {
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
   const createAttachments = jest.fn();
-  let onChoicesSuccess: (values: Choice[]) => void;
   let mockedContext: AppMockRenderer;
 
   beforeAll(() => {
     postCase.mockResolvedValue({
       id: sampleId,
-      ...sampleData,
+      ...sampleDataWithoutTags,
     });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useCreateAttachmentsMock.mockImplementation(() => ({ createAttachments }));
@@ -152,21 +160,19 @@ describe('Create case', () => {
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
-    useGetChoicesMock.mockImplementation(
-      ({ onSuccess }: { onSuccess: (values: Choice[]) => void }) => {
-        onChoicesSuccess = onSuccess;
-        return useGetChoicesResponse;
-      }
-    );
+    useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       data: sampleTags,
       refetch,
     }));
+
     useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
       actionTypeTitle: '.servicenow',
       iconClass: 'logoSecurity',
     });
+
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
   });
 
   beforeEach(() => {
@@ -174,20 +180,28 @@ describe('Create case', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
+  });
+
   describe('Step 1 - Case Fields', () => {
     it('renders correctly', async () => {
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
-      expect(renderResult.getByTestId('caseTitle')).toBeTruthy();
-      expect(renderResult.getByTestId('caseSeverity')).toBeTruthy();
-      expect(renderResult.getByTestId('caseDescription')).toBeTruthy();
-      expect(renderResult.getByTestId('caseTags')).toBeTruthy();
-      expect(renderResult.getByTestId('caseConnectors')).toBeTruthy();
-      expect(renderResult.getByTestId('case-creation-form-steps')).toBeTruthy();
+
+      await waitForFormToRender(screen);
+
+      expect(screen.getByTestId('caseTitle')).toBeTruthy();
+      expect(screen.getByTestId('caseSeverity')).toBeTruthy();
+      expect(screen.getByTestId('caseDescription')).toBeTruthy();
+      expect(screen.getByTestId('createCaseAssigneesComboBox')).toBeTruthy();
+      expect(screen.getByTestId('caseTags')).toBeTruthy();
+      expect(screen.getByTestId('caseConnectors')).toBeTruthy();
+      expect(screen.getByTestId('case-creation-form-steps')).toBeTruthy();
     });
 
     it('should post case on submit click', async () => {
@@ -196,18 +210,23 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await fillFormReactTestingLib(renderResult);
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen, withTags: true });
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
       await waitFor(() => {
-        expect(postCase).toBeCalledWith(sampleData);
+        expect(postCase).toHaveBeenCalled();
       });
+
+      expect(postCase).toBeCalledWith({ ...sampleDataWithoutTags, tags: sampleTags });
     });
 
     it('should post a case on submit click with the selected severity', async () => {
@@ -216,56 +235,57 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await fillFormReactTestingLib(renderResult);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(renderResult.getByTestId('case-severity-selection'));
+      userEvent.click(screen.getByTestId('case-severity-selection'));
       await waitForEuiPopoverOpen();
-      expect(renderResult.getByTestId('case-severity-selection-high')).toBeVisible();
-      userEvent.click(renderResult.getByTestId('case-severity-selection-high'));
 
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      expect(screen.getByTestId('case-severity-selection-high')).toBeVisible();
+
+      userEvent.click(screen.getByTestId('case-severity-selection-high'));
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
       await waitFor(() => {
-        expect(postCase).toBeCalledWith({
-          ...sampleData,
-          severity: CaseSeverity.HIGH,
-        });
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        severity: CaseSeverity.HIGH,
       });
     });
 
-    it('does not submits the title when the length is longer than 64 characters', async () => {
-      const longTitle =
-        'This is a title that should not be saved as it is longer than 64 characters.';
+    it('does not submits the title when the length is longer than 160 characters', async () => {
+      const longTitle = 'a'.repeat(161);
 
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
+      mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
       );
 
-      act(() => {
-        wrapper
-          .find(`[data-test-subj="caseTitle"] input`)
-          .first()
-          .simulate('change', { target: { value: longTitle } });
-        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-      });
+      await waitForFormToRender(screen);
+
+      const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
+      userEvent.paste(titleInput, longTitle);
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find('[data-test-subj="caseTitle"] .euiFormErrorText').text()).toBe(
-          'The length of the title is too long. The maximum length is 64.'
-        );
+        expect(
+          screen.getByText('The length of the name is too long. The maximum length is 160.')
+        ).toBeInTheDocument();
       });
+
       expect(postCase).not.toHaveBeenCalled();
     });
 
@@ -275,57 +295,74 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
-      );
-
-      fillForm(wrapper);
-      wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-
-      await waitFor(() =>
-        expect(postCase).toBeCalledWith({ ...sampleData, settings: { syncAlerts: false } })
-      );
-    });
-
-    it('should set sync alerts to false when the sync feature setting is false', async () => {
-      useGetConnectorsMock.mockReturnValue({
-        ...sampleConnectorData,
-        data: connectorsMock,
-      });
-
-      const wrapper = mount(
-        <TestProviders features={{ alerts: { sync: false, enabled: true } }}>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
-      );
-
-      fillForm(wrapper);
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-
-      await waitFor(() =>
-        expect(postCase).toBeCalledWith({ ...sampleData, settings: { syncAlerts: false } })
-      );
-    });
-
-    it('should select LOW as the default severity', async () => {
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
-      expect(renderResult.getByTestId('caseSeverity')).toBeTruthy();
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      const syncAlertsButton = within(screen.getByTestId('caseSyncAlerts')).getByTestId('input');
+
+      userEvent.click(syncAlertsButton);
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => expect(postCase).toHaveBeenCalled());
+
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        settings: { syncAlerts: false },
+      });
+    });
+
+    it('should set sync alerts to false when the sync feature setting is false', async () => {
+      mockedContext = createAppMockRenderer({
+        features: { alerts: { sync: false, enabled: true } },
+      });
+
+      useGetConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        data: connectorsMock,
+      });
+
+      mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => expect(postCase).toHaveBeenCalled());
+
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        settings: { syncAlerts: false },
+      });
+    });
+
+    it('should select LOW as the default severity', async () => {
+      mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+
+      expect(screen.getByTestId('caseSeverity')).toBeTruthy();
       // there should be 2 low elements. one for the options popover and one for the displayed one.
-      expect(renderResult.getAllByTestId('case-severity-selection-low').length).toBe(2);
+      expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(2);
+
+      await waitForComponentToUpdate();
     });
 
     it('should select the default connector set in the configuration', async () => {
@@ -345,37 +382,35 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
+      mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
       );
 
-      fillForm(wrapper);
-      await act(async () => {
-        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-      });
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      await waitFor(() =>
-        expect(postCase).toBeCalledWith({
-          ...sampleData,
-          connector: {
-            fields: {
-              impact: null,
-              severity: null,
-              urgency: null,
-              category: null,
-              subcategory: null,
-            },
-            id: 'servicenow-1',
-            name: 'My Connector',
-            type: '.servicenow',
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => expect(postCase).toHaveBeenCalled());
+
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        connector: {
+          fields: {
+            impact: null,
+            severity: null,
+            urgency: null,
+            category: null,
+            subcategory: null,
           },
-        })
-      );
+          id: 'servicenow-1',
+          name: 'My Connector',
+          type: '.servicenow',
+        },
+      });
     });
 
     it('should default to none if the default connector does not exist in connectors', async () => {
@@ -395,356 +430,98 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
+      mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
       );
 
-      fillForm(wrapper);
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
       await waitFor(() => {
-        expect(postCase).toBeCalledWith(sampleData);
+        expect(postCase).toBeCalled();
         expect(pushCaseToExternalService).not.toHaveBeenCalled();
       });
+
+      expect(pushCaseToExternalService).not.toHaveBeenCalled();
+      expect(postCase).toBeCalledWith(sampleDataWithoutTags);
     });
   });
 
-  describe('Step 2 - Connector Fields', () => {
-    it(`should submit and push to Jira connector`, async () => {
-      useGetConnectorsMock.mockReturnValue({
-        ...sampleConnectorData,
-        data: connectorsMock,
-      });
-
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
-      );
-
-      fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeFalsy();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
-
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeTruthy();
-      });
-
-      wrapper
-        .find('select[data-test-subj="issueTypeSelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: '10007' },
-        });
-
-      wrapper
-        .find('select[data-test-subj="prioritySelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: '2' },
-        });
-
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-
-      await waitFor(() => {
-        expect(postCase).toBeCalledWith({
-          ...sampleData,
-          connector: {
-            id: 'jira-1',
-            name: 'Jira',
-            type: '.jira',
-            fields: { issueType: '10007', parent: null, priority: '2' },
-          },
-        });
-        expect(pushCaseToExternalService).toHaveBeenCalledWith({
-          caseId: sampleId,
-          connector: {
-            id: 'jira-1',
-            name: 'Jira',
-            type: '.jira',
-            fields: { issueType: '10007', parent: null, priority: '2' },
-          },
-        });
-        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
-          id: sampleId,
-          ...sampleData,
-        });
-      });
-    });
-
+  // FLAKY: https://github.com/elastic/kibana/issues/143408
+  describe.skip('Step 2 - Connector Fields', () => {
     it(`should submit and push to resilient connector`, async () => {
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         data: connectorsMock,
       });
 
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
+      mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
       );
 
-      fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeFalsy();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      userEvent.click(screen.getByTestId('dropdown-connectors'));
 
       await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeTruthy();
+        expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
       });
 
-      act(() => {
-        (
-          wrapper.find(EuiComboBox).at(1).props() as unknown as {
-            onChange: (a: EuiComboBoxOptionOption[]) => void;
-          }
-        ).onChange([{ value: '19', label: 'Denial of Service' }]);
+      userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
+        skipPointerEventsCheck: true,
       });
-
-      wrapper
-        .find('select[data-test-subj="severitySelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: '4' },
-        });
-
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
       await waitFor(() => {
-        expect(postCase).toBeCalledWith({
-          ...sampleData,
-          connector: {
-            id: 'resilient-2',
-            name: 'My Connector 2',
-            type: '.resilient',
-            fields: { incidentTypes: ['19'], severityCode: '4' },
-          },
-        });
-
-        expect(pushCaseToExternalService).toHaveBeenCalledWith({
-          caseId: sampleId,
-          connector: {
-            id: 'resilient-2',
-            name: 'My Connector 2',
-            type: '.resilient',
-            fields: { incidentTypes: ['19'], severityCode: '4' },
-          },
-        });
-
-        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
-          id: sampleId,
-          ...sampleData,
-        });
-      });
-    });
-
-    it(`should submit and push to servicenow itsm connector`, async () => {
-      useGetConnectorsMock.mockReturnValue({
-        ...sampleConnectorData,
-        data: connectorsMock,
+        expect(screen.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: 'Low' }));
       });
 
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
+      const checkbox = within(screen.getByTestId('incidentTypeComboBox')).getByTestId(
+        'comboBoxSearchInput'
       );
 
-      fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-fields-sn-itsm"]`).exists()).toBeFalsy();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-1"]`).simulate('click');
+      userEvent.type(checkbox, 'Denial of Service{enter}');
+      userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find(`[data-test-subj="connector-fields-sn-itsm"]`).exists()).toBeTruthy();
+        expect(postCase).toHaveBeenCalled();
+        expect(pushCaseToExternalService).toHaveBeenCalled();
+        expect(onFormSubmitSuccess).toHaveBeenCalled();
       });
 
-      // we need the choices response to conditionally show the subcategory select
-      act(() => {
-        onChoicesSuccess(useGetChoicesResponse.choices);
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        connector: {
+          id: 'resilient-2',
+          name: 'My Connector 2',
+          type: '.resilient',
+          fields: { incidentTypes: ['21'], severityCode: '4' },
+        },
       });
 
-      ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
-        wrapper
-          .find(`select[data-test-subj="${subj}"]`)
-          .first()
-          .simulate('change', {
-            target: { value: '2' },
-          });
+      expect(pushCaseToExternalService).toHaveBeenCalledWith({
+        caseId: sampleId,
+        connector: {
+          id: 'resilient-2',
+          name: 'My Connector 2',
+          type: '.resilient',
+          fields: { incidentTypes: ['21'], severityCode: '4' },
+        },
       });
 
-      wrapper
-        .find('select[data-test-subj="categorySelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: 'software' },
-        });
-
-      wrapper
-        .find('select[data-test-subj="subcategorySelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: 'os' },
-        });
-
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-
-      await waitFor(() => {
-        expect(postCase).toBeCalledWith({
-          ...sampleData,
-          connector: {
-            id: 'servicenow-1',
-            name: 'My Connector',
-            type: '.servicenow',
-            fields: {
-              impact: '2',
-              severity: '2',
-              urgency: '2',
-              category: 'software',
-              subcategory: 'os',
-            },
-          },
-        });
-
-        expect(pushCaseToExternalService).toHaveBeenCalledWith({
-          caseId: sampleId,
-          connector: {
-            id: 'servicenow-1',
-            name: 'My Connector',
-            type: '.servicenow',
-            fields: {
-              impact: '2',
-              severity: '2',
-              urgency: '2',
-              category: 'software',
-              subcategory: 'os',
-            },
-          },
-        });
-
-        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
-          id: sampleId,
-          ...sampleData,
-        });
-      });
-    });
-
-    it(`should submit and push to servicenow sir connector`, async () => {
-      useGetConnectorsMock.mockReturnValue({
-        ...sampleConnectorData,
-        data: connectorsMock,
-      });
-
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
-      );
-
-      fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-fields-sn-sir"]`).exists()).toBeFalsy();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-sir"]`).simulate('click');
-
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find(`[data-test-subj="connector-fields-sn-sir"]`).exists()).toBeTruthy();
-      });
-
-      // we need the choices response to conditionally show the subcategory select
-      act(() => {
-        onChoicesSuccess(useGetChoicesResponse.choices);
-      });
-
-      wrapper
-        .find('[data-test-subj="destIpCheckbox"] input')
-        .first()
-        .simulate('change', { target: { checked: false } });
-
-      wrapper
-        .find('select[data-test-subj="prioritySelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: '1' },
-        });
-
-      wrapper
-        .find('select[data-test-subj="categorySelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: 'Denial of Service' },
-        });
-
-      wrapper
-        .find('select[data-test-subj="subcategorySelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: '26' },
-        });
-
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-
-      await waitFor(() => {
-        expect(postCase).toBeCalledWith({
-          ...sampleData,
-          connector: {
-            id: 'servicenow-sir',
-            name: 'My Connector SIR',
-            type: '.servicenow-sir',
-            fields: {
-              destIp: false,
-              sourceIp: true,
-              malwareHash: true,
-              malwareUrl: true,
-              priority: '1',
-              category: 'Denial of Service',
-              subcategory: '26',
-            },
-          },
-        });
-
-        expect(pushCaseToExternalService).toHaveBeenCalledWith({
-          caseId: sampleId,
-          connector: {
-            id: 'servicenow-sir',
-            name: 'My Connector SIR',
-            type: '.servicenow-sir',
-            fields: {
-              destIp: false,
-              sourceIp: true,
-              malwareHash: true,
-              malwareUrl: true,
-              priority: '1',
-              category: 'Denial of Service',
-              subcategory: '26',
-            },
-          },
-        });
-
-        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
-          id: sampleId,
-          ...sampleData,
-        });
+      expect(onFormSubmitSuccess).toHaveBeenCalledWith({
+        id: sampleId,
+        ...sampleDataWithoutTags,
       });
     });
   });
@@ -755,32 +532,38 @@ describe('Create case', () => {
       data: connectorsMock,
     });
 
-    const wrapper = mockedContext.render(
+    mockedContext.render(
       <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
       </FormContext>
     );
 
-    await fillFormReactTestingLib(wrapper);
-    expect(wrapper.queryByTestId('connector-fields-jira')).toBeFalsy();
-    userEvent.click(wrapper.getByTestId('dropdown-connectors'));
-    await waitForEuiPopoverOpen();
-    await act(async () => {
-      userEvent.click(wrapper.getByTestId('dropdown-connector-jira-1'));
-    });
-    expect(wrapper.getByTestId('connector-fields-jira')).toBeTruthy();
+    await waitForFormToRender(screen);
+    await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(wrapper.getByTestId('create-case-submit'));
+    userEvent.click(screen.getByTestId('dropdown-connectors'));
+
     await waitFor(() => {
-      expect(afterCaseCreated).toHaveBeenCalledWith(
-        {
-          id: sampleId,
-          ...sampleData,
-        },
-        createAttachments
-      );
+      expect(screen.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
     });
+
+    userEvent.click(screen.getByTestId('dropdown-connector-jira-1'), undefined, {
+      skipPointerEventsCheck: true,
+    });
+    userEvent.click(screen.getByTestId('create-case-submit'));
+
+    await waitFor(() => {
+      expect(afterCaseCreated).toHaveBeenCalled();
+    });
+
+    expect(afterCaseCreated).toHaveBeenCalledWith(
+      {
+        id: sampleId,
+        ...sampleDataWithoutTags,
+      },
+      createAttachments
+    );
   });
 
   it('should call createAttachments with the attachments after the case is created', async () => {
@@ -811,20 +594,22 @@ describe('Create case', () => {
       },
     ];
 
-    const wrapper = mockedContext.render(
+    mockedContext.render(
       <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
       </FormContext>
     );
 
-    await fillFormReactTestingLib(wrapper);
+    await waitForFormToRender(screen);
+    await fillFormReactTestingLib({ renderer: screen });
 
-    await act(async () => {
-      userEvent.click(wrapper.getByTestId('create-case-submit'));
+    userEvent.click(screen.getByTestId('create-case-submit'));
+
+    await waitFor(() => {
+      expect(createAttachments).toHaveBeenCalledTimes(1);
     });
 
-    expect(createAttachments).toHaveBeenCalledTimes(1);
     expect(createAttachments).toHaveBeenCalledWith({
       caseId: 'case-id',
       data: attachments,
@@ -839,18 +624,19 @@ describe('Create case', () => {
     });
     const attachments: CaseAttachments = [];
 
-    const wrapper = mockedContext.render(
+    mockedContext.render(
       <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
       </FormContext>
     );
 
-    await fillFormReactTestingLib(wrapper);
+    await waitForFormToRender(screen);
+    await fillFormReactTestingLib({ renderer: screen });
 
-    await act(async () => {
-      userEvent.click(wrapper.getByTestId('create-case-submit'));
-    });
+    userEvent.click(screen.getByTestId('create-case-submit'));
+
+    await waitForComponentToUpdate();
 
     expect(createAttachments).not.toHaveBeenCalled();
   });
@@ -873,30 +659,32 @@ describe('Create case', () => {
       },
     ];
 
-    const wrapper = mount(
-      <TestProviders>
-        <FormContext
-          onSuccess={onFormSubmitSuccess}
-          afterCaseCreated={afterCaseCreated}
-          attachments={attachments}
-        >
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
-      </TestProviders>
+    mockedContext.render(
+      <FormContext
+        onSuccess={onFormSubmitSuccess}
+        afterCaseCreated={afterCaseCreated}
+        attachments={attachments}
+      >
+        <CreateCaseFormFields {...defaultCreateCaseForm} />
+        <SubmitCaseButton />
+      </FormContext>
     );
 
-    fillForm(wrapper);
-    expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeFalsy();
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
+    await waitForFormToRender(screen);
+    await fillFormReactTestingLib({ renderer: screen });
+
+    userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeTruthy();
+      expect(screen.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
     });
 
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    userEvent.click(screen.getByTestId('dropdown-connector-jira-1'), undefined, {
+      skipPointerEventsCheck: true,
+    });
+
+    userEvent.click(screen.getByTestId('create-case-submit'));
+
     await waitFor(() => {
       expect(postCase).toHaveBeenCalled();
       expect(createAttachments).toHaveBeenCalled();
@@ -926,22 +714,136 @@ describe('Create case', () => {
         actions: { save: false, show: false },
       };
 
-      const result = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await act(async () => {
-        fillFormReactTestingLib(result);
-      });
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      await act(async () => {
-        userEvent.click(result.getByTestId('create-case-submit'));
-      });
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
+      await waitForComponentToUpdate();
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Assignees', () => {
+    it('should submit assignees', async () => {
+      mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      const assigneesComboBox = within(screen.getByTestId('createCaseAssigneesComboBox'));
+
+      await waitFor(() => {
+        expect(assigneesComboBox.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      });
+
+      userEvent.paste(assigneesComboBox.getByTestId('comboBoxSearchInput'), 'dr');
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('comboBoxOptionsList createCaseAssigneesComboBox-optionsList')
+        ).toBeInTheDocument();
+      });
+
+      userEvent.click(await screen.findByText(`${userProfiles[0].user.full_name}`));
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        assignees: [{ uid: userProfiles[0].uid }],
+      });
+    });
+
+    it('should not render the assignees on basic license', async () => {
+      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+
+      mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await waitForComponentToUpdate();
+
+      expect(screen.queryByTestId('createCaseAssigneesComboBox')).toBeNull();
+    });
+  });
+
+  describe('draft comment', () => {
+    describe('existing storage key', () => {
+      beforeEach(() => {
+        sessionStorage.setItem(defaultCreateCaseForm.draftStorageKey, 'value set in storage');
+      });
+
+      afterEach(() => {
+        sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
+      });
+
+      it('should have session storage value same as draft comment', async () => {
+        mockedContext.render(
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
+            <SubmitCaseButton />
+          </FormContext>
+        );
+
+        await waitForFormToRender(screen);
+        const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+          'euiMarkdownEditorTextArea'
+        );
+
+        jest.useFakeTimers();
+
+        act(() => jest.advanceTimersByTime(1000));
+
+        await waitFor(() => expect(descriptionInput).toHaveValue('value set in storage'));
+
+        jest.useRealTimers();
+      });
+    });
+
+    describe('set storage key', () => {
+      afterEach(() => {
+        sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
+      });
+
+      it('should have session storage value same as draft comment', async () => {
+        mockedContext.render(
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
+            <SubmitCaseButton />
+          </FormContext>
+        );
+
+        await waitForFormToRender(screen);
+        const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+          'euiMarkdownEditorTextArea'
+        );
+
+        await waitFor(() => {
+          expect(descriptionInput).toHaveValue(
+            sessionStorage.getItem(defaultCreateCaseForm.draftStorageKey)
+          );
+        });
+      });
     });
   });
 });

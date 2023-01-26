@@ -123,6 +123,7 @@ export const AvailableReferenceLineIcons = {
   MAP_MARKER: 'mapMarker',
   PIN_FILLED: 'pinFilled',
   STAR_EMPTY: 'starEmpty',
+  STAR_FILLED: 'starFilled',
   TAG: 'tag',
   TRIANGLE: 'triangle',
 } as const;

@@ -6,7 +6,7 @@
  */
 
 import type { KpiRiskScoreRequestOptions } from '../../../../../../../common/search_strategy';
-import { RiskQueries } from '../../../../../../../common/search_strategy';
+import { RiskScoreEntity, RiskQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: KpiRiskScoreRequestOptions = {
   defaultIndex: [
@@ -22,5 +22,5 @@ export const mockOptions: KpiRiskScoreRequestOptions = {
   factoryQueryType: RiskQueries.kpiRiskScore,
   filterQuery:
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
-  aggBy: 'host.name',
+  entity: RiskScoreEntity.host,
 };

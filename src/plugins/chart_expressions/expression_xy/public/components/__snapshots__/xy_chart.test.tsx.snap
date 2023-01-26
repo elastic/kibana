@@ -2,12 +2,12 @@
 
 exports[`XYChart component annotations should render basic line annotation 1`] = `
 <LineAnnotation
+  customTooltip={[Function]}
   dataValues={
     Array [
       Object {
         "dataValue": 1647591917140,
         "details": "Annotation",
-        "header": "2022-03-18T08:25:17.140Z",
       },
     ]
   }
@@ -18,8 +18,10 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
     <Marker
       config={
         Object {
+          "customTooltip": [Function],
           "icon": "triangle",
           "id": "annotation",
+          "isGrouped": false,
           "label": "Annotation",
           "position": "bottom",
           "time": "2022-03-18T08:25:17.140Z",
@@ -38,6 +40,7 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
     />
   }
   markerPosition="top"
+  placement="bottom"
   style={
     Object {
       "line": Object {
@@ -97,13 +100,12 @@ Array [
 
 exports[`XYChart component annotations should render grouped line annotations preserving the shared styles 1`] = `
 <LineAnnotation
-  customTooltipDetails={[Function]}
+  customTooltip={[Function]}
   dataValues={
     Array [
       Object {
-        "dataValue": 1647591900025,
-        "details": "Event 1",
-        "header": 1647591900000,
+        "dataValue": 1647591917125,
+        "details": "",
       },
     ]
   }
@@ -115,22 +117,22 @@ exports[`XYChart component annotations should render grouped line annotations pr
       config={
         Object {
           "color": "red",
-          "customTooltipDetails": [Function],
+          "customTooltip": [Function],
           "icon": "3",
           "id": "event1",
-          "label": "Event 1",
+          "isGrouped": true,
+          "label": "",
           "lineStyle": "dashed",
           "lineWidth": 3,
           "position": "bottom",
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "timebucket": 1647591900000,
+          "timebucket": 1647591917100,
           "type": "point",
         }
       }
       hasReducedPadding={true}
       isHorizontal={true}
-      label="Event 1"
     />
   }
   markerBody={
@@ -139,6 +141,7 @@ exports[`XYChart component annotations should render grouped line annotations pr
     />
   }
   markerPosition="top"
+  placement="bottom"
   style={
     Object {
       "line": Object {
@@ -157,13 +160,12 @@ exports[`XYChart component annotations should render grouped line annotations pr
 
 exports[`XYChart component annotations should render grouped line annotations with default styles 1`] = `
 <LineAnnotation
-  customTooltipDetails={[Function]}
+  customTooltip={[Function]}
   dataValues={
     Array [
       Object {
-        "dataValue": 1647591900025,
-        "details": "Event 1",
-        "header": 1647591900000,
+        "dataValue": 1647591917125,
+        "details": "",
       },
     ]
   }
@@ -175,22 +177,22 @@ exports[`XYChart component annotations should render grouped line annotations wi
       config={
         Object {
           "color": "#f04e98",
-          "customTooltipDetails": [Function],
+          "customTooltip": [Function],
           "icon": "2",
           "id": "event1",
-          "label": "Event 1",
+          "isGrouped": true,
+          "label": "",
           "lineStyle": "solid",
           "lineWidth": 1,
           "position": "bottom",
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "timebucket": 1647591900000,
+          "timebucket": 1647591917100,
           "type": "point",
         }
       }
       hasReducedPadding={true}
       isHorizontal={true}
-      label="Event 1"
     />
   }
   markerBody={
@@ -199,6 +201,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
     />
   }
   markerPosition="top"
+  placement="bottom"
   style={
     Object {
       "line": Object {
@@ -214,12 +217,12 @@ exports[`XYChart component annotations should render grouped line annotations wi
 
 exports[`XYChart component annotations should render simplified annotations when simpleView is true 1`] = `
 <LineAnnotation
+  customTooltip={[Function]}
   dataValues={
     Array [
       Object {
         "dataValue": 1647591917140,
         "details": "Annotation",
-        "header": "2022-03-18T08:25:17.140Z",
       },
     ]
   }
@@ -227,6 +230,7 @@ exports[`XYChart component annotations should render simplified annotations when
   id="annotation_2022_03_18_t_08_25_17_140_z"
   key="annotation_2022_03_18_t_08_25_17_140_z"
   markerPosition="top"
+  placement="bottom"
   style={
     Object {
       "line": Object {
@@ -553,6 +557,19 @@ exports[`XYChart component it renders area 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -602,14 +619,6 @@ exports[`XYChart component it renders area 1`] = `
               },
             },
             "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
           }
         }
       />
@@ -1535,6 +1544,19 @@ exports[`XYChart component it renders bar 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -1584,14 +1606,6 @@ exports[`XYChart component it renders bar 1`] = `
               },
             },
             "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
           }
         }
       />
@@ -2517,6 +2531,19 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -2566,14 +2593,6 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
             },
             "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
           }
         }
       />
@@ -3499,6 +3518,19 @@ exports[`XYChart component it renders line 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -3548,14 +3580,6 @@ exports[`XYChart component it renders line 1`] = `
               },
             },
             "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
           }
         }
       />
@@ -4481,6 +4505,19 @@ exports[`XYChart component it renders stacked area 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -4530,14 +4567,6 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
             },
             "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
           }
         }
       />
@@ -5115,7 +5144,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             "getAll": [Function],
           }
         }
-        shouldShowValueLabels={false}
+        shouldShowValueLabels={true}
         syncColors={false}
         timeZone="UTC"
         titles={
@@ -5463,6 +5492,19 @@ exports[`XYChart component it renders stacked bar 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -5512,14 +5554,6 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
             },
             "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
           }
         }
       />
@@ -6097,7 +6131,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "getAll": [Function],
           }
         }
-        shouldShowValueLabels={false}
+        shouldShowValueLabels={true}
         syncColors={false}
         timeZone="UTC"
         titles={
@@ -6445,6 +6479,19 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -6494,14 +6541,6 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
             },
             "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
           }
         }
       />
@@ -7079,7 +7118,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "getAll": [Function],
           }
         }
-        shouldShowValueLabels={false}
+        shouldShowValueLabels={true}
         syncColors={false}
         timeZone="UTC"
         titles={
@@ -7457,6 +7496,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -7506,14 +7558,6 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
             },
             "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
           }
         }
       />
@@ -8677,6 +8721,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -8726,14 +8783,6 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
             },
             "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
           }
         }
       />
@@ -9890,6 +9939,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -9939,14 +10001,6 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
             },
             "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
           }
         }
       />

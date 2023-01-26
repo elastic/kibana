@@ -62,8 +62,8 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
-          exampleCount: 10,
-          docCountFormatted: '5000 (100%)',
+          exampleCount: 11,
+          docCountFormatted: '86,274 (100%)',
           viewableInLens: true,
           hasActionMenu: true,
         },
@@ -92,9 +92,9 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
-          docCountFormatted: '5000 (100%)',
+          docCountFormatted: '86,274 (100%)',
           statsMaxDecimalPlaces: 3,
-          topValuesCount: 10,
+          topValuesCount: 11,
           viewableInLens: true,
           hasActionMenu: false,
         },
@@ -153,7 +153,6 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     await ml.dataVisualizerTable.assertSearchPanelExist();
-    await ml.dataVisualizerTable.assertSampleSizeInputExists();
     await ml.dataVisualizerTable.assertFieldTypeInputExists();
     await ml.dataVisualizerTable.assertFieldNameInputExists();
 

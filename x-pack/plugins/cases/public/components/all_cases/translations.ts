@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
+export * from '../user_profiles/translations';
 
 export const NO_CASES = i18n.translate('xpack.cases.caseTable.noCases.title', {
   defaultMessage: 'No cases to display',
@@ -63,15 +64,11 @@ export const INCIDENT_MANAGEMENT_SYSTEM = i18n.translate('xpack.cases.caseTable.
 });
 
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseTable.searchPlaceholder', {
-  defaultMessage: 'e.g. case name',
+  defaultMessage: 'Search cases',
 });
 
 export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {
   defaultMessage: 'Closed',
-});
-
-export const DELETE = i18n.translate('xpack.cases.caseTable.delete', {
-  defaultMessage: 'Delete',
 });
 
 export const SELECT = i18n.translate('xpack.cases.caseTable.select', {
@@ -113,3 +110,40 @@ export const ATTC_STAT = i18n.translate('xpack.cases.casesStats.mttr', {
 export const ATTC_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescription', {
   defaultMessage: 'The average duration (from creation to closure) for your current cases',
 });
+
+export const FILTER_ASSIGNEES_ARIA_LABEL = i18n.translate(
+  'xpack.cases.allCasesView.filterAssigneesAriaLabel',
+  {
+    defaultMessage: 'click to filter assignees',
+  }
+);
+
+export const CLEAR_FILTERS = i18n.translate(
+  'xpack.cases.allCasesView.filterAssignees.clearFilters',
+  {
+    defaultMessage: 'Clear filters',
+  }
+);
+
+export const TOTAL_ASSIGNEES_FILTERED = (total: number) =>
+  i18n.translate('xpack.cases.allCasesView.totalFilteredUsers', {
+    defaultMessage: '{total, plural, one {# filter} other {# filters}} selected',
+    values: { total },
+  });
+
+export const NO_ASSIGNEES = i18n.translate(
+  'xpack.cases.allCasesView.filterAssignees.noAssigneesLabel',
+  {
+    defaultMessage: 'No assignees',
+  }
+);
+
+export const SHOW_LESS = i18n.translate('xpack.cases.allCasesView.showLessAvatars', {
+  defaultMessage: 'show less',
+});
+
+export const SHOW_MORE = (count: number) =>
+  i18n.translate('xpack.cases.allCasesView.showMoreAvatars', {
+    defaultMessage: '+{count} more',
+    values: { count },
+  });

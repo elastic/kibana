@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
 
-import { ConnectorConfigurationApiLogic } from '../../../api/connector_package/update_connector_configuration_api_logic';
+import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
@@ -55,7 +55,11 @@ export const ConnectorConfigurationForm = () => {
       <EuiFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton type="submit" isLoading={status === Status.LOADING}>
+            <EuiButton
+              data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
+              type="submit"
+              isLoading={status === Status.LOADING}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.config.submitButton.title',
                 {
@@ -66,6 +70,7 @@ export const ConnectorConfigurationForm = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-telemetry-id="entSearchContent-connector-configuration-cancelEdit"
               isDisabled={status === Status.LOADING}
               onClick={() => {
                 setIsEditing(false);

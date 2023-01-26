@@ -6,19 +6,21 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { useKibanaSpace } from './hooks/use_kibana_space';
+
 import { getServiceLocations } from '../../state';
+import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
+
+import { useKibanaSpace } from './hooks';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
 import { ADD_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 
-export const MonitorAddPage = () => {
+const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });
-  const { space, loading, error } = useKibanaSpace();
+  const { space } = useKibanaSpace();
   useTrackPageview({ app: 'synthetics', path: 'add-monitor', delay: 15000 });
   useMonitorAddEditBreadcrumbs();
   const dispatch = useDispatch();
@@ -27,11 +29,15 @@ export const MonitorAddPage = () => {
     dispatch(getServiceLocations());
   }, [dispatch]);
 
-  return !loading && !error ? (
+  return (
     <MonitorForm space={space?.id}>
       <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
     </MonitorForm>
-  ) : (
-    <EuiLoadingSpinner />
   );
 };
+
+export const MonitorAddPageWithServiceAllowed = React.memo(() => (
+  <ServiceAllowedWrapper>
+    <MonitorAddPage />
+  </ServiceAllowedWrapper>
+));

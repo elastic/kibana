@@ -118,6 +118,7 @@ export class MapEmbeddable
   private _prevIsRestore: boolean = false;
   private _prevMapExtent?: MapExtent;
   private _prevTimeRange?: TimeRange;
+  private _prevTimeslice?: [number, number];
   private _prevQuery?: Query;
   private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
@@ -262,6 +263,10 @@ export class MapEmbeddable
     return getMapAttributeService().getInputAsValueType(this.getExplicitInput());
   }
 
+  public getLayerList() {
+    return getLayerList(this._savedMap.getStore().getState());
+  }
+
   public getDescription() {
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
@@ -310,6 +315,7 @@ export class MapEmbeddable
   onUpdate() {
     if (
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
+      !_.isEqual(this.input.timeslice, this._prevTimeslice) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
       !compareFilters(this._getFilters(), this._prevFilters) ||
       this._getSearchSessionId() !== this._prevSearchSessionId
@@ -401,6 +407,7 @@ export class MapEmbeddable
   _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
     const filters = this._getFilters();
     this._prevTimeRange = this.input.timeRange;
+    this._prevTimeslice = this.input.timeslice;
     this._prevQuery = this.input.query;
     this._prevFilters = filters;
     this._prevSearchSessionId = this._getSearchSessionId();
@@ -409,6 +416,9 @@ export class MapEmbeddable
         filters,
         query: this.input.query,
         timeFilters: this.input.timeRange,
+        timeslice: this.input.timeslice
+          ? { from: this.input.timeslice[0], to: this.input.timeslice[1] }
+          : undefined,
         forceRefresh,
         searchSessionId: this._getSearchSessionId(),
         searchSessionMapBuffer: getIsRestore(this._getSearchSessionId())

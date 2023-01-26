@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 
 import type { RequestHandler, Logger } from '@kbn/core/server';
@@ -18,6 +18,7 @@ import type { ResponseActionBodySchema } from '../../../../common/endpoint/schem
 import {
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
+  EndpointActionGetFileSchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
 import {
@@ -32,6 +33,7 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   ENDPOINT_ACTIONS_INDEX,
+  GET_FILE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -40,9 +42,9 @@ import type {
   HostMetadata,
   LogsEndpointAction,
   LogsEndpointActionResponse,
-  ResponseActions,
   ResponseActionParametersWithPidOrEntityId,
 } from '../../../../common/endpoint/types';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -157,21 +159,38 @@ export function registerResponseActionRoutes(
       responseActionRequestHandler(endpointContext, 'running-processes')
     )
   );
+
+  // `get-file` currently behind FF
+  if (endpointContext.experimentalFeatures.responseActionGetFileEnabled) {
+    router.post(
+      {
+        path: GET_FILE_ROUTE,
+        validate: EndpointActionGetFileSchema,
+        options: { authRequired: true, tags: ['access:securitySolution'] },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'get-file')
+      )
+    );
+  }
 }
 
-const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
+const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([
   ['isolate', 'HOST_ISOLATION'],
   ['unisolate', 'HOST_ISOLATION'],
   ['kill-process', 'KILL_PROCESS'],
   ['suspend-process', 'SUSPEND_PROCESS'],
   ['running-processes', 'RUNNING_PROCESSES'],
+  ['get-file', 'GET_FILE'],
 ]);
 
-const returnActionIdCommands: ResponseActions[] = ['isolate', 'unisolate'];
+const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
   endpointContext: EndpointAppContext,
-  command: ResponseActions
+  command: ResponseActionsApiCommandNames
 ): RequestHandler<
   unknown,
   unknown,
@@ -210,7 +229,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     caseIDs = [...new Set(caseIDs)];
 
     // create an Action ID and dispatch it to ES & Fleet Server
-    const actionID = uuid.v4();
+    const actionID = uuidv4();
 
     let fleetActionIndexResult;
     let logsEndpointActionsResult;
@@ -233,8 +252,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         } as EndpointActionData<T>,
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,
       user: {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        id: user!.username,
+        id: user ? user.username : 'unknown',
       },
     };
 

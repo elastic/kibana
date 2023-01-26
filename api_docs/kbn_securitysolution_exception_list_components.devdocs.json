@@ -1,0 +1,1628 @@
+{
+  "id": "@kbn/securitysolution-exception-list-components",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.EmptyViewerState",
+        "type": "Function",
+        "tags": [],
+        "label": "EmptyViewerState",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<EmptyViewerStateProps>"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/empty_viewer_state/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.EmptyViewerState.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionItemCard",
+        "type": "Function",
+        "tags": [],
+        "label": "ExceptionItemCard",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/securitysolution-exception-list-components",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+            "section": "def-common.ExceptionItemProps",
+            "text": "ExceptionItemProps"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCard.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionItemCardComments",
+        "type": "Function",
+        "tags": [],
+        "label": "ExceptionItemCardComments",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/securitysolution-exception-list-components",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+            "section": "def-common.ExceptionItemCardCommentsProps",
+            "text": "ExceptionItemCardCommentsProps"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/comments/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardComments.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionItemCardConditions",
+        "type": "Function",
+        "tags": [],
+        "label": "ExceptionItemCardConditions",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          "CriteriaConditionsProps",
+          ">"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/conditions/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardConditions.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionItemCardHeader",
+        "type": "Function",
+        "tags": [],
+        "label": "ExceptionItemCardHeader",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/securitysolution-exception-list-components",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+            "section": "def-common.ExceptionItemCardHeaderProps",
+            "text": "ExceptionItemCardHeaderProps"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardHeader.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionItemCardMetaInfo",
+        "type": "Function",
+        "tags": [],
+        "label": "ExceptionItemCardMetaInfo",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/securitysolution-exception-list-components",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+            "section": "def-common.ExceptionItemCardMetaInfoProps",
+            "text": "ExceptionItemCardMetaInfoProps"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardMetaInfo.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionItems",
+        "type": "Function",
+        "tags": [],
+        "label": "ExceptionItems",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<ExceptionItemsProps>"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/exception_items/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItems.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionListHeader",
+        "type": "Function",
+        "tags": [],
+        "label": "ExceptionListHeader",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<ExceptionListHeaderComponentProps>"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionListHeader.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.generateLinkedRulesMenuItems",
+        "type": "Function",
+        "tags": [],
+        "label": "generateLinkedRulesMenuItems",
+        "description": [],
+        "signature": [
+          "({ dataTestSubj, linkedRules, securityLinkAnchorComponent, leftIcon, }: MenuItemLinkedRulesProps) => React.ReactElement<any, string | React.JSXElementConstructor<any>>[] | null"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/generate_linked_rules_menu_item/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.generateLinkedRulesMenuItems.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dataTestSubj,\n  linkedRules,\n  securityLinkAnchorComponent,\n  leftIcon = '',\n}",
+            "description": [],
+            "signature": [
+              "MenuItemLinkedRulesProps"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/generate_linked_rules_menu_item/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.HeaderMenu",
+        "type": "Function",
+        "tags": [],
+        "label": "HeaderMenu",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<HeaderMenuComponentProps>"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.HeaderMenu.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.Pagination",
+        "type": "Function",
+        "tags": [],
+        "label": "Pagination",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/securitysolution-exception-list-components",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+            "section": "def-common.PaginationProps",
+            "text": "PaginationProps"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/pagination/pagination.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.Pagination.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.SearchBar",
+        "type": "Function",
+        "tags": [],
+        "label": "SearchBar",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<SearchBarProps>"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/search_bar/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.SearchBar.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ValueWithSpaceWarning",
+        "type": "Function",
+        "tags": [],
+        "label": "ValueWithSpaceWarning",
+        "description": [],
+        "signature": [
+          "({ value, tooltipIconType, tooltipIconText, }: React.PropsWithChildren<ValueWithSpaceWarningProps>) => JSX.Element | null"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/value_with_space_warning/value_with_space_warning.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ValueWithSpaceWarning.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  value,\n  tooltipIconType = 'iInCircle',\n  tooltipIconText,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<ValueWithSpaceWarningProps>"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/value_with_space_warning/value_with_space_warning.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.Action",
+        "type": "Interface",
+        "tags": [],
+        "label": "Action",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.Action.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.Action.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.Action.label",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "string | boolean"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.Action.disabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.Action.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "(e: React.MouseEvent<Element, MouseEvent>) => void"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-exception-list-components",
+                "id": "def-common.Action.onClick.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "e",
+                "description": [],
+                "signature": [
+                  "React.MouseEvent<Element, MouseEvent>"
+                ],
+                "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.BackOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "BackOptions",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.pageId",
+            "type": "string",
+            "tags": [],
+            "label": "pageId",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.onNavigate",
+            "type": "Function",
+            "tags": [],
+            "label": "onNavigate",
+            "description": [],
+            "signature": [
+              "(path: string) => void"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-exception-list-components",
+                "id": "def-common.BackOptions.onNavigate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionItemCardCommentsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExceptionItemCardCommentsProps",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/comments/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardCommentsProps.comments",
+            "type": "Array",
+            "tags": [],
+            "label": "comments",
+            "description": [],
+            "signature": [
+              "EuiCommentProps",
+              "[]"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/comments/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardCommentsProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/comments/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionItemCardHeaderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExceptionItemCardHeaderProps",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardHeaderProps.item",
+            "type": "Object",
+            "tags": [],
+            "label": "item",
+            "description": [],
+            "signature": [
+              "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"binary\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardHeaderProps.actions",
+            "type": "Array",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ key: string; icon: string; label: string | boolean; onClick: () => void; }[]"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardHeaderProps.disableActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardHeaderProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionItemCardMetaInfoProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExceptionItemCardMetaInfoProps",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardMetaInfoProps.item",
+            "type": "Object",
+            "tags": [],
+            "label": "item",
+            "description": [],
+            "signature": [
+              "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"binary\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardMetaInfoProps.rules",
+            "type": "Array",
+            "tags": [],
+            "label": "rules",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-exception-list-components",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+                "section": "def-common.Rule",
+                "text": "Rule"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardMetaInfoProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardMetaInfoProps.formattedDateComponent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "formattedDateComponent",
+            "description": [],
+            "signature": [
+              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"article\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"output\" | \"svg\" | \"map\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"input\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"animate\" | \"progress\" | \"view\" | \"big\" | \"sub\" | \"sup\" | \"var\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemCardMetaInfoProps.securityLinkAnchorComponent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "securityLinkAnchorComponent",
+            "description": [],
+            "signature": [
+              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"article\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"output\" | \"svg\" | \"map\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"input\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"animate\" | \"progress\" | \"view\" | \"big\" | \"sub\" | \"sup\" | \"var\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionItemProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExceptionItemProps",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.disableActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.exceptionItem",
+            "type": "Object",
+            "tags": [],
+            "label": "exceptionItem",
+            "description": [],
+            "signature": [
+              "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"binary\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.listType",
+            "type": "Enum",
+            "tags": [],
+            "label": "listType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-io-ts-list-types",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+                "section": "def-common.ExceptionListTypeEnum",
+                "text": "ExceptionListTypeEnum"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.ruleReferences",
+            "type": "Array",
+            "tags": [],
+            "label": "ruleReferences",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-exception-list-components",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+                "section": "def-common.Rule",
+                "text": "Rule"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.editActionLabel",
+            "type": "string",
+            "tags": [],
+            "label": "editActionLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.deleteActionLabel",
+            "type": "string",
+            "tags": [],
+            "label": "deleteActionLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.securityLinkAnchorComponent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "securityLinkAnchorComponent",
+            "description": [],
+            "signature": [
+              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"article\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"output\" | \"svg\" | \"map\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"input\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"animate\" | \"progress\" | \"view\" | \"big\" | \"sub\" | \"sup\" | \"var\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.formattedDateComponent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "formattedDateComponent",
+            "description": [],
+            "signature": [
+              "\"symbol\" | \"object\" | React.ComponentType<any> | \"body\" | \"path\" | \"circle\" | \"filter\" | \"data\" | \"line\" | \"area\" | \"time\" | \"label\" | \"legend\" | \"article\" | \"image\" | \"link\" | \"menu\" | \"stop\" | \"base\" | \"text\" | \"title\" | \"s\" | \"small\" | \"source\" | \"output\" | \"svg\" | \"map\" | \"meta\" | \"script\" | \"summary\" | \"desc\" | \"q\" | \"pattern\" | \"mask\" | \"input\" | \"slot\" | \"style\" | \"head\" | \"section\" | \"animate\" | \"progress\" | \"view\" | \"big\" | \"sub\" | \"sup\" | \"var\" | \"html\" | \"a\" | \"img\" | \"audio\" | \"br\" | \"form\" | \"main\" | \"abbr\" | \"address\" | \"aside\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"button\" | \"canvas\" | \"caption\" | \"cite\" | \"code\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"select\" | \"span\" | \"strong\" | \"table\" | \"template\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"video\" | \"wbr\" | \"webview\" | \"animateMotion\" | \"animateTransform\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\""
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.getFormattedComments",
+            "type": "Function",
+            "tags": [],
+            "label": "getFormattedComments",
+            "description": [],
+            "signature": [
+              "(comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]) => ",
+              "EuiCommentProps",
+              "[]"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-exception-list-components",
+                "id": "def-common.ExceptionItemProps.getFormattedComments.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "comments",
+                "description": [],
+                "signature": [
+                  "({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]"
+                ],
+                "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.onDeleteException",
+            "type": "Function",
+            "tags": [],
+            "label": "onDeleteException",
+            "description": [],
+            "signature": [
+              "(arg: ",
+              {
+                "pluginId": "@kbn/securitysolution-exception-list-components",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+                "section": "def-common.ExceptionListItemIdentifiers",
+                "text": "ExceptionListItemIdentifiers"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-exception-list-components",
+                "id": "def-common.ExceptionItemProps.onDeleteException.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "arg",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/securitysolution-exception-list-components",
+                    "scope": "common",
+                    "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+                    "section": "def-common.ExceptionListItemIdentifiers",
+                    "text": "ExceptionListItemIdentifiers"
+                  }
+                ],
+                "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionItemProps.onEditException",
+            "type": "Function",
+            "tags": [],
+            "label": "onEditException",
+            "description": [],
+            "signature": [
+              "(item: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"binary\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }) => void"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-exception-list-components",
+                "id": "def-common.ExceptionItemProps.onEditException.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"binary\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
+                ],
+                "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionListItemIdentifiers",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExceptionListItemIdentifiers",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionListItemIdentifiers.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionListItemIdentifiers.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionListItemIdentifiers.namespaceType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "namespaceType",
+            "description": [],
+            "signature": [
+              "\"single\" | \"agnostic\""
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ExceptionListSummaryProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExceptionListSummaryProps",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionListSummaryProps.pagination",
+            "type": "Object",
+            "tags": [],
+            "label": "pagination",
+            "description": [],
+            "signature": [
+              "Pagination"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ExceptionListSummaryProps.lastUpdated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "lastUpdated",
+            "description": [],
+            "signature": [
+              "string | number | null"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.GetExceptionItemProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetExceptionItemProps",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.GetExceptionItemProps.pagination",
+            "type": "Object",
+            "tags": [],
+            "label": "pagination",
+            "description": [],
+            "signature": [
+              "Pagination",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.GetExceptionItemProps.search",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.GetExceptionItemProps.filters",
+            "type": "string",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ListDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "ListDetails",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ListDetails.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.ListDetails.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.PaginationProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PaginationProps",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.PaginationProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.PaginationProps.ariaLabel",
+            "type": "string",
+            "tags": [],
+            "label": "ariaLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.PaginationProps.pagination",
+            "type": "Object",
+            "tags": [],
+            "label": "pagination",
+            "description": [],
+            "signature": [
+              "Pagination"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.PaginationProps.onPaginationChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onPaginationChange",
+            "description": [],
+            "signature": [
+              "(arg: ",
+              {
+                "pluginId": "@kbn/securitysolution-exception-list-components",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+                "section": "def-common.GetExceptionItemProps",
+                "text": "GetExceptionItemProps"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-exception-list-components",
+                "id": "def-common.PaginationProps.onPaginationChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "arg",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/securitysolution-exception-list-components",
+                    "scope": "common",
+                    "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+                    "section": "def-common.GetExceptionItemProps",
+                    "text": "GetExceptionItemProps"
+                  }
+                ],
+                "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.Rule",
+        "type": "Interface",
+        "tags": [],
+        "label": "Rule",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.Rule.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.Rule.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.Rule.rule_id",
+            "type": "string",
+            "tags": [],
+            "label": "rule_id",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.Rule.exceptions_list",
+            "type": "Array",
+            "tags": [],
+            "label": "exceptions_list",
+            "description": [],
+            "signature": [
+              "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.RuleReference",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleReference",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.RuleReference.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.RuleReference.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.RuleReference.referenced_rules",
+            "type": "Array",
+            "tags": [],
+            "label": "referenced_rules",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-exception-list-components",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+                "section": "def-common.Rule",
+                "text": "Rule"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.RuleReference.listId",
+            "type": "string",
+            "tags": [],
+            "label": "listId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.RuleReferences",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleReferences",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.RuleReferences.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: RuleReference",
+            "description": [],
+            "signature": [
+              "[key: string]:  ",
+              {
+                "pluginId": "@kbn/securitysolution-exception-list-components",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
+                "section": "def-common.RuleReference",
+                "text": "RuleReference"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ListTypeText",
+        "type": "Enum",
+        "tags": [],
+        "label": "ListTypeText",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ViewerStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "ViewerStatus",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.ViewerFlyoutName",
+        "type": "Type",
+        "tags": [],
+        "label": "ViewerFlyoutName",
+        "description": [],
+        "signature": [
+          "\"addException\" | \"editException\" | null"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

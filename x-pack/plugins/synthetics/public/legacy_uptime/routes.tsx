@@ -6,12 +6,13 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { EuiPageTemplateProps, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { ManageLocations } from './pages/monitor_management/manage_locations';
 import {
   CERTIFICATES_ROUTE,
@@ -60,18 +61,13 @@ import { AddMonitorBtn } from './components/monitor_management/add_monitor_btn';
 import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
 import { ServiceAllowedWrapper } from './pages/monitor_management/service_allowed_wrapper';
 
-type RouteProps = {
+type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
   component: React.FC;
   dataTestSubj: string;
   title: string;
   telemetryId: UptimePage;
-  pageHeader: {
-    pageTitle: string | JSX.Element;
-    children?: JSX.Element;
-    rightSideItems?: JSX.Element[];
-  };
-} & EuiPageTemplateProps;
+};
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.legacyBaseTitle', {
   defaultMessage: 'Uptime - Kibana',
@@ -244,7 +240,7 @@ const getRoutes = (): RouteProps[] => {
         defaultMessage: 'Monitor Management | {baseTitle}',
         values: { baseTitle },
       }),
-      path: MONITOR_MANAGEMENT_ROUTE + '/:type',
+      path: MONITOR_MANAGEMENT_ROUTE + '/:type?',
       component: () => (
         <ServiceAllowedWrapper>
           <MonitorManagementPage />

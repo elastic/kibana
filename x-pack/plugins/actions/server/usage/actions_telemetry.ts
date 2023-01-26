@@ -7,6 +7,11 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  AvgActionRunOutcomeByConnectorTypeBucket,
+  parseActionRunOutcomeByConnectorTypesBucket,
+} from './lib/parse_connector_type_bucket';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { ActionResult, PreConfiguredAction } from '../types';
 
@@ -395,7 +400,7 @@ export async function getInUseTotalCount(
   }
 }
 
-function replaceFirstAndLastDotSymbols(strToReplace: string) {
+export function replaceFirstAndLastDotSymbols(strToReplace: string) {
   const hasFirstSymbolDot = strToReplace.startsWith('.');
   const appliedString = hasFirstSymbolDot ? strToReplace.replace('.', '__') : strToReplace;
   const hasLastSymbolDot = strToReplace.endsWith('.');
@@ -415,6 +420,7 @@ export async function getExecutionsPerDayCount(
   countFailedByType: Record<string, number>;
   avgExecutionTime: number;
   avgExecutionTimeByType: Record<string, number>;
+  countRunOutcomeByConnectorType: Record<string, number>;
 }> {
   const scriptedMetric = {
     scripted_metric: {
@@ -536,6 +542,35 @@ export async function getExecutionsPerDayCount(
               },
             },
           },
+          count_connector_types_by_action_run_outcome_per_day: {
+            nested: {
+              path: 'kibana.saved_objects',
+            },
+            aggs: {
+              actionSavedObjects: {
+                filter: { term: { 'kibana.saved_objects.type': 'action' } },
+                aggs: {
+                  connector_types: {
+                    terms: {
+                      field: 'kibana.saved_objects.type_id',
+                    },
+                    aggs: {
+                      outcome: {
+                        reverse_nested: {},
+                        aggs: {
+                          count: {
+                            terms: {
+                              field: 'event.outcome',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     });
@@ -564,6 +599,14 @@ export async function getExecutionsPerDayCount(
       {}
     );
 
+    const aggsCountConnectorTypeByActionRun = actionResults.aggregations as {
+      count_connector_types_by_action_run_outcome_per_day: {
+        actionSavedObjects: {
+          connector_types: AggregationsTermsAggregateBase<AvgActionRunOutcomeByConnectorTypeBucket>;
+        };
+      };
+    };
+
     return {
       hasErrors: false,
       countTotal: aggsExecutions.total,
@@ -586,6 +629,10 @@ export async function getExecutionsPerDayCount(
       ),
       avgExecutionTime: aggsAvgExecutionTime,
       avgExecutionTimeByType,
+      countRunOutcomeByConnectorType: parseActionRunOutcomeByConnectorTypesBucket(
+        aggsCountConnectorTypeByActionRun.count_connector_types_by_action_run_outcome_per_day
+          .actionSavedObjects.connector_types.buckets
+      ),
     };
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
@@ -601,6 +648,7 @@ export async function getExecutionsPerDayCount(
       countFailedByType: {},
       avgExecutionTime: 0,
       avgExecutionTimeByType: {},
+      countRunOutcomeByConnectorType: {},
     };
   }
 }

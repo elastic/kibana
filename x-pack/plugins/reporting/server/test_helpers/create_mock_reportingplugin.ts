@@ -113,6 +113,7 @@ export const createMockConfigSchema = (
       ...overrides.queue,
     },
     csv: {
+      scroll: { size: 500, duration: '30s' },
       ...overrides.csv,
     },
     roles: {

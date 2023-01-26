@@ -7,9 +7,11 @@
 
 import expect from '@kbn/expect';
 
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { ES_TEST_INDEX_NAME, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import { createDataStream, deleteDataStream } from '../lib/create_test_data';
 import {
   createConnector,
@@ -159,7 +161,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             "fields": [
               {
                 "field": "@timestamp",
-                "format": "epoch_millis" 
+                "format": "epoch_millis"
               }
             ],
             "query": {
@@ -185,6 +187,73 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(hit.fields).not.to.be.empty();
           hit.fields['@timestamp'].forEach((timestamp: string) => {
             expect(reIsNumeric.test(timestamp)).to.be(true);
+          });
+        });
+      }
+    });
+
+    it(`runs correctly: _source: false field for esQuery search type`, async () => {
+      // write documents from now to the future end date in groups
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+      await createRule({
+        name: 'always fire',
+        esQuery: `
+          {
+            "query": {
+                "match_all": { }
+            },
+            "_source": false
+        }`.replace(`"`, `\"`),
+        size: 100,
+        thresholdComparator: '>',
+        threshold: [-1],
+      });
+
+      const docs = await waitForDocs(2);
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { name, title } = doc._source.params;
+        expect(name).to.be('always fire');
+        expect(title).to.be(`rule 'always fire' matched query`);
+
+        const hits = JSON.parse(doc._source.hits);
+        expect(hits).not.to.be.empty();
+        hits.forEach((hit: any) => {
+          expect(hit._source).to.be(undefined);
+        });
+      }
+    });
+
+    it(`runs correctly: _source field for esQuery search type`, async () => {
+      // write documents from now to the future end date in groups
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+      await createRule({
+        name: 'always fire',
+        esQuery: `
+          {
+            "query": {
+                "match_all": { }
+            },
+            "_source": "testedValue*"
+        }`.replace(`"`, `\"`),
+        size: 100,
+        thresholdComparator: '>',
+        threshold: [-1],
+      });
+
+      const docs = await waitForDocs(2);
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { name, title } = doc._source.params;
+        expect(name).to.be('always fire');
+        expect(title).to.be(`rule 'always fire' matched query`);
+
+        const hits = JSON.parse(doc._source.hits);
+        expect(hits).not.to.be.empty();
+        hits.forEach((hit: any) => {
+          expect(hit._source).not.to.be.empty();
+          Object.keys(hit._source).forEach((key) => {
+            expect(key.startsWith('testedValue')).to.be(true);
           });
         });
       }
@@ -265,6 +334,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
             searchType: params.searchType,
+            aggType: params.aggType || 'count',
+            groupBy: params.groupBy || 'all',
             ...ruleParams,
           },
         })

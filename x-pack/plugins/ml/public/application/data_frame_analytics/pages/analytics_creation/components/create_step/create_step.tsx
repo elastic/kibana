@@ -58,6 +58,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
     if (canCreateDataView === false) {
       setFormState({ createIndexPattern: false });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [capabilities]);
 
   if (step !== ANALYTICS_STEPS.CREATE) return null;

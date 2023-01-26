@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import { appContextService } from '../../..';
 import { ElasticsearchAssetType } from '../../../../types';
-import { IngestManagerError } from '../../../../errors';
+import { FleetError } from '../../../../errors';
 import type { EsAssetReference } from '../../../../../common/types';
 import { updateEsAssetReferences } from '../../packages/install';
 
@@ -51,7 +51,7 @@ export async function deletePipeline(esClient: ElasticsearchClient, id: string):
       // Only throw if error is not a 404 error. Sometimes the pipeline is already deleted, but we have
       // duplicate references to them, see https://github.com/elastic/kibana/issues/91192
       if (err.statusCode !== 404) {
-        throw new IngestManagerError(`error deleting pipeline ${id}: ${err}`);
+        throw new FleetError(`error deleting pipeline ${id}: ${err}`);
       }
     }
   }

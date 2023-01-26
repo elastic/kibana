@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
+import { noop } from 'lodash/fp';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -18,12 +19,14 @@ import { createSecurityJobs } from './use_security_jobs_helpers';
 import { useMlCapabilities } from '../../ml/hooks/use_ml_capabilities';
 import * as i18n from '../../ml/translations';
 import { getJobsSummary } from '../../ml/api/get_jobs_summary';
+import type { inputsModel } from '../../../store';
 
 export interface UseSecurityJobsReturn {
   loading: boolean;
   jobs: SecurityJob[];
   isMlAdmin: boolean;
   isLicensed: boolean;
+  refetch: inputsModel.Refetch;
 }
 
 /**
@@ -35,25 +38,24 @@ export interface UseSecurityJobsReturn {
  * NOTE: If the user is not an ml admin, jobs will be empty and isMlAdmin will be false.
  * If you only need installed jobs, try the {@link useInstalledSecurityJobs} hook.
  *
- * @param refetchData
  */
-export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => {
+export const useSecurityJobs = (): UseSecurityJobsReturn => {
   const [jobs, setJobs] = useState<SecurityJob[]>([]);
   const [loading, setLoading] = useState(true);
   const mlCapabilities = useMlCapabilities();
   const [securitySolutionDefaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const http = useHttp();
   const { addError } = useAppToasts();
-
+  const refetch = useRef<inputsModel.Refetch>(noop);
   const isMlAdmin = hasMlAdminPermissions(mlCapabilities);
   const isLicensed = hasMlLicense(mlCapabilities);
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
-    setLoading(true);
 
     async function fetchSecurityJobIdsFromGroupsData() {
+      setLoading(true);
       if (isMlAdmin && isLicensed) {
         try {
           // Batch fetch all installed jobs, ML modules, and check which modules are compatible with securitySolutionDefaultIndex
@@ -87,11 +89,13 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
     }
 
     fetchSecurityJobIdsFromGroupsData();
+
+    refetch.current = fetchSecurityJobIdsFromGroupsData;
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [refetchData, isMlAdmin, isLicensed, securitySolutionDefaultIndex, addError, http]);
+  }, [isMlAdmin, isLicensed, securitySolutionDefaultIndex, addError, http]);
 
-  return { isLicensed, isMlAdmin, jobs, loading };
+  return { isLicensed, isMlAdmin, jobs, loading, refetch: refetch.current };
 };

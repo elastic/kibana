@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -14,7 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ApmPluginStartDeps } from '../../../../plugin';
 import {
   TraceSearchQuery,
   TraceSearchType,
@@ -56,7 +58,12 @@ export function TraceSearchBox({
   error,
   loading,
 }: Props) {
-  const { unifiedSearch } = useApmPluginContext();
+  const { unifiedSearch, core, data, dataViews } = useApmPluginContext();
+  const { notifications, http, docLinks, uiSettings } = core;
+  const {
+    services: { storage },
+  } = useKibana<ApmPluginStartDeps>();
+
   const { dataView } = useApmDataView();
 
   return (
@@ -132,6 +139,22 @@ export function TraceSearchBox({
                           ...query,
                           query: String(e.query ?? ''),
                         });
+                      }}
+                      appName={i18n.translate(
+                        'xpack.apm.traceExplorer.appName',
+                        {
+                          defaultMessage: 'APM',
+                        }
+                      )}
+                      deps={{
+                        unifiedSearch,
+                        notifications,
+                        http,
+                        docLinks,
+                        uiSettings,
+                        data,
+                        dataViews,
+                        storage,
                       }}
                     />
                   </form>

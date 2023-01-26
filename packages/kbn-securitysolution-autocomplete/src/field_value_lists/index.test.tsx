@@ -16,7 +16,7 @@ import { getField } from '../fields/index.mock';
 import { AutocompleteFieldListsComponent } from '.';
 import {
   getListResponseMock,
-  getFoundListSchemaMock,
+  getFoundListsBySizeSchemaMock,
   DATE_NOW,
   IMMUTABLE,
   VERSION,
@@ -34,14 +34,15 @@ const mockKeywordList: ListSchema = {
   name: 'keyword list',
   type: 'keyword',
 };
-const mockResult = { ...getFoundListSchemaMock() };
-mockResult.data = [...mockResult.data, mockKeywordList];
+const mockResult = { ...getFoundListsBySizeSchemaMock() };
+mockResult.smallLists = [...mockResult.smallLists, mockKeywordList];
+mockResult.largeLists = [];
 jest.mock('@kbn/securitysolution-list-hooks', () => {
   const originalModule = jest.requireActual('@kbn/securitysolution-list-hooks');
 
   return {
     ...originalModule,
-    useFindLists: () => ({
+    useFindListsBySize: () => ({
       error: undefined,
       loading: false,
       result: mockResult,
@@ -116,7 +117,7 @@ describe('AutocompleteFieldListsComponent', () => {
       wrapper
         .find('EuiComboBox[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]')
         .prop('options')
-    ).toEqual([{ label: 'some name' }]);
+    ).toEqual([{ label: 'some name', disabled: false }]);
   });
 
   test('it correctly displays lists that match the selected "keyword" field esType', () => {
@@ -139,7 +140,7 @@ describe('AutocompleteFieldListsComponent', () => {
       wrapper
         .find('EuiComboBox[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]')
         .prop('options')
-    ).toEqual([{ label: 'keyword list' }]);
+    ).toEqual([{ label: 'keyword list', disabled: false }]);
   });
 
   test('it correctly displays lists that match the selected "ip" field esType', () => {
@@ -162,7 +163,7 @@ describe('AutocompleteFieldListsComponent', () => {
       wrapper
         .find('EuiComboBox[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]')
         .prop('options')
-    ).toEqual([{ label: 'some name' }]);
+    ).toEqual([{ label: 'some name', disabled: false }]);
   });
 
   test('it correctly displays selected list', async () => {
@@ -206,7 +207,7 @@ describe('AutocompleteFieldListsComponent', () => {
       wrapper.find(EuiComboBox).props() as unknown as {
         onChange: (a: EuiComboBoxOptionOption[]) => void;
       }
-    ).onChange([{ label: 'some name' }]);
+    ).onChange([{ label: 'some name', disabled: false }]);
 
     await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith({

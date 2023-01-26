@@ -6,20 +6,24 @@
  */
 
 import expect from '@kbn/expect';
+import { expect as jestExpect } from 'expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { adminTestUser } from '@kbn/test';
+import { resolve } from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
 } from '../../fixtures/kerberos/kerberos_tools';
+import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
   const spnegoToken = getSPNEGOToken();
 
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
+  const retry = getService('retry');
 
   function checkCookieIsSet(cookie: Cookie) {
     expect(cookie.value).to.not.be.empty();
@@ -98,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
         // If browser and Kibana can successfully negotiate this HTML won't rendered, but if not
         // users will see a proper `Unauthenticated` page.
         expect(spnegoResponse.headers['content-security-policy']).to.be.a('string');
-        expect(spnegoResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(spnegoResponse.text).to.contain('error');
       });
 
       it('AJAX requests should not initiate SPNEGO', async () => {
@@ -139,26 +143,29 @@ export default function ({ getService }: FtrProviderContext) {
           ? ['kibana_admin', 'superuser_anonymous']
           : ['kibana_admin'];
 
-        await supertest
+        const spnegoResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(200, {
-            username: 'tester@TEST.ELASTIC.CO',
-            roles: expectedUserRoles,
-            full_name: null,
-            email: null,
-            metadata: {
-              kerberos_user_principal_name: 'tester@TEST.ELASTIC.CO',
-              kerberos_realm: 'TEST.ELASTIC.CO',
-            },
-            enabled: true,
-            authentication_realm: { name: 'kerb1', type: 'kerberos' },
-            lookup_realm: { name: 'kerb1', type: 'kerberos' },
-            authentication_provider: { type: 'kerberos', name: 'kerberos' },
-            authentication_type: 'token',
-            elastic_cloud_user: false,
-          });
+          .expect(200);
+
+        jestExpect(spnegoResponse.body).toEqual({
+          username: 'tester@TEST.ELASTIC.CO',
+          roles: expectedUserRoles,
+          full_name: null,
+          email: null,
+          metadata: {
+            kerberos_user_principal_name: 'tester@TEST.ELASTIC.CO',
+            kerberos_realm: 'TEST.ELASTIC.CO',
+          },
+          enabled: true,
+          authentication_realm: { name: 'kerb1', type: 'kerberos' },
+          lookup_realm: { name: 'kerb1', type: 'kerberos' },
+          authentication_provider: { type: 'kerberos', name: 'kerberos' },
+          authentication_type: 'token',
+          elastic_cloud_user: false,
+          profile_uid: jestExpect.any(String),
+        });
       });
 
       it('should re-initiate SPNEGO handshake if token is rejected with 401', async () => {
@@ -475,6 +482,75 @@ export default function ({ getService }: FtrProviderContext) {
         checkCookieIsCleared(parseCookie(cookies[0])!);
 
         expect(nonAjaxResponse.headers['www-authenticate']).to.be('Negotiate');
+      });
+    });
+
+    describe('Audit Log', function () {
+      const logFilePath = resolve(__dirname, '../../fixtures/audit/kerberos.log');
+      const logFile = new FileWrapper(logFilePath, retry);
+
+      beforeEach(async () => {
+        await logFile.reset();
+      });
+
+      it('should log a single `user_login` and `user_logout` event per session', async () => {
+        // Accessing Kibana without an existing session should create a `user_login` event.
+        const response = await supertest
+          .get('/security/account')
+          .set('Authorization', `Negotiate ${spnegoToken}`)
+          .expect(200);
+
+        const cookies = response.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+        const sessionCookie = parseCookie(cookies[0])!;
+
+        // Accessing Kibana again using the same session should not create another `user_login` event.
+        await supertest
+          .get('/security/account')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(200);
+
+        // Clearing the session should create a `user_logout` event.
+        await supertest
+          .get('/api/security/logout')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(302);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(2);
+
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('success');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].user.name).to.be('tester@TEST.ELASTIC.CO');
+        expect(auditEvents[0].kibana.authentication_provider).to.be('kerberos');
+
+        expect(auditEvents[1]).to.be.ok();
+        expect(auditEvents[1].event.action).to.be('user_logout');
+        expect(auditEvents[1].event.outcome).to.be('unknown');
+        expect(auditEvents[1].trace.id).to.be.ok();
+        expect(auditEvents[1].user.name).to.be('tester@TEST.ELASTIC.CO');
+        expect(auditEvents[1].kibana.authentication_provider).to.be('kerberos');
+      });
+
+      it('should log authentication failure correctly', async () => {
+        await supertest
+          .get('/security/account')
+          .set('Authorization', `Negotiate ${Buffer.from('Hello').toString('base64')}`)
+          .expect(401);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(1);
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('failure');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].kibana.authentication_provider).to.be('kerberos');
       });
     });
   });

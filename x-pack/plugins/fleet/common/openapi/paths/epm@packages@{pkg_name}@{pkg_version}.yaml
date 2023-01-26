@@ -21,6 +21,14 @@ get:
                       - install_failed
                       - not_installed
                   savedObject:
+                    type: object
+                  latestVersion:
+                    type: string
+                  keepPoliciesUpToDate:
+                    type: boolean
+                  notice:
+                    type: string
+                  licensePath:
                     type: string
                 required:
                   - status
@@ -39,6 +47,23 @@ parameters:
     name: pkgVersion
     in: path
     required: true
+  - schema:
+      type: boolean
+    name: ignoreUnverified
+    description: 'Ignore if the package is fails signature verification'
+    in: query
+  - schema:
+      type: boolean
+    name: full
+    description: 'Return all fields from the package manifest, not just those supported by the Elastic Package Registry'
+    in: query
+  - in: query 
+    name: prerelease
+    schema:
+      type: boolean
+      default: false
+    description: >-
+      Whether to return prerelease versions of packages (e.g. beta, rc, preview) 
 post:
   summary: Packages - Install
   tags: []

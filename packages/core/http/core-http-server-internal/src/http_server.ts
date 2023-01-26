@@ -9,7 +9,7 @@
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   createServer,
   getListenerOptions,
@@ -21,6 +21,8 @@ import type { Duration } from 'moment';
 import { firstValueFrom, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import apm from 'elastic-apm-node';
+// @ts-expect-error no type definition
+import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
@@ -147,9 +149,17 @@ export class HttpServer {
   ): Promise<HttpServerSetup> {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
+    this.config = config;
     this.server = createServer(serverOptions, listenerOptions);
     await this.server.register([HapiStaticFiles]);
-    this.config = config;
+    if (config.compression.brotli.enabled) {
+      await this.server.register({
+        plugin: Brok,
+        options: {
+          compress: { quality: config.compression.brotli.quality },
+        },
+      });
+    }
 
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
@@ -355,7 +365,7 @@ export class HttpServer {
       request.app = {
         ...(request.app ?? {}),
         requestId,
-        requestUuid: uuid.v4(),
+        requestUuid: uuidv4(),
         // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
         // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
         traceId: apm.currentTraceIds['trace.id'],

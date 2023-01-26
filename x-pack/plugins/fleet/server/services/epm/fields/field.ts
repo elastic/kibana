@@ -37,6 +37,7 @@ export interface Field {
   include_in_root?: boolean;
   null_value?: string;
   dimension?: boolean;
+  default_field?: boolean;
 
   // Meta fields
   metric_type?: string;
@@ -278,7 +279,7 @@ const isFields = (path: string) => {
  */
 
 export const loadFieldsFromYaml = (
-  pkg: Pick<PackageInfo, 'version' | 'name'>,
+  pkg: Pick<PackageInfo, 'version' | 'name' | 'type'>,
   datasetName?: string
 ): Field[] => {
   // Fetch all field definition files

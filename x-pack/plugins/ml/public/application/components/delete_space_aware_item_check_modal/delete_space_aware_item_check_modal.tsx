@@ -278,6 +278,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
       setDidUntag(false);
     }
     setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasManagedJob]);
 
   const onUntagClick = async () => {
@@ -338,10 +339,12 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
         <>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTitle"
-                defaultMessage="Checking space permissions"
-              />
+              <h1>
+                <FormattedMessage
+                  id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTitle"
+                  defaultMessage="Checking space permissions"
+                />
+              </h1>
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 

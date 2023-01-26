@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Adds a `metric` renderer and function to the expression plugin. The renderer will display the `legacy metric` chart.",
   "server": true,

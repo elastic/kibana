@@ -7,20 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { PaletteOutput } from './types';
+import type { SystemPaletteExpressionFunctionDefinition } from './types';
 import { paletteIds } from '../../constants';
 
-export interface SystemPaletteArguments {
-  name: string;
-}
-
-export function systemPalette(): ExpressionFunctionDefinition<
-  'system_palette',
-  null,
-  SystemPaletteArguments,
-  PaletteOutput
-> {
+export function systemPalette(): SystemPaletteExpressionFunctionDefinition {
   return {
     name: 'system_palette',
     aliases: [],

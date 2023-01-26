@@ -29,7 +29,7 @@ export const CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT =
 export const CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME =
   '[data-test-subj="description-action"] .euiCommentEvent__headerUsername';
 
-export const CASE_DETAILS_USERNAMES = '[data-test-subj="case-view-username"]';
+export const CASE_DETAILS_USERNAMES = '[data-test-subj="user-profile-username"]';
 
 export const CASE_EVENT_UPDATE = '.euiCommentEvent[data-type="update"]';
 
@@ -45,7 +45,7 @@ export const CASE_USER_ACTION = '[data-test-subj="user-action-markdown"]';
 
 export const CONNECTOR_CARD_DETAILS = '[data-test-subj="connector-card"]';
 
-export const CONNECTOR_TITLE = '[data-test-subj="connector-card"] span.euiTitle';
+export const CONNECTOR_TITLE = '[data-test-subj="connector-card"] p.euiTitle';
 
 export const DELETE_CASE_CONFIRM_BUTTON = '[data-test-subj="confirmModalConfirmButton"]';
 

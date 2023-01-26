@@ -22,13 +22,13 @@ load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories", "yarn_install
 # Setup the Node.js toolchain for the architectures we want to support
 node_repositories(
   node_repositories = {
-    "16.16.0-darwin_amd64": ("node-v16.16.0-darwin-x64.tar.gz", "node-v16.16.0-darwin-x64", "982edd0fad364ad6e2d72161671544ab9399bd0ca8c726bde3cd07775c4c709a"),
-    "16.16.0-darwin_arm64": ("node-v16.16.0-darwin-arm64.tar.gz", "node-v16.16.0-darwin-arm64", "167721c2d72402e54adc0f8c87ca840796216c4d98946509d73221b771ad3e4c"),
-    "16.16.0-linux_arm64": ("node-v16.16.0-linux-arm64.tar.xz", "node-v16.16.0-linux-arm64", "6cb8f1353480646c1cd8ab9911995e5591e1a97811f43ea4ab3e946a57e7c80e"),
-    "16.16.0-linux_amd64": ("node-v16.16.0-linux-x64.tar.xz", "node-v16.16.0-linux-x64", "edcb6e9bb049ae365611aa209fc03c4bfc7e0295dbcc5b2f1e710ac70384a8ec"),
-    "16.16.0-windows_amd64": ("node-v16.16.0-win-x64.zip", "node-v16.16.0-win-x64", "c657acc98af55018c8fd6113c7e08d67c8083af75ba0306f9561b0117abc39d4"),
+    "18.13.0-darwin_amd64": ("node-v18.13.0-darwin-x64.tar.gz", "node-v18.13.0-darwin-x64", "8b57c4da4ff6cca19d5ef7953f8816e3406d1508a2e4ee7f997984b3b1d11b77"),
+    "18.13.0-darwin_arm64": ("node-v18.13.0-darwin-arm64.tar.gz", "node-v18.13.0-darwin-arm64", "418d535e64dbcbd628715180c2de4ffcecb8a84b81f233c60e6ab9f0d795c249"),
+    "18.13.0-linux_arm64": ("node-v18.13.0-linux-arm64.tar.xz", "node-v18.13.0-linux-arm64", "5b338667822341d1ea3b18d5b37d442a655829b9eafdc5f9008f00b8451ac148"),
+    "18.13.0-linux_amd64": ("node-v18.13.0-linux-x64.tar.xz", "node-v18.13.0-linux-x64", "7f5d6922a91986ef059ba8a4396aa435440adacfe6fc6fab60a857c8f2cf5e7a"),
+    "18.13.0-windows_amd64": ("node-v18.13.0-win-x64.zip", "node-v18.13.0-win-x64", "29c99ad1167ddbd72f2b15e91b560e36ac785b1873ba6791ab50d9d62f1957e2"),
   },
-  node_version = "16.16.0",
+  node_version = "18.13.0",
   node_urls = [
     "https://nodejs.org/dist/v{version}/{filename}",
   ],

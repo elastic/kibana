@@ -40,7 +40,7 @@ describe('ElasticV3ServerShipper', () => {
   const setLastBatchSent = (ms: number) => (shipper['lastBatchSent'] = ms);
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     shipper = new ElasticV3ServerShipper(
       { version: '1.2.3', channelName: 'test-channel', debug: true },
@@ -117,13 +117,13 @@ describe('ElasticV3ServerShipper', () => {
   );
 
   test(
-    'calls to reportEvents call `fetch` after 10 minutes when optIn value is set to true',
+    'calls to reportEvents call `fetch` after 10 seconds when optIn value is set to true',
     fakeSchedulers(async (advance) => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
-      setLastBatchSent(Date.now() - 10 * MINUTES);
-      advance(10 * MINUTES);
+      setLastBatchSent(Date.now() - 10 * SECONDS);
+      advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
         {
@@ -150,12 +150,12 @@ describe('ElasticV3ServerShipper', () => {
   );
 
   test(
-    'calls to reportEvents do not call `fetch` after 10 minutes when optIn value is set to false',
+    'calls to reportEvents do not call `fetch` after 10 seconds when optIn value is set to false',
     fakeSchedulers((advance) => {
       shipper.reportEvents(events);
       shipper.optIn(false);
-      setLastBatchSent(Date.now() - 10 * MINUTES);
-      advance(10 * MINUTES);
+      setLastBatchSent(Date.now() - 10 * SECONDS);
+      advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
       expect(fetchMock).not.toHaveBeenCalled();
     })
   );
@@ -201,8 +201,8 @@ describe('ElasticV3ServerShipper', () => {
       shipper['firstTimeOffline'] = null;
       shipper.reportEvents(events);
       shipper.optIn(true);
-      setLastBatchSent(Date.now() - 10 * MINUTES);
-      advance(10 * MINUTES);
+      setLastBatchSent(Date.now() - 10 * SECONDS);
+      advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
         {
@@ -226,11 +226,11 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(new Array(1000).fill(events[0]));
       shipper.optIn(true);
 
-      // Due to the size of the test events, it matches 9 rounds.
+      // Due to the size of the test events, it matches 8 rounds.
       for (let i = 0; i < 9; i++) {
         const counter = firstValueFrom(shipper.telemetryCounter$);
         setLastBatchSent(Date.now() - 10 * SECONDS);
-        advance(10 * SECONDS);
+        advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
         expect(fetchMock).toHaveBeenNthCalledWith(
           i + 1,
           'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -277,8 +277,8 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
-      setLastBatchSent(Date.now() - 10 * MINUTES);
-      advance(10 * MINUTES);
+      setLastBatchSent(Date.now() - 10 * SECONDS);
+      advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
         {
@@ -315,8 +315,8 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
-      setLastBatchSent(Date.now() - 10 * MINUTES);
-      advance(10 * MINUTES);
+      setLastBatchSent(Date.now() - 10 * SECONDS);
+      advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
         {
@@ -458,8 +458,8 @@ describe('ElasticV3ServerShipper', () => {
           shipper.reportEvents(events);
           shipper.optIn(true);
           const counter = firstValueFrom(shipper.telemetryCounter$);
-          setLastBatchSent(Date.now() - 10 * MINUTES);
-          advance(10 * MINUTES);
+          setLastBatchSent(Date.now() - 10 * SECONDS);
+          advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
           expect(fetchMock).toHaveBeenNthCalledWith(
             1,
             'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -578,6 +578,47 @@ describe('ElasticV3ServerShipper', () => {
           );
         })
       );
+    });
+  });
+
+  describe('flush method', () => {
+    test('resolves straight away if it should not send anything', async () => {
+      await expect(shipper.flush()).resolves.toBe(undefined);
+    });
+
+    test('resolves when all the ongoing requests are complete', async () => {
+      shipper.optIn(true);
+      shipper.reportEvents(events);
+      expect(fetchMock).toHaveBeenCalledTimes(0);
+      fetchMock.mockImplementation(async () => {
+        // eslint-disable-next-line dot-notation
+        expect(shipper['inFlightRequests$'].value).toBe(1);
+      });
+      await expect(shipper.flush()).resolves.toBe(undefined);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://telemetry-staging.elastic.co/v3/send/test-channel',
+        {
+          body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
+          headers: {
+            'content-type': 'application/x-ndjson',
+            'x-elastic-cluster-id': 'UNKNOWN',
+            'x-elastic-stack-version': '1.2.3',
+          },
+          method: 'POST',
+          query: { debug: true },
+        }
+      );
+    });
+
+    test('calling flush multiple times does not keep hanging', async () => {
+      await expect(shipper.flush()).resolves.toBe(undefined);
+      await expect(shipper.flush()).resolves.toBe(undefined);
+      await Promise.all([shipper.flush(), shipper.flush()]);
+    });
+
+    test('calling flush after shutdown does not keep hanging', async () => {
+      shipper.shutdown();
+      await expect(shipper.flush()).resolves.toBe(undefined);
     });
   });
 });

@@ -6,12 +6,9 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import * as fetchers from '../../../state/api/monitor_management';
-import { FETCH_STATUS, useFetcher as originalUseFetcher } from '@kbn/observability-plugin/public';
-import { spyOnUseFetcher } from '../../../lib/helper/spy_use_fetcher';
 import { Actions } from './actions';
 import { DeleteMonitor } from './delete_monitor';
 import {
@@ -21,76 +18,73 @@ import {
   SourceType,
 } from '../../../../../common/runtime_types';
 
-describe('<Actions />', () => {
-  const onUpdate = jest.fn();
-  const useFetcher = spyOnUseFetcher({});
+import { createRealStore } from '../../../lib/helper/helper_with_redux';
 
-  it('calls delete monitor on monitor deletion', () => {
-    useFetcher.mockImplementation(originalUseFetcher);
+describe('<DeleteMonitor />', () => {
+  const onUpdate = jest.fn();
+
+  it('calls delete monitor on monitor deletion', async () => {
     const deleteMonitor = jest.spyOn(fetchers, 'deleteMonitor');
     const id = 'test-id';
-    render(<DeleteMonitor id={id} name="sample name" onUpdate={onUpdate} />);
+    const store = createRealStore();
+    render(<DeleteMonitor configId={id} name="sample name" onUpdate={onUpdate} />, {
+      store,
+    });
+
+    const dispatchSpy = jest.spyOn(store, 'dispatch');
 
     expect(deleteMonitor).not.toBeCalled();
 
-    userEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('button'));
 
-    userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
-    expect(deleteMonitor).toBeCalledWith({ id });
+    expect(dispatchSpy).toHaveBeenCalledWith({
+      payload: {
+        id: 'test-id',
+        name: 'sample name',
+      },
+      type: 'DELETE_MONITOR',
+    });
+
+    expect(store.getState().deleteMonitor.loading.includes(id)).toEqual(true);
+
+    expect(await screen.findByLabelText('Loading')).toBeTruthy();
   });
 
-  it('calls set refresh when deletion is successful', () => {
+  it('calls set refresh when deletion is successful', async () => {
     const id = 'test-id';
     const name = 'sample monitor';
+    const store = createRealStore();
+
     render(
       <Actions
-        id={id}
+        configId={id}
         name={name}
         onUpdate={onUpdate}
         monitors={
           [
             {
-              id: 'test-id',
+              id,
               attributes: {
                 [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
+                [ConfigKey.CONFIG_ID]: id,
               } as BrowserFields,
             },
           ] as unknown as MonitorManagementListResult['monitors']
         }
-      />
+      />,
+      { store }
     );
 
-    userEvent.click(screen.getByLabelText('Delete monitor'));
+    fireEvent.click(screen.getByRole('button'));
 
-    expect(onUpdate).toHaveBeenCalled();
-  });
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
-  it('shows loading spinner while waiting for monitor to delete', () => {
-    const id = 'test-id';
-    useFetcher.mockReturnValue({
-      data: {},
-      status: FETCH_STATUS.LOADING,
-      refetch: () => {},
+    await waitFor(() => {
+      expect(onUpdate).toHaveBeenCalled();
     });
-    render(
-      <Actions
-        id={id}
-        name="sample name"
-        onUpdate={onUpdate}
-        monitors={
-          [
-            {
-              id: 'test-id',
-              attributes: {
-                [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
-              } as BrowserFields,
-            },
-          ] as unknown as MonitorManagementListResult['monitors']
-        }
-      />
-    );
 
-    expect(screen.getByLabelText('Deleting monitor...')).toBeInTheDocument();
+    expect(store.getState().deleteMonitor.deletedMonitorIds.includes(id)).toEqual(true);
   });
 });

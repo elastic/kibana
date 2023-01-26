@@ -25,9 +25,12 @@ import { BundleMetricsPlugin } from './bundle_metrics_plugin';
 import { EmitStatsPlugin } from './emit_stats_plugin';
 import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
-const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
-const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
-const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+const BABEL_PRESET = [
+  require.resolve('@kbn/babel-preset/webpack_preset'),
+  {
+    'kibana/ignoredPkgIds': Object.keys(UiSharedDepsSrc.externals),
+  },
+];
 const DLL_MANIFEST = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
 
 const nodeModulesButNotKbnPackages = (path: string) => {
@@ -76,7 +79,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       },
     },
 
-    externals: [UiSharedDepsSrc.externals],
+    externals: UiSharedDepsSrc.externals,
 
     plugins: [
       new CleanWebpackPlugin(),
@@ -149,7 +152,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
               options: {
                 sourceMap: !worker.dist,
                 postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                  config: require.resolve('../../postcss.config.js'),
                 },
               },
             },
@@ -176,7 +179,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   options: {
                     sourceMap: !worker.dist,
                     postcssOptions: {
-                      config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                      config: require.resolve('../../postcss.config.js'),
                     },
                   },
                 },
@@ -188,7 +191,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
-                          `src/core/public/core_app/styles/_globals_${theme}.scss`
+                          `src/core/public/styles/core_app/_globals_${theme}.scss`
                         )
                       )};\n${content}`;
                     },
@@ -227,9 +230,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             options: {
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
-              presets: IS_CODE_COVERAGE
-                ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
-                : [BABEL_PRESET_PATH],
+              presets: [BABEL_PRESET],
             },
           },
         },
@@ -239,6 +240,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             loader: 'raw-loader',
           },
         },
+        {
+          test: /\.peggy$/,
+          loader: require.resolve('@kbn/peggy-loader'),
+        },
       ],
     },
 
@@ -246,7 +251,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'main'],
       alias: {
-        core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
+        core_app_image_assets: Path.resolve(
+          worker.repoRoot,
+          'src/core/public/styles/core_app/images'
+        ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
       },
       symlinks: false,

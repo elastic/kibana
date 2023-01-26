@@ -13,7 +13,7 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import { getUICapabilities } from './capabilities';
-import { CasesPermissions } from '../../../common';
+import type { CasesPermissions } from '../../../common';
 
 export type CasesOwners =
   | typeof SECURITY_SOLUTION_OWNER

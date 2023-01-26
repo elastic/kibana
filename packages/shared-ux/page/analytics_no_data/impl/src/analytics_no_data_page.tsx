@@ -15,7 +15,10 @@ import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.compo
  * An entire page that can be displayed when Kibana "has no data", specifically for Analytics.  Uses
  * services from a Provider to supply props to a pure component.
  */
-export const AnalyticsNoDataPage = ({ onDataViewCreated }: AnalyticsNoDataPageProps) => {
+export const AnalyticsNoDataPage = ({
+  onDataViewCreated,
+  allowAdHocDataView,
+}: AnalyticsNoDataPageProps) => {
   const services = useServices();
   const { kibanaGuideDocLink } = services;
 
@@ -23,6 +26,7 @@ export const AnalyticsNoDataPage = ({ onDataViewCreated }: AnalyticsNoDataPagePr
     <Component
       {...{
         onDataViewCreated,
+        allowAdHocDataView,
         kibanaGuideDocLink,
       }}
     />

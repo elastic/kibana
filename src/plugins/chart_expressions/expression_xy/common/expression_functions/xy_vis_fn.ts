@@ -15,7 +15,6 @@ import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types'
 import {
   hasAreaLayer,
   hasBarLayer,
-  hasHistogramBarLayer,
   validateExtents,
   validateFillOpacity,
   validateMarkSizeRatioLimits,
@@ -63,7 +62,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
 
   const {
     referenceLines = [],
-    annotationLayers = [],
     // data_layer args
     seriesType,
     accessors,
@@ -101,7 +99,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
     ...appendLayerIds(referenceLines, 'referenceLines'),
-    ...appendLayerIds(annotationLayers, 'annotationLayers'),
   ];
 
   logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
@@ -114,9 +111,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
 
-  const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
-
-  validateValueLabels(args.valueLabels, hasBar, hasNotHistogramBars);
+  validateValueLabels(args.valueLabels, hasBar);
   validateMarkSizeRatioWithAccessor(args.markSizeRatio, dataLayers[0].markSizeAccessor);
   validateMarkSizeRatioLimits(args.markSizeRatio);
   validateLineWidthForChartType(lineWidth, args.seriesType);
@@ -138,6 +133,10 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
           (handlers.variables?.embeddableTitle as string) ??
           handlers.getExecutionContext?.()?.description,
       },
+      canNavigateToLens: Boolean(handlers.variables.canNavigateToLens),
+      syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
+      syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
+      syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
     },
   };
 };

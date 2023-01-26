@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from '@kbn/core/types';
+import { i18n } from '@kbn/i18n';
 import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
 import {
   enableComparisonByDefault,
@@ -15,25 +15,38 @@ import {
   maxSuggestions,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
-  enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
-  apmOperationsTab,
+  apmLabsButton,
+  enableAgentExplorerView,
+  enableAwsLambdaMetrics,
+  apmAWSLambdaPriceFactor,
+  apmAWSLambdaRequestCostPerMillion,
+  enableCriticalPath,
+  enableInfrastructureHostsView,
+  profilingElasticsearchPlugin,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
-  {
-    defaultMessage: 'technical preview',
-  }
+  { defaultMessage: 'technical preview' }
 );
+
+function feedbackLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
+    'xpack.observability.uiSettings.giveFeedBackLabel',
+    { defaultMessage: 'Give feedback' }
+  )}</a>`;
+}
+
+type UiSettings = UiSettingsParams<boolean | number | string | object> & { showInLabs?: boolean };
 
 /**
  * uiSettings definitions for Observability.
  */
-export const uiSettings: Record<string, UiSettingsParams<boolean | number | string>> = {
+export const uiSettings: Record<string, UiSettings> = {
   [enableNewSyntheticsView]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableNewSyntheticsViewExperimentName', {
@@ -41,10 +54,11 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     value: false,
     description: i18n.translate(
-      'xpack.observability.enableNewSyntheticsViewExperimentDescription',
+      'xpack.observability.enableNewSyntheticsViewExperimentDescriptionBeta',
       {
         defaultMessage:
-          'Enable new synthetic monitoring application in observability. Refresh the page to apply the setting.',
+          '{technicalPreviewLabel} Enable new synthetic monitoring application in observability. Refresh the page to apply the setting.',
+        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
       }
     ),
     schema: schema.boolean(),
@@ -60,6 +74,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       defaultMessage: 'Inspect Elasticsearch queries in API responses.',
     }),
     schema: schema.boolean(),
+    requiresPageReload: true,
   },
   [maxSuggestions]: {
     category: [observabilityFeatureId],
@@ -147,37 +162,29 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
         }
       ),
     },
-  },
-  [enableServiceGroups]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableServiceGroups', {
-      defaultMessage: 'Service groups feature',
-    }),
-    value: false,
-    description: i18n.translate('xpack.observability.enableServiceGroupsDescription', {
-      defaultMessage: '{technicalPreviewLabel} Enable the Service groups feature on APM UI',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
+    showInLabs: true,
   },
   [apmServiceInventoryOptimizedSorting]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
-      defaultMessage: 'Optimize APM Service Inventory page load performance',
+      defaultMessage: 'Optimize services list load performance in APM',
     }),
     description: i18n.translate(
       'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
       {
         defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory page sort (for Services without Machine Learning applied) to sort by Service Name',
-        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
+        values: {
+          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+          feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-apm-page-performance' }),
+        },
       }
     ),
     schema: schema.boolean(),
     value: false,
     requiresPageReload: false,
     type: 'boolean',
+    showInLabs: true,
   },
   [apmServiceGroupMaxNumberOfServices]: {
     category: [observabilityFeatureId],
@@ -197,26 +204,138 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {feedbackLink}.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-trace-explorer' }),
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
+  },
+  [apmLabsButton]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmLabs', {
+      defaultMessage: 'Enable labs button in APM',
+    }),
+    description: i18n.translate('xpack.observability.apmLabsDescription', {
+      defaultMessage:
+        'This flag determines if the viewer has access to the Labs button, a quick way to enable and disable technical preview features in APM.',
     }),
     schema: schema.boolean(),
     value: false,
     requiresPageReload: true,
     type: 'boolean',
   },
-  [apmOperationsTab]: {
+  [enableInfrastructureHostsView]: {
     category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmOperationsBreakdown', {
-      defaultMessage: 'APM Operations Breakdown',
+    name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
+      defaultMessage: 'Infrastructure Hosts view',
     }),
-    description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
+    value: false,
+    description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+        '{technicalPreviewLabel} Enable the Hosts view in the Infrastructure app. {feedbackLink}.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-host-observability' }),
+      },
+    }),
+    schema: schema.boolean(),
+  },
+  [enableAwsLambdaMetrics]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableAwsLambdaMetrics', {
+      defaultMessage: 'AWS Lambda Metrics',
+    }),
+    description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab. {feedbackLink}',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-aws-lambda' }),
+      },
+    }),
+    schema: schema.boolean(),
+    value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
+  },
+  [enableAgentExplorerView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableAgentExplorer', {
+      defaultMessage: 'Agent explorer',
+    }),
+    description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
+      defaultMessage: '{technicalPreviewLabel} Enables Agent explorer view.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
     }),
     schema: schema.boolean(),
     value: false,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
+  },
+  [apmAWSLambdaPriceFactor]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmAWSLambdaPricePerGbSeconds', {
+      defaultMessage: 'AWS lambda price factor',
+    }),
+    type: 'json',
+    value: JSON.stringify({ x86_64: 0.0000166667, arm: 0.0000133334 }, null, 2),
+    description: i18n.translate('xpack.observability.apmAWSLambdaPricePerGbSecondsDescription', {
+      defaultMessage: 'Price per Gb-second.',
+    }),
+    schema: schema.object({
+      arm: schema.number(),
+      x86_64: schema.number(),
+    }),
+  },
+  [apmAWSLambdaRequestCostPerMillion]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmAWSLambdaRequestCostPerMillion', {
+      defaultMessage: 'AWS lambda price per 1M requests',
+    }),
+    value: 0.2,
+    schema: schema.number({ min: 0 }),
+  },
+  [enableCriticalPath]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableCriticalPath', {
+      defaultMessage: 'Critical path',
+    }),
+    description: i18n.translate('xpack.observability.enableCriticalPathDescription', {
+      defaultMessage: '{technicalPreviewLabel} Optionally display the critical path of a trace.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
+  },
+  [profilingElasticsearchPlugin]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingElasticsearchPlugin', {
+      defaultMessage: 'Use Elasticsearch profiler plugin',
+    }),
+    description: i18n.translate('xpack.observability.profilingElasticsearchPluginDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Whether to load stacktraces using Elasticsearch profiler plugin.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
   },

@@ -52,7 +52,7 @@ describe('core lifecycle handlers', () => {
           cors: {
             enabled: false,
           },
-          compression: { enabled: true },
+          compression: { enabled: true, brotli: { enabled: false } },
           name: kibanaName,
           securityResponseHeaders: {
             // reflects default config
@@ -60,6 +60,7 @@ describe('core lifecycle handlers', () => {
             xContentTypeOptions: 'nosniff',
             referrerPolicy: 'strict-origin-when-cross-origin',
             permissionsPolicy: null,
+            crossOriginOpenerPolicy: 'same-origin',
           },
           customResponseHeaders: {
             'some-header': 'some-value',

@@ -45,6 +45,9 @@ export default function ({ getService }: FtrProviderContext) {
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
             stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
             actions: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
+            rulesSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
@@ -53,6 +56,126 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertest
           .get('/api/security/privileges')
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200)
+          .expect((res: any) => {
+            // when comparing privileges, the order of the privileges doesn't matter.
+            // supertest uses assert.deepStrictEqual.
+            // expect.js doesn't help us here.
+            // and lodash's isEqual doesn't know how to compare Sets.
+            const success = isEqualWith(res.body, expected, (value, other, key) => {
+              if (Array.isArray(value) && Array.isArray(other)) {
+                return isEqual(value.sort(), other.sort());
+              }
+
+              // Lodash types aren't correct, `undefined` should be supported as a return value here and it
+              // has special meaning.
+              return undefined as any;
+            });
+
+            if (!success) {
+              throw new Error(
+                `Expected ${util.inspect(res.body)} to equal ${util.inspect(expected)}`
+              );
+            }
+          })
+          .expect(200);
+      });
+
+      it('should include sub-feature privileges when respectlicenseLevel is false', async () => {
+        const expected = {
+          global: ['all', 'read'],
+          space: ['all', 'read'],
+          features: {
+            graph: ['all', 'read', 'minimal_all', 'minimal_read'],
+            savedObjectsTagging: ['all', 'read', 'minimal_all', 'minimal_read'],
+            canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
+            maps: ['all', 'read', 'minimal_all', 'minimal_read'],
+            generalCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
+            observabilityCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
+            fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
+            fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
+            actions: ['all', 'read', 'minimal_all', 'minimal_read'],
+            stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
+            ml: ['all', 'read', 'minimal_all', 'minimal_read'],
+            siem: [
+              'actions_log_management_all',
+              'actions_log_management_read',
+              'all',
+              'blocklist_all',
+              'blocklist_read',
+              'endpoint_list_all',
+              'endpoint_list_read',
+              'event_filters_all',
+              'event_filters_read',
+              'host_isolation_all',
+              'host_isolation_exceptions_all',
+              'host_isolation_exceptions_read',
+              'minimal_all',
+              'minimal_read',
+              'policy_management_all',
+              'policy_management_read',
+              'process_operations_all',
+              'read',
+              'trusted_applications_all',
+              'trusted_applications_read',
+            ],
+            uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
+            infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
+            logs: ['all', 'read', 'minimal_all', 'minimal_read'],
+            apm: ['all', 'read', 'minimal_all', 'minimal_read'],
+            discover: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'store_search_session',
+            ],
+            visualize: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
+            dashboard: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'store_search_session',
+            ],
+            dev_tools: ['all', 'read', 'minimal_all', 'minimal_read'],
+            advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
+            indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
+            savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+            osquery: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'live_queries_all',
+              'live_queries_read',
+              'run_saved_queries',
+              'saved_queries_all',
+              'saved_queries_read',
+              'packs_all',
+              'packs_read',
+            ],
+            rulesSettings: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'allFlappingSettings',
+              'readFlappingSettings',
+            ],
+          },
+          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+        };
+
+        await supertest
+          .get('/api/security/privileges?respectLicenseLevel=false')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200)

@@ -13,5 +13,4 @@ echo "--- Synthetics plugin @elastic/synthetics Tests"
 
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "Synthetics plugin @elastic/synthetics Tests" \
-  node plugins/synthetics/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" ${GREP:+--grep \"${GREP}\"}
+node plugins/synthetics/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" ${GREP:+--grep \"${GREP}\"}

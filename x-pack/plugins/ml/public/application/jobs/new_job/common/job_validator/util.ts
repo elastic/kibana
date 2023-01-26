@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BasicValidations } from './job_validator';
 import { Job, Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import {
@@ -203,7 +204,7 @@ export function populateValidationMessages(
   }
 }
 
-export function invalidTimeIntervalMessage(value: string | undefined) {
+export function invalidTimeIntervalMessage(value: estypes.Duration | undefined) {
   return i18n.translate(
     'xpack.ml.newJob.wizard.validateJob.frequencyInvalidTimeIntervalFormatErrorMessage',
     {

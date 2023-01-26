@@ -11,6 +11,7 @@ Object {
   },
   "body": Object {
     "size": 0,
+    "track_total_hits": 1,
   },
   "terminate_after": 1,
 }
@@ -66,6 +67,7 @@ Object {
         "order": "desc",
       },
     },
+    "track_total_hits": 1,
   },
   "terminate_after": 1,
 }
@@ -152,6 +154,7 @@ Array [
         },
       },
       "size": 0,
+      "track_total_hits": false,
     },
   },
   Object {
@@ -213,8 +216,10 @@ Array [
         },
       },
       "size": 0,
+      "track_total_hits": false,
     },
   },
+  undefined,
 ]
 `;
 
@@ -255,6 +260,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": false,
   },
 }
 `;

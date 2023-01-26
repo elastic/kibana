@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
-import {
-  CaseStatuses,
-  CaseUserActionResponse,
+import type { SavedObject } from '@kbn/core/server';
+import type {
+  CaseUserActionInjectedAttributesWithoutActionId,
   SingleCaseMetricsResponse,
   StatusInfo,
   StatusUserAction,
-  StatusUserActionRt,
   UserActionWithResponse,
 } from '../../../common/api';
+import { CaseStatuses, StatusUserActionRt } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { SingleCaseBaseHandler } from './single_case_base_handler';
-import { SingleCaseBaseHandlerCommonOptions } from './types';
+import type { SingleCaseBaseHandlerCommonOptions } from './types';
 
 export class Lifespan extends SingleCaseBaseHandler {
   constructor(options: SingleCaseBaseHandlerCommonOptions) {
@@ -27,7 +26,6 @@ export class Lifespan extends SingleCaseBaseHandler {
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
     const {
-      unsecuredSavedObjectsClient,
       authorization,
       services: { userActionService },
       logger,
@@ -49,8 +47,7 @@ export class Lifespan extends SingleCaseBaseHandler {
         Operations.getUserActionMetrics
       );
 
-      const statusUserActions = await userActionService.findStatusChanges({
-        unsecuredSavedObjectsClient,
+      const statusUserActions = await userActionService.finder.findStatusChanges({
         caseId: this.caseId,
         filter: authorizationFilter,
       });
@@ -86,7 +83,7 @@ interface StatusCalculations {
 }
 
 export function getStatusInfo(
-  statusUserActions: Array<SavedObject<CaseUserActionResponse>>,
+  statusUserActions: Array<SavedObject<CaseUserActionInjectedAttributesWithoutActionId>>,
   caseOpenTimestamp: Date
 ): StatusInfo {
   const accStatusInfo = statusUserActions.reduce<StatusCalculations>(
@@ -141,7 +138,7 @@ export function getStatusInfo(
 }
 
 function isValidStatusChangeUserAction(
-  attributes: CaseUserActionResponse,
+  attributes: CaseUserActionInjectedAttributesWithoutActionId,
   newStatusChangeTimestamp: Date
 ): attributes is UserActionWithResponse<StatusUserAction> {
   return StatusUserActionRt.is(attributes) && isDateValid(newStatusChangeTimestamp);

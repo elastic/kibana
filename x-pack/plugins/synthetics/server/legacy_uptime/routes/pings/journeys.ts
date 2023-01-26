@@ -12,7 +12,7 @@ import { API_URLS } from '../../../../common/constants';
 
 export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: API_URLS.JOURNEY_CREATE,
+  path: API_URLS.JOURNEY,
   validate: {
     params: schema.object({
       checkGroup: schema.string(),

@@ -9,11 +9,11 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import type { EqlRuleParams } from '../../schemas/rule_schemas';
-import { eqlRuleParams } from '../../schemas/rule_schemas';
+import type { EqlRuleParams } from '../../rule_schema';
+import { eqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from '../../signals/executors/eql';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import { validateIndexPatterns } from '../utils';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
@@ -41,7 +41,6 @@ export const createEqlAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
@@ -68,24 +67,23 @@ export const createEqlAlertType = (
           tuple,
           inputIndex,
           runtimeMappings,
-          exceptionItems,
           ruleExecutionLogger,
           bulkCreate,
           wrapHits,
           wrapSequences,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
       } = execOptions;
-
       const result = await eqlExecutor({
         completeRule,
         tuple,
         inputIndex,
         runtimeMappings,
-        exceptionItems,
         ruleExecutionLogger,
         services,
         version,
@@ -94,6 +92,8 @@ export const createEqlAlertType = (
         wrapSequences,
         primaryTimestamp,
         secondaryTimestamp,
+        exceptionFilter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },

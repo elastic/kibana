@@ -19,6 +19,7 @@
         "description": [],
         "path": "x-pack/plugins/license_api_guard/server/license.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licenseApiGuard",
@@ -32,6 +33,7 @@
             ],
             "path": "x-pack/plugins/license_api_guard/server/license.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licenseApiGuard",
@@ -45,6 +47,7 @@
                 ],
                 "path": "x-pack/plugins/license_api_guard/server/license.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -62,6 +65,7 @@
             ],
             "path": "x-pack/plugins/license_api_guard/server/license.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licenseApiGuard",
@@ -75,6 +79,7 @@
                 ],
                 "path": "x-pack/plugins/license_api_guard/server/license.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -90,10 +95,10 @@
             "signature": [
               "<Context extends ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-common.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
               ", Params, Query, Body>(handler: ",
@@ -105,19 +110,50 @@
                 "text": "RequestHandler"
               },
               "<Params, Query, Body, Context, any, ",
-              "KibanaResponseFactory",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
               ">) => (ctx: Context, request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<Params, Query, Body, any>, response: ",
-              "KibanaResponseFactory",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
               ") => ",
-              "IKibanaResponse",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
               "<any> | Promise<",
-              "IKibanaResponse",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
               "<any>>"
             ],
             "path": "x-pack/plugins/license_api_guard/server/license.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licenseApiGuard",
@@ -135,11 +171,18 @@
                     "text": "RequestHandler"
                   },
                   "<Params, Query, Body, Context, any, ",
-                  "KibanaResponseFactory",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaResponseFactory",
+                    "text": "KibanaResponseFactory"
+                  },
                   ">"
                 ],
                 "path": "x-pack/plugins/license_api_guard/server/license.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -153,7 +196,8 @@
             "label": "isEsSecurityEnabled",
             "description": [],
             "path": "x-pack/plugins/license_api_guard/server/license.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

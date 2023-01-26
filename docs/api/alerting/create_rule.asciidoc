@@ -21,7 +21,7 @@ the `consumer` and `rule_type_id` of the rules you're creating. For example, the
 *Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
 features, *{observability}*, and *Security* features. If the rule has `actions`,
 you must also have `read` privileges for the *Management* >
-*Actions and Connectors* feature. For more details, refer to
+*{connectors-feature}* feature. For more details, refer to
 <<kibana-feature-privileges>>.
 
 === {api-description-title}
@@ -62,7 +62,8 @@ the URL, the default space is used.
 types of alerts. If you don't need this, set this value to `default`.
 
 `id`:::
-(Required, string) The ID of the connector saved object.
+(Required, string) The ID of the connector saved object, which you can obtain by
+using <<get-all-connectors-api>>.
 
 `params`:::
 (Required, object) The map to the `params` that the
@@ -80,11 +81,21 @@ For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`,
 after it is created.
 
 `name`::
-(Required, string) A name to reference and search.
+(Required, string) The name of the rule. While this name does not have to be
+unique, a distinctive name can help you identify a rule.
 
 `notify_when`::
-(Required, string) The condition for throttling the notification:
-`onActionGroupChange`, `onActiveAlert`, or `onThrottleInterval`.
+(Required, string) Defines how often alerts generate actions. Valid values are: 
++
+--
+
+* `onActionGroupChange`: Actions run when the alert status changes.
+* `onActiveAlert`: Actions run when the alert becomes active and at each check
+interval while the rule conditions are met.
+* `onThrottleInterval`: Actions run when the alert becomes active and at the
+interval specified in the `throttle` property while the rule conditions are met.
+
+--
 
 `params`::
 (Required, object) The parameters to pass to the rule type executor `params`
@@ -98,32 +109,19 @@ is scheduled to run. For example, `.es-query`, `.index-threshold`,
 information, refer to <<rule-types>>.
 
 `schedule`::
-(Required, object) The schedule specifying when this rule should be run, using
-one of the available schedule formats.
-+
-.Schedule formats
-[%collapsible%open]
-=====
-A schedule is structured such that the key specifies the format you wish to use
-and its value specifies the schedule.
-
-We currently support the _interval format_ which specifies the interval in
-seconds, minutes, hours or days at which the rule should run. For example:
-`{ "interval": "10s" }`, `{ "interval": "5m" }`, `{ "interval": "1h" }`, or
-`{ "interval": "1d" }`.
-
-There are plans to support multiple other schedule formats in the near future.
-=====
+(Required, object) The check interval, which specifies how frequently the rule
+conditions are checked. The interval must be specified in seconds, minutes,
+hours or days. For example: `{ "interval": "10s" }`, `{ "interval": "5m" }`,
+`{ "interval": "1h" }`, or `{ "interval": "1d" }`.
 
 `tags`::
-(Optional, string array) A list of keywords to reference and search.
+(Optional, string array) A list of tag names that are applied to a rule.
 
 `throttle`::
-(Optional, string) How often this rule should fire the same actions. This will
-prevent the rule from sending out the same notification over and over. For
-example, if a rule with a `schedule` of 1 minute stays in a triggered state for
-90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending
-90 notifications during this period.
+(Optional, string) Defines how often an alert generates repeated actions.
+This custom action interval must be specified in seconds, minutes, hours, or
+days. For example, `10m` or `1h`. This property is used only if `notify_when`
+is `onThrottleInterval`.
 
 [[create-rule-api-request-codes]]
 ===  {api-response-codes-title}
@@ -134,7 +132,8 @@ example, if a rule with a `schedule` of 1 minute stays in a triggered state for
 [[create-rule-api-example]]
 === {api-examples-title}
 
-Create a rule that has actions associated with a server log connector:
+Create an <<rule-type-index-threshold,index threshold rule>> that has actions
+associated with a server log connector:
 
 [source,sh]
 --------------------------------------------------

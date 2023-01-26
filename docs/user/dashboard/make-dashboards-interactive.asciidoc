@@ -28,14 +28,14 @@ data-type="inline"
 
 *Controls* are interactive panels you add to your dashboards to filter and display only the data you want to explore.
 
-There are two types of controls:
+There are three types of controls:
 
 * *Options list* &mdash; Adds a dropdown that allows you to filter the data with one or more options that you select.
 +
 For example, if you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, you can add an options list for the `machine.os.keyword` field that allows you to display only the logs generated from `osx` and `ios` operating systems.
 +
 [role="screenshot"]
-image::images/dashboard_controlsOptionsList_8.3.0.png[Options list control for the `machine.os.keyword` field with the `osx` and `ios` options selected]
+image::images/dashboard_controlsOptionsList_8.6.0.png[Options list control for the `machine.os.keyword` field with the `osx` and `ios` options selected]
 
 * *Range slider* &mdash; Adds a slider that allows you to filter the data within a specified range of values. 
 +
@@ -44,11 +44,17 @@ For example, if you are using the *[Logs] Web Traffic* dashboard from the sample
 [role="screenshot"]
 image::images/dashboard_controlsRangeSlider_8.3.0.png[Range slider control for the `hour_of_day` field with a range of `9` to `17` selected]
 
-[float]
-[[create-and-add-controls]]
-==== Create and add controls
+* *Time slider* &mdash; Adds a time range slider that allows you to filter the data within a specified range of time, advance the time range backward and forward, and animate your change in data over the specified time range.
++
+For example, you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, and the global time filter is *Last 7 days*. When you add the time slider, you can click the previous and next buttons to advance the time range backward or forward, and click the play button to watch how the data changes over the last 7 days. 
+[role="screenshot"]
+image::images/dashboard_timeSliderControl_8.5.0.gif[Time slider control for the the Last 7 days]
 
-To add interactive filters, create controls, then add them to your dashboard.
+[float]
+[[create-and-add-options-list-and-range-slider-controls]]
+==== Create and add Options list and Range slider controls
+
+To add interactive Options list and Range slider controls, create the controls, then add them to your dashboard.
 
 . Open or create a new dashboard. 
 
@@ -70,32 +76,56 @@ The *Control type* is automatically applied for the field you selected.
 
 * To expand the width of the control to fit the available space on the dashboard, select *Expand width to fit available space*.
 
-. If you are creating an *Options list*, specify the options.
+. If you are creating an *Options list*, specify the additional settings:
 
-.. To allow users to select multiple options, select *Allow multiple selections in dropdown*.
+* To allow multiple options to be selected in the dropdown, select *Allow multiple selections in dropdown*.
 
-.. To populate the entire list of options, even when the Options list takes longer to populate than expected, select *Run past timeout*.
+* To allow options to be inlcluded or excluded on the dashboard, select *Allow selections to be excluded*.
+
+* To allow an exists query to be created, select *Allow exists query*.
+
+* To populate the entire list of options, even when the list takes longer to populate than expected, select *Ignore timeout for results*.
 
 . Click *Save and close*.
 
 [float]
-[[filter-the-data-with-options-lists]]
-==== Filter the data with Options lists
+[[add-time-slider-controls]]
+==== Add time slider controls
+
+To add interactive time slider controls, create the control, then add it to your dashboard.
+
+. Open or create a new dashboard. 
+
+. In the dashboard toolbar, click *Controls*, then select *Add time slider control*.
+
+. The time slider control uses the time range from the global time filter. To change the time range in the time slider control, <<set-time-filter,change the global time filter>>. 
+
+. Save the dashboard.
+
+[float]
+[[filter-the-data-with-options-list-controls]]
+==== Filter the data with Options list controls
 Filter the data with one or more options that you select.
 
 . Open the Options list dropdown.
 
-. Select the options for the data you want to display on the dashboard.
+. Select the available options.
 +
-The dashboard displays only the data for the options you selected.
+The *Exists* query returns all documents that contain an indexed value for the field. 
 
-. To clear the selection, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all selected options in the Options list].
+. Select how to filter the options.
+
+* To display only the data for the options you selected, click *Include*.
+
+* To exclude the data for the options you selected, click *Exclude*.
+
+. To clear the selections, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all selected options in the Options list].
 
 . To display only the options you selected in the dropdown, click image:images/dashboard_showOnlySelectedOptions_8.3.0.png[The icon to display only the options you have selected in the Options list].
 
 [float]
-[[filter-the-data-with-range-sliders]]
-==== Filter the data with Range sliders
+[[filter-the-data-with-range-slider-controls]]
+==== Filter the data with Range slider controls
 Filter the data within a specified range of values.
 
 . On the Range slider, click a value.
@@ -103,6 +133,21 @@ Filter the data within a specified range of values.
 . Move the sliders to specify the values you want to display.
 +
 The dashboard displays only the data for the range of values you specified.
+
+. To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
+
+[float]
+[[filter-the-data-with-time-slider-controls]]
+==== Filter the data with time slider controls
+Filter the data within a specified range of time.
+
+. To view a different time range, click the time slider, then move the sliders to specify the time range you want to display.
+
+. To advance the time range forward, click image:images/dashboard_timeSliderControl_advanceForward_8.5.0.png[The icon to advance the time range forward].
+
+. To advance the time range backward, click image:images/dashboard_timeSliderControl_advanceBackward_8.5.0.png[The icon to advance the time range backward].
+
+. To animate the data changes over time, click image:images/dashboard_timeSliderControl_animate_8.5.0.png[The icon to clear all specified values in the Range slider].
 
 . To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
 
@@ -126,9 +171,9 @@ The dashboard displays only the data for the range of values you specified.
 
 [float]
 [[edit-controls]]
-==== Edit controls
+==== Edit Options list and Range slider control settings
 
-Change the settings for a control.
+Change the settings for the Options list and Range slider controls.
 
 . Hover over the control you want to edit, then click image:images/dashboard_controlsEditControl_8.3.0.png[The Edit control icon that opens the Edit control flyout].
 
@@ -153,7 +198,7 @@ There are three types of *Discover* interactions you can add to dashboards:
 
 * *Panel interactions* &mdash; Opens panel data in *Discover*, including the dashboard-level filters, but not the panel-level filters.
 +
-To enable panel interactions, configure <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.`>> in kibana.yml. If you are using 7.13.0 and earlier, panel interactions are enabled by default.
+To enable panel interactions, configure <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>> in kibana.yml. If you are using 7.13.0 and earlier, panel interactions are enabled by default.
 +
 To use panel interactions, open the panel menu, then click *Explore underlying data*.
 

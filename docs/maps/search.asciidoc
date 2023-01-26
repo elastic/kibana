@@ -107,7 +107,7 @@ You can create spatial filters in two ways:
 Spatial filters have the following properties:
 
 * *Geometry label* enables you to provide a meaningful name for your spatial filter.
-* *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations[spatial relation operator] to use at search time.
+* *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#geo-shape-spatial-relations[spatial relation operator] to use at search time.
 * *Action* specifies whether to apply the filter to the current view or to a drilldown action. Only available when the map is a panel in a {kibana-ref}/dashboard.html[dashboard] with {kibana-ref}/drilldowns.html[drilldowns].
 
 [role="screenshot"]

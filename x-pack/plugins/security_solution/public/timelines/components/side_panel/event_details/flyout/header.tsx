@@ -12,6 +12,7 @@ import { ExpandableEventTitle } from '../expandable_event';
 import { BackToAlertDetailsLink } from './back_to_alert_details_link';
 
 interface FlyoutHeaderComponentProps {
+  eventId: string;
   isAlert: boolean;
   isHostIsolationPanelOpen: boolean;
   isolateAction: 'isolateHost' | 'unisolateHost';
@@ -22,6 +23,7 @@ interface FlyoutHeaderComponentProps {
 }
 
 const FlyoutHeaderContentComponent = ({
+  eventId,
   isAlert,
   isHostIsolationPanelOpen,
   isolateAction,
@@ -36,6 +38,7 @@ const FlyoutHeaderContentComponent = ({
         <BackToAlertDetailsLink isolateAction={isolateAction} showAlertDetails={showAlertDetails} />
       ) : (
         <ExpandableEventTitle
+          eventId={eventId}
           isAlert={isAlert}
           loading={loading}
           ruleName={ruleName}
@@ -48,6 +51,7 @@ const FlyoutHeaderContentComponent = ({
 const FlyoutHeaderContent = React.memo(FlyoutHeaderContentComponent);
 
 const FlyoutHeaderComponent = ({
+  eventId,
   isAlert,
   isHostIsolationPanelOpen,
   isolateAction,
@@ -59,6 +63,7 @@ const FlyoutHeaderComponent = ({
   return (
     <EuiFlyoutHeader hasBorder={isHostIsolationPanelOpen}>
       <FlyoutHeaderContentComponent
+        eventId={eventId}
         isAlert={isAlert}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
         isolateAction={isolateAction}

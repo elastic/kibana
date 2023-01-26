@@ -39,4 +39,9 @@ export const i18nTexts = {
         'Encountered an error with the number of CSV rows generated from the search: expected {expected}, received {received}.',
       values: { expected, received },
     }),
+  csvUnableToClosePit: () =>
+    i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.csvUnableToClosePit', {
+      defaultMessage:
+        'Unable to close the Point-In-Time used for search. Check the Kibana server logs.',
+    }),
 };

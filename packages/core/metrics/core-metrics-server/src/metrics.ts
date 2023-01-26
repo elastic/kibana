@@ -41,6 +41,26 @@ export interface IntervalHistogram {
 }
 
 /**
+ * Protocol(s) used by the Elasticsearch Client
+ * @public
+ */
+
+export type ElasticsearchClientProtocol = 'none' | 'http' | 'https' | 'mixed';
+
+/**
+ * Metrics related to the elasticsearch clients
+ * @public
+ */
+export interface ElasticsearchClientsMetrics {
+  /** Total number of active sockets (all nodes, all connections) */
+  totalActiveSockets: number;
+  /** Total number of available sockets (alive but idle, all nodes, all connections) */
+  totalIdleSockets: number;
+  /** Total number of queued requests (all nodes, all connections) */
+  totalQueuedRequests: number;
+}
+
+/**
  * Process related metrics
  * @public
  */
@@ -166,9 +186,12 @@ export interface OpsMetrics {
   /** Time metrics were recorded at. */
   collected_at: Date;
   /**
+   * Metrics related to the elasticsearch client
+   */
+  elasticsearch_client: ElasticsearchClientsMetrics;
+  /**
    * Process related metrics.
-   * @deprecated use the processes field instead.
-   * @removeBy 8.8.0
+   * @remarks processes field preferred
    */
   process: OpsProcessMetrics;
   /** Process related metrics. Reports an array of objects for each kibana pid.*/

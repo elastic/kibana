@@ -15,7 +15,7 @@ import {
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from './types';
@@ -23,12 +23,12 @@ import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list
 import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 import { getRuleRangeTuples } from './utils';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { getCompleteRuleMock, getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { getCompleteRuleMock, getQueryRuleParams } from '../rule_schema/mocks';
 import { bulkCreateFactory } from '../rule_types/factories/bulk_create_factory';
 import { wrapHitsFactory } from '../rule_types/factories/wrap_hits_factory';
 import { ruleExecutionLogMock } from '../rule_monitoring/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
-import type { QueryRuleParams } from '../schemas/rule_schemas';
+import type { QueryRuleParams } from '../rule_schema';
 import { createPersistenceServicesMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import type { PersistenceServices } from '@kbn/rule-registry-plugin/server';
 import {
@@ -36,6 +36,7 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
@@ -55,13 +56,14 @@ describe('searchAfterAndBulkCreate', () => {
   let inputIndexPattern: string[] = [];
   let listClient = listMock.getListClient();
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-  const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
+  const someGuids = Array.from({ length: 13 }).map(() => uuidv4());
   const sampleParams = getQueryRuleParams();
   const queryCompleteRule = getCompleteRuleMock<QueryRuleParams>(sampleParams);
   const defaultFilter = {
     match_all: {},
   };
   const mockCommonFields: CommonAlertFieldsLatest = {
+    [ALERT_RULE_PARAMETERS]: {},
     [ALERT_RULE_CATEGORY]: 'Custom Query Rule',
     [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
     [ALERT_RULE_EXECUTION_UUID]: '97e8f53a-4971-4935-bb54-9b8f86930cc7',
@@ -104,6 +106,8 @@ describe('searchAfterAndBulkCreate', () => {
       ignoreFields: [],
       spaceId: 'default',
       indicesToQuery: inputIndexPattern,
+      alertTimestampOverride: undefined,
+      ruleExecutionLogger,
     });
   });
 
@@ -201,7 +205,6 @@ describe('searchAfterAndBulkCreate', () => {
 
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       tuple,
-      completeRule: queryCompleteRule,
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -295,7 +298,6 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      completeRule: queryCompleteRule,
       tuple,
       listClient,
       exceptionsList: [exceptionItem],
@@ -370,7 +372,6 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      completeRule: queryCompleteRule,
       tuple,
       listClient,
       exceptionsList: [exceptionItem],
@@ -429,7 +430,6 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      completeRule: queryCompleteRule,
       tuple,
       listClient,
       exceptionsList: [exceptionItem],
@@ -498,7 +498,6 @@ describe('searchAfterAndBulkCreate', () => {
       );
 
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      completeRule: queryCompleteRule,
       tuple,
       listClient,
       exceptionsList: [],
@@ -553,7 +552,6 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      completeRule: queryCompleteRule,
       tuple,
       listClient,
       exceptionsList: [exceptionItem],
@@ -622,7 +620,6 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      completeRule: queryCompleteRule,
       tuple,
       listClient,
       exceptionsList: [exceptionItem],
@@ -693,7 +690,6 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      completeRule: queryCompleteRule,
       tuple,
       listClient,
       exceptionsList: [],
@@ -743,7 +739,6 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       tuple,
-      completeRule: queryCompleteRule,
       services: mockService,
       ruleExecutionLogger,
       eventsTelemetry: undefined,
@@ -789,7 +784,6 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       tuple,
-      completeRule: queryCompleteRule,
       services: mockService,
       ruleExecutionLogger,
       eventsTelemetry: undefined,
@@ -914,7 +908,6 @@ describe('searchAfterAndBulkCreate', () => {
     );
     const { success, createdSignalsCount, lastLookBackDate, errors } =
       await searchAfterAndBulkCreate({
-        completeRule: queryCompleteRule,
         tuple,
         listClient,
         exceptionsList: [],
@@ -1001,7 +994,6 @@ describe('searchAfterAndBulkCreate', () => {
     const mockEnrichment = jest.fn((a) => a);
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       enrichment: mockEnrichment,
-      completeRule: queryCompleteRule,
       tuple,
       listClient,
       exceptionsList: [],

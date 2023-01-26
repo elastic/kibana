@@ -129,7 +129,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
         <p>
           <FormattedMessage
             id="xpack.fleet.debug.preconfigurationDebugger.description"
-            defaultMessage="This tool can be used to reset preconfigured policies that are managed via {codeKibanaYml}. This includes Fleet's default policies that may existin cloud environments."
+            defaultMessage="This tool can be used to reset preconfigured policies that are managed via {codeKibanaYml}. This includes Fleet's default policies that may exist in cloud environments."
             values={{ codeKibanaYml: <EuiCode>kibana.yml</EuiCode> }}
           />
         </p>

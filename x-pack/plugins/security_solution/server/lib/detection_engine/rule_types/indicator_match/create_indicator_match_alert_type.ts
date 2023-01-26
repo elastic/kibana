@@ -9,11 +9,11 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { ThreatRuleParams } from '../../schemas/rule_schemas';
-import { threatRuleParams } from '../../schemas/rule_schemas';
+import type { ThreatRuleParams } from '../../rule_schema';
+import { threatRuleParams } from '../../rule_schema';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import { validateIndexPatterns } from '../utils';
 
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions
@@ -42,7 +42,6 @@ export const createIndicatorMatchAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
@@ -69,7 +68,6 @@ export const createIndicatorMatchAlertType = (
           runtimeMappings,
           completeRule,
           tuple,
-          exceptionItems,
           listClient,
           ruleExecutionLogger,
           searchAfterSize,
@@ -77,6 +75,8 @@ export const createIndicatorMatchAlertType = (
           wrapHits,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
@@ -88,7 +88,6 @@ export const createIndicatorMatchAlertType = (
         completeRule,
         tuple,
         listClient,
-        exceptionItems,
         services,
         version,
         searchAfterSize,
@@ -98,6 +97,8 @@ export const createIndicatorMatchAlertType = (
         wrapHits,
         primaryTimestamp,
         secondaryTimestamp,
+        exceptionFilter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },

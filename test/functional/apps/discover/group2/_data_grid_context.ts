@@ -11,8 +11,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES = [
-  ['extension', 'jpg'],
-  ['geo.src', 'IN'],
+  ['extension', 'jpg', 'extension.raw'],
+  ['geo.src', 'IN', 'geo.src'],
 ];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -84,8 +85,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should open the context view with the filters disabled', async () => {
       let disabledFilterCounter = 0;
-      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        if (await filterBar.hasFilter(columnName, value, false)) {
+      for (const [_, value, columnId] of TEST_FILTER_COLUMN_NAMES) {
+        if (await filterBar.hasFilter(columnId, value, false)) {
           disabledFilterCounter++;
         }
       }
@@ -107,12 +108,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();
-      await PageObjects.common.sleep(250);
-      // accept alert if it pops up
+
+      // close popup
       const alert = await browser.getAlert();
       await alert?.accept();
-      expect(await browser.getCurrentUrl()).to.contain('#/context');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      if (await testSubjects.exists('confirmModalConfirmButton')) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
+
+      await retry.waitFor('navigate to context', async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        return currentUrl.includes('#/context');
+      });
       await retry.waitFor('document table has a length of 6', async () => {
         const nrOfDocs = (await dataGrid.getBodyRows()).length;
         log.debug('document table length', nrOfDocs);

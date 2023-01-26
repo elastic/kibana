@@ -12,15 +12,15 @@ import { CommonCorrelationsQueryParams } from '../../../../common/correlations/t
 import {
   SPAN_DURATION,
   TRANSACTION_DURATION,
-} from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../lib/helpers/setup_request';
+} from '../../../../common/es_fields/apm';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 
 /**
  * Compute the actual percentile bucket counts and actual fractions
  */
 export const fetchDurationFractions = async ({
-  setup,
+  apmEventClient,
   eventType,
   start,
   end,
@@ -29,16 +29,16 @@ export const fetchDurationFractions = async ({
   query,
   ranges,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   eventType: ProcessorEvent;
   ranges: estypes.AggregationsAggregationRange[];
 }): Promise<{ fractions: number[]; totalDocCount: number }> => {
-  const { apmEventClient } = setup;
   const resp = await apmEventClient.search('get_duration_fractions', {
     apm: {
       events: [eventType],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: getCommonCorrelationsQuery({
         start,

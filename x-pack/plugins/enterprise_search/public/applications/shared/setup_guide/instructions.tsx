@@ -8,7 +8,7 @@
 import React from 'react';
 
 import {
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiText,
   EuiSteps,
   EuiCode,

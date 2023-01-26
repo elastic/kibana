@@ -11,8 +11,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES = [
-  ['extension', 'jpg'],
-  ['geo.src', 'IN'],
+  ['extension', 'jpg', 'extension.raw'],
+  ['geo.src', 'IN', 'geo.src'],
 ];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('context link in discover', () => {
+  describe('context link in discover classic', () => {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
@@ -98,8 +98,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should open the context view with the filters disabled', async () => {
       let disabledFilterCounter = 0;
-      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        if (await filterBar.hasFilter(columnName, value, false)) {
+      for (const [_, value, columnId] of TEST_FILTER_COLUMN_NAMES) {
+        if (await filterBar.hasFilter(columnId, value, false)) {
           disabledFilterCounter++;
         }
       }
@@ -146,10 +146,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rowActions = await docTable.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();
       await PageObjects.common.sleep(250);
-      // accept alert if it pops up
+
+      // close popup
       const alert = await browser.getAlert();
       await alert?.accept();
-      expect(await browser.getCurrentUrl()).to.contain('#/doc');
+      if (await testSubjects.exists('confirmModalConfirmButton')) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
+
+      await retry.waitFor('navigate to doc view', async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        return currentUrl.includes('#/doc');
+      });
       await retry.waitFor('doc view being rendered', async () => {
         return await PageObjects.discover.isShowingDocViewer();
       });

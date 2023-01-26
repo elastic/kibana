@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import { CaseAssignees } from '../../../common/api/cases/assignee';
-import {
+import type {
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  Logger,
+  ISavedObjectsSerializer,
+  SavedObject,
+} from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
+import type { CaseAssignees } from '../../../common/api/cases/assignee';
+import type {
   CasePostRequest,
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
+  CaseUserActionInjectedAttributesWithoutActionId,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
@@ -19,7 +27,7 @@ import {
   UserAction,
   UserActionTypes,
 } from '../../../common/api';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export interface BuilderParameters {
   title: {
@@ -98,9 +106,22 @@ export interface Attributes {
   payload: Record<string, unknown>;
 }
 
-export interface BuilderReturnValue {
+export interface SavedObjectParameters {
   attributes: Attributes;
   references: SavedObjectReference[];
+}
+
+export interface EventDetails {
+  getMessage: (storedUserActionId?: string) => string;
+  action: UserAction;
+  descriptiveAction: string;
+  savedObjectId: string;
+  savedObjectType: string;
+}
+
+export interface UserActionEvent {
+  parameters: SavedObjectParameters;
+  eventDetails: EventDetails;
 }
 
 export type CommonBuilderArguments = CommonArguments & {
@@ -112,4 +133,33 @@ export type CommonBuilderArguments = CommonArguments & {
 
 export interface BuilderDeps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+}
+
+export interface ServiceContext {
+  log: Logger;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  savedObjectsSerializer: ISavedObjectsSerializer;
+  auditLogger: AuditLogger;
+}
+
+export interface PushTimeFrameInfo {
+  mostRecent: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  oldest: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+}
+
+export interface CaseConnectorActivity {
+  connectorId: string;
+  fields: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  push?: PushTimeFrameInfo;
+}
+
+export type CaseConnectorFields = Map<
+  string,
+  SavedObject<CaseUserActionInjectedAttributesWithoutActionId>
+>;
+
+export interface PushInfo {
+  date: Date;
+  connectorId: string;
 }

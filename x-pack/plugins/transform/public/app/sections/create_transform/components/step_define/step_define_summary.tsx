@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { type FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -56,14 +56,14 @@ export const StepDefineSummary: FC<Props> = ({
   const pivotQuery = getPivotQuery(searchQuery);
 
   const previewRequest = getPreviewTransformRequestBody(
-    searchItems.dataView.title,
+    searchItems.dataView.getIndexPattern(),
     pivotQuery,
     partialPreviewRequest,
     runtimeMappings
   );
 
   const pivotPreviewProps = usePivotData(
-    searchItems.dataView.title,
+    searchItems.dataView.getIndexPattern(),
     pivotQuery,
     validationStatus,
     partialPreviewRequest,
@@ -86,13 +86,13 @@ export const StepDefineSummary: FC<Props> = ({
     <div data-test-subj="transformStepDefineSummary">
       <EuiForm>
         {searchItems.savedSearch === undefined && (
-          <Fragment>
+          <>
             <EuiFormRow
               label={i18n.translate('xpack.transform.stepDefineSummary.dataViewLabel', {
                 defaultMessage: 'Data view',
               })}
             >
-              <span>{searchItems.dataView.title}</span>
+              <span>{searchItems.dataView.getIndexPattern()}</span>
             </EuiFormRow>
             {typeof searchString === 'string' && (
               <EuiFormRow
@@ -121,7 +121,7 @@ export const StepDefineSummary: FC<Props> = ({
                 </EuiCodeBlock>
               </EuiFormRow>
             )}
-          </Fragment>
+          </>
         )}
 
         {searchItems.savedSearch !== undefined && searchItems.savedSearch.id !== undefined && (

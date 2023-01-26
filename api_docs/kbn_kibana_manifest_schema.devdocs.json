@@ -14,30 +14,40 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/kibana-manifest-schema",
-        "id": "def-server.MANIFEST_V1",
+        "id": "def-common.MANIFEST_V1",
         "type": "Object",
         "tags": [],
         "label": "MANIFEST_V1",
         "description": [],
         "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/kibana-manifest-schema",
-            "id": "def-server.MANIFEST_V1.type",
+            "id": "def-common.MANIFEST_V1.type",
             "type": "string",
             "tags": [],
             "label": "type",
             "description": [],
             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/kibana-manifest-schema",
-            "id": "def-server.MANIFEST_V1.required",
+            "id": "def-common.MANIFEST_V1.required",
             "type": "Array",
             "tags": [],
             "label": "required",
@@ -46,167 +56,183 @@
               "string[]"
             ],
             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/kibana-manifest-schema",
-            "id": "def-server.MANIFEST_V1.properties",
+            "id": "def-common.MANIFEST_V1.properties",
             "type": "Object",
             "tags": [],
             "label": "properties",
             "description": [],
             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.id",
+                "id": "def-common.MANIFEST_V1.properties.id",
                 "type": "Object",
                 "tags": [],
                 "label": "id",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.id.description",
+                    "id": "def-common.MANIFEST_V1.properties.id.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.id.type",
+                    "id": "def-common.MANIFEST_V1.properties.id.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.id.pattern",
+                    "id": "def-common.MANIFEST_V1.properties.id.pattern",
                     "type": "string",
                     "tags": [],
                     "label": "pattern",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.version",
+                "id": "def-common.MANIFEST_V1.properties.version",
                 "type": "Object",
                 "tags": [],
                 "label": "version",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.version.description",
+                    "id": "def-common.MANIFEST_V1.properties.version.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.version.type",
+                    "id": "def-common.MANIFEST_V1.properties.version.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.version.pattern",
+                    "id": "def-common.MANIFEST_V1.properties.version.pattern",
                     "type": "string",
                     "tags": [],
                     "label": "pattern",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.kibanaVersion",
+                "id": "def-common.MANIFEST_V1.properties.kibanaVersion",
                 "type": "Object",
                 "tags": [],
                 "label": "kibanaVersion",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.kibanaVersion.description",
+                    "id": "def-common.MANIFEST_V1.properties.kibanaVersion.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.kibanaVersion.type",
+                    "id": "def-common.MANIFEST_V1.properties.kibanaVersion.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.kibanaVersion.pattern",
+                    "id": "def-common.MANIFEST_V1.properties.kibanaVersion.pattern",
                     "type": "string",
                     "tags": [],
                     "label": "pattern",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.type",
+                "id": "def-common.MANIFEST_V1.properties.type",
                 "type": "Object",
                 "tags": [],
                 "label": "type",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.type.description",
+                    "id": "def-common.MANIFEST_V1.properties.type.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.type.enum",
+                    "id": "def-common.MANIFEST_V1.properties.type.enum",
                     "type": "Array",
                     "tags": [],
                     "label": "enum",
@@ -215,33 +241,36 @@
                       "string[]"
                     ],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.configPath",
+                "id": "def-common.MANIFEST_V1.properties.configPath",
                 "type": "Object",
                 "tags": [],
                 "label": "configPath",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.configPath.description",
+                    "id": "def-common.MANIFEST_V1.properties.configPath.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.configPath.oneOf",
+                    "id": "def-common.MANIFEST_V1.properties.configPath.oneOf",
                     "type": "Array",
                     "tags": [],
                     "label": "oneOf",
@@ -250,59 +279,65 @@
                       "({ type: string; } | { type: string; items: { type: string; }; })[]"
                     ],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.requiredPlugins",
+                "id": "def-common.MANIFEST_V1.properties.requiredPlugins",
                 "type": "Object",
                 "tags": [],
                 "label": "requiredPlugins",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.requiredPlugins.description",
+                    "id": "def-common.MANIFEST_V1.properties.requiredPlugins.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.requiredPlugins.type",
+                    "id": "def-common.MANIFEST_V1.properties.requiredPlugins.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.requiredPlugins.items",
+                    "id": "def-common.MANIFEST_V1.properties.requiredPlugins.items",
                     "type": "Object",
                     "tags": [],
                     "label": "items",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/kibana-manifest-schema",
-                        "id": "def-server.MANIFEST_V1.properties.requiredPlugins.items.type",
+                        "id": "def-common.MANIFEST_V1.properties.requiredPlugins.items.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
                         "description": [],
                         "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                        "deprecated": false
+                        "deprecated": false,
+                        "trackAdoption": false
                       }
                     ]
                   }
@@ -310,53 +345,58 @@
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.optionalPlugins",
+                "id": "def-common.MANIFEST_V1.properties.optionalPlugins",
                 "type": "Object",
                 "tags": [],
                 "label": "optionalPlugins",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.optionalPlugins.description",
+                    "id": "def-common.MANIFEST_V1.properties.optionalPlugins.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.optionalPlugins.type",
+                    "id": "def-common.MANIFEST_V1.properties.optionalPlugins.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.optionalPlugins.items",
+                    "id": "def-common.MANIFEST_V1.properties.optionalPlugins.items",
                     "type": "Object",
                     "tags": [],
                     "label": "items",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/kibana-manifest-schema",
-                        "id": "def-server.MANIFEST_V1.properties.optionalPlugins.items.type",
+                        "id": "def-common.MANIFEST_V1.properties.optionalPlugins.items.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
                         "description": [],
                         "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                        "deprecated": false
+                        "deprecated": false,
+                        "trackAdoption": false
                       }
                     ]
                   }
@@ -364,53 +404,58 @@
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.requiredBundles",
+                "id": "def-common.MANIFEST_V1.properties.requiredBundles",
                 "type": "Object",
                 "tags": [],
                 "label": "requiredBundles",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.requiredBundles.description",
+                    "id": "def-common.MANIFEST_V1.properties.requiredBundles.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.requiredBundles.type",
+                    "id": "def-common.MANIFEST_V1.properties.requiredBundles.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.requiredBundles.items",
+                    "id": "def-common.MANIFEST_V1.properties.requiredBundles.items",
                     "type": "Object",
                     "tags": [],
                     "label": "items",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/kibana-manifest-schema",
-                        "id": "def-server.MANIFEST_V1.properties.requiredBundles.items.type",
+                        "id": "def-common.MANIFEST_V1.properties.requiredBundles.items.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
                         "description": [],
                         "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                        "deprecated": false
+                        "deprecated": false,
+                        "trackAdoption": false
                       }
                     ]
                   }
@@ -418,117 +463,128 @@
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.ui",
+                "id": "def-common.MANIFEST_V1.properties.ui",
                 "type": "Object",
                 "tags": [],
                 "label": "ui",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.ui.description",
+                    "id": "def-common.MANIFEST_V1.properties.ui.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.ui.type",
+                    "id": "def-common.MANIFEST_V1.properties.ui.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.server",
+                "id": "def-common.MANIFEST_V1.properties.server",
                 "type": "Object",
                 "tags": [],
                 "label": "server",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.server.description",
+                    "id": "def-common.MANIFEST_V1.properties.server.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.server.type",
+                    "id": "def-common.MANIFEST_V1.properties.server.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.extraPublicDirs",
+                "id": "def-common.MANIFEST_V1.properties.extraPublicDirs",
                 "type": "Object",
                 "tags": [],
                 "label": "extraPublicDirs",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.extraPublicDirs.description",
+                    "id": "def-common.MANIFEST_V1.properties.extraPublicDirs.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.extraPublicDirs.type",
+                    "id": "def-common.MANIFEST_V1.properties.extraPublicDirs.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.extraPublicDirs.items",
+                    "id": "def-common.MANIFEST_V1.properties.extraPublicDirs.items",
                     "type": "Object",
                     "tags": [],
                     "label": "items",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/kibana-manifest-schema",
-                        "id": "def-server.MANIFEST_V1.properties.extraPublicDirs.items.type",
+                        "id": "def-common.MANIFEST_V1.properties.extraPublicDirs.items.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
                         "description": [],
                         "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                        "deprecated": false
+                        "deprecated": false,
+                        "trackAdoption": false
                       }
                     ]
                   }
@@ -536,53 +592,58 @@
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.serviceFolders",
+                "id": "def-common.MANIFEST_V1.properties.serviceFolders",
                 "type": "Object",
                 "tags": [],
                 "label": "serviceFolders",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.serviceFolders.description",
+                    "id": "def-common.MANIFEST_V1.properties.serviceFolders.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.serviceFolders.type",
+                    "id": "def-common.MANIFEST_V1.properties.serviceFolders.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.serviceFolders.items",
+                    "id": "def-common.MANIFEST_V1.properties.serviceFolders.items",
                     "type": "Object",
                     "tags": [],
                     "label": "items",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/kibana-manifest-schema",
-                        "id": "def-server.MANIFEST_V1.properties.serviceFolders.items.type",
+                        "id": "def-common.MANIFEST_V1.properties.serviceFolders.items.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
                         "description": [],
                         "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                        "deprecated": false
+                        "deprecated": false,
+                        "trackAdoption": false
                       }
                     ]
                   }
@@ -590,27 +651,29 @@
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.owner",
+                "id": "def-common.MANIFEST_V1.properties.owner",
                 "type": "Object",
                 "tags": [],
                 "label": "owner",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.owner.type",
+                    "id": "def-common.MANIFEST_V1.properties.owner.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.owner.required",
+                    "id": "def-common.MANIFEST_V1.properties.owner.required",
                     "type": "Array",
                     "tags": [],
                     "label": "required",
@@ -619,79 +682,87 @@
                       "string[]"
                     ],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.owner.properties",
+                    "id": "def-common.MANIFEST_V1.properties.owner.properties",
                     "type": "Object",
                     "tags": [],
                     "label": "properties",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/kibana-manifest-schema",
-                        "id": "def-server.MANIFEST_V1.properties.owner.properties.name",
+                        "id": "def-common.MANIFEST_V1.properties.owner.properties.name",
                         "type": "Object",
                         "tags": [],
                         "label": "name",
                         "description": [],
                         "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                         "deprecated": false,
+                        "trackAdoption": false,
                         "children": [
                           {
                             "parentPluginId": "@kbn/kibana-manifest-schema",
-                            "id": "def-server.MANIFEST_V1.properties.owner.properties.name.description",
+                            "id": "def-common.MANIFEST_V1.properties.owner.properties.name.description",
                             "type": "string",
                             "tags": [],
                             "label": "description",
                             "description": [],
                             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                            "deprecated": false
+                            "deprecated": false,
+                            "trackAdoption": false
                           },
                           {
                             "parentPluginId": "@kbn/kibana-manifest-schema",
-                            "id": "def-server.MANIFEST_V1.properties.owner.properties.name.type",
+                            "id": "def-common.MANIFEST_V1.properties.owner.properties.name.type",
                             "type": "string",
                             "tags": [],
                             "label": "type",
                             "description": [],
                             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                            "deprecated": false
+                            "deprecated": false,
+                            "trackAdoption": false
                           }
                         ]
                       },
                       {
                         "parentPluginId": "@kbn/kibana-manifest-schema",
-                        "id": "def-server.MANIFEST_V1.properties.owner.properties.githubTeam",
+                        "id": "def-common.MANIFEST_V1.properties.owner.properties.githubTeam",
                         "type": "Object",
                         "tags": [],
                         "label": "githubTeam",
                         "description": [],
                         "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                         "deprecated": false,
+                        "trackAdoption": false,
                         "children": [
                           {
                             "parentPluginId": "@kbn/kibana-manifest-schema",
-                            "id": "def-server.MANIFEST_V1.properties.owner.properties.githubTeam.description",
+                            "id": "def-common.MANIFEST_V1.properties.owner.properties.githubTeam.description",
                             "type": "string",
                             "tags": [],
                             "label": "description",
                             "description": [],
                             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                            "deprecated": false
+                            "deprecated": false,
+                            "trackAdoption": false
                           },
                           {
                             "parentPluginId": "@kbn/kibana-manifest-schema",
-                            "id": "def-server.MANIFEST_V1.properties.owner.properties.githubTeam.type",
+                            "id": "def-common.MANIFEST_V1.properties.owner.properties.githubTeam.type",
                             "type": "string",
                             "tags": [],
                             "label": "type",
                             "description": [],
                             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                            "deprecated": false
+                            "deprecated": false,
+                            "trackAdoption": false
                           }
                         ]
                       }
@@ -701,65 +772,71 @@
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.description",
+                "id": "def-common.MANIFEST_V1.properties.description",
                 "type": "Object",
                 "tags": [],
                 "label": "description",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.description.description",
+                    "id": "def-common.MANIFEST_V1.properties.description.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.description.type",
+                    "id": "def-common.MANIFEST_V1.properties.description.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V1.properties.enabledOnAnonymousPages",
+                "id": "def-common.MANIFEST_V1.properties.enabledOnAnonymousPages",
                 "type": "Object",
                 "tags": [],
                 "label": "enabledOnAnonymousPages",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.enabledOnAnonymousPages.description",
+                    "id": "def-common.MANIFEST_V1.properties.enabledOnAnonymousPages.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V1.properties.enabledOnAnonymousPages.type",
+                    "id": "def-common.MANIFEST_V1.properties.enabledOnAnonymousPages.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -770,27 +847,29 @@
       },
       {
         "parentPluginId": "@kbn/kibana-manifest-schema",
-        "id": "def-server.MANIFEST_V2",
+        "id": "def-common.MANIFEST_V2",
         "type": "Object",
         "tags": [],
         "label": "MANIFEST_V2",
         "description": [],
         "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/kibana-manifest-schema",
-            "id": "def-server.MANIFEST_V2.type",
+            "id": "def-common.MANIFEST_V2.type",
             "type": "string",
             "tags": [],
             "label": "type",
             "description": [],
             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/kibana-manifest-schema",
-            "id": "def-server.MANIFEST_V2.required",
+            "id": "def-common.MANIFEST_V2.required",
             "type": "Array",
             "tags": [],
             "label": "required",
@@ -799,197 +878,160 @@
               "string[]"
             ],
             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/kibana-manifest-schema",
-            "id": "def-server.MANIFEST_V2.properties",
+            "id": "def-common.MANIFEST_V2.allowTrailingCommas",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowTrailingCommas",
+            "description": [
+              "// @ts-expect-error VSCode specific JSONSchema extension"
+            ],
+            "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/kibana-manifest-schema",
+            "id": "def-common.MANIFEST_V2.properties",
             "type": "Object",
             "tags": [],
             "label": "properties",
             "description": [],
             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V2.properties.id",
+                "id": "def-common.MANIFEST_V2.properties.id",
                 "type": "Object",
                 "tags": [],
                 "label": "id",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V2.properties.id.type",
+                    "id": "def-common.MANIFEST_V2.properties.id.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V2.properties.id.pattern",
+                    "id": "def-common.MANIFEST_V2.properties.id.pattern",
                     "type": "string",
                     "tags": [],
                     "label": "pattern",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-manifest-schema",
+                    "id": "def-common.MANIFEST_V2.properties.id.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V2.properties.owner",
+                "id": "def-common.MANIFEST_V2.properties.owner",
                 "type": "Object",
                 "tags": [],
                 "label": "owner",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V2.properties.owner.type",
-                    "type": "string",
+                    "id": "def-common.MANIFEST_V2.properties.owner.oneOf",
+                    "type": "Array",
                     "tags": [],
-                    "label": "type",
+                    "label": "oneOf",
                     "description": [],
+                    "signature": [
+                      "({ type: string; pattern: string; } | { type: string; items: { type: string; pattern: string; }; })[]"
+                    ],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V2.properties.owner.description",
+                    "id": "def-common.MANIFEST_V2.properties.owner.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                    "deprecated": false
-                  },
-                  {
-                    "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V2.properties.owner.pattern",
-                    "type": "string",
-                    "tags": [],
-                    "label": "pattern",
-                    "description": [],
-                    "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
               {
                 "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V2.properties.typeDependencies",
+                "id": "def-common.MANIFEST_V2.properties.devOnly",
                 "type": "Object",
                 "tags": [],
-                "label": "typeDependencies",
+                "label": "devOnly",
                 "description": [],
                 "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V2.properties.typeDependencies.type",
+                    "id": "def-common.MANIFEST_V2.properties.devOnly.type",
                     "type": "string",
                     "tags": [],
                     "label": "type",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V2.properties.typeDependencies.description",
+                    "id": "def-common.MANIFEST_V2.properties.devOnly.description",
                     "type": "string",
                     "tags": [],
                     "label": "description",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V2.properties.typeDependencies.items",
-                    "type": "Object",
+                    "id": "def-common.MANIFEST_V2.properties.devOnly.default",
+                    "type": "boolean",
                     "tags": [],
-                    "label": "items",
+                    "label": "default",
                     "description": [],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
                     "deprecated": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/kibana-manifest-schema",
-                        "id": "def-server.MANIFEST_V2.properties.typeDependencies.items.type",
-                        "type": "string",
-                        "tags": [],
-                        "label": "type",
-                        "description": [],
-                        "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                        "deprecated": false
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/kibana-manifest-schema",
-                "id": "def-server.MANIFEST_V2.properties.runtimeDependencies",
-                "type": "Object",
-                "tags": [],
-                "label": "runtimeDependencies",
-                "description": [],
-                "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                "deprecated": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V2.properties.runtimeDependencies.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                    "deprecated": false
-                  },
-                  {
-                    "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V2.properties.runtimeDependencies.description",
-                    "type": "string",
-                    "tags": [],
-                    "label": "description",
-                    "description": [],
-                    "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                    "deprecated": false
-                  },
-                  {
-                    "parentPluginId": "@kbn/kibana-manifest-schema",
-                    "id": "def-server.MANIFEST_V2.properties.runtimeDependencies.items",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "items",
-                    "description": [],
-                    "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                    "deprecated": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/kibana-manifest-schema",
-                        "id": "def-server.MANIFEST_V2.properties.runtimeDependencies.items.type",
-                        "type": "string",
-                        "tags": [],
-                        "label": "type",
-                        "description": [],
-                        "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-                        "deprecated": false
-                      }
-                    ]
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -997,7 +1039,7 @@
           },
           {
             "parentPluginId": "@kbn/kibana-manifest-schema",
-            "id": "def-server.MANIFEST_V2.oneOf",
+            "id": "def-common.MANIFEST_V2.oneOf",
             "type": "Array",
             "tags": [],
             "label": "oneOf",
@@ -1006,19 +1048,12 @@
               "({ type: string; properties: { type: { enum: string[]; }; plugin: { type: string; required: string[]; properties: { id: { type: string; pattern: string; }; configPath: { description: string; type: string; items: { type: string; pattern: string; }; }; requiredPlugins: { type: string; items: { type: string; pattern: string; }; }; optionalPlugins: { type: string; items: { type: string; pattern: string; }; }; description: { description: string; type: string; }; enabledOnAnonymousPages: { description: string; type: string; }; serviceFolders: { description: string; type: string; items: { type: string; }; }; }; }; }; } | { type: string; properties: { type: { const: string; }; sharedBrowserBundle: { type: string; description: string; }; }; } | { type: string; properties: { type: { enum: string[]; }; }; })[]"
             ],
             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

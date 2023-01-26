@@ -2,69 +2,73 @@
 
 exports[`RevertToBasic component should display when license is about to expire 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
   >
     <div
-      class="euiCard__content"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
-      <span
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        Revert to Basic license
-      </span>
       <div
-        class="euiText euiCard__description emotion-euiText-s"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span>
-            You’ll revert to our free features and lose access to machine learning, advanced security, and other 
-            <a
-              class="euiLink emotion-euiLink-primary"
-              href="https://www.elastic.co/subscriptions"
-              rel="noopener"
-              target="_blank"
-            >
-              subscription features
-              <span
-                class="emotion-euiLink__externalIcon"
-                data-euiicon-type="popout"
-              >
-                External link
-              </span>
-              <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-              >
-                (opens in a new tab or window)
-              </span>
-            </a>
-            .
-          </span>
-        </p>
-      </div>
-    </div>
-    <div
-      class="euiCard__footer"
-    >
-      <button
-        class="euiButton euiButton--primary"
-        data-test-subj="revertToBasicButton"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButton__content"
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
         >
           <span
-            class="euiButton__text"
+            class="emotion-euiCard__text-center"
+          >
+            Revert to Basic license
+          </span>
+        </p>
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
+        >
+          <p>
+            <span>
+              You’ll revert to our free features and lose access to machine learning, advanced security, and other 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://www.elastic.co/subscriptions"
+                rel="noopener"
+                target="_blank"
+              >
+                subscription features
+                <span
+                  class="emotion-euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                >
+                  External link
+                </span>
+                <span
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+              .
+            </span>
+          </p>
+        </div>
+      </div>
+      <div
+        class="emotion-euiCard__footer"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+          data-test-subj="revertToBasicButton"
+          type="button"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
           >
             Revert to Basic
           </span>
-        </span>
-      </button>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -72,69 +76,73 @@ exports[`RevertToBasic component should display when license is about to expire 
 
 exports[`RevertToBasic component should display when license is expired 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
   >
     <div
-      class="euiCard__content"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
-      <span
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        Revert to Basic license
-      </span>
       <div
-        class="euiText euiCard__description emotion-euiText-s"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span>
-            You’ll revert to our free features and lose access to machine learning, advanced security, and other 
-            <a
-              class="euiLink emotion-euiLink-primary"
-              href="https://www.elastic.co/subscriptions"
-              rel="noopener"
-              target="_blank"
-            >
-              subscription features
-              <span
-                class="emotion-euiLink__externalIcon"
-                data-euiicon-type="popout"
-              >
-                External link
-              </span>
-              <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-              >
-                (opens in a new tab or window)
-              </span>
-            </a>
-            .
-          </span>
-        </p>
-      </div>
-    </div>
-    <div
-      class="euiCard__footer"
-    >
-      <button
-        class="euiButton euiButton--primary"
-        data-test-subj="revertToBasicButton"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButton__content"
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
         >
           <span
-            class="euiButton__text"
+            class="emotion-euiCard__text-center"
+          >
+            Revert to Basic license
+          </span>
+        </p>
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
+        >
+          <p>
+            <span>
+              You’ll revert to our free features and lose access to machine learning, advanced security, and other 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://www.elastic.co/subscriptions"
+                rel="noopener"
+                target="_blank"
+              >
+                subscription features
+                <span
+                  class="emotion-euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                >
+                  External link
+                </span>
+                <span
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+              .
+            </span>
+          </p>
+        </div>
+      </div>
+      <div
+        class="emotion-euiCard__footer"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+          data-test-subj="revertToBasicButton"
+          type="button"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
           >
             Revert to Basic
           </span>
-        </span>
-      </button>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -142,69 +150,73 @@ exports[`RevertToBasic component should display when license is expired 1`] = `
 
 exports[`RevertToBasic component should display when trial is active 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--centerAligned emotion-euiPanel-grow-m-m-plain-hasBorder"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
   >
     <div
-      class="euiCard__content"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
-      <span
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        Revert to Basic license
-      </span>
       <div
-        class="euiText euiCard__description emotion-euiText-s"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span>
-            You’ll revert to our free features and lose access to machine learning, advanced security, and other 
-            <a
-              class="euiLink emotion-euiLink-primary"
-              href="https://www.elastic.co/subscriptions"
-              rel="noopener"
-              target="_blank"
-            >
-              subscription features
-              <span
-                class="emotion-euiLink__externalIcon"
-                data-euiicon-type="popout"
-              >
-                External link
-              </span>
-              <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-              >
-                (opens in a new tab or window)
-              </span>
-            </a>
-            .
-          </span>
-        </p>
-      </div>
-    </div>
-    <div
-      class="euiCard__footer"
-    >
-      <button
-        class="euiButton euiButton--primary"
-        data-test-subj="revertToBasicButton"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButton__content"
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
         >
           <span
-            class="euiButton__text"
+            class="emotion-euiCard__text-center"
+          >
+            Revert to Basic license
+          </span>
+        </p>
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
+        >
+          <p>
+            <span>
+              You’ll revert to our free features and lose access to machine learning, advanced security, and other 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://www.elastic.co/subscriptions"
+                rel="noopener"
+                target="_blank"
+              >
+                subscription features
+                <span
+                  class="emotion-euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                >
+                  External link
+                </span>
+                <span
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+              .
+            </span>
+          </p>
+        </div>
+      </div>
+      <div
+        class="emotion-euiCard__footer"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+          data-test-subj="revertToBasicButton"
+          type="button"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
           >
             Revert to Basic
           </span>
-        </span>
-      </button>
+        </button>
+      </div>
     </div>
   </div>
 </div>

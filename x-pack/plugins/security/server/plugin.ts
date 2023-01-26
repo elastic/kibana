@@ -8,6 +8,7 @@
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import type { CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -88,12 +89,6 @@ export interface SecurityPluginSetup {
    * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
    */
   privilegeDeprecationsService: PrivilegeDeprecationsService;
-
-  /**
-   * Sets the flag to indicate that Kibana is running inside an Elastic Cloud deployment. This flag is supposed to be
-   * set by the Cloud plugin and can be only once.
-   */
-  setIsElasticCloudDeployment: () => void;
 }
 
 /**
@@ -123,6 +118,7 @@ export interface PluginSetupDependencies {
 }
 
 export interface PluginStartDependencies {
+  cloud?: CloudStart;
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
@@ -204,21 +200,6 @@ export class SecurityPlugin
       throw new Error(`userProfileStart is not registered!`);
     }
     return this.userProfileStart;
-  };
-
-  /**
-   * Indicates whether Kibana is running inside an Elastic Cloud deployment. Since circular plugin dependencies are
-   * forbidden, this flag is supposed to be set by the Cloud plugin that already depends on the Security plugin.
-   * @private
-   */
-  private isElasticCloudDeployment?: boolean;
-  private readonly getIsElasticCloudDeployment = () => this.isElasticCloudDeployment === true;
-  private readonly setIsElasticCloudDeployment = () => {
-    if (this.isElasticCloudDeployment !== undefined) {
-      throw new Error(`The Elastic Cloud deployment flag has been set already!`);
-    }
-
-    this.isElasticCloudDeployment = true;
   };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -318,7 +299,7 @@ export class SecurityPlugin
       getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
     });
 
-    this.userProfileService.setup({ authz: this.authorizationSetup });
+    this.userProfileService.setup({ authz: this.authorizationSetup, license });
 
     setupSpacesClient({
       spaces,
@@ -330,7 +311,6 @@ export class SecurityPlugin
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
-      getSpacesService: () => spaces?.spacesService,
     });
 
     this.registerDeprecations(core, license);
@@ -374,13 +354,12 @@ export class SecurityPlugin
         license,
         logger: this.logger.get('deprecations'),
       }),
-      setIsElasticCloudDeployment: this.setIsElasticCloudDeployment,
     });
   }
 
   public start(
     core: CoreStart,
-    { features, licensing, taskManager, spaces }: PluginStartDependencies
+    { cloud, features, licensing, taskManager, spaces }: PluginStartDependencies
   ) {
     this.logger.debug('Starting plugin');
 
@@ -391,7 +370,7 @@ export class SecurityPlugin
     const clusterClient = core.elasticsearch.client;
     const { watchOnlineStatus$ } = this.elasticsearchService.start();
     const { session } = this.sessionManagementService.start({
-      auditLogger: this.auditSetup!.withoutRequest,
+      audit: this.auditSetup!,
       elasticsearchClient: clusterClient.asInternalUser,
       kibanaIndexName: this.getKibanaIndexName(),
       online$: watchOnlineStatus$(),
@@ -413,7 +392,7 @@ export class SecurityPlugin
       session,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
-      isElasticCloudDeployment: this.getIsElasticCloudDeployment,
+      isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
     });
 
     this.authorizationService.start({

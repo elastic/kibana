@@ -5,18 +5,34 @@
  * 2.0.
  */
 
-import { Rule } from '../../../../../types';
+import { estypes } from '@elastic/elasticsearch';
+import { AlertStatus, ValidFeatureId } from '@kbn/rule-data-utils';
+import type { PartialTheme, Theme } from '@elastic/charts';
 
-export interface RuleAlertsSummaryProps {
-  rule: Rule;
-  filteredRuleTypes: string[];
-}
-export interface AlertChartData {
-  status: 'active' | 'recovered' | 'total';
-  count: number;
-  date: number;
+export interface Alert {
+  key: number;
+  doc_count: number;
 }
 
-export interface AlertsChartProps {
-  data: AlertChartData[];
+export interface AlertSummaryTimeRange {
+  utcFrom: string;
+  utcTo: string;
+  // fixed_interval condition in ES query such as 1m, 1h, 1d
+  fixedInterval: string;
+  title?: JSX.Element | string;
+  dateFormat?: string;
+}
+
+export interface ChartThemes {
+  theme: PartialTheme;
+  baseTheme: Theme;
+}
+
+export interface AlertSummaryWidgetProps {
+  featureIds?: ValidFeatureId[];
+  filter?: estypes.QueryDslQueryContainer;
+  fullSize?: boolean;
+  onClick?: (status?: AlertStatus) => void;
+  timeRange: AlertSummaryTimeRange;
+  chartThemes: ChartThemes;
 }

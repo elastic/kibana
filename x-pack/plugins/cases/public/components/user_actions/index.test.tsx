@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
@@ -18,11 +18,12 @@ import {
   getUserAction,
   getHostIsolationUserAction,
   hostIsolationComment,
-  hostReleaseComment,
 } from '../../containers/mock';
 import { UserActions } from '.';
-import { TestProviders } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { Actions } from '../../../common/api';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
@@ -32,6 +33,8 @@ const onShowAlertDetails = jest.fn();
 const defaultProps = {
   caseServices: {},
   caseUserActions: [],
+  userProfiles: new Map(),
+  currentUserProfile: undefined,
   connectors: [],
   actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
   getRuleDetailsHref: jest.fn(),
@@ -65,6 +68,7 @@ describe(`UserActions`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };
+  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -74,22 +78,20 @@ describe(`UserActions`, () => {
     });
 
     jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
+    appMockRender = createAppMockRenderer();
   });
 
   it('Loading spinner when user actions loading and displays fullName/username', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...{ ...defaultProps, isLoadingUserActions: true }} />
-      </TestProviders>
+    appMockRender.render(
+      <UserActions
+        {...{ ...defaultProps, currentUserProfile: userProfiles[0], isLoadingUserActions: true }}
+      />
     );
 
-    expect(wrapper.find(`[data-test-subj="user-actions-loading"]`).exists()).toEqual(true);
-    expect(wrapper.find(`[data-test-subj="user-action-avatar"]`).first().prop('name')).toEqual(
-      defaultProps.data.createdBy.fullName
-    );
-    expect(
-      wrapper.find(`[data-test-subj="description-action"] figcaption strong`).first().text()
-    ).toEqual(defaultProps.data.createdBy.username);
+    expect(screen.getByTestId('user-actions-loading')).toBeInTheDocument();
+    expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+    expect(screen.getByText('LK')).toBeInTheDocument();
+    expect(screen.getByText('Leslie Knope')).toBeInTheDocument();
   });
 
   it('Renders service now update line with top and bottom when push is required', async () => {
@@ -266,7 +268,7 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-save-markdown"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] button[data-test-subj="user-action-save-markdown"]`
       )
       .first()
       .simulate('click');
@@ -314,7 +316,9 @@ describe(`UserActions`, () => {
       });
 
     wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="user-action-save-markdown"]`)
+      .find(
+        `[data-test-subj="description-action"] button[data-test-subj="user-action-save-markdown"]`
+      )
       .first()
       .simulate('click');
 
@@ -382,6 +386,127 @@ describe(`UserActions`, () => {
     });
   });
 
+  it('it should persist the draft of new comment while existing old comment is updated', async () => {
+    const editedComment = 'it is an edited comment';
+    const newComment = 'another cool comment';
+    const ourActions = [getUserAction('comment', Actions.create)];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <UserActions {...props} />
+      </TestProviders>
+    );
+
+    // type new comment in text area
+    wrapper
+      .find(`[data-test-subj="add-comment"] textarea`)
+      .first()
+      .simulate('change', { target: { value: newComment } });
+
+    wrapper
+      .find(
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-ellipses"]`
+      )
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find(
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-pencil"]`
+      )
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find(`.euiMarkdownEditorTextArea`)
+      .first()
+      .simulate('change', {
+        target: { value: editedComment },
+      });
+
+    wrapper
+      .find(
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] button[data-test-subj="user-action-save-markdown"]`
+      )
+      .first()
+      .simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
+          )
+          .exists()
+      ).toEqual(false);
+      expect(patchComment).toBeCalledWith({
+        commentUpdate: editedComment,
+        caseId: 'case-id',
+        commentId: props.data.comments[0].id,
+        version: props.data.comments[0].version,
+      });
+    });
+
+    expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
+  });
+
+  it('it should persist the draft of new comment while description is updated', async () => {
+    const newComment = 'another cool comment';
+    const wrapper = mount(
+      <TestProviders>
+        <UserActions {...defaultProps} />
+      </TestProviders>
+    );
+
+    // type new comment in text area
+    wrapper
+      .find(`[data-test-subj="add-comment"] textarea`)
+      .first()
+      .simulate('change', { target: { value: newComment } });
+
+    wrapper
+      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-pencil"]`)
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find(`.euiMarkdownEditorTextArea`)
+      .first()
+      .simulate('change', {
+        target: { value: sampleData.content },
+      });
+
+    wrapper
+      .find(
+        `[data-test-subj="description-action"] button[data-test-subj="user-action-save-markdown"]`
+      )
+      .first()
+      .simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="description-action"] [data-test-subj="user-action-markdown-form"]`
+          )
+          .exists()
+      ).toEqual(false);
+      expect(onUpdateField).toBeCalledWith({ key: 'description', value: sampleData.content });
+    });
+
+    expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
+  });
+
   describe('Host isolation action', () => {
     it('renders in the cases details view', async () => {
       const isolateAction = [getHostIsolationUserAction()];
@@ -402,62 +527,24 @@ describe(`UserActions`, () => {
     });
 
     it('shows the correct username', async () => {
-      const isolateAction = [getHostIsolationUserAction()];
+      const isolateAction = [
+        getHostIsolationUserAction({ createdBy: { profileUid: userProfiles[0].uid } }),
+      ];
       const props = {
         ...defaultProps,
+        userProfiles: userProfilesMap,
         caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [hostIsolationComment()] },
+        data: {
+          ...defaultProps.data,
+          comments: [hostIsolationComment({ createdBy: { profileUid: userProfiles[0].uid } })],
+        },
       };
 
-      const wrapper = mount(
-        <TestProviders>
-          <UserActions {...props} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(wrapper.find(`[data-test-subj="user-action-avatar"]`).first().prop('name')).toEqual(
-          defaultProps.data.createdBy.fullName
-        );
-      });
-    });
+      appMockRender.render(<UserActions {...props} />);
 
-    it('shows a lock icon if the action is isolate', async () => {
-      const isolateAction = [getHostIsolationUserAction()];
-      const props = {
-        ...defaultProps,
-        caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [hostIsolationComment()] },
-      };
-
-      const wrapper = mount(
-        <TestProviders>
-          <UserActions {...props} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="endpoint-action-icon"]`).first().prop('iconType')
-        ).toBe('lock');
-      });
-    });
-    it('shows a lockOpen icon if the action is unisolate/release', async () => {
-      const isolateAction = [getHostIsolationUserAction()];
-      const props = {
-        ...defaultProps,
-        caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [hostReleaseComment()] },
-      };
-
-      const wrapper = mount(
-        <TestProviders>
-          <UserActions {...props} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="endpoint-action-icon"]`).first().prop('iconType')
-        ).toBe('lockOpen');
-      });
+      expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+      expect(screen.getByText('DR')).toBeInTheDocument();
+      expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
     });
   });
 });

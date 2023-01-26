@@ -39,7 +39,7 @@ import { queryClient } from '..';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
 const fetchInstalledIntegrations = async () => {
-  const response = await sendGetPackages({ experimental: true });
+  const response = await sendGetPackages({ prerelease: true });
 
   if (response.error) {
     throw new Error(response.error.message);

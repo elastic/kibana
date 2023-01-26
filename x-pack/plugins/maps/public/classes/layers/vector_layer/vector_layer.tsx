@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/data-plugin/common';
 import { Feature, GeoJsonProperties, Geometry, Position } from 'geojson';
@@ -123,7 +123,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
-    layerDescriptor.type = LAYER_TYPE.GEOJSON_VECTOR;
+    layerDescriptor.type =
+      layerDescriptor.type !== undefined ? layerDescriptor.type : LAYER_TYPE.GEOJSON_VECTOR;
 
     if (!options.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -161,8 +162,13 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     );
   }
 
-  async cloneDescriptor(): Promise<VectorLayerDescriptor> {
-    const clonedDescriptor = (await super.cloneDescriptor()) as VectorLayerDescriptor;
+  async cloneDescriptor(): Promise<VectorLayerDescriptor[]> {
+    const clones = await super.cloneDescriptor();
+    if (clones.length === 0) {
+      return [];
+    }
+
+    const clonedDescriptor = clones[0] as VectorLayerDescriptor;
     if (clonedDescriptor.joins) {
       clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
         if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
@@ -177,7 +183,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         const originalJoinId = joinDescriptor.right.id!;
 
         // right.id is uuid used to track requests in inspector
-        joinDescriptor.right.id = uuid();
+        joinDescriptor.right.id = uuidv4();
 
         // Update all data driven styling properties using join fields
         if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
@@ -214,7 +220,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         }
       });
     }
-    return clonedDescriptor;
+    return [clonedDescriptor];
   }
 
   getSource(): IVectorSource {
@@ -294,10 +300,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getCurrentStyle().renderLegendDetails();
   }
 
-  async getBounds(syncContext: DataRequestContext) {
+  async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     return syncBoundsData({
       layerId: this.getId(),
-      syncContext,
+      syncContext: getDataRequestContext(this.getId()),
       source: this.getSource(),
       sourceQuery: this.getQuery(),
     });
