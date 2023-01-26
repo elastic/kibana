@@ -20,26 +20,22 @@ import { HeaderSection } from '../../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { getSeverityTableColumns } from '../columns';
 import { getSeverityColor } from '../helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 const DONUT_HEIGHT = 150;
 
-type FieldFilter = ({ field, value }: { field: string; value: string | number }) => void;
-
 interface AlertsChartsPanelProps {
-  addFilter?: FieldFilter;
   data: ParsedSeverityData;
   isLoading: boolean;
   uniqueQueryId: string;
+  addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
 }
 
 export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
-  addFilter,
   data,
   isLoading,
   uniqueQueryId,
+  addFilter,
 }) => {
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
   const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
     return getSeverityColor(d.dataName);
   }, []);
@@ -62,7 +58,6 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
     },
   };
 
-  const style = isChartEmbeddablesEnabled ? { width: '50%' } : undefined;
   const onElementClick: ElementClickListener = useCallback(
     (event) => {
       const flattened = event.flat(2);
@@ -79,21 +74,21 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
     },
     [addFilter]
   );
+
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
         <EuiPanel>
           <HeaderSection
-            hideSubtitle
             id={uniqueQueryId}
             inspectTitle={i18n.SEVERITY_LEVELS_TITLE}
             outerDirection="row"
-            showInspectButton={!isChartEmbeddablesEnabled}
             title={i18n.SEVERITY_LEVELS_TITLE}
             titleSize="xs"
+            hideSubtitle
           />
-          <EuiFlexGroup data-test-subj="severty-chart" gutterSize="none">
-            <EuiFlexItem style={style}>
+          <EuiFlexGroup data-test-subj="severty-chart" gutterSize="l">
+            <EuiFlexItem>
               <EuiInMemoryTable
                 data-test-subj="severity-level-alerts-table"
                 columns={columns}
@@ -102,7 +97,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
                 sorting={sorting}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={style}>
+            <EuiFlexItem grow={false}>
               <DonutChart
                 data-test-subj="severity-level-donut"
                 data={data}

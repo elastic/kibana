@@ -183,9 +183,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
         >
           {isPanelExpanded && (
             <FieldSelection
-              chartOptionsContextMenu={
-                isChartEmbeddablesEnabled ? undefined : chartOptionsContextMenu
-              }
+              chartOptionsContextMenu={chartOptionsContextMenu}
               setStackByField0={setStackByField0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={setStackByField1}
@@ -200,23 +198,21 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
           )}
         </HeaderSection>
 
-        {isPanelExpanded ? (
-          isLoadingAlerts ? (
-            <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
-          ) : (
-            <>
-              {alertsData != null && isPanelExpanded && (
-                <AlertsTreemap
-                  addFilter={addFilter}
-                  data={alertsData}
-                  maxBuckets={DEFAULT_STACK_BY_FIELD0_SIZE}
-                  stackByField0={stackByField0}
-                  stackByField1={stackByField1}
-                />
-              )}
-            </>
-          )
-        ) : null}
+        {isLoadingAlerts && isPanelExpanded ? (
+          <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
+        ) : (
+          <>
+            {alertsData != null && isPanelExpanded && (
+              <AlertsTreemap
+                addFilter={addFilter}
+                data={alertsData}
+                maxBuckets={DEFAULT_STACK_BY_FIELD0_SIZE}
+                stackByField0={stackByField0}
+                stackByField1={stackByField1}
+              />
+            )}
+          </>
+        )}
       </KpiPanel>
     </InspectButtonContainer>
   );
