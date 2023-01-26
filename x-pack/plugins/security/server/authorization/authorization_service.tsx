@@ -182,7 +182,7 @@ export class AuthorizationService {
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
         const customBrandingValue = await customBranding.getBrandingFor(request, {
-          unauthenticated: true,
+          unauthenticated: false,
         });
         const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
         const body = renderToString(

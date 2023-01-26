@@ -211,7 +211,7 @@ export class AuthenticationService {
         : `${http.basePath.get(request)}/`;
       if (!isLoginPageAvailable) {
         const customBrandingValue = await customBranding.getBrandingFor(request, {
-          unauthenticated: false,
+          unauthenticated: true,
         });
         return toolkit.render({
           body: renderUnauthenticatedPage({
