@@ -9,20 +9,29 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloForecastedBadge as Component, Props } from './slo_forecasted_badge';
-import { aForecastedSLO } from '../../../data/slo';
+import {
+  HEALTHY_ROLLING_SLO,
+  historicalSummaryData,
+} from '../../../data/slo/historical_summary_data';
+import { createSLO } from '../../../data/slo/slo';
+import { SloSummary as Component, Props } from './slo_summary';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/SloForecastedBadge',
+  title: 'app/SLO/ListPage/SloSummary',
   decorators: [KibanaReactStorybookDecorator],
 };
 
 const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
 const defaultProps = {
-  slo: aForecastedSLO,
+  slo: createSLO(),
+  historicalSummary: historicalSummaryData[HEALTHY_ROLLING_SLO],
+  historicalSummaryLoading: false,
 };
 
-export const SloForecastedBadge = Template.bind({});
-SloForecastedBadge.args = defaultProps;
+export const WithHistoricalData = Template.bind({});
+WithHistoricalData.args = { ...defaultProps };
+
+export const WithLoadingData = Template.bind({});
+WithLoadingData.args = { ...defaultProps, historicalSummaryLoading: true };
