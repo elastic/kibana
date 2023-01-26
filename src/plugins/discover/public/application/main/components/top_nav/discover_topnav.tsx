@@ -186,7 +186,7 @@ export const DiscoverTopNav = ({
   );
 
   const onEditDataView = async (editedDataView: DataView) => {
-   if (!editedDataView.isPersisted()) {
+    if (!editedDataView.isPersisted()) {
       await updateAdHocDataViewId(editedDataView);
     } else {
       stateContainer.actions.setDataView(editedDataView);
