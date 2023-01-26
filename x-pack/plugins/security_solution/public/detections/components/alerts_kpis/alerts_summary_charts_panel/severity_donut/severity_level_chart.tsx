@@ -71,6 +71,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
     },
   };
 
+  const style = isChartEmbeddablesEnabled ? { width: '50%' } : undefined;
   const onElementClick: ElementClickListener = useCallback(
     (event) => {
       const flattened = event.flat(2);
@@ -102,7 +103,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
             titleSize="xs"
           />
           <EuiFlexGroup data-test-subj="severty-chart" gutterSize="none">
-            <EuiFlexItem>
+            <EuiFlexItem style={style}>
               {isChartEmbeddablesEnabled ? (
                 <VisualizationEmbeddable
                   label={i18n.SEVERITY_TOTAL_ALERTS}
@@ -124,7 +125,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
                 />
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} style={style}>
               {isChartEmbeddablesEnabled ? (
                 <VisualizationEmbeddable
                   applyGlobalQueriesAndFilters={false}
@@ -137,7 +138,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
                   scopeId={SourcererScopeName.detections}
                   stackByField="kibana.alert.workflow_status"
                   timerange={timerange}
-                  width="135px"
+                  width="100%"
                 />
               ) : (
                 <DonutChart

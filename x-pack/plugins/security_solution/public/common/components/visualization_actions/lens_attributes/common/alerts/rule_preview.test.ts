@@ -6,17 +6,15 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import { mockRulePreviewFilter, wrapper } from '../../../mocks';
-import { v4 as uuidv4 } from 'uuid';
 
 import { useLensAttributes } from '../../../use_lens_attributes';
 
 import { getRulePreviewLensAttributes } from './rule_preview';
-const mockLayerId = 'mockLayerId';
 const mockInternalReferenceId = 'mockInternalReferenceId';
 const mockRuleId = 'mockRuleId';
 
 jest.mock('uuid', () => ({
-  v4: jest.fn(),
+  v4: jest.fn().mockReturnValueOnce('mockLayerId').mockReturnValueOnce('mockInternalReferenceId'),
 }));
 
 jest.mock('../../../../../containers/sourcerer', () => ({
@@ -38,7 +36,6 @@ jest.mock('../../../../../utils/route/use_route_spy', () => ({
 describe('getRulePreviewLensAttributes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (uuidv4 as jest.Mock).mockReturnValueOnce(mockLayerId).mockReturnValue(mockInternalReferenceId);
   });
   it('should render without extra options', () => {
     const { result } = renderHook(
