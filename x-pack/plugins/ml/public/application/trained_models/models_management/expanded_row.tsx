@@ -20,6 +20,7 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiTitle,
+  useEuiPaddingSize,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -35,22 +36,28 @@ interface ExpandedRowProps {
   item: ModelItemFull;
 }
 
-const badgeFormatter = (items: string[]) => {
-  if (items.length === 0) return;
-  return (
-    <div>
-      {items.map((item) => (
-        <EuiBadge key={item} color="hollow">
-          {item}
-        </EuiBadge>
-      ))}
-    </div>
-  );
+const useBadgeFormatter = () => {
+  const xs = useEuiPaddingSize('xs');
+
+  function badgeFormatter(items: string[]) {
+    if (items.length === 0) return;
+    return (
+      <div>
+        {items.map((item) => (
+          <span css={{ marginRight: xs! }} key={item}>
+            <EuiBadge color="hollow">{item}</EuiBadge>
+          </span>
+        ))}
+      </div>
+    );
+  }
+  return { badgeFormatter };
 };
 
 export function useListItemsFormatter() {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
+  const { badgeFormatter } = useBadgeFormatter();
 
   const formatterDictionary: Record<string, (value: any) => JSX.Element | string | undefined> =
     useMemo(

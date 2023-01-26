@@ -119,7 +119,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                   <h5>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.nodesList.expandedRow.allocatedModelsTitle"
-                      defaultMessage="Allocated models"
+                      defaultMessage="Allocated trained models"
                     />
                   </h5>
                 </EuiTitle>
