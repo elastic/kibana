@@ -17,6 +17,7 @@ type PropArguments = Pick<
   | 'allowFullScreen'
   | 'useDarkTheme'
   | 'transparentBackground'
+  | 'placeholder'
 >;
 
 export type Params = Record<keyof PropArguments, any>;
@@ -34,8 +35,9 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
   propArguments = {
     languageId: {
       control: {
-        type: 'select',
+        type: 'radio',
       },
+      options: ['json', 'loglang', 'plaintext'],
       defaultValue: 'json',
     },
     value: {
@@ -68,6 +70,12 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
       },
       defaultValue: false,
     },
+    placeholder: {
+      control: {
+        type: 'text',
+      },
+      defaultValue: 'myplaceholder',
+    },
   };
 
   serviceArguments = {};
@@ -81,6 +89,7 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
       allowFullScreen: this.getArgumentValue('allowFullScreen', params),
       useDarkTheme: this.getArgumentValue('useDarkTheme', params),
       transparentBackground: this.getArgumentValue('transparentBackground', params),
+      placeholder: this.getArgumentValue('placeholder', params),
     };
   }
 

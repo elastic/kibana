@@ -423,17 +423,14 @@ export const CodeEditor: React.FC<Props> = ({
   useEffect(() => {
     if (placeholder && !value && _editor.current) {
       // Mounts editor inside constructor
-      _placeholderWidget.current = new PlaceholderWidget(
-        placeholder,
-        _editor.current,
-        euiTheme.colors.subduedText
-      );
+      _placeholderWidget.current = new PlaceholderWidget(placeholder, _editor.current);
     }
+
     return () => {
       _placeholderWidget.current?.dispose();
       _placeholderWidget.current = null;
     };
-  }, [placeholder, value, euiTheme]);
+  }, [placeholder, value]);
 
   useEffect(() => {
     // register theme for dark or light
