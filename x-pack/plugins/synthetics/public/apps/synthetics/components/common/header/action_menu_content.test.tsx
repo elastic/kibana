@@ -14,7 +14,7 @@ describe('ActionMenuContent', () => {
     const { getByRole, getByText } = render(<ActionMenuContent />);
 
     const settingsAnchor = getByRole('link', { name: 'Navigate to the Uptime settings page' });
-    expect(settingsAnchor.getAttribute('href')).toBe('/settings');
+    expect(settingsAnchor.getAttribute('href')).toBe('/settings?dateRangeStart=now-24h');
     expect(getByText('Settings'));
   });
 
