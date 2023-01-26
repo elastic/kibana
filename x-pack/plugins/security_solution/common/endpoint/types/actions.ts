@@ -149,9 +149,15 @@ export interface ResponseActionGetFileParameters {
   path: string;
 }
 
+export interface ResponseActionsExecuteParameters {
+  command: string;
+  timeout: number;
+}
+
 export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId
+  | ResponseActionsExecuteParameters
   | ResponseActionGetFileParameters;
 
 export interface EndpointActionData<

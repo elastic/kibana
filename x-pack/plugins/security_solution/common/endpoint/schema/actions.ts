@@ -15,7 +15,7 @@ import {
 
 const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
-  endpoint_ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+  endpoint_ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
   /** If defined, any case associated with the given IDs will be updated */
   alert_ids: schema.maybe(schema.arrayOf(schema.string())),
   /** Case IDs to be updated */
@@ -149,3 +149,13 @@ export const EndpointActionFileInfoSchema = {
 };
 
 export type EndpointActionFileInfoParams = TypeOf<typeof EndpointActionFileInfoSchema.params>;
+
+export const ExecuteActionRequestSchema = {
+  body: schema.object({
+    ...BaseActionRequestSchema,
+    parameters: schema.object({
+      command: schema.string({ minLength: 1 }),
+      timeout: schema.maybe(schema.number({ min: 1 })),
+    }),
+  }),
+};

@@ -19,6 +19,7 @@ import {
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   EndpointActionGetFileSchema,
+  ExecuteActionRequestSchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
 import {
@@ -34,6 +35,7 @@ import {
   UNISOLATE_HOST_ROUTE,
   ENDPOINT_ACTIONS_INDEX,
   GET_FILE_ROUTE,
+  GET_EXECUTE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -43,6 +45,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionParametersWithPidOrEntityId,
+  ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -175,6 +178,19 @@ export function registerResponseActionRoutes(
       )
     );
   }
+
+  router.post(
+    {
+      path: GET_EXECUTE_ROUTE,
+      validate: ExecuteActionRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canExecuteCommand'] },
+      logger,
+      responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
+    )
+  );
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([
@@ -184,6 +200,7 @@ const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKe
   ['suspend-process', 'SUSPEND_PROCESS'],
   ['running-processes', 'RUNNING_PROCESSES'],
   ['get-file', 'GET_FILE'],
+  ['execute', 'EXECUTE'],
 ]);
 
 const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];

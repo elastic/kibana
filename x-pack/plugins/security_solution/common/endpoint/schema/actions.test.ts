@@ -11,6 +11,7 @@ import {
   EndpointActionListRequestSchema,
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
+  ExecuteActionRequestSchema,
 } from './actions';
 
 describe('actions schemas', () => {
@@ -235,9 +236,17 @@ describe('actions schemas', () => {
   });
 
   describe('NoParametersRequestSchema', () => {
-    it('should require at least 1 Endpoint ID', () => {
+    it('should require endpoint_ids', () => {
       expect(() => {
         NoParametersRequestSchema.body.validate({});
+      }).toThrow();
+    });
+
+    it('should require at least 1 endpoint id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: [''],
+        });
       }).toThrow();
     });
 
@@ -336,6 +345,84 @@ describe('actions schemas', () => {
           parameters: {
             pid: 1234,
           },
+        });
+      }).not.toThrow();
+    });
+  });
+
+  describe('ExecuteActionRequestSchema', () => {
+    it('should require endpoint_ids and parameters.command', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({});
+      }).toThrow();
+    });
+
+    it('should require at least 1 endpoint id', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: [''],
+          parameters: {
+            command: 'ls -al',
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should require at least 1 endpoint id and a command', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: '',
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should accept at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+          },
+        });
+      }).not.toThrow();
+    });
+
+    it('should not accept optional invalid timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: '',
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should also accept a valid timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: 1000,
+          },
+        });
+      }).not.toThrow();
+    });
+
+    it('should also accept an optional comment', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: 1000,
+          },
+          comment: 'a user comment',
         });
       }).not.toThrow();
     });

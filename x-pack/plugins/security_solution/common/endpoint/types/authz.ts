@@ -46,6 +46,8 @@ export interface EndpointAuthz {
   canGetRunningProcesses: boolean;
   /** If user has permissions to use the Response Actions Console */
   canAccessResponseConsole: boolean;
+  /** If user has write permissions to use execute action */
+  canExecuteCommand: boolean;
   /** If user has write permissions to use file operations */
   canWriteFileOperations: boolean;
   /** if user has write permissions for trusted applications */
