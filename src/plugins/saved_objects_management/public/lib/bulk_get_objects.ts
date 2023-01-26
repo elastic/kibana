@@ -12,9 +12,8 @@ import { BulkGetHTTPBodyV1, BulkGetHTTPResponseV1 } from '../../common/types';
 export async function bulkGetObjects(
   http: HttpStart,
   objects: BulkGetHTTPBodyV1
-): Promise<BulkGetHTTPResponseV1[]> {
-  return await http.post<BulkGetHTTPResponseV1[]>(
-    `/api/kibana/management/saved_objects/_bulk_get`,
-    { body: JSON.stringify(objects) }
-  );
+): Promise<BulkGetHTTPResponseV1> {
+  return await http.post<BulkGetHTTPResponseV1>(`/api/kibana/management/saved_objects/_bulk_get`, {
+    body: JSON.stringify(objects),
+  });
 }
