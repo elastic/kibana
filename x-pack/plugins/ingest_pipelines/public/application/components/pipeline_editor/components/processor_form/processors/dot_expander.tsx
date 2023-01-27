@@ -15,6 +15,7 @@ import { FieldNameField } from './common_fields/field_name_field';
 import { FieldsConfig, from, to } from './shared';
 
 const fieldsConfig: FieldsConfig = {
+  /* Optional fields config */
   path: {
     type: FIELD_TYPES.TEXT,
     serializer: from.emptyStringToUndefined,
@@ -26,8 +27,6 @@ const fieldsConfig: FieldsConfig = {
         'Output field. Only required if the field to expand is part another object field.',
     }),
   },
-
-  /* Optional fields config */
   override: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
