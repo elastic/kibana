@@ -14,7 +14,7 @@ import {
   isPivotTransformTestData,
   LatestTransformTestData,
   PivotTransformTestData,
-} from '../permissions';
+} from '../helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');

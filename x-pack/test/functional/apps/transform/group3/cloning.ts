@@ -11,7 +11,7 @@ import {
   TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getLatestTransformConfig } from '../permissions';
+import { getLatestTransformConfig } from '../helpers';
 
 interface TestData {
   type: 'pivot' | 'latest';
