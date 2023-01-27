@@ -31,7 +31,6 @@ describe('SitemapsTable', () => {
     createdOn: '2018-01-01T00:00:00.000Z',
     deduplicationEnabled: true,
     entryPoints: [],
-    extractionRules: [],
     documentCount: 10,
     id: '6113e1407a2f2e6f42489794',
     url: 'https://www.elastic.co',
