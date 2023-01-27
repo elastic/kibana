@@ -12,7 +12,7 @@ import apm from 'elastic-apm-node';
 import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
 import { map, mergeScan } from 'rxjs/operators';
-import { groupBy, pick, isPlainObject } from 'lodash';
+import { groupBy, isPlainObject } from 'lodash';
 
 import { Logger } from '@kbn/core/server';
 
@@ -22,7 +22,6 @@ import { TaskClaim, asTaskClaimEvent, startTaskTimer, TaskTiming } from '../task
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from './query_clauses';
 
 import {
-  updateFieldsAndMarkAsFailed,
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
