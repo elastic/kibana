@@ -27,6 +27,9 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
       Object {
         "awaitingNodeAssignment": false,
         "bucketSpanSeconds": 900,
+        "customSettings": Object {
+          "security_app_display_name": "Unusual Network Activity",
+        },
         "datafeedId": "datafeed-linux_anomalous_network_activity_ecs",
         "datafeedIndices": Array [
           "auditbeat-*",
@@ -57,6 +60,9 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
       Object {
         "awaitingNodeAssignment": false,
         "bucketSpanSeconds": 900,
+        "customSettings": Object {
+          "security_app_display_name": "Unusually Linux Processes",
+        },
         "datafeedId": "datafeed-rare_process_by_host_linux_ecs",
         "datafeedIndices": Array [
           "auditbeat-*",
@@ -84,6 +90,9 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
       Object {
         "awaitingNodeAssignment": false,
         "bucketSpanSeconds": 900,
+        "customSettings": Object {
+          "security_app_display_name": "Unusually Windows Processes",
+        },
         "datafeedId": "",
         "datafeedIndices": Array [],
         "datafeedState": "",
