@@ -10,7 +10,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { EmbeddableOutput, Embeddable, EmbeddableInput, IContainer } from '../../..';
 
 export interface EmbeddableTimeRangeInput extends EmbeddableInput {
-  timeRange?: TimeRange;
+  timeRange: TimeRange;
 }
 
 export const TIME_RANGE_EMBEDDABLE = 'TIME_RANGE_EMBEDDABLE';
