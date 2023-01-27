@@ -37,7 +37,7 @@ describe('useGetCaseUserActions', () => {
 
   it('returns proper state on getCaseUserActions', async () => {
     const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(
-      () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+      () => useGetCaseUserActions(basicCase.id),
       { wrapper }
     );
 
@@ -65,7 +65,7 @@ describe('useGetCaseUserActions', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
     const { waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(
-      () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+      () => useGetCaseUserActions(basicCase.id),
       { wrapper }
     );
 
@@ -86,7 +86,7 @@ describe('useGetCaseUserActions', () => {
         );
 
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(
-        () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+        () => useGetCaseUserActions(basicCase.id),
         { wrapper }
       );
 
@@ -109,7 +109,7 @@ describe('useGetCaseUserActions', () => {
       );
 
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(
-        () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+        () => useGetCaseUserActions(basicCase.id),
         { wrapper }
       );
 
@@ -130,7 +130,7 @@ describe('useGetCaseUserActions', () => {
         );
 
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(
-        () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+        () => useGetCaseUserActions(basicCase.id),
         { wrapper }
       );
 
@@ -156,7 +156,7 @@ describe('useGetCaseUserActions', () => {
         );
 
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(
-        () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+        () => useGetCaseUserActions(basicCase.id),
         { wrapper }
       );
 
@@ -178,7 +178,7 @@ describe('useGetCaseUserActions', () => {
         );
 
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(
-        () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+        () => useGetCaseUserActions(basicCase.id),
         { wrapper }
       );
 
