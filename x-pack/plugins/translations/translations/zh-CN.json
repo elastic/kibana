@@ -11817,7 +11817,7 @@
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.helptext": "使用您索引中的文档进行测试",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.description": "您可以通过传递文档数组来模拟管道结果。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.runButton": "模拟管道",
-    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.subtitle": "文档",
+    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.subtitle.documents": "文档",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.title": "复查管道结果（可选）",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.title": "添加推理管道",
     "xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.apiIndexSubtitle": "采集管道将针对搜索应用程序优化您的索引。如果希望在基于 API 的索引中使用这些管道，您需要在 API 请求中显式引用它们。",
