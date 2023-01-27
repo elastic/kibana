@@ -99,7 +99,6 @@ describe('AlertsTable', () => {
   const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
     columns,
-    bulkActions: [],
     deletedEventIds: [],
     disabledCellActions: [],
     pageSize: 1,
@@ -107,7 +106,6 @@ describe('AlertsTable', () => {
     leadingControlColumns: [],
     showExpandToDetails: true,
     trailingControlColumns: [],
-    alerts,
     useFetchAlertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
