@@ -59,10 +59,9 @@ deprecated:[6.3.0, Use `xpack.xpack_main.telemetry.enabled` instead.]
 
 `xpack.xpack_main.telemetry.enabled`::
 Set to `true` (default) to send cluster statistics to Elastic. Reporting your
-cluster statistics helps us improve your user experience. Your data is never
-shared with anyone. Set to `false` to disable statistics reporting from any
-browser connected to the {kib} instance. You can also opt out through the
-*Advanced Settings* in {kib}.
+cluster statistics helps us improve your user experience. Set to `false` to
+disable statistics reporting from any browser connected to the {kib} instance.
+You can also opt out through the *Advanced Settings* in {kib}.
 
 `xpack.monitoring.elasticsearch.pingTimeout`::
 Specifies the time in milliseconds to wait for {es} to respond to internal
