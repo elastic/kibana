@@ -10,7 +10,7 @@ import { isEmpty, xor } from 'lodash';
 import moment, { Moment } from 'moment';
 import fastIsEqual from 'fast-deep-equal';
 
-import { DashboardPanelMap } from '../../../../../common';
+import { DashboardPanelMap } from '../../../../common';
 
 const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {

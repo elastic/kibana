@@ -14,4 +14,5 @@ export {
   DashboardContainerFactoryDefinition,
 } from './embeddable/dashboard_container_factory';
 
-export { DashboardRenderer, type DashboardAPI } from './dashboard_renderer';
+export { DashboardRenderer } from './external_api/dashboard_renderer';
+export { type DashboardAPI } from './external_api/dashboard_api';

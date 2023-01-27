@@ -6,11 +6,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupContainer,
+  ControlGroupRenderer,
+  CONTROL_GROUP_TYPE,
+} from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Filter, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
 interface Props {
@@ -38,7 +41,7 @@ export const ControlsContent: React.FC<Props> = ({
   onFilterChange,
 }) => {
   const [controlPanel, setControlPanels] = useControlPanels(dataView);
-  const [controlGroup, setControlGroup] = useState<ControlGroupContainer | undefined>();
+  const [controlGroup, setControlGroup] = useState<ControlGroupContainer | null>();
 
   useEffect(() => {
     if (!controlGroup) {
@@ -58,8 +61,9 @@ export const ControlsContent: React.FC<Props> = ({
   }, [controlGroup, onFilterChange, setControlPanels]);
 
   return (
-    <LazyControlsRenderer
+    <ControlGroupRenderer
       filters={filters}
+      ref={setControlGroup}
       getInitialInput={async () => ({
         id: dataView.id ?? '',
         type: CONTROL_GROUP_TYPE,
@@ -73,9 +77,6 @@ export const ControlsContent: React.FC<Props> = ({
         defaultControlWidth: 'small',
         panels: controlPanel,
       })}
-      onLoadComplete={(newControlGroup) => {
-        setControlGroup(newControlGroup);
-      }}
       query={query}
       timeRange={timeRange}
     />

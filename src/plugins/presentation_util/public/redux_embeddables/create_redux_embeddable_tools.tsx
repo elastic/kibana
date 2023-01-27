@@ -25,12 +25,11 @@ import {
   EmbeddableReducers,
   ReduxEmbeddableTools,
   ReduxEmbeddableState,
-  ReduxEmbeddableContext,
   ReduxEmbeddableSetters,
   ReduxEmbeddableSyncSettings,
 } from './types';
-import { syncReduxEmbeddable } from './sync_redux_embeddable';
 import { cleanStateForRedux } from './clean_redux_embeddable_state';
+import { EmbeddableSyncActions, syncReduxEmbeddable } from './sync_redux_embeddable';
 
 export const createReduxEmbeddableTools = <
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
@@ -123,10 +122,12 @@ export const createReduxEmbeddableTools = <
    * with redux and remove this sync.
    */
   const stopReduxEmbeddableSync = syncReduxEmbeddable<ReduxEmbeddableStateType>({
-    actions: slice.actions as ReduxEmbeddableContext<
-      ReduxEmbeddableStateType,
-      typeof reducers
-    >['actions'],
+    syncActions: {
+      replaceEmbeddableReduxInput: slice.actions
+        .replaceEmbeddableReduxInput as EmbeddableSyncActions<ReduxEmbeddableStateType>['replaceEmbeddableReduxInput'],
+      replaceEmbeddableReduxOutput: slice.actions
+        .replaceEmbeddableReduxOutput as EmbeddableSyncActions<ReduxEmbeddableStateType>['replaceEmbeddableReduxOutput'],
+    },
     settings: syncSettings,
     embeddable,
     store,

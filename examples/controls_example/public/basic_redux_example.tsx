@@ -6,59 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
-import {
-  LazyControlGroupRenderer,
-  ControlGroupContainer,
-  useControlGroupContainerContext,
-  ControlStyle,
-} from '@kbn/controls-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { EuiButtonGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
+import { EuiButtonGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { ControlGroupRenderer, ControlStyle, ControlGroupAPI } from '@kbn/controls-plugin/public';
 
 export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
-  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
+  const [controlGroupAPI, setControlGroupApi] = useState<ControlGroupAPI | null>();
 
-  const ControlGroupReduxWrapper = useMemo(() => {
-    if (controlGroup) return controlGroup.getReduxEmbeddableTools().Wrapper;
-  }, [controlGroup]);
-
-  const ButtonControls = () => {
-    const {
-      useEmbeddableDispatch,
-      useEmbeddableSelector: select,
-      actions: { setControlStyle },
-    } = useControlGroupContainerContext();
-    const dispatch = useEmbeddableDispatch();
-    const controlStyle = select((state) => state.explicitInput.controlStyle);
-
-    return (
-      <EuiButtonGroup
-        legend="Text style"
-        options={[
-          {
-            id: `oneLine`,
-            label: 'One line',
-            value: 'oneLine' as ControlStyle,
-          },
-          {
-            id: `twoLine`,
-            label: 'Two lines',
-            value: 'twoLine' as ControlStyle,
-          },
-        ]}
-        idSelected={controlStyle}
-        onChange={(id, value) => {
-          dispatch(setControlStyle(value));
-        }}
-        type="single"
-      />
-    );
-  };
+  const controlStyle = controlGroupAPI?.select((state) => state.explicitInput.controlStyle);
 
   return (
     <>
@@ -70,16 +27,29 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        {ControlGroupReduxWrapper && (
-          <ControlGroupReduxWrapper>
-            <ButtonControls />
-          </ControlGroupReduxWrapper>
+        {controlGroupAPI && (
+          <EuiButtonGroup
+            legend="Text style"
+            options={[
+              {
+                id: `oneLine`,
+                label: 'One line',
+                value: 'oneLine' as ControlStyle,
+              },
+              {
+                id: `twoLine`,
+                label: 'Two lines',
+                value: 'twoLine' as ControlStyle,
+              },
+            ]}
+            idSelected={controlStyle ?? 'oneLine'}
+            onChange={(id, value) => controlGroupAPI?.dispatch.setControlStyle(value)}
+            type="single"
+          />
         )}
 
         <ControlGroupRenderer
-          onLoadComplete={async (newControlGroup) => {
-            setControlGroup(newControlGroup);
-          }}
+          ref={setControlGroupApi}
           getInitialInput={async (initialInput, builder) => {
             await builder.addDataControlFromField(initialInput, {
               dataViewId,

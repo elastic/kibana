@@ -16,7 +16,7 @@ import { DashboardContainerInputWithoutId } from '../../../types';
 import { pluginServices } from '../../../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../../dashboard_constants';
 import { DashboardCreationOptions } from '../../dashboard_container_factory';
-import { getUnsavedChanges } from '../../state/diffing/dashboard_diffing_integration';
+import { getUnsavedChanges } from '../../../state/diffing/dashboard_diffing_integration';
 
 /**
  * input keys that will cause a new session to be created.

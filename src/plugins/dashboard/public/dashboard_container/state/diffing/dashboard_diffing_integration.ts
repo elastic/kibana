@@ -10,13 +10,13 @@ import { AnyAction, Middleware } from 'redux';
 import { debounceTime, Observable, Subject, switchMap } from 'rxjs';
 
 import { isKeyEqual } from './dashboard_diffing_functions';
-import { DashboardContainer } from '../../dashboard_container';
-import { DashboardContainerInput } from '../../../../../common';
-import { DashboardContainerInputWithoutId } from '../../../types';
-import { pluginServices } from '../../../../services/plugin_services';
-import { CHANGE_CHECK_DEBOUNCE } from '../../../../dashboard_constants';
+import { DashboardContainer } from '../../embeddable/dashboard_container';
+import { DashboardContainerInput } from '../../../../common';
+import { DashboardContainerInputWithoutId } from '../../types';
+import { pluginServices } from '../../../services/plugin_services';
+import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
-import { DashboardCreationOptions } from '../../dashboard_container_factory';
+import { DashboardCreationOptions } from '../../embeddable/dashboard_container_factory';
 
 /**
  * An array of reducers which cannot cause unsaved changes. Unsaved changes only compares the explicit input

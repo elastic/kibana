@@ -38,7 +38,8 @@ export {
   type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
-  controlGroupInputBuilder,
+  type ControlGroupInputBuilder,
+  type ControlGroupAPI,
   type ControlGroupOutput,
 } from './control_group';
 
@@ -54,11 +55,7 @@ export {
   type RangeSliderEmbeddableInput,
 } from './range_slider';
 
-export {
-  LazyControlGroupRenderer,
-  useControlGroupContainerContext,
-  type ControlGroupRendererProps,
-} from './control_group';
+export { ControlGroupRenderer, type ControlGroupRendererProps } from './control_group';
 
 export function plugin() {
   return new ControlsPlugin();

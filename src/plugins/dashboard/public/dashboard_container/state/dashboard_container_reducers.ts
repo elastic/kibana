@@ -7,12 +7,8 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { DashboardContainerInput } from '../../../../common';
-import {
-  DashboardPublicState,
-  DashboardReduxState,
-  DashboardStateFromSaveModal,
-} from '../../types';
+import { DashboardContainerInput } from '../../../common';
+import { DashboardPublicState, DashboardReduxState, DashboardStateFromSaveModal } from '../types';
 
 export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------

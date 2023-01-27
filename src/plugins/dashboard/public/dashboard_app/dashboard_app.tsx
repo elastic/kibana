@@ -8,15 +8,7 @@
 
 import { History } from 'history';
 import useMount from 'react-use/lib/useMount';
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -73,7 +65,7 @@ export function DashboardApp({
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
-  const dashboardAPI = useRef<DashboardAPI>(null);
+  const [dashboardAPI, setDashboardAPI] = useState<DashboardAPI | null>(null);
 
   /**
    * Unpack & set up dashboard services
@@ -180,10 +172,10 @@ export function DashboardApp({
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
    */
   useEffect(() => {
-    if (!dashboardAPI.current) return;
+    if (!dashboardAPI) return;
     const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
       kbnUrlStateStorage,
-      dashboardAPI: dashboardAPI.current,
+      dashboardAPI,
     });
     return () => stopWatchingAppStateInUrl();
   }, [dashboardAPI, kbnUrlStateStorage]);
@@ -195,15 +187,15 @@ export function DashboardApp({
       )}
       {!showNoDataPage && (
         <>
-          {dashboardAPI.current && (
-            <DashboardAPIContext.Provider value={dashboardAPI.current}>
+          {dashboardAPI && (
+            <DashboardAPIContext.Provider value={dashboardAPI}>
               <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
             </DashboardAPIContext.Provider>
           )}
 
           {getLegacyConflictWarning?.()}
           <DashboardRenderer
-            ref={dashboardAPI}
+            ref={setDashboardAPI}
             savedObjectId={savedDashboardId}
             getCreationOptions={getCreationOptions}
           />

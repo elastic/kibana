@@ -21,7 +21,7 @@ import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardLoadedEventStatus, DashboardRenderPerformanceStats } from '../../types';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
-import { getPanelLayoutsAreEqual } from '../../embeddable/state/diffing/dashboard_diffing_utils';
+import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
 
 let lastValidGridSize = 0;
 

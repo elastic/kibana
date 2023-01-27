@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import './_dashboard_container.scss';
+import '../_dashboard_container.scss';
 
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
@@ -24,24 +24,19 @@ import {
   DashboardCreationOptions,
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
-} from './embeddable/dashboard_container_factory';
-import { DASHBOARD_CONTAINER_TYPE } from '..';
-import { DashboardContainerInput } from '../../common';
-import type { DashboardContainer } from './embeddable/dashboard_container';
+} from '../embeddable/dashboard_container_factory';
+import { DashboardAPI, DASHBOARD_CONTAINER_TYPE } from '..';
+import { DashboardContainerInput } from '../../../common';
+import type { DashboardContainer } from '../embeddable/dashboard_container';
+import { buildApiFromDashboardContainer } from './dashboard_api';
 
 export interface DashboardRendererProps {
   savedObjectId?: string;
   getCreationOptions?: () => DashboardCreationOptions;
 }
 
-// TODO lock down DashboardAPI
-export type DashboardAPI = DashboardContainer;
-
-const buildApiFromDashboardContainer = (container?: DashboardContainer): DashboardAPI | undefined =>
-  container;
-
 export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardRendererProps>(
-  ({ savedObjectId, getCreationOptions }: DashboardRendererProps, ref) => {
+  ({ savedObjectId, getCreationOptions }, ref) => {
     const dashboardRoot = useRef(null);
     const [loading, setLoading] = useState(true);
     const [screenshotMode, setScreenshotMode] = useState(false);
@@ -55,7 +50,7 @@ export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardR
     useEffect(() => {
       (async () => {
         // Lazy loading all services is required in this component because it is exported and contributes to the bundle size.
-        const { pluginServices } = await import('../services/plugin_services');
+        const { pluginServices } = await import('../../services/plugin_services');
         const {
           screenshotMode: { isScreenshotMode },
         } = pluginServices.getServices();
@@ -76,13 +71,12 @@ export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardR
 
     useEffect(() => {
       let canceled = false;
-      let destroyContainer: () => void;
 
       (async () => {
         const creationOptions = getCreationOptions?.();
 
         // Lazy loading all services is required in this component because it is exported and contributes to the bundle size.
-        const { pluginServices } = await import('../services/plugin_services');
+        const { pluginServices } = await import('../../services/plugin_services');
         const { embeddable } = pluginServices.getServices();
 
         const dashboardFactory = embeddable.getEmbeddableFactory(
@@ -105,12 +99,10 @@ export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardR
           container.render(dashboardRoot.current);
         }
         setDashboardContainer(container);
-
-        destroyContainer = () => container.destroy();
       })();
       return () => {
         canceled = true;
-        destroyContainer?.();
+        dashboardContainer?.destroy();
       };
       // Disabling exhaustive deps because embeddable should only be created when the dashboardIdToBuild changes.
       // eslint-disable-next-line react-hooks/exhaustive-deps

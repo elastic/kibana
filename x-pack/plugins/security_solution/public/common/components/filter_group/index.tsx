@@ -7,12 +7,12 @@
 
 import type {
   ControlGroupInput,
-  ControlGroupContainer,
-  controlGroupInputBuilder,
+  ControlGroupInputBuilder,
   ControlGroupOutput,
+  ControlGroupAPI,
   OptionsListEmbeddableInput,
 } from '@kbn/controls-plugin/public';
-import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -27,7 +27,6 @@ import {
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { cloneDeep, debounce } from 'lodash';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
@@ -37,10 +36,6 @@ import { APP_ID } from '../../../../common/constants';
 import './index.scss';
 import { FilterGroupLoading } from './loading';
 import { withSpaceId } from '../with_space_id';
-
-type ControlGroupBuilder = typeof controlGroupInputBuilder;
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 export const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
@@ -71,7 +66,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   const filterChangedSubscription = useRef<Subscription>();
   const inputChangedSubscription = useRef<Subscription>();
 
-  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
+  const [controlGroup, setControlGroup] = useState<ControlGroupAPI>();
 
   const localStoragePageFilterKey = useMemo(
     () => `${APP_ID}.${spaceId}.${URL_PARAM_KEY.pageFilter}`,
@@ -162,7 +157,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     });
   }, [controlGroup, debouncedFilterUpdates, debouncedInputUpdatesHandler]);
 
-  const onControlGroupLoadHandler = useCallback((controlGroupContainer: ControlGroupContainer) => {
+  const onControlGroupLoadHandler = useCallback((controlGroupContainer: ControlGroupAPI) => {
+    if (!controlGroupContainer) return;
     setControlGroup(controlGroupContainer);
   }, []);
 
@@ -241,7 +237,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   const setOptions = useCallback(
     async (
       defaultInput: Partial<ControlGroupInput>,
-      { addOptionsListControl }: ControlGroupBuilder
+      { addOptionsListControl }: ControlGroupInputBuilder
     ) => {
       const initialInput: Partial<ControlGroupInput> = {
         ...defaultInput,
@@ -327,10 +323,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     <FilterWrapper className="filter-group__wrapper">
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
         <EuiFlexItem grow={true} data-test-subj="filter_group__items">
-          <ControlGroupRenderer
-            onLoadComplete={onControlGroupLoadHandler}
-            getInitialInput={setOptions}
-          />
+          <ControlGroupRenderer ref={onControlGroupLoadHandler} getInitialInput={setOptions} />
           {!controlGroup ? <FilterGroupLoading /> : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

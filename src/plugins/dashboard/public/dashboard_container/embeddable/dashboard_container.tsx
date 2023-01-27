@@ -48,8 +48,8 @@ import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardPanelState, DashboardContainerInput } from '../../../common';
 import { DashboardReduxState, DashboardRenderPerformanceStats } from '../types';
-import { dashboardContainerReducers } from './state/dashboard_container_reducers';
-import { startDiffingDashboardState } from './state/diffing/dashboard_diffing_integration';
+import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
+import { startDiffingDashboardState } from '../state/diffing/dashboard_diffing_integration';
 import { DASHBOARD_LOADED_EVENT, DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
 import { combineDashboardFiltersWithControlGroupFilters } from './create/controls/dashboard_control_group_integration';
 

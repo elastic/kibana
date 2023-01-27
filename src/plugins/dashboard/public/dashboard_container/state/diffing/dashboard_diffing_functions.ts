@@ -11,9 +11,9 @@ import fastIsEqual from 'fast-deep-equal';
 import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
 import { compareFilters, COMPARE_ALL_OPTIONS, isFilterPinned } from '@kbn/es-query';
 
-import { DashboardContainer } from '../../dashboard_container';
-import { DashboardContainerInput } from '../../../../../common';
-import { DashboardContainerInputWithoutId } from '../../../types';
+import { DashboardContainer } from '../../embeddable/dashboard_container';
+import { DashboardContainerInput } from '../../../../common';
+import { DashboardContainerInputWithoutId } from '../../types';
 import { areTimesEqual, getPanelLayoutsAreEqual } from './dashboard_diffing_utils';
 
 export interface DiffFunctionProps<Key extends keyof DashboardContainerInput> {

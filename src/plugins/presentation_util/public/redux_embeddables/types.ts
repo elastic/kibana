@@ -6,16 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  Dispatch,
-  AnyAction,
-  CaseReducer,
-  PayloadAction,
-  ActionCreatorWithPayload,
-  EnhancedStore,
-} from '@reduxjs/toolkit';
-import { TypedUseSelectorHook } from 'react-redux';
-import { EmbeddableInput, EmbeddableOutput, Embeddable } from '@kbn/embeddable-plugin/public';
+import { CaseReducer, PayloadAction, EnhancedStore } from '@reduxjs/toolkit';
+import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 
 export interface ReduxEmbeddableSyncSettings<
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
@@ -103,34 +95,4 @@ export interface EmbeddableReducers<
    * This type will be overridden to remove any and be type safe when returned by setupReduxEmbeddable.
    */
   [key: string]: CaseReducer<ReduxEmbeddableStateType, PayloadAction<any>>;
-}
-
-/**
- * This context type contains the actions, selector, and dispatch that embeddables need to interact with their state. This
- * should be passed down from the embeddable class, to its react components by wrapping the embeddable's render output in ReduxEmbeddableContext.
- */
-export interface ReduxEmbeddableContext<
-  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
-  ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>,
-  EmbeddableType extends Embeddable<
-    ReduxEmbeddableStateType['explicitInput'],
-    ReduxEmbeddableStateType['output']
-  > = Embeddable<ReduxEmbeddableStateType['explicitInput'], ReduxEmbeddableStateType['output']>
-> {
-  actions: {
-    [Property in keyof ReducerType]: ActionCreatorWithPayload<
-      Parameters<ReducerType[Property]>[1]['payload']
-    >;
-  } & {
-    // Generic reducers to interact with embeddable Input and Output.
-    updateEmbeddableReduxInput: ActionCreatorWithPayload<
-      Partial<ReduxEmbeddableStateType['explicitInput']>
-    >;
-    updateEmbeddableReduxOutput: ActionCreatorWithPayload<
-      Partial<ReduxEmbeddableStateType['output']>
-    >;
-  };
-  embeddableInstance: EmbeddableType;
-  useEmbeddableSelector: TypedUseSelectorHook<ReduxEmbeddableStateType>;
-  useEmbeddableDispatch: () => Dispatch<AnyAction>;
 }

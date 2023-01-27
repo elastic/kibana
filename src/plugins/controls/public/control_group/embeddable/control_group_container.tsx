@@ -37,17 +37,15 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { getNextPanelOrder } from './control_group_helpers';
-import type {
-  AddDataControlProps,
-  AddOptionsListControlProps,
-  AddRangeSliderControlProps,
-} from '../control_group_input_builder';
 import {
+  type AddDataControlProps,
+  type AddOptionsListControlProps,
+  type AddRangeSliderControlProps,
   getDataControlPanelState,
   getOptionsListPanelState,
   getRangeSliderPanelState,
   getTimeSliderPanelState,
-} from '../control_group_input_builder';
+} from '../external_api/control_group_input_builder';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {

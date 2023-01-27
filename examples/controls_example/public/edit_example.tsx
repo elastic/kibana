@@ -19,17 +19,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
+import { ControlGroupRenderer, ControlGroupAPI } from '@kbn/controls-plugin/public';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
+  const [controlGroup, setControlGroup] = useState<ControlGroupAPI | null>();
 
   async function onSave() {
     setIsSaving(true);
@@ -104,6 +101,7 @@ export const EditExample = () => {
           </>
         ) : null}
         <ControlGroupRenderer
+          ref={setControlGroup}
           getInitialInput={async (initialInput, builder) => {
             const persistedInput = await onLoad();
             return {
@@ -111,9 +109,6 @@ export const EditExample = () => {
               ...persistedInput,
               viewMode: ViewMode.EDIT,
             };
-          }}
-          onLoadComplete={async (newControlGroup) => {
-            setControlGroup(newControlGroup);
           }}
         />
       </EuiPanel>

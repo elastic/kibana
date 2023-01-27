@@ -13,7 +13,7 @@ import { DashboardStart } from './plugin';
 import { DashboardContainerInput, DashboardPanelState } from '../common';
 import { DashboardContainerOutput, DashboardReduxState } from './dashboard_container/types';
 import { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
-import { dashboardContainerReducers } from './dashboard_container/embeddable/state/dashboard_container_reducers';
+import { dashboardContainerReducers } from './dashboard_container/state/dashboard_container_reducers';
 
 export type Start = jest.Mocked<DashboardStart>;
 

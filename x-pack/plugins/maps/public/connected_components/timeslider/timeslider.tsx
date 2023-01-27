@@ -11,17 +11,14 @@ import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  ControlGroupContainer,
+  type ControlGroupAPI,
   type ControlGroupInput,
-  type controlGroupInputBuilder,
-  LazyControlGroupRenderer,
+  type ControlGroupInputBuilder,
+  ControlGroupRenderer,
 } from '@kbn/controls-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { first } from 'rxjs/operators';
 import type { TimeRange } from '@kbn/es-query';
 import { Timeslice } from '../../../common/descriptor_types';
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 export interface Props {
   setTimeslice: (timeslice?: Timeslice) => void;
@@ -44,7 +41,7 @@ export class Timeslider extends Component<Props, {}> {
 
   _getInitialInput = async (
     initialInput: Partial<ControlGroupInput>,
-    builder: typeof controlGroupInputBuilder
+    builder: ControlGroupInputBuilder
   ) => {
     builder.addTimeSliderControl(initialInput);
     return {
@@ -54,8 +51,8 @@ export class Timeslider extends Component<Props, {}> {
     };
   };
 
-  _onLoadComplete = (controlGroup: ControlGroupContainer) => {
-    if (!this._isMounted) {
+  _onLoadComplete = (controlGroup: ControlGroupAPI | null) => {
+    if (!this._isMounted || !controlGroup) {
       return;
     }
 
@@ -90,7 +87,7 @@ export class Timeslider extends Component<Props, {}> {
     return (
       <div className="mapTimeslider mapTimeslider--animation">
         <ControlGroupRenderer
-          onLoadComplete={this._onLoadComplete}
+          ref={this._onLoadComplete}
           getInitialInput={this._getInitialInput}
           timeRange={this.props.timeRange}
         />

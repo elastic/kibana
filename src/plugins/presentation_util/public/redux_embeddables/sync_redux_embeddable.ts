@@ -9,19 +9,26 @@
 import deepEqual from 'fast-deep-equal';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { EnhancedStore } from '@reduxjs/toolkit';
-import { ReduxEmbeddableContext, ReduxEmbeddableState, ReduxEmbeddableSyncSettings } from './types';
+import { ActionCreatorWithPayload, EnhancedStore } from '@reduxjs/toolkit';
+import { ReduxEmbeddableState, ReduxEmbeddableSyncSettings } from './types';
 import { cleanInputForRedux } from './clean_redux_embeddable_state';
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+
+export interface EmbeddableSyncActions<
+  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
+> {
+  replaceEmbeddableReduxInput: ActionCreatorWithPayload<ReduxEmbeddableStateType['explicitInput']>;
+  replaceEmbeddableReduxOutput: ActionCreatorWithPayload<ReduxEmbeddableStateType['output']>;
+}
 
 export const syncReduxEmbeddable = <
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
 >({
   store,
-  actions,
   settings,
   embeddable,
+  syncActions,
 }: {
   settings?: ReduxEmbeddableSyncSettings;
   store: EnhancedStore<ReduxEmbeddableStateType>;
@@ -29,7 +36,7 @@ export const syncReduxEmbeddable = <
     ReduxEmbeddableStateType['explicitInput'],
     ReduxEmbeddableStateType['output']
   >;
-  actions: ReduxEmbeddableContext<ReduxEmbeddableStateType>['actions'];
+  syncActions: EmbeddableSyncActions<ReduxEmbeddableState>;
 }) => {
   if (settings?.disableSync) {
     return;
@@ -81,7 +88,7 @@ export const syncReduxEmbeddable = <
 
     if (!inputEqual(reduxExplicitInput, embeddableExplictInput)) {
       store.dispatch(
-        actions.replaceEmbeddableReduxInput(cleanInputForRedux(embeddableExplictInput))
+        syncActions.replaceEmbeddableReduxInput(cleanInputForRedux(embeddableExplictInput))
       );
     }
     embeddableToReduxInProgress = false;
@@ -93,7 +100,7 @@ export const syncReduxEmbeddable = <
     embeddableToReduxInProgress = true;
     const reduxState = store.getState();
     if (!outputEqual(reduxState.output, embeddableOutput)) {
-      store.dispatch(actions.replaceEmbeddableReduxOutput(embeddableOutput));
+      store.dispatch(syncActions.replaceEmbeddableReduxOutput(embeddableOutput));
     }
     embeddableToReduxInProgress = false;
   });
