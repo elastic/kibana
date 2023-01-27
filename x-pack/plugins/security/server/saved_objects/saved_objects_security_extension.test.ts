@@ -15,6 +15,7 @@ import type {
 import type {
   SavedObjectReferenceWithContext,
   SavedObjectsClient,
+  SavedObjectsFindResult,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
 
@@ -6148,20 +6149,71 @@ describe('#authorizeDisableLegacyUrlAliases', () => {
   });
 });
 
-// // ToDo: move to extension test
-// it('throws a forbidden error when unauthorized', async () => {
-//   const { wrapper, baseClient, forbiddenError, securityExtension } = setup({
-//     securityEnabled,
-//   });
-//   securityExtension!.authorizeDisableLegacyUrlAliases.mockImplementation(() => {
-//     throw new Error('Oh no!');
-//   });
-//   const aliases = [alias1, alias2];
-//   await expect(() => wrapper.disableLegacyUrlAliases(aliases)).rejects.toThrow(
-//     forbiddenError
-//   );
+describe(`#auditObjectsForSpaceDeletion`, () => {
+  const spaceId = 'x';
 
-//   expectAuthorizationCheck(securityExtension!, aliases);
-//   // expectAuditEvents(securityExtension!, aliases, { error: true });
-//   expect(baseClient.disableLegacyUrlAliases).not.toHaveBeenCalled();
-// });
+  const objects: Array<SavedObjectsFindResult<unknown>> = [
+    {
+      id: '1',
+      namespaces: ['*'],
+      type: 'dashboard',
+      score: 1,
+      attributes: undefined,
+      references: [],
+    },
+    {
+      id: '2',
+      namespaces: ['x'],
+      type: 'dashboard',
+      score: 1,
+      attributes: undefined,
+      references: [],
+    },
+    {
+      id: '3',
+      namespaces: ['default', 'x'],
+      type: 'dashboard',
+      score: 1,
+      attributes: undefined,
+      references: [],
+    },
+  ];
+
+  beforeEach(() => {
+    checkAuthorizationSpy.mockClear();
+    enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+  });
+
+  test(`adds audit event for each object without '*' in namespaces`, async () => {
+    const { securityExtension, auditLogger } = setup();
+    securityExtension.auditObjectsForSpaceDeletion(spaceId, objects);
+
+    expect(auditHelperSpy).not.toHaveBeenCalled(); // The helper is not called, the addAudit method is called directly
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length - 1);
+    expect(auditLogger.log).toHaveBeenCalledTimes(objects.length - 1);
+    const i = 0;
+    for (const obj of objects) {
+      if (i === 0) continue; // The first object namespaces includes '*', so there will not be an audit for it
+
+      expect(auditLogger.log).toHaveBeenNthCalledWith(i, {
+        error: undefined,
+        event: {
+          action: AuditAction.UPDATE_OBJECTS_SPACES,
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: obj.namespaces!.length > 1 ? obj.namespaces : undefined,
+          saved_object: undefined,
+        },
+        message: `User is updating spaces of dashboard [id=${obj.id}]`,
+      });
+    }
+  });
+});
