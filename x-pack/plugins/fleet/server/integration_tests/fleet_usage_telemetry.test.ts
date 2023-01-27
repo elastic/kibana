@@ -165,13 +165,30 @@ describe('fleet usage telemetry', () => {
 
     await esClient.create({
       index: '.fleet-policies',
-      id: 'policy1',
+      id: 'policy1-rv2',
       body: {
+        revision_idx: 2,
+        policy_id: 'fleet-server-policy',
         data: {
-          id: 'fleet-server-policy',
           outputs: {
             default: {
               type: 'elasticsearch',
+            },
+          },
+        },
+      },
+      refresh: 'wait_for',
+    });
+    await esClient.create({
+      index: '.fleet-policies',
+      id: 'policy1-rv1',
+      body: {
+        revision_idx: 1,
+        policy_id: 'fleet-server-policy',
+        data: {
+          outputs: {
+            default: {
+              type: 'logstash', // this should not show up in telemetry as it is from a past revision
             },
           },
         },
@@ -285,7 +302,8 @@ describe('fleet usage telemetry', () => {
             },
           ],
         },
-        agent_policies: { count: 3, output_types: ['elasticsearch'] },
+        // there are 2 agent policies test-456789 and fleet-server-policy
+        agent_policies: { count: 2, output_types: ['elasticsearch'] },
         // agent_logs_top_errors: ['stderr panic close of closed channel'],
         // fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
       })

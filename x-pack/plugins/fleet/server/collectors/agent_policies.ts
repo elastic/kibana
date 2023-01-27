@@ -16,6 +16,29 @@ export interface AgentPoliciesUsage {
   output_types: string[];
 }
 
+interface AgentPoliciesUsageAggs {
+  unique_policies: {
+    buckets: Array<{
+      key: string;
+      output_types: {
+        hits: {
+          hits: Array<{
+            _source: {
+              data?: {
+                outputs?: {
+                  [key: string]: {
+                    type: string;
+                  };
+                };
+              };
+            };
+          }>;
+        };
+      };
+    }>;
+  };
+}
+
 const DEFAULT_AGENT_POLICIES_USAGE = {
   count: 0,
   output_types: [],
@@ -26,29 +49,45 @@ export const getAgentPoliciesUsage = async (
   abortController: AbortController
 ): Promise<AgentPoliciesUsage> => {
   try {
-    const res = await esClient.search(
+    const res = await esClient.search<{}, AgentPoliciesUsageAggs>(
       {
         index: AGENT_POLICY_INDEX,
-        size: ES_SEARCH_LIMIT,
-        track_total_hits: true,
-        rest_total_hits_as_int: true,
+        size: 0,
+        aggregations: {
+          unique_policies: {
+            terms: {
+              field: 'policy_id',
+              size: ES_SEARCH_LIMIT,
+            },
+            aggregations: {
+              output_types: {
+                top_hits: {
+                  size: 1,
+                  sort: {
+                    revision_idx: 'desc',
+                  },
+                  _source: ['data.outputs.*.type'],
+                },
+              },
+            },
+          },
+        },
       },
       { signal: abortController.signal }
     );
+    const agentPolicyCount = res?.aggregations?.unique_policies?.buckets?.length;
 
-    const agentPolicies = res.hits.hits;
+    const allOutputs = (res?.aggregations?.unique_policies?.buckets ?? [])?.flatMap((bucket) =>
+      bucket.output_types.hits.hits.flatMap((hit) =>
+        Object.values(hit._source?.data?.outputs || {})
+      )
+    );
 
-    const outputTypes = new Set<string>();
-    agentPolicies.forEach((item) => {
-      const source = (item._source as any) ?? {};
-      Object.keys(source.data.outputs).forEach((output) => {
-        outputTypes.add(source.data.outputs[output].type);
-      });
-    });
+    const uniqueOutputs = new Set(allOutputs.flatMap((output) => output.type));
 
     return {
-      count: res.hits.total as number,
-      output_types: Array.from(outputTypes),
+      count: agentPolicyCount as number,
+      output_types: Array.from(uniqueOutputs),
     };
   } catch (error) {
     if (error.statusCode === 404) {
