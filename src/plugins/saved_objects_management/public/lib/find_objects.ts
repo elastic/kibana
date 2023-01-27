@@ -7,24 +7,16 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { keysToCamelCaseShallow } from './case_conversion';
 import { FindQueryHTTPV1, FindResponseHTTPV1 } from '../../common/types';
 
 export async function findObjects(
   http: HttpStart,
   findOptions: FindQueryHTTPV1
 ): Promise<FindResponseHTTPV1> {
-  const response = await http.get<Record<string, any>>(
-    '/api/kibana/management/saved_objects/_find',
-    {
-      query: {
-        ...findOptions,
-        hasReference: findOptions.hasReference
-          ? JSON.stringify(findOptions.hasReference)
-          : undefined,
-      } as Record<string, any>,
-    }
-  );
-
-  return keysToCamelCaseShallow(response) as FindResponseHTTPV1;
+  return http.get<FindResponseHTTPV1>('/api/kibana/management/saved_objects/_find', {
+    query: {
+      ...findOptions,
+      hasReference: findOptions.hasReference ? JSON.stringify(findOptions.hasReference) : undefined,
+    } as Record<string, any>,
+  });
 }
