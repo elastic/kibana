@@ -516,26 +516,25 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
 
   return (
     <div>
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiText size="xs">
-            <h4>
-              <FormattedMessage
-                id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle"
-                defaultMessage="Anomaly explanation"
-              />
-            </h4>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink href={docsUrl} target="_blank">
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanation.learnMoreLinkText"
-              defaultMessage="Learn more"
-            />
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiText size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle"
+            defaultMessage="Anomaly explanation {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink href={docsUrl} target="_blank" css={{ marginLeft: '8px' }}>
+                  <FormattedMessage
+                    id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanation.learnMoreLinkText"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </h4>
+      </EuiText>
+
       <EuiSpacer size="s" />
 
       {explanationDetails.map(({ title, description }) => (
