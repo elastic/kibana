@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
 import type { FindResponseHTTPV1 } from '../../common';
-import { injectMetaAttributes } from '../lib';
+import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import type { ISavedObjectsManagement } from '../services';
 
 export const registerFindRoute = (
@@ -79,18 +79,17 @@ export const registerFindRoute = (
         searchFields: [...searchFields],
       });
 
-      const enhancedSavedObjects = findResponse.saved_objects
-        .map((so) => injectMetaAttributes(so, managementService))
-        .map((obj) => {
-          const result = { ...obj, attributes: {} as Record<string, any> };
-          for (const field of includedFields) {
-            result.attributes[field] = obj.attributes[field];
-          }
-          return result;
-        });
+      const savedObjects = findResponse.saved_objects.map(toSavedObjectWithMeta);
 
       const response: FindResponseHTTPV1 = {
-        saved_objects: enhancedSavedObjects,
+        saved_objects: savedObjects.map((so) => {
+          const obj = injectMetaAttributes(so, managementService);
+          const result = { ...obj, attributes: {} as Record<string, any> };
+          for (const field of includedFields) {
+            result.attributes[field] = (obj.attributes as Record<string, any>)[field];
+          }
+          return result;
+        }),
         total: findResponse.total,
       };
 

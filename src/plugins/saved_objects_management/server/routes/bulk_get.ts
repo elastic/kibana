@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import { injectMetaAttributes } from '../lib';
+import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import type { ISavedObjectsManagement } from '../services';
 import type { BulkGetHTTPResponseV1 } from '../../common';
 
@@ -41,12 +41,13 @@ export const registerBulkGetRoute = (
       const client = getClient({ includedHiddenTypes });
       const response = await client.bulkGet<unknown>(objects);
 
-      const body = response.saved_objects.map((obj) => {
-        if (!obj.error) {
+      const body: BulkGetHTTPResponseV1 = response.saved_objects.map((obj) => {
+        const so = toSavedObjectWithMeta(obj);
+        if (!so.error) {
           return injectMetaAttributes(obj, managementService);
         }
-        return obj;
-      }) as BulkGetHTTPResponseV1;
+        return so;
+      });
 
       return res.ok({ body });
     })

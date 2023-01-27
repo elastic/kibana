@@ -139,6 +139,7 @@ export interface FindQueryHTTPV1 {
   sortOrder?: FindSortOrderHTTPV1;
   hasReference?: ReferenceHTTPV1 | ReferenceHTTPV1[];
   hasReferenceOperator?: FindSearchOperatorHTTPV1;
+  // TODO: Fix. This exposes attribute schemas to clients.
   fields?: string | string[];
 }
 
