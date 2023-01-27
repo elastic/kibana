@@ -28,7 +28,7 @@ export const updateExtractionRule = async ({
 }: UpdateExtractionRuleArgs) => {
   const route = `/internal/enterprise_search/indices/${indexName}/crawler/domains/${domainId}/extraction_rules/${rule.id}`;
 
-  const params = {
+  const params: { extraction_rule: ExtractionRuleBase } = {
     extraction_rule: {
       description: rule.description,
       rules: rule.rules,
