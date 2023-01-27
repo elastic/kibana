@@ -21,6 +21,7 @@ function stat(values: Partial<ServiceTransactionStat>): ServiceTransactionStat {
     transactionErrorRate: 3,
     transactionType: 'request',
     agentName: 'java',
+    overflowCount: null,
     ...values,
   };
 }

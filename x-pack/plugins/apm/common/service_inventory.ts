@@ -18,7 +18,7 @@ export interface ServiceListItem {
   transactionErrorRate?: number | null;
   environments?: string[];
   alertsCount?: number;
-  overflowCount?: number;
+  overflowCount?: number | null;
 }
 
 export enum ServiceInventoryFieldName {

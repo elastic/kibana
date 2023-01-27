@@ -34,7 +34,7 @@ interface ServiceLinkProps {
   agentName?: AgentName;
   query: TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
   serviceName: string;
-  overflowCount?: number;
+  overflowCount?: number | null;
 }
 
 export function ServiceLink({
