@@ -55,8 +55,8 @@ import { useAddBulkToTimelineAction } from './timeline_actions/use_add_bulk_to_t
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import {
-  defaultGroupingOptions,
   getAlertsGroupingQuery,
+  getDefaultGroupingOptions,
   getSelectedGroupBadgeMetrics,
   getSelectedGroupButtonContent,
   getSelectedGroupCustomMetrics,
@@ -112,7 +112,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<string | undefined>(
-    storage.get(ALERTS_TABLE_GROUPS_SELECTION_KEY)
+    storage.get(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`)
   );
 
   const {
@@ -334,6 +334,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [uniqueQueryId]
   );
 
+  const defaultGroupingOptions = getDefaultGroupingOptions(tableId);
   const [options, setOptions] = useState(
     defaultGroupingOptions.find((o) => o.key === selectedGroup)
       ? defaultGroupingOptions
@@ -355,7 +356,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       <GroupsSelector
         groupSelected={selectedGroup}
         onGroupChange={(groupSelection?: string) => {
-          storage.set(ALERTS_TABLE_GROUPS_SELECTION_KEY, groupSelection);
+          storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, groupSelection);
           setGroupsActivePage(0);
           setSelectedGroup(groupSelection);
           if (groupSelection && !options.find((o) => o.key === groupSelection)) {
@@ -374,14 +375,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           setGroupsActivePage(0);
           setSelectedGroup(undefined);
           setOptions(defaultGroupingOptions);
-          storage.set(ALERTS_TABLE_GROUPS_SELECTION_KEY, undefined);
+          storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, undefined);
         }}
         fields={indexPatterns.fields}
         options={options}
         title={i18n.GROUP_ALERTS_SELECTOR}
       />
     ),
-    [indexPatterns.fields, options, selectedGroup]
+    [defaultGroupingOptions, indexPatterns.fields, options, selectedGroup, tableId]
   );
 
   const takeActionItems = useGroupTakeActionsItems({
