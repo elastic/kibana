@@ -20648,7 +20648,6 @@
     "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.high": "此存储桶中的实际值与典型值之间的差异会产生较大影响。",
     "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.low": "此存储桶中的实际值与典型值之间的差异会产生适度影响。",
     "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.medium": "此存储桶中的实际值与典型值之间的差异会产生重大影响。",
-    "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle": "异常解释",
     "xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle": "类别示例",
     "xpack.ml.anomaliesTable.anomalyDetails.descriptionTitle": "描述",
     "xpack.ml.anomaliesTable.anomalyDetails.detailsOnHighestSeverityAnomalyTitle": "有关最高严重性异常的详情",
