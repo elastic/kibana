@@ -94,7 +94,6 @@ export type CaseUserActionInjectedAttributesWithoutActionId = rt.TypeOf<
   typeof CaseUserActionInjectedAttributesWithoutActionIdRt
 >;
 
-
 export type UserAction = rt.TypeOf<typeof ActionsRt>;
 export type UserActionTypes = ActionTypeValues;
 
