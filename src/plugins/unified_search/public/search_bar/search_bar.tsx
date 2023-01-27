@@ -109,7 +109,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
     dataTestSubj,
     dataViewPickerComponentProps,
     displayStyle,
-    fillSubmitButton,
+    fillSubmitButton = false,
     filters,
     hiddenFilterPanelOptions,
     iconType,
@@ -168,7 +168,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
     [`uniSearchBar--${displayStyle}`]: displayStyle,
   });
 
-  const [stateQuery, setStateQuery] = useState<QT | Query | AggregateQuery | undefined>(
+  const [stateQuery, setStateQuery] = useState<QT | Query | undefined>(
     query ? { ...query } : undefined
   );
   const [stateDateRangeFrom, setStateDateRangeFrom] = useState<string | undefined>(
@@ -200,7 +200,10 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
         if (isOfQueryType(query)) {
           if (isOfQueryType(stateQuery)) {
             if (query.query !== stateQuery?.query) {
-              setStateQuery({ query: query.query, language: query.language });
+              const newQueryString =
+                stateProps.query === props.query ? stateQuery.query : query.query;
+
+              setStateQuery({ query: newQueryString, language: query.language });
             }
 
             if (stateQuery?.language !== query?.language) {
@@ -217,11 +220,11 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
         }
       }
 
-      if (dateRangeFrom !== stateProps.dateRangeFrom) {
+      if (dateRangeFrom !== stateDateRangeFrom) {
         setStateDateRangeFrom(dateRangeFrom);
       }
 
-      if (dateRangeTo !== stateProps.dateRangeTo) {
+      if (dateRangeTo !== stateDateRangeTo) {
         setStateDateRangeTo(dateRangeTo);
       }
 
@@ -249,23 +252,25 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
     if (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined) {
       return false;
     }
+
     if (indexPatterns?.length) {
       // return true if at least one of the DateView has timeFieldName
       return indexPatterns.some((dataView) => Boolean(dataView.timeFieldName));
     }
+
     return true;
   };
 
   const isDirty = () => {
-    if (!showDatePicker && stateQuery && query) {
-      return !isEqual(stateQuery, query);
+    if (!stateQuery || !query) {
+      return false;
     }
 
-    return (
-      (stateQuery && query && !isEqual(stateQuery, query)) ||
-      dateRangeFrom !== stateDateRangeFrom ||
-      dateRangeTo !== stateDateRangeTo
-    );
+    if (!isEqual(stateQuery, query)) {
+      return true;
+    }
+
+    return dateRangeFrom !== stateDateRangeFrom || dateRangeTo !== stateDateRangeTo;
   };
 
   const handleSave = async (
@@ -408,7 +413,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
         dataViewPickerComponentProps={dataViewPickerComponentProps}
         dateRangeFrom={stateDateRangeFrom}
         dateRangeTo={stateDateRangeTo}
-        fillSubmitButton={Boolean(fillSubmitButton)}
+        fillSubmitButton={fillSubmitButton}
         filterBar={
           shouldRenderFilterBar ? (
             shouldShowDatePickerAsBadge ? (

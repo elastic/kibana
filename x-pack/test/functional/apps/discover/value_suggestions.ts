@@ -73,6 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('show up if in range', async () => {
           await PageObjects.timePicker.setDefaultAbsoluteRange();
+          await sleep(1000);
           await queryBar.setQuery('extension.raw : ');
           await queryBar.expectSuggestions({ count: 5, contains: '"jpg"' });
         });
@@ -136,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('show up', async () => {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await sleep(500);
+        await sleep(1000);
         await queryBar.setQuery('extension.raw : ');
         await queryBar.expectSuggestions({ count: 5, contains: '"jpg"' });
       });
