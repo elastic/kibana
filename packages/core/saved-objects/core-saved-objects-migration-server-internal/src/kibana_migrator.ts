@@ -37,6 +37,10 @@ import { createIndexMap } from './core/build_index_map';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
 
+// ensure plugins don't try to convert SO namespaceTypes after 8.0.0
+// see https://github.com/elastic/kibana/issues/147344
+const ALLOWED_CONVERT_VERSION = '8.0.0';
+
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
@@ -92,6 +96,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     this.kibanaVersion = kibanaVersion;
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion: this.kibanaVersion,
+      convertVersion: ALLOWED_CONVERT_VERSION,
       typeRegistry,
       log: this.log,
     });

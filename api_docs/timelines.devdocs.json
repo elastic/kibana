@@ -2459,7 +2459,13 @@
             "description": [],
             "signature": [
               "(data: ",
-              "Ecs",
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.EcsSecurityExtension",
+                "text": "EcsSecurityExtension"
+              },
               ") => boolean"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
@@ -2474,7 +2480,13 @@
                 "label": "data",
                 "description": [],
                 "signature": [
-                  "Ecs"
+                  {
+                    "pluginId": "@kbn/securitysolution-ecs",
+                    "scope": "common",
+                    "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                    "section": "def-common.EcsSecurityExtension",
+                    "text": "EcsSecurityExtension"
+                  }
                 ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                 "deprecated": false,
@@ -2493,7 +2505,13 @@
             "description": [],
             "signature": [
               "({ contextId, data, isDraggable, scopeId, }: { contextId?: string | undefined; data: ",
-              "Ecs",
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.EcsSecurityExtension",
+                "text": "EcsSecurityExtension"
+              },
               "; isDraggable: boolean; scopeId: string; }) => React.ReactNode"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
@@ -2533,7 +2551,13 @@
                     "label": "data",
                     "description": [],
                     "signature": [
-                      "Ecs"
+                      {
+                        "pluginId": "@kbn/securitysolution-ecs",
+                        "scope": "common",
+                        "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                        "section": "def-common.EcsSecurityExtension",
+                        "text": "EcsSecurityExtension"
+                      }
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                     "deprecated": false,
@@ -2911,9 +2935,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
+                "section": "def-common.JsonObject",
                 "text": "JsonObject"
               },
               " | undefined"
@@ -3275,9 +3299,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
+                "section": "def-common.JsonObject",
                 "text": "JsonObject"
               },
               " | undefined"
@@ -3351,7 +3375,13 @@
             "signature": [
               "Maybe",
               "<",
-              "Ecs",
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.EcsSecurityExtension",
+                "text": "EcsSecurityExtension"
+              },
               "> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
@@ -3600,7 +3630,13 @@
             "label": "ecs",
             "description": [],
             "signature": [
-              "Ecs"
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.EcsSecurityExtension",
+                "text": "EcsSecurityExtension"
+              }
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
@@ -3974,7 +4010,13 @@
             "text": "TimelineNonEcsData"
           },
           "[]; ecsData?: ",
-          "Ecs",
+          {
+            "pluginId": "@kbn/securitysolution-ecs",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionEcsPluginApi",
+            "section": "def-common.EcsSecurityExtension",
+            "text": "EcsSecurityExtension"
+          },
           " | undefined; eventId: string; globalFilters?: ",
           {
             "pluginId": "@kbn/es-query",

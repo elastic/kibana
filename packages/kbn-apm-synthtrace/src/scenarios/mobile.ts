@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { apm, timerange } from '../..';
-import {
+import { MobileDevice, apm, ApmFields } from '@kbn/apm-synthtrace-client';
+import type {
   DeviceInfo,
-  MobileDevice,
-  OSInfo,
   GeoInfo,
   NetworkConnectionInfo,
-} from '../lib/apm/mobile_device';
-import { ApmFields } from '../lib/apm/apm_fields';
+  OSInfo,
+} from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
-import { getLogger } from '../cli/utils/get_common_services';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
@@ -313,15 +309,11 @@ function randomInt(max: number) {
   return Math.floor(Math.random() * max);
 }
 
-const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
-  const logger = getLogger(runOptions);
-
-  const { numDevices = 10 } = runOptions.scenarioOpts || {};
+const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
+  const { numDevices = 10 } = scenarioOpts || {};
 
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
-
+    generate: ({ range }) => {
       const androidDevices = [...Array(numDevices).keys()].map((index) => {
         const deviceMetadata = ANDROID_DEVICES[randomInt(ANDROID_DEVICES.length)];
         const geoNetwork = GEO_AND_NETWORK[randomInt(GEO_AND_NETWORK.length)];
@@ -364,7 +356,9 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                   .span({
                     spanName: 'onCreate',
                     spanType: 'app',
-                    spanSubtype: 'internal',
+                    spanSubtype: 'external',
+                    'service.target.type': 'http',
+                    'span.destination.service.resource': 'external',
                   })
                   .duration(50)
                   .success()
@@ -376,7 +370,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                     httpUrl: 'https://backend:1234/api/start',
                   })
                   .duration(800)
-                  .success()
+                  .failure()
                   .timestamp(timestamp + 400)
               ),
             device
@@ -415,9 +409,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         });
       };
 
-      return [...androidDevices, ...iOSDevices]
-        .map((device) => logger.perf('generating_apm_events', () => sessionTransactions(device)))
-        .reduce((p, c) => p.merge(c));
+      return [...androidDevices, ...iOSDevices].map((device) => sessionTransactions(device));
     },
   };
 };

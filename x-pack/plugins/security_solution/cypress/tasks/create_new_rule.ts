@@ -32,7 +32,6 @@ import {
   APPLY_SELECTED_SAVED_QUERY_BUTTON,
   AT_LEAST_ONE_INDEX_PATTERN,
   AT_LEAST_ONE_VALID_MATCH,
-  BACK_TO_ALL_RULES_LINK,
   COMBO_BOX_CLEAR_BTN,
   CREATE_AND_ENABLE_BTN,
   CUSTOM_QUERY_INPUT,
@@ -120,19 +119,20 @@ import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
+import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
-  cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
-  cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
+  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
+  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const createRuleWithoutEnabling = () => {
   cy.get(CREATE_WITHOUT_ENABLING_BTN).click({ force: true });
   cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
-  cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
-  cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
+  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
+  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const fillAboutRule = (
@@ -617,11 +617,14 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRul
 };
 
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRule) => {
-  rule.machineLearningJobs.forEach((machineLearningJob) => {
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(`${machineLearningJob}{enter}`);
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
-  });
+  const text = rule.machineLearningJobs
+    .map((machineLearningJob) => `${machineLearningJob}{downArrow}{enter}`)
+    .join('');
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(text);
+
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
+
   cy.get(ANOMALY_THRESHOLD_INPUT).type(
     `{selectall}${getMachineLearningRule().anomalyScoreThreshold}`,
     {

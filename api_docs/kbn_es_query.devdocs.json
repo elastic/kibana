@@ -130,7 +130,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[], indexPattern: ",
+          "[], indexPattern: Pick<",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -138,7 +138,7 @@
             "section": "def-common.DataViewBase",
             "text": "DataViewBase"
           },
-          ", disabled: boolean | undefined, negate: boolean | undefined, alias: string | null | undefined, store: ",
+          ", \"id\">, disabled: boolean | undefined, negate: boolean | undefined, alias: string | null | undefined, store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -214,13 +214,15 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
+              "Pick<",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
                 "section": "def-common.DataViewBase",
                 "text": "DataViewBase"
-              }
+              },
+              ", \"id\">"
             ],
             "path": "packages/kbn-es-query/src/filters/build_filters/combined_filter.ts",
             "deprecated": false,
@@ -781,9 +783,9 @@
           ", negate: boolean, disabled: boolean, params: ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Serializable",
+            "section": "def-common.Serializable",
             "text": "Serializable"
           },
           ", alias: string | null, store: ",
@@ -914,9 +916,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.Serializable",
+                "section": "def-common.Serializable",
                 "text": "Serializable"
               }
             ],
@@ -1823,9 +1825,9 @@
           ", queryStringOptions: string | ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ", dateFormatTZ: string | undefined) => ",
@@ -1865,9 +1867,9 @@
               "string | ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               }
             ],
@@ -2196,6 +2198,129 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.filterToQueryDsl",
+        "type": "Function",
+        "tags": [],
+        "label": "filterToQueryDsl",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          ", inputDataViews: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
+          "[] | undefined, options: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryFiltersConfig",
+            "text": "EsQueryFiltersConfig"
+          },
+          ") => ",
+          "QueryDslQueryContainer"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.filterToQueryDsl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              }
+            ],
+            "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.filterToQueryDsl.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inputDataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.filterToQueryDsl.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.EsQueryFiltersConfig",
+                "text": "EsQueryFiltersConfig"
+              }
+            ],
+            "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -4047,7 +4172,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          ", field?: string | undefined, operator?: FilterOperator | undefined, params?: any) => { meta: { key: string | undefined; field: string | undefined; params: { query: undefined; }; value: undefined; type: undefined; alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; }; query: undefined; $state?: { store: ",
+          ", field?: string | undefined, operator?: FilterOperator | undefined, params?: any, fieldType?: string | undefined) => { meta: { key: string | undefined; field: string | undefined; params: { query: undefined; }; value: undefined; type: undefined; alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; }; query: undefined; $state?: { store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -4063,7 +4188,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; } | undefined; } | { meta: { negate: boolean | undefined; type: string | undefined; params: any; alias?: string | null | undefined; disabled?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; key?: string | undefined; value?: string | undefined; }; query: { range: { [x: string]: any; }; }; $state?: { store: ",
+          "; } | undefined; } | { meta: { negate: boolean | undefined; type: string | undefined; params: { gte: string | number | undefined; lt: string | number | undefined; }; alias?: string | null | undefined; disabled?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; key?: string | undefined; value?: string | undefined; }; query: { range: { [x: string]: { gte: string | number | undefined; lt: string | number | undefined; }; }; }; $state?: { store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -4079,7 +4204,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; } | undefined; } | { meta: { negate: boolean | undefined; type: string | undefined; params: any; alias?: string | null | undefined; disabled?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; key?: string | undefined; value?: string | undefined; }; query: { match_phrase: { [x: string]: any; }; }; $state?: { store: ",
+          "; } | undefined; } | { meta: { negate: boolean | undefined; type: string | undefined; params: any; value: undefined; alias?: string | null | undefined; disabled?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; key?: string | undefined; }; query: { match_phrase: { [x: string]: any; }; }; $state?: { store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -4158,6 +4283,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.updateFilter.$5",
+            "type": "string",
+            "tags": [],
+            "label": "fieldType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/filters/helpers/update_filter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -4624,6 +4764,22 @@
             "path": "packages/kbn-es-query/src/kuery/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.KueryQueryOptions.caseInsensitive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "caseInsensitive",
+            "description": [
+              "\nWhether term-level queries should be treated as case-insensitive or not. For example, `agent.keyword: foobar` won't\nmatch a value of \"FooBar\" unless this parameter is `true`.\n(See https://www.elastic.co/guide/en/elasticsearch/reference/8.6/query-dsl-term-query.html#term-field-params)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/kuery/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4963,9 +5119,9 @@
           " & { allowLeadingWildcards?: boolean | undefined; queryStringOptions?: ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           " | undefined; }"

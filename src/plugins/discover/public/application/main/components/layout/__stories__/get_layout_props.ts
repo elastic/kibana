@@ -18,12 +18,12 @@ import {
   DataMain$,
   DataTotalHits$,
   RecordRawType,
-} from '../../../hooks/use_saved_search';
+} from '../../../services/discover_data_state_container';
 import { buildDataTableRecordList } from '../../../../../utils/build_data_record';
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { SavedSearch } from '../../../../..';
 import { DiscoverLayoutProps } from '../types';
-import { GetStateReturn } from '../../../services/discover_state';
+import { DiscoverStateContainer } from '../../../services/discover_state';
 
 const documentObservables = {
   main$: new BehaviorSubject({
@@ -91,16 +91,15 @@ const getCommonProps = (dataView: DataView) => {
     savedSearch: savedSearchMock,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
-
     stateContainer: {
       setAppState: action('Set app state'),
-      appStateContainer: {
+      appState: {
         getState: () => ({
           interval: 'auto',
         }),
         setState: action('Set app state'),
       },
-    } as unknown as GetStateReturn,
+    } as unknown as DiscoverStateContainer,
     setExpandedDoc: action('opening an expanded doc'),
   };
 };

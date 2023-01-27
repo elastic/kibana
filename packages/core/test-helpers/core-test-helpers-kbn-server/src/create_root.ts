@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   createTestEsCluster,
   CreateTestEsClusterOptions,

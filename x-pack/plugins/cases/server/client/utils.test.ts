@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { v1 as uuidv1 } from 'uuid';
+
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { toElasticsearchQuery } from '@kbn/es-query';
+
+import { CaseStatuses } from '../../common';
+import { CaseSeverity } from '../../common/api';
+import { ESCaseSeverity, ESCaseStatus } from '../services/cases/types';
+import { createSavedObjectsSerializerMock } from './mocks';
 import {
   arraysDifference,
   buildNestedFilter,
   buildRangeFilter,
   constructQueryOptions,
+  constructSearch,
   convertSortField,
 } from './utils';
-import { toElasticsearchQuery } from '@kbn/es-query';
-import { CaseStatuses } from '../../common';
-import { CaseSeverity } from '../../common/api';
-import { SEVERITY_EXTERNAL_TO_ESMODEL } from '../common/constants';
 
 describe('utils', () => {
   describe('convertSortField', () => {
@@ -29,6 +35,14 @@ describe('utils', () => {
 
     it('transforms created_at correctly', () => {
       expect(convertSortField('created_at')).toBe('created_at');
+    });
+
+    it('transforms updated_at correctly', () => {
+      expect(convertSortField('updated_at')).toBe('updated_at');
+    });
+
+    it('transforms updatedAt correctly', () => {
+      expect(convertSortField('updatedAt')).toBe('updated_at');
     });
 
     it('transforms closedAt correctly', () => {
@@ -386,8 +400,12 @@ describe('utils', () => {
       `);
     });
 
-    it('creates a filter for the status', () => {
-      expect(constructQueryOptions({ status: CaseStatuses.open }).filter).toMatchInlineSnapshot(`
+    it.each([
+      [CaseStatuses.open, ESCaseStatus.OPEN],
+      [CaseStatuses['in-progress'], ESCaseStatus.IN_PROGRESS],
+      [CaseStatuses.closed, ESCaseStatus.CLOSED],
+    ])('creates a filter for status "%s"', (status, expectedStatus) => {
+      expect(constructQueryOptions({ status }).filter).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -398,7 +416,7 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "open",
+              "value": "${expectedStatus}",
             },
           ],
           "function": "is",
@@ -407,9 +425,13 @@ describe('utils', () => {
       `);
     });
 
-    it('creates a filter for the severity', () => {
-      Object.values(CaseSeverity).forEach((severity) => {
-        expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
+    it.each([
+      [CaseSeverity.LOW, ESCaseSeverity.LOW],
+      [CaseSeverity.MEDIUM, ESCaseSeverity.MEDIUM],
+      [CaseSeverity.HIGH, ESCaseSeverity.HIGH],
+      [CaseSeverity.CRITICAL, ESCaseSeverity.CRITICAL],
+    ])('creates a filter for severity "%s"', (severity, expectedSeverity) => {
+      expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -420,14 +442,13 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}",
+              "value": "${expectedSeverity}",
             },
           ],
           "function": "is",
           "type": "function",
         }
         `);
-      });
     });
 
     it('creates a filter for the time range', () => {
@@ -899,6 +920,38 @@ describe('utils', () => {
           }
         `);
       });
+    });
+  });
+
+  describe('constructSearchById', () => {
+    const savedObjectsSerializer = createSavedObjectsSerializerMock();
+
+    it('returns the rootSearchFields and search with correct values when given a uuid', () => {
+      const uuid = uuidv1(); // the specific version is irrelevant
+
+      expect(constructSearch(uuid, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
+        .toMatchInlineSnapshot(`
+        Object {
+          "rootSearchFields": Array [
+            "_id",
+          ],
+          "search": "\\"${uuid}\\" \\"cases:${uuid}\\"",
+        }
+      `);
+    });
+
+    it('search value not changed and no rootSearchFields when search is non-uuid', () => {
+      const search = 'foobar';
+      const result = constructSearch(search, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer);
+
+      expect(result).not.toHaveProperty('rootSearchFields');
+      expect(result).toEqual({ search });
+    });
+
+    it('returns undefined if search term undefined', () => {
+      expect(constructSearch(undefined, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)).toEqual(
+        undefined
+      );
     });
   });
 });

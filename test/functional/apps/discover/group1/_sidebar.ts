@@ -25,9 +25,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
+  const retry = getService('retry');
+  const INITIAL_FIELD_LIST_SUMMARY = '53 available fields. 0 empty fields. 3 meta fields.';
 
-  // Failing: See https://github.com/elastic/kibana/issues/147687
-  describe.skip('discover sidebar', function describeIndexTests() {
+  describe('discover sidebar', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
@@ -46,12 +47,116 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
+      await PageObjects.discover.cleanSidebarLocalStorage();
     });
 
     describe('field filtering', function () {
       it('should reveal and hide the filter form when the toggle is clicked', async function () {
         await PageObjects.discover.openSidebarFieldFilter();
         await PageObjects.discover.closeSidebarFieldFilter();
+      });
+
+      it('should filter by field type', async function () {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+        await PageObjects.discover.openSidebarFieldFilter();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          INITIAL_FIELD_LIST_SUMMARY
+        );
+
+        await testSubjects.click('typeFilter-keyword');
+
+        await retry.waitFor('first updates', async () => {
+          return (
+            (await PageObjects.discover.getSidebarAriaDescription()) ===
+            '7 available fields. 0 empty fields. 2 meta fields.'
+          );
+        });
+
+        await testSubjects.click('typeFilter-number');
+
+        await retry.waitFor('second updates', async () => {
+          return (
+            (await PageObjects.discover.getSidebarAriaDescription()) ===
+            '13 available fields. 0 empty fields. 3 meta fields.'
+          );
+        });
+
+        await testSubjects.click('fieldListFiltersFieldTypeFilterClearAll');
+
+        await retry.waitFor('reset', async () => {
+          return (
+            (await PageObjects.discover.getSidebarAriaDescription()) === INITIAL_FIELD_LIST_SUMMARY
+          );
+        });
+      });
+
+      it('should show filters by type in text-based view', async function () {
+        await kibanaServer.uiSettings.update({ 'discover:enableSql': true });
+        await browser.refresh();
+
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+        await PageObjects.discover.openSidebarFieldFilter();
+        let options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
+        expect(options).to.have.length(6);
+        await PageObjects.discover.closeSidebarFieldFilter();
+
+        await PageObjects.discover.selectTextBaseLang('SQL');
+
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+        await PageObjects.discover.openSidebarFieldFilter();
+        options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
+        expect(options).to.have.length(3);
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '50 selected fields. 51 available fields.'
+        );
+
+        await testSubjects.click('typeFilter-number');
+
+        await retry.waitFor('updates', async () => {
+          return (
+            (await PageObjects.discover.getSidebarAriaDescription()) ===
+            '6 selected fields. 6 available fields.'
+          );
+        });
+      });
+
+      it('should be able to search by string', async function () {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          INITIAL_FIELD_LIST_SUMMARY
+        );
+
+        await PageObjects.discover.findFieldByName('i');
+
+        await retry.waitFor('first updates', async () => {
+          return (
+            (await PageObjects.discover.getSidebarAriaDescription()) ===
+            '30 available fields. 0 empty fields. 2 meta fields.'
+          );
+        });
+
+        await PageObjects.discover.findFieldByName('p');
+
+        await retry.waitFor('second updates', async () => {
+          return (
+            (await PageObjects.discover.getSidebarAriaDescription()) ===
+            '4 available fields. 0 empty fields. 0 meta fields.'
+          );
+        });
+
+        const fieldSearch = await testSubjects.find('clearSearchButton');
+        await fieldSearch.click();
+
+        await retry.waitFor('reset', async () => {
+          return (
+            (await PageObjects.discover.getSidebarAriaDescription()) === INITIAL_FIELD_LIST_SUMMARY
+          );
+        });
       });
     });
 
@@ -154,7 +259,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
       });
 
@@ -253,7 +358,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         await PageObjects.discover.selectTextBaseLang('SQL');
@@ -309,7 +414,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         await PageObjects.discover.selectIndexPattern('with-timefield');
@@ -335,7 +440,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
         await kibanaServer.importExport.unload(
           'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
@@ -354,7 +459,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         await PageObjects.discover.selectIndexPattern('without-timefield');
@@ -386,7 +491,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         await kibanaServer.importExport.unload(
@@ -402,7 +507,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         await PageObjects.discover.clickFieldListItem('extension');
@@ -415,7 +520,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         // check that the filter was passed down to the sidebar
@@ -433,7 +538,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         await PageObjects.discover.selectIndexPattern('indices-stats*');
@@ -451,7 +556,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         await kibanaServer.importExport.unload(
@@ -465,7 +570,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         await PageObjects.discover.addRuntimeField(
@@ -503,7 +608,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         allFields = await PageObjects.discover.getAllFieldNames();
@@ -517,7 +622,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('discoverNoResultsError');
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         await PageObjects.discover.addRuntimeField('_invalid-runtimefield', `emit(‘’);`);
@@ -541,6 +646,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverNoResultsError'); // still has error
 
         // check that the sidebar is rendered event after a refresh
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
         allFields = await PageObjects.discover.getAllFieldNames();
         expect(allFields.includes('_invalid-runtimefield')).to.be(true);
 
@@ -563,7 +669,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          INITIAL_FIELD_LIST_SUMMARY
         );
 
         await PageObjects.discover.selectIndexPattern('with-timefield');

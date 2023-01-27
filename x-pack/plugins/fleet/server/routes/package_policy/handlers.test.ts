@@ -27,6 +27,8 @@ import type {
 import type { FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
+import { getPackagePoliciesHandler } from './handlers';
+
 import { registerRoutes } from '.';
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
@@ -64,12 +66,39 @@ jest.mock(
         delete: jest.fn(),
         get: jest.fn(),
         getByIDs: jest.fn(),
-        list: jest.fn(),
+        list: jest.fn(async (_, __) => {
+          return {
+            total: 1,
+            perPage: 10,
+            page: 1,
+            items: [
+              {
+                id: `123`,
+                name: `Package Policy 123`,
+                description: '',
+                created_at: '2022-12-19T20:43:45.879Z',
+                created_by: 'elastic',
+                updated_at: '2022-12-19T20:43:45.879Z',
+                updated_by: 'elastic',
+                policy_id: `agent-policy-id-a`,
+                enabled: true,
+                inputs: [],
+                namespace: 'default',
+                package: {
+                  name: 'a-package',
+                  title: 'package A',
+                  version: '1.0.0',
+                },
+                revision: 1,
+              },
+            ],
+          };
+        }),
         listIds: jest.fn(),
         update: jest.fn(),
         // @ts-ignore
         runExternalCallbacks: jest.fn((callbackType, packagePolicy, context, request) =>
-          callbackType === 'postPackagePolicyDelete'
+          callbackType === 'packagePolicyPostDelete'
             ? Promise.resolve(undefined)
             : Promise.resolve(packagePolicy)
         ),
@@ -434,6 +463,79 @@ describe('When calling package policy', () => {
       await routeHandler(context, request, response);
       expect(response.ok).toHaveBeenCalledWith({
         body: { item: { ...existingPolicy, namespace: 'namespace' } },
+      });
+    });
+  });
+
+  describe('list api handler', () => {
+    it('should return agent count when `withAgentCount` query param is used', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        query: {
+          withAgentCount: true,
+        },
+      });
+      (
+        (await context.core).elasticsearch.client.asInternalUser.search as jest.Mock
+      ).mockImplementation(() => {
+        return {
+          took: 3,
+          timed_out: false,
+          _shards: {
+            total: 2,
+            successful: 2,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: 100,
+            max_score: 0,
+            hits: [],
+          },
+          aggregations: {
+            agent_counts: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'agent-policy-id-a',
+                  doc_count: 100,
+                },
+              ],
+            },
+          },
+        };
+      });
+
+      await getPackagePoliciesHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          page: 1,
+          perPage: 10,
+          total: 1,
+          items: [
+            {
+              agents: 100,
+              created_at: '2022-12-19T20:43:45.879Z',
+              created_by: 'elastic',
+              description: '',
+              enabled: true,
+              id: '123',
+              inputs: [],
+              name: 'Package Policy 123',
+              namespace: 'default',
+              package: {
+                name: 'a-package',
+                title: 'package A',
+                version: '1.0.0',
+              },
+              policy_id: 'agent-policy-id-a',
+              revision: 1,
+              updated_at: '2022-12-19T20:43:45.879Z',
+              updated_by: 'elastic',
+            },
+          ],
+        },
       });
     });
   });

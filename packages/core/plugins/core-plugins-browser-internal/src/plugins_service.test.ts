@@ -86,6 +86,7 @@ describe('PluginsService', () => {
         plugin: createManifest('pluginC', { required: ['pluginA'], optional: ['nonexist'] }),
       },
     ];
+    // @ts-expect-error this file was not being type checked properly in the past, error is legit
     mockSetupDeps = {
       analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
       application: applicationServiceMock.createInternalSetupContract(),
@@ -102,6 +103,7 @@ describe('PluginsService', () => {
       application: expect.any(Object),
       getStartServices: expect.any(Function),
     };
+    // @ts-expect-error this file was not being type checked properly in the past, error is legit
     mockStartDeps = {
       analytics: analyticsServiceMock.createAnalyticsServiceStart(),
       application: applicationServiceMock.createInternalStartContract(),

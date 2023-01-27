@@ -63,10 +63,9 @@ export const rewriteRule = ({
     connector_type_id: actionTypeId,
     ...(frequency
       ? {
-          frequency: {
-            ...frequency,
-            notify_when: frequency.notifyWhen,
-          },
+          summary: frequency.summary,
+          notify_when: frequency.notifyWhen,
+          throttle: frequency.throttle,
         }
       : {}),
   })),

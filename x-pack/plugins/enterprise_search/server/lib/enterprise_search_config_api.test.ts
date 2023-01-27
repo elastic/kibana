@@ -13,7 +13,7 @@ import fetch from 'node-fetch';
 
 const { Response } = jest.requireActual('node-fetch');
 
-jest.mock('@kbn/utils', () => ({
+jest.mock('@kbn/repo-info', () => ({
   kibanaPackageJson: { version: '1.0.0' },
 }));
 

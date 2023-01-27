@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import type { useMonitorList } from '../hooks/use_monitor_list';
 import { MonitorAsyncError } from './monitor_errors/monitor_async_error';
-import { useInlineErrors } from '../hooks/use_inline_errors';
 import { useOverviewStatus } from '../hooks/use_overview_status';
 import { ListFilters } from './list_filters/list_filters';
 import { MonitorList } from './monitor_list_table/monitor_list';
+import { MonitorStats } from './monitor_stats/monitor_stats';
 
 export const MonitorListContainer = ({
   isEnabled,
@@ -33,11 +33,13 @@ export const MonitorListContainer = ({
     reloadPage,
   } = monitorListProps;
 
-  const { errorSummaries, loading: errorsLoading } = useInlineErrors({
-    onlyInvalidMonitors: false,
-    sortField: pageState.sortField,
-    sortOrder: pageState.sortOrder,
-  });
+  // TODO: Display inline errors in the management table
+
+  // const { errorSummaries, loading: errorsLoading } = useInlineErrors({
+  //   onlyInvalidMonitors: false,
+  //   sortField: pageState.sortField,
+  //   sortOrder: pageState.sortOrder,
+  // });
 
   const overviewStatusArgs = useMemo(() => {
     return {
@@ -45,7 +47,11 @@ export const MonitorListContainer = ({
     };
   }, [pageState]);
 
-  const { status } = useOverviewStatus(overviewStatusArgs);
+  const { status, reload: reloadStatus } = useOverviewStatus(overviewStatusArgs);
+
+  useEffect(() => {
+    reloadStatus();
+  }, [reloadStatus, syntheticsMonitors]);
 
   if (!isEnabled && absoluteTotal === 0) {
     return null;
@@ -56,16 +62,17 @@ export const MonitorListContainer = ({
       <MonitorAsyncError />
       <ListFilters />
       <EuiSpacer />
+      <MonitorStats status={status} />
+      <EuiSpacer />
       <MonitorList
         syntheticsMonitors={syntheticsMonitors}
         total={total}
         pageState={pageState}
         error={error}
-        loading={monitorsLoading || errorsLoading}
-        status={status}
-        errorSummaries={errorSummaries}
+        loading={monitorsLoading}
         loadPage={loadPage}
         reloadPage={reloadPage}
+        status={status}
       />
     </>
   );

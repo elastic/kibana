@@ -662,13 +662,13 @@ describe('I18n engine', () => {
         i18n.translate('a.short', {
           values: { expires: new Date(2018, 5, 20, 18, 40, 30, 50) },
         } as any)
-      ).toBe('Coupon expires at 6:40 PM');
+      ).toBe('Coupon expires at 6:40 PM');
 
       expect(
         i18n.translate('a.medium', {
           values: { expires: new Date(2018, 5, 20, 18, 40, 30, 50) },
         } as any)
-      ).toBe('Coupon expires at 6:40:30 PM');
+      ).toBe('Coupon expires at 6:40:30 PM');
     });
 
     test('should format default messages with time formatter', () => {
@@ -679,14 +679,14 @@ describe('I18n engine', () => {
           defaultMessage: 'Coupon expires at {expires, time, short}',
           values: { expires: new Date(2018, 5, 20, 18, 40, 30, 50) },
         })
-      ).toBe('Coupon expires at 6:40 PM');
+      ).toBe('Coupon expires at 6:40 PM');
 
       expect(
         i18n.translate('foo', {
           defaultMessage: 'Coupon expires at {expires, time, medium}',
           values: { expires: new Date(2018, 5, 20, 18, 40, 30, 50) },
         })
-      ).toBe('Coupon expires at 6:40:30 PM');
+      ).toBe('Coupon expires at 6:40:30 PM');
     });
 
     test('should format message with a custom format', () => {

@@ -47,7 +47,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, setHeaderActionM
   useUpgradeSecurityPackages();
 
   return (
-    <SecuritySolutionAppWrapper className="kbnAppWrapper">
+    <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">
       <ConsoleManager>
         <TourContextProvider>
           <>

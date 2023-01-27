@@ -8,44 +8,64 @@
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { ActionsCompletion } from '../../common';
+import { ActionsCompletion, RuleLastRunOutcomes } from '../../common';
 import {
   RuleLastRunOutcomeValues,
-  RuleLastRunOutcomes,
   RuleExecutionStatusWarningReasons,
   RawRuleLastRun,
   RuleLastRun,
 } from '../types';
 import { translations } from '../constants/translations';
 import { RuleRunMetrics } from './rule_run_metrics_store';
+import { RuleResultService } from '../monitoring/rule_result_service';
 
 export interface ILastRun {
   lastRun: RuleLastRun;
   metrics: RuleRunMetrics | null;
 }
 
-export const lastRunFromState = (stateWithMetrics: RuleTaskStateAndMetrics): ILastRun => {
-  const { metrics } = stateWithMetrics;
+export const lastRunFromState = (
+  stateWithMetrics: RuleTaskStateAndMetrics,
+  ruleResultService: RuleResultService
+): ILastRun => {
   let outcome: RuleLastRunOutcomes = RuleLastRunOutcomeValues[0];
   // Check for warning states
-  let warning = null;
-  let outcomeMsg = null;
+  let warning: RuleLastRun['warning'] = null;
+  const outcomeMsg: string[] = [];
+
+  const { errors, warnings, outcomeMessage } = ruleResultService.getLastRunResults();
+  const { metrics } = stateWithMetrics;
+
+  if (warnings.length > 0) {
+    outcome = RuleLastRunOutcomeValues[1];
+  }
 
   // We only have a single warning field so prioritizing the alert circuit breaker over the actions circuit breaker
   if (metrics.hasReachedAlertLimit) {
     outcome = RuleLastRunOutcomeValues[1];
     warning = RuleExecutionStatusWarningReasons.MAX_ALERTS;
-    outcomeMsg = translations.taskRunner.warning.maxAlerts;
+    outcomeMsg.push(translations.taskRunner.warning.maxAlerts);
   } else if (metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
     outcome = RuleLastRunOutcomeValues[1];
     warning = RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS;
-    outcomeMsg = translations.taskRunner.warning.maxExecutableActions;
+    outcomeMsg.push(translations.taskRunner.warning.maxExecutableActions);
+  }
+
+  // Overwrite outcome to be error if last run reported any errors
+  if (errors.length > 0) {
+    outcome = RuleLastRunOutcomeValues[2];
+  }
+
+  // Optionally push outcome message reported by
+  // rule execution to the Framework's outcome message array
+  if (outcomeMessage) {
+    outcomeMsg.push(outcomeMessage);
   }
 
   return {
     lastRun: {
       outcome,
-      outcomeMsg: outcomeMsg || null,
+      outcomeMsg: outcomeMsg.length > 0 ? outcomeMsg : null,
       warning: warning || null,
       alertsCount: {
         active: metrics.numberOfActiveAlerts,
@@ -59,11 +79,12 @@ export const lastRunFromState = (stateWithMetrics: RuleTaskStateAndMetrics): ILa
 };
 
 export const lastRunFromError = (error: Error): ILastRun => {
+  const esErrorMessage = getEsErrorMessage(error);
   return {
     lastRun: {
       outcome: RuleLastRunOutcomeValues[2],
       warning: getReasonFromError(error),
-      outcomeMsg: getEsErrorMessage(error),
+      outcomeMsg: esErrorMessage ? [esErrorMessage] : null,
       alertsCount: {},
     },
     metrics: null,
@@ -82,6 +103,6 @@ export const lastRunToRaw = (lastRun: ILastRun['lastRun']): RawRuleLastRun => {
       ignored: alertsCount.ignored || 0,
     },
     warning: warning ?? null,
-    outcomeMsg: outcomeMsg ?? null,
+    outcomeMsg: outcomeMsg && !Array.isArray(outcomeMsg) ? [outcomeMsg] : outcomeMsg,
   };
 };

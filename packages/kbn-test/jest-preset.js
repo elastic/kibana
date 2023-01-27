@@ -9,10 +9,7 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
-const pkgMap = require('@kbn/synthetic-package-map').readPackageMap();
-
-/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
-/** @type {JestConfig} */
+/** @type {import("@jest/types").Config.InitialOptions} */
 module.exports = {
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
@@ -26,32 +23,10 @@ module.exports = {
     : ['html', 'text'],
 
   // An array of file extensions your modules use
-  moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'mjs', 'json', 'node'],
 
-  // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
-    '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
-    '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
-    'elastic-apm-node':
-      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/apm_agent_mock.js',
-    '\\.module.(css|scss)$':
-      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/css_module_mock.js',
-    '\\.(css|less|scss)$':
-      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/style_mock.js',
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/file_mock.js',
-    '\\.ace\\.worker$':
-      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/worker_module_mock.js',
-    '\\.editor\\.worker(\\.js)?$':
-      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/worker_module_mock.js',
-    '^(!!)?file-loader!':
-      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/file_mock.js',
-    ...Object.fromEntries(
-      Array.from(pkgMap.entries()).map(([pkgId, repoRelativeDir]) => [
-        `^${pkgId}(/.*)?$`,
-        `<rootDir>/${repoRelativeDir}$1`,
-      ])
-    ),
+    // do not use these, they're so slow. We have a custom resolver that can handle resolving different types of requests.
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
@@ -61,7 +36,7 @@ module.exports = {
   reporters: [
     'default',
     [
-      '@kbn/test/target_node/src/jest/junit_reporter',
+      '<rootDir>/packages/kbn-test/src/jest/junit_reporter',
       {
         rootDirectory: '.',
       },
@@ -69,7 +44,7 @@ module.exports = {
     ...(process.env.TEST_GROUP_TYPE_UNIT
       ? [
           [
-            '@kbn/test/target_node/src/jest/ci_stats_jest_reporter',
+            '<rootDir>/packages/kbn-test/src/jest/ci_stats_jest_reporter.ts',
             {
               testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
             },
@@ -80,20 +55,18 @@ module.exports = {
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
-    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/babel_polyfill.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/polyfills.jsdom.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/enzyme.js',
+    '<rootDir>/src/setup_node_env/polyfill.ts',
+    '<rootDir>/packages/kbn-test/src/jest/setup/polyfills.jsdom.js',
+    '<rootDir>/packages/kbn-test/src/jest/setup/enzyme.js',
   ],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
-    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/setup_test.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.moment_timezone.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.eui.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/react_testing_library.js',
-    process.env.CI
-      ? '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/disable_console_logs.js'
-      : [],
+    '<rootDir>/packages/kbn-test/src/jest/setup/setup_test.js',
+    '<rootDir>/packages/kbn-test/src/jest/setup/mocks.moment_timezone.js',
+    '<rootDir>/packages/kbn-test/src/jest/setup/mocks.eui.js',
+    '<rootDir>/packages/kbn-test/src/jest/setup/react_testing_library.js',
+    process.env.CI ? '<rootDir>/packages/kbn-test/src/jest/setup/disable_console_logs.js' : [],
   ].flat(),
 
   snapshotFormat: {
@@ -104,8 +77,8 @@ module.exports = {
   // A list of paths to snapshot serializer modules Jest should use for snapshot testing
   snapshotSerializers: [
     '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
-    '<rootDir>/node_modules/enzyme-to-json/serializer',
-    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/emotion.js',
+    'enzyme-to-json/serializer',
+    '<rootDir>/packages/kbn-test/src/jest/setup/emotion.js',
   ],
 
   // The test environment that will be used for testing
@@ -123,9 +96,9 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/transforms/babel.js',
-    '^.+\\.(txt|html)?$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/transforms/raw.js',
-    '^.+\\.peggy?$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/transforms/peggy.js',
+    '^.+\\.(js|tsx?)$': '<rootDir>/packages/kbn-test/src/jest/transforms/babel.js',
+    '^.+\\.(txt|html)?$': '<rootDir>/packages/kbn-test/src/jest/transforms/raw.js',
+    '^.+\\.peggy?$': '<rootDir>/packages/kbn-test/src/jest/transforms/peggy.js',
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
@@ -146,9 +119,7 @@ module.exports = {
     '!**/index.{js,ts,tsx}',
   ],
 
-  // A custom resolver to preserve symlinks by default
-  resolver:
-    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/preserve_symlinks_resolver.js',
-
   watchPathIgnorePatterns: ['.*/__tmp__/.*'],
+
+  resolver: '<rootDir>/packages/kbn-test/src/jest/resolver.js',
 };

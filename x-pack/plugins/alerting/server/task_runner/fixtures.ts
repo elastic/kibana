@@ -110,7 +110,8 @@ export const generateSavedObjectParams = ({
     },
     lastRun: {
       outcome,
-      outcomeMsg: error?.message || warning?.message || null,
+      outcomeMsg:
+        (error?.message && [error?.message]) || (warning?.message && [warning?.message]) || null,
       warning: error?.reason || warning?.reason || null,
       alertsCount: {
         active: 0,
@@ -121,6 +122,7 @@ export const generateSavedObjectParams = ({
       },
     },
     nextRun,
+    running: false,
   },
   { refresh: false, namespace: undefined },
 ];
@@ -142,6 +144,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
+  autoRecoverAlerts: true,
 };
 
 export const mockRunNowResponse = {
@@ -282,7 +285,7 @@ export const generateRunnerResult = ({
     state: {
       ...(state && { alertInstances }),
       ...(state && { alertRecoveredInstances }),
-      ...(state && { alertTypeState: undefined }),
+      ...(state && { alertTypeState: {} }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z') }),
       ...(state && { summaryActions }),
     },
@@ -344,6 +347,7 @@ export const generateAlertInstance = (
       },
       flappingHistory,
       flapping: false,
+      pendingRecoveredCount: 0,
     },
     state: {
       bar: false,

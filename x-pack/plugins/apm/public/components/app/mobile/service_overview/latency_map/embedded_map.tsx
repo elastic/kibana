@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   MapEmbeddable,
   MapEmbeddableInput,
@@ -25,15 +25,17 @@ import { EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLayerList } from './get_layer_list';
-import { useApmParams } from '../../../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
-
-function EmbeddedMapComponent({ filters }: { filters: Filter[] }) {
-  const {
-    query: { rangeFrom, rangeTo, kuery },
-  } = useApmParams('/mobile-services/{serviceName}/overview');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+function EmbeddedMapComponent({
+  start,
+  end,
+  kuery = '',
+  filters,
+}: {
+  start: string;
+  end: string;
+  kuery?: string;
+  filters: Filter[];
+}) {
   const [error, setError] = useState<boolean>();
 
   const [embeddable, setEmbeddable] = useState<
@@ -81,7 +83,7 @@ function EmbeddedMapComponent({ filters }: { filters: Filter[] }) {
 
       const input: MapEmbeddableInput = {
         attributes: { title: '' },
-        id: uuid.v4(),
+        id: uuidv4(),
         title: i18n.translate(
           'xpack.apm.serviceOverview.embeddedMap.input.title',
           {

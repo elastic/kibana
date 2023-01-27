@@ -50,6 +50,24 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       }
     },
 
+    async navigateToStepDetails({
+      configId,
+      stepIndex,
+      checkGroup,
+      doLogin = true,
+    }: {
+      checkGroup: string;
+      configId: string;
+      stepIndex: number;
+      doLogin?: boolean;
+    }) {
+      const stepDetails = `/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=us_central`;
+      await page.goto(overview + stepDetails, { waitUntil: 'networkidle' });
+      if (doLogin) {
+        await this.loginToKibana();
+      }
+    },
+
     async waitForMonitorManagementLoadingToFinish() {
       while (true) {
         if ((await page.$(this.byTestId('uptimeLoader'))) === null) break;
@@ -89,12 +107,19 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     async deleteMonitors() {
       let isSuccessful: boolean = false;
       while (true) {
-        if ((await page.$(this.byTestId('syntheticsMonitorListActions'))) === null) {
+        if (
+          !(await page.isVisible(this.byTestId('euiCollapsedItemActionsButton'), { timeout: 0 }))
+        ) {
           isSuccessful = true;
           break;
         }
-        await page.click(this.byTestId('syntheticsMonitorListActions'), { delay: 800 });
-        await page.click('text=delete', { delay: 800 });
+        await page.click(this.byTestId('euiCollapsedItemActionsButton'), {
+          delay: 800,
+          force: true,
+        });
+        await page.click(`.euiContextMenuPanel ${this.byTestId('syntheticsMonitorDeleteAction')}`, {
+          delay: 800,
+        });
         await page.waitForSelector('[data-test-subj="confirmModalTitleText"]');
         await this.clickByTestSubj('confirmModalConfirmButton');
         isSuccessful = Boolean(await this.findByTestSubj('uptimeDeleteMonitorSuccess'));
@@ -104,10 +129,16 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       return isSuccessful;
     },
 
-    async navigateToEditMonitor() {
+    async navigateToEditMonitor(monitorName: string) {
+      await this.adjustRows();
       await page.waitForSelector('text=Showing');
-      await this.clickByTestSubj('syntheticsMonitorListActions');
-      await page.click('text=Edit', { timeout: 2 * 60 * 1000, delay: 800 });
+      await page.click(
+        `tr:has-text("${monitorName}") [data-test-subj="euiCollapsedItemActionsButton"]`
+      );
+      await page.click(`.euiContextMenuPanel ${this.byTestId('syntheticsMonitorEditAction')}`, {
+        timeout: 2 * 60 * 1000,
+        delay: 800,
+      });
       await this.findByText('Edit monitor');
     },
 
@@ -161,6 +192,12 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
 
     async fillCodeEditor(value: string) {
       await page.fill('[data-test-subj=codeEditorContainer] textarea', value);
+    },
+
+    async adjustRows() {
+      await page.click('[data-test-subj="tablePaginationPopoverButton"]');
+      await page.click('text="100 rows"');
+      await page.waitForTimeout(3e3);
     },
 
     async createBasicHTTPMonitorDetails({

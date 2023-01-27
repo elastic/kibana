@@ -16,7 +16,7 @@ export type {
   ScopedFilesClient,
 } from '@kbn/files-plugin/public';
 
-export type { FileImageMetadata } from '@kbn/shared-ux-file-types/';
+export type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 
 export type {
   IContainer,
@@ -24,5 +24,7 @@ export type {
   EmbeddableFactoryDefinition,
 } from '@kbn/embeddable-plugin/public';
 export type { ApplicationStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+
+export type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 
 export const imageEmbeddableFileKind: FileKind = defaultImageFileKind;

@@ -6,22 +6,29 @@
  */
 
 import React from 'react';
+import { EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { ObservabilityAppServices } from '../../application/types';
-import { paths } from '../../config';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
-import { isSloFeatureEnabled } from './helpers';
-import { SLOS_BREADCRUMB_TEXT, SLOS_PAGE_TITLE } from './translations';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useLicense } from '../../hooks/use_license';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
 import PageNotFound from '../404';
+import { paths } from '../../config';
+import { isSloFeatureEnabled } from './helpers/is_slo_feature_enabled';
+import type { ObservabilityAppServices } from '../../application/types';
 
 export function SlosPage() {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const {
+    application: { navigateToUrl },
+    http: { basePath },
+  } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
+
+  const { hasAtLeast } = useLicense();
 
   const {
     loading,
@@ -30,10 +37,16 @@ export function SlosPage() {
 
   useBreadcrumbs([
     {
-      href: http.basePath.prepend(paths.observability.slos),
-      text: SLOS_BREADCRUMB_TEXT,
+      href: basePath.prepend(paths.observability.slos),
+      text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
+        defaultMessage: 'SLOs',
+      }),
     },
   ]);
+
+  const handleClickCreateSlo = () => {
+    navigateToUrl(basePath.prepend(paths.observability.sloCreate));
+  };
 
   if (!isSloFeatureEnabled(config)) {
     return <PageNotFound />;
@@ -43,15 +56,23 @@ export function SlosPage() {
     return null;
   }
 
-  if (total === 0) {
+  if (total === 0 || !hasAtLeast('platinum')) {
     return <SloListWelcomePrompt />;
   }
 
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: SLOS_PAGE_TITLE,
-        rightSideItems: [],
+        pageTitle: i18n.translate('xpack.observability.slosPageTitle', {
+          defaultMessage: 'SLOs',
+        }),
+        rightSideItems: [
+          <EuiButton color="primary" fill onClick={handleClickCreateSlo}>
+            {i18n.translate('xpack.observability.slos.sloList.pageHeader.createNewButtonLabel', {
+              defaultMessage: 'Create new SLO',
+            })}
+          </EuiButton>,
+        ],
         bottomBorder: false,
       }}
       data-test-subj="slosPage"

@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { buildEsQuery } from '@kbn/es-query';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -43,7 +44,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LandingPageComponent } from '../../../../common/components/landing_page';
-import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { getNetworkDetailsPageFilter } from '../../../../common/components/visualization_actions/utils';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
@@ -51,7 +52,8 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
-import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 
 export { getTrailingBreadcrumbs } from './utils';
 
@@ -137,7 +139,8 @@ const NetworkDetailsComponent: React.FC = () => {
     ip,
   });
 
-  const { jobIds } = useInstalledSecurityJobsIds();
+  const { jobNameById } = useInstalledSecurityJobNameById();
+  const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(detailName, flowTarget),
     startDate: from,
@@ -146,11 +149,6 @@ const NetworkDetailsComponent: React.FC = () => {
     jobIds,
     aggregationInterval: 'auto',
   });
-
-  const headerDraggableArguments = useMemo(
-    () => ({ field: `${flowTarget}.ip`, value: ip }),
-    [flowTarget, ip]
-  );
 
   const entityFilter = useMemo(
     () => ({
@@ -172,7 +170,6 @@ const NetworkDetailsComponent: React.FC = () => {
             <HeaderPage
               border
               data-test-subj="network-details-headline"
-              draggableArguments={headerDraggableArguments}
               subtitle={
                 <LastEventTime
                   indexKey={LastEventIndexKey.ipDetails}
@@ -180,7 +177,16 @@ const NetworkDetailsComponent: React.FC = () => {
                   ip={ip}
                 />
               }
-              title={ip}
+              title={
+                <CellActions
+                  field={{ type: 'ip', value: ip, name: `${flowTarget}.ip` }}
+                  mode={CellActionsMode.HOVER}
+                  visibleCellActions={5}
+                  triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+                >
+                  {ip}
+                </CellActions>
+              }
             >
               <FlowTargetSelectConnected flowTarget={flowTarget} />
             </HeaderPage>
@@ -202,6 +208,7 @@ const NetworkDetailsComponent: React.FC = () => {
               endDate={to}
               narrowDateRange={narrowDateRange}
               indexPatterns={selectedPatterns}
+              jobNameById={jobNameById}
             />
 
             <EuiHorizontalRule />
@@ -229,7 +236,7 @@ const NetworkDetailsComponent: React.FC = () => {
               </>
             )}
 
-            <SecuritySolutionTabNavigation
+            <TabNavigationWithBreadcrumbs
               navTabs={navTabsNetworkDetails(ip, hasMlUserPermissions(capabilities), flowTarget)}
             />
             <EuiSpacer />

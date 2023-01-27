@@ -8,7 +8,7 @@
 import { type Subject, ReplaySubject } from 'rxjs';
 import type { ElasticsearchClient, Logger, LogMeta } from '@kbn/core/server';
 import sinon from 'sinon';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import {
@@ -28,6 +28,7 @@ import {
   RuleDataService,
 } from '@kbn/rule-registry-plugin/server';
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { get } from 'lodash';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   MockRuleParams,
@@ -150,7 +151,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           });
         }
 
-        return Promise.resolve({ shouldTriggerAlert: triggerAlert });
+        return Promise.resolve({ state: { shouldTriggerAlert: triggerAlert } });
       });
 
       const getSummarizedAlerts = createGetSummarizedAlerts();
@@ -185,8 +186,8 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
 
       // Execute the rule the first time - this creates a new alert
       const preExecution1Start = new Date();
-      const execution1Uuid = uuid.v4();
-      const execution1Results = await executor({
+      const execution1Uuid = uuidv4();
+      const execution1Result = await executor({
         ...options,
         startedAt: new Date(),
         state: getState(true, {}),
@@ -205,11 +206,11 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
 
       // Execute again to update the existing alert
       const preExecution2Start = new Date();
-      const execution2Uuid = uuid.v4();
-      const execution2Results = await executor({
+      const execution2Uuid = uuidv4();
+      const execution2Result = await executor({
         ...options,
         startedAt: new Date(),
-        state: getState(true, execution1Results.trackedAlerts),
+        state: getState(true, execution1Result.state.trackedAlerts),
         executionId: execution2Uuid,
       });
 
@@ -224,11 +225,11 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       expect(execution2SummarizedAlerts.recovered.count).to.eql(0);
 
       // Execute again to recover the alert
-      const execution3Uuid = uuid.v4();
+      const execution3Uuid = uuidv4();
       await executor({
         ...options,
         startedAt: new Date(),
-        state: getState(false, execution2Results.trackedAlerts),
+        state: getState(false, execution2Result.state.trackedAlerts),
         executionId: execution3Uuid,
       });
 
@@ -272,7 +273,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
     });
 
     it(`shouldn't return muted alerts`, async () => {
-      const ruleId = uuid.v4();
+      const ruleId = uuidv4();
       const id1 = 'host-01';
       const id2 = 'host-02';
 
@@ -287,7 +288,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       // This creates the executor that is passed to the Alerting framework.
       const executor = createLifecycleRuleExecutor<
         MockRuleParams,
-        { shouldTriggerAlert: boolean },
+        {},
         MockAlertState,
         MockAlertContext,
         MockAllowedActionGroups
@@ -307,6 +308,8 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
             [ALERT_REASON]: 'Test alert is firing',
           },
         });
+
+        return { state: {} };
       });
 
       const getSummarizedAlerts = createGetSummarizedAlerts();
@@ -340,7 +343,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       ) => ({ wrapped: { shouldTriggerAlert }, trackedAlerts: alerts, trackedAlertsRecovered: {} });
 
       // Execute the rule the first time - this creates a new alert
-      const execution1Uuid = uuid.v4();
+      const execution1Uuid = uuidv4();
       await executor({
         ...options,
         startedAt: new Date(),
@@ -357,7 +360,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       expect(summarizedAlertsExcludingId1.new.count).to.eql(1);
       expect(summarizedAlertsExcludingId1.ongoing.count).to.eql(0);
       expect(summarizedAlertsExcludingId1.recovered.count).to.eql(0);
-      expect(summarizedAlertsExcludingId1.new.data[0][ALERT_INSTANCE_ID]).to.eql(id2);
+      expect(get(summarizedAlertsExcludingId1.new.data[0], ALERT_INSTANCE_ID)).to.eql(id2);
 
       const summarizedAlertsExcludingId2 = await getSummarizedAlerts({
         ruleId,
@@ -368,7 +371,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       expect(summarizedAlertsExcludingId2.new.count).to.eql(1);
       expect(summarizedAlertsExcludingId2.ongoing.count).to.eql(0);
       expect(summarizedAlertsExcludingId2.recovered.count).to.eql(0);
-      expect(summarizedAlertsExcludingId2.new.data[0][ALERT_INSTANCE_ID]).to.eql(id1);
+      expect(get(summarizedAlertsExcludingId2.new.data[0], ALERT_INSTANCE_ID)).to.eql(id1);
     });
   });
 }

@@ -7,16 +7,16 @@
 
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
+import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '@kbn/slo-schema';
 import { DateRange, toMomentUnitOfTime } from '../models';
 
 import type { TimeWindow } from '../models/time_window';
-import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '../../types/schema';
 
 export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date()): DateRange => {
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
     const unit = toMomentUnitOfTime(timeWindow.duration.unit);
     const now = moment.utc(currentDate).startOf('minute');
-    const startTime = moment.utc(timeWindow.calendar.start_time);
+    const startTime = moment.utc(timeWindow.calendar.startTime);
 
     const differenceInUnit = now.diff(startTime, unit);
     if (differenceInUnit < 0) {

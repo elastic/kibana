@@ -1,106 +1,38 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
+load("@npm//webpack-cli:index.bzl", "webpack_cli")
 
-PKG_DIRNAME = "kbn-ui-shared-deps-src"
-PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-src"
+SRCS = glob([
+  "index.js",
+  "webpack.config.js",
+  "src/**/*",
+])
 
-SOURCE_FILES = glob(
-  [
-    "**/*.ts",
-    "**/*.js",
-  ],
-  exclude = [
-    "**/*.config.js",
-    "**/*.mock.*",
-    "**/*.test.*",
-    "**/*.stories.*",
-    "**/__snapshots__/**",
-    "**/integration_tests/**",
-    "**/mocks/**",
-    "**/scripts/**",
-    "**/storybook/**",
-    "**/test_fixtures/**",
-    "**/test_helpers/**",
-  ],
-)
-
-SRCS = SOURCE_FILES
-
-filegroup(
-  name = "srcs",
-  srcs = SRCS,
-)
-
-NPM_MODULE_EXTRA_FILES = [
-  "package.json",
-]
-
-RUNTIME_DEPS = [
-  "//packages/kbn-safer-lodash-set",
-  "//packages/kbn-analytics",
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-datemath",
-  "//packages/kbn-es-query",
-  "//packages/kbn-flot-charts",
-  "//packages/kbn-i18n",
-  "//packages/kbn-i18n-react",
-  "//packages/kbn-monaco",
-  "//packages/kbn-std",
-  "//packages/kbn-ui-shared-deps-npm",
-  "//packages/kbn-ui-theme",
-  "//packages/kbn-peggy-loader",
-  "//packages/kbn-rison",
-]
-
-TYPES_DEPS = [
-  "//packages/kbn-safer-lodash-set:npm_module_types",
-  "//packages/kbn-analytics:npm_module_types",
-  "//packages/kbn-datemath:npm_module_types",
-  "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/kbn-monaco:npm_module_types",
-  "//packages/kbn-std:npm_module_types",
-  "//packages/kbn-ui-shared-deps-npm:npm_module_types",
-  "//packages/kbn-ui-theme:npm_module_types",
-  "@npm//webpack",
-]
-
-jsts_transpiler(
-  name = "target_node",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-)
-
-ts_config(
-  name = "tsconfig",
-  src = "tsconfig.json",
-  deps = [
-    "//:tsconfig.base.json",
-    "//:tsconfig.bazel.json",
-  ],
-)
-
-ts_project(
-  name = "tsc_types",
-  args = ['--pretty'],
-  srcs = SRCS,
-  deps = TYPES_DEPS,
-  allow_js = True,
-  declaration = True,
-  emit_declaration_only = True,
-  out_dir = "target_types",
-  tsconfig = ":tsconfig",
-)
-
-webpack(
+webpack_cli(
   name = "shared_built_assets",
-  data = RUNTIME_DEPS + [
-    "//:package.json",
-    ":srcs",
-    ":tsconfig",
-    ":webpack.config.js",
+  data = SRCS + [
+    "//:.browserslistrc",
+    "@npm//webpack",
+    "@npm//mini-css-extract-plugin",
+    "@npm//moment",
+    "@npm//babel-loader",
+    "@npm//css-loader",
+    "@npm//url-loader",
+    "//packages/kbn-ui-shared-deps-npm",
+    "//packages/kbn-babel-register",
+    "//packages/kbn-babel-preset",
+    # packages included in the shared deps src bundle
+    "//packages/kbn-flot-charts",
+    "//packages/kbn-ui-theme",
+    "//packages/kbn-i18n",
+    "//packages/kbn-i18n-react",
+    "//packages/kbn-monaco",
+    "//packages/kbn-datemath",
+    "//packages/kbn-analytics",
+    "//packages/kbn-es-query",
+    "//packages/kbn-std",
+    "//packages/kbn-safer-lodash-set",
+    "//packages/kbn-peggy",
+    "//packages/kbn-peggy-loader",
+    "//packages/kbn-rison",
   ],
   output_dir = True,
   args = [
@@ -110,39 +42,15 @@ webpack(
     "$(@D)",
     "--stats=errors-only"
   ],
-)
-
-js_library(
-  name = PKG_DIRNAME,
-  srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets"],
-  package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-js_library(
-  name = "npm_module_types",
-  srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets", ":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "npm_module",
-  deps = [":" + PKG_DIRNAME],
-)
-
-filegroup(
-  name = "build",
-  srcs = [
-    ":npm_module",
-  ],
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "build_types",
-  deps = [":npm_module_types"],
+  env = select({
+    "//:dist": {
+      "NODE_ENV": "production",
+      "NODE_OPTIONS": "--openssl-legacy-provider",
+    },
+    "//conditions:default": {
+      "NODE_ENV": "development",
+      "NODE_OPTIONS": "--openssl-legacy-provider",
+    },
+  }),
   visibility = ["//visibility:public"],
 )

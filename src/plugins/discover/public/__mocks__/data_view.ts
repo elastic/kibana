@@ -98,6 +98,7 @@ export const buildDataViewMock = ({
     name,
     metaFields: ['_index', '_score'],
     fields: dataViewFields,
+    type: 'default',
     getName: () => name,
     getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
     getSourceFiltering: () => ({}),

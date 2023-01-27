@@ -9,24 +9,18 @@ import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { type DataViewListItem, type DataView, DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { useSearchSession } from './use_search_session';
+import { FetchStatus } from '../../types';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { useUrlTracking } from './use_url_tracking';
-import { getState } from '../services/discover_state';
+import { getDiscoverStateContainer } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
-import { useSavedSearch as useSavedSearchData } from './use_saved_search';
-import {
-  MODIFY_COLUMNS_ON_SWITCH,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../common';
-import { useSearchSession } from './use_search_session';
-import { FetchStatus } from '../../types';
+import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -37,18 +31,14 @@ export function useDiscoverState({
   history,
   savedSearch,
   setExpandedDoc,
-  dataViewList: initialDataViewList,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
   setExpandedDoc: (doc?: DataTableRecord) => void;
-  dataViewList: DataViewListItem[];
 }) {
   const { uiSettings, data, filterManager, dataViews, toastNotifications, trackUiMetric } =
     services;
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-  const { timefilter } = data.query.timefilter;
 
   const dataView = savedSearch.searchSource.getField('index')!;
 
@@ -57,37 +47,171 @@ export function useDiscoverState({
     return savedSearch.searchSource.createChild();
   }, [savedSearch, dataView]);
 
+  const stateContainer = useMemo(() => {
+    const container = getDiscoverStateContainer({
+      history,
+      savedSearch,
+      services,
+    });
+    const nextDataView = savedSearch.searchSource.getField('index')!;
+    container.actions.setDataView(nextDataView);
+    if (!nextDataView.isPersisted()) {
+      container.actions.appendAdHocDataViews(nextDataView);
+    }
+    return container;
+  }, [history, savedSearch, services]);
+
   const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
-  const stateContainer = useMemo(
-    () =>
-      getState({
-        history,
-        savedSearch,
-        services,
-      }),
-    [history, savedSearch, services]
-  );
+  const { appState, replaceUrlAppState, searchSessionManager } = stateContainer;
 
-  const { appStateContainer, replaceUrlAppState } = stateContainer;
-
-  const [state, setState] = useState(appStateContainer.getState());
+  const [state, setState] = useState(appState.getState());
 
   /**
    * Search session logic
    */
-  const searchSessionManager = useSearchSession({ services, history, stateContainer, savedSearch });
+  useSearchSession({ services, stateContainer, savedSearch });
 
-  const initialFetchStatus: FetchStatus = useMemo(() => {
-    // A saved search is created on every page load, so we check the ID to see if we're loading a
-    // previously saved search or if it is just transient
-    const shouldSearchOnPageLoad =
-      uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearch.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false ||
-      searchSessionManager.hasSearchSessionIdInURL();
-    return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
-  }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
+  /**
+   * Adhoc data views functionality
+   */
+  const isTextBasedMode = state?.query && isOfAggregateQueryType(state?.query);
+  const { persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
+    dataView,
+    dataViews,
+    stateContainer,
+    savedSearch,
+    setUrlTracking,
+    filterManager,
+    toastNotifications,
+    trackUiMetric,
+    isTextBasedMode,
+  });
+
+  /**
+   * Updates data views selector state
+   */
+  const updateDataViewList = useCallback(
+    async (newAdHocDataViews: DataView[]) => {
+      await stateContainer.actions.loadDataViewList();
+      stateContainer.actions.setAdHocDataViews(newAdHocDataViews);
+    },
+    [stateContainer.actions]
+  );
+
+  /**
+   * Data fetching logic
+   */
+  const { data$, refetch$, reset, inspectorAdapters, initialFetchStatus } =
+    stateContainer.dataState;
+  /**
+   * State changes (data view, columns), when a text base query result is returned
+   */
+  useTextBasedQueryLanguage({
+    documents$: data$.documents$,
+    dataViews,
+    stateContainer,
+    savedSearch,
+  });
+
+  /**
+   * Reset to display loading spinner when savedSearch is changing
+   */
+  useEffect(() => reset(), [savedSearch.id, reset]);
+
+  /**
+   * Sync URL state with local app state on saved search load
+   * or dataView / savedSearch switch
+   */
+  useEffect(() => {
+    const stopSync = stateContainer.initializeAndSync(dataView, filterManager, data);
+    setState(stateContainer.appState.getState());
+
+    return () => stopSync();
+  }, [stateContainer, filterManager, data, dataView]);
+
+  /**
+   * Data store subscribing to trigger fetching
+   */
+  useEffect(() => {
+    const stopSync = stateContainer.dataState.subscribe();
+    return () => stopSync();
+  }, [stateContainer]);
+
+  /**
+   * Track state changes that should trigger a fetch
+   */
+  useEffect(() => {
+    const unsubscribe = appState.subscribe(async (nextState) => {
+      const { hideChart, interval, breakdownField, sort, index } = state;
+      // Cast to boolean to avoid false positives when comparing
+      // undefined and false, which would trigger a refetch
+      const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
+      const chartIntervalChanged = nextState.interval !== interval;
+      const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
+      const docTableSortChanged = !isEqual(nextState.sort, sort);
+      const dataViewChanged = !isEqual(nextState.index, index);
+      // NOTE: this is also called when navigating from discover app to context app
+      if (nextState.index && dataViewChanged) {
+        /**
+         *  Without resetting the fetch state, e.g. a time column would be displayed when switching
+         *  from a data view without to a data view with time filter for a brief moment
+         *  That's because appState is updated before savedSearchData$
+         *  The following line of code catches this, but should be improved
+         */
+        const nextDataViewData = await loadDataView(
+          services.dataViews,
+          services.uiSettings,
+          nextState.index
+        );
+        const nextDataView = resolveDataView(
+          nextDataViewData,
+          savedSearch.searchSource,
+          services.toastNotifications
+        );
+
+        // If the requested data view is not found, don't try to load it,
+        // and instead reset the app state to the fallback data view
+        if (!nextDataViewData.stateValFound) {
+          replaceUrlAppState({ index: nextDataView.id });
+          return;
+        }
+        savedSearch.searchSource.setField('index', nextDataView);
+        reset();
+        stateContainer.actions.setDataView(nextDataView);
+      }
+
+      if (
+        dataViewChanged &&
+        stateContainer.dataState.initialFetchStatus === FetchStatus.UNINITIALIZED
+      ) {
+        // stop execution if given data view has changed, and it's not configured to initially start a search in Discover
+        return;
+      }
+
+      if (
+        chartDisplayChanged ||
+        chartIntervalChanged ||
+        breakdownFieldChanged ||
+        docTableSortChanged
+      ) {
+        refetch$.next(undefined);
+      }
+
+      setState(nextState);
+    });
+    return () => unsubscribe();
+  }, [
+    services,
+    appState,
+    state,
+    refetch$,
+    data$,
+    reset,
+    savedSearch,
+    replaceUrlAppState,
+    stateContainer,
+  ]);
 
   /**
    * Function triggered when user changes data view in the sidebar
@@ -122,141 +246,6 @@ export function useDiscoverState({
       stateContainer,
     ]
   );
-
-  /**
-   * Adhoc data views functionality
-   */
-  const isTextBasedMode = state?.query && isOfAggregateQueryType(state?.query);
-  const { adHocDataViewList, persistDataView, updateAdHocDataViewId, onAddAdHocDataViews } =
-    useAdHocDataViews({
-      dataView,
-      dataViews,
-      stateContainer,
-      savedSearch,
-      setUrlTracking,
-      filterManager,
-      toastNotifications,
-      trackUiMetric,
-      isTextBasedMode,
-    });
-
-  const [savedDataViewList, setSavedDataViewList] = useState(initialDataViewList);
-
-  /**
-   * Updates data views selector state
-   */
-  const updateDataViewList = useCallback(
-    async (newAdHocDataViews: DataView[]) => {
-      setSavedDataViewList(await data.dataViews.getIdsWithTitle());
-      onAddAdHocDataViews(newAdHocDataViews);
-    },
-    [data.dataViews, onAddAdHocDataViews]
-  );
-
-  /**
-   * Data fetching logic
-   */
-  const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
-    initialFetchStatus,
-    searchSessionManager,
-    savedSearch,
-    searchSource,
-    services,
-    stateContainer,
-    useNewFieldsApi,
-  });
-  /**
-   * State changes (data view, columns), when a text base query result is returned
-   */
-  useTextBasedQueryLanguage({
-    documents$: data$.documents$,
-    dataViews,
-    stateContainer,
-    dataViewList: [...savedDataViewList, ...adHocDataViewList],
-    savedSearch,
-  });
-
-  /**
-   * Reset to display loading spinner when savedSearch is changing
-   */
-  useEffect(() => reset(), [savedSearch.id, reset]);
-
-  /**
-   * Sync URL state with local app state on saved search load
-   * or dataView / savedSearch switch
-   */
-  useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync(dataView, filterManager, data);
-    setState(stateContainer.appStateContainer.getState());
-
-    return () => stopSync();
-  }, [stateContainer, filterManager, data, dataView]);
-
-  /**
-   * Track state changes that should trigger a fetch
-   */
-  useEffect(() => {
-    const unsubscribe = appStateContainer.subscribe(async (nextState) => {
-      const { hideChart, interval, breakdownField, sort, index } = state;
-      // Cast to boolean to avoid false positives when comparing
-      // undefined and false, which would trigger a refetch
-      const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
-      const chartIntervalChanged = nextState.interval !== interval;
-      const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
-      const docTableSortChanged = !isEqual(nextState.sort, sort);
-      const dataViewChanged = !isEqual(nextState.index, index);
-      // NOTE: this is also called when navigating from discover app to context app
-      if (nextState.index && dataViewChanged) {
-        /**
-         *  Without resetting the fetch state, e.g. a time column would be displayed when switching
-         *  from a data view without to a data view with time filter for a brief moment
-         *  That's because appState is updated before savedSearchData$
-         *  The following line of code catches this, but should be improved
-         */
-        const nextDataViewData = await loadDataView(
-          services.dataViews,
-          services.uiSettings,
-          nextState.index
-        );
-        const nextDataView = resolveDataView(
-          nextDataViewData,
-          savedSearch.searchSource,
-          services.toastNotifications
-        );
-
-        // If the requested data view is not found, don't try to load it,
-        // and instead reset the app state to the fallback data view
-        if (!nextDataViewData.stateValFound) {
-          replaceUrlAppState({ index: nextDataView.id });
-          return;
-        }
-
-        savedSearch.searchSource.setField('index', nextDataView);
-        reset();
-      }
-
-      if (
-        chartDisplayChanged ||
-        chartIntervalChanged ||
-        breakdownFieldChanged ||
-        docTableSortChanged
-      ) {
-        refetch$.next(undefined);
-      }
-
-      setState(nextState);
-    });
-    return () => unsubscribe();
-  }, [
-    services,
-    appStateContainer,
-    state,
-    refetch$,
-    data$,
-    reset,
-    savedSearch.searchSource,
-    replaceUrlAppState,
-  ]);
 
   /**
    * function to revert any changes to a given saved search
@@ -305,7 +294,7 @@ export function useDiscoverState({
    * Trigger data fetching on dataView or savedSearch changes
    */
   useEffect(() => {
-    if (dataView) {
+    if (dataView && initialFetchStatus === FetchStatus.LOADING) {
       refetch$.next(undefined);
     }
   }, [initialFetchStatus, refetch$, dataView, savedSearch.id]);
@@ -321,22 +310,15 @@ export function useDiscoverState({
   }, [dataView, stateContainer]);
 
   return {
-    data$,
-    dataView,
     inspectorAdapters,
-    refetch$,
     resetSavedSearch,
     onChangeDataView,
     onUpdateQuery,
     searchSource,
-    setState,
-    state,
     stateContainer,
-    adHocDataViewList,
-    savedDataViewList,
     persistDataView,
     updateAdHocDataViewId,
-    updateDataViewList,
     searchSessionManager,
+    updateDataViewList,
   };
 }

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"],
+    "lib": [
+      "ES2019"
+    ],
+    "esModuleInterop": true
+  },
+  "include": ["**/*.ts"],
+  "exclude": [
+    "target/**/*",
+  ]
+}

@@ -25,11 +25,12 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 
 export interface ObservabilityAppServices {
   application: ApplicationStart;
   cases: CasesUiStart;
+  charts: ChartsPluginStart;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -46,6 +47,5 @@ export interface ObservabilityAppServices {
   theme: ThemeServiceStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiSettings: IUiSettingsClient;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
   isDev?: boolean;
 }

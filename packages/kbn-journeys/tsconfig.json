@@ -1,9 +1,7 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "node",
       "@kbn/ambient-ftr-types",
@@ -11,5 +9,16 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/ftr-common-functional-services",
+    "@kbn/ftr-screenshot-filename",
+    "@kbn/test",
+    "@kbn/tooling-log",
+    "@kbn/repo-info",
+    "@kbn/std",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

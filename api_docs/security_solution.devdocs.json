@@ -47,11 +47,42 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.kibanaBranch",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaBranch",
+            "description": [
+              "\nThe current Kibana branch. e.g. 'main'"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-public.Plugin.kibanaVersion",
             "type": "string",
             "tags": [],
             "label": "kibanaVersion",
-            "description": [],
+            "description": [
+              "\nThe current Kibana version. e.g. '8.0.0' or '8.0.0-SNAPSHOT'"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.prebuiltRulesPackageVersion",
+            "type": "string",
+            "tags": [],
+            "label": "prebuiltRulesPackageVersion",
+            "description": [
+              "\nFor internal use. Specify which version of the Detection Rules fleet package to install\nwhen upgrading rules. If not provided, the latest compatible package will be installed,\nor if running from a dev environment or -SNAPSHOT build, the latest pre-release package\nwill be used (if fleet is available or not within an airgapped environment).\n\nNote: This is for `upgrade only`, which occurs by means of the `useUpgradeSecurityPackages`\nhook when navigating to a Security Solution page. The package version specified in\n`fleet_packages.json` in project root will always be installed first on Kibana start if\nthe package is not already installed."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1241,6 +1272,17 @@
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.TimelineModel.selectAll",
+            "type": "boolean",
+            "tags": [],
+            "label": "selectAll",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1434,9 +1476,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -1489,9 +1531,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-server.PluginInitializerContext",
+                    "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<unknown>"
@@ -1573,9 +1615,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: ",
@@ -1603,9 +1645,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -1675,9 +1717,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.CoreRequestHandlerContext",
+                "section": "def-common.CoreRequestHandlerContext",
                 "text": "CoreRequestHandlerContext"
               }
             ],
@@ -1835,9 +1877,9 @@
               "(req: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => Promise<",
@@ -1864,9 +1906,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -1922,54 +1964,6 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getScopedFleetServices",
-            "type": "Function",
-            "tags": [],
-            "label": "getScopedFleetServices",
-            "description": [],
-            "signature": [
-              "(req: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>) => ",
-              "EndpointScopedFleetServicesInterface"
-            ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "securitySolution",
-                "id": "def-server.SecuritySolutionApiRequestHandlerContext.getScopedFleetServices.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "req",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "path": "x-pack/plugins/security_solution/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.getQueryRuleAdditionalOptions",
             "type": "Object",
             "tags": [],
@@ -1996,7 +1990,9 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; }> & { experimentalFeatures: Readonly<{ tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; excludePoliciesInFilterEnabled: boolean; kubernetesEnabled: boolean; disableIsolationUIPendingStatuses: boolean; pendingActionResponsesWithAck: boolean; policyListEnabled: boolean; policyResponseInFleetEnabled: boolean; chartEmbeddablesEnabled: boolean; previewTelemetryUrlEnabled: boolean; responseActionsConsoleEnabled: boolean; insightsRelatedAlertsByProcessAncestry: boolean; extendedRuleExecutionLoggingEnabled: boolean; socTrendsEnabled: boolean; responseActionsEnabled: boolean; endpointRbacEnabled: boolean; endpointRbacV1Enabled: boolean; alertDetailsPageEnabled: boolean; responseActionGetFileEnabled: boolean; alertsPageChartsEnabled: boolean; riskyHostsEnabled: boolean; riskyUsersEnabled: boolean; }>; }"
+          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; }> & { experimentalFeatures: ",
+          "ExperimentalFeatures",
+          "; }"
         ],
         "path": "x-pack/plugins/security_solution/server/config.ts",
         "deprecated": false,

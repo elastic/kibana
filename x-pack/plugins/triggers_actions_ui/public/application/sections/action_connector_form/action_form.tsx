@@ -35,7 +35,7 @@ import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { DEFAULT_FREQUENCY, VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
@@ -55,6 +55,7 @@ export interface ActionAccordionFormProps {
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   featureId: string;
   messageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
@@ -63,6 +64,8 @@ export interface ActionAccordionFormProps {
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideActionHeader?: boolean;
+  hideNotifyWhen?: boolean;
+  minimumThrottleInterval?: [number | undefined, string];
 }
 
 interface ActiveActionConnectorState {
@@ -77,6 +80,7 @@ export const ActionForm = ({
   setActionGroupIdByIndex,
   setActions,
   setActionParamsProperty,
+  setActionFrequencyProperty,
   featureId,
   messageVariables,
   actionGroups,
@@ -87,6 +91,8 @@ export const ActionForm = ({
   recoveryActionGroup,
   isActionGroupDisabledForActionType,
   hideActionHeader,
+  hideNotifyWhen,
+  minimumThrottleInterval,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -210,6 +216,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
+        frequency: DEFAULT_FREQUENCY,
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     }
@@ -221,6 +228,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
+        frequency: DEFAULT_FREQUENCY,
       });
       setActionIdByIndex(actions.length.toString(), actions.length - 1);
       setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
@@ -360,6 +368,7 @@ export const ActionForm = ({
               index={index}
               key={`action-form-action-at-${index}`}
               setActionParamsProperty={setActionParamsProperty}
+              setActionFrequencyProperty={setActionFrequencyProperty}
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
@@ -388,6 +397,8 @@ export const ActionForm = ({
                 );
                 setActiveActionItem(undefined);
               }}
+              hideNotifyWhen={hideNotifyWhen}
+              minimumThrottleInterval={minimumThrottleInterval}
             />
           );
         })}

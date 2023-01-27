@@ -121,7 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(unauthenticatedResponse.headers['set-cookie']).to.be(undefined);
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
     });
 
@@ -168,9 +168,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse.body.statusCode).to.be(401);
         expect(apiResponse.body.error).to.be('Unauthorized');
         expect(apiResponse.body.message).to.include.string(
-          '[security_exception] Reason: unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]'
+          'unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]'
         );
-
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });
     });

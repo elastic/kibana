@@ -23,7 +23,6 @@ import {
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../../shared_components';
-import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
@@ -174,7 +173,6 @@ export const percentileRanksOperation: OperationDefinition<
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
-      getDisallowedPreviousShiftMessage(layer, columnId),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   paramEditor: function PercentileParamEditor({

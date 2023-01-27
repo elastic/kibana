@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target_node/src/plugin_list/generate_plugin_list.js
+  You can update the template within packages/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts
 
 ////
 
@@ -182,6 +182,10 @@ for use in their own application.
 
 |{kib-repo}blob/{branch}/src/plugins/files_management/README.md[filesManagement]
 |Minimal interface for admins to manage files in Kibana.
+
+
+|{kib-repo}blob/{branch}/src/plugins/ftr_apis/README.md[ftrApis]
+|This plugin exposes a set of APIs used internally during functional tests by the FTR.
 
 
 |{kib-repo}blob/{branch}/src/plugins/guided_onboarding/README.md[guidedOnboarding]

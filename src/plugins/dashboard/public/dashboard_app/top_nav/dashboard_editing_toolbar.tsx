@@ -25,6 +25,7 @@ import { useDashboardContainerContext } from '../../dashboard_container/dashboar
 import { pluginServices } from '../../services/plugin_services';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
+import { ControlsToolbarButton } from './controls_toolbar_button';
 
 export function DashboardEditingToolbar() {
   const {
@@ -165,6 +166,17 @@ export function DashboardEditingToolbar() {
     .map(getVisTypeQuickButton)
     .filter((button) => button) as QuickButtonProps[];
 
+  const extraButtons = [
+    <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
+    <AddFromLibraryButton
+      onClick={() => dashboardContainer.addFromLibrary()}
+      data-test-subj="dashboardAddPanelButton"
+    />,
+  ];
+  if (dashboardContainer.controlGroup) {
+    extraButtons.push(<ControlsToolbarButton controlGroup={dashboardContainer.controlGroup} />);
+  }
+
   return (
     <>
       <EuiHorizontalRule margin="none" />
@@ -180,17 +192,7 @@ export function DashboardEditingToolbar() {
             />
           ),
           quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-          extraButtons: [
-            <EditorMenu
-              createNewVisType={createNewVisType}
-              createNewEmbeddable={createNewEmbeddable}
-            />,
-            <AddFromLibraryButton
-              onClick={() => dashboardContainer.addFromLibrary()}
-              data-test-subj="dashboardAddPanelButton"
-            />,
-            dashboardContainer.controlGroup?.getToolbarButtons(),
-          ],
+          extraButtons,
         }}
       </SolutionToolbar>
     </>

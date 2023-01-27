@@ -8,11 +8,14 @@
 import { expect, Page } from '@elastic/synthetics';
 
 export async function waitForLoadingToFinish({ page }: { page: Page }) {
-  while (true) {
+  let retries = 50;
+  while (retries) {
+    retries--;
     if ((await page.$(byTestId('kbnLoadingMessage'))) === null) break;
     await page.waitForTimeout(2 * 1000);
   }
-  while (true) {
+  retries = 50;
+  while (retries) {
     if ((await page.$(byTestId('globalLoadingIndicator'))) === null) break;
     await page.waitForTimeout(2 * 1000);
   }
@@ -44,7 +47,7 @@ export async function loginToKibana({
 }
 
 export const byTestId = (testId: string) => {
-  return `[data-test-subj=${testId}]`;
+  return `[data-test-subj="${testId}"]`;
 };
 
 export const assertText = async ({

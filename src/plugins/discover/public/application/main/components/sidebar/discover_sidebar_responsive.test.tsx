@@ -14,19 +14,22 @@ import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hit
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
+import {
+  AvailableFields$,
+  DataDocuments$,
+  RecordRawType,
+} from '../../services/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import { VIEW_MODE } from '../../../../../common/constants';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
 import { resetExistingFieldsCache } from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -136,7 +139,6 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
       fetchStatus: FetchStatus.COMPLETE,
       fields: [] as string[],
     }) as AvailableFields$,
-    dataViewList: [dataView as DataViewListItem],
     onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
@@ -151,7 +153,7 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
 }
 
 function getAppStateContainer({ query }: { query?: Query | AggregateQuery }) {
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
   appStateContainer.set({
     query: query ?? { query: '', language: 'lucene' },
     filters: [],
@@ -166,7 +168,11 @@ async function mountComponent(
 ): Promise<ReactWrapper<DiscoverSidebarResponsiveProps>> {
   let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
   const mockedServices = services ?? createMockServices();
-  mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () => props.dataViewList);
+  mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
+    props.selectedDataView
+      ? [{ id: props.selectedDataView.id!, title: props.selectedDataView.title! }]
+      : []
+  );
   mockedServices.data.dataViews.get = jest.fn().mockImplementation(async (id) => {
     return [props.selectedDataView].find((d) => d!.id === id);
   });
@@ -227,6 +233,11 @@ describe('discover responsive sidebar', function () {
     expect(compLoadingExistence.find(EuiProgress).exists()).toBe(true);
 
     await act(async () => {
+      const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
+      appStateContainer.set({
+        query: { query: '', language: 'lucene' },
+        filters: [],
+      });
       resolveFunction!({
         indexPatternTitle: 'test-loaded',
         existingFieldNames: Object.keys(mockfieldCounts),
@@ -385,7 +396,8 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'discoverFieldListPanelAddExistFilter-extension').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
-  it('should allow filtering by string, and calcFieldCount should just be executed once', async function () {
+
+  it('should allow searching by string, and calcFieldCount should just be executed once', async function () {
     const comp = await mountComponent(props);
 
     expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('3');
@@ -394,7 +406,7 @@ describe('discover responsive sidebar', function () {
     );
 
     await act(async () => {
-      await findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
+      await findTestSubject(comp, 'fieldListFiltersFieldSearch').simulate('change', {
         target: { value: 'bytes' },
       });
     });
@@ -405,6 +417,34 @@ describe('discover responsive sidebar', function () {
     );
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
+
+  it('should allow filtering by field type', async function () {
+    const comp = await mountComponent(props);
+
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('3');
+    expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+    );
+
+    await act(async () => {
+      await findTestSubject(comp, 'fieldListFiltersFieldTypeFilterToggle').simulate('click');
+    });
+
+    await comp.update();
+
+    await act(async () => {
+      await findTestSubject(comp, 'typeFilter-number').simulate('click');
+    });
+
+    await comp.update();
+
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('2');
+    expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 popular field. 2 available fields. 1 empty field. 0 meta fields.'
+    );
+
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+  }, 10000);
 
   it('should show "Add a field" button to create a runtime field', async () => {
     const services = createMockServices();
@@ -422,6 +462,11 @@ describe('discover responsive sidebar', function () {
         fetchStatus: FetchStatus.COMPLETE,
         recordRawType: RecordRawType.PLAIN,
         result: getDataTableRecords(stubLogstashDataView),
+        textBasedQueryColumns: [
+          { id: '1', name: 'extension', meta: { type: 'text' } },
+          { id: '1', name: 'bytes', meta: { type: 'number' } },
+          { id: '1', name: '@timestamp', meta: { type: 'date' } },
+        ],
       }) as DataDocuments$,
     };
     const compInViewerMode = await mountComponent(propsWithTextBasedMode, {
@@ -450,15 +495,15 @@ describe('discover responsive sidebar', function () {
 
     expect(selectedFieldsCount.text()).toBe('2');
     expect(popularFieldsCount.exists()).toBe(false);
-    expect(availableFieldsCount.text()).toBe('4');
+    expect(availableFieldsCount.text()).toBe('3');
     expect(emptyFieldsCount.exists()).toBe(false);
     expect(metaFieldsCount.exists()).toBe(false);
     expect(unmappedFieldsCount.exists()).toBe(false);
 
-    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(0);
 
     expect(findTestSubject(compInViewerMode, 'fieldListGrouped__ariaDescription').text()).toBe(
-      '2 selected fields. 4 available fields.'
+      '2 selected fields. 3 available fields.'
     );
   });
 

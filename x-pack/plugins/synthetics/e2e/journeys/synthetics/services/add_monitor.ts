@@ -30,7 +30,7 @@ export const addTestMonitor = async (
 ) => {
   const testData = {
     locations: [{ id: 'us_central', isServiceManaged: true }],
-    ...(params?.type !== 'browser' ? {} : data),
+    ...(params?.type !== 'browser' ? {} : testDataMonitor),
     ...(params || {}),
     name,
   };
@@ -98,8 +98,9 @@ export const cleanTestParams = async (params: Record<string, any>) => {
   }
 };
 
-const data = {
+export const testDataMonitor = {
   type: 'browser',
+  alert: { status: { enabled: true } },
   form_monitor_type: 'single',
   enabled: true,
   schedule: { unit: 'm', number: '10' },

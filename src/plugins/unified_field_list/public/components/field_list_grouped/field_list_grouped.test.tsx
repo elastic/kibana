@@ -16,6 +16,7 @@ import { ReactWrapper } from 'enzyme';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import FieldListGrouped, { type FieldListGroupedProps } from './field_list_grouped';
+import { FieldListFilters } from '../field_list_filters';
 import { ExistenceFetchStatus } from '../../types';
 import { FieldsAccordion } from './fields_accordion';
 import { NoFieldsCallout } from './no_fields_callout';
@@ -68,13 +69,19 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
   async function mountGroupedList({ listProps, hookParams }: WrapperProps): Promise<ReactWrapper> {
     const Wrapper: React.FC<WrapperProps> = (props) => {
       const {
+        fieldListFiltersProps,
         fieldListGroupedProps: { fieldGroups },
       } = useGroupedFields({
         ...props.hookParams,
         services: mockedServices,
       });
 
-      return <FieldListGrouped {...props.listProps} fieldGroups={fieldGroups} />;
+      return (
+        <>
+          <FieldListFilters {...fieldListFiltersProps} />
+          <FieldListGrouped {...props.listProps} fieldGroups={fieldGroups} />
+        </>
+      );
     };
 
     let wrapper: ReactWrapper;
@@ -301,7 +308,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     ).toStrictEqual([25, 88, 0, 0]);
   });
 
-  it('renders correctly when filtered', async () => {
+  it('renders correctly when fields are searched and filtered', async () => {
     const hookParams = {
       dataViewId: dataView.id!,
       allFields: manyFields,
@@ -319,12 +326,12 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     );
 
     await act(async () => {
-      await wrapper.setProps({
-        hookParams: {
-          ...hookParams,
-          onFilterField: (field: DataViewField) => field.name.startsWith('@'),
-        },
-      });
+      await wrapper
+        .find('[data-test-subj="fieldListFiltersFieldSearch"]')
+        .last()
+        .simulate('change', {
+          target: { value: '@' },
+        });
       await wrapper.update();
     });
 
@@ -333,17 +340,34 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     );
 
     await act(async () => {
-      await wrapper.setProps({
-        hookParams: {
-          ...hookParams,
-          onFilterField: (field: DataViewField) => field.name.startsWith('_'),
-        },
-      });
+      await wrapper
+        .find('[data-test-subj="fieldListFiltersFieldSearch"]')
+        .last()
+        .simulate('change', {
+          target: { value: '_' },
+        });
       await wrapper.update();
     });
 
     expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
-      '0 available fields. 12 unmapped fields. 0 empty fields. 3 meta fields.'
+      '3 available fields. 24 unmapped fields. 0 empty fields. 3 meta fields.'
+    );
+
+    await act(async () => {
+      await wrapper
+        .find('[data-test-subj="fieldListFiltersFieldTypeFilterToggle"]')
+        .last()
+        .simulate('click');
+      await wrapper.update();
+    });
+
+    await act(async () => {
+      await wrapper.find('[data-test-subj="typeFilter-date"]').first().simulate('click');
+      await wrapper.update();
+    });
+
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '1 available field. 4 unmapped fields. 0 empty fields. 0 meta fields.'
     );
   });
 
@@ -430,5 +454,55 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
       '2 selected fields. 10 popular fields. 25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.'
     );
+  });
+
+  it('persists sections state in local storage', async () => {
+    const wrapper = await mountGroupedList({
+      listProps: {
+        ...defaultProps,
+        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+        localStorageKeyPrefix: 'test',
+      },
+      hookParams: {
+        dataViewId: dataView.id!,
+        allFields: manyFields,
+      },
+    });
+
+    // only Available is open
+    expect(
+      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
+    ).toStrictEqual([true, false, false, false]);
+
+    await act(async () => {
+      await wrapper
+        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
+        .find('button')
+        .first()
+        .simulate('click');
+      await wrapper.update();
+    });
+
+    // now Empty is open too
+    expect(
+      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
+    ).toStrictEqual([true, false, true, false]);
+
+    const wrapper2 = await mountGroupedList({
+      listProps: {
+        ...defaultProps,
+        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+        localStorageKeyPrefix: 'test',
+      },
+      hookParams: {
+        dataViewId: dataView.id!,
+        allFields: manyFields,
+      },
+    });
+
+    // both Available and Empty are open for the second instance
+    expect(
+      wrapper2.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
+    ).toStrictEqual([true, false, true, false]);
   });
 });

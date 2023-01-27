@@ -6,43 +6,37 @@
  */
 
 import React, { useCallback, useEffect, useState, FC } from 'react';
+
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPageBody,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageSection,
   EuiPanel,
-  EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedSearch } from '@kbn/discover-plugin/public';
+import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 
+import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
-import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/use_url_state';
+import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
-import { FullTimeRangeSelector } from '../full_time_range_selector';
+
 import { DocumentCountContent } from '../document_count_content/document_count_content';
-import { DatePickerWrapper } from '../date_picker_wrapper';
 import { SearchPanel } from '../search_panel';
-
-import { restorableDefaults } from './explain_log_rate_spikes_app_state';
-import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
-import type { GroupTableItem } from '../spike_analysis_table/spike_analysis_table_groups';
+import type { GroupTableItem } from '../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
+import { PageHeader } from '../page_header';
 
-// TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
-import './explain_log_rate_spikes_page.scss';
+import { restorableDefaults, type AiOpsPageUrlState } from './explain_log_rate_spikes_app_state';
+import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
 
 function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: GroupTableItem) {
   if (changePoint) {
@@ -54,21 +48,9 @@ function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: Grou
   }
 }
 
-/**
- * ExplainLogRateSpikes props require a data view.
- */
-interface ExplainLogRateSpikesPageProps {
-  /** The data view to analyze. */
-  dataView: DataView;
-  /** The saved search to analyze. */
-  savedSearch: SavedSearch | SavedSearchSavedObject | null;
-}
-
-export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
-  dataView,
-  savedSearch,
-}) => {
+export const ExplainLogRateSpikesPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
+  const { dataView, savedSearch } = useDataSource();
 
   const {
     currentSelectedChangePoint,
@@ -79,7 +61,10 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     setSelectedGroup,
   } = useSpikeAnalysisTableRowContext();
 
-  const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
+  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
+    'AIOPS_INDEX_VIEWER',
+    restorableDefaults
+  );
   const [globalState, setGlobalState] = useUrlState('_g');
 
   const [currentSavedSearch, setCurrentSavedSearch] = useState(savedSearch);
@@ -184,42 +169,9 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
 
   return (
     <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiPageContentHeader className="aiopsPageHeader">
-            <EuiPageContentHeaderSection>
-              <div className="dataViewTitleHeader">
-                <EuiTitle size={'s'}>
-                  <h2>{dataView.getName()}</h2>
-                </EuiTitle>
-              </div>
-            </EuiPageContentHeaderSection>
-
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="aiopsTimeRangeSelectorSection"
-            >
-              {dataView.timeFieldName !== undefined && (
-                <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
-                    dataView={dataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <DatePickerWrapper />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentHeader>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiHorizontalRule />
-      <EuiPageContentBody>
+      <PageHeader />
+      <EuiSpacer size="m" />
+      <EuiPageSection paddingSize="none">
         <EuiFlexGroup gutterSize="m" direction="column">
           <EuiFlexItem>
             <SearchPanel
@@ -284,7 +236,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </EuiPageBody>
   );
 };

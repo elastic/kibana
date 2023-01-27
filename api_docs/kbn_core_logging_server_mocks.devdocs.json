@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-logging-server-mocks",
-        "id": "def-server.loggingServiceMock",
+        "id": "def-common.loggingServiceMock",
         "type": "Object",
         "tags": [],
         "label": "loggingServiceMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-server.loggingServiceMock.create",
+            "id": "def-common.loggingServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,7 +52,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-server.loggingServiceMock.createSetupContract",
+            "id": "def-common.loggingServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -53,9 +61,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.LoggingServiceSetup",
+                "section": "def-common.LoggingServiceSetup",
                 "text": "LoggingServiceSetup"
               },
               ">"
@@ -68,7 +76,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-server.loggingServiceMock.createInternalPrebootContract",
+            "id": "def-common.loggingServiceMock.createInternalPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalPrebootContract",
@@ -86,7 +94,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-server.loggingServiceMock.createInternalSetupContract",
+            "id": "def-common.loggingServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -107,7 +115,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server-mocks",
-        "id": "def-server.loggingSystemMock",
+        "id": "def-common.loggingSystemMock",
         "type": "Object",
         "tags": [],
         "label": "loggingSystemMock",
@@ -118,7 +126,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-server.loggingSystemMock.create",
+            "id": "def-common.loggingSystemMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -136,7 +144,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-server.loggingSystemMock.collect",
+            "id": "def-common.loggingSystemMock.collect",
             "type": "Function",
             "tags": [],
             "label": "collect",
@@ -145,41 +153,41 @@
               "(loggerFactory: ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LoggerFactory",
+                "section": "def-common.LoggerFactory",
                 "text": "LoggerFactory"
               },
               ") => { debug: [message: string, meta?: ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " | undefined][]; error: [errorOrMessage: string | Error, meta?: ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " | undefined][]; fatal: [errorOrMessage: string | Error, meta?: ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " | undefined][]; info: [message: string, meta?: ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " | undefined][]; log: [record: ",
@@ -187,17 +195,17 @@
               "][]; trace: [message: string, meta?: ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " | undefined][]; warn: [errorOrMessage: string | Error, meta?: ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
+                "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
               " | undefined][]; }"
@@ -209,7 +217,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-logging-server-mocks",
-                "id": "def-server.loggingSystemMock.collect.$1",
+                "id": "def-common.loggingSystemMock.collect.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "loggerFactory",
@@ -217,9 +225,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/logging",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.LoggerFactory",
+                    "section": "def-common.LoggerFactory",
                     "text": "LoggerFactory"
                   }
                 ],
@@ -231,7 +239,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-server.loggingSystemMock.clear",
+            "id": "def-common.loggingSystemMock.clear",
             "type": "Function",
             "tags": [],
             "label": "clear",
@@ -240,9 +248,9 @@
               "(loggerFactory: ",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LoggerFactory",
+                "section": "def-common.LoggerFactory",
                 "text": "LoggerFactory"
               },
               ") => void"
@@ -254,7 +262,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-logging-server-mocks",
-                "id": "def-server.loggingSystemMock.clear.$1",
+                "id": "def-common.loggingSystemMock.clear.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "loggerFactory",
@@ -262,9 +270,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/logging",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.LoggerFactory",
+                    "section": "def-common.LoggerFactory",
                     "text": "LoggerFactory"
                   }
                 ],
@@ -276,7 +284,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-server.loggingSystemMock.createLogger",
+            "id": "def-common.loggingSystemMock.createLogger",
             "type": "Function",
             "tags": [],
             "label": "createLogger",
@@ -285,9 +293,9 @@
               "(context?: string[]) => ",
               {
                 "pluginId": "@kbn/logging-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingMocksPluginApi",
-                "section": "def-server.MockedLogger",
+                "section": "def-common.MockedLogger",
                 "text": "MockedLogger"
               }
             ],
@@ -298,7 +306,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-logging-server-mocks",
-                "id": "def-server.loggingSystemMock.createLogger.$1",
+                "id": "def-common.loggingSystemMock.createLogger.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "context",
@@ -316,13 +324,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }
