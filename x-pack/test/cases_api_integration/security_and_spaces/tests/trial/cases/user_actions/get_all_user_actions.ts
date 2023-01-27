@@ -7,7 +7,7 @@
 
 import http from 'http';
 import expect from '@kbn/expect';
-import { UserActionWithResponse, PushedUserAction, User } from '@kbn/cases-plugin/common/api';
+import { PushedUserAction, User, UserActionWithDeprecatedResponse } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
@@ -72,13 +72,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const pushUserAction = userActions[1] as UserActionWithResponse<PushedUserAction>;
+      const pushUserAction = userActions[1] as UserActionWithDeprecatedResponse<PushedUserAction>;
 
       expect(userActions.length).to.eql(2);
       expect(pushUserAction.type).to.eql('pushed');
       expect(pushUserAction.action).to.eql('push_to_service');
       expect(pushUserAction.created_by).to.eql(defaultUser);
-      expect(pushUserAction.case_id).to.eql(postedCase.id);
+      expect(pushUserAction.case_id).to.eql('postedCase.id');
       expect(pushUserAction.comment_id).to.eql(null);
       expect(pushUserAction.owner).to.eql('securitySolutionFixture');
       expect(pushUserAction.payload.externalService).to.eql({
@@ -181,7 +181,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
-        const pushUserAction = userActions[1] as UserActionWithResponse<PushedUserAction>;
+        const pushUserAction = userActions[1] as UserActionWithDeprecatedResponse<PushedUserAction>;
 
         expect(pushUserAction.payload.externalService.pushed_by).to.eql(superUserWithProfile);
       });
@@ -200,7 +200,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
-        const pushUserAction = userActions[1] as UserActionWithResponse<PushedUserAction>;
+        const pushUserAction = userActions[1] as UserActionWithDeprecatedResponse<PushedUserAction>;
 
         expect(pushUserAction.payload.externalService.pushed_by).to.eql(superUserInfo);
       });

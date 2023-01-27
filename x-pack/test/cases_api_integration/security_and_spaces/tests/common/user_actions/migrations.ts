@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { ActionTypes, CaseUserActionsResponse, CommentType } from '@kbn/cases-plugin/common/api';
+import { ActionTypes, CaseUserActionsDeprecatedResponse, CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { deleteAllCaseItems } from '../../../../common/lib/utils';
 import { getCaseUserActions } from '../../../../common/lib/user_actions';
@@ -256,7 +256,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     describe('7.13 connector id extraction', () => {
-      let userActions: CaseUserActionsResponse;
+      let userActions: CaseUserActionsDeprecatedResponse;
 
       before(async () => {
         await esArchiver.load(
@@ -1220,6 +1220,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   });
 }
 
-function getUserActionById(userActions: CaseUserActionsResponse, id: string): any {
+function getUserActionById(userActions: CaseUserActionsDeprecatedResponse, id: string): any {
   return userActions.find((userAction) => userAction.action_id === id);
 }

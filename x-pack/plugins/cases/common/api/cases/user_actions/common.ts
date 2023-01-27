@@ -69,3 +69,5 @@ export type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonA
 export type UserActionWithResponse<T> = T & { id: string; version: string } & rt.TypeOf<
     typeof CaseUserActionInjectedIdsRt
   >;
+export type UserActionWithDeprecatedResponse<T> = T & rt.TypeOf<typeof CaseUserActionInjectedDeprecatedIdsRt>;
+
