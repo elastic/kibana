@@ -32,6 +32,8 @@ import {
   CLOSED_ALERTS_FILTER_BTN,
   OPENED_ALERTS_FILTER_BTN,
   EVENT_CONTAINER_TABLE_LOADING,
+  SELECT_ALL_ALERTS,
+  SELECT_ALL_VISIBLE_ALERTS,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -335,4 +337,13 @@ export const resetFilters = () => {
   cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
   cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
   waitForPageFilters();
+};
+
+export const selectFirstPageAlerts = () => {
+  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().scrollIntoView().click({ force: true });
+};
+
+export const selectAllAlerts = () => {
+  selectFirstPageAlerts();
+  cy.get(SELECT_ALL_ALERTS).click();
 };

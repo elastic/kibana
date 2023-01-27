@@ -8,8 +8,11 @@
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 
+import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { getUseCellActionsHook } from '../../../detections/hooks/trigger_actions_alert_table/use_cell_actions';
+import { getBulkActionHook } from '../../../detections/hooks/trigger_actions_alert_table/use_bulk_actions';
+import { getUseActionColumnHook } from '../../../detections/hooks/trigger_actions_alert_table/use_actions_column';
 import { getPersistentControlsHook } from '../../../detections/hooks/trigger_actions_alert_table/use_persistent_controls';
-import { useActionsColumn } from '../../../detections/hooks/trigger_actions_alert_table/use_actions_column';
 import { APP_ID, CASES_FEATURE_ID } from '../../../../common/constants';
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { TableId, TimelineId } from '../../../../common/types';
@@ -17,8 +20,6 @@ import { getColumns } from '../../../detections/configurations/security_solution
 import { getRenderCellValueHook } from '../../../detections/configurations/security_solution_detections/render_cell_value';
 import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useBulkActionHook } from '../../../detections/hooks/trigger_actions_alert_table/use_bulk_actions';
-import { useCellActions } from '../../../detections/hooks/trigger_actions_alert_table/use_cell_actions';
 
 const registerAlertsTableConfiguration = (
   registry: AlertsTableConfigurationRegistryContract,
@@ -36,8 +37,6 @@ const registerAlertsTableConfiguration = (
     return { header, body, footer };
   };
 
-  const usePersistentControls = getPersistentControlsHook(storage);
-
   const renderCellValueHookAlertPage = getRenderCellValueHook({
     scopeId: SourcererScopeName.default,
   });
@@ -46,24 +45,40 @@ const registerAlertsTableConfiguration = (
     scopeId: TimelineId.casePage,
   });
 
-  // regitser Alert Table on Alert Page
+  const sort: AlertsTableConfigurationRegistry['sort'] = [
+    {
+      '@timestamp': {
+        order: 'desc',
+      },
+    },
+  ];
+
+  // register Alert Table on Alert Page
   registry.register({
     id: `${APP_ID}`,
     casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookAlertPage,
-    useActionsColumn,
+    useActionsColumn: getUseActionColumnHook(TableId.alertsOnAlertsPage),
     useInternalFlyout,
-    useBulkActions: useBulkActionHook,
-    useCellActions,
-    usePersistentControls,
-    sort: [
-      {
-        '@timestamp': {
-          order: 'desc',
-        },
-      },
-    ],
+    useBulkActions: getBulkActionHook(TableId.alertsOnAlertsPage),
+    useCellActions: getUseCellActionsHook(TableId.alertsOnAlertsPage),
+    usePersistentControls: getPersistentControlsHook(TableId.alertsOnAlertsPage),
+    sort,
+  });
+
+  // register Alert Table on RuleDetails Page
+  registry.register({
+    id: `${APP_ID}-rule-details`,
+    casesFeatureId: CASES_FEATURE_ID,
+    columns: alertColumns,
+    getRenderCellValue: renderCellValueHookAlertPage,
+    useActionsColumn: getUseActionColumnHook(TableId.alertsOnRuleDetailsPage),
+    useInternalFlyout,
+    useBulkActions: getBulkActionHook(TableId.alertsOnRuleDetailsPage),
+    useCellActions: getUseCellActionsHook(TableId.alertsOnRuleDetailsPage),
+    usePersistentControls: getPersistentControlsHook(TableId.alertsOnRuleDetailsPage),
+    sort,
   });
 
   registry.register({
@@ -71,18 +86,12 @@ const registerAlertsTableConfiguration = (
     casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookCasePage,
-    useActionsColumn,
+    useActionsColumn: getUseActionColumnHook(TableId.alertsOnAlertsPage),
     useInternalFlyout,
-    useBulkActions: useBulkActionHook,
-    useCellActions,
-    usePersistentControls,
-    sort: [
-      {
-        '@timestamp': {
-          order: 'desc',
-        },
-      },
-    ],
+    useBulkActions: getBulkActionHook(TableId.alertsOnAlertsPage),
+    useCellActions: getUseCellActionsHook(TableId.alertsOnAlertsPage),
+    usePersistentControls: getPersistentControlsHook(TableId.alertsOnAlertsPage),
+    sort,
   });
 };
 

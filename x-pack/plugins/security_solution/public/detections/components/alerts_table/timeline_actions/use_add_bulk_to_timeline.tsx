@@ -114,7 +114,7 @@ export const useAddBulkToTimelineAction = ({
     indexNames: selectedPatterns,
     filterQuery,
     runtimeMappings,
-    limit: Math.min(BULK_ADD_TO_TIMELINE_LIMIT, totalCount),
+    limit: 1000, // Math.min(BULK_ADD_TO_TIMELINE_LIMIT, 100),
     timerangeKind: 'absolute',
   });
 

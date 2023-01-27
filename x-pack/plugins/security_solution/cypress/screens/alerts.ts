@@ -26,8 +26,7 @@ export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
 export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="event"]';
 
-export const ALERTS_COUNT =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
+export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
 
 export const ALERTS_TREND_SIGNAL_RULE_NAME_PANEL =
   '[data-test-subj="render-content-kibana.alert.rule.name"]';
@@ -42,7 +41,7 @@ export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
 export const DESTINATION_IP = '[data-test-subj^=formatted-field][data-test-subj$=destination\\.ip]';
 
-export const EMPTY_ALERT_TABLE = '[data-test-subj="tGridEmptyState"]';
+export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsStateTableEmptyState"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
@@ -133,3 +132,7 @@ export const ACTION_COLUMN = '[data-gridcell-column-id="default-timeline-control
 export const DATAGRID_CHANGES_IN_PROGRESS = '[data-test-subj="body-data-grid"] .euiProgress';
 
 export const EVENT_CONTAINER_TABLE_LOADING = '[data-test-subj="internalAlertsPageLoading"]';
+
+export const SELECT_ALL_VISIBLE_ALERTS = '[data-test-subj="bulk-actions-header"]';
+
+export const SELECT_ALL_ALERTS = '[data-test-subj="selectAllAlertsButton"]';

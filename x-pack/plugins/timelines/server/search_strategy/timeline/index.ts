@@ -101,10 +101,9 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   const dsl = queryFactory.buildDsl(request);
   return es.search({ ...request, params: dsl }, options, deps).pipe(
     map((response) => {
-      logger.debug(
+      logger.warn(
         JSON.stringify({
           timelineSearch: {
-            _source: dsl._source,
             request,
             dsl,
             ...response,

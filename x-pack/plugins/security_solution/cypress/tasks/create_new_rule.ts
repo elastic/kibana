@@ -667,6 +667,7 @@ export const selectNewTermsRuleType = () => {
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
+      cy.log('Waiting for alerts to appear');
       refreshPage();
       return cy
         .get(ALERTS_TABLE_COUNT)
