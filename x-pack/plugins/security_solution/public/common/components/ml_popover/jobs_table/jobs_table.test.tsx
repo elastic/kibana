@@ -62,7 +62,7 @@ describe('JobsTableComponent', () => {
     );
   });
 
-  test('should display job friendly name', async () => {
+  test('should display the job friendly name', async () => {
     const wrapper = mount(
       <JobsTableComponent
         isLoading={true}
