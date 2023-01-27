@@ -77,6 +77,21 @@ describe('AddIndicesLogic', () => {
   });
 
   describe('listeners', () => {
+    describe('engineUpdated', () => {
+      it('closes the add indices flyout', () => {
+        jest.spyOn(AddIndicesLogic.actions, 'closeAddIndicesFlyout');
+
+        AddIndicesLogic.actions.engineUpdated({
+          created: '1999-12-31T23:59:59Z',
+          indices: [],
+          name: 'engine-name',
+          updated: '1999-12-31T23:59:59Z',
+        });
+
+        expect(AddIndicesLogic.actions.closeAddIndicesFlyout).toHaveBeenCalledTimes(1);
+      });
+    });
+
     describe('submitSelectedIndices', () => {
       it('does not make a request if there are no selectedIndices', () => {
         jest.spyOn(AddIndicesLogic.actions, 'addIndicesToEngine');
