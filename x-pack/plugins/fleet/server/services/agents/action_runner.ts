@@ -168,13 +168,13 @@ export abstract class ActionRunner {
 
         for (const action of actions) {
           if (action.agents?.[0] === agents[0].id) {
-            appContextService
-              .getLogger()
-              .debug(
-                `skipping batch as there is already an action document present with last agent ids, actionId: ${this
-                  .actionParams!.actionId!}`
-              );
             if (action.type !== 'UPDATE_TAGS') {
+              appContextService
+                .getLogger()
+                .debug(
+                  `skipping batch as there is already an action document present with last agent ids, actionId: ${this
+                    .actionParams!.actionId!}`
+                );
               return { actionId: this.actionParams.actionId! };
             }
           }
@@ -193,7 +193,7 @@ export abstract class ActionRunner {
 
     const perPage = this.actionParams.batchSize ?? SO_SEARCH_LIMIT;
 
-    appContextService.getLogger().debug('this.actionParams.kuery: ' + this.actionParams.kuery);
+    appContextService.getLogger().debug('kuery: ' + this.actionParams.kuery);
 
     const getAgents = () =>
       getAgentsByKuery(this.esClient, this.soClient, {
@@ -219,8 +219,6 @@ export abstract class ActionRunner {
     let allAgentsProcessed = currentAgents.length;
 
     while (allAgentsProcessed < res.total) {
-      appContextService.getLogger().debug('res.total: ' + res.total);
-      appContextService.getLogger().debug('this.actionParams.total: ' + this.actionParams.total);
       const lastAgent = currentAgents[currentAgents.length - 1];
       this.retryParams.searchAfter = lastAgent.sort!;
       const nextPage = await getAgents();
