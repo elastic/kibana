@@ -141,6 +141,12 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
     },
 
     {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.jobId', {
+        defaultMessage: 'Report job ID',
+      }),
+      description: info.id,
+    },
+    {
       title: i18n.translate('xpack.reporting.listing.infoPanel.processedByInfo', {
         defaultMessage: 'Processed by',
       }),
