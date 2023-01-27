@@ -143,8 +143,7 @@ export const usePivotData = (
     resetPagination,
     setErrorMessage,
     setNoDataMessage,
-    setRowCount,
-    setRowCountRelation,
+    setRowCountInfo,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -154,8 +153,10 @@ export const usePivotData = (
   const getPreviewData = async () => {
     if (!validationStatus.isValid) {
       setTableItems([]);
-      setRowCount(0);
-      setRowCountRelation(ES_CLIENT_TOTAL_HITS_RELATION.EQ);
+      setRowCountInfo({
+        rowCount: 0,
+        rowCountRelation: ES_CLIENT_TOTAL_HITS_RELATION.EQ,
+      });
       setNoDataMessage(validationStatus.errorMessage!);
       return;
     }
@@ -175,8 +176,10 @@ export const usePivotData = (
     if (!isPostTransformsPreviewResponseSchema(resp)) {
       setErrorMessage(getErrorMessage(resp));
       setTableItems([]);
-      setRowCount(0);
-      setRowCountRelation(ES_CLIENT_TOTAL_HITS_RELATION.EQ);
+      setRowCountInfo({
+        rowCount: 0,
+        rowCountRelation: ES_CLIENT_TOTAL_HITS_RELATION.EQ,
+      });
       setPreviewMappingsProperties({});
       setStatus(INDEX_STATUS.ERROR);
       return;
@@ -208,8 +211,10 @@ export const usePivotData = (
     populatedProperties = getCombinedProperties(populatedProperties, docs);
 
     setTableItems(docs);
-    setRowCount(docs.length);
-    setRowCountRelation(ES_CLIENT_TOTAL_HITS_RELATION.EQ);
+    setRowCountInfo({
+      rowCount: docs.length,
+      rowCountRelation: ES_CLIENT_TOTAL_HITS_RELATION.EQ,
+    });
     setPreviewMappingsProperties(populatedProperties);
     setStatus(INDEX_STATUS.LOADED);
 
