@@ -602,71 +602,269 @@
         ],
         "signature": [
           "Omit<",
-          "EcsBase",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsBase",
+            "text": "EcsBase"
+          },
           ", \"message\" | \"@timestamp\"> & ",
-          "EcsTracing",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsTracing",
+            "text": "EcsTracing"
+          },
           " & { agent?: ",
-          "EcsAgent",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsAgent",
+            "text": "EcsAgent"
+          },
           " | undefined; as?: ",
-          "EcsAutonomousSystem",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsAs",
+            "text": "EcsAs"
+          },
           " | undefined; client?: ",
-          "EcsClient",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsClient",
+            "text": "EcsClient"
+          },
           " | undefined; cloud?: ",
-          "EcsCloud",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsCloud",
+            "text": "EcsCloud"
+          },
           " | undefined; container?: ",
-          "EcsContainer",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsContainer",
+            "text": "EcsContainer"
+          },
           " | undefined; destination?: ",
-          "EcsDestination",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsDestination",
+            "text": "EcsDestination"
+          },
           " | undefined; dns?: ",
-          "EcsDns",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsDns",
+            "text": "EcsDns"
+          },
           " | undefined; error?: ",
-          "EcsError",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsError",
+            "text": "EcsError"
+          },
           " | undefined; event?: ",
-          "EcsEvent",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsEvent",
+            "text": "EcsEvent"
+          },
           " | undefined; file?: ",
-          "EcsFile",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsFile",
+            "text": "EcsFile"
+          },
           " | undefined; group?: ",
-          "EcsGroup",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsGroup",
+            "text": "EcsGroup"
+          },
           " | undefined; host?: ",
-          "EcsHost",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsHost",
+            "text": "EcsHost"
+          },
           " | undefined; http?: ",
-          "EcsHttp",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsHttp",
+            "text": "EcsHttp"
+          },
           " | undefined; log?: Omit<",
-          "EcsLog",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsLog",
+            "text": "EcsLog"
+          },
           ", \"logger\" | \"level\"> | undefined; network?: ",
-          "EcsNetwork",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsNetwork",
+            "text": "EcsNetwork"
+          },
           " | undefined; observer?: ",
-          "EcsObserver",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsObserver",
+            "text": "EcsObserver"
+          },
           " | undefined; organization?: ",
-          "EcsOrganization",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsOrganization",
+            "text": "EcsOrganization"
+          },
           " | undefined; package?: ",
-          "EcsPackage",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsPackage",
+            "text": "EcsPackage"
+          },
           " | undefined; process?: ",
-          "EcsProcess",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsProcess",
+            "text": "EcsProcess"
+          },
           " | undefined; registry?: ",
-          "EcsRegistry",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsRegistry",
+            "text": "EcsRegistry"
+          },
           " | undefined; related?: ",
-          "EcsRelated",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsRelated",
+            "text": "EcsRelated"
+          },
           " | undefined; rule?: ",
-          "EcsRule",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsRule",
+            "text": "EcsRule"
+          },
           " | undefined; server?: ",
-          "EcsServer",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsServer",
+            "text": "EcsServer"
+          },
           " | undefined; service?: ",
-          "EcsService",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsService",
+            "text": "EcsService"
+          },
           " | undefined; source?: ",
-          "EcsSource",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsSource",
+            "text": "EcsSource"
+          },
           " | undefined; threat?: ",
-          "EcsThreat",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsThreat",
+            "text": "EcsThreat"
+          },
           " | undefined; tls?: ",
-          "EcsTls",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsTls",
+            "text": "EcsTls"
+          },
           " | undefined; url?: ",
-          "EcsUrl",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsUrl",
+            "text": "EcsUrl"
+          },
           " | undefined; user?: ",
-          "EcsUser",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsUser",
+            "text": "EcsUser"
+          },
           " | undefined; user_agent?: ",
-          "EcsUserAgent",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsUserAgent",
+            "text": "EcsUserAgent"
+          },
           " | undefined; vulnerability?: ",
-          "EcsVulnerability",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsVulnerability",
+            "text": "EcsVulnerability"
+          },
           " | undefined; }"
         ],
         "path": "packages/kbn-logging/src/log_meta.ts",
