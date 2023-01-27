@@ -6,15 +6,14 @@
  */
 
 import apm from 'elastic-apm-node';
-import { cloneDeep, omit } from 'lodash';
+import { omit } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
-import { Alert, createAlertFactory } from '../alert';
 import {
   ElasticsearchError,
   ErrorWithReason,
@@ -22,11 +21,8 @@ import {
   executionStatusFromState,
   ruleExecutionStatusToRaw,
   isRuleSnoozed,
-  processAlerts,
-  setFlapping,
   lastRunFromError,
   getNextRun,
-  determineAlertsToReturn,
 } from '../lib';
 import {
   RuleExecutionStatus,
@@ -48,7 +44,7 @@ import {
   RuleTypeParams,
   RuleTypeState,
   parseDuration,
-  WithoutReservedActionGroups,
+  RawAlertInstance,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -65,12 +61,12 @@ import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { loadRule } from './rule_loader';
-import { logAlerts } from './log_alerts';
-import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
+import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
+import { LegacyAlertsClient } from '../alerts_client/legacy_alerts_client';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -106,7 +102,6 @@ export class TaskRunner<
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly inMemoryMetrics: InMemoryMetrics;
   private readonly maxAlerts: number;
-  private alerts: Record<string, Alert<State, Context>>;
   private timer: TaskRunnerTimer;
   private alertingEventLogger: AlertingEventLogger;
   private usageCounter?: UsageCounter;
@@ -114,7 +109,14 @@ export class TaskRunner<
   private cancelled: boolean;
   private stackTraceLog: StackTraceLog | null;
   private ruleMonitoring: RuleMonitoringService;
+  private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
+  private legacyAlertsClient: LegacyAlertsClient<
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -140,18 +142,27 @@ export class TaskRunner<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
-    this.executionId = uuid.v4();
+    this.executionId = uuidv4();
     this.inMemoryMetrics = inMemoryMetrics;
     this.maxAlerts = context.maxAlerts;
-    this.alerts = {};
     this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
     this.ruleMonitoring = new RuleMonitoringService();
+    this.ruleRunning = new RunningHandler(
+      this.context.internalSavedObjectsRepository,
+      this.logger,
+      loggerId
+    );
     this.ruleResult = new RuleResultService();
+    this.legacyAlertsClient = new LegacyAlertsClient({
+      logger: this.logger,
+      maxAlerts: context.maxAlerts,
+      ruleType: this.ruleType as UntypedNormalizedRuleType,
+    });
   }
 
-  private async updateRuleSavedObject(
+  private async updateRuleSavedObjectPostRun(
     ruleId: string,
     namespace: string | undefined,
     attributes: {
@@ -163,11 +174,25 @@ export class TaskRunner<
   ) {
     const client = this.context.internalSavedObjectsRepository;
     try {
-      await partiallyUpdateAlert(client, ruleId, attributes, {
-        ignore404: true,
-        namespace,
-        refresh: false,
-      });
+      // Future engineer -> Here we are just checking if we need to wait for
+      // the update of the attribute `running` in the rule's saved object
+      // and we are swallowing the error because we still want to move forward
+      // with the update of our rule since we are putting back the running attribute
+      // back to false
+      await this.ruleRunning.waitFor();
+      // eslint-disable-next-line no-empty
+    } catch {}
+    try {
+      await partiallyUpdateAlert(
+        client,
+        ruleId,
+        { ...attributes, running: false },
+        {
+          ignore404: true,
+          namespace,
+          refresh: false,
+        }
+      );
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
     }
@@ -271,36 +296,13 @@ export class TaskRunner<
       searchSourceClient,
     });
 
-    const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts, originalRecoveredAlerts } =
-      await this.timer.runWithTimer(TaskRunnerTimerSpan.RuleTypeRun, async () => {
-        for (const id in alertRawInstances) {
-          if (alertRawInstances.hasOwnProperty(id)) {
-            this.alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
-          }
-        }
-
-        const recoveredAlerts: Record<string, Alert<State, Context>> = {};
-        for (const id in alertRecoveredRawInstances) {
-          if (alertRecoveredRawInstances.hasOwnProperty(id)) {
-            recoveredAlerts[id] = new Alert<State, Context>(id, alertRecoveredRawInstances[id]);
-          }
-        }
-
-        const alertsCopy = cloneDeep(this.alerts);
-
-        const alertFactory = createAlertFactory<
-          State,
-          Context,
-          WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-        >({
-          alerts: this.alerts,
-          logger: this.logger,
-          maxAlerts: this.maxAlerts,
-          canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
-        });
+    const { updatedRuleTypeState } = await this.timer.runWithTimer(
+      TaskRunnerTimerSpan.RuleTypeRun,
+      async () => {
+        this.legacyAlertsClient.initialize(alertRawInstances, alertRecoveredRawInstances);
 
         const checkHasReachedAlertLimit = () => {
-          const reachedLimit = alertFactory.hasReachedAlertLimit();
+          const reachedLimit = this.legacyAlertsClient.hasReachedAlertLimit();
           if (reachedLimit) {
             this.logger.warn(
               `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
@@ -310,7 +312,7 @@ export class TaskRunner<
           return reachedLimit;
         };
 
-        let updatedState: void | Record<string, unknown>;
+        let executorResult: { state: RuleState } | undefined;
         try {
           const ctx = {
             type: 'alert',
@@ -330,7 +332,7 @@ export class TaskRunner<
             scopedClusterClient.asInternalUser
           );
 
-          updatedState = await this.context.executionContext.withContext(ctx, () =>
+          executorResult = await this.context.executionContext.withContext(ctx, () =>
             this.ruleType.executor({
               executionId: this.executionId,
               services: {
@@ -338,7 +340,7 @@ export class TaskRunner<
                 searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
                 uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
                 scopedClusterClient: wrappedScopedClusterClient.client(),
-                alertFactory: getPublicAlertFactory(alertFactory),
+                alertFactory: this.legacyAlertsClient.getExecutorServices(),
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
@@ -379,7 +381,7 @@ export class TaskRunner<
           // or requested it and then reported back whether it exceeded the limit
           // If neither of these apply, this check will throw an error
           // These errors should show up during rule type development
-          alertFactory.alertLimit.checkLimitUsage();
+          this.legacyAlertsClient.checkLimitUsage();
         } catch (err) {
           // Check if this error is due to reaching the alert limit
           if (!checkHasReachedAlertLimit()) {
@@ -405,55 +407,19 @@ export class TaskRunner<
         ]);
 
         return {
-          originalAlerts: alertsCopy,
-          originalRecoveredAlerts: recoveredAlerts,
-          updatedRuleTypeState: updatedState || undefined,
-          hasReachedAlertLimit: alertFactory.hasReachedAlertLimit(),
-        };
-      });
-
-    const { activeAlerts, recoveredAlerts, currentRecoveredAlerts } = await this.timer.runWithTimer(
-      TaskRunnerTimerSpan.ProcessAlerts,
-      async () => {
-        const {
-          newAlerts: processedAlertsNew,
-          activeAlerts: processedAlertsActive,
-          currentRecoveredAlerts: processedAlertsRecoveredCurrent,
-          recoveredAlerts: processedAlertsRecovered,
-        } = processAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
-          alerts: this.alerts,
-          existingAlerts: originalAlerts,
-          previouslyRecoveredAlerts: originalRecoveredAlerts,
-          hasReachedAlertLimit,
-          alertLimit: this.maxAlerts,
-          setFlapping: true,
-        });
-
-        setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-          processedAlertsActive,
-          processedAlertsRecovered
-        );
-
-        logAlerts({
-          logger: this.logger,
-          alertingEventLogger: this.alertingEventLogger,
-          newAlerts: processedAlertsNew,
-          activeAlerts: processedAlertsActive,
-          recoveredAlerts: processedAlertsRecoveredCurrent,
-          ruleLogPrefix: ruleLabel,
-          ruleRunMetricsStore,
-          canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
-          shouldPersistAlerts: this.shouldLogAndScheduleActionsForAlerts(),
-        });
-
-        return {
-          newAlerts: processedAlertsNew,
-          activeAlerts: processedAlertsActive,
-          recoveredAlerts: processedAlertsRecovered,
-          currentRecoveredAlerts: processedAlertsRecoveredCurrent,
+          updatedRuleTypeState: executorResult?.state || undefined,
         };
       }
     );
+
+    await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
+      this.legacyAlertsClient.processAndLogAlerts({
+        eventLogger: this.alertingEventLogger,
+        ruleLabel,
+        ruleRunMetricsStore,
+        shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+      });
+    });
 
     const executionHandler = new ExecutionHandler({
       rule,
@@ -484,18 +450,22 @@ export class TaskRunner<
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
         executionHandlerRunResult = await executionHandler.run({
-          ...activeAlerts,
-          ...currentRecoveredAlerts,
+          ...this.legacyAlertsClient.getProcessedAlerts('active'),
+          ...this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent'),
         });
       }
     });
 
-    const { alertsToReturn, recoveredAlertsToReturn } = determineAlertsToReturn<
-      State,
-      Context,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >(activeAlerts, recoveredAlerts);
+    let alertsToReturn: Record<string, RawAlertInstance> = {};
+    let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
+    // Only serialize alerts into task state if we're auto-recovering, otherwise
+    // we don't need to keep this information around.
+    if (this.ruleType.autoRecoverAlerts) {
+      const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
+        this.legacyAlertsClient.getAlertsToSerialize();
+      alertsToReturn = alerts;
+      recoveredAlertsToReturn = recovered;
+    }
 
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
@@ -517,6 +487,7 @@ export class TaskRunner<
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule`;
       apm.currentTransaction.addLabels({
+        alerting_rule_space_id: spaceId,
         alerting_rule_id: ruleId,
       });
     }
@@ -648,8 +619,7 @@ export class TaskRunner<
           executionStatus
         )} - ${JSON.stringify(lastRun)}`
       );
-
-      await this.updateRuleSavedObject(ruleId, namespace, {
+      await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         nextRun,
         lastRun: lastRunToRaw(lastRun),
@@ -668,6 +638,7 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
     const runDate = new Date();
     this.logger.debug(`executing rule ${this.ruleType.id}:${ruleId} at ${runDate.toISOString()}`);
 
@@ -846,7 +817,7 @@ export class TaskRunner<
     this.logger.debug(
       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
     );
-    await this.updateRuleSavedObject(ruleId, namespace, {
+    await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
       lastRun: {
         outcome: 'failed',

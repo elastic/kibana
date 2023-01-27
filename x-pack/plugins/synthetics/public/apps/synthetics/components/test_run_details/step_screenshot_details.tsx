@@ -7,41 +7,37 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { useTheme } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { JourneyStep } from '../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../common/screenshot/journey_step_screenshot_container';
+import { StepMetaInfo } from './components/step_info';
 
 export const StepScreenshotDetails = ({
   stepIndex,
   step,
+  stateId,
 }: {
   stepIndex: number;
+  stateId?: string;
   step?: JourneyStep;
 }) => {
   const { checkGroupId } = useParams<{ checkGroupId: string }>();
 
-  const theme = useTheme();
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder={false}
-      css={{ backgroundColor: theme.eui.euiColorLightestShade }}
-    >
+    <EuiPanel hasShadow={false} hasBorder={false} color="subdued">
       <EuiFlexGroup>
-        <EuiFlexItem css={{ alignItems: 'flex-start' }}>
+        <EuiFlexItem css={{ alignItems: 'flex-start' }} grow={false}>
           <JourneyStepScreenshotContainer
             key={stepIndex}
             checkGroup={step?.monitor.check_group ?? checkGroupId}
-            initialStepNo={stepIndex}
+            initialStepNumber={stepIndex}
             stepStatus={step?.synthetics.payload?.status}
             allStepsLoaded={true}
             retryFetchOnRevisit={false}
-            asThumbnail={false}
-            size="m"
+            size={[180, 112]}
           />
         </EuiFlexItem>
-        <EuiFlexItem>{/* TODO: add image details*/}</EuiFlexItem>
+        <StepMetaInfo step={step} stepIndex={stepIndex} stateId={stateId} />
       </EuiFlexGroup>
     </EuiPanel>
   );

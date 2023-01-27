@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -28,6 +28,11 @@ import {
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import {
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+  parseDuration,
+} from '@kbn/alerting-plugin/common/parse_duration';
 import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
@@ -44,6 +49,7 @@ import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './act
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
+import { ActionNotifyWhen } from './action_notify_when';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -53,11 +59,14 @@ export type ActionTypeFormProps = {
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
+  hideNotifyWhen?: boolean;
+  minimumThrottleInterval?: [number | undefined, string];
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -83,6 +92,7 @@ export const ActionTypeForm = ({
   onConnectorSelected,
   onDeleteAction,
   setActionParamsProperty,
+  setActionFrequencyProperty,
   actionTypesIndex,
   connectors,
   defaultActionGroupId,
@@ -93,6 +103,8 @@ export const ActionTypeForm = ({
   actionTypeRegistry,
   isActionGroupDisabledForActionType,
   recoveryActionGroup,
+  hideNotifyWhen = false,
+  minimumThrottleInterval,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -106,6 +118,18 @@ export const ActionTypeForm = ({
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
   });
+  const [actionThrottle, setActionThrottle] = useState<number | null>(
+    actionItem.frequency?.throttle
+      ? getDurationNumberInItsUnit(actionItem.frequency.throttle)
+      : null
+  );
+  const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
+    actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
+  );
+  const [minimumActionThrottle = -1, minimumActionThrottleUnit] = minimumThrottleInterval ?? [
+    -1,
+    's',
+  ];
 
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
@@ -120,6 +144,25 @@ export const ActionTypeForm = ({
 
     return defaultParams;
   };
+
+  const [showMinimumThrottleWarning, showMinimumThrottleUnitWarning] = useMemo(() => {
+    try {
+      if (!actionThrottle) return [false, false];
+      const throttleUnitDuration = parseDuration(`1${actionThrottleUnit}`);
+      const minThrottleUnitDuration = parseDuration(`1${minimumActionThrottleUnit}`);
+      const boundedThrottle =
+        throttleUnitDuration > minThrottleUnitDuration
+          ? actionThrottle
+          : Math.max(actionThrottle, minimumActionThrottle);
+      const boundedThrottleUnit =
+        parseDuration(`${actionThrottle}${actionThrottleUnit}`) >= minThrottleUnitDuration
+          ? actionThrottleUnit
+          : minimumActionThrottleUnit;
+      return [boundedThrottle !== actionThrottle, boundedThrottleUnit !== actionThrottleUnit];
+    } catch (e) {
+      return [false, false];
+    }
+  }, [minimumActionThrottle, minimumActionThrottleUnit, actionThrottle, actionThrottleUnit]);
 
   useEffect(() => {
     (async () => {
@@ -185,6 +228,34 @@ export const ActionTypeForm = ({
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
       : false;
 
+  const actionNotifyWhen = (
+    <ActionNotifyWhen
+      frequency={actionItem.frequency}
+      throttle={actionThrottle}
+      throttleUnit={actionThrottleUnit}
+      onNotifyWhenChange={useCallback(
+        (notifyWhen) => {
+          setActionFrequencyProperty('notifyWhen', notifyWhen, index);
+        },
+        [setActionFrequencyProperty, index]
+      )}
+      onThrottleChange={useCallback(
+        (throttle: number | null, throttleUnit: string) => {
+          setActionThrottle(throttle);
+          setActionThrottleUnit(throttleUnit);
+          setActionFrequencyProperty(
+            'throttle',
+            throttle ? `${throttle}${throttleUnit}` : null,
+            index
+          );
+        },
+        [setActionFrequencyProperty, index]
+      )}
+      showMinimumThrottleWarning={showMinimumThrottleWarning}
+      showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+    />
+  );
+
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
 
@@ -198,9 +269,11 @@ export const ActionTypeForm = ({
     connectors.filter((connector) => connector.isPreconfigured)
   );
 
+  const showSelectActionGroup = actionGroups && selectedActionGroup && setActionGroupIdByIndex;
+
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
-      {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
+      {showSelectActionGroup && (
         <>
           <EuiSuperSelect
             prepend={
@@ -226,10 +299,11 @@ export const ActionTypeForm = ({
               setActionGroup(group);
             }}
           />
-
-          <EuiSpacer size="l" />
+          {!hideNotifyWhen && <EuiSpacer size="xs" />}
         </>
       )}
+      {!hideNotifyWhen && actionNotifyWhen}
+      {(showSelectActionGroup || !hideNotifyWhen) && <EuiSpacer size="l" />}
       <EuiFormRow
         fullWidth
         label={

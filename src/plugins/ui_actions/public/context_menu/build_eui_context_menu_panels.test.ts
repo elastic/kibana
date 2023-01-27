@@ -9,7 +9,7 @@
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { buildContextMenuForActions } from './build_eui_context_menu_panels';
 import { Action, createAction } from '../actions';
-import { PresentableGrouping } from '../util';
+import { PresentableGrouping } from '@kbn/ui-actions-browser';
 
 const createTestAction = ({
   type,

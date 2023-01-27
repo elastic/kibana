@@ -13044,6 +13044,12 @@
             "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
           }
         },
+        "sessionConcurrentSessionsMaxSessions": {
+          "type": "long",
+          "_meta": {
+            "description": "The maximum number of the concurrent user sessions (0 if not configured)."
+          }
+        },
         "anonymousCredentialType": {
           "type": "keyword",
           "_meta": {

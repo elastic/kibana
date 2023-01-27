@@ -149,6 +149,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
                     defaultMessage: 'Specify host URL',
                   }
                 )}
+                isUrl
               />
             </>
           </EuiFormRow>

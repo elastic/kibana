@@ -159,6 +159,7 @@ enabled:
   - x-pack/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.ts
   - x-pack/test/fleet_functional/config.ts
+  - x-pack/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/test/functional_basic/config.ts
   - x-pack/test/functional_cors/config.ts
   - x-pack/test/functional_embedded/config.ts
@@ -262,9 +263,11 @@ enabled:
   - x-pack/test/security_api_integration/oidc.config.ts
   - x-pack/test/security_api_integration/pki.config.ts
   - x-pack/test/security_api_integration/saml.config.ts
+  - x-pack/test/security_api_integration/saml_cloud.config.ts
   - x-pack/test/security_api_integration/session_idle.config.ts
   - x-pack/test/security_api_integration/session_invalidate.config.ts
   - x-pack/test/security_api_integration/session_lifespan.config.ts
+  - x-pack/test/security_api_integration/session_concurrent_limit.config.ts
   - x-pack/test/security_api_integration/token.config.ts
   - x-pack/test/security_api_integration/user_profiles.config.ts
   - x-pack/test/security_functional/login_selector.config.ts

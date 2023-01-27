@@ -15,9 +15,10 @@
     "@kbn/std",
     "@kbn/ui-shared-deps-npm",
     "@kbn/core-base-common",
-    "@kbn/core-injected-metadata-common-internal"
+    "@kbn/core-injected-metadata-common-internal",
+    "@kbn/core-custom-branding-common",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }
