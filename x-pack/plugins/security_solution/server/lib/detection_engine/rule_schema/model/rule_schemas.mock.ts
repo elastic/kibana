@@ -215,6 +215,8 @@ export const getRuleConfigMock = (type: string = 'rule-type'): SanitizedRuleConf
   producer: 'sample producer',
   ruleTypeId: `${type}-id`,
   ruleTypeName: type,
+  muteAll: false,
+  snoozeSchedule: [],
 });
 
 export const getCompleteRuleMock = <T extends RuleParams>(params: T): CompleteRule<T> => ({

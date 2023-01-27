@@ -65,6 +65,8 @@ describe('legacyRules_notification_alert_type', () => {
         updatedAt: new Date('2019-12-14T16:40:33.400Z'),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
     };
