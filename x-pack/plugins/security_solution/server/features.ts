@@ -215,7 +215,7 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
         defaultMessage: 'All Spaces is required for File Operations access.',
       }
     ),
-    name: i18n.translate('xpack.securitySolution.featureRegistr.subFeatures.fileOperations', {
+    name: i18n.translate('xpack.securitySolution.featureRegister.subFeatures.fileOperations', {
       defaultMessage: 'File Operations',
     }),
     privilegeGroups: [
@@ -232,6 +232,36 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
               read: [],
             },
             ui: ['writeFileOperations'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
+      {
+        defaultMessage: 'All Spaces is required for Execute Operations access.',
+      }
+    ),
+    name: i18n.translate('xpack.securitySolution.featureRegister.subFeatures.executeOperations', {
+      defaultMessage: 'Execute Operations',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [`${APP_ID}-writeExecuteOperations`],
+            id: 'execute_operations_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['writeExecuteOperations'],
           },
         ],
       },
@@ -528,6 +558,13 @@ function getSubFeatures(experimentalFeatures: ConfigType['experimentalFeatures']
   if (!experimentalFeatures.responseActionGetFileEnabled) {
     filteredSubFeatures = filteredSubFeatures.filter((subFeat) => {
       return subFeat.name !== 'File Operations';
+    });
+  }
+
+  // behind FF (planned for 8.8)
+  if (!experimentalFeatures.responseActionExecuteEnabled) {
+    filteredSubFeatures = filteredSubFeatures.filter((subFeat) => {
+      return subFeat.name !== 'Execute operations';
     });
   }
 

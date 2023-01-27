@@ -85,6 +85,9 @@ describe('When using calculateRouteAuthz()', () => {
           writeFileOperations: {
             executePackageAction: false,
           },
+          writeExecuteOperations: {
+            executePackageAction: false,
+          },
         },
       },
 

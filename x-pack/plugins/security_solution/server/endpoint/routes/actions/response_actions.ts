@@ -188,7 +188,7 @@ export function registerResponseActionRoutes(
         options: { authRequired: true, tags: ['access:securitySolution'] },
       },
       withEndpointAuthz(
-        { all: ['canExecuteCommand'] },
+        { all: ['canWriteExecuteOperations'] },
         logger,
         responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
       )

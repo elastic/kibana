@@ -213,6 +213,13 @@ export const calculateEndpointAuthz = (
     'writeFileOperations'
   );
 
+  const canWriteExecuteOperations = hasKibanaPrivilege(
+    fleetAuthz,
+    isEndpointRbacEnabled,
+    hasEndpointManagementAccess,
+    'writeExecuteOperations'
+  );
+
   return {
     canWriteSecuritySolution,
     canReadSecuritySolution,
@@ -235,7 +242,7 @@ export const calculateEndpointAuthz = (
     canAccessResponseConsole:
       isEnterpriseLicense &&
       (canIsolateHost || canWriteProcessOperations || canWriteFileOperations),
-    canExecuteCommand: canWriteFileOperations && isEnterpriseLicense,
+    canWriteExecuteOperations: canWriteExecuteOperations && isEnterpriseLicense,
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
     // artifacts
     canWriteTrustedApplications,
@@ -271,7 +278,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canGetRunningProcesses: false,
     canAccessResponseConsole: false,
     canWriteFileOperations: false,
-    canExecuteCommand: false,
+    canWriteExecuteOperations: false,
     canWriteTrustedApplications: false,
     canReadTrustedApplications: false,
     canWriteHostIsolationExceptions: false,
