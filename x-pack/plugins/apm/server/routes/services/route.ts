@@ -1220,7 +1220,7 @@ const serviceAlertsRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: rangeRt,
+    query: t.intersection([rangeRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -1231,7 +1231,7 @@ const serviceAlertsRoute = createApmServerRoute({
   }> => {
     const { params } = resources;
     const {
-      query: { start, end },
+      query: { start, end, environment },
     } = params;
     const { serviceName } = params.path;
 
@@ -1239,6 +1239,7 @@ const serviceAlertsRoute = createApmServerRoute({
     const servicesAlerts = await getServicesAlerts({
       serviceName,
       apmAlertsClient,
+      environment,
       start,
       end,
     });
