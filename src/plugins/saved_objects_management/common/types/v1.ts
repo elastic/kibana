@@ -12,8 +12,8 @@ import type { SavedObjectsNamespaceType } from '@kbn/core/public';
 /** Domain interfaces */
 
 /**
- * The metadata injected into a {@link SavedObject | saved object} when returning
- * {@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints.
+ * Saved Object Management metadata associated with a saved object. See
+ * {@link SavedObjectWithMetadataV1}.
  */
 export interface SavedObjectMetadataV1 {
   icon?: string;
@@ -22,6 +22,15 @@ export interface SavedObjectMetadataV1 {
   inAppUrl?: { path: string; uiCapabilitiesPath: string };
   namespaceType?: SavedObjectsNamespaceType;
   hiddenType?: boolean;
+}
+
+/**
+ * One saved object's reference to another saved object.
+ */
+export interface SavedObjectReferenceV1 {
+  name: string;
+  type: string;
+  id: string;
 }
 
 /**
@@ -35,8 +44,11 @@ export interface SavedObjectWithMetadataV1<T = unknown> {
   type: string;
   meta: SavedObjectMetadataV1;
   error?: SavedObjectError;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
   attributes: T;
+  namespaces?: string[];
+  references: SavedObjectReferenceV1[];
 }
 
 export type SavedObjectRelationKindV1 = 'child' | 'parent';
@@ -136,7 +148,7 @@ export interface FindResponseHTTPV1 {
 }
 
 export interface GetAllowedTypesResponseHTTPV1 {
-  types: SavedObjectManagementTypeInfoV1;
+  types: SavedObjectManagementTypeInfoV1[];
 }
 
 export interface RelationshipsParamsHTTPV1 {
