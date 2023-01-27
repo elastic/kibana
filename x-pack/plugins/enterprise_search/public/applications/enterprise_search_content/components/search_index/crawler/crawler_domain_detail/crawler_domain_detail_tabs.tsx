@@ -16,6 +16,7 @@ import { AuthenticationPanel } from './authentication_panel/authentication_panel
 import { CrawlRulesTable } from './crawl_rules_table';
 import { DeduplicationPanel } from './deduplication_panel/deduplication_panel';
 import { EntryPointsTable } from './entry_points_table';
+import { ExtractionRules } from './extraction_rules/extraction_rules';
 import { SitemapsTable } from './sitemaps_table';
 
 export enum CrawlerDomainTabId {
@@ -23,6 +24,7 @@ export enum CrawlerDomainTabId {
   AUTHENTICATION = 'authentication',
   SITE_MAPS = 'site_maps',
   CRAWL_RULES = 'crawl_rules',
+  EXTRACTION_RULES = 'extraction_rules',
   DEDUPLICATION = 'deduplication',
 }
 
@@ -88,6 +90,18 @@ export const CrawlerDomainDetailTabs: React.FC<CrawlerDomainDetailTabsProps> = (
       id: CrawlerDomainTabId.CRAWL_RULES,
       name: i18n.translate('xpack.enterpriseSearch.content.crawler.crawlRules', {
         defaultMessage: 'Crawl rules',
+      }),
+    },
+    {
+      content: (
+        <>
+          <EuiSpacer />
+          <ExtractionRules />
+        </>
+      ),
+      id: CrawlerDomainTabId.EXTRACTION_RULES,
+      name: i18n.translate('xpack.enterpriseSearch.content.crawler.extractionRules', {
+        defaultMessage: 'Extraction rules',
       }),
     },
     {
