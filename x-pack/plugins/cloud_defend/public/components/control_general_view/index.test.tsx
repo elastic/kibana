@@ -10,7 +10,7 @@ import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
-import { getCloudDefendNewPolicyMock } from '../../test/mocks';
+import { getCloudDefendNewPolicyMock, MOCK_YAML_INVALID_CONFIGURATION } from '../../test/mocks';
 import { ControlGeneralView } from '.';
 import { getInputFromPolicy } from '../../common/utils';
 import { INPUT_CONTROL } from '../../../common/constants';
@@ -105,5 +105,14 @@ describe('<ControlGeneralView />', () => {
     rerender(<WrappedComponent policy={policy} />);
 
     expect(getByTitle('Remove excludeCustomNginxBuild3 from selection in this group')).toBeTruthy();
+  });
+
+  it('doesnt blow up if invalid yaml passed in', async () => {
+    const { queryAllByTestId } = render(
+      <WrappedComponent policy={getCloudDefendNewPolicyMock(MOCK_YAML_INVALID_CONFIGURATION)} />
+    );
+
+    expect(queryAllByTestId('cloud-defend-selector')).toHaveLength(0);
+    expect(queryAllByTestId('cloud-defend-response')).toHaveLength(0);
   });
 });
