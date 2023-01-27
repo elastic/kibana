@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FailedTestsByStep } from './failed_tests_by_step';
 import { PingState } from '../../../../../../common/runtime_types';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
@@ -34,7 +35,7 @@ export const ErrorsTabContent = ({
     <>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <PanelWithTitle title={OVERVIEW_LABEL}>
+          <PanelWithTitle title={OVERVIEW_LABEL} titleLeftAlign>
             <EuiFlexGroup>
               <EuiFlexItem>
                 {monitorId && (
@@ -60,9 +61,7 @@ export const ErrorsTabContent = ({
             <ErrorsList errorStates={errorStates} loading={loading} />
           </PanelWithTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <PanelWithTitle title={FAILED_TESTS_BY_STEPS_LABEL} />
-        </EuiFlexItem>
+        <FailedTestsByStep time={time} />
       </EuiFlexGroup>
     </>
   );
@@ -78,8 +77,4 @@ const OVERVIEW_LABEL = i18n.translate('xpack.synthetics.errors.overview', {
 
 const FAILED_TESTS_LABEL = i18n.translate('xpack.synthetics.errors.failedTests', {
   defaultMessage: 'Failed tests',
-});
-
-const FAILED_TESTS_BY_STEPS_LABEL = i18n.translate('xpack.synthetics.errors.failedTests.byStep', {
-  defaultMessage: 'Failed tests by step',
 });

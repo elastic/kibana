@@ -9,9 +9,15 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { CriteriaWithPagination, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import {
+  CriteriaWithPagination,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
 import { MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
@@ -25,7 +31,6 @@ import { ENGINE_PATH } from '../../../../routes';
 
 import { convertMetaToPagination, Meta } from '../../types';
 
-// add health status
 interface EnginesListTableProps {
   enginesList: EnterpriseSearchEngine[];
   isLoading?: boolean;
@@ -33,6 +38,7 @@ interface EnginesListTableProps {
   meta: Meta;
   onChange: (criteria: CriteriaWithPagination<EnterpriseSearchEngine>) => void;
   onDelete: (engine: EnterpriseSearchEngine) => void;
+  viewEngineIndices: (engineName: string) => void;
 }
 export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   enginesList,
@@ -40,6 +46,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   meta,
   onChange,
   onDelete,
+  viewEngineIndices,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngine>> = [
@@ -74,11 +81,28 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
     },
     {
-      field: 'indices.length',
-      datatype: 'number',
+      field: 'indices',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.indices', {
         defaultMessage: 'Indices',
       }),
+      align: 'right',
+
+      render: (indices: string[], engine) => (
+        <EuiButtonEmpty
+          size="s"
+          className="engineListTableFlyoutButton"
+          data-test-subj="engineListTableIndicesFlyoutButton"
+          onClick={() => viewEngineIndices(engine.name)}
+        >
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.enginesList.table.column.view.indices"
+            defaultMessage="{indicesLength} indices"
+            values={{
+              indicesLength: indices.length,
+            }}
+          />
+        </EuiButtonEmpty>
+      ),
     },
 
     {

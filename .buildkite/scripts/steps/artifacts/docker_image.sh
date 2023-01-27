@@ -54,6 +54,16 @@ echo "--- Push manifest"
 docker manifest push "$KIBANA_IMAGE"
 docker logout docker.elastic.co
 
+cat << EOF | buildkite-agent annotate --style "info" --context image
+  ### Container Images
+
+  Manifest: \`$KIBANA_IMAGE\`
+
+  AMD64: \`$KIBANA_IMAGE-amd64\`
+
+  ARM64: \`$KIBANA_IMAGE-arm64\`
+EOF
+
 echo "--- Build dependencies report"
 node scripts/licenses_csv_report "--csv=target/dependencies-$GIT_ABBREV_COMMIT.csv"
 
@@ -78,7 +88,7 @@ steps:
       env:
         MODE: sed
         TARGET_FILE: kibana-controller.yaml
-        IMAGE_TAG: "$KIBANA_IMAGE"
+        IMAGE_TAG: "$GIT_ABBREV_COMMIT"
         SERVICE: kibana-controller
 EOF
 
