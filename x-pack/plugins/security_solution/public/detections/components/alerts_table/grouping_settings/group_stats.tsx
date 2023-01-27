@@ -116,6 +116,18 @@ export const getSelectedGroupBadgeMetrics = (
         },
         ...defaultBadges,
       ];
+    case 'source.ip':
+      return [
+        {
+          title: i18n.STATS_GROUP_IPS,
+          value: bucket.hostsCountAggregation?.value ?? 0,
+        },
+        {
+          title: i18n.STATS_GROUP_RULES,
+          value: bucket.rulesCountAggregation?.value ?? 0,
+        },
+        ...defaultBadges,
+      ];
   }
   return [
     {

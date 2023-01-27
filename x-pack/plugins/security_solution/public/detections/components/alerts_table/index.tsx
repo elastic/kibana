@@ -18,11 +18,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { InspectButton } from '../../../common/components/inspect';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import type { GroupingTableAggregation, RawBucket } from '../../../common/components/grouping';
-import {
-  GroupingContainer,
-  getGroupingQuery,
-  GroupsSelector,
-} from '../../../common/components/grouping';
+import { GroupingContainer, GroupsSelector } from '../../../common/components/grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertWorkflowStatus } from '../../../common/types';
@@ -59,7 +55,8 @@ import { useAddBulkToTimelineAction } from './timeline_actions/use_add_bulk_to_t
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import {
-  defaultGroupingOptions,
+  getAlertsGroupingQuery,
+  getDefaultGroupingOptions,
   getSelectedGroupBadgeMetrics,
   getSelectedGroupButtonContent,
   getSelectedGroupCustomMetrics,
@@ -70,7 +67,7 @@ import {
 export const ALERTS_TABLE_GROUPS_SELECTION_KEY = 'securitySolution.alerts.table.group-selection';
 const storage = new Storage(localStorage);
 
-const ALERTS_GROUPING_ID = '';
+const ALERTS_GROUPING_ID = 'alerts-grouping';
 
 interface OwnProps {
   defaultFilters?: Filter[];
@@ -115,7 +112,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<string | undefined>(
-    storage.get(ALERTS_TABLE_GROUPS_SELECTION_KEY)
+    storage.get(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`)
   );
 
   const {
@@ -252,14 +249,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_GROUPING_ID}-${uuidv4()}`, []);
 
-  const getGroupFields = (groupValue: string) => {
-    if (groupValue === 'kibana.alert.rule.name') {
-      return [groupValue, 'kibana.alert.rule.description'];
-    } else {
-      return [groupValue];
-    }
-  };
-
   const additionalFilters = useMemo(() => {
     try {
       return [
@@ -289,88 +278,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const queryGroups = useMemo(
     () =>
-      getGroupingQuery({
+      getAlertsGroupingQuery({
         additionalFilters,
-        additionalAggregationsRoot: [
-          {
-            alertsCount: {
-              terms: {
-                field: 'kibana.alert.rule.producer',
-                exclude: ['alerts'],
-              },
-            },
-          },
-          ...(selectedGroup
-            ? [
-                {
-                  groupsNumber: {
-                    cardinality: {
-                      field: selectedGroup,
-                    },
-                  },
-                },
-              ]
-            : []),
-        ],
+        selectedGroup,
         from,
         runtimeMappings,
-        stackByMupltipleFields0: selectedGroup ? getGroupFields(selectedGroup) : [],
         to,
-        additionalStatsAggregationsFields0: [
-          {
-            countSeveritySubAggregation: {
-              cardinality: {
-                field: 'kibana.alert.severity',
-              },
-            },
-          },
-          {
-            severitiesSubAggregation: {
-              terms: {
-                field: 'kibana.alert.severity',
-              },
-            },
-          },
-          {
-            usersCountAggregation: {
-              cardinality: {
-                field: 'user.name',
-              },
-            },
-          },
-          {
-            hostsCountAggregation: {
-              cardinality: {
-                field: 'host.name',
-              },
-            },
-          },
-          {
-            alertsCount: {
-              cardinality: {
-                field: 'kibana.alert.uuid',
-              },
-            },
-          },
-          {
-            ruleTags: {
-              terms: {
-                field: 'kibana.alert.rule.tags',
-              },
-            },
-          },
-          {
-            rulesCountAggregation: {
-              cardinality: {
-                field: 'kibana.alert.rule.rule_id',
-              },
-            },
-          },
-        ],
-        stackByMupltipleFields0Size: pagination.pageSize,
-        stackByMupltipleFields0From: pagination.pageIndex * pagination.pageSize,
-        additionalStatsAggregationsFields1: [],
-        stackByMupltipleFields1: [],
+        pageSize: pagination.pageSize,
+        pageIndex: pagination.pageIndex,
       }),
     [
       additionalFilters,
@@ -419,6 +334,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [uniqueQueryId]
   );
 
+  const defaultGroupingOptions = getDefaultGroupingOptions(tableId);
   const [options, setOptions] = useState(
     defaultGroupingOptions.find((o) => o.key === selectedGroup)
       ? defaultGroupingOptions
@@ -440,7 +356,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       <GroupsSelector
         groupSelected={selectedGroup}
         onGroupChange={(groupSelection?: string) => {
-          storage.set(ALERTS_TABLE_GROUPS_SELECTION_KEY, groupSelection);
+          storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, groupSelection);
           setGroupsActivePage(0);
           setSelectedGroup(groupSelection);
           if (groupSelection && !options.find((o) => o.key === groupSelection)) {
@@ -459,14 +375,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           setGroupsActivePage(0);
           setSelectedGroup(undefined);
           setOptions(defaultGroupingOptions);
-          storage.set(ALERTS_TABLE_GROUPS_SELECTION_KEY, undefined);
+          storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, undefined);
         }}
         fields={indexPatterns.fields}
         options={options}
         title={i18n.GROUP_ALERTS_SELECTOR}
       />
     ),
-    [indexPatterns.fields, options, selectedGroup]
+    [defaultGroupingOptions, indexPatterns.fields, options, selectedGroup, tableId]
   );
 
   const takeActionItems = useGroupTakeActionsItems({
@@ -491,7 +407,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       tableId={tableId}
       leadingControlColumns={leadingControlColumns}
       onRuleChange={onRuleChange}
-      pageFilters={defaultFiltersMemo ?? []}
+      pageFilters={defaultFiltersMemo}
       renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}
       sourcererScope={SourcererScopeName.detections}
@@ -518,6 +434,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             data={alertsGroupsData?.aggregations ?? {}}
             renderChildComponent={(groupFilter) => (
               <StatefulEventsViewer
+                additionalFilters={additionalFiltersComponent}
                 currentFilter={filterGroup as AlertWorkflowStatus}
                 defaultCellActions={defaultCellActions}
                 defaultModel={getAlertsDefaultModel(license)}
