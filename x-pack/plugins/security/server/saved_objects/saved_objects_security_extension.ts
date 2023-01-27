@@ -343,6 +343,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     if (params.actions.size === 0) {
       throw new Error('No actions specified for authorization');
     }
+    if (params.types.has('')) params.types.delete('');
     if (params.types.size === 0) {
       throw new Error('No types specified for authorization');
     }
@@ -1128,6 +1129,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   }
 
   async authorizeDisableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
+    if (aliases.length === 0) throw new Error(`No aliases specified for authorization`);
+
     const [uniqueSpaces, typesAndSpaces] = aliases.reduce(
       ([spaces, typesAndSpacesMap], { targetSpace, targetType }) => {
         const spacesForType = typesAndSpacesMap.get(targetType) ?? new Set();
@@ -1139,33 +1142,20 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       [new Set<string>(), new Map<string, Set<string>>()]
     );
 
-    let error: Error | undefined;
-    try {
-      await this.authorize({
-        actions: new Set([SecurityAction.BULK_UPDATE]),
-        types: new Set(typesAndSpaces.keys()),
-        spaces: uniqueSpaces,
-        enforceMap: typesAndSpaces,
-      });
-    } catch (err) {
-      error = this.errors.decorateForbiddenError(
-        new Error(`Unable to disable aliases: ${err.message}`)
-      );
-    }
-
-    for (const alias of aliases) {
-      const id = `${alias.targetSpace}:${alias.targetType}:${alias.sourceId}`;
-      this.addAuditEvent({
-        action: AuditAction.UPDATE,
-        savedObject: { type: LEGACY_URL_ALIAS_TYPE, id },
-        error,
-        ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the update operation has not occurred yet
-      });
-    }
-
-    if (error) {
-      throw error;
-    }
+    await this.authorize({
+      actions: new Set([SecurityAction.BULK_UPDATE]),
+      types: new Set(typesAndSpaces.keys()),
+      spaces: uniqueSpaces,
+      enforceMap: typesAndSpaces,
+      auditOptions: {
+        objects: aliases.map((alias) => {
+          return {
+            type: LEGACY_URL_ALIAS_TYPE,
+            id: `${alias.targetSpace}:${alias.targetType}:${alias.sourceId}`,
+          };
+        }),
+      },
+    });
   }
 
   async auditObjectsForSpaceDeletion<T>(

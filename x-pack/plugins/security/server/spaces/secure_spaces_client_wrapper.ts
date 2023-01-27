@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClient } from '@kbn/core/server';
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
@@ -50,7 +50,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     private readonly request: KibanaRequest,
     private readonly authorization: AuthorizationServiceSetup,
     private readonly auditLogger: AuditLogger,
-    // private readonly errors: SavedObjectsClient['errors'],
+    private readonly errors: SavedObjectsClient['errors'],
     private readonly securityExtension: ISavedObjectsSecurityExtension | undefined
   ) {
     this.useRbac = this.authorization.mode.useRbacForRequest(this.request);
@@ -349,7 +349,14 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     //     throw error;
     //   }
     // }
-    this.securityExtension?.authorizeDisableLegacyUrlAliases(aliases); // will throw if unauthorized
+
+    try {
+      await this.securityExtension?.authorizeDisableLegacyUrlAliases(aliases); // will throw if unauthorized
+    } catch (err) {
+      throw this.errors.decorateForbiddenError(
+        new Error(`Unable to disable aliases: ${err.message}`)
+      );
+    }
     return this.spacesClient.disableLegacyUrlAliases(aliases);
   }
 

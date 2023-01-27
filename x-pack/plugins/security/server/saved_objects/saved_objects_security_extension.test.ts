@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BulkResolveError } from '@kbn/core-saved-objects-common';
+import type { BulkResolveError, LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { AuthorizeCreateObject, AuthorizeUpdateObject } from '@kbn/core-saved-objects-server';
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
 import type {
@@ -5859,3 +5859,309 @@ describe('find', () => {
     });
   });
 });
+
+describe('#authorizeDisableLegacyUrlAliases', () => {
+  const legacyUrlAlias1: LegacyUrlAliasTarget = {
+    targetType: 'a',
+    targetSpace: 'x',
+    sourceId: 'id1',
+  };
+  const legacyUrlAlias2: LegacyUrlAliasTarget = {
+    targetType: 'b',
+    targetSpace: 'y',
+    sourceId: 'id2',
+  };
+  const legacyUrlAlias3: LegacyUrlAliasTarget = {
+    targetType: 'c',
+    targetSpace: 'z',
+    sourceId: 'id3',
+  };
+  const legacyUrlAliases: LegacyUrlAliasTarget[] = [
+    legacyUrlAlias1,
+    legacyUrlAlias2,
+    legacyUrlAlias3,
+  ];
+
+  beforeEach(() => {
+    checkAuthorizationSpy.mockClear();
+    enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+  });
+
+  const actionString = 'bulk_update';
+
+  const fullyAuthorizedCheckPrivilegesResponse = {
+    hasAllRequested: true,
+    privileges: {
+      kibana: [
+        { privilege: 'mock-saved_object:a/bulk_update', authorized: true },
+        { privilege: 'login:', authorized: true },
+        {
+          resource: 'y',
+          privilege: 'mock-saved_object:b/bulk_update',
+          authorized: true,
+        },
+        {
+          resource: 'z',
+          privilege: 'mock-saved_object:c/bulk_update',
+          authorized: true,
+        },
+      ],
+    },
+  } as CheckPrivilegesResponse;
+
+  const expectedTypes = new Set(legacyUrlAliases.map((alias) => alias.targetType));
+  const expectedActions = new Set([SecurityAction.BULK_UPDATE]);
+  const expectedSpaces = new Set(legacyUrlAliases.map((alias) => alias.targetSpace));
+
+  const expectedEnforceMap = new Map([
+    [legacyUrlAlias1.targetType, new Set([legacyUrlAlias1.targetSpace])],
+    [legacyUrlAlias2.targetType, new Set([legacyUrlAlias2.targetSpace])],
+    [legacyUrlAlias3.targetType, new Set([legacyUrlAlias3.targetSpace])],
+  ]);
+
+  const auditObjects = legacyUrlAliases.map((alias) => {
+    return {
+      type: 'legacy-url-alias',
+      id: `${alias.targetSpace}:${alias.targetType}:${alias.sourceId}`,
+    };
+  });
+
+  const expectedTypeMap = new Map()
+    .set('a', {
+      bulk_update: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    })
+    .set('b', {
+      bulk_update: { authorizedSpaces: ['y'] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    })
+    .set('c', {
+      bulk_update: { authorizedSpaces: ['z'] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    });
+
+  test('throws an error when `aliases` is empty', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    await expect(securityExtension.authorizeDisableLegacyUrlAliases([])).rejects.toThrowError(
+      'No aliases specified for authorization'
+    );
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('throws an error when `targetSpace` is empty', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    setupSimpleCheckPrivsMockResolve(checkPrivileges, 'a', 'bulk_update', true);
+    await expect(
+      securityExtension.authorizeDisableLegacyUrlAliases([
+        { targetType: 'a', targetSpace: '', sourceId: 'id' },
+      ])
+    ).rejects.toThrowError('No spaces specified for authorization');
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('throws an error when `targetType` is empty', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    setupSimpleCheckPrivsMockResolve(checkPrivileges, 'a', 'bulk_update', true);
+    await expect(
+      securityExtension.authorizeDisableLegacyUrlAliases([
+        { targetType: '', targetSpace: 'x', sourceId: 'id' },
+      ])
+    ).rejects.toThrowError('No types specified for authorization');
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('throws an error when checkAuthorization fails', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+    await expect(
+      securityExtension.authorizeDisableLegacyUrlAliases(legacyUrlAliases)
+    ).rejects.toThrowError('Oh no!');
+  });
+
+  test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await securityExtension.authorizeDisableLegacyUrlAliases(legacyUrlAliases);
+
+    expect(authorizeSpy).toHaveBeenCalledTimes(1);
+    expect(authorizeSpy).toHaveBeenCalledWith({
+      actions: expectedActions,
+      types: expectedTypes,
+      spaces: expectedSpaces,
+      enforceMap: expectedEnforceMap,
+      auditOptions: { objects: auditObjects },
+    });
+
+    expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+      actions: new Set([actionString]),
+      spaces: expectedSpaces,
+      types: expectedTypes,
+      options: { allowGlobalResource: false },
+    });
+
+    expect(checkPrivileges).toHaveBeenCalledTimes(1);
+    expect(checkPrivileges).toHaveBeenCalledWith(
+      [
+        `mock-saved_object:${legacyUrlAlias1.targetType}/${actionString}`,
+        `mock-saved_object:${legacyUrlAlias2.targetType}/${actionString}`,
+        `mock-saved_object:${legacyUrlAlias3.targetType}/${actionString}`,
+        'login:',
+      ],
+      [...expectedSpaces]
+    );
+
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledWith({
+      action: SecurityAction.BULK_UPDATE,
+      typesAndSpaces: expectedEnforceMap,
+      typeMap: expectedTypeMap,
+      auditOptions: { objects: auditObjects },
+    });
+  });
+
+  test(`returns when fully authorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await expect(
+      securityExtension.authorizeDisableLegacyUrlAliases(legacyUrlAliases)
+    ).resolves.toBe(undefined);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`returns when partially authorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/bulk_update', authorized: true },
+          { privilege: 'login:', authorized: false },
+          {
+            resource: 'y',
+            privilege: 'mock-saved_object:b/bulk_update',
+            authorized: true,
+          },
+          {
+            resource: 'z',
+            privilege: 'mock-saved_object:c/bulk_update',
+            authorized: true,
+          },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    await expect(
+      securityExtension.authorizeDisableLegacyUrlAliases(legacyUrlAliases)
+    ).resolves.toBe(undefined);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`adds an audit event per object when successful`, async () => {
+    const { securityExtension, checkPrivileges, auditLogger } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await securityExtension.authorizeDisableLegacyUrlAliases(legacyUrlAliases);
+
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(legacyUrlAliases.length);
+    expect(auditLogger.log).toHaveBeenCalledTimes(legacyUrlAliases.length);
+    let i = 1;
+    for (const alias of legacyUrlAliases) {
+      const legacyObjectId = `${alias.targetSpace}:${alias.targetType}:${alias.sourceId}`;
+      expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
+        error: undefined,
+        event: {
+          action: AuditAction.UPDATE,
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          saved_object: { type: 'legacy-url-alias', id: legacyObjectId },
+        },
+        message: `User is updating legacy-url-alias [id=${legacyObjectId}]`,
+      });
+    }
+  });
+
+  test(`throws when unauthorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    setupSimpleCheckPrivsMockResolve(checkPrivileges, 'a', 'bulk_update', false);
+
+    await expect(
+      securityExtension.authorizeDisableLegacyUrlAliases(legacyUrlAliases)
+    ).rejects.toThrow(`Unable to bulk_update a,b,c`);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`adds an audit event per object when unauthorized`, async () => {
+    const { securityExtension, checkPrivileges, auditLogger } = setup();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/share_to_space', authorized: false },
+          { privilege: 'login:', authorized: true },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    await expect(
+      securityExtension.authorizeDisableLegacyUrlAliases(legacyUrlAliases)
+    ).rejects.toThrow(`Unable to bulk_update a,b,c`);
+
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(legacyUrlAliases.length);
+    expect(auditLogger.log).toHaveBeenCalledTimes(legacyUrlAliases.length);
+    let i = 1;
+    for (const alias of legacyUrlAliases) {
+      const legacyObjectId = `${alias.targetSpace}:${alias.targetType}:${alias.sourceId}`;
+      expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
+        error: {
+          code: 'Error',
+          message: 'Unable to bulk_update a,b,c',
+        },
+        event: {
+          action: AuditAction.UPDATE,
+          category: ['database'],
+          outcome: 'failure',
+          type: ['change'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          saved_object: { type: 'legacy-url-alias', id: legacyObjectId },
+        },
+        message: `Failed attempt to update legacy-url-alias [id=${legacyObjectId}]`,
+      });
+    }
+  });
+});
+
+// // ToDo: move to extension test
+// it('throws a forbidden error when unauthorized', async () => {
+//   const { wrapper, baseClient, forbiddenError, securityExtension } = setup({
+//     securityEnabled,
+//   });
+//   securityExtension!.authorizeDisableLegacyUrlAliases.mockImplementation(() => {
+//     throw new Error('Oh no!');
+//   });
+//   const aliases = [alias1, alias2];
+//   await expect(() => wrapper.disableLegacyUrlAliases(aliases)).rejects.toThrow(
+//     forbiddenError
+//   );
+
+//   expectAuthorizationCheck(securityExtension!, aliases);
+//   // expectAuditEvents(securityExtension!, aliases, { error: true });
+//   expect(baseClient.disableLegacyUrlAliases).not.toHaveBeenCalled();
+// });

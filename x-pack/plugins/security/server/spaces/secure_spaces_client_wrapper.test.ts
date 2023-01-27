@@ -95,10 +95,10 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
   const request = httpServerMock.createKibanaRequest();
 
   const forbiddenError = new Error('Mock ForbiddenError');
-  // const errors = {
-  //   decorateForbiddenError: jest.fn().mockReturnValue(forbiddenError),
-  //   // other errors exist but are not needed for these test cases
-  // } as unknown as jest.Mocked<typeof SavedObjectsErrorHelpers>;
+  const errors = {
+    decorateForbiddenError: jest.fn().mockReturnValue(forbiddenError),
+    // other errors exist but are not needed for these test cases
+  } as unknown as jest.Mocked<typeof SavedObjectsErrorHelpers>;
 
   const securityExtension = securityEnabled
     ? (savedObjectsExtensionsMock.create()
@@ -109,7 +109,7 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
     request,
     authorization,
     auditLogger,
-    // errors,
+    errors,
     securityExtension
   );
   return {
@@ -663,9 +663,11 @@ describe('SecureSpacesClientWrapper', () => {
     it('deletes the space with all saved objects when authorized', async () => {
       const username = 'some_user';
 
-      const { wrapper, baseClient, authorization, auditLogger, request } = setup({
-        securityEnabled: true,
-      });
+      const { wrapper, baseClient, authorization, auditLogger, request, securityExtension } = setup(
+        {
+          securityEnabled: true,
+        }
+      );
 
       const checkPrivileges = jest.fn().mockResolvedValue({
         username,
@@ -704,6 +706,12 @@ describe('SecureSpacesClientWrapper', () => {
       //   savedObject: { type: 'dashboard', id: '3' },
       //   deleteFromSpaces: [space.id],
       // });
+      expect(securityExtension!.auditObjectsForSpaceDeletion).toHaveBeenCalledTimes(1);
+      expect(securityExtension!.auditObjectsForSpaceDeletion).toHaveBeenCalledWith(space.id, [
+        { id: '1', namespaces: ['*'], type: 'dashboard' },
+        { id: '2', namespaces: ['existing_space'], type: 'dashboard' },
+        { id: '3', namespaces: ['default', 'existing_space'], type: 'dashboard' },
+      ]);
     });
   });
 
@@ -730,6 +738,11 @@ describe('SecureSpacesClientWrapper', () => {
       aliases: Array<{ targetSpace: string; targetType: string }>
     ) {
       // expect(securityExtension.authorize).toHaveBeenCalledTimes(1);
+      expect(securityExtension.authorizeDisableLegacyUrlAliases).toHaveBeenCalledTimes(1);
+      expect(securityExtension.authorizeDisableLegacyUrlAliases).toHaveBeenCalledWith([
+        alias1,
+        alias2,
+      ]);
 
       // const targetTypes = aliases.map((alias) => alias.targetType);
       // const targetSpaces = aliases.map((alias) => alias.targetSpace);
@@ -737,10 +750,10 @@ describe('SecureSpacesClientWrapper', () => {
       // const expectedActions = new Set([SecurityAction.BULK_UPDATE]);
       // const expectedSpaces = new Set(targetSpaces);
       // const expectedTypes = new Set(targetTypes);
-      const expectedEnforceMap = new Map<string, Set<string>>();
-      aliases.forEach((alias) => {
-        expectedEnforceMap.set(alias.targetType, new Set([alias.targetSpace]));
-      });
+      // const expectedEnforceMap = new Map<string, Set<string>>();
+      // aliases.forEach((alias) => {
+      //   expectedEnforceMap.set(alias.targetType, new Set([alias.targetSpace]));
+      // });
 
       // const {
       //   actions: actualActions,
@@ -774,13 +787,13 @@ describe('SecureSpacesClientWrapper', () => {
     describe('when security is enabled', () => {
       const securityEnabled = true;
 
-      it('throws a forbidden error when unauthorized', async () => {
+      it('propagates decorated error when authorizeDisableLegacyUrlAliases throws', async () => {
         const { wrapper, baseClient, forbiddenError, securityExtension } = setup({
           securityEnabled,
         });
-        // securityExtension!.authorize.mockImplementation(() => {
-        //   throw new Error('Oh no!');
-        // });
+        securityExtension!.authorizeDisableLegacyUrlAliases.mockImplementation(() => {
+          throw forbiddenError;
+        });
         const aliases = [alias1, alias2];
         await expect(() => wrapper.disableLegacyUrlAliases(aliases)).rejects.toThrow(
           forbiddenError
