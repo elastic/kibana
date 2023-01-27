@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -99,7 +99,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
   };
 
   return (
-    <Fragment>
+    <>
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
@@ -126,16 +126,16 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
                   )}
                 </EuiFlexItem>
                 {isActive && (
-                  <EuiFlexItem grow={false} style={{ margin: '8px' }}>
+                  <EuiFlexItem grow={false}>
                     <Buttons index={i} />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
               {d.detector_description !== undefined && (
-                <Fragment>
+                <>
                   <EuiHorizontalRule margin="s" />
                   <StringifiedDetector detector={d} />
-                </Fragment>
+                </>
               )}
             </EuiPanel>
           </EuiFlexItem>
@@ -145,7 +145,8 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
       <EuiSpacer size="m" />
 
       <DetectorsValidationWarning validation={validation} />
-    </Fragment>
+      <EuiSpacer size="m" />
+    </>
   );
 };
 
@@ -155,7 +156,7 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
   }
 
   return (
-    <Fragment>
+    <>
       <EuiSpacer size="s" />
       <EuiCallOut
         title={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.title', {
@@ -169,7 +170,7 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
           defaultMessage="At least one detector is needed to create a job."
         />
       </EuiCallOut>
-    </Fragment>
+    </>
   );
 };
 
@@ -178,12 +179,12 @@ const DetectorsValidationWarning: FC<{ validation: Validation }> = ({ validation
     return null;
   }
   return (
-    <Fragment>
-      <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
-        <Fragment />
-      </EuiFormRow>
+    <>
       <EuiSpacer size="s" />
-    </Fragment>
+      <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
+        <></>
+      </EuiFormRow>
+    </>
   );
 };
 
