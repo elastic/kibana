@@ -62,6 +62,22 @@ describe('JobsTableComponent', () => {
     );
   });
 
+  test('should display job friendly name', async () => {
+    const wrapper = mount(
+      <JobsTableComponent
+        isLoading={true}
+        jobs={securityJobs}
+        onJobStateChange={onJobStateChangeMock}
+      />
+    );
+
+    await waitFor(() =>
+      expect(wrapper.find('[data-test-subj="jobs-table-link"]').first().text()).toContain(
+        'Unusual Network Activity'
+      )
+    );
+  });
+
   test('should render the hyperlink with URI encodings which points specifically to the job id', async () => {
     securityJobs[0].id = 'job id with spaces';
     const href = await getRenderedHref(
