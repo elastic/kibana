@@ -69,8 +69,7 @@ export const ALERTS_HISTOGRAM_PANEL_LOADER = '[data-test-subj="loadingPanelAlert
 
 export const ALERTS_CONTAINER_LOADING_BAR = '[data-test-subj="events-container-loading-true"]';
 
-export const NUMBER_OF_ALERTS =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
+export const NUMBER_OF_ALERTS = ALERTS_COUNT;
 
 export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 

@@ -83,7 +83,7 @@ export const getUseActionColumnHook =
         setIsActionLoading,
         refresh,
         clearSelection,
-        alert,
+        ecsAlert: alert,
         nonEcsData,
       }) => {
         const timelineItem: TimelineItem = {

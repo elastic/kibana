@@ -12,7 +12,7 @@ export const CLOSE_SINGLE_ALERT_CHECKBOX = '[data-test-subj="closeAlertOnAddExce
 export const CONFIRM_BTN = '[data-test-subj="addExceptionConfirmButton"]';
 
 export const FIELD_INPUT =
-  '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"]';
+  '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"] input';
 
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 

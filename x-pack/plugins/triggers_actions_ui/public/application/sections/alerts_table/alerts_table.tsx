@@ -190,7 +190,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                 {renderCustomActionsRow &&
                   ecsAlertsData[visibleRowIndex] &&
                   renderCustomActionsRow({
-                    alert: ecsAlertsData[visibleRowIndex],
+                    alert: alerts[visibleRowIndex],
+                    ecsAlert: ecsAlertsData[visibleRowIndex],
                     nonEcsData: oldAlertsData[visibleRowIndex],
                     rowIndex: visibleRowIndex,
                     setFlyoutAlert: handleFlyoutAlert,
@@ -215,6 +216,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     return controlColumns;
   }, [
     actionsColumnWidth,
+    alerts,
     oldAlertsData,
     ecsAlertsData,
     getBulkActionsLeadingControlColumn,

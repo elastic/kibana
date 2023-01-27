@@ -555,7 +555,8 @@ export type UseCellActions = (props: {
 };
 
 export interface RenderCustomActionsRowArgs {
-  alert: FetchAlertData['ecsAlertsData'][number];
+  alert: FetchAlertData['alerts'][number];
+  ecsAlert: FetchAlertData['ecsAlertsData'][number];
   nonEcsData: FetchAlertData['oldAlertsData'][number];
   rowIndex: number;
   cveProps: EuiDataGridCellValueElementProps;
