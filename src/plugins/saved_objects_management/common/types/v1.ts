@@ -131,7 +131,7 @@ export interface FindQueryHTTPV1 {
 }
 
 export interface FindResponseHTTPV1 {
-  savedObjects: SavedObjectWithMetadataV1[];
+  saved_objects: SavedObjectWithMetadataV1[];
   total: number;
 }
 

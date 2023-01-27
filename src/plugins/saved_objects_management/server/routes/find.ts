@@ -90,7 +90,7 @@ export const registerFindRoute = (
         });
 
       const response: FindResponseHTTPV1 = {
-        savedObjects: enhancedSavedObjects,
+        saved_objects: enhancedSavedObjects,
         total: findResponse.total,
       };
 
