@@ -12,6 +12,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -27,9 +29,12 @@ function mountAndFindSubjects(props: Omit<DiscoverNoResultsProps, 'onDisableFilt
       },
     },
   };
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverNoResults onDisableFilters={() => {}} {...props} />
+      <DiscoverMainProvider value={stateContainer}>
+        <DiscoverNoResults onDisableFilters={() => {}} {...props} />
+      </DiscoverMainProvider>
     </KibanaContextProvider>
   );
   return {
