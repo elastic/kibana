@@ -8,7 +8,7 @@
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { isArray } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { RawBucket } from '../types';
 
 export interface BadgeMetric {
@@ -24,16 +24,16 @@ export interface CustomMetric {
 }
 
 interface GroupPanelProps {
-  level?: number;
-  groupBucket: RawBucket;
-  selectedGroup: string;
-  renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
-  groupPanelRenderer?: JSX.Element;
-  onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket) => void;
-  customAccordionClassName?: string;
   customAccordionButtonClassName?: string;
+  customAccordionClassName?: string;
   extraAction?: React.ReactNode;
-  forceState: 'open' | 'closed' | undefined;
+  forceState?: 'open' | 'closed';
+  groupBucket: RawBucket;
+  groupPanelRenderer?: JSX.Element;
+  level?: number;
+  onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket) => void;
+  renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
+  selectedGroup: string;
 }
 
 const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
@@ -48,66 +48,75 @@ const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
   </div>
 );
 
-const GroupPanelComponent = ({
-  level = 0,
-  groupBucket,
-  selectedGroup,
-  renderChildComponent,
-  groupPanelRenderer,
-  onToggleGroup,
-  extraAction,
-  customAccordionClassName = 'groupingAccordionForm',
-  customAccordionButtonClassName = 'groupingAccordionForm__button',
-  forceState,
-}: GroupPanelProps) => {
-  const groupFieldValue =
-    groupBucket.key && isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key;
-
-  const groupFiltersMemo = useMemo(() => {
-    const groupFilters = [];
-    if (groupFieldValue && selectedGroup) {
-      groupFilters.push({
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-          type: 'phrase',
-          key: selectedGroup,
-          params: {
-            query: groupFieldValue,
-          },
-        },
-        query: {
-          match_phrase: {
-            [selectedGroup]: {
+export const createGroupQuery = (selectedGroup: string, groupFieldValue: string) =>
+  groupFieldValue && selectedGroup
+    ? [
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            key: selectedGroup,
+            negate: false,
+            params: {
               query: groupFieldValue,
+            },
+            type: 'phrase',
+          },
+          query: {
+            match_phrase: {
+              [selectedGroup]: {
+                query: groupFieldValue,
+              },
             },
           },
         },
-      });
-    }
-    return groupFilters;
-  }, [groupFieldValue, selectedGroup]);
+      ]
+    : [];
 
-  if (!groupFieldValue) {
-    return null;
-  }
-  return (
+const GroupPanelComponent = ({
+  customAccordionButtonClassName = 'groupingAccordionForm__button',
+  customAccordionClassName = 'groupingAccordionForm',
+  extraAction,
+  forceState,
+  groupBucket,
+  groupPanelRenderer,
+  level = 0,
+  onToggleGroup,
+  renderChildComponent,
+  selectedGroup,
+}: GroupPanelProps) => {
+  const groupFieldValue = useMemo(
+    () => (groupBucket.key && isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key),
+    [groupBucket.key]
+  );
+
+  const groupFilters = useMemo(
+    () => createGroupQuery(selectedGroup, groupFieldValue),
+    [groupFieldValue, selectedGroup]
+  );
+
+  const onToggle = useCallback(
+    (isOpen) => {
+      if (onToggleGroup) {
+        onToggleGroup(isOpen, groupBucket);
+      }
+    },
+    [groupBucket, onToggleGroup]
+  );
+
+  return !groupFieldValue ? null : (
     <EuiAccordion
-      id={`group${level}-${groupFieldValue}`}
-      className={customAccordionClassName}
       buttonClassName={customAccordionButtonClassName}
       buttonContent={groupPanelRenderer ?? <DefaultGroupPanelRenderer title={groupFieldValue} />}
+      className={customAccordionClassName}
+      data-test-subj="grouping-accordion"
       extraAction={extraAction}
-      paddingSize="l"
       forceState={forceState}
-      onToggle={(isOpen) => {
-        if (onToggleGroup) {
-          onToggleGroup(isOpen, groupBucket);
-        }
-      }}
+      id={`group${level}-${groupFieldValue}`}
+      onToggle={onToggle}
+      paddingSize="l"
     >
-      {renderChildComponent(groupFiltersMemo)}
+      {renderChildComponent(groupFilters)}
     </EuiAccordion>
   );
 };
