@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { invariant } from '../../../../../../common/utils/invariant';
 import type { ConfigType } from '../../../../../config';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type {
@@ -52,6 +53,9 @@ export const createRuleExecutionLogService = (
     ): Promise<IRuleExecutionLogForExecutors> => {
       return withSecuritySpan('IRuleExecutionLogService.createClientForExecutors', async () => {
         const { savedObjectsClient, context, ruleMonitoringService, ruleResultService } = params;
+
+        invariant(ruleMonitoringService, 'ruleMonitoringService required for detection rules');
+        invariant(ruleResultService, 'ruleResultService required for detection rules');
 
         const childLogger = logger.get('ruleExecution');
 
