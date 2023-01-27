@@ -81,17 +81,3 @@ export const logLevelFromExecutionStatus = (status: RuleExecutionStatus): LogLev
       return LogLevel.trace;
   }
 };
-
-export const logLevelFromLastRunOutcome = (status: RuleLastRunOutcomes): LogLevel => {
-  switch (status) {
-    case 'succeeded':
-      return LogLevel.info;
-    case 'warning':
-      return LogLevel.warn;
-    case 'failed':
-      return LogLevel.error;
-    default:
-      assertUnreachable(status);
-      return LogLevel.trace;
-  }
-};
