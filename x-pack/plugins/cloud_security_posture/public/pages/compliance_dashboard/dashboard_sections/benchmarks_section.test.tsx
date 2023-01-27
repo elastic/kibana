@@ -8,6 +8,7 @@
 import React from 'react';
 import { render as reactRender, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { cloneDeep } from 'lodash';
 import {
   BenchmarksSection,
   TABLE_COLUMN_SCORE_TEST_ID,
@@ -30,16 +31,16 @@ describe('<BenchmarksSection />', () => {
     );
 
   describe('Sorting', () => {
-    const mockDashboardDataCopy = structuredClone(mockDashboardData);
-    const clusterMockDataCopy = structuredClone(clusterMockData);
+    const mockDashboardDataCopy = cloneDeep(mockDashboardData);
+    const clusterMockDataCopy = cloneDeep(clusterMockData);
     clusterMockDataCopy.stats.postureScore = 50;
     clusterMockDataCopy.meta.clusterId = '1';
 
-    const clusterMockDataCopy1 = structuredClone(clusterMockData);
+    const clusterMockDataCopy1 = cloneDeep(clusterMockData);
     clusterMockDataCopy1.stats.postureScore = 95;
     clusterMockDataCopy1.meta.clusterId = '2';
 
-    const clusterMockDataCopy2 = structuredClone(clusterMockData);
+    const clusterMockDataCopy2 = cloneDeep(clusterMockData);
     clusterMockDataCopy2.stats.postureScore = 45;
     clusterMockDataCopy2.meta.clusterId = '3';
 
