@@ -19,7 +19,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import { APP_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
-import { spawn } from 'child_process';
 import type {
   GetOutputsResponse,
   PutOutputRequest,
@@ -27,6 +26,7 @@ import type {
   GenerateServiceTokenResponse,
 } from '@kbn/fleet-plugin/common/types';
 import { outputRoutesService } from '@kbn/fleet-plugin/common/services';
+import execa from 'execa';
 import { isLocalhost } from '../common/localhost_services';
 import { fetchFleetAgents } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
@@ -180,12 +180,13 @@ const startFleetServerWithDocker = async ({
   log.info(`Starting a new fleet server using Docker`);
   log.indent(4);
 
+  const esURL = new URL(elasticUrl);
+  const containerName = `dev-fleet-server.${esURL.hostname}`;
   let esUrlWithRealIp: string = elasticUrl;
 
   if (isElasticOnLocalhost) {
-    const esNewUrl = new URL(elasticUrl);
-    esNewUrl.hostname = localhostRealIp;
-    esUrlWithRealIp = esNewUrl.toString();
+    esURL.hostname = localhostRealIp;
+    esUrlWithRealIp = esURL.toString();
   }
 
   try {
@@ -193,6 +194,7 @@ const startFleetServerWithDocker = async ({
 
     const dockerArgs = [
       'run',
+
       '--restart',
       'no',
 
@@ -200,6 +202,14 @@ const startFleetServerWithDocker = async ({
       'host.docker.internal:host-gateway',
 
       '--rm',
+
+      '--detach',
+
+      '--name',
+      containerName,
+
+      '--hostname',
+      containerName,
 
       '--env',
       'FLEET_SERVER_ENABLE=1',
@@ -219,17 +229,22 @@ const startFleetServerWithDocker = async ({
       `docker.elastic.co/beats/elastic-agent:${agentVersion}`,
     ];
 
+    // TODO:PT check if container name is already running and kill it
+
     log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 
-    spawn('docker', dockerArgs, {
-      // TODO:PT redirect to an internal stream and watch it until it shows that it has been enrolled with Fleet
-      stdio: 'inherit',
-    });
+    const containerId = (await execa('docker', dockerArgs)).stdout;
 
     // TODO:PT Remove delay once we are able to determine if fleet server connected
     await new Promise((r) => setTimeout(r, 15000));
 
-    log.info(`Done with container running fleet-server`);
+    log.info(`Done. Fleet Server is running and connected to Fleet.
+  Container Name: ${containerName}
+  Container Id:   ${containerId}
+
+  View running output:  docker attach ---sig-proxy=false ${containerName}
+  Shell access:         docker exec -it ${containerName} /bin/bash
+`);
   } catch (error) {
     log.indent(-4);
     throw error;
@@ -312,6 +327,8 @@ const configureFleetIfNeeded = async () => {
         }
       }
     }
+
+    // TODO:PT should we also add an entry to the Fleet server list in settings?
   } catch (error) {
     log.indent(-4);
     throw error;
