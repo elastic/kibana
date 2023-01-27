@@ -45,6 +45,19 @@ export const RightTopMenu = ({
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
     'tGridEventRenderedViewEnabled'
   );
+
+  const menuOptions = useMemo(
+    () =>
+      additionalMenuOptions.length
+        ? additionalMenuOptions.map((additionalMenuOption, i) => (
+            <UpdatedFlexItem grow={false} $show={!loading} key={i}>
+              {additionalMenuOption}
+            </UpdatedFlexItem>
+          ))
+        : null,
+    [additionalMenuOptions, loading]
+  );
+
   return (
     <UpdatedFlexGroup
       alignItems={alignItems}
@@ -65,13 +78,7 @@ export const RightTopMenu = ({
             <SummaryViewSelector viewSelected={tableView} onViewChange={onViewChange} />
           </UpdatedFlexItem>
         )}
-      {additionalMenuOptions.length
-        ? additionalMenuOptions.map((additionalMenuOption) => (
-            <UpdatedFlexItem grow={false} $show={!loading}>
-              {additionalMenuOption}
-            </UpdatedFlexItem>
-          ))
-        : null}
+      {menuOptions}
     </UpdatedFlexGroup>
   );
 };

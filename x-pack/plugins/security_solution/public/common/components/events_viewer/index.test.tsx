@@ -18,7 +18,7 @@ import { eventsDefaultModel } from './default_model';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { useTimelineEvents } from '../../../timelines/containers';
+import { useTimelineEvents } from './use_timelines_events';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
@@ -46,21 +46,13 @@ const originalKibanaLib = jest.requireActual('../../lib/kibana');
 const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
 mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
-jest.mock('../../../timelines/containers', () => ({
-  useTimelineEvents: jest.fn(),
-}));
+jest.mock('./use_timelines_events');
 
 jest.mock('../../utils/normalize_time_range');
 
 const mockUseFieldBrowserOptions = jest.fn();
 jest.mock('../../../timelines/components/fields_browser', () => ({
   useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
-}));
-
-jest.mock('./helpers', () => ({
-  getDefaultViewSelection: () => 'gridView',
-  resolverIsShowing: () => false,
-  getCombinedFilterQuery: () => undefined,
 }));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
@@ -87,7 +79,12 @@ const testProps = {
   hasCrudPermissions: true,
 };
 describe('StatefulEventsViewer', () => {
-  (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
+  beforeAll(() => {
+    (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
+  });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('it renders the events viewer', () => {
     const wrapper = mount(
@@ -126,5 +123,26 @@ describe('StatefulEventsViewer', () => {
 
     unmount();
     expect(mockCloseEditor).toHaveBeenCalled();
+  });
+
+  test('renders the RightTopMenu additional menu options when given additionalRightMenuOptions props', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <StatefulEventsViewer
+          {...testProps}
+          additionalRightMenuOptions={[<p data-test-subj="right-option" />]}
+        />
+      </TestProviders>
+    );
+    expect(getByTestId('right-option')).toBeInTheDocument();
+  });
+
+  test('does not render the RightTopMenu additional menu options when given additionalRightMenuOptions props', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <StatefulEventsViewer {...testProps} />
+      </TestProviders>
+    );
+    expect(queryByTestId('right-option')).not.toBeInTheDocument();
   });
 });
