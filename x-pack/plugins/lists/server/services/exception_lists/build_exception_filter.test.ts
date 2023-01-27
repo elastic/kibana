@@ -51,6 +51,7 @@ import {
   buildNestedClause,
   createOrClauses,
   filterOutUnprocessableValueLists,
+  removeExpiredExceptions,
 } from './build_exception_filter';
 
 const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
@@ -470,6 +471,113 @@ describe('build_exceptions_filter', () => {
                             Object {
                               "match_phrase": Object {
                                 "host.name": "some host name",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        }
+      `);
+    });
+
+    test('it should remove all exception items that are expired', async () => {
+      const futureDate = new Date(Date.now() + 1000000).toISOString();
+      const expiredDate = new Date(Date.now() - 1000000).toISOString();
+      const exceptions = [
+        { ...getExceptionListItemSchemaMock(), expire_time: futureDate },
+        { ...getExceptionListItemSchemaMock(), expire_time: expiredDate },
+        getExceptionListItemSchemaMock(),
+      ];
+
+      const { filter } = await buildExceptionFilter({
+        alias: null,
+        chunkSize: 1,
+        excludeExceptions: true,
+        listClient,
+        lists: exceptions,
+        startedAt: new Date(),
+      });
+
+      expect(filter).toMatchInlineSnapshot(`
+        Object {
+          "meta": Object {
+            "alias": null,
+            "disabled": false,
+            "negate": true,
+          },
+          "query": Object {
+            "bool": Object {
+              "should": Array [
+                Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "nested": Object {
+                          "path": "some.parentField",
+                          "query": Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "some.parentField.nested.field": "some value",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          "score_mode": "none",
+                        },
+                      },
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "some.not.nested.field": "some value",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "nested": Object {
+                          "path": "some.parentField",
+                          "query": Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "some.parentField.nested.field": "some value",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          "score_mode": "none",
+                        },
+                      },
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "some.not.nested.field": "some value",
                               },
                             },
                           ],
@@ -1300,6 +1408,24 @@ describe('build_exceptions_filter', () => {
 
       expect(filteredExceptions).toEqual([]);
       expect(unprocessableValueListExceptions).toEqual([listExceptionItem]);
+    });
+  });
+
+  describe('removeExpiredExceptions', () => {
+    test('it should filter out expired exceptions', () => {
+      const futureDate = new Date(Date.now() + 1000000).toISOString();
+      const expiredDate = new Date(Date.now() - 1000000).toISOString();
+      const exceptions = [
+        { ...getExceptionListItemSchemaMock(), expire_time: futureDate },
+        { ...getExceptionListItemSchemaMock(), expire_time: expiredDate },
+        getExceptionListItemSchemaMock(),
+      ];
+      const filteredExceptions = removeExpiredExceptions(exceptions, new Date());
+
+      expect(filteredExceptions).toEqual([
+        { ...getExceptionListItemSchemaMock(), expire_time: futureDate },
+        getExceptionListItemSchemaMock(),
+      ]);
     });
   });
 });
