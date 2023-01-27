@@ -100,7 +100,7 @@
     "@dnd-kit/utilities": "^2.0.0",
     "@elastic/apm-rum": "^5.12.0",
     "@elastic/apm-rum-react": "^1.4.2",
-    "@elastic/charts": "51.3.0",
+    "@elastic/charts": "52.0.0",
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@8.6.0-canary.3",
     "@elastic/ems-client": "8.4.0",
