@@ -20,7 +20,7 @@ export async function getRelationships(
     type
   )}/${encodeURIComponent(id)}`;
   try {
-    return await http.get<RelationshipsResponseHTTPV1>(url, {
+    return await http.get(url, {
       query: {
         savedObjectTypes,
       },

@@ -13,10 +13,7 @@ export function bulkDeleteObjects(
   http: HttpStart,
   objects: BulkDeleteBodyHTTPV1
 ): Promise<BulkDeleteResponseHTTPV1> {
-  return http.post<BulkDeleteResponseHTTPV1>(
-    '/internal/kibana/management/saved_objects/_bulk_delete',
-    {
-      body: JSON.stringify(objects),
-    }
-  );
+  return http.post('/internal/kibana/management/saved_objects/_bulk_delete', {
+    body: JSON.stringify(objects),
+  });
 }

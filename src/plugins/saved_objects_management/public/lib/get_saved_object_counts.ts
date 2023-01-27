@@ -20,8 +20,7 @@ export async function getSavedObjectCounts({
   searchString?: string;
   references?: SavedObjectsFindOptionsReference[];
 }): Promise<ScrollCountResponseHTTPV1> {
-  return await http.post<ScrollCountResponseHTTPV1>(
-    `/api/kibana/management/saved_objects/scroll/counts`,
-    { body: JSON.stringify({ typesToInclude, searchString, references }) }
-  );
+  return await http.post(`/api/kibana/management/saved_objects/scroll/counts`, {
+    body: JSON.stringify({ typesToInclude, searchString, references }),
+  });
 }

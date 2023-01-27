@@ -13,7 +13,7 @@ export async function findObjects(
   http: HttpStart,
   findOptions: FindQueryHTTPV1
 ): Promise<FindResponseHTTPV1> {
-  return http.get<FindResponseHTTPV1>('/api/kibana/management/saved_objects/_find', {
+  return http.get('/api/kibana/management/saved_objects/_find', {
     query: {
       ...findOptions,
       hasReference: findOptions.hasReference ? JSON.stringify(findOptions.hasReference) : undefined,
