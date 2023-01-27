@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DimensionButtonIcon } from '../dimension_button_icon';
 import { PaletteIndicator } from '../palette_indicator';
@@ -37,24 +37,31 @@ export function DimensionButton({
 }) {
   return (
     <>
-      <EuiLink
-        className="lnsLayerPanel__dimensionLink"
-        data-test-subj="lnsLayerPanel-dimensionLink"
-        onClick={() => onClick(accessorConfig.columnId)}
-        aria-label={triggerLinkA11yText(label)}
-        title={triggerLinkA11yText(label)}
-        color={
-          message?.severity === 'error'
-            ? 'danger'
-            : message?.severity === 'warning'
-            ? 'warning'
-            : undefined
-        }
-      >
-        <DimensionButtonIcon message={message} accessorConfig={accessorConfig}>
-          {children}
-        </DimensionButtonIcon>
-      </EuiLink>
+      <EuiFlexItem>
+        <EuiToolTip
+          content={message?.shortMessage || message?.longMessage || undefined}
+          position="left"
+        >
+          <EuiLink
+            className="lnsLayerPanel__dimensionLink"
+            data-test-subj="lnsLayerPanel-dimensionLink"
+            onClick={() => onClick(accessorConfig.columnId)}
+            aria-label={triggerLinkA11yText(label)}
+            title={triggerLinkA11yText(label)}
+            color={
+              message?.severity === 'error'
+                ? 'danger'
+                : message?.severity === 'warning'
+                ? 'warning'
+                : undefined
+            }
+          >
+            <DimensionButtonIcon message={message} accessorConfig={accessorConfig}>
+              {children}
+            </DimensionButtonIcon>
+          </EuiLink>
+        </EuiToolTip>
+      </EuiFlexItem>
       <EuiButtonEmpty
         size="s"
         className="lnsLayerPanel__dimensionRemove"

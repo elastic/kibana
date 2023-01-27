@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AccessorConfig, UserMessage } from '../../../types';
 import { IconError, IconWarning } from '../custom_icons';
@@ -98,20 +98,15 @@ export function DimensionButtonIcon({
   let indicatorIcon = null;
   if (message || (accessorConfig.triggerIconType && accessorConfig.triggerIconType !== 'none')) {
     indicatorIcon = (
-      <EuiToolTip
-        display="block"
-        content={message?.shortMessage || message?.longMessage || undefined}
-      >
-        <EuiFlexItem grow={false}>
-          {message && (
-            <EuiIcon
-              {...baseIconProps}
-              type={message.severity === 'error' ? IconError : IconWarning}
-            />
-          )}
-          {!message && getIconFromAccessorConfig(accessorConfig)}
-        </EuiFlexItem>
-      </EuiToolTip>
+      <EuiFlexItem grow={false}>
+        {message && (
+          <EuiIcon
+            {...baseIconProps}
+            type={message.severity === 'error' ? IconError : IconWarning}
+          />
+        )}
+        {!message && getIconFromAccessorConfig(accessorConfig)}
+      </EuiFlexItem>
     );
   }
 
