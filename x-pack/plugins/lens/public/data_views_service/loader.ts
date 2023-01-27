@@ -154,7 +154,9 @@ export async function loadIndexPatterns({
 
   onIndexPatternRefresh?.();
 
-  const allIndexPatterns = await Promise.allSettled(missingIds.map((id) => dataViews.get(id, false)));
+  const allIndexPatterns = await Promise.allSettled(
+    missingIds.map((id) => dataViews.get(id, false))
+  );
   // ignore rejected indexpatterns here, they're already handled at the app level
   let indexPatterns = allIndexPatterns
     .filter(
