@@ -87,7 +87,7 @@ export const createClientForExecutors = (
 
           await Promise.all([
             writeStatusChangeToConsole(normalizedArgs, logMeta),
-            writeStatusChangeToMonitoringService(normalizedArgs),
+            writeStatusChangeToRuleObject(normalizedArgs),
             writeStatusChangeToEventLog(normalizedArgs),
           ]);
         } catch (e) {
@@ -160,9 +160,7 @@ export const createClientForExecutors = (
     writeMessageToConsole(logMessage, logLevel, logMeta);
   };
 
-  const writeStatusChangeToMonitoringService = async (
-    args: NormalizedStatusChangeArgs
-  ): Promise<void> => {
+  const writeStatusChangeToRuleObject = async (args: NormalizedStatusChangeArgs): Promise<void> => {
     const { newStatus, message, metrics } = args;
 
     if (newStatus === RuleExecutionStatus.running) {
