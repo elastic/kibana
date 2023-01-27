@@ -190,16 +190,13 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
         alertB: [true, false, false], // active then recovers
         alertC: [true, false, true], // active twice
       };
-      const ruleParameters = {
-        pattern,
-        useLegacy: false,
-      };
+      const ruleParameters = { pattern };
       const createdRule = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestRuleData({
-            rule_type_id: 'test.patternFiring',
+            rule_type_id: 'test.patternFiringAad',
             // set the schedule long so we can use "runSoon" to specify rule runs
             schedule: { interval: '1d' },
             throttle: null,

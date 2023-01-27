@@ -446,23 +446,13 @@ function getPatternFiringAlertType() {
       schema.string(),
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
     ),
-    useLegacy: schema.boolean({ defaultValue: true }),
     reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State extends RuleTypeState {
     patternIndex?: number;
   }
-  const result: RuleType<
-    ParamsType,
-    never,
-    State,
-    {},
-    {},
-    'default',
-    'recovered',
-    { patternIndex: number; instancePattern: boolean[] }
-  > = {
+  const result: RuleType<ParamsType, never, State, {}, {}, 'default', 'recovered'> = {
     id: 'test.patternFiring',
     name: 'Test: Firing on a Pattern',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -504,29 +494,91 @@ function getPatternFiringAlertType() {
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
         if (scheduleByPattern === true) {
-          if (!params.useLegacy && services.alertsClient) {
+          services.alertFactory.create(instanceId).scheduleActions('default', {
+            ...EscapableStrings,
+            deep: DeepContextVariables,
+          });
+        } else if (typeof scheduleByPattern === 'string') {
+          services.alertFactory.create(instanceId).scheduleActions('default', scheduleByPattern);
+        }
+      }
+
+      return {
+        state: {
+          patternIndex: patternIndex + 1,
+        },
+      };
+    },
+  };
+  return result;
+}
+
+function getPatternFiringAlertsAsDataRuleType() {
+  const paramsSchema = schema.object({
+    pattern: schema.recordOf(
+      schema.string(),
+      schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
+    ),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State extends RuleTypeState {
+    patternIndex?: number;
+  }
+  const result: RuleType<
+    ParamsType,
+    never,
+    State,
+    {},
+    {},
+    'default',
+    'recovered',
+    { patternIndex: number; instancePattern: boolean[] }
+  > = {
+    id: 'test.patternFiringAad',
+    name: 'Test: Firing on a Pattern and writing Alerts as Data',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor(alertExecutorOptions) {
+      const { services, state, params } = alertExecutorOptions;
+      const pattern = params.pattern;
+      if (typeof pattern !== 'object') throw new Error('pattern is not an object');
+      let maxPatternLength = 0;
+      for (const [instanceId, instancePattern] of Object.entries(pattern)) {
+        if (!Array.isArray(instancePattern)) {
+          throw new Error(`pattern for instance ${instanceId} is not an array`);
+        }
+        maxPatternLength = Math.max(maxPatternLength, instancePattern.length);
+      }
+
+      // get the pattern index, return if past it
+      const patternIndex = state.patternIndex ?? 0;
+      if (patternIndex >= maxPatternLength) {
+        return { state: { patternIndex } };
+      }
+
+      // fire if pattern says to
+      for (const [instanceId, instancePattern] of Object.entries(pattern)) {
+        const scheduleByPattern = instancePattern[patternIndex];
+        if (scheduleByPattern === true) {
+          if (services.alertsClient) {
             services.alertsClient.create({
               [ALERT_ACTION_GROUP]: 'default',
               [ALERT_ID]: instanceId,
               patternIndex,
               instancePattern: instancePattern as boolean[],
             });
-          } else {
-            services.alertFactory.create(instanceId).scheduleActions('default', {
-              ...EscapableStrings,
-              deep: DeepContextVariables,
-            });
           }
         } else if (typeof scheduleByPattern === 'string') {
-          if (!params.useLegacy && services.alertsClient) {
+          if (services.alertsClient) {
             services.alertsClient.create({
               [ALERT_ACTION_GROUP]: 'default',
               [ALERT_ID]: instanceId,
               patternIndex,
               instancePattern: [true],
             });
-          } else {
-            services.alertFactory.create(instanceId).scheduleActions('default', scheduleByPattern);
           }
         }
       }
@@ -1043,4 +1095,5 @@ export function defineAlertTypes(
   alerting.registerType(getExceedsAlertLimitRuleType());
   alerting.registerType(getAlwaysFiringAlertAsDataRuleType(logger, { ruleRegistry }));
   alerting.registerType(getPatternFiringAutoRecoverFalseAlertType());
+  alerting.registerType(getPatternFiringAlertsAsDataRuleType());
 }
