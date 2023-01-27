@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -36,19 +36,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     // The file data visualizer should work the same as with a trial license
     loadTestFile(
-      require.resolve('../../../../functional/apps/ml/data_visualizer/file_data_visualizer')
+      require.resolve('../../../../../functional/apps/ml/data_visualizer/file_data_visualizer')
     );
-
-    // The data visualizer should work the same as with a trial license, except the missing create actions
-    // That's why the 'basic' version of 'index_data_visualizer_actions_panel' is loaded here
-    loadTestFile(
-      require.resolve('../../../../functional/apps/ml/data_visualizer/index_data_visualizer')
-    );
-    loadTestFile(
-      require.resolve(
-        '../../../../functional/apps/ml/data_visualizer/index_data_visualizer_grid_in_discover'
-      )
-    );
-    loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));
   });
 }

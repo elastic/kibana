@@ -163,7 +163,9 @@ enabled:
   - x-pack/test/functional_basic/apps/ml/permissions/group1/config.ts
   - x-pack/test/functional_basic/apps/ml/permissions/group2/config.ts
   - x-pack/test/functional_basic/apps/ml/permissions/group3/config.ts
-  - x-pack/test/functional_basic/apps/ml/data_visualizer/config.ts
+  - x-pack/test/functional_basic/apps/ml/data_visualizer/group1/config.ts
+  - x-pack/test/functional_basic/apps/ml/data_visualizer/group2/config.ts
+  - x-pack/test/functional_basic/apps/ml/data_visualizer/group3/config.ts
   - x-pack/test/functional_basic/apps/transform/group1/config.ts
   - x-pack/test/functional_basic/apps/transform/group2/config.ts
   - x-pack/test/functional_basic/apps/transform/group3/config.ts
