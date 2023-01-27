@@ -611,7 +611,7 @@ set `telemetry.allowChangingOptInStatus` to `false` and `telemetry.optIn` to `tr
 
 | `telemetry.enabled`
  | Reporting your cluster statistics helps
-us improve your user experience. Your data is never shared with anyone. Set to
+us improve your user experience. Set to
 `false` to disable telemetry capabilities entirely. You can alternatively opt
 out through *Advanced Settings*. *Default: `true`*
 
@@ -639,7 +639,7 @@ Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
 
 | `xpack.actions.whitelistedHosts:`
  | Set this value to an array of host names, with actions such as email, slack, pagerduty, and
- webhook, can connect to.  An element of `*` indicates any host can be connected.  
+ webhook, can connect to.  An element of `*` indicates any host can be connected.
  An empty array indicates no hosts can be connected.
  *Default: +[ {asterisk} ]+*
 
