@@ -135,7 +135,7 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.getByTestId('case-view-status-action-button')).toBeTruthy();
-    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
 
     await waitForComponentToUpdate();
   });
@@ -152,7 +152,7 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
-    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
 
     await waitForComponentToUpdate();
   });
@@ -169,7 +169,7 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.getByTestId('case-severity-selection')).toBeDisabled();
-    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
 
     await waitForComponentToUpdate();
   });
@@ -183,7 +183,7 @@ describe('Case View Page activity tab', () => {
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(result.getByTestId('case-view-loading-content')).toBeTruthy();
     expect(result.queryByTestId('case-view-activity')).toBeFalsy();
-    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
   });
 
   it('should not render the assignees on basic license', () => {
