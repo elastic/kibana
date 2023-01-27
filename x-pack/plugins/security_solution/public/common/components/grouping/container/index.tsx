@@ -89,8 +89,6 @@ const GroupingContainerComponent = ({
           isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key
         }`;
 
-        console.log('trigger[groupKey]', { trigger, groupKey, it: trigger[groupKey] });
-
         return (
           <span key={groupKey}>
             <GroupPanel

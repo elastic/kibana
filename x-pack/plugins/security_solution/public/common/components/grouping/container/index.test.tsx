@@ -158,7 +158,7 @@ describe('grouping container', () => {
     expect(getByTestId('empty-results-panel')).toBeInTheDocument();
   });
 
-  it.only('Opens one group at a time when each group is clicked', () => {
+  it('Opens one group at a time when each group is clicked', () => {
     const { getAllByTestId } = render(
       <TestProviders>
         <GroupingContainer {...testProps} />
