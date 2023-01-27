@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { AxiosError } from 'axios';
-
 export interface ResponseError {
   errorMessages: string[] | null | undefined;
   errors: { [k: string]: string } | null | undefined;
