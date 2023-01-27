@@ -25,7 +25,7 @@ export interface AddIndicesLogicActions {
 
 export interface AddIndicesLogicValues {
   selectedIndices: ElasticsearchIndexWithIngestion[];
-  updateEngineError: typeof UpdateEngineApiLogic.values.error;
+  updateEngineError: typeof UpdateEngineApiLogic.values.error | undefined;
   updateEngineStatus: typeof UpdateEngineApiLogic.values.status;
 }
 
