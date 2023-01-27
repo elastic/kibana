@@ -44,6 +44,7 @@ import { getGuidePanelStyles } from './guide_panel.styles';
 import { GuideButton } from './guide_button';
 
 import wellDoneAnimatedGif from '../../assets/well_done_animated.gif';
+import wellDoneAnimatedDarkGif from '../../assets/well_done_animated_dark.gif';
 
 interface GuidePanelProps {
   api: GuidedOnboardingApi;
@@ -223,6 +224,9 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
 
   const stepsCompleted = getProgress(pluginState?.activeGuide);
   const isGuideReadyToComplete = pluginState?.activeGuide?.status === 'ready_to_complete';
+  const getImageUrl = () => {
+    return isDarkTheme ? wellDoneAnimatedDarkGif : wellDoneAnimatedGif;
+  };
 
   const backToGuidesButton = (
     <EuiButtonEmpty
@@ -280,36 +284,35 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
 
               <EuiFlyoutBody css={styles.flyoutOverrides.flyoutBody}>
                 <div>
-                  <EuiEmptyPrompt
-                    css={styles.wellDoneAnimatedPrompt}
-                    paddingSize="none"
-                    icon={
+                  {isGuideReadyToComplete && (
+                    <>
                       <EuiImage
                         size="fullWidth"
-                        src={wellDoneAnimatedGif}
+                        src={getImageUrl()}
                         alt={i18n.translate('guidedOnboarding.dropdownPanel.wellDoneAnimatedGif', {
                           defaultMessage: `Guide completed animated gif`,
                         })}
                       />
-                    }
-                    body={
-                      <EuiText size="m" color="default">
-                        <p data-test-subj="guideDescription">
-                          {isGuideReadyToComplete
-                            ? i18n.translate(
-                                'guidedOnboarding.dropdownPanel.completeGuideFlyoutDescription',
-                                {
-                                  defaultMessage: `You've completed the Elastic {guideName} guide. Feel free to come back to the Guides for more onboarding help or a refresher.`,
-                                  values: {
-                                    guideName: guideConfig.guideName,
-                                  },
-                                }
-                              )
-                            : guideConfig.description}
-                        </p>
-                      </EuiText>
-                    }
-                  />
+
+                      <EuiSpacer />
+                    </>
+                  )}
+
+                  <EuiText size="m">
+                    <p data-test-subj="guideDescription">
+                      {isGuideReadyToComplete
+                        ? i18n.translate(
+                            'guidedOnboarding.dropdownPanel.completeGuideFlyoutDescription',
+                            {
+                              defaultMessage: `You've completed the Elastic {guideName} guide. Feel free to come back to the Guides for more onboarding help or a refresher.`,
+                              values: {
+                                guideName: guideConfig.guideName,
+                              },
+                            }
+                          )
+                        : guideConfig.description}
+                    </p>
+                  </EuiText>
 
                   {guideConfig.docs && (
                     <>
