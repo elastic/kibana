@@ -143,6 +143,8 @@ export function useGetMonitorEmbeddedFilters() {
           break;
         case 'tags':
           embeddableFilters.push({ field: 'tags', values });
+        case 'projects':
+          embeddableFilters.push({ field: 'monitor.project.id', values });
       }
     }
   }
