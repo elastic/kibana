@@ -210,7 +210,7 @@ export function ServiceInventory() {
   ].some((item) => 'healthStatus' in item);
 
   const hasKibanaUiLimitRestrictedData =
-    mainStatisticsFetch.data?.maxServiceGroupsExceeded;
+    mainStatisticsFetch.data?.maxServiceCountExceeded;
 
   const displayAlerts = [...mainStatisticsItems, ...preloadedServices].some(
     (item) => ServiceInventoryFieldName.AlertsCount in item

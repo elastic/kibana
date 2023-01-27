@@ -41,7 +41,7 @@ interface AggregationParams {
   randomSampler: RandomSampler;
 }
 
-export async function getServiceAggregatedTransactionStats({
+export async function getServiceStatsForServiceMetrics({
   environment,
   kuery,
   apmEventClient,
@@ -52,7 +52,7 @@ export async function getServiceAggregatedTransactionStats({
   randomSampler,
 }: AggregationParams) {
   const response = await apmEventClient.search(
-    'get_service_aggregated_transaction_stats',
+    'get_service_stats_for_service_metric',
     {
       apm: {
         events: [ProcessorEvent.metric],
@@ -157,7 +157,7 @@ export async function getServiceAggregatedTransactionStats({
           end,
           value: topTransactionTypeBucket.doc_count,
         }),
-        overflowCount: bucket.overflowCount.value,
+        overflowCount: bucket.overflowCount.value || 0,
       };
     }) ?? []
   );

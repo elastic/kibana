@@ -11,16 +11,16 @@ import React from 'react';
 export const OTHER_SERVICE_NAME = '_other';
 
 export function ServiceMaxGroupsMessage({
-  remainingServices = 1,
+  overflowCount = 1,
 }: {
-  remainingServices?: number;
+  overflowCount?: number;
 }) {
   return (
     <FormattedMessage
-      defaultMessage="Number of services that have been instrumented has reached the current max. capacity that can be handled by the APM server. There are at least {remainingServices, plural, one {1 service} other {# services}} missing in this list. Please increase the memory allocated to APM server."
+      defaultMessage="Number of services that have been instrumented has reached the current max. capacity that can be handled by the APM server. There are at least {overflowCount, plural, one {1 service} other {# services}} missing in this list. Please increase the memory allocated to APM server."
       id="xpack.apm.serviceDetail.maxGroups.message"
       values={{
-        remainingServices,
+        overflowCount,
       }}
     />
   );

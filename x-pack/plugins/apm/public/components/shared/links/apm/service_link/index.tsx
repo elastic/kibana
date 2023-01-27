@@ -34,7 +34,7 @@ interface ServiceLinkProps {
   agentName?: AgentName;
   query: TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
   serviceName: string;
-  overflowCount?: number | null;
+  overflowCount?: number;
 }
 
 export function ServiceLink({
@@ -71,7 +71,7 @@ export function ServiceLink({
             iconType="alert"
           >
             <EuiText style={{ width: `${unit * 28}px` }} size="s">
-              <ServiceMaxGroupsMessage remainingServices={overflowCount} />
+              <ServiceMaxGroupsMessage overflowCount={overflowCount} />
             </EuiText>
           </PopoverTooltip>
         </EuiFlexItem>

@@ -46,7 +46,7 @@ interface AggregationParams {
   randomSampler: RandomSampler;
 }
 
-export async function getServiceTransactionStats({
+export async function getServiceStats({
   environment,
   kuery,
   apmEventClient,
@@ -68,62 +68,57 @@ export async function getServiceTransactionStats({
     outcomes,
   };
 
-  const response = await apmEventClient.search(
-    'get_service_transaction_stats',
-    {
-      apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
-        ],
-      },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...getDocumentTypeFilterForTransactions(
-                searchAggregatedTransactions
-              ),
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...serviceGroupQuery(serviceGroup),
-            ],
-          },
+  const response = await apmEventClient.search('get_service_stats', {
+    apm: {
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...getDocumentTypeFilterForTransactions(
+              searchAggregatedTransactions
+            ),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...serviceGroupQuery(serviceGroup),
+          ],
         },
-        aggs: {
-          sample: {
-            random_sampler: randomSampler,
-            aggs: {
-              services: {
-                terms: {
-                  field: SERVICE_NAME,
-                  size: maxNumServices,
-                },
-                aggs: {
-                  overflowCount: {
-                    max: {
-                      field: SERVICE_OVERFLOW_COUNT,
-                    },
+      },
+      aggs: {
+        sample: {
+          random_sampler: randomSampler,
+          aggs: {
+            services: {
+              terms: {
+                field: SERVICE_NAME,
+                size: maxNumServices,
+              },
+              aggs: {
+                overflowCount: {
+                  max: {
+                    field: SERVICE_OVERFLOW_COUNT,
                   },
-                  transactionType: {
-                    terms: {
-                      field: TRANSACTION_TYPE,
-                    },
-                    aggs: {
-                      ...metrics,
-                      environments: {
-                        terms: {
-                          field: SERVICE_ENVIRONMENT,
-                        },
+                },
+                transactionType: {
+                  terms: {
+                    field: TRANSACTION_TYPE,
+                  },
+                  aggs: {
+                    ...metrics,
+                    environments: {
+                      terms: {
+                        field: SERVICE_ENVIRONMENT,
                       },
-                      sample: {
-                        top_metrics: {
-                          metrics: [{ field: AGENT_NAME } as const],
-                          sort: {
-                            '@timestamp': 'desc' as const,
-                          },
+                    },
+                    sample: {
+                      top_metrics: {
+                        metrics: [{ field: AGENT_NAME } as const],
+                        sort: {
+                          '@timestamp': 'desc' as const,
                         },
                       },
                     },
@@ -134,8 +129,8 @@ export async function getServiceTransactionStats({
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return (
     response.aggregations?.sample.services.buckets.map((bucket) => {
@@ -163,7 +158,7 @@ export async function getServiceTransactionStats({
           end,
           value: topTransactionTypeBucket.doc_count,
         }),
-        overflowCount: bucket.overflowCount.value,
+        overflowCount: bucket.overflowCount.value || 0,
       };
     }) ?? []
   );

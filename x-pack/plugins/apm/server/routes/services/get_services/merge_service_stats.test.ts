@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
-import { getServiceTransactionStats } from './get_service_transaction_stats';
+import { getServiceStats } from './get_service_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
 type ServiceTransactionStat = Awaited<
-  ReturnType<typeof getServiceTransactionStats>
+  ReturnType<typeof getServiceStats>
 >[number];
 
 function stat(values: Partial<ServiceTransactionStat>): ServiceTransactionStat {
@@ -21,7 +21,7 @@ function stat(values: Partial<ServiceTransactionStat>): ServiceTransactionStat {
     transactionErrorRate: 3,
     transactionType: 'request',
     agentName: 'java',
-    overflowCount: null,
+    overflowCount: 0,
     ...values,
   };
 }
@@ -70,6 +70,7 @@ describe('mergeServiceStats', () => {
         throughput: 4,
         transactionErrorRate: 3,
         transactionType: 'request',
+        overflowCount: 0,
       },
       {
         agentName: 'java',
@@ -81,6 +82,7 @@ describe('mergeServiceStats', () => {
         transactionErrorRate: 3,
         transactionType: 'request',
         alertsCount: 1,
+        overflowCount: 0,
       },
     ]);
   });
@@ -123,6 +125,7 @@ describe('mergeServiceStats', () => {
         throughput: 2,
         transactionErrorRate: 3,
         transactionType: 'request',
+        overflowCount: 0,
       },
       {
         agentName: 'java',
@@ -167,6 +170,7 @@ describe('mergeServiceStats', () => {
         transactionErrorRate: 3,
         transactionType: 'request',
         alertsCount: 3,
+        overflowCount: 0,
       },
     ]);
   });
@@ -199,6 +203,7 @@ describe('mergeServiceStats', () => {
         throughput: 2,
         transactionErrorRate: 3,
         transactionType: 'request',
+        overflowCount: 0,
       },
     ]);
   });

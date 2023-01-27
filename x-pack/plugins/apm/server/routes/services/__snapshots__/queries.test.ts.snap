@@ -89,7 +89,7 @@ Array [
               "aggs": Object {
                 "overflowCount": Object {
                   "max": Object {
-                    "field": "service.aggregation.overflow_count",
+                    "field": "service_transaction.aggregation.overflow_count",
                   },
                 },
                 "transactionType": Object {

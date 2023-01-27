@@ -57,7 +57,11 @@ export function orderServiceItems({
   // For healthStatus, sort items by healthStatus first, then by tie-breaker
 
   const sortFn = sorts[primarySortField as ServiceInventoryFieldName];
-  let sortedItems;
+  const sortOtherBucketFirst = (item: ServiceListItem) => {
+    return item.serviceName === OTHER_SERVICE_NAME ? -1 : 0;
+  };
+
+  const sortOtherBucketFirstDirection = 'asc';
 
   if (primarySortField === ServiceInventoryFieldName.HealthStatus) {
     const tiebreakerSortDirection =
@@ -67,28 +71,15 @@ export function orderServiceItems({
 
     const tiebreakerSortFn = sorts[tiebreakerField];
 
-    sortedItems = orderBy(
+    return orderBy(
       items,
-      [sortFn, tiebreakerSortFn],
-      [sortDirection, tiebreakerSortDirection]
+      [sortOtherBucketFirst, sortFn, tiebreakerSortFn],
+      [sortOtherBucketFirstDirection, sortDirection, tiebreakerSortDirection]
     );
-  } else {
-    sortedItems = orderBy(items, sortFn, sortDirection);
   }
-
-  // Irrespective of sort order, move the service overflow bucket to the top
-  let indexOfOverFlowBucket = -1;
-  const isOverFlowBucketPresent = sortedItems.some((item, index) => {
-    if (item.serviceName === OTHER_SERVICE_NAME) {
-      indexOfOverFlowBucket = index;
-      return true;
-    }
-    return false;
-  });
-
-  if (isOverFlowBucketPresent) {
-    sortedItems.unshift(sortedItems.splice(indexOfOverFlowBucket, 1)[0]);
-  }
-
-  return sortedItems;
+  return orderBy(
+    items,
+    [sortOtherBucketFirst, sortFn],
+    [sortOtherBucketFirstDirection, sortDirection]
+  );
 }

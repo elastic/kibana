@@ -81,7 +81,7 @@ const servicesRoute = createApmServerRoute({
           latency: number | null;
           transactionErrorRate: number;
           throughput: number;
-          overflowCount: number | null;
+          overflowCount: number;
         }
       | {
           serviceName: string;
@@ -117,7 +117,7 @@ const servicesRoute = createApmServerRoute({
         alertsCount: number;
       }
     >;
-    maxServiceGroupsExceeded: boolean;
+    maxServiceCountExceeded: boolean;
   }> {
     const {
       config,

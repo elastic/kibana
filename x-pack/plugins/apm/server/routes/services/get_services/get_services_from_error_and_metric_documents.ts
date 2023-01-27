@@ -98,7 +98,7 @@ export async function getServicesFromErrorAndMetricDocuments({
           agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
         };
       }) ?? [],
-    maxServiceGroupsExceeded:
+    maxServiceCountExceeded:
       (response.aggregations?.sample.services.sum_other_doc_count ?? 0) > 0,
   };
 }

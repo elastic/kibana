@@ -10,8 +10,8 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
-import { getServiceTransactionStats } from './get_service_transaction_stats';
-import { getServiceAggregatedTransactionStats } from './get_service_aggregated_transaction_stats';
+import { getServiceStats } from './get_service_stats';
+import { getServiceStatsForServiceMetrics } from './get_service_stats_for_service_metric';
 import { mergeServiceStats } from './merge_service_stats';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
@@ -63,16 +63,16 @@ export async function getServicesItems({
 
     const [
       transactionStats,
-      { services, maxServiceGroupsExceeded },
+      { services, maxServiceCountExceeded },
       healthStatuses,
       alertCounts,
     ] = await Promise.all([
       searchAggregatedServiceMetrics
-        ? getServiceAggregatedTransactionStats({
+        ? getServiceStatsForServiceMetrics({
             ...commonParams,
             apmEventClient,
           })
-        : getServiceTransactionStats({
+        : getServiceStats({
             ...commonParams,
             apmEventClient,
           }),
@@ -98,7 +98,7 @@ export async function getServicesItems({
           healthStatuses,
           alertCounts,
         }) ?? [],
-      maxServiceGroupsExceeded,
+      maxServiceCountExceeded,
     };
   });
 }

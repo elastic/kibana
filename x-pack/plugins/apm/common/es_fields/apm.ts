@@ -33,7 +33,8 @@ export const SERVICE_RUNTIME_VERSION = 'service.runtime.version';
 export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
 export const SERVICE_TARGET_TYPE = 'service.target.type';
-export const SERVICE_OVERFLOW_COUNT = 'service.aggregation.overflow_count';
+export const SERVICE_OVERFLOW_COUNT =
+  'service_transaction.aggregation.overflow_count';
 
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
