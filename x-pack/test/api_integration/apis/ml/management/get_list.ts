@@ -16,7 +16,6 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
   const spacesService = getService('spaces');
   const supertest = getService('supertestWithoutAuth');
-  const log = getService('log');
 
   const adJobIdSpace1s1 = 'fq_single_space1s1';
   const adJobIdSpace2s1 = 'fq_single_space2s1';
@@ -45,8 +44,6 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('get management list', () => {
     before(async () => {
-      const tm1 = await ml.api.getTrainedModelsES();
-      log.info(JSON.stringify(tm1, null, 2));
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
@@ -87,9 +84,6 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.createTrainedModel(trainedModelIdSpace3s2, trainedModelConfig3.body, idSpace2);
 
       await ml.testResources.setKibanaTimeZoneToUTC();
-
-      const tm2 = await ml.api.getTrainedModelsES();
-      log.info(JSON.stringify(tm2, null, 2));
     });
 
     after(async () => {

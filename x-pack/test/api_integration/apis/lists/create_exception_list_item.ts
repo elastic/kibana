@@ -46,7 +46,6 @@ export default function ({ getService }: FtrProviderContext) {
         'Invalid value "undefined" supplied to "value"',
         'Invalid value "undefined" supplied to "entries"',
       ]);
-      expect(true).to.eql(true);
     });
 
     it('should return a 400 if endpoint exception entry has disallowed field', async () => {
@@ -72,7 +71,6 @@ export default function ({ getService }: FtrProviderContext) {
         .send(badItem)
         .expect(400);
       expect(body.message).to.eql(`cannot add endpoint exception item on field ${fieldName}`);
-      expect(true).to.eql(true);
     });
   });
 }

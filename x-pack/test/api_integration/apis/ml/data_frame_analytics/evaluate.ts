@@ -136,6 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set(COMMON_REQUEST_HEADERS)
             .send(testConfig.eval);
           ml.api.assertResponseStatusCode(200, status, body);
+
           if (testConfig.jobType === 'classification') {
             const { classification } = body;
             expect(body).to.have.property('classification');
