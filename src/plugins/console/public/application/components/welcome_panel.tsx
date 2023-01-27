@@ -29,7 +29,7 @@ interface Props {
 
 export function WelcomePanel(props: Props) {
   return (
-    <EuiFlyout onClose={props.onDismiss} data-test-subj="welcomePanel" size="m" ownFocus={false}>
+    <EuiFlyout onClose={props.onDismiss} data-test-subj="welcomePanel" size="s" ownFocus={false}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
@@ -78,7 +78,7 @@ export function WelcomePanel(props: Props) {
           <EditorExample
             panel="welcome-example-3"
             example={examples.multipleRequestsExample}
-            linesOfExampleCode={19}
+            linesOfExampleCode={22}
             mode="output"
           />
 
@@ -103,7 +103,7 @@ export function WelcomePanel(props: Props) {
           <EditorExample
             panel="welcome-example-4"
             example={examples.commentsExample}
-            linesOfExampleCode={11}
+            linesOfExampleCode={14}
           />
           <h4>
             <FormattedMessage
@@ -126,7 +126,10 @@ export function WelcomePanel(props: Props) {
             <li>
               <FormattedMessage
                 id="console.welcomePage.useVariables.step1"
-                defaultMessage="Click Variable, and then enter the variable name and value."
+                defaultMessage="Click {variableText}, and then enter the variable name and value."
+                values={{
+                  variableText: <strong>Variables</strong>,
+                }}
               />
             </li>
             <li>
@@ -139,7 +142,7 @@ export function WelcomePanel(props: Props) {
           <EditorExample
             panel="welcome-example-5"
             example={examples.variablesExample}
-            linesOfExampleCode={8}
+            linesOfExampleCode={9}
           />
 
           <h4>
@@ -151,7 +154,10 @@ export function WelcomePanel(props: Props) {
           <p>
             <FormattedMessage
               id="console.welcomePage.keyboardShortcutsDescription"
-              defaultMessage="For a list of keyboard shortcuts, click Help."
+              defaultMessage="For a list of keyboard shortcuts, click {helpText}."
+              values={{
+                helpText: <strong>Help</strong>,
+              }}
             />
           </p>
 
