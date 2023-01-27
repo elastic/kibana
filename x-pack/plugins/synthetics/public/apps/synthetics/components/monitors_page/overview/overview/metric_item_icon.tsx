@@ -81,7 +81,17 @@ export const MetricItemIcon = ({
       <Container>
         <EuiPopover
           button={
-            <StyledIcon onMouseEnter={() => setIsPopoverOpen()} boxShadow={euiShadow}>
+            <StyledIcon
+              onMouseEnter={() => setIsPopoverOpen()}
+              boxShadow={euiShadow}
+              onClick={() => {
+                if (configIdByLocation === isPopoverOpen) {
+                  dispatch(toggleErrorPopoverOpen(null));
+                } else {
+                  dispatch(toggleErrorPopoverOpen(configIdByLocation));
+                }
+              }}
+            >
               <EuiButtonIcon iconType="alert" color="danger" size="m" />
             </StyledIcon>
           }
