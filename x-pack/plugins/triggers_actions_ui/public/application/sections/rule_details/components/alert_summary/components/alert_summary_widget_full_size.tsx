@@ -88,7 +88,6 @@ export const AlertsSummaryWidgetFullSize = ({
             point: { visible: false },
           }}
           curve={CurveType.CURVE_MONOTONE_X}
-          timeZone="UTC"
         />
       </Chart>
     </EuiPanel>
