@@ -8,6 +8,10 @@
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
@@ -132,6 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('show up', async () => {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await sleep(500);
         await queryBar.setQuery('extension.raw : ');
         await queryBar.expectSuggestions({ count: 5, contains: '"jpg"' });
       });

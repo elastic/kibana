@@ -178,10 +178,16 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
     dateRangeTo ?? 'now'
   );
   const [stateOpenQueryBarMenu, setStateOpenQueryBarMenu] = useState(false);
-  // Needed to do complicated state comparisons...
+  // Needed to do lifecycle comparisons... See the useEffect for more info.
   const [stateProps, setStateProps] = useState(props);
 
   useEffect(() => {
+    // This component used to be a class component. It used getDerivedStateFromProps
+    // to store a copy of the old props in state, and then updated certain pieces
+    // of state depending on specific conditions.
+    // This useEffect is basically a refactor of that getDerivedStateFromProps.
+    // The isEqual comparison of props *is* expensive, but if you remove it
+    // lots of FTR tests will break. So optimize at your own peril.
     if (!isEqual(stateProps, props)) {
       if (!query) {
         if (stateQuery) {
