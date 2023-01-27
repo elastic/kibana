@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { ActionTypes, CaseUserActionsDeprecatedResponse, CommentType } from '@kbn/cases-plugin/common/api';
+import {
+  ActionTypes,
+  CaseUserActionsDeprecatedResponse,
+  CommentType,
+} from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { deleteAllCaseItems } from '../../../../common/lib/utils';
 import { getCaseUserActions } from '../../../../common/lib/user_actions';

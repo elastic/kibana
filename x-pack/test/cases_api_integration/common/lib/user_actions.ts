@@ -24,7 +24,7 @@ export const removeServerGeneratedPropertiesFromUserAction = (
 ) => {
   const keysToRemove: Array<keyof CaseUserActionDeprecatedResponse> = ['action_id', 'created_at'];
   return removeServerGeneratedPropertiesFromObject<
-  CaseUserActionDeprecatedResponse,
+    CaseUserActionDeprecatedResponse,
     typeof keysToRemove[number]
   >(attributes, keysToRemove);
 };
