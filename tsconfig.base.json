@@ -194,6 +194,8 @@
       "@kbn/core-capabilities-browser-mocks/*": ["packages/core/capabilities/core-capabilities-browser-mocks/*"],
       "@kbn/core-capabilities-common": ["packages/core/capabilities/core-capabilities-common"],
       "@kbn/core-capabilities-common/*": ["packages/core/capabilities/core-capabilities-common/*"],
+      "@kbn/core-capabilities-integration-tests": ["packages/core/capabilities/core-capabilities-integration-tests"],
+      "@kbn/core-capabilities-integration-tests/*": ["packages/core/capabilities/core-capabilities-integration-tests/*"],
       "@kbn/core-capabilities-server": ["packages/core/capabilities/core-capabilities-server"],
       "@kbn/core-capabilities-server/*": ["packages/core/capabilities/core-capabilities-server/*"],
       "@kbn/core-capabilities-server-internal": ["packages/core/capabilities/core-capabilities-server-internal"],
