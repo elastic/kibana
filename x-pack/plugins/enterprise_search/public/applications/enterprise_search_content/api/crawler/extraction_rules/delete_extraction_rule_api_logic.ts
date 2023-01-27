@@ -18,7 +18,7 @@ export interface DeleteExtractionRuleArgs {
 }
 
 export interface DeleteExtractionRuleResponse {
-  extraction_rules: ExtractionRule[]; // the name of the newly created index
+  extraction_rules: ExtractionRule[];
 }
 
 export const deleteExtractionRule = async ({

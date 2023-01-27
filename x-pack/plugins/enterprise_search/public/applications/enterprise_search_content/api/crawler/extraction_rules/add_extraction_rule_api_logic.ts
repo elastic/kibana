@@ -21,7 +21,7 @@ export interface AddExtractionRuleArgs {
 }
 
 export interface AddExtractionRuleResponse {
-  extraction_rules: ExtractionRule[]; // the name of the newly created index
+  extraction_rules: ExtractionRule[];
 }
 
 export const addExtractionRule = async ({ domainId, indexName, rule }: AddExtractionRuleArgs) => {

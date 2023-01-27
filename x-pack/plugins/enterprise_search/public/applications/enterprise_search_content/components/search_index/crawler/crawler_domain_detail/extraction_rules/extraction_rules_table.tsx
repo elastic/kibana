@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import { ExtractionRule } from '../../../../../../../../common/types/extraction_rules';
+import { CANCEL_BUTTON_LABEL } from '../../../../../../shared/constants';
 
 import { ContentFieldsPanel } from './content_fields_panel';
 import { ExtractionRulesLogic } from './extraction_rules_logic';
@@ -223,12 +224,7 @@ export const ExtractionRulesTable: React.FC = () => {
               defaultMessage: 'Are you sure you want to delete this field rule?',
             }
           )}
-          cancelButtonText={i18n.translate(
-            'xpack.enterpriseSearch.content.crawler.extractionRules.deleteFieldModal.cancelLabel',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
+          cancelButtonText={CANCEL_BUTTON_LABEL}
         >
           {i18n.translate(
             'xpack.enterpriseSearch.content.crawler.extractionRules.deleteFieldModal.description',

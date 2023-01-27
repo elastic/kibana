@@ -13,6 +13,8 @@ import { EuiButton, EuiConfirmModal, EuiEmptyPrompt, EuiText } from '@elastic/eu
 
 import { i18n } from '@kbn/i18n';
 
+import { CANCEL_BUTTON_LABEL } from '../../../../../../shared/constants';
+
 import { EditExtractionRule } from './edit_extraction_rule';
 import { ExtractionRulesLogic } from './extraction_rules_logic';
 import { ExtractionRulesTable } from './extraction_rules_table';
@@ -54,12 +56,7 @@ export const ExtractionRules: React.FC = () => {
               defaultMessage: 'Are you sure you want to delete this extraction rule?',
             }
           )}
-          cancelButtonText={i18n.translate(
-            'xpack.enterpriseSearch.content.crawler.extractionRules.deleteModal.cancelLabel',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
+          cancelButtonText={CANCEL_BUTTON_LABEL}
         >
           {i18n.translate(
             'xpack.enterpriseSearch.content.crawler.extractionRules.deleteModal.description',

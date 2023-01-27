@@ -68,7 +68,7 @@ interface ExtractionRulesActions {
     fieldRuleIndex?: number;
     isNewRule: boolean;
   };
-  receiveDomainData: CrawlerDomainDetailActions['receiveDomainData'];
+  fetchDomainData: CrawlerDomainDetailActions['fetchDomainData'];
   saveExtractionRule(extractionRule: ExtractionRuleBase): {
     extractionRule: ExtractionRuleBase;
   };
@@ -162,10 +162,8 @@ export const ExtractionRulesLogic = kea<
   },
   events: ({ actions, values }) => ({
     beforeUnmount: () => {
-      // make sure we feed back our updated extraction rules data to the domain
-      if (values.domain) {
-        actions.receiveDomainData({ ...values.domain, extractionRules: values.extractionRules });
-      }
+      // This prevents stale data from hanging around on unload
+      actions.fetchDomainData(values.domainId);
     },
   }),
   listeners: ({ actions, values }) => ({

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ExtractionRule } from '../../../../../../common/types/extraction_rules';
+import {
+  ExtractionRule,
+  ExtractionRuleBase,
+} from '../../../../../../common/types/extraction_rules';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 
 import { createApiLogic } from '../../../../shared/api_logic/create_api_logic';
@@ -18,7 +21,7 @@ export interface UpdateExtractionRuleArgs {
 }
 
 export interface UpdateExtractionRuleResponse {
-  extraction_rules: ExtractionRule[]; // the name of the newly created index
+  extraction_rules: ExtractionRule[];
 }
 
 export const updateExtractionRule = async ({
