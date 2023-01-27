@@ -14,7 +14,13 @@ import { AlertSummaryTimeRange } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useMemo, useRef, useCallback, useState } from 'react';
 
 import { observabilityFeatureId } from '../../../../../common';
-
+import type { ObservabilityAppServices } from '../../../../application/types';
+import {
+  DataSections,
+  LoadingObservability,
+  HeaderActions,
+  DataAssistantFlyout,
+} from '../../components';
 import { EmptySections } from '../../../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../../../components/app/header';
 import { Resources } from '../../../../components/app/resources';
@@ -33,15 +39,6 @@ import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
 import { getNewsFeed } from '../../../../services/get_news_feed';
 import { buildEsQuery } from '../../../../utils/build_es_query';
 import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
-
-import type { ObservabilityAppServices } from '../../../../application/types';
-
-import {
-  DataSections,
-  LoadingObservability,
-  HeaderActions,
-  DataAssistantFlyout,
-} from '../../components';
 
 import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
 import { calculateBucketSize, useOverviewMetrics } from './helpers';
