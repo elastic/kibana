@@ -9,7 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { AxisTitleSettings, AxisTitleSettingsProps } from './axis_title_settings';
-import { Label, VisLabel } from './vis_label';
+import { Label, VisLabel } from '../../vis_label';
 
 describe('Axes Title settings', () => {
   let props: AxisTitleSettingsProps;

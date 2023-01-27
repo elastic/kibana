@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
-import { UnifiedAxisExtentConfig } from './types';
+import type { Ast } from '@kbn/interpreter';
+import type { UnifiedAxisExtentConfig } from './types';
 
 // TODO: import it from the expression config directly?
 const CHART_TO_FN_NAME = {
@@ -25,8 +25,10 @@ export const axisExtentConfigToExpression = (
       arguments: {
         // rely on expression default value here
         mode: extent?.mode ? [extent.mode] : [],
-        lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
-        upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
+        lowerBound: extent?.lowerBound != null ? [extent.lowerBound] : [],
+        upperBound: extent?.upperBound != null ? [extent.upperBound] : [],
+        // be explicit in this case
+        niceValues: extent?.niceValues != null ? [extent.niceValues] : [true],
       },
     },
   ],
