@@ -13,7 +13,12 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType, EuiFlyoutSize, RecursivePartial } from '@elastic/eui';
+import type {
+  IconType,
+  EuiFlyoutSize,
+  RecursivePartial,
+  EuiDataGridToolBarAdditionalControlsOptions,
+} from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
@@ -63,6 +68,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
+import { AlertSummaryTimeRange } from './application/sections/rule_details/components/alert_summary/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
@@ -124,6 +130,7 @@ export type {
   GetFieldTableColumns,
   BrowserFieldItem,
   RulesListVisibleColumns,
+  AlertSummaryTimeRange,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -478,6 +485,7 @@ export interface AlertsTableProps {
   onResetColumns: () => void;
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
+  controls?: EuiDataGridToolBarAdditionalControlsOptions;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -504,8 +512,24 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (selectedIds: TimelineItem[], isAllSelected: boolean) => void;
+  onClick: (
+    selectedIds: TimelineItem[],
+    isAllSelected: boolean,
+    setIsBulkActionsLoading: (isLoading: boolean) => void
+  ) => void;
 }
+
+export interface RenderCustomActionsRowArgs {
+  alert: EcsFieldsResponse;
+  setFlyoutAlert: (data: unknown) => void;
+  id?: string;
+  setIsActionLoading?: (isLoading: boolean) => void;
+}
+
+export type UseActionsColumnRegistry = () => {
+  renderCustomActionsRow: (args: RenderCustomActionsRowArgs) => JSX.Element;
+  width?: number;
+};
 
 export type UseBulkActionsRegistry = () => BulkActionsConfig[];
 
@@ -520,15 +544,11 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
-  useActionsColumn?: () => {
-    renderCustomActionsRow: (
-      alert: EcsFieldsResponse,
-      setFlyoutAlert: (data: unknown) => void,
-      id?: string
-    ) => JSX.Element;
-    width?: number;
-  };
+  useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
+  usePersistentControls?: () => {
+    right?: ReactNode;
+  };
 }
 
 export enum BulkActionsVerbs {
@@ -538,19 +558,28 @@ export enum BulkActionsVerbs {
   selectCurrentPage = 'selectCurrentPage',
   selectAll = 'selectAll',
   rowCountUpdate = 'rowCountUpdate',
+  updateRowLoadingState = 'updateRowLoadingState',
+  updateAllLoadingState = 'updateAllLoadingState',
 }
 
 export interface BulkActionsReducerAction {
   action: BulkActionsVerbs;
   rowIndex?: number;
   rowCount?: number;
+  isLoading?: boolean;
 }
 
 export interface BulkActionsState {
-  rowSelection: Set<number>;
+  rowSelection: Map<number, RowSelectionState>;
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
+}
+
+export type RowSelection = Map<number, RowSelectionState>;
+
+export interface RowSelectionState {
+  isLoading: boolean;
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

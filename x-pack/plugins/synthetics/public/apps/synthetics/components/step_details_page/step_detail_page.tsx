@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { BreakdownLegend } from './step_timing_breakdown/breakdown_legend';
-import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
-import { ObjectWeightList } from './step_objects/object_weight_list';
-import { NetworkTimingsDonut } from './step_timing_breakdown/network_timings_donut';
-import { StepMetrics } from './step_metrics/step_metrics';
-import { NetworkTimingsBreakdown } from './network_timings_breakdown';
-import { ObjectCountList } from './step_objects/object_count_list';
-import { StepImage } from './step_screenshot/step_image';
-import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
-import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
-
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
+import { ErrorCallOut } from './error_callout';
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
+import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
+import { NetworkTimingsDonut } from './step_timing_breakdown/network_timings_donut';
+import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { getNetworkEvents } from '../../state/network_events/actions';
+import { ObjectWeightList } from './step_objects/object_weight_list';
+import { StepMetrics } from './step_metrics/step_metrics';
+import { ObjectCountList } from './step_objects/object_count_list';
+import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
+import { StepImage } from './step_screenshot/step_image';
+import { BreakdownLegend } from './step_timing_breakdown/breakdown_legend';
+import { NetworkTimingsBreakdown } from './network_timings_breakdown';
 
 export const StepDetailPage = () => {
   const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
@@ -28,24 +30,28 @@ export const StepDetailPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
   useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
 
-  const { data, loading, isFailed, currentStep } = useJourneySteps(checkGroupId);
+  const { data, isFailedStep, currentStep } = useJourneySteps();
+
+  useStepDetailsBreadcrumbs();
 
   const activeStep = data?.steps?.find(
     (step) => step.synthetics?.step?.index === Number(stepIndex)
   );
 
-  useStepDetailsBreadcrumbs([{ text: data?.details?.journey.monitor.name ?? '' }]);
+  const dispatch = useDispatch();
 
-  if (loading) {
-    return (
-      <div className="eui-textCenter">
-        <EuiLoadingSpinner size="xxl" />
-      </div>
+  useEffect(() => {
+    dispatch(
+      getNetworkEvents.get({
+        checkGroup: checkGroupId,
+        stepIndex: Number(stepIndex),
+      })
     );
-  }
+  }, [dispatch, stepIndex, checkGroupId]);
 
   return (
     <>
+      <ErrorCallOut step={activeStep} />
       {data?.details?.journey?.config_id && (
         <MonitorDetailsLinkPortal
           configId={data.details.journey.config_id}
@@ -56,7 +62,7 @@ export const StepDetailPage = () => {
         <EuiFlexItem grow={1}>
           <EuiPanel hasShadow={false} hasBorder>
             {data?.details?.journey && currentStep && (
-              <StepImage ping={data?.details?.journey} step={currentStep} isFailed={isFailed} />
+              <StepImage ping={data?.details?.journey} step={currentStep} isFailed={isFailedStep} />
             )}
           </EuiPanel>
         </EuiFlexItem>
@@ -85,7 +91,7 @@ export const StepDetailPage = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
-            <EuiFlexGroup>
+            <EuiFlexGroup gutterSize="xl">
               <EuiFlexItem grow={1}>
                 <ObjectWeightList />
               </EuiFlexItem>

@@ -673,6 +673,7 @@ export const RuleForm = ({
             actionTypeRegistry={actionTypeRegistry}
             setActionFrequencyProperty={setActionFrequencyProperty}
             defaultSummaryMessage={ruleTypeModel?.defaultSummaryMessage || summaryMessage}
+            minimumThrottleInterval={[ruleInterval, ruleIntervalUnit]}
           />
         </>
       ) : null}

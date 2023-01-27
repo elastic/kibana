@@ -66,6 +66,7 @@ export interface ActionAccordionFormProps {
   hideActionHeader?: boolean;
   hideNotifyWhen?: boolean;
   defaultSummaryMessage?: string;
+  minimumThrottleInterval?: [number | undefined, string];
 }
 
 interface ActiveActionConnectorState {
@@ -93,6 +94,7 @@ export const ActionForm = ({
   hideActionHeader,
   hideNotifyWhen,
   defaultSummaryMessage,
+  minimumThrottleInterval,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -399,6 +401,7 @@ export const ActionForm = ({
               }}
               hideNotifyWhen={hideNotifyWhen}
               defaultSummaryMessage={defaultSummaryMessage}
+              minimumThrottleInterval={minimumThrottleInterval}
             />
           );
         })}

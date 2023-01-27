@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
+import type {
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  Logger,
+  ISavedObjectsSerializer,
+  SavedObject,
+} from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
   CasePostRequest,
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
+  CaseUserActionInjectedAttributesWithoutActionId,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
@@ -125,4 +133,33 @@ export type CommonBuilderArguments = CommonArguments & {
 
 export interface BuilderDeps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+}
+
+export interface ServiceContext {
+  log: Logger;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  savedObjectsSerializer: ISavedObjectsSerializer;
+  auditLogger: AuditLogger;
+}
+
+export interface PushTimeFrameInfo {
+  mostRecent: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  oldest: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+}
+
+export interface CaseConnectorActivity {
+  connectorId: string;
+  fields: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  push?: PushTimeFrameInfo;
+}
+
+export type CaseConnectorFields = Map<
+  string,
+  SavedObject<CaseUserActionInjectedAttributesWithoutActionId>
+>;
+
+export interface PushInfo {
+  date: Date;
+  connectorId: string;
 }

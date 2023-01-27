@@ -72,6 +72,12 @@
     "@kbn/ml-url-state",
     "@kbn/ml-nested-property",
     "@kbn/ml-local-storage",
+    "@kbn/ml-date-picker",
     "@kbn/ml-is-defined",
-  ]
+    "@kbn/ml-query-utils",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/react-field",
+    "@kbn/unified-field-list-plugin",
+  ],
 }

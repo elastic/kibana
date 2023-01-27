@@ -19,7 +19,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiPortal,
-  EuiProgress,
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
@@ -30,9 +29,12 @@ import {
 } from '@kbn/unified-field-list-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
+import {
+  AvailableFields$,
+  DataDocuments$,
+  RecordRawType,
+} from '../../services/discover_data_state_container';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
@@ -44,6 +46,8 @@ import {
   DiscoverSidebarReducerActionType,
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
+
+const EMPTY_FIELD_COUNTS = {};
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -123,7 +127,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
-  const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
@@ -159,7 +162,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
               dataView: selectedDataViewRef.current,
-              fieldCounts: calcFieldCounts(documentState.result),
+              fieldCounts: isPlainRecordType
+                ? EMPTY_FIELD_COUNTS
+                : calcFieldCounts(documentState.result),
+              textBasedQueryColumns: documentState.textBasedQueryColumns,
               isPlainRecord: isPlainRecordType,
             },
           });
@@ -169,7 +175,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
               dataView: selectedDataViewRef.current,
-              fieldCounts: {},
+              fieldCounts: EMPTY_FIELD_COUNTS,
               isPlainRecord: isPlainRecordType,
             },
           });
@@ -320,13 +326,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     <>
       {!props.isClosed && (
         <EuiHideFor sizes={['xs', 's']}>
-          {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
           <DiscoverSidebar
             {...props}
+            isProcessing={isProcessing}
             onFieldEdited={onFieldEdited}
             allFields={sidebarState.allFields}
-            fieldFilter={fieldFilter}
-            setFieldFilter={setFieldFilter}
             editField={editField}
             createNewDataView={createNewDataView}
             showFieldList={showFieldList}
@@ -386,10 +390,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               </EuiFlyoutHeader>
               <DiscoverSidebar
                 {...props}
+                isProcessing={isProcessing}
                 onFieldEdited={onFieldEdited}
                 allFields={sidebarState.allFields}
-                fieldFilter={fieldFilter}
-                setFieldFilter={setFieldFilter}
                 alwaysShowActionButtons={true}
                 setFieldEditorRef={setFieldEditorRef}
                 closeFlyout={closeFlyout}

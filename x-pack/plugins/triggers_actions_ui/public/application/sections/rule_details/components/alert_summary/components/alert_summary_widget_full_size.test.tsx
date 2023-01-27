@@ -7,20 +7,25 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { AlertsSummaryWidgetFullSize } from './alert_summary_widget_full_size';
+import {
+  AlertsSummaryWidgetFullSize,
+  AlertsSummaryWidgetFullSizeProps,
+} from './alert_summary_widget_full_size';
 import { render } from '@testing-library/react';
-import { AlertSummaryWidgetProps } from '..';
-import { mockAlertSummaryResponse } from '../../../../../mock/alert_summary_widget';
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: jest.fn(() => false),
-}));
+import {
+  mockedAlertSummaryResponse,
+  mockedChartThemes,
+} from '../../../../../mock/alert_summary_widget';
 
 describe('AlertSummaryWidgetFullSize', () => {
-  const renderComponent = (props: Partial<AlertSummaryWidgetProps> = {}) =>
+  const renderComponent = (props: Partial<AlertsSummaryWidgetFullSizeProps> = {}) =>
     render(
       <IntlProvider locale="en">
-        <AlertsSummaryWidgetFullSize {...mockAlertSummaryResponse} {...props} />
+        <AlertsSummaryWidgetFullSize
+          chartThemes={mockedChartThemes}
+          {...mockedAlertSummaryResponse}
+          {...props}
+        />
       </IntlProvider>
     );
 
@@ -34,7 +39,15 @@ describe('AlertSummaryWidgetFullSize', () => {
     const alertSummaryWidget = renderComponent();
 
     expect(alertSummaryWidget.queryByTestId('activeAlertsCount')).toHaveTextContent('2');
-    expect(alertSummaryWidget.queryByTestId('recoveredAlertsCount')).toHaveTextContent('15');
-    expect(alertSummaryWidget.queryByTestId('totalAlertsCount')).toHaveTextContent('17');
+    expect(alertSummaryWidget.queryByTestId('totalAlertsCount')).toHaveTextContent('22');
+  });
+
+  it('should render higher counts correctly', async () => {
+    const alertSummaryWidget = renderComponent({
+      activeAlertCount: 2000,
+    });
+
+    expect(alertSummaryWidget.queryByTestId('activeAlertsCount')).toHaveTextContent('2k');
+    expect(alertSummaryWidget.queryByTestId('totalAlertsCount')).toHaveTextContent('2.02k');
   });
 });

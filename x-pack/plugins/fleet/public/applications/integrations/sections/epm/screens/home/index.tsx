@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Switch, Route } from 'react-router-dom';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
-import { getPackageReleaseLabel } from '../../../../../../services/package_prerelease';
+import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 
@@ -35,14 +35,15 @@ import { AvailablePackages } from './available_packages';
 
 export interface CategoryParams {
   category?: ExtendedIntegrationCategory;
+  subcategory?: string;
 }
 
 export const getParams = (params: CategoryParams, search: string) => {
-  const { category } = params;
+  const { category, subcategory } = params;
   const selectedCategory: ExtendedIntegrationCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam };
+  return { selectedCategory, searchParam, selectedSubcategory: subcategory };
 };
 
 export const categoryExists = (category: string, categories: CategoryFacet[]) => {
@@ -111,9 +112,11 @@ export const mapToCard = ({
 };
 
 export const EPMHomePage: React.FC = () => {
+  const [prereleaseEnabled, setPrereleaseEnabled] = useState<boolean>(false);
+
   // loading packages to find installed ones
   const { data: allPackages, isLoading } = useGetPackages({
-    prerelease: true,
+    prerelease: prereleaseEnabled,
   });
 
   const installedPackages = useMemo(
@@ -140,7 +143,7 @@ export const EPMHomePage: React.FC = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
         <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
-          <AvailablePackages />
+          <AvailablePackages setPrereleaseEnabled={setPrereleaseEnabled} />
         </DefaultLayout>
       </Route>
     </Switch>
