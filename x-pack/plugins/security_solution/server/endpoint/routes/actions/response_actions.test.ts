@@ -41,7 +41,7 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   GET_FILE_ROUTE,
-  GET_EXECUTE_ROUTE,
+  EXECUTE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   ActionDetails,
@@ -568,7 +568,7 @@ describe('Response actions', () => {
 
       it('handles execute', async () => {
         const ctx = await callRoute(
-          GET_EXECUTE_ROUTE,
+          EXECUTE_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al', timeout: 1000 } },
           },

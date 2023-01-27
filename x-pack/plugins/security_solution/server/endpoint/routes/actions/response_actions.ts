@@ -35,7 +35,7 @@ import {
   UNISOLATE_HOST_ROUTE,
   ENDPOINT_ACTIONS_INDEX,
   GET_FILE_ROUTE,
-  GET_EXECUTE_ROUTE,
+  EXECUTE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -183,7 +183,7 @@ export function registerResponseActionRoutes(
   if (endpointContext.experimentalFeatures.responseActionExecuteEnabled) {
     router.post(
       {
-        path: GET_EXECUTE_ROUTE,
+        path: EXECUTE_ROUTE,
         validate: ExecuteActionRequestSchema,
         options: { authRequired: true, tags: ['access:securitySolution'] },
       },
