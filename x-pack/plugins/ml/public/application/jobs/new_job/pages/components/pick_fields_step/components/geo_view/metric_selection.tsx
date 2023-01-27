@@ -71,12 +71,15 @@ export const GeoDetector: FC<Props> = ({ setIsValid }) => {
   useEffect(() => {
     async function getMapLayersForGeoJob() {
       if (jobCreator.geoField) {
-        const filters = data.query.filterManager.getFilters() ?? [];
+        const { filter, query } = jobCreator.savedSearchQuery ?? {};
+        const filters = [...data.query.filterManager.getFilters(), ...(filter ?? [])];
+
         const layers = await mapLoader.getMapLayersForGeoJob(
           jobCreator.geoField,
           jobCreator.splitField,
           fieldValues,
-          filters
+          filters,
+          query
         );
         setLayerList(layers);
       }
