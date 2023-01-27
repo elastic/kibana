@@ -396,6 +396,8 @@
       "@kbn/core-mount-utils-browser/*": ["packages/core/mount-utils/core-mount-utils-browser/*"],
       "@kbn/core-mount-utils-browser-internal": ["packages/core/mount-utils/core-mount-utils-browser-internal"],
       "@kbn/core-mount-utils-browser-internal/*": ["packages/core/mount-utils/core-mount-utils-browser-internal/*"],
+      "@kbn/core-node-integration-tests": ["packages/core/node/core-node-integration-tests"],
+      "@kbn/core-node-integration-tests/*": ["packages/core/node/core-node-integration-tests/*"],
       "@kbn/core-node-server": ["packages/core/node/core-node-server"],
       "@kbn/core-node-server/*": ["packages/core/node/core-node-server/*"],
       "@kbn/core-node-server-internal": ["packages/core/node/core-node-server-internal"],
