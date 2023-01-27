@@ -32,7 +32,6 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
-  TaskStatus,
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
