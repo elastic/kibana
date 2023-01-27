@@ -59,7 +59,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
           {i18n.translate(
             'xpack.enterpriseSearch.content.engine.api.generateEngineApiKeyModal.title',
             {
-              defaultMessage: 'Create Engine read-only API key',
+              defaultMessage: 'Create Engine read-only API Key',
             }
           )}
         </EuiModalHeaderTitle>
@@ -75,7 +75,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
                       <EuiFlexItem>
                         <EuiFormRow label="Name your API key" fullWidth>
                           <EuiFieldText
-                            data-telemetry-id={`entSearchContent-engines-api-generateEngineApiKeyModal-editName`}
+                            data-telemetry-id="entSearchContent-engines-api-generateEngineApiKeyModal-editName"
                             fullWidth
                             placeholder="Type a name for your API key"
                             onChange={(event) => setKeyName(event.currentTarget.value)}
@@ -87,7 +87,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
 
                       <EuiFlexItem grow={false}>
                         <EuiButton
-                          data-telemetry-id={`entSearchContent-engines-api-generateEngineApiKeyModal-generateApiKeyButton`}
+                          data-telemetry-id="entSearchContent-engines-api-generateEngineApiKeyModal-generateApiKeyButton"
                           data-test-subj="generateApiKeyButton"
                           iconSide="left"
                           iconType="plusInCircle"
@@ -103,7 +103,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
                           {i18n.translate(
                             'xpack.enterpriseSearch.content.engine.api.generateEngineApiKeyModal.generateButton',
                             {
-                              defaultMessage: 'Generate Read only key',
+                              defaultMessage: 'Generate read-only key',
                             }
                           )}
                         </EuiButton>
@@ -127,7 +127,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
-                            data-telemetry-id={`entSearchContent-engines-api-generateEngineApiKeyModal-csvDownloadButton`}
+                            data-telemetry-id="entSearchContent-engines-api-generateEngineApiKeyModal-csvDownloadButton"
                             aria-label={i18n.translate(
                               'xpack.enterpriseSearch.content.engine.api.generateEngineApiKeyModal.csvDownloadButton',
                               { defaultMessage: 'Download API key' }
@@ -166,7 +166,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
       <EuiModalFooter>
         {apiKey ? (
           <EuiButton
-            data-telemetry-id={`entSearchContent-engines-api-generateEngineApiKeyModal-done`}
+            data-telemetry-id="entSearchContent-engines-api-generateEngineApiKeyModal-done"
             fill
             onClick={onClose}
           >
@@ -179,7 +179,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
           </EuiButton>
         ) : (
           <EuiButtonEmpty
-            data-telemetry-id={`entSearchContent-engines-api-generateEngineApiKeyModal-cancel`}
+            data-telemetry-id="entSearchContent-engines-api-generateEngineApiKeyModal-cancel"
             onClick={onClose}
           >
             {i18n.translate(

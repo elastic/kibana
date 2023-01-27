@@ -64,7 +64,7 @@ export const EngineAPI: React.FC = () => {
               })}{' '}
               <EuiLink
                 href={docLinks.apiKeys}
-                data-telemetry-id={`entSearchContent-engines-api-step1-learnMoreLink`}
+                data-telemetry-id="entSearchContent-engines-api-step1-learnMoreLink"
                 external
                 target="_blank"
               >
@@ -81,7 +81,7 @@ export const EngineAPI: React.FC = () => {
                 iconSide="left"
                 iconType="plusInCircleFilled"
                 onClick={openGenerateModal}
-                data-telemetry-id={`entSearchContent-engines-api-step1-createApiKeyButton`}
+                data-telemetry-id="entSearchContent-engines-api-step1-createApiKeyButton"
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.engine.api.step1.createAPIKeyButton',
@@ -95,7 +95,7 @@ export const EngineAPI: React.FC = () => {
               <EuiButton
                 iconSide="left"
                 iconType="popout"
-                data-telemetry-id={`entSearchContent-engines-api-step1-viewKeysButton`}
+                data-telemetry-id="entSearchContent-engines-api-step1-viewKeysButton"
                 onClick={() =>
                   KibanaLogic.values.navigateToUrl('/app/management/security/api_keys', {
                     shouldNotCreateHref: true,
@@ -162,7 +162,7 @@ export const EngineAPI: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButton
-                data-telemetry-id={`entSearchContent-engines-api-step4-learnHowLink`}
+                data-telemetry-id="entSearchContent-engines-api-step4-learnHowLink"
                 onClick={() =>
                   navigateToUrl(
                     generateEncodedPath(`${ANALYTICS_PLUGIN.URL}${COLLECTION_VIEW_PATH}`, {
