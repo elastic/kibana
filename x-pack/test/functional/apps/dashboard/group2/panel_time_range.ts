@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
         await dashboardCustomizePanel.clickToggleQuickMenuButton();
         await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
         expect(await testSubjects.exists('emptyPlaceholder'));
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('can remove a custom time range from a panel', async () => {
         await dashboardBadgeActions.clickTimeRangeBadgeAction();
         await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardBadgeActions.expectMissingTimeRangeBadgeAction();
         expect(await testSubjects.exists('xyVisChart'));
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
         await dashboardCustomizePanel.clickToggleQuickMenuButton();
         await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
         expect(await testSubjects.exists('emptyPlaceholder'));
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('can remove a custom time range from a panel', async () => {
         await dashboardBadgeActions.clickTimeRangeBadgeAction();
         await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardBadgeActions.expectMissingTimeRangeBadgeAction();
         expect(await testSubjects.exists('xyVisChart'));

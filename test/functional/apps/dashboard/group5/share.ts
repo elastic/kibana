@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should have "panels" in app state when a panel has been modified', async () => {
           await dashboardPanelActions.customizePanel();
           await dashboardCustomizePanel.setCustomPanelTitle('Test New Title');
-          await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+          await dashboardCustomizePanel.clickSaveButton();
           await PageObjects.dashboard.waitForRenderComplete();
           await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
 

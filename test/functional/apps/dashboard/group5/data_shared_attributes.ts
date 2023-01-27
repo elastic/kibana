@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.customizePanel();
       await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
       await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_VIS_TITLE);
-      await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+      await dashboardCustomizePanel.clickSaveButton();
       await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutClosed();
 
       await retry.try(async () => {
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
         await dashboardCustomizePanel.clickToggleHidePanelTitle();
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutClosed();
       };
       await toggleHideTitle();
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.switchToEditMode();
       await dashboardPanelActions.customizePanel();
       await dashboardCustomizePanel.resetCustomPanelTitle();
-      await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+      await dashboardCustomizePanel.clickSaveButton();
       await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutClosed();
 
       await retry.try(async () => {
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.customizePanel(el);
       await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
       await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_SEARCH_TITLE);
-      await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+      await dashboardCustomizePanel.clickSaveButton();
       await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutClosed();
 
       await retry.try(async () => {

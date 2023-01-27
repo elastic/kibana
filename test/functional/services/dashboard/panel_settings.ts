@@ -93,8 +93,8 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
       await testSubjects.click('resetCustomEmbeddablePanelDescriptionButton');
     }
 
-    public async clickFlyoutPrimaryButton() {
-      log.debug('clickFlyoutPrimaryButton');
+    public async clickSaveButton() {
+      log.debug('clickSaveButton');
       await testSubjects.click('saveCustomizePanelButton');
     }
 

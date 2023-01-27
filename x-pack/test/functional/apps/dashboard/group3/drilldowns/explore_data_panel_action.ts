@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await panelActions.customizePanel();
       await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-      await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+      await dashboardCustomizePanel.clickSaveButton();
       await dashboard.saveDashboard('Dashboard with Pie Chart');
     });
 
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
       await dashboardCustomizePanel.clickToggleQuickMenuButton();
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
-      await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+      await dashboardCustomizePanel.clickSaveButton();
 
       await dashboard.saveDashboard('Dashboard with Pie Chart');
 

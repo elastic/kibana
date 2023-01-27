@@ -198,6 +198,3 @@ test('Can set title and description to an empty string', async () => {
   expect(descriptionFieldAfter.props().value).toBe('');
   expect(updateInput).toBeCalledWith({ description: '', title: '' });
 });
-
-// TODO
-test.skip('Can set a custom time range for the panel', async () => {});

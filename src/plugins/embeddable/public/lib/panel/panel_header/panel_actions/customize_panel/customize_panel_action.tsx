@@ -71,9 +71,6 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
       closed$.next(true);
       handle.close();
     };
-    const closeFlyout = () => {
-      close();
-    };
 
     const handle = this.overlays.openFlyout(
       toMountPoint(
@@ -101,6 +98,6 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
         filter((mode) => mode !== ViewMode.EDIT),
         take(1)
       )
-      .subscribe({ next: closeFlyout, complete: closeFlyout });
+      .subscribe({ next: close, complete: close });
   }
 }

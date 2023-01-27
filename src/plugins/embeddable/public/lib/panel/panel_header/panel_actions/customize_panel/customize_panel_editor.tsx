@@ -96,7 +96,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
   );
 
   const commonlyUsedRangesForDatePicker = props.commonlyUsedRanges
-    ? props.commonlyUsedRanges!.map(
+    ? props.commonlyUsedRanges.map(
         ({ from, to, display }: { from: string; to: string; display: string }) => {
           return {
             start: from,
@@ -246,7 +246,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
                 <EuiSwitch
                   checked={!inheritTimeRange}
                   data-test-subj="customizePanelShowCustomTimeRange"
-                  id="hideTitle"
+                  id="showCustomTimeRange"
                   label={
                     <FormattedMessage
                       defaultMessage="Apply custom time range to panel"

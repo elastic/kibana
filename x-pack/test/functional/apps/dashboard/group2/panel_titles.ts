@@ -52,14 +52,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('saving new panel with blank title clears "unsaved changes" badge', async () => {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('');
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.clearUnsavedChanges();
       });
 
       it('custom title causes unsaved changes and saving clears it', async () => {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         const panelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
         expect(panelTitle).to.equal(CUSTOM_TITLE);
         await PageObjects.dashboard.clearUnsavedChanges();
@@ -69,11 +69,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const BY_VALUE_TITLE = 'Reset Title - By Value';
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle(BY_VALUE_TITLE);
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
 
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.resetCustomPanelTitle();
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         const panelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
         expect(panelTitle).to.equal(EMPTY_TITLE);
         await PageObjects.dashboard.clearUnsavedChanges();
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.switchToEditMode();
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.clickQuickSave();
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.switchToEditMode();
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.clickToggleHidePanelTitle();
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.clickQuickSave();
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.switchToEditMode();
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.clickToggleHidePanelTitle();
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.clickQuickSave();
       });
     });
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('linking a by value panel with a custom title to the library will overwrite the custom title with the library title', async () => {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await dashboardPanelActions.saveToLibrary(LIBRARY_TITLE_FOR_CUSTOM_TESTS);
         await retry.try(async () => {
           // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
@@ -134,11 +134,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('resetting title on a by reference panel sets it to the library title', async () => {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('This should go away');
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
 
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.resetCustomPanelTitle();
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         const resetPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
         expect(resetPanelTitle).to.equal(LIBRARY_TITLE_FOR_CUSTOM_TESTS);
       });
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('unlinking a by reference panel with a custom title will keep the current title', async () => {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await dashboardPanelActions.unlinkFromLibary();
         const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
         expect(newPanelTitle).to.equal(CUSTOM_TITLE);
@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it("linking a by value panel with a blank title to the library will set the panel's title to the library title", async () => {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('');
-        await dashboardCustomizePanel.clickFlyoutPrimaryButton();
+        await dashboardCustomizePanel.clickSaveButton();
         await dashboardPanelActions.saveToLibrary(LIBRARY_TITLE_FOR_EMPTY_TESTS);
         await retry.try(async () => {
           // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
