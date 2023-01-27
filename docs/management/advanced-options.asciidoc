@@ -218,9 +218,9 @@ might increase the search time. This setting is off by default. Users must opt-i
 [horizontal]
 `siem:defaultAnomalyScore`:: The threshold above which Machine Learning job anomalies are displayed in the SIEM app.
 `siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events.
-`siem:enableNewsFeed`:: Enables the security news feed on the SIEM *Overview* 
+`siem:enableNewsFeed`:: Enables the security news feed on the SIEM *Overview*
 page.
-`siem:newsFeedUrl`:: The URL from which the security news feed content is 
+`siem:newsFeedUrl`:: The URL from which the security news feed content is
 retrieved.
 `siem:refreshIntervalDefaults`:: The default refresh interval for the SIEM time filter, in milliseconds.
 `siem:timeDefaults`:: The default period of time in the SIEM time filter.
@@ -274,4 +274,4 @@ If disabled, only visualizations that are considered production-ready are availa
 === Usage data settings
 
 Helps improve the Elastic Stack by providing usage statistics for
-basic features. This data will not be shared outside of Elastic.
+basic features.
