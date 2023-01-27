@@ -447,7 +447,10 @@ export class Embeddable
 
   private get activeVisualizationState() {
     if (!this.activeVisualization) return;
-    return this.activeVisualization.initialize(() => '', this.savedVis?.state.visualization);
+    return this.activeVisualization.fromPersistableState?.(
+      this.savedVis?.state.visualization,
+      this.savedVis?.references
+    );
   }
 
   private indexPatterns: IndexPatternMap = {};
