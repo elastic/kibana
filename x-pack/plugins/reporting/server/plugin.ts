@@ -8,7 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { PLUGIN_ID } from '../common/constants';
 import { ReportingCore } from './';
-import { initializeBrowserDriverFactory } from './browsers';
+import { HeadlessChromiumDriverFactory, initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { LevelLogger, ReportingStore } from './lib';
@@ -98,7 +98,12 @@ export class ReportingPlugin
     (async () => {
       await reportingCore.pluginSetsUp();
 
-      const browserDriverFactory = await initializeBrowserDriverFactory(reportingCore, this.logger);
+      let browserDriverFactory: HeadlessChromiumDriverFactory | null = null;
+      try {
+        browserDriverFactory = await initializeBrowserDriverFactory(reportingCore, this.logger);
+      } catch (err) {
+        this.logger.error(err);
+      }
       const store = new ReportingStore(reportingCore, this.logger);
 
       await reportingCore.pluginStart({

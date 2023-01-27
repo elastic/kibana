@@ -102,14 +102,14 @@ export function loadSavedDashboards(maxNumber) {
   });
 }
 
-export function loadIndexPatterns(maxNumber) {
+export function loadIndexPatterns() {
   // Loads the list of Kibana index patterns, as used in editing custom URLs.
   // TODO - amend loadIndexPatterns in index_utils.js to do the request,
   // without needing an Angular Provider.
   return new Promise((resolve, reject) => {
     const dataViewsContract = getDataViews();
     dataViewsContract
-      .find('*', maxNumber)
+      .getIdsWithTitle()
       .then((dataViews) => {
         const sortedDataViews = dataViews.sort((a, b) => a.title.localeCompare(b.title));
         resolve(sortedDataViews);

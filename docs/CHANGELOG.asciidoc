@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.9>>
 * <<release-notes-7.17.8>>
 * <<release-notes-7.17.7>>
 * <<release-notes-7.17.6>>
@@ -78,6 +79,37 @@ Review important information about the {kib} 7.17.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.17.9]]
+== {kib} 7.17.9
+
+coming::[7.17.9]
+
+Review the following information about the 7.17.9 release.
+
+[float]
+[[breaking-changes-v7.17.9]]
+=== Breaking changes
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in the 7.17.9 release.
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.17.9]]
+=== Bug fix
+Machine Learning::
+* Fixes for errors when loading data views which are missing index {kibana-pull}147916[#147916]
+
 [[release-notes-7.17.8]]
 == {kib} 7.17.8
 
@@ -87,9 +119,7 @@ Review the following information about the 7.17.8 release.
 [[breaking-changes-v7.17.8]]
 === Breaking changes
 
-// tag::notable-breaking-changes[]
 There are no breaking changes in the 7.17.8 release.
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following: 
 

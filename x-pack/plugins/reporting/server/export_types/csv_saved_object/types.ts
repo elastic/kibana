@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { DataViewListItem } from 'src/plugins/data_views/common';
+export type {
+  CsvSavedSearchExportParamsType,
+  CsvSavedSearchExportBodyType,
+} from '../../routes/generate/generate_from_savedobject';
 
-export function loadSavedDashboards(maxNumber: number): Promise<any[]>;
-export function loadIndexPatterns(): Promise<DataViewListItem[]>;
+export type {
+  JobParamsCsvFromSavedObject,
+  TaskPayloadCsvFromSavedObject,
+} from '../../../common/types';

@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-import type { DataViewListItem } from 'src/plugins/data_views/common';
-
-export function loadSavedDashboards(maxNumber: number): Promise<any[]>;
-export function loadIndexPatterns(): Promise<DataViewListItem[]>;
+export { getSortForSearchSource } from './get_sort_for_search_source';
+export { getSharingData } from './get_sharing_data';
