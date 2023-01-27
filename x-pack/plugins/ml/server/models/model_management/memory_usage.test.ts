@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import { MemoryStatsResponse, ModelService, modelsProvider } from './models_provider';
-import { IScopedClusterClient } from '@kbn/core/server';
+import { MemoryStatsResponse, MemoryUsageService } from './memory_usage';
 import { MlClient } from '../../lib/ml_client';
 import mockResponse from './__mocks__/mock_deployment_response.json';
 
 describe('Model service', () => {
-  const client = {
-    asInternalUser: {},
-  } as unknown as jest.Mocked<IScopedClusterClient>;
-
   const mlClient = {
     getTrainedModelsStats: jest.fn(() => {
       return Promise.resolve({
@@ -137,10 +132,10 @@ describe('Model service', () => {
     }),
   } as unknown as jest.Mocked<MlClient>;
 
-  let service: ModelService;
+  let service: MemoryUsageService;
 
   beforeEach(() => {
-    service = modelsProvider(client, mlClient);
+    service = new MemoryUsageService(mlClient);
   });
 
   afterEach(() => {});

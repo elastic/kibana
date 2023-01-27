@@ -121,7 +121,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     getTrainedModelsNodesOverview() {
       return httpService.http<NodesOverviewResponse>({
-        path: `${apiBasePath}/trained_models/nodes_overview`,
+        path: `${apiBasePath}/model_management/nodes_overview`,
         method: 'GET',
       });
     },
@@ -190,7 +190,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     memoryUsage(type?: MlSavedObjectType, node?: string, showClosedJobs = false) {
       return httpService.http<JobMemorySize[]>({
-        path: `${apiBasePath}/memory_usage`,
+        path: `${apiBasePath}/model_management/memory_usage`,
         method: 'GET',
         query: { type, node, showClosedJobs },
       });
