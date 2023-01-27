@@ -12,6 +12,13 @@ import { AppState } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 
+/**
+ * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
+ * or programmatically. It's main purpose is to detect which changes should trigger a refetch of the data.
+ * @param stateContainer
+ * @param savedSearch
+ * @param setState
+ */
 export const buildStateSubscribe =
   ({
     stateContainer,

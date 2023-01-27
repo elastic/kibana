@@ -13,6 +13,13 @@ import { DiscoverStateContainer } from '../../services/discover_state';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
 import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 
+/**
+ * Function executed when switching data view in the UI
+ * @param id
+ * @param services
+ * @param discoverState
+ * @param setUrlTracking
+ */
 export async function changeDataView(
   id: string,
   {
