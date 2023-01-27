@@ -144,7 +144,7 @@ export const getSelectedGroupCustomMetrics = (
 ): CustomMetric[] => {
   const singleSeverityComponent =
     bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
-      ? getSingleGroupSeverity(bucket.severitiesSubAggregation?.buckets[0].key)
+      ? getSingleGroupSeverity(bucket.severitiesSubAggregation?.buckets[0].key.toString())
       : null;
   const severityComponent =
     bucket.countSeveritySubAggregation?.value && bucket.countSeveritySubAggregation?.value > 1

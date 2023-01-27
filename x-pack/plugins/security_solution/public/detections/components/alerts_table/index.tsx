@@ -359,7 +359,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, groupSelection);
           setGroupsActivePage(0);
           setSelectedGroup(groupSelection);
-          if (groupSelection && !options.find((o) => o.key === groupSelection)) {
+          if (
+            groupSelection &&
+            groupSelection !== 'none' &&
+            !options.find((o) => o.key === groupSelection)
+          ) {
             setOptions([
               ...defaultGroupingOptions,
               {

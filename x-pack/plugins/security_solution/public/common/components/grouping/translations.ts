@@ -28,5 +28,5 @@ export const TECHNICAL_PREVIEW = i18n.translate(
 );
 
 export const GROUP_BY = i18n.translate('xpack.securitySolution.selector.grouping.label', {
-  defaultMessage: 'Group by',
+  defaultMessage: 'Group by field',
 });

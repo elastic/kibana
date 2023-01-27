@@ -326,7 +326,7 @@ export const STATS_GROUP_IPS = i18n.translate(
 export const GROUP_ALERTS_SELECTOR = i18n.translate(
   'xpack.securitySolution.detectionEngine.selectGroup.title',
   {
-    defaultMessage: `Group alerts`,
+    defaultMessage: `Group alerts by`,
   }
 );
 
