@@ -1484,7 +1484,7 @@
         "label": "useGroupedFields",
         "description": [],
         "signature": [
-          "({\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  onFilterField,\n}: ",
+          "({\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n}: ",
           {
             "pluginId": "unifiedFieldList",
             "scope": "public",
@@ -1511,7 +1511,7 @@
             "id": "def-public.useGroupedFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  onFilterField,\n}",
+            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n}",
             "description": [],
             "signature": [
               {
@@ -4266,38 +4266,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedFieldList",
-            "id": "def-public.GroupedFieldsParams.onFilterField",
-            "type": "Function",
-            "tags": [],
-            "label": "onFilterField",
-            "description": [],
-            "signature": [
-              "((field: T) => boolean) | undefined"
-            ],
-            "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedFieldList",
-                "id": "def-public.GroupedFieldsParams.onFilterField.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "field",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5042,21 +5010,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "unifiedFieldList",
-        "id": "def-common.FIELD_EXISTENCE_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "FIELD_EXISTENCE_SETTING",
-        "description": [],
-        "signature": [
-          "\"lens:useFieldExistenceSampling\""
-        ],
-        "path": "src/plugins/unified_field_list/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "unifiedFieldList",
         "id": "def-common.PLUGIN_ID",
