@@ -16,8 +16,8 @@ import { groupBy, pick, isPlainObject } from 'lodash';
 
 import { Logger } from '@kbn/core/server';
 
-import { asOk, asErr, Result } from '../lib/result_type';
-import { ConcreteTaskInstance } from '../task';
+import { asOk, asErr, Result, isOk, isErr } from '../lib/result_type';
+import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer, TaskTiming } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from './query_clauses';
 
@@ -27,8 +27,6 @@ import {
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
-  tasksClaimedByOwner,
-  tasksOfType,
   EnabledTask,
 } from './mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -37,6 +35,7 @@ import {
   TaskStore,
   UpdateByQueryResult,
   SearchOpts,
+  BulkUpdateResult,
 } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
@@ -280,12 +279,8 @@ export class TaskClaiming {
     size,
     taskTypes,
   }: OwnershipClaimingOpts): Promise<ClaimAvailableTasksResult> {
-    const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
-      this.definitions.getAllTypes(),
-      (type) =>
-        taskTypes.has(type) && !this.isTaskTypeExcluded(type)
-          ? 'taskTypesToClaim'
-          : 'taskTypesToSkip'
+    const { taskTypesToClaim = [] } = groupBy(this.definitions.getAllTypes(), (type) =>
+      taskTypes.has(type) && !this.isTaskTypeExcluded(type) ? 'taskTypesToClaim' : 'taskTypesToSkip'
     );
     const queryForScheduledTasks = mustBeAllOf(
       // Task must be enabled
@@ -297,49 +292,71 @@ export class TaskClaiming {
 
     const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
     const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
-    const script = updateFieldsAndMarkAsFailed({
-      fieldUpdates: {
-        ownerId: this.taskStore.taskManagerId,
-        retryAt: claimOwnershipUntil,
-      },
-      claimableTaskTypes: taskTypesToClaim,
-      skippedTaskTypes: taskTypesToSkip,
-      unusedTaskTypes: this.unusedTypes,
-      taskMaxAttempts: pick(this.taskMaxAttempts, taskTypesToClaim),
-    });
-
     const apmTrans = apm.startTransaction(
       TASK_MANAGER_MARK_AS_CLAIMED,
       TASK_MANAGER_TRANSACTION_TYPE
     );
 
     try {
-      const updateByQueryResult = await this.taskStore.updateByQuery(
-        {
-          query,
-          script,
-          sort,
-        },
-        {
-          max_docs: size,
-        }
-      );
-
-      const claimedTasksQuery = tasksClaimedByOwner(
-        this.taskStore.taskManagerId,
-        tasksOfType([...taskTypes])
-      );
-      const { docs } = await this.taskStore.fetch({
-        query: claimedTasksQuery,
+      const searchResult = await this.taskStore.search({
+        query,
+        sort,
         size,
-        sort: SortByRunAtAndRetryAt,
         seq_no_primary_term: true,
       });
 
+      const docsToUpdate: ConcreteTaskInstance[] = [];
+      for (let i = 0; i < searchResult.docs.length; i++) {
+        const doc = searchResult.docs[i];
+        if (taskTypesToClaim.includes(doc.taskType)) {
+          docsToUpdate.push(doc);
+          if (doc.schedule != null || doc.attempts < this.taskMaxAttempts[doc.taskType]) {
+            if (doc.retryAt != null && doc.retryAt < new Date()) {
+              doc.scheduledAt = doc.retryAt;
+            } else {
+              doc.scheduledAt = doc.runAt;
+            }
+
+            doc.status = TaskStatus.Claiming;
+            doc.ownerId = this.taskStore.taskManagerId;
+            doc.retryAt = claimOwnershipUntil;
+          } else {
+            docsToUpdate.push(doc);
+            doc.status = TaskStatus.Failed;
+          }
+        } else if (this.unusedTypes.includes(doc.taskType)) {
+          docsToUpdate.push(doc);
+          doc.status = TaskStatus.Unrecognized;
+        }
+      }
+
+      let bulkUpdateResults: BulkUpdateResult[] = [];
+      if (docsToUpdate.length > 0) {
+        bulkUpdateResults = await this.taskStore.bulkUpdate(docsToUpdate);
+      }
+
       apmTrans?.end('success');
+
+      const claimedDocs = bulkUpdateResults.reduce((acc, result) => {
+        if (isOk(result)) {
+          acc.push(result.value);
+        }
+        return acc;
+      }, [] as ConcreteTaskInstance[]);
+      const versionConflicts = bulkUpdateResults.reduce((acc, result) => {
+        if (isErr(result) && result.error.error.error === 'Conflict') {
+          ++acc;
+        }
+        return acc;
+      }, 0);
+
+      if (versionConflicts > 0) {
+        this.logger.warn(`Version conflict claiming ${versionConflicts} tasks`);
+      }
+
       return {
-        docs,
-        tasksConflicted: updateByQueryResult.version_conflicts,
+        docs: claimedDocs,
+        tasksConflicted: versionConflicts,
       };
     } catch (err) {
       apmTrans?.end('failure');

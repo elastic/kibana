@@ -23,6 +23,7 @@ import {
   ElasticsearchClient,
 } from '@kbn/core/server';
 
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { asOk, asErr, Result } from './lib/result_type';
 
 import {
@@ -75,7 +76,7 @@ export interface FetchResult {
 
 export type BulkUpdateResult = Result<
   ConcreteTaskInstance,
-  { entity: ConcreteTaskInstance; error: Error }
+  { entity: ConcreteTaskInstance; error: SavedObjectError }
 >;
 
 export interface UpdateByQueryResult {
@@ -252,14 +253,14 @@ export class TaskStore {
       return attrsById;
     }, new Map());
 
-    let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
+    let updatedSavedObjects: SavedObjectsUpdateResponse[];
     try {
       ({ saved_objects: updatedSavedObjects } =
         await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
           docs.map((doc) => ({
             type: 'task',
             id: doc.id,
-            options: { version: doc.version },
+            version: doc.version,
             attributes: attributesByDocId.get(doc.id)!,
           })),
           {
@@ -271,8 +272,8 @@ export class TaskStore {
       throw e;
     }
 
-    return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) =>
-      isSavedObjectsUpdateResponse(updatedSavedObject)
+    return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) => {
+      return updatedSavedObject.error == null
         ? asOk(
             savedObjectToConcreteTaskInstance({
               ...updatedSavedObject,
@@ -287,9 +288,9 @@ export class TaskStore {
             // so we can rely on the index in the `docs` to match an error
             // on the same index in the `bulkUpdate` result
             entity: docs[index],
-            error: updatedSavedObject,
-          })
-    );
+            error: updatedSavedObject.error,
+          });
+    });
   }
 
   /**
@@ -358,7 +359,7 @@ export class TaskStore {
     }
   }
 
-  private async search(opts: SearchOpts = {}): Promise<FetchResult> {
+  public async search(opts: SearchOpts = {}): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
@@ -534,10 +535,4 @@ function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): Aggrega
     ...opts,
     query,
   };
-}
-
-function isSavedObjectsUpdateResponse(
-  result: SavedObjectsUpdateResponse | Error
-): result is SavedObjectsUpdateResponse {
-  return result && typeof (result as SavedObjectsUpdateResponse).id === 'string';
 }
