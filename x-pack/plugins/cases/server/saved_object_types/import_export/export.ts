@@ -12,7 +12,10 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsExportTransformContext,
 } from '@kbn/core/server';
-import type { CaseUserActionAttributes, CommentAttributes } from '../../../common/api';
+import type {
+  CaseUserActionAttributesWithoutConnectorId,
+  CommentAttributesWithoutRefs,
+} from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -34,7 +37,13 @@ export async function handleExport({
   objects: Array<SavedObject<ESCaseAttributes>>;
   coreSetup: CoreSetup;
   logger: Logger;
-}): Promise<Array<SavedObject<ESCaseAttributes | CommentAttributes | CaseUserActionAttributes>>> {
+}): Promise<
+  Array<
+    SavedObject<
+      ESCaseAttributes | CommentAttributesWithoutRefs | CaseUserActionAttributesWithoutConnectorId
+    >
+  >
+> {
   try {
     if (objects.length <= 0) {
       return [];
@@ -64,15 +73,17 @@ export async function handleExport({
 async function getAttachmentsAndUserActionsForCases(
   savedObjectsClient: SavedObjectsClientContract,
   caseIds: string[]
-): Promise<Array<SavedObject<CommentAttributes | CaseUserActionAttributes>>> {
+): Promise<
+  Array<SavedObject<CommentAttributesWithoutRefs | CaseUserActionAttributesWithoutConnectorId>>
+> {
   const [attachments, userActions] = await Promise.all([
-    getAssociatedObjects<CommentAttributes>({
+    getAssociatedObjects<CommentAttributesWithoutRefs>({
       savedObjectsClient,
       caseIds,
       sortField: defaultSortField,
       type: CASE_COMMENT_SAVED_OBJECT,
     }),
-    getAssociatedObjects<CaseUserActionAttributes>({
+    getAssociatedObjects<CaseUserActionAttributesWithoutConnectorId>({
       savedObjectsClient,
       caseIds,
       sortField: defaultSortField,

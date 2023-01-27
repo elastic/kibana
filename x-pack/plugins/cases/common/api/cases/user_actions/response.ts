@@ -13,11 +13,11 @@ import {
   CaseUserActionSavedObjectIdsRt,
   UserActionCommonAttributesRt,
 } from './common';
-import { CreateCaseUserActionRt } from './create_case';
+import { CreateCaseUserActionRt, CreateCaseUserActionWithoutConnectorIdRt } from './create_case';
 import { DescriptionUserActionRt } from './description';
 import { CommentUserActionRt } from './comment';
-import { ConnectorUserActionRt } from './connector';
-import { PushedUserActionRt } from './pushed';
+import { ConnectorUserActionRt, ConnectorUserActionWithoutConnectorIdRt } from './connector';
+import { PushedUserActionRt, PushedUserActionWithoutConnectorIdRt } from './pushed';
 import { TagsUserActionRt } from './tags';
 import { TitleUserActionRt } from './title';
 import { SettingsUserActionRt } from './settings';
@@ -45,11 +45,11 @@ export const UserActionsRt = rt.union([
   DeleteCaseUserActionRt,
 ]);
 
-export const UserActionsWithoutConnectorIdRt = rt.union([
+const UserActionsWithoutConnectorIdRt = rt.union([
   CommonUserActionsRt,
-  CreateCaseUserActionRt,
-  ConnectorUserActionRt,
-  PushedUserActionRt,
+  CreateCaseUserActionWithoutConnectorIdRt,
+  ConnectorUserActionWithoutConnectorIdRt,
+  PushedUserActionWithoutConnectorIdRt,
   DeleteCaseUserActionRt,
 ]);
 
@@ -83,7 +83,7 @@ const CaseUserActionResponseWithoutActionIdRt = rt.intersection([
   }),
 ]);
 
-export const CaseUserActionAttributesRt = CaseUserActionBasicRt;
+const CaseUserActionAttributesRt = CaseUserActionBasicRt;
 export const CaseUserActionsResponseRt = rt.array(CaseUserActionResponseRt);
 export const CaseUserActionsResponseWithoutActionIdRt = rt.array(
   CaseUserActionResponseWithoutActionIdRt
@@ -91,7 +91,7 @@ export const CaseUserActionsResponseWithoutActionIdRt = rt.array(
 
 export type CaseUserActionAttributes = rt.TypeOf<typeof CaseUserActionAttributesRt>;
 export type CaseUserActionAttributesWithoutConnectorId = rt.TypeOf<
-  typeof CaseUserActionAttributesRt
+  typeof CaseUserActionBasicWithoutConnectorIdRt
 >;
 export type CaseUserActionsResponse = rt.TypeOf<typeof CaseUserActionsResponseRt>;
 export type CaseUserActionResponse = rt.TypeOf<typeof CaseUserActionResponseRt>;
@@ -106,6 +106,3 @@ export type UserAction = rt.TypeOf<typeof ActionsRt>;
 export type UserActionTypes = ActionTypeValues;
 
 export type CaseUserAction = rt.TypeOf<typeof CaseUserActionBasicRt>;
-export type CaseUserActionWithoutConnectorId = rt.TypeOf<
-  typeof CaseUserActionBasicWithoutConnectorIdRt
->;

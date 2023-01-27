@@ -19,7 +19,6 @@ import {
   AttributesTypeUser,
   CommentsResponse,
   CaseAttributes,
-  CaseUserActionAttributes,
   CasePostRequest,
   CaseUserActionResponse,
   PushedUserAction,
@@ -28,6 +27,7 @@ import {
   CreateCaseUserAction,
   CaseStatuses,
   CaseSeverity,
+  CaseUserActionAttributesWithoutConnectorId,
 } from '@kbn/cases-plugin/common/api';
 import { ESCaseSeverity, ESCaseStatus } from '@kbn/cases-plugin/server/services/cases/types';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
@@ -213,7 +213,7 @@ const expectExportToHaveCaseSavedObject = (
 };
 
 const expectExportToHaveUserActions = (objects: SavedObject[], caseRequest: CasePostRequest) => {
-  const userActionSOs = findSavedObjectsByType<CaseUserActionAttributes>(
+  const userActionSOs = findSavedObjectsByType<CaseUserActionAttributesWithoutConnectorId>(
     objects,
     CASE_USER_ACTION_SAVED_OBJECT
   );
@@ -225,7 +225,7 @@ const expectExportToHaveUserActions = (objects: SavedObject[], caseRequest: Case
 };
 
 const expectCaseCreateUserAction = (
-  userActions: Array<SavedObject<CaseUserActionAttributes>>,
+  userActions: Array<SavedObject<CaseUserActionAttributesWithoutConnectorId>>,
   caseRequest: CasePostRequest
 ) => {
   const userActionForCaseCreate = findUserActionSavedObject(userActions, 'create', 'create_case');
@@ -252,7 +252,7 @@ const expectCaseCreateUserAction = (
 };
 
 const expectCreateCommentUserAction = (
-  userActions: Array<SavedObject<CaseUserActionAttributes>>
+  userActions: Array<SavedObject<CaseUserActionAttributesWithoutConnectorId>>
 ) => {
   const userActionForComment = findUserActionSavedObject(userActions, 'create', 'comment');
   const createCommentUserAction = userActionForComment!.attributes as CommentUserAction;
@@ -280,9 +280,9 @@ const findSavedObjectsByType = <ReturnType>(
 };
 
 const findUserActionSavedObject = (
-  savedObjects: Array<SavedObject<CaseUserActionAttributes>>,
+  savedObjects: Array<SavedObject<CaseUserActionAttributesWithoutConnectorId>>,
   action: string,
   type: string
-): SavedObject<CaseUserActionAttributes> | undefined => {
+): SavedObject<CaseUserActionAttributesWithoutConnectorId> | undefined => {
   return savedObjects.find((so) => so.attributes.action === action && so.attributes.type === type);
 };
