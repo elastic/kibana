@@ -12,6 +12,8 @@ import * as i18n from '../../../../../detections/pages/detection_engine/rules/tr
 import { toggleSelectedGroup } from '../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
 import { caseInsensitiveSort } from '../helpers';
 
+const TAGS_POPOVER_WIDTH = 274;
+
 interface TagsFilterPopoverProps {
   selectedTags: string[];
   tags: string[];
@@ -100,7 +102,7 @@ const TagsFilterPopoverComponent = ({
         noMatchesMessage={i18n.NO_TAGS_AVAILABLE}
       >
         {(list, search) => (
-          <div style={{ width: 275 }}>
+          <div style={{ width: TAGS_POPOVER_WIDTH }}>
             <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
           </div>
