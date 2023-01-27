@@ -17,11 +17,11 @@ import {
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { ToolbarPopover } from '.';
-import { LegendLocationSettings } from './legend_location_settings';
-import { ColumnsNumberSetting } from './columns_number_setting';
-import { LegendSizeSettings } from './legend_size_settings';
-import { useDebouncedValue } from './debounced_value';
+import { ToolbarPopover } from '../toolbar_popover';
+import { LegendLocationSettings } from './location/legend_location_settings';
+import { ColumnsNumberSetting } from './layout/columns_number_setting';
+import { LegendSizeSettings } from './size/legend_size_settings';
+import { useDebouncedValue } from '../debounced_value';
 
 export interface LegendSettingsPopoverProps {
   /**

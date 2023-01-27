@@ -6,8 +6,8 @@
  */
 
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { createMockDatasource } from '../../mocks';
-import { OperationDescriptor, DatasourcePublicAPI } from '../../types';
+import { createMockDatasource } from '../../../mocks';
+import { OperationDescriptor, DatasourcePublicAPI } from '../../../types';
 import {
   hasNumericHistogramDimension,
   validateAxisDomain,
