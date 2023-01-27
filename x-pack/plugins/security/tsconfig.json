@@ -51,6 +51,7 @@
     "@kbn/web-worker-stub",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-base-server-internal",
   ],
   "exclude": [
     "target/**/*",

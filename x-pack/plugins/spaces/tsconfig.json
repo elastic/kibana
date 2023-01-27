@@ -27,6 +27,7 @@
     "@kbn/test",
     "@kbn/utils",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/core-saved-objects-common",
   ],
   "exclude": [
     "target/**/*",
