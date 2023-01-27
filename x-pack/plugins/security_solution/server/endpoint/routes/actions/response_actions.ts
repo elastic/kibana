@@ -179,18 +179,21 @@ export function registerResponseActionRoutes(
     );
   }
 
-  router.post(
-    {
-      path: GET_EXECUTE_ROUTE,
-      validate: ExecuteActionRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canExecuteCommand'] },
-      logger,
-      responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
-    )
-  );
+  // `execute` currently behind FF (planned for 8.8)
+  if (endpointContext.experimentalFeatures.responseActionExecuteEnabled) {
+    router.post(
+      {
+        path: GET_EXECUTE_ROUTE,
+        validate: ExecuteActionRequestSchema,
+        options: { authRequired: true, tags: ['access:securitySolution'] },
+      },
+      withEndpointAuthz(
+        { all: ['canExecuteCommand'] },
+        logger,
+        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
+      )
+    );
+  }
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([

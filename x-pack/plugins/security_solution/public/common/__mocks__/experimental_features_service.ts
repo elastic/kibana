@@ -15,6 +15,7 @@ const ExperimentalFeaturesServiceMock = {
     const ff: ExperimentalFeatures = {
       ...allowedExperimentalValues,
       responseActionGetFileEnabled: true,
+      responseActionExecuteEnabled: true,
     };
 
     return ff;
