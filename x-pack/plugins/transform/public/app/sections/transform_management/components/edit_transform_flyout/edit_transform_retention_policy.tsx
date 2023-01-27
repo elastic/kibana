@@ -17,6 +17,7 @@ import { useAppDependencies } from '../../../../app_dependencies';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
+  useEditTransformFlyoutDataViewId,
   useEditTransformFlyoutState,
   useEditTransformFlyoutDispatch,
 } from './use_edit_transform_flyout';
@@ -25,10 +26,9 @@ export const EditTransformRetentionPolicy: FC = () => {
   const appDeps = useAppDependencies();
   const dataViewsClient = appDeps.data.dataViews;
 
-  const {
-    dataViewId,
-    formState: { formFields, formSections },
-  } = useEditTransformFlyoutState();
+  const dataViewId = useEditTransformFlyoutDataViewId();
+
+  const { formFields, formSections } = useEditTransformFlyoutState();
   const dispatch = useEditTransformFlyoutDispatch();
 
   const [dateFieldNames, setDateFieldNames] = useState<string[]>([]);

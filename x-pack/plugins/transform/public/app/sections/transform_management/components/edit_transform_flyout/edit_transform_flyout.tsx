@@ -38,9 +38,9 @@ import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
 import {
   applyFormStateToTransformConfig,
-  useEditTransformFlyout,
-  EditTransformFlyoutStateContext,
-  EditTransformFlyoutDispatchContext,
+  useEditTransformFlyoutConfig,
+  useEditTransformFlyoutState,
+  EditTransformFlyoutProvider,
 } from './use_edit_transform_flyout';
 
 interface EditTransformFlyoutProps {
@@ -54,10 +54,26 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
   config,
   dataViewId,
 }) => {
+  return (
+    <EditTransformFlyoutProvider config={config} dataViewId={dataViewId}>
+      <EditTransformFlyoutConsumer closeFlyout={closeFlyout} />
+    </EditTransformFlyoutProvider>
+  );
+};
+
+interface EditTransformFlyoutConsumerProps {
+  closeFlyout: () => void;
+}
+
+export const EditTransformFlyoutConsumer: FC<EditTransformFlyoutConsumerProps> = ({
+  closeFlyout,
+}) => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
 
-  const [state, dispatch] = useEditTransformFlyout(config);
+  const config = useEditTransformFlyoutConfig();
+  const state = useEditTransformFlyoutState();
+
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
   async function submitFormHandler() {
@@ -112,13 +128,7 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
         />
       ) : null}
       <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
-        <EditTransformFlyoutStateContext.Provider
-          value={{ closeFlyout, config, formState: state, dataViewId }}
-        >
-          <EditTransformFlyoutDispatchContext.Provider value={dispatch}>
-            <EditTransformFlyoutForm />
-          </EditTransformFlyoutDispatchContext.Provider>
-        </EditTransformFlyoutStateContext.Provider>
+        <EditTransformFlyoutForm />
         {errorMessage !== undefined && (
           <>
             <EuiSpacer size="m" />

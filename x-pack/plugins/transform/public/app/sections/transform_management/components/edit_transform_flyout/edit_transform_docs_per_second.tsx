@@ -16,9 +16,7 @@ import {
 } from './use_edit_transform_flyout';
 
 export const EditTransformDocsPerSecond: FC = () => {
-  const {
-    formState: { formFields },
-  } = useEditTransformFlyoutState();
+  const { formFields } = useEditTransformFlyoutState();
   const dispatch = useEditTransformFlyoutDispatch();
 
   return (
