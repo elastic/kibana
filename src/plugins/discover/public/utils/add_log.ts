@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-export const addLog = (function () {
+/**
+ * Conditional (window.ELASTIC_DISCOVER_LOGGER needs to be set to true) logger function
+ * @param args
+ */
+// @ts-expect-error
+
+export const addLog = (...args) => {
   // @ts-expect-error
   if (window?.ELASTIC_DISCOVER_LOGGER) {
-    // console.log(message, payload);
     // eslint-disable-next-line no-console
-    return Function.prototype.bind.call(console.log, console);
+    console.log(...args);
   }
-  return () => void 0;
-})();
+};

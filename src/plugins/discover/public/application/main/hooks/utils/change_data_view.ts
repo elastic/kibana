@@ -8,6 +8,7 @@
 
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { addLog } from '../../../../utils/add_log';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
@@ -32,6 +33,7 @@ export async function changeDataView(
     setUrlTracking: (dataView: DataView) => void;
   }
 ) {
+  addLog('changeDataView', { id });
   const { dataViews, uiSettings } = services;
   const dataView = discoverState.internalState.getState().dataView;
   const state = discoverState.appState.getState();
