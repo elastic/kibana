@@ -18,9 +18,8 @@ import { GROUPS_UNIT } from '../translations';
 import type { GroupingTableAggregation, RawBucket } from '../types';
 
 interface GroupingContainerProps {
-  selectedGroup: string;
-  inspectButton?: JSX.Element;
-  takeActionItems: (groupFilters: Filter[]) => JSX.Element[];
+  badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
+  customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
   data: GroupingTableAggregation &
     Record<
       string,
@@ -33,32 +32,33 @@ interface GroupingContainerProps {
           | undefined;
       }
     >;
+  groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element;
   groupsSelector?: JSX.Element;
-  unit?: (n: number) => string;
-  badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
-  customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
-  renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
+  inspectButton?: JSX.Element;
   pagination: {
     pageIndex: number;
     pageSize: number;
     onChangeItemsPerPage: (itemsPerPageNumber: number) => void;
     onChangePage: (pageNumber: number) => void;
   };
-  groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element;
+  renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
+  selectedGroup: string;
+  takeActionItems: (groupFilters: Filter[]) => JSX.Element[];
+  unit?: (n: number) => string;
 }
 
 const GroupingContainerComponent = ({
-  selectedGroup,
-  takeActionItems,
-  data,
-  groupsSelector,
-  unit,
   badgeMetricStats,
   customMetricStats,
-  renderChildComponent,
-  pagination,
-  inspectButton,
+  data,
   groupPanelRenderer,
+  groupsSelector,
+  inspectButton,
+  pagination,
+  renderChildComponent,
+  selectedGroup,
+  takeActionItems,
+  unit,
 }: GroupingContainerProps) => {
   const [trigger, setTrigger] = useState<
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
@@ -186,7 +186,7 @@ const GroupingContainerComponent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <GroupingStyledContainer>
+      <GroupingStyledContainer data-test-subj="grouping-container">
         {data?.groupsNumber?.value === 0 ? <EmptyGroupingComponent /> : groupPanels}
         <EuiSpacer size="m" />
         <EuiTablePagination

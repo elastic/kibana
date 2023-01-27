@@ -35,13 +35,6 @@ const GroupStatsComponent = ({
   onTakeActionsOpen,
   takeActionItems,
 }: GroupStatsProps) => {
-  console.log('GroupStats', {
-    badgeMetricStats,
-    bucket,
-    customMetricStats,
-    onTakeActionsOpen,
-    takeActionItems,
-  });
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = useCallback(
