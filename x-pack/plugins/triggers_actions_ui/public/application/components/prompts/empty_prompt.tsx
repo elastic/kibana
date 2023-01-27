@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
-import { useKibana } from '../../../common/lib/kibana';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 
 export const EmptyPrompt = ({
   onCreateRulesClick,
@@ -17,7 +16,6 @@ export const EmptyPrompt = ({
   onCreateRulesClick: () => void;
   showCreateRule: boolean;
 }) => {
-  const { docLinks } = useKibana().services;
   const renderActions = () => {
     if (showCreateRule) {
       return [
@@ -33,17 +31,6 @@ export const EmptyPrompt = ({
             defaultMessage="Create rule"
           />
         </EuiButton>,
-        <EuiButtonEmpty
-          href={docLinks.links.alerting.guide}
-          target="_blank"
-          iconType="help"
-          data-test-subj="documentationLink"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.home.docsLinkText"
-            defaultMessage="Documentation"
-          />
-        </EuiButtonEmpty>,
       ];
     }
     return null;

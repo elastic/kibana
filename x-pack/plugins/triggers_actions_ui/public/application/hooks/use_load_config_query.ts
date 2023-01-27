@@ -16,6 +16,7 @@ export const useLoadConfigQuery = () => {
       return triggersActionsUiConfig({ http });
     },
     initialData: { isUsingSecurity: false },
+    refetchOnWindowFocus: false,
   });
 
   return {

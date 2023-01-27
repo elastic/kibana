@@ -76,7 +76,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       RulesList,
       'xl'
     )({
-      showCreateRuleButton: false,
       showCreateRuleButtonInPrompt: true,
       setHeaderActions,
     });

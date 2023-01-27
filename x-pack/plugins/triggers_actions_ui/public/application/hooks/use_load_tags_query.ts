@@ -45,6 +45,7 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
     queryFn,
     onError: onErrorFn,
     enabled,
+    refetchOnWindowFocus: false,
   });
 
   return {
