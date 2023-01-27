@@ -162,6 +162,7 @@ export async function getServiceStatsForServiceMetrics({
           }),
         };
       }) ?? [],
-    overflowCount: response.aggregations?.sample?.overflowCount.value || 0,
+    serviceOverflowCount:
+      response.aggregations?.sample?.overflowCount.value || 0,
   };
 }

@@ -136,7 +136,7 @@ export function getServiceColumns({
           agentName={agentName}
           query={{ ...query, transactionType }}
           serviceName={serviceName}
-          overflowCount={serviceOverflowCount}
+          serviceOverflowCount={serviceOverflowCount}
         />
       ),
     },

@@ -212,7 +212,8 @@ export function ServiceInventory() {
   const hasKibanaUiLimitRestrictedData =
     mainStatisticsFetch.data?.maxServiceCountExceeded;
 
-  const serviceOverflowCount = mainStatisticsFetch.data?.overflowCount;
+  const serviceOverflowCount =
+    mainStatisticsFetch.data?.serviceOverflowCount ?? 0;
 
   const displayAlerts = [...mainStatisticsItems, ...preloadedServices].some(
     (item) => ServiceInventoryFieldName.AlertsCount in item

@@ -42,7 +42,7 @@ export async function getServices({
   randomSampler: RandomSampler;
 }) {
   return withApmSpan('get_services', async () => {
-    const { items, maxServiceCountExceeded, overflowCount } =
+    const { items, maxServiceCountExceeded, serviceOverflowCount } =
       await getServicesItems({
         environment,
         kuery,
@@ -61,7 +61,7 @@ export async function getServices({
     return {
       items,
       maxServiceCountExceeded,
-      overflowCount,
+      serviceOverflowCount,
     };
   });
 }

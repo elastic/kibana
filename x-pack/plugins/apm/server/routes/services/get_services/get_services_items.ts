@@ -62,7 +62,7 @@ export async function getServicesItems({
     };
 
     const [
-      { serviceStats, overflowCount },
+      { serviceStats, serviceOverflowCount },
       { services, maxServiceCountExceeded },
       healthStatuses,
       alertCounts,
@@ -99,7 +99,7 @@ export async function getServicesItems({
           alertCounts,
         }) ?? [],
       maxServiceCountExceeded,
-      overflowCount,
+      serviceOverflowCount,
     };
   });
 }
