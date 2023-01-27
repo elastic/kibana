@@ -35,28 +35,27 @@ paths:
     $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@alert@{alertid}@_mute.yaml'
   '/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute':
     $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@alert@{alertid}@_unmute.yaml'
-
 # Deprecated APIs
-#  '/s/{spaceId}/api/alerts/alert/{alertId}':
-#    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}.yaml'
-#  '/s/{spaceId}/api/alerts/alert/{alertId}/_disable':
-#   $ref: 'paths/s@{spaceid}@api@alertss@alert@{alertid}@_disable.yaml'
-#  '/s/{spaceId}/api/alerts/alert/{alertId}/_enable':
-#   $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@_enable.yaml'
-#  '/s/{spaceId}/api/alerts/alert/{alertId}/_mute_all':
-#   $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@_mute_all.yaml'
-#  '/s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all':
-#   $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@_unmute_all.yaml'
-#  '/s/{spaceId}/api/alerts/alerts/_find':
-#   $ref: 'paths/s@{spaceid}@api@alerts@_find.yaml'
-#  '/s/{spaceId}/api/alerts/alerts/_health':
-#   $ref: 'paths/s@{spaceid}@api@alerts@_health.yaml'
-#  '/s/{spaceId}/api/alerts/alerts/list_alert_types':
-#   $ref: 'paths/s@{spaceid}@api@alerts@list_alert_types.yaml'
-#  '/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute':
-#   $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@alert_instance@{alertinstanceid}@_mute.yaml'
-#  '/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute':
-#   $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@alert_instance@{alertinstanceid}@_unmute.yaml'
+  '/s/{spaceId}/api/alerts/alert/{alertId}':
+    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}.yaml'
+  '/s/{spaceId}/api/alerts/alert/{alertId}/_disable':
+    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@_disable.yaml'
+  '/s/{spaceId}/api/alerts/alert/{alertId}/_enable':
+    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@_enable.yaml'
+  '/s/{spaceId}/api/alerts/alert/{alertId}/_mute_all':
+    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@_mute_all.yaml'
+  '/s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all':
+    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@_unmute_all.yaml'
+  '/s/{spaceId}/api/alerts/alerts/_find':
+    $ref: 'paths/s@{spaceid}@api@alerts@_find.yaml'
+  '/s/{spaceId}/api/alerts/alerts/_health':
+    $ref: 'paths/s@{spaceid}@api@alerts@_health.yaml'
+  '/s/{spaceId}/api/alerts/alerts/list_alert_types':
+    $ref: 'paths/s@{spaceid}@api@alerts@list_alert_types.yaml'
+  '/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute':
+    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@alert_instance@{alertinstanceid}@_mute.yaml'
+  '/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute':
+    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@alert_instance@{alertinstanceid}@_unmute.yaml'
 
 components:
   securitySchemes:
