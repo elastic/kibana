@@ -32,6 +32,7 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
+  TaskStatus,
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -68,6 +69,7 @@ export interface UpdateByQuerySearchOpts extends SearchOpts {
 
 export interface UpdateByQueryOpts extends SearchOpts {
   max_docs?: number;
+  refresh?: boolean;
 }
 
 export interface FetchResult {
@@ -241,6 +243,20 @@ export class TaskStore {
       // passing in the whole object, this is safe to do.
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
       { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
+    );
+  }
+
+  public async waitForRefresh(): Promise<void> {
+    await this.savedObjectsRepository.update<Partial<SerializedConcreteTaskInstance>>(
+      'task',
+      'foo',
+      { taskType: 'foo' },
+      {
+        refresh: 'wait_for',
+        upsert: {
+          taskType: 'foo',
+        },
+      }
     );
   }
 
@@ -442,7 +458,7 @@ export class TaskStore {
   public async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    { max_docs: max_docs }: UpdateByQueryOpts = {}
+    { max_docs: max_docs, refresh }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
@@ -450,7 +466,7 @@ export class TaskStore {
         { total, updated, version_conflicts } = await this.esClient.updateByQuery({
           index: this.index,
           ignore_unavailable: true,
-          refresh: true,
+          refresh: refresh == null ? true : refresh,
           conflicts: 'proceed',
           body: {
             ...opts,
