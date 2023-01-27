@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import React, { ComponentProps } from 'react';
-import { Story } from '@storybook/react';
+import { Meta, Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { RulesListNotifyBadgeWithApi } from './notify_badge_with_api';
+import React from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
-type Args = ComponentProps<typeof RulesListNotifyBadgeWithApi>;
+import { EuiText } from '@elastic/eui';
+import { RulesListNotifyBadgeWithApi } from './notify_badge_with_api';
+import { RulesListNotifyBadgePropsWithApi } from './types';
 
 const rule = {
   id: uuidv4(),
@@ -38,22 +39,99 @@ export default {
         type: 'boolean',
       },
     },
+    showOnHover: {
+      defaultValue: false,
+      control: {
+        type: 'boolean',
+      },
+    },
+    showTooltipInline: {
+      defaultValue: false,
+      control: {
+        type: 'boolean',
+      },
+    },
     onRuleChanged: {},
   },
   args: {
     rule,
     onRuleChanged: (...args: any) => action('onRuleChanged')(args),
   },
-};
+} as Meta<RulesListNotifyBadgePropsWithApi>;
 
-const Template: Story<Args> = (args) => {
+const Template: Story<RulesListNotifyBadgePropsWithApi> = (args) => {
   return <RulesListNotifyBadgeWithApi {...args} />;
 };
 
 export const DefaultRuleNotifyBadgeWithApi = Template.bind({});
 
-// export const DefaultRuleNotifyBadgeWithApi = Template.bind({});
+const IndefinitelyDate = new Date();
+IndefinitelyDate.setDate(IndefinitelyDate.getDate() + 1);
+export const IndefinitelyRuleNotifyBadgeWithApi = Template.bind({});
+IndefinitelyRuleNotifyBadgeWithApi.args = {
+  rule: {
+    ...rule,
+    muteAll: true,
+    isSnoozedUntil: IndefinitelyDate,
+  },
+};
 
-// DisabledRule.args = {
-//   rule: mockRule({ enabled: false }),
-// };
+export const ActiveSnoozesRuleNotifyBadgeWithApi = Template.bind({});
+const ActiveSnoozeDate = new Date();
+ActiveSnoozeDate.setDate(ActiveSnoozeDate.getDate() + 2);
+ActiveSnoozesRuleNotifyBadgeWithApi.args = {
+  rule: {
+    ...rule,
+    activeSnoozes: ['24da3b26-bfa5-4317-b72f-4063dbea618e'],
+    isSnoozedUntil: ActiveSnoozeDate,
+    snoozeSchedule: [
+      {
+        duration: 172800000,
+        rRule: {
+          tzid: 'America/New_York',
+          count: 1,
+          dtstart: ActiveSnoozeDate.toISOString(),
+        },
+        id: '24da3b26-bfa5-4317-b72f-4063dbea618e',
+      },
+    ],
+  },
+};
+
+const SnoozeDate = new Date();
+export const ScheduleSnoozesRuleNotifyBadgeWithApi: Story<RulesListNotifyBadgePropsWithApi> = (
+  args
+) => {
+  return (
+    <div>
+      <EuiText size="s">Open popover to see the next snoozes scheduled</EuiText>
+      <RulesListNotifyBadgeWithApi {...args} />
+    </div>
+  );
+};
+
+ScheduleSnoozesRuleNotifyBadgeWithApi.args = {
+  rule: {
+    ...rule,
+    snoozeSchedule: [
+      {
+        duration: 172800000,
+        rRule: {
+          tzid: 'America/New_York',
+          count: 1,
+          dtstart: new Date(SnoozeDate.setDate(SnoozeDate.getDate() + 2)).toISOString(),
+        },
+        id: '24da3b26-bfa5-4317-b72f-4063dbea618e',
+      },
+      {
+        duration: 172800000,
+        rRule: {
+          tzid: 'America/New_York',
+          count: 1,
+          dtstart: new Date(SnoozeDate.setDate(SnoozeDate.getDate() + 2)).toISOString(),
+        },
+        id: '24da3b26-bfa5-4317-b72f-4063dbea618e',
+      },
+    ],
+  },
+};

@@ -58,8 +58,8 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
       onRuleChanged={props.onRuleChanged}
       snoozeRule={onSnoozeRule}
       unsnoozeRule={onUnsnoozeRule}
-      showTooltipInline={false}
-      showOnHover={true}
+      showTooltipInline={props.showTooltipInline}
+      showOnHover={props.showOnHover}
     />
   );
 };

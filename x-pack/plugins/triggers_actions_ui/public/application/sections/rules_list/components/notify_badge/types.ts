@@ -27,5 +27,5 @@ export interface RulesListNotifyBadgeProps {
 
 export type RulesListNotifyBadgePropsWithApi = Pick<
   RulesListNotifyBadgeProps,
-  'rule' | 'isLoading' | 'onRuleChanged'
+  'rule' | 'isLoading' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
 >;
