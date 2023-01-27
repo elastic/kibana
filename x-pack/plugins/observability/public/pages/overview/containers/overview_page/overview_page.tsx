@@ -10,8 +10,7 @@ import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { AlertSummaryTimeRange } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useMemo, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 
 import { observabilityFeatureId } from '../../../../../common';
 import type { ObservabilityAppServices } from '../../../../application/types';
@@ -69,7 +68,6 @@ export function OverviewPage() {
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
   const { hasAnyData, isAllRequestsComplete } = useHasData();
-  const refetch = useRef<() => void>();
 
   const { trackMetric } = useOverviewMetrics({ hasAnyData });
 
@@ -90,7 +88,7 @@ export function OverviewPage() {
     })
   );
   const timeBuckets = useTimeBuckets();
-  const alertSummaryTimeRange: AlertSummaryTimeRange = getAlertSummaryTimeRange(
+  const alertSummaryTimeRange = getAlertSummaryTimeRange(
     {
       from: relativeStart,
       to: relativeEnd,
@@ -112,6 +110,15 @@ export function OverviewPage() {
     [absoluteStart, absoluteEnd]
   );
 
+  useEffect(() => {
+    setEsQuery(
+      buildEsQuery({
+        from: relativeStart,
+        to: relativeEnd,
+      })
+    );
+  }, [relativeEnd, relativeStart]);
+
   const handleTimeRangeRefresh = useCallback(() => {
     setEsQuery(
       buildEsQuery({
@@ -119,7 +126,6 @@ export function OverviewPage() {
         to: relativeEnd,
       })
     );
-    return refetch.current && refetch.current();
   }, [relativeEnd, relativeStart]);
 
   const handleCloseGuidedSetupTour = () => {
