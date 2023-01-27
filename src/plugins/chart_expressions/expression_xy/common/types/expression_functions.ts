@@ -72,6 +72,7 @@ export interface AxisExtentConfig {
   lowerBound?: number;
   upperBound?: number;
   enforce?: boolean;
+  niceValues?: boolean;
 }
 
 export interface AxisConfig {
