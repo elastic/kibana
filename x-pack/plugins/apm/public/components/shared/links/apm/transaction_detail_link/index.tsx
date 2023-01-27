@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { identity, pickBy } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -19,10 +20,7 @@ import { getComparisonEnabled } from '../../../time_comparison/get_comparison_en
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
 import { APMQueryParams } from '../../url_helpers';
 import { APMLinkExtendProps, getLegacyApmHref } from '../apm_link';
-import {
-  TransactionDetailMaxGroupsMessage,
-  txGroupsDroppedBucketName,
-} from './transaction_detail_max_groups_message';
+import { txGroupsDroppedBucketName } from './transaction_detail_max_groups_message';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
@@ -52,7 +50,7 @@ export function TransactionDetailLink({
   environment,
   comparisonEnabled,
   offset = '1d',
-  overflowCount,
+  overflowCount = 0,
   ...rest
 }: Props) {
   const { urlParams } = useLegacyUrlParams();
@@ -102,8 +100,12 @@ export function TransactionDetailLink({
           iconType="alert"
         >
           <EuiText style={{ width: `${unit * 28}px` }} size="s">
-            <TransactionDetailMaxGroupsMessage
-              remainingTransactions={overflowCount ?? 0}
+            <FormattedMessage
+              defaultMessage="Current APM server capacity for handling unique transaction groups has been reached. There are at least {overflowCount, plural, one {1 transaction} other {# transactions}} missing in this list. Please decrease the number of transaction groups in your service or increase the memory allocated to APM server."
+              id="xpack.apm.transactionDetail.maxGroups.message"
+              values={{
+                overflowCount,
+              }}
             />
           </EuiText>
         </PopoverTooltip>

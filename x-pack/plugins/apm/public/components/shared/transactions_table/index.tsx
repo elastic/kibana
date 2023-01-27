@@ -7,11 +7,13 @@
 
 import {
   EuiBasicTable,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -26,13 +28,11 @@ import {
   useFetcher,
 } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { txGroupsDroppedBucketName } from '../links/apm/transaction_detail_link/transaction_detail_max_groups_message';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
-import { TransactionsCallout } from './transactions_callout';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -151,8 +151,8 @@ export function TransactionsTable({
       ).then((response) => {
         const currentPageTransactionGroups = orderBy(
           response.transactionGroups,
-          field,
-          direction
+          ['overflowCount', field],
+          ['desc', direction]
         ).slice(index * size, (index + 1) * size);
 
         return {
@@ -240,10 +240,6 @@ export function TransactionsTable({
     { preservePreviousData: false }
   );
 
-  const otherBucketTransactionGroup = transactionGroups.find(
-    (item) => item.name === txGroupsDroppedBucketName
-  );
-
   const columns = getColumns({
     serviceName,
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
@@ -306,15 +302,28 @@ export function TransactionsTable({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {showMaxTransactionGroupsExceededWarning &&
-        (maxTransactionGroupsExceeded || otherBucketTransactionGroup) && (
-          <EuiFlexItem>
-            <TransactionsCallout
-              maxTransactionGroupsExceeded={maxTransactionGroupsExceeded}
-              otherBucketTransactionGroup={otherBucketTransactionGroup}
-            />
-          </EuiFlexItem>
-        )}
+      {showMaxTransactionGroupsExceededWarning && maxTransactionGroupsExceeded && (
+        <EuiFlexItem>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.apm.transactionsCallout.cardinalityWarning.title',
+              {
+                defaultMessage:
+                  'Number of transaction groups exceed the allowed maximum(1,000) that are displayed.',
+              }
+            )}
+            color="warning"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.apm.transactionsCallout.transactionGroupLimit.exceeded"
+                defaultMessage="The maximum number of transaction groups displayed in Kibana has been reached. Try narrowing down results by using the query bar."
+              />
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiFlexItem>
           <OverviewTableContainer
