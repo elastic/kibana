@@ -155,8 +155,6 @@ export const useExistingFieldsFetcher = (
           info.existingFieldsByFieldNameMap = booleanMap(existingFieldNames);
           info.fetchStatus = ExistenceFetchStatus.succeeded;
         } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(error);
           info.fetchStatus = ExistenceFetchStatus.failed;
         }
       }
