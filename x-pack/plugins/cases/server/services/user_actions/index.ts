@@ -691,7 +691,7 @@ export class CaseUserActionService {
       aggs: CaseUserActionService.buildParticipantsAgg(),
     });
 
-    const users = new Set<{ uid: string }>();
+    const users = new Set<string>();
     const participants = [];
     const participantsBuckets = response.aggregations?.participants.buckets ?? [];
     const assigneesBuckets = response.aggregations?.assignees.buckets ?? [];
@@ -716,12 +716,12 @@ export class CaseUserActionService {
       });
 
       if (user.attributes.created_by.profile_uid) {
-        users.add({ uid: user.attributes.created_by.profile_uid });
+        users.add(user.attributes.created_by.profile_uid);
       }
     }
 
     for (const bucket of assigneesBuckets) {
-      users.add({ uid: bucket.key });
+      users.add(bucket.key);
     }
 
     return { participants, users };

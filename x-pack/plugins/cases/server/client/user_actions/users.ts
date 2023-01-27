@@ -31,7 +31,8 @@ export const getUsers = async (
 
     // ensure that we have authorization for reading the case
     await casesClient.cases.resolve({ id: caseId, includeComments: false });
-    const { participants: participantsInfo, users } = await userActionService.getUsers({ caseId });
+    const { participants: participantsInfo, users: userProfileUids } =
+      await userActionService.getUsers({ caseId });
 
     for (const participant of participantsInfo) {
       entities.push({ id: participant.id, owner: participant.owner });
@@ -43,7 +44,8 @@ export const getUsers = async (
       operation: Operations.getUserActionUsers,
     });
 
-    const results = { participants, users: Array.from(users.values()) };
+    const users = Array.from(userProfileUids.values()).map((uid) => ({ uid }));
+    const results = { participants, users };
 
     return GetCaseUsersResponseRt.encode(results);
   } catch (error) {
