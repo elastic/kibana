@@ -103,7 +103,11 @@ export const ExtractionRules: React.FC = () => {
             </EuiText>
           }
           actions={
-            <EuiButton iconType="plusInCircle" onClick={editNewExtractionRule}>
+            <EuiButton
+              data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-addContentExtractionRule"
+              iconType="plusInCircle"
+              onClick={editNewExtractionRule}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.crawler.extractionRulesTable.emptyMessageAddRuleLabel',
                 {

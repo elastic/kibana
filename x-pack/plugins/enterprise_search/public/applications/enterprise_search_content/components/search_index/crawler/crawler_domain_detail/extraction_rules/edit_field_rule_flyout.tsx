@@ -136,6 +136,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                   )}
                 >
                   <EuiFieldText
+                    data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleFieldName"
                     isInvalid={!!error && isTouched}
                     fullWidth
                     value={field.value ?? ''}
@@ -191,6 +192,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                     )}
                   >
                     <EuiRadioGroup
+                      data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleSource"
                       options={[
                         {
                           id: FieldType.HTML,
@@ -242,6 +244,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                           name="selector"
                           render={({ field: selectorField, fieldState: { error, isTouched } }) => (
                             <EuiFieldText
+                              data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleSelector"
                               isInvalid={!!error && isTouched}
                               fullWidth
                               placeholder={
@@ -320,6 +323,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                     error={error}
                   >
                     <EuiRadioGroup
+                      data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleExtraction"
                       options={[
                         {
                           id: ContentFrom.EXTRACTED,
@@ -366,6 +370,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                             )}
                           >
                             <EuiRadioGroup
+                              data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleMultipleObjects"
                               options={[
                                 {
                                   id: MultipleObjectsHandling.STRING,
@@ -410,6 +415,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                             )}
                           >
                             <EuiFieldText
+                              data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleFixedValue"
                               fullWidth
                               value={valueField.value ?? ''}
                               onChange={valueField.onChange}
@@ -441,6 +447,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-saveContentField"
               disabled={!formState.isValid}
               onClick={() => {
                 saveRule({ ...getValues() });

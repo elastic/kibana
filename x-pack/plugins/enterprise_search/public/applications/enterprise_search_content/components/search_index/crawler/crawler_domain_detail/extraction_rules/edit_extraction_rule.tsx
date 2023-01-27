@@ -193,6 +193,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
               )}
             >
               <EuiFieldText
+                data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editRuleDescription"
                 isInvalid={!!(fieldState.error && fieldState.isTouched)}
                 value={field.value ?? ''}
                 onBlur={field.onBlur}
@@ -217,6 +218,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
           )}
         >
           <EuiRadioGroup
+            data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editRuleUrlFilters"
             options={[
               {
                 id: UrlState.ALL,
@@ -323,6 +325,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
                 <EuiFlexItem style={{ alignSelf: 'center' }}>
                   {urlFiltersFields.length > 1 && (
                     <EuiButtonIcon
+                      data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-removeUrlFilter"
                       aria-label={i18n.translate(
                         'xpack.enterpriseSearch.content.indices.extractionRules.editRule.url.urlFilters.removeFilter',
                         {
@@ -339,6 +342,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
             ))}
             <EuiSpacer />
             <EuiButton
+              data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-addUrlFilter"
               iconType="plusInCircle"
               onClick={() => appendUrlFilter({ filter: ExtractionFilter.BEGINS, pattern: '' })}
             >
@@ -352,7 +356,11 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
           </>
         )}
         <EuiSpacer />
-        <EuiLink href="TODO" external>
+        <EuiLink
+          data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-learnMoreUrlFilters"
+          href="TODO"
+          external
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.extractionRules.editRule.url.urlFiltersLink',
             {
@@ -383,7 +391,10 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
         <EuiFormRow>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={cancelEditing}>
+              <EuiButtonEmpty
+                data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-cancelEditExtractionRule"
+                onClick={cancelEditing}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.extractionRules.editRule.cancelButtonLabel',
                   {
@@ -394,6 +405,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-saveExtractionRule"
                 type="submit"
                 onClick={() => saveRule({ ...getValues() })}
                 disabled={!formState.isValid}

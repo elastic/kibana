@@ -24,8 +24,8 @@ import { FieldRulesTable } from './field_rules_table';
 
 interface ContentFieldsPanelProps {
   contentFields: Array<ExtractionRuleFieldRule & { id: string }>;
-  editNewField: () => void;
   editExistingField: (id: string) => void;
+  editNewField: () => void;
   removeField: (id: string) => void;
 }
 
@@ -60,7 +60,11 @@ export const ContentFieldsPanel: React.FC<ContentFieldsPanelProps> = ({
         </EuiText>
       }
       actions={
-        <EuiButton iconType="plusInCircle" onClick={editNewField}>
+        <EuiButton
+          data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-addContentFirstContentField"
+          iconType="plusInCircle"
+          onClick={editNewField}
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.extractionRules.editRule.fieldRules.emptyMessageAddRuleLabel',
             {
@@ -87,7 +91,11 @@ export const ContentFieldsPanel: React.FC<ContentFieldsPanelProps> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="plusInCircle" onClick={editNewField}>
+          <EuiButton
+            data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-addContentFieldRule"
+            iconType="plusInCircle"
+            onClick={editNewField}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.extractionRules.editRule.fieldRules.addContentFieldRuleLabel',
               {

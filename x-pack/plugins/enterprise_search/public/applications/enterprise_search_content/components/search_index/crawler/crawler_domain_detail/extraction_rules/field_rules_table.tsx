@@ -137,45 +137,6 @@ export const FieldRulesTable: React.FC<FieldRulesTableProps> = ({
         defaultMessage: 'Actions',
       }),
     },
-    // {
-    // field: ,
-    // name: i18n.translate('xpack.enterpriseSearch.crawler.extractionRulesTable.ruleTableHead', {
-    //   defaultMessage: 'Rule',
-    // }),
-    // render: (extractionRule) => (
-    //   <EuiText size="s">{getReadableCrawlerRule(extractionRule.rule)}</EuiText>
-    // ),
-    // },
-    // {
-    //   editingRender: (extractionRule, onChange, { isInvalid, isLoading }) => (
-    //     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-    //       <EuiFlexItem>
-    //         <EuiFieldText
-    //           fullWidth
-    //           value={extractionRule.pattern}
-    //           onChange={(e) => onChange(e.target.value)}
-    //           disabled={isLoading}
-    //           isInvalid={isInvalid}
-    //         />
-    //       </EuiFlexItem>
-    //       <EuiFlexItem grow={false}>
-    //         <EuiIconTip
-    //           content={getExtractionRulePathPatternTooltip(extractionRule as ExtractionRule)}
-    //           type="iInCircle"
-    //           position="top"
-    //         />
-    //       </EuiFlexItem>
-    //     </EuiFlexGroup>
-    //   ),
-    //   field: 'pattern',
-    //   name: i18n.translate(
-    //     'xpack.enterpriseSearch.crawler.extractionRulesTable.pathPatternTableHead',
-    //     {
-    //       defaultMessage: 'Path pattern',
-    //     }
-    //   ),
-    //   render: (extractionRule) => <EuiCode>{extractionRule.pattern}</EuiCode>,
-    // },
   ];
 
   return (
