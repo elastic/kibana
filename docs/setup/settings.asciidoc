@@ -548,7 +548,7 @@ set `telemetry.allowChangingOptInStatus` to `false` and `telemetry.optIn` to `tr
 
 `telemetry.enabled`::
 Reporting your cluster statistics helps
-us improve your user experience. Your data is never shared with anyone. Set to
+us improve your user experience. Set to
 `false` to disable telemetry capabilities entirely. You can alternatively opt
 out through *Advanced Settings*. *Default: `true`*
 
