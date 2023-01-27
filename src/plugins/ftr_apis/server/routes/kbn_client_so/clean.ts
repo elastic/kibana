@@ -34,7 +34,7 @@ export const registerCleanRoute = (router: IRouter) => {
 
       for await (const response of finder.find()) {
         const objects = response.saved_objects.map(({ type, id }) => ({ type, id }));
-        const { statuses } = await soClient.bulkDelete(objects);
+        const { statuses } = await soClient.bulkDelete(objects, { force: true });
         deleted += statuses.filter((status) => status.success).length;
       }
 
