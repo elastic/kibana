@@ -56,15 +56,17 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
       onChange={onChange}
       data-test-subj={dataTestSubj}
       editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
+        const editorModelUri: string = editor.getModel()?.uri.toString()!;
         if (schema) {
           monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
             validate: true,
-            enableSchemaRequest: true,
+            enableSchemaRequest: false,
             schemaValidation: 'warning',
             schemas: [
+              ...(monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas ?? []),
               {
-                uri: editor.getModel()?.uri.toString() ?? '',
-                fileMatch: ['*'],
+                uri: editorModelUri,
+                fileMatch: [editorModelUri],
                 schema,
               },
             ],

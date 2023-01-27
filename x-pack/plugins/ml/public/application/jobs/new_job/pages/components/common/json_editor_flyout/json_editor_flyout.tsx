@@ -83,19 +83,22 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showJsonFlyout]);
 
-  useEffect(function fetchSchemasOnMount() {
-    jsonSchemaApi
-      .getSchemaDefinition({ path: '/_ml/anomaly_detectors/{job_id}', method: 'put' })
-      .then((result) => {
-        setJobSchema(result);
-      });
+  useEffect(
+    function fetchSchemasOnMount() {
+      jsonSchemaApi
+        .getSchemaDefinition({ path: '/_ml/anomaly_detectors/{job_id}', method: 'put' })
+        .then((result) => {
+          setJobSchema(result);
+        });
 
-    // jsonSchemaApi
-    //   .getSchemaDefinition({ path: '/_ml/datafeeds/{datafeed_id}', method: 'put' })
-    //   .then((result) => {
-    //     setDatefeedSchema(result);
-    //   });
-  }, []);
+      jsonSchemaApi
+        .getSchemaDefinition({ path: '/_ml/datafeeds/{datafeed_id}', method: 'put' })
+        .then((result) => {
+          setDatefeedSchema(result);
+        });
+    },
+    [jsonSchemaApi]
+  );
 
   const editJsonMode =
     jobEditorMode === EDITOR_MODE.EDITABLE || datafeedEditorMode === EDITOR_MODE.EDITABLE;
@@ -191,7 +194,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                   schema={jobSchema}
                 />
               ) : null}
-              {datafeedEditorMode !== EDITOR_MODE.HIDDEN && (
+              {datafeedEditorMode !== EDITOR_MODE.HIDDEN && datafeedSchema ? (
                 <>
                   <Contents
                     editJson={datafeedEditorMode === EDITOR_MODE.EDITABLE}
@@ -201,6 +204,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                     })}
                     value={datafeedConfigString}
                     heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
+                    schema={datafeedSchema}
                   />
                   {datafeedEditorMode === EDITOR_MODE.EDITABLE && (
                     <EuiFlexItem>
@@ -211,7 +215,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                     </EuiFlexItem>
                   )}
                 </>
-              )}
+              ) : null}
             </EuiFlexGroup>
             {showChangedIndicesWarning && (
               <>
