@@ -9,9 +9,10 @@
     "githubTeam": "kibana-reporting-services"
   },
   "description": "Example integration code for applications to feature reports.",
-  "optionalPlugins": [],
+  "optionalPlugins": [
+    "reporting"
+  ],
   "requiredPlugins": [
-    "reporting",
     "developerExamples",
     "kibanaReact",
     "navigation",

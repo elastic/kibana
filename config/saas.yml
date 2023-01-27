@@ -1,0 +1,3 @@
+xpack.canvas.enabled: false
+xpack.reporting.enabled: false
+xpack.watcher.enabled: false
