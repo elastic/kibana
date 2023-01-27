@@ -11,24 +11,19 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 
+import { useAbsoluteDate } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { useGetMonitorEmbeddedFilters } from '../list_filters/use_filters';
 import * as labels from '../labels';
 
-interface MonitorCompleteCountProps {
-  from?: string;
-  to?: string;
-}
-
-export const MonitorTestRunsCount = ({
-  from = 'now-30d',
-  to = 'now',
-}: MonitorCompleteCountProps) => {
+export const MonitorTestRunsCount = () => {
   const { observability } = useKibana<ClientPluginsStart>().services;
   const theme = useTheme();
   const { embeddableReportDefinitions, embeddableFilters } = useGetMonitorEmbeddedFilters();
 
   const { ExploratoryViewEmbeddable } = observability;
+
+  const { from: absFrom, to: absTo } = useAbsoluteDate({ from: 'now-30d', to: 'now' });
 
   return (
     <ExploratoryViewEmbeddable
@@ -36,7 +31,7 @@ export const MonitorTestRunsCount = ({
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
         {
-          time: { from, to },
+          time: { from: absFrom, to: absTo },
           reportDefinitions: {
             'monitor.id': [],
             ...embeddableReportDefinitions,

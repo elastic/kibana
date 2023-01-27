@@ -95,6 +95,7 @@ export async function queryMonitorStatus(
                         'error',
                         'agent',
                         'url',
+                        'state',
                       ],
                     },
                   },

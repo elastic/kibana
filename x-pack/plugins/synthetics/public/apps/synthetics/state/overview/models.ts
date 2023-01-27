@@ -33,6 +33,7 @@ export interface MonitorOverviewState {
   pageState: MonitorOverviewPageState;
   loading: boolean;
   loaded: boolean;
+  isErrorPopoverOpen?: string | null;
   error: IHttpSerializedFetchError | null;
   status: OverviewStatusState | null;
   statusError: IHttpSerializedFetchError | null;
