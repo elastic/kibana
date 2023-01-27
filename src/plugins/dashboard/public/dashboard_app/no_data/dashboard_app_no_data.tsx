@@ -39,7 +39,7 @@ export const DashboardAppNoDataPage = ({
       application,
       http: { basePath },
       customBranding: {
-        hasCustomBranding$: customBranding.customBranding.hasCustomBranding$,
+        hasCustomBranding$: customBranding.hasCustomBranding$,
       },
     },
     dataViews,
