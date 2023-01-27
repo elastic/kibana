@@ -148,7 +148,7 @@ describe('SavedObjectsTable', () => {
 
     findObjectsMock.mockImplementation(() => ({
       total: 4,
-      savedObjects: [
+      saved_objects: [
         {
           id: '1',
           type: 'index-pattern',
