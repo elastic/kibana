@@ -535,7 +535,7 @@ export interface BulkActionsConfig {
     setIsBulkActionsLoading: (isLoading: boolean) => void,
     clearSelection: () => void,
     refresh: () => void
-  ) => void | Promise<void>;
+  ) => void;
 }
 
 export type UseBulkActionsRegistry = (

@@ -16,7 +16,6 @@ import type { TimelineItem } from '../../../../common/search_strategy';
 import { getAlertsDefaultModel } from '../../components/alerts_table/default_config';
 import type { TableId } from '../../../../common/types';
 import type { State } from '../../../common/store';
-import { useUserData } from '../../components/user_info';
 import { RowAction } from '../../../common/components/control_columns/row_action';
 
 export const getUseActionColumnHook =
@@ -31,48 +30,14 @@ export const getUseActionColumnHook =
       [ACTION_BUTTON_COUNT]
     );
 
-    // const {
-    // setEventsDeleted: setEventsDeletedAction,
-    // setEventsLoading: setEventsLoadingAction,
-    // setSelected,
-    // } = dataTableActions;
-
     const {
       dataTable: {
         columns,
-        deletedEventIds,
         showCheckboxes,
-        queryFields,
         selectedEventIds,
         loadingEventIds,
       } = getAlertsDefaultModel(license),
     } = useSelector((state: State) => eventsViewerSelector(state, tableId));
-
-    const [{ hasIndexWrite = false, hasIndexMaintenance = false }] = useUserData();
-
-    const hasCrudPermissions = useMemo(
-      () => hasIndexWrite && hasIndexMaintenance,
-      [hasIndexMaintenance, hasIndexWrite]
-    );
-
-    const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
-
-    // const onRowSelected: OnRowSelected = useCallback(
-    // ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
-    // setSelected({
-    // id: tableId,
-    // eventIds: getEventIdToDataMapping(
-    // nonDeletedEvents,
-    // eventIds,
-    // queryFields,
-    // hasCrudPermissions as boolean
-    // ),
-    // isSelected,
-    // isSelectAllChecked: isSelected && selectedCount + 1 === nonDeletedEvent.length,
-    // });
-    // },
-    // [setSelected, nonDeletedEvents, queryFields, hasCrudPermissions, selectedCount]
-    // );
 
     const columnHeaders = columns;
 

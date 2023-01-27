@@ -86,11 +86,9 @@ const registerAlertsTableConfiguration = (
     casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookCasePage,
-    useActionsColumn: getUseActionColumnHook(TableId.alertsOnAlertsPage),
     useInternalFlyout,
-    useBulkActions: getBulkActionHook(TableId.alertsOnAlertsPage),
-    useCellActions: getUseCellActionsHook(TableId.alertsOnAlertsPage),
-    usePersistentControls: getPersistentControlsHook(TableId.alertsOnAlertsPage),
+    useBulkActions: getBulkActionHook(TableId.alertsOnCasePage),
+    useCellActions: getUseCellActionsHook(TableId.alertsOnCasePage),
     sort,
   });
 };

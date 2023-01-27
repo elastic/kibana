@@ -34,6 +34,7 @@ export enum TableId {
   alternateTest = 'alternateTest',
   rulePreview = 'rule-preview',
   kubernetesPageSessions = 'kubernetes-page-sessions',
+  alertsOnCasePage = 'alerts-case-page',
 }
 
 const TableIdLiteralRt = runtimeTypes.union([

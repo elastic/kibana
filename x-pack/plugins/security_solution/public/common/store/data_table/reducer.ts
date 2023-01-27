@@ -86,19 +86,21 @@ export const dataTableReducer = reducerWithInitialState(initialDataTableState)
       dataTableSettingsProps,
     }),
   }))
-  .case(toggleDetailPanel, (state, action) => ({
-    ...state,
-    tableById: {
-      ...state.tableById,
-      [action.id]: {
-        ...state.tableById[action.id],
-        expandedDetail: {
-          ...state.tableById[action.id].expandedDetail,
-          ...updateTableDetailsPanel(action),
+  .case(toggleDetailPanel, (state, action) => {
+    return {
+      ...state,
+      tableById: {
+        ...state.tableById,
+        [action.id]: {
+          ...state.tableById[action.id],
+          expandedDetail: {
+            ...state.tableById[action.id].expandedDetail,
+            ...updateTableDetailsPanel(action),
+          },
         },
       },
-    },
-  }))
+    };
+  })
   .case(applyDeltaToColumnWidth, (state, { id, columnId, delta }) => ({
     ...state,
     tableById: applyDeltaToTableColumnWidth({

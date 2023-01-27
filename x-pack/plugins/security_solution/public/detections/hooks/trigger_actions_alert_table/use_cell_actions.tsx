@@ -39,7 +39,7 @@ export const getUseCellActionsHook =
     columns: EuiDataGridColumn[];
     data: unknown[][];
     ecsData: unknown[];
-    dataGridRef?: EuiDataGridRefProps;
+    dataGridRef?: EuiDataGridRefProps | null;
     pageSize: number;
   }) => {
     const { browserFields } = useSourcererDataView(SourcererScopeName.detections);

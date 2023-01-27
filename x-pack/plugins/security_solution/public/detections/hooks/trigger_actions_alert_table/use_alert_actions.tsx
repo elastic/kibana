@@ -7,6 +7,8 @@
 
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useCallback } from 'react';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { useUpdateAlertsStatus } from '../../../common/components/toolbar/bulk_actions/use_update_alerts';
@@ -14,15 +16,31 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import type { AlertWorkflowStatus } from '../../../common/types';
+import type { TableId } from '../../../../common/types';
 import { FILTER_CLOSED, FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import * as i18n from '../translations';
 import { getUpdateAlertsQuery } from '../../components/alerts_table/actions';
+import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 
 interface UseBulkAlertActionItemsArgs {
+  /* Table ID for which this hook is being used */
+  tableId: TableId;
+  /* start time being passed to the Events Table */
+  from: string;
+  /* End Time of the table being passed to the Events Table */
+  to: string;
+  /* Sourcerer Scope Id*/
   scopeId: SourcererScopeName;
+  /* filter of the Alerts Query*/
+  filters: Filter[];
 }
 
-export const useBulkAlertActionItems = ({ scopeId }: UseBulkAlertActionItemsArgs) => {
+export const useBulkAlertActionItems = ({
+  scopeId,
+  filters,
+  from,
+  to,
+}: UseBulkAlertActionItemsArgs) => {
   const { startTransaction } = useStartTransaction();
 
   const { updateAlertStatus } = useUpdateAlertsStatus();
@@ -72,8 +90,6 @@ export const useBulkAlertActionItems = ({ scopeId }: UseBulkAlertActionItemsArgs
     [addError]
   );
 
-  const query = undefined;
-
   const { selectedPatterns } = useSourcererDataView(scopeId);
 
   const getOnAction = useCallback(
@@ -85,6 +101,13 @@ export const useBulkAlertActionItems = ({ scopeId }: UseBulkAlertActionItemsArgs
         clearSelection,
         refresh
       ) => {
+        const ids = items.map((item) => item._id);
+        let query: Record<string, unknown> = getUpdateAlertsQuery(ids).query;
+
+        if (isSelectAllChecked) {
+          const timeFilter = buildTimeRangeFilter(from, to);
+          query = buildEsQuery(undefined, [], [...timeFilter, ...filters], undefined);
+        }
         if (query) {
           startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
         } else if (items.length > 1) {
@@ -93,14 +116,12 @@ export const useBulkAlertActionItems = ({ scopeId }: UseBulkAlertActionItemsArgs
           startTransaction({ name: APM_USER_INTERACTIONS.STATUS_UPDATE });
         }
 
-        const ids = items.map((item) => item._id);
-
         try {
           setLoading(true);
           const response = await updateAlertStatus({
             index: selectedPatterns.join(','),
             status,
-            query: getUpdateAlertsQuery(ids),
+            query,
           });
 
           setLoading(false);
@@ -128,8 +149,10 @@ export const useBulkAlertActionItems = ({ scopeId }: UseBulkAlertActionItemsArgs
       onAlertStatusUpdateSuccess,
       updateAlertStatus,
       selectedPatterns,
-      query,
       startTransaction,
+      filters,
+      from,
+      to,
     ]
   );
 
@@ -144,7 +167,7 @@ export const useBulkAlertActionItems = ({ scopeId }: UseBulkAlertActionItemsArgs
 
       return {
         label,
-        key: 'add-bulk-to-timeline',
+        key: `${status}-alert-status`,
         'data-test-subj': `${status}-alert-status`,
         disableOnQuery: false,
         onClick: getOnAction(status),

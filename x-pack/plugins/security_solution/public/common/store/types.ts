@@ -34,9 +34,7 @@ export type State = HostsPluginState &
     inputs: InputsState;
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;
-  } & DataTableState &
-  AlertTableState;
-
+  } & DataTableState;
 /**
  * The Redux store type for the Security app.
  */

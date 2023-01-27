@@ -27,7 +27,6 @@ import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions
 import * as i18n from '../translations';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
-import type { SetEventsLoading } from '../../../../../common/types';
 import { TableId } from '../../../../../common/types';
 import type { AlertData, EcsHit } from '../../../../detection_engine/rule_exceptions/utils/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
@@ -54,8 +53,7 @@ interface AlertContextMenuProps {
   ecsRowData: Ecs;
   onRuleChange?: () => void;
   scopeId: string;
-  refetch: () => void;
-  setEventsLoading: SetEventsLoading;
+  refetch: () => void | undefined;
 }
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
@@ -69,7 +67,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   globalQuery,
   timelineQuery,
   refetch,
-  setEventsLoading,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
@@ -181,7 +178,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     scopeId,
     refetch: refetchAll,
     closePopover,
-    setEventsLoading,
   });
 
   const handleOnAddExceptionTypeClick = useCallback(

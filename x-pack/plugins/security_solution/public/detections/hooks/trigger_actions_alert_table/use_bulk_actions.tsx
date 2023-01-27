@@ -69,7 +69,13 @@ export const getBulkActionHook =
       tableId,
     });
 
-    const alertActions = useBulkAlertActionItems({ scopeId: SourcererScopeName.detections });
+    const alertActions = useBulkAlertActionItems({
+      scopeId: SourcererScopeName.detections,
+      filters,
+      from,
+      to,
+      tableId,
+    });
 
     const caseActions = useBulkAddToCaseActions();
 

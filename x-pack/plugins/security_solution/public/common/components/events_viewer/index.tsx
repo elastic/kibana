@@ -17,6 +17,7 @@ import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
+import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
   ControlColumnProps,
@@ -26,6 +27,7 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
   TableId,
+  ViewSelection,
 } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -64,8 +66,6 @@ import type { SetQuery } from '../../containers/use_global_time/types';
 import { defaultHeaders } from '../../store/data_table/defaults';
 import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
 import { getEventIdToDataMapping } from '../data_table/helpers';
-import { ALERTS_TABLE_VIEW_SELECTION_KEY } from './summary_view_select';
-import type { ViewSelection } from './summary_view_select';
 import { RightTopMenu } from './right_top_menu';
 import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';

@@ -8,7 +8,6 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import type { SetEventsLoading } from '../../../../../common/types';
 import type { AlertWorkflowStatus } from '../../../../common/types';
 import { useBulkActionItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import { getScopedActions } from '../../../../helpers';
@@ -22,7 +21,6 @@ interface Props {
   scopeId: string;
   indexName: string;
   refetch?: () => void;
-  setEventsLoading: SetEventsLoading;
 }
 
 export const useAlertsActions = ({
@@ -32,7 +30,6 @@ export const useAlertsActions = ({
   scopeId,
   indexName,
   refetch,
-  setEventsLoading,
 }: Props) => {
   const dispatch = useDispatch();
   const { hasIndexWrite } = useAlertsPrivileges();
@@ -67,7 +64,7 @@ export const useAlertsActions = ({
     eventIds: [eventId],
     currentStatus: alertStatus as AlertWorkflowStatus,
     indexName,
-    setEventsLoading: setEventsLoading ?? localSetEventsLoading,
+    setEventsLoading: localSetEventsLoading,
     setEventsDeleted,
     onUpdateSuccess: onStatusUpdate,
     onUpdateFailure: onStatusUpdate,

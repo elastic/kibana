@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { CustomBulkAction } from '../../../../../common/types';
 import { TableId } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -182,7 +183,7 @@ export const useAddBulkToTimelineAction = ({
     [dispatch, createTimeline, selectedEventIds, tableId]
   );
 
-  const onActionClick: BulkActionsConfig['onClick'] = useCallback(
+  const onActionClick: BulkActionsConfig['onClick'] | CustomBulkAction['onClick'] = useCallback(
     (items: TimelineItem[] | undefined, isAllSelected: boolean, setLoading, clearSelection) => {
       if (!items) return;
       /*

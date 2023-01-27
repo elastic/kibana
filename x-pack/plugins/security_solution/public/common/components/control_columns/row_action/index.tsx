@@ -65,9 +65,9 @@ const RowActionComponent = ({
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data;
 
   useMemo(() => {
-    const rowData: Partial<TimelineItem> = data[pageRowIndex];
+    const rowData: Partial<TimelineItem> = data;
     return rowData ?? {};
-  }, [data, pageRowIndex]);
+  }, [data]);
 
   const dispatch = useDispatch();
 

@@ -21,25 +21,26 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
 
   const userCasesPermissions = useGetUserCasesPermissions();
 
+  const caseAddToNewCaseFlyoutHandler = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
+    onClose,
+    onSuccess,
+  });
+
+  const caseAddToExistingCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
+    onClose,
+    onRowClick: onSuccess,
+  });
+
   const createCaseFlyout = useCallback(
-    (caseAttachments?: CaseAttachmentsWithoutOwner) =>
-      casesUi.hooks
-        .getUseCasesAddToNewCaseFlyout({
-          onClose,
-          onSuccess,
-        })
-        .open({ attachments: caseAttachments }),
-    [casesUi.hooks, onClose, onSuccess]
+    (caseAttachments?: CaseAttachmentsWithoutOwner) => {
+      caseAddToNewCaseFlyoutHandler.open({ attachments: caseAttachments });
+    },
+    [caseAddToNewCaseFlyoutHandler]
   );
   const selectCaseModal = useCallback(
     (caseAttachments?: CaseAttachmentsWithoutOwner) =>
-      casesUi.hooks
-        .getUseCasesAddToExistingCaseModal({
-          onClose,
-          onRowClick: onSuccess,
-        })
-        .open({ attachments: caseAttachments }),
-    [casesUi.hooks, onClose, onSuccess]
+      caseAddToExistingCaseModal.open({ attachments: caseAttachments }),
+    [caseAddToExistingCaseModal]
   );
 
   return useMemo(() => {

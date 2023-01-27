@@ -10,8 +10,7 @@ import type { Filter } from '@kbn/es-query';
 import type { ExpandedDetail } from '../../../../common/types/detail_panel';
 import type { SessionViewConfig } from '../../../../common/types/session_view';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
-import type { ColumnHeaderOptions, SortColumnTable } from '../../../../common/types';
-import type { ViewSelection } from '../../components/events_viewer/summary_view_select';
+import type { ColumnHeaderOptions, SortColumnTable, ViewSelection } from '../../../../common/types';
 
 export interface DataTableModelSettings {
   defaultColumns: Array<
