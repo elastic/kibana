@@ -30,6 +30,8 @@ Object {
     "_source": Array [
       "agent.name",
       "service.runtime.name",
+      "cloud.provider",
+      "cloud.service.name",
     ],
     "query": Object {
       "bool": Object {
@@ -54,11 +56,23 @@ Object {
             },
           },
         ],
-        "should": Object {
-          "exists": Object {
-            "field": "service.runtime.name",
+        "should": Array [
+          Object {
+            "exists": Object {
+              "field": "service.runtime.name",
+            },
           },
-        },
+          Object {
+            "exists": Object {
+              "field": "cloud.provider",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "cloud.service.name",
+            },
+          },
+        ],
       },
     },
     "size": 1,
