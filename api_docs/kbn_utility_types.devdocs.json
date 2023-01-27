@@ -262,6 +262,21 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.ArrayElement",
+        "type": "Type",
+        "tags": [],
+        "label": "ArrayElement",
+        "description": [],
+        "signature": [
+          "A extends readonly (infer T)[] ? T : never"
+        ],
+        "path": "packages/kbn-utility-types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-common.Assign",
         "type": "Type",
         "tags": [
