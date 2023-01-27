@@ -167,6 +167,7 @@ enabled:
   - x-pack/test/functional_basic/apps/transform/group1/config.ts
   - x-pack/test/functional_basic/apps/transform/group2/config.ts
   - x-pack/test/functional_basic/apps/transform/group3/config.ts
+  - x-pack/test/functional_basic/apps/transform/group4/config.ts
   - x-pack/test/functional_basic/apps/transform/permissions/config.ts
   - x-pack/test/functional_basic/apps/transform/feature_controls/config.ts
   - x-pack/test/functional_cors/config.ts
@@ -226,6 +227,7 @@ enabled:
   - x-pack/test/functional/apps/transform/group1/config.ts
   - x-pack/test/functional/apps/transform/group2/config.ts
   - x-pack/test/functional/apps/transform/group3/config.ts
+  - x-pack/test/functional/apps/transform/group4/config.ts
   - x-pack/test/functional/apps/transform/permissions/config.ts
   - x-pack/test/functional/apps/transform/feature_controls/config.ts
   - x-pack/test/functional/apps/upgrade_assistant/config.ts
