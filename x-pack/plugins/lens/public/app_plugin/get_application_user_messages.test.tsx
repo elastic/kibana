@@ -368,4 +368,19 @@ describe('filtering user messages', () => {
       ]
     `);
   });
+
+  it('sorts with warnings after errors', () => {
+    expect(
+      filterAndSortUserMessages(userMessages, undefined, {}).map((message) => message.severity)
+    ).toMatchInlineSnapshot(`
+      Array [
+        "error",
+        "error",
+        "error",
+        "warning",
+        "warning",
+        "warning",
+      ]
+    `);
+  });
 });
