@@ -17,22 +17,28 @@ import { pluginServices } from '../../../services/plugin_services';
 import { DashboardGrid } from './dashboard_grid';
 import { DashboardContainer } from '../../embeddable/dashboard_container';
 import { getSampleDashboardInput } from '../../../mocks';
+import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
 
-jest.mock('./dashboard_grid_item', () => ({
-  DashboardGridItem: require('react').forwardRef((props, ref) => {
-    const className =
-      props.expandedPanelId === undefined
-        ? 'regularPanel'
-        : props.expandedPanelId === props.id
-        ? 'expandedPanel'
-        : 'hiddenPanel';
-    return (
-      <div className={className} id={`mockDashboardGridItem_${props.id}`} ref={ref}>
-        mockDashboardGridItem
-      </div>
-    );
-  }),
-}));
+jest.mock('./dashboard_grid_item', () => {
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    DashboardGridItem: require('react').forwardRef(
+      (props: DashboardGridItemProps, ref: HTMLDivElement) => {
+        const className =
+          props.expandedPanelId === undefined
+            ? 'regularPanel'
+            : props.expandedPanelId === props.id
+            ? 'expandedPanel'
+            : 'hiddenPanel';
+        return (
+          <div className={className} id={`mockDashboardGridItem_${props.id}`}>
+            mockDashboardGridItem
+          </div>
+        );
+      }
+    ),
+  };
+});
 
 const DashboardServicesProvider = pluginServices.getContextProvider();
 
