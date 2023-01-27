@@ -89,7 +89,10 @@ export const useLensAttributes = ({
   const hasAdHocDataViews = Object.values(attrs?.state?.adHocDataViews ?? {}).length > 0;
 
   const lensAttrsWithInjectedData = useMemo(() => {
-    if (lensAttributes == null && (getLensAttributes == null || stackByField == null)) {
+    if (
+      lensAttributes == null &&
+      (getLensAttributes == null || stackByField == null || stackByField?.length === 0)
+    ) {
       return null;
     }
 

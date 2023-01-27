@@ -205,6 +205,24 @@ describe('useLensAttributes', () => {
     expect(result?.current).toBeNull();
   });
 
+  it('should return null if stackByField is an empty string', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: 'security-solution-default',
+      indicesExist: false,
+      selectedPatterns: ['auditbeat-*'],
+    });
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: '',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current).toBeNull();
+  });
+
   it('should return Lens attributes if adHocDataViews exist', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',
