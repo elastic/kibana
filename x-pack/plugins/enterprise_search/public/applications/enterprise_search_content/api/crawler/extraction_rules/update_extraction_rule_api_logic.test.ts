@@ -25,7 +25,12 @@ describe('UpdateExtractionRuleApiLogic', () => {
       const domainId = 'domain-id';
       const extractionRuleId = 'extraction_rule_id';
       const indexName = 'elastic-crawler';
-      const rule = { fakeRule: 'fake' } as any;
+      const rule = {
+        description: 'haha',
+        id: extractionRuleId,
+        rules: ['a'],
+        url_filters: ['b'],
+      } as any;
       http.put.mockReturnValue(Promise.resolve('result'));
 
       const result = updateExtractionRule({
@@ -35,7 +40,11 @@ describe('UpdateExtractionRuleApiLogic', () => {
       });
       expect(http.put).toHaveBeenCalledWith(
         `/internal/enterprise_search/indices/${indexName}/crawler/domains/${domainId}/extraction_rules/${extractionRuleId}`,
-        { body: JSON.stringify({ extraction_rule: rule }) }
+        {
+          body: JSON.stringify({
+            extraction_rule: { description: 'haha', rules: ['a'], url_filters: ['b'] },
+          }),
+        }
       );
       await expect(result).resolves.toEqual('result');
     });
