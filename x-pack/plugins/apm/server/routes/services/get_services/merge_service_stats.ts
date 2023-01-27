@@ -13,21 +13,19 @@ import { getServicesFromErrorAndMetricDocuments } from './get_services_from_erro
 import { getServiceStats } from './get_service_stats';
 
 export function mergeServiceStats({
-  transactionStats,
+  serviceStats,
   servicesFromErrorAndMetricDocuments,
   healthStatuses,
   alertCounts,
 }: {
-  transactionStats: Awaited<ReturnType<typeof getServiceStats>>;
+  serviceStats: Awaited<ReturnType<typeof getServiceStats>>['serviceStats'];
   servicesFromErrorAndMetricDocuments: Awaited<
     ReturnType<typeof getServicesFromErrorAndMetricDocuments>
   >['services'];
   healthStatuses: Awaited<ReturnType<typeof getHealthStatuses>>;
   alertCounts: Awaited<ReturnType<typeof getServicesAlerts>>;
 }) {
-  const foundServiceNames = transactionStats.map(
-    ({ serviceName }) => serviceName
-  );
+  const foundServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
   const servicesWithOnlyMetricDocuments =
     servicesFromErrorAndMetricDocuments.filter(
@@ -46,7 +44,7 @@ export function mergeServiceStats({
 
   return joinByKey(
     asMutableArray([
-      ...transactionStats,
+      ...serviceStats,
       ...servicesFromErrorAndMetricDocuments,
       ...matchedHealthStatuses,
       ...alertCounts,

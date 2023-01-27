@@ -62,7 +62,7 @@ export async function getServicesItems({
     };
 
     const [
-      transactionStats,
+      { serviceStats, overflowCount },
       { services, maxServiceCountExceeded },
       healthStatuses,
       alertCounts,
@@ -93,12 +93,13 @@ export async function getServicesItems({
     return {
       items:
         mergeServiceStats({
-          transactionStats,
+          serviceStats,
           servicesFromErrorAndMetricDocuments: services,
           healthStatuses,
           alertCounts,
         }) ?? [],
       maxServiceCountExceeded,
+      overflowCount,
     };
   });
 }

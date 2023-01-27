@@ -99,13 +99,13 @@ Array [
       "aggs": Object {
         "sample": Object {
           "aggs": Object {
+            "overflowCount": Object {
+              "sum": Object {
+                "field": "service_transaction.aggregation.overflow_count",
+              },
+            },
             "services": Object {
               "aggs": Object {
-                "overflowCount": Object {
-                  "max": Object {
-                    "field": "service_transaction.aggregation.overflow_count",
-                  },
-                },
                 "transactionType": Object {
                   "aggs": Object {
                     "avg_duration": Object {

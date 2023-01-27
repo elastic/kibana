@@ -36,7 +36,6 @@ interface ServiceLinkProps {
   serviceName: string;
   overflowCount?: number;
 }
-
 export function ServiceLink({
   agentName,
   query,

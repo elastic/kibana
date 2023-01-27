@@ -52,6 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.items.length).to.be(0);
         expect(response.body.maxServiceCountExceeded).to.be(false);
+        expect(response.body.overflowCount).to.be(0);
       });
     }
   );
@@ -191,7 +192,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             throughput: totalRps * 60,
             transactionErrorRate:
               config.multiple.dev.rps / (config.multiple.prod.rps + config.multiple.dev.rps),
-            overflowCount: 0,
           });
         });
 
@@ -235,7 +235,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             latency: 1000 * ((config.multiple.prod.duration * config.multiple.prod.rps) / totalRps),
             throughput: totalRps * 60,
             transactionErrorRate: 0,
-            overflowCount: 0,
           });
         });
       });
@@ -271,7 +270,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             latency: 1000 * ((config.multiple.dev.duration * config.multiple.dev.rps) / totalRps),
             throughput: totalRps * 60,
             transactionErrorRate: 1,
-            overflowCount: 0,
           });
         });
       });

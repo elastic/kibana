@@ -212,6 +212,8 @@ export function ServiceInventory() {
   const hasKibanaUiLimitRestrictedData =
     mainStatisticsFetch.data?.maxServiceCountExceeded;
 
+  const serviceOverflowCount = mainStatisticsFetch.data?.overflowCount;
+
   const displayAlerts = [...mainStatisticsItems, ...preloadedServices].some(
     (item) => ServiceInventoryFieldName.AlertsCount in item
   );
@@ -352,6 +354,7 @@ export function ServiceInventory() {
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
             initialPageSize={INITIAL_PAGE_SIZE}
+            serviceOverflowCount={serviceOverflowCount}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

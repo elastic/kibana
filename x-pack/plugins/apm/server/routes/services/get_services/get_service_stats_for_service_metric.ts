@@ -75,17 +75,17 @@ export async function getServiceStatsForServiceMetrics({
           sample: {
             random_sampler: randomSampler,
             aggs: {
+              overflowCount: {
+                sum: {
+                  field: SERVICE_OVERFLOW_COUNT,
+                },
+              },
               services: {
                 terms: {
                   field: SERVICE_NAME,
                   size: maxNumServices,
                 },
                 aggs: {
-                  overflowCount: {
-                    max: {
-                      field: SERVICE_OVERFLOW_COUNT,
-                    },
-                  },
                   transactionType: {
                     terms: {
                       field: TRANSACTION_TYPE,
@@ -130,35 +130,38 @@ export async function getServiceStatsForServiceMetrics({
     }
   );
 
-  return (
-    response.aggregations?.sample.services.buckets.map((bucket) => {
-      const topTransactionTypeBucket =
-        bucket.transactionType.buckets.find(
-          ({ key }) =>
-            key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
-        ) ?? bucket.transactionType.buckets[0];
+  return {
+    serviceStats:
+      response.aggregations?.sample.services.buckets.map((bucket) => {
+        const topTransactionTypeBucket =
+          bucket.transactionType.buckets.find(
+            ({ key }) =>
+              key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
+          ) ?? bucket.transactionType.buckets[0];
 
-      return {
-        serviceName: bucket.key as string,
-        transactionType: topTransactionTypeBucket.key as string,
-        environments: topTransactionTypeBucket.environments.buckets.map(
-          (environmentBucket) => environmentBucket.key as string
-        ),
-        agentName: topTransactionTypeBucket.sample.top[0].metrics[
-          AGENT_NAME
-        ] as AgentName,
-        latency: topTransactionTypeBucket.avg_duration.value,
-        transactionErrorRate: calculateFailedTransactionRateFromServiceMetrics({
-          failedTransactions: topTransactionTypeBucket.failure_count.value,
-          successfulTransactions: topTransactionTypeBucket.success_count.value,
-        }),
-        throughput: calculateThroughputWithRange({
-          start,
-          end,
-          value: topTransactionTypeBucket.doc_count,
-        }),
-        overflowCount: bucket.overflowCount.value || 0,
-      };
-    }) ?? []
-  );
+        return {
+          serviceName: bucket.key as string,
+          transactionType: topTransactionTypeBucket.key as string,
+          environments: topTransactionTypeBucket.environments.buckets.map(
+            (environmentBucket) => environmentBucket.key as string
+          ),
+          agentName: topTransactionTypeBucket.sample.top[0].metrics[
+            AGENT_NAME
+          ] as AgentName,
+          latency: topTransactionTypeBucket.avg_duration.value,
+          transactionErrorRate:
+            calculateFailedTransactionRateFromServiceMetrics({
+              failedTransactions: topTransactionTypeBucket.failure_count.value,
+              successfulTransactions:
+                topTransactionTypeBucket.success_count.value,
+            }),
+          throughput: calculateThroughputWithRange({
+            start,
+            end,
+            value: topTransactionTypeBucket.doc_count,
+          }),
+        };
+      }) ?? [],
+    overflowCount: response.aggregations?.sample?.overflowCount.value || 0,
+  };
 }

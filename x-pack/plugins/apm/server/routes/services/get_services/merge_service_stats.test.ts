@@ -10,7 +10,7 @@ import { mergeServiceStats } from './merge_service_stats';
 
 type ServiceTransactionStat = Awaited<
   ReturnType<typeof getServiceStats>
->[number];
+>['serviceStats'][number];
 
 function stat(values: Partial<ServiceTransactionStat>): ServiceTransactionStat {
   return {
@@ -21,7 +21,6 @@ function stat(values: Partial<ServiceTransactionStat>): ServiceTransactionStat {
     transactionErrorRate: 3,
     transactionType: 'request',
     agentName: 'java',
-    overflowCount: 0,
     ...values,
   };
 }
@@ -30,7 +29,7 @@ describe('mergeServiceStats', () => {
   it('joins stats by service name', () => {
     expect(
       mergeServiceStats({
-        transactionStats: [
+        serviceStats: [
           stat({
             serviceName: 'opbeans-java',
             environments: ['production'],
@@ -70,7 +69,6 @@ describe('mergeServiceStats', () => {
         throughput: 4,
         transactionErrorRate: 3,
         transactionType: 'request',
-        overflowCount: 0,
       },
       {
         agentName: 'java',
@@ -82,7 +80,6 @@ describe('mergeServiceStats', () => {
         transactionErrorRate: 3,
         transactionType: 'request',
         alertsCount: 1,
-        overflowCount: 0,
       },
     ]);
   });
@@ -90,7 +87,7 @@ describe('mergeServiceStats', () => {
   it('shows services that only have metric documents', () => {
     expect(
       mergeServiceStats({
-        transactionStats: [
+        serviceStats: [
           stat({
             serviceName: 'opbeans-java-2',
             environments: ['staging'],
@@ -125,7 +122,6 @@ describe('mergeServiceStats', () => {
         throughput: 2,
         transactionErrorRate: 3,
         transactionType: 'request',
-        overflowCount: 0,
       },
       {
         agentName: 'java',
@@ -140,7 +136,7 @@ describe('mergeServiceStats', () => {
   it('does not show services that only have ML data', () => {
     expect(
       mergeServiceStats({
-        transactionStats: [
+        serviceStats: [
           stat({
             serviceName: 'opbeans-java-2',
             environments: ['staging'],
@@ -170,7 +166,6 @@ describe('mergeServiceStats', () => {
         transactionErrorRate: 3,
         transactionType: 'request',
         alertsCount: 3,
-        overflowCount: 0,
       },
     ]);
   });
@@ -178,7 +173,7 @@ describe('mergeServiceStats', () => {
   it('concatenates environments from metric/transaction data', () => {
     expect(
       mergeServiceStats({
-        transactionStats: [
+        serviceStats: [
           stat({
             serviceName: 'opbeans-java',
             environments: ['staging'],
@@ -203,7 +198,6 @@ describe('mergeServiceStats', () => {
         throughput: 2,
         transactionErrorRate: 3,
         transactionType: 'request',
-        overflowCount: 0,
       },
     ]);
   });

@@ -61,6 +61,7 @@ export function getServiceColumns({
   showHealthStatusColumn,
   showAlertsColumn,
   link,
+  serviceOverflowCount,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
@@ -70,6 +71,7 @@ export function getServiceColumns({
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   link: any;
+  serviceOverflowCount: number;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -129,15 +131,12 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      render: (
-        _,
-        { serviceName, agentName, transactionType, overflowCount }
-      ) => (
+      render: (_, { serviceName, agentName, transactionType }) => (
         <ServiceLink
           agentName={agentName}
           query={{ ...query, transactionType }}
           serviceName={serviceName}
-          overflowCount={overflowCount}
+          overflowCount={serviceOverflowCount}
         />
       ),
     },
@@ -277,8 +276,9 @@ interface Props {
     sortField: ServiceInventoryFieldName,
     sortDirection: 'asc' | 'desc'
   ) => ServiceListItem[];
-}
 
+  serviceOverflowCount: number;
+}
 export function ServiceList({
   items,
   noItemsMessage,
@@ -292,6 +292,7 @@ export function ServiceList({
   initialSortDirection,
   initialPageSize,
   sortFn,
+  serviceOverflowCount,
 }: Props) {
   const breakpoints = useBreakpoints();
   const { link } = useApmRouter();
@@ -329,6 +330,7 @@ export function ServiceList({
         showHealthStatusColumn: displayHealthStatus,
         showAlertsColumn: displayAlerts,
         link,
+        serviceOverflowCount,
       }),
     [
       query,
@@ -339,6 +341,7 @@ export function ServiceList({
       displayHealthStatus,
       displayAlerts,
       link,
+      serviceOverflowCount,
     ]
   );
 
