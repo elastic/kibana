@@ -15,6 +15,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CustomFieldPanel } from './custom_field_panel';
+import { NavItemBetaBadge } from '../../navigation/nav_item_beta_badge';
+import { GROUP_BY, TECHNICAL_PREVIEW } from '../translations';
 
 export type GroupSelection = 'kibana.alert.rule.name' | 'user.name' | 'host.name' | 'source.ip';
 
@@ -32,6 +34,7 @@ interface GroupSelectorProps {
   onClearSelected: () => void;
   fields: FieldSpec[];
   options: Array<{ key: string; label: string }>;
+  title?: string;
 }
 
 const GroupsSelectorComponent = ({
@@ -40,6 +43,7 @@ const GroupsSelectorComponent = ({
   onClearSelected,
   fields,
   options,
+  title = '',
 }: GroupSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
@@ -48,7 +52,7 @@ const GroupsSelectorComponent = ({
         id: 'firstPanel',
         items: [
           {
-            name: i18n.translate('xpack.infra.waffle.customGroupByOptionName', {
+            name: i18n.translate('xpack.securitySolution.groupsSelector.customGroupByOptionName', {
               defaultMessage: 'Custom field',
             }),
             icon: 'empty',
@@ -67,7 +71,7 @@ const GroupsSelectorComponent = ({
       },
       {
         id: 'customPanel',
-        title: i18n.translate('xpack.infra.waffle.customGroupByPanelTitle', {
+        title: i18n.translate('xpack.securitySolution.groupsSelector.customGroupByPanelTitle', {
           defaultMessage: 'Group By Custom Field',
         }),
         width: 685,
@@ -101,9 +105,8 @@ const GroupsSelectorComponent = ({
         flush="both"
         style={{ fontWeight: 'normal' }}
       >
-        {i18n.translate('xpack.securitySolution.selector.grouping.label', {
-          defaultMessage: 'Group alerts',
-        })}
+        <NavItemBetaBadge text={TECHNICAL_PREVIEW} className="eui-alignMiddle" />{' '}
+        {title ?? GROUP_BY}
         {groupSelected ? ': ' : ''}
         {groupSelected ? (
           <EuiBadge
@@ -119,7 +122,7 @@ const GroupsSelectorComponent = ({
         ) : null}
       </EuiButtonEmpty>
     ),
-    [groupSelected, onButtonClick, onClearSelected, selectedOption]
+    [groupSelected, onButtonClick, onClearSelected, selectedOption, title]
   );
 
   return (

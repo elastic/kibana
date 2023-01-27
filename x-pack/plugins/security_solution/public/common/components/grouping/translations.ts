@@ -14,8 +14,19 @@ export const GROUPS_UNIT = (totalCount: number) =>
   });
 
 export const TAKE_ACTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.groups.additionalActions.takeAction',
+  'xpack.securitySolution.grouping.additionalActions.takeAction',
   {
     defaultMessage: 'Take actions',
   }
 );
+
+export const TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.grouping.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);
+
+export const GROUP_BY = i18n.translate('xpack.securitySolution.selector.grouping.label', {
+  defaultMessage: 'Group by',
+});

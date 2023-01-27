@@ -317,9 +317,16 @@ export const STATS_GROUP_HOSTS = i18n.translate(
 );
 
 export const STATS_GROUP_IPS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.groups.stats.hostsCount',
+  'xpack.securitySolution.detectionEngine.groups.stats.ipsCount',
   {
     defaultMessage: `IP's:`,
+  }
+);
+
+export const GROUP_ALERTS_SELECTOR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.selectGroup.title',
+  {
+    defaultMessage: `Group alerts`,
   }
 );
 

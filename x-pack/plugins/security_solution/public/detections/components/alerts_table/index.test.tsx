@@ -36,6 +36,8 @@ describe('AlertsTableComponent', () => {
           showOnlyThreatIndicatorAlerts={false}
           onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
           dispatch={jest.fn()}
+          runtimeMappings={{}}
+          signalIndexName={'test'}
         />
       </TestProviders>
     );

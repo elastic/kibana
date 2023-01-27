@@ -50,20 +50,26 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
       <div style={{ padding: 16 }}>
         <EuiForm>
           <EuiFormRow
-            label={i18n.translate('xpack.infra.waffle.customGroupByFieldLabel', {
+            label={i18n.translate('xpack.securitySolution.groupsSelector.customGroupByFieldLabel', {
               defaultMessage: 'Field',
             })}
-            helpText={i18n.translate('xpack.infra.waffle.customGroupByHelpText', {
-              defaultMessage: 'This is the field used for the terms aggregation',
-            })}
+            helpText={i18n.translate(
+              'xpack.securitySolution.groupsSelector.customGroupByHelpText',
+              {
+                defaultMessage: 'This is the field used for the terms aggregation',
+              }
+            )}
             display="rowCompressed"
             fullWidth
           >
             <EuiComboBox
               data-test-subj="groupByCustomField"
-              placeholder={i18n.translate('xpack.infra.waffle.customGroupByDropdownPlacehoder', {
-                defaultMessage: 'Select one',
-              })}
+              placeholder={i18n.translate(
+                'xpack.securitySolution.groupsSelector.customGroupByDropdownPlacehoder',
+                {
+                  defaultMessage: 'Select one',
+                }
+              )}
               singleSelection={{ asPlainText: true }}
               selectedOptions={this.state.selectedOptions}
               options={options as EuiComboBoxOptionOption[]}

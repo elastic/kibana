@@ -30,3 +30,22 @@ export const StatsContainer = styled.span`
     width: 100%;
   }
 `;
+
+export const GroupingStyledContainer = styled.div`
+  .euiAccordion__childWrapper {
+    border-bottom: 1px solid #d3dae6;
+    border-radius: 5px;
+  }
+  .euiAccordion__triggerWrapper {
+    border-bottom: 1px solid #d3dae6;
+    border-radius: 5px;
+    min-height: 77px;
+  }
+  .groupingAccordionForm {
+    border-top: 1px solid #d3dae6;
+    border-left: 1px solid #d3dae6;
+    border-right: 1px solid #d3dae6;
+    border-bottom: none;
+    border-radius: 5px;
+  }
+`;
