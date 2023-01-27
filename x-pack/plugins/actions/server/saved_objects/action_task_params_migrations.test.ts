@@ -11,7 +11,11 @@ import {
   isPreconfiguredAction,
 } from './action_task_params_migrations';
 import { ActionTaskParams } from '../types';
-import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type {
+  SavedObjectMigrationFn,
+  SavedObjectReference,
+  SavedObjectUnsanitizedDoc,
+} from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
 
@@ -41,7 +45,7 @@ describe('successful migrations', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
-      )['7.16.0'];
+      )['7.16.0'] as SavedObjectMigrationFn;
       const actionTaskParam = getMockData();
       const migratedActionTaskParam = migration716(actionTaskParam, context);
       expect(migratedActionTaskParam).toEqual({
@@ -60,7 +64,7 @@ describe('successful migrations', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
-      )['7.16.0'];
+      )['7.16.0'] as SavedObjectMigrationFn;
       const actionTaskParam = getMockData({ actionId: 'my-slack1' });
       const migratedActionTaskParam = migration716(actionTaskParam, context);
       expect(migratedActionTaskParam).toEqual({
@@ -73,7 +77,7 @@ describe('successful migrations', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
-      )['7.16.0'];
+      )['7.16.0'] as SavedObjectMigrationFn;
       const actionTaskParam = getMockData({ relatedSavedObjects: [] });
       const migratedActionTaskParam = migration716(actionTaskParam, context);
       expect(migratedActionTaskParam).toEqual({
@@ -96,7 +100,7 @@ describe('successful migrations', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
-      )['7.16.0'];
+      )['7.16.0'] as SavedObjectMigrationFn;
       const actionTaskParam = getMockData({
         relatedSavedObjects: [
           {
@@ -140,7 +144,7 @@ describe('successful migrations', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
-      )['7.16.0'];
+      )['7.16.0'] as SavedObjectMigrationFn;
       const actionTaskParam = getMockData({
         actionId: 'my-slack1',
         relatedSavedObjects: [
@@ -180,7 +184,7 @@ describe('successful migrations', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
-      )['7.16.0'];
+      )['7.16.0'] as SavedObjectMigrationFn;
       const actionTaskParam = getMockData({
         relatedSavedObjects: [
           {
@@ -239,7 +243,7 @@ describe('successful migrations', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
-      )['7.16.0'];
+      )['7.16.0'] as SavedObjectMigrationFn;
       const actionTaskParam = getMockData(
         {
           relatedSavedObjects: [
@@ -297,7 +301,7 @@ describe('successful migrations', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
-      )['7.16.0'];
+      )['7.16.0'] as SavedObjectMigrationFn;
       const actionTaskParam = getMockData({}, [
         {
           id: 'existing-ref-id',
@@ -327,7 +331,7 @@ describe('successful migrations', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
-      )['7.16.0'];
+      )['7.16.0'] as SavedObjectMigrationFn;
       const actionTaskParam = getMockData({ relatedSavedObjects: [] }, [
         {
           id: 'existing-ref-id',
@@ -360,7 +364,9 @@ describe('successful migrations', () => {
 
   describe('8.0.0', () => {
     test('no op migration for rules SO', () => {
-      const migration800 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.0.0'];
+      const migration800 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])[
+        '8.0.0'
+      ] as SavedObjectMigrationFn;
       const actionTaskParam = getMockData();
       expect(migration800(actionTaskParam, context)).toEqual(actionTaskParam);
     });
@@ -380,7 +386,7 @@ describe('handles errors during migrations', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
-      )['7.16.0'];
+      )['7.16.0'] as SavedObjectMigrationFn;
       const actionTaskParam = getMockData();
       expect(() => {
         migration716(actionTaskParam, context);

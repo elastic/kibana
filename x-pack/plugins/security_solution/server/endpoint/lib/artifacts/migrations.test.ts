@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { ManifestConstants } from './common';
 import type { OldInternalManifestSchema } from './migrations';
@@ -21,7 +21,7 @@ describe('7.12.0 manifest migrations', () => {
   const ARTIFACT_ID_3 =
     'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
 
-  const migration = migrations['7.12.0'];
+  const migration = migrations['7.12.0'] as SavedObjectMigrationFn;
 
   test('Migrates ids property', () => {
     const doc: SavedObjectUnsanitizedDoc<OldInternalManifestSchema> = {

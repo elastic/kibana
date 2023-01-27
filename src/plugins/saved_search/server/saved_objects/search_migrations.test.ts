@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type {
+  SavedObjectMigrationContext,
+  SavedObjectMigrationFn,
+  SavedObjectUnsanitizedDoc,
+} from '@kbn/core/server';
 import { getAllMigrations, searchMigrations } from './search_migrations';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
@@ -369,7 +373,12 @@ Object {
       [versionToTest]: (state) => ({ ...state, migrated: true }),
     });
 
-    expect(migrations[versionToTest](savedSearch, {} as SavedObjectMigrationContext)).toEqual({
+    expect(
+      (migrations[versionToTest] as SavedObjectMigrationFn)(
+        savedSearch,
+        {} as SavedObjectMigrationContext
+      )
+    ).toEqual({
       attributes: {
         kibanaSavedObjectMeta: {
           searchSourceJSON: JSON.stringify({
@@ -395,7 +404,12 @@ Object {
       [versionToTest]: (state) => ({ ...state, migrated: true }),
     });
 
-    expect(migrations[versionToTest](savedSearch, {} as SavedObjectMigrationContext)).toEqual({
+    expect(
+      (migrations[versionToTest] as SavedObjectMigrationFn)(
+        savedSearch,
+        {} as SavedObjectMigrationContext
+      )
+    ).toEqual({
       attributes: {
         kibanaSavedObjectMeta: {
           searchSourceJSON: '5',

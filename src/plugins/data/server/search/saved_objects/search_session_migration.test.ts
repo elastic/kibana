@@ -14,8 +14,13 @@ import {
   SearchSessionSavedObjectAttributesPre$8$6$0,
 } from './search_session_migration';
 import { SavedObject } from '@kbn/core/types';
-import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
-import { SavedObjectMigrationContext } from '@kbn/core/server';
+import {
+  SEARCH_SESSION_TYPE,
+  SearchSessionSavedObjectAttributes,
+  SearchSessionStatus,
+  SearchStatus,
+} from '../../../common';
+import type { SavedObjectMigrationContext, SavedObjectMigrationFn } from '@kbn/core/server';
 
 describe('7.12.0 -> 7.13.0', () => {
   const mockCompletedSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> =
@@ -66,7 +71,10 @@ describe('7.12.0 -> 7.13.0', () => {
       references: [],
     };
 
-  const migration = searchSessionSavedObjectMigrations['7.13.0'];
+  const migration = searchSessionSavedObjectMigrations['7.13.0'] as SavedObjectMigrationFn<
+    unknown,
+    SearchSessionSavedObjectAttributesPre$7$14$0
+  >;
   test('"completed" is populated from "touched" for completed session', () => {
     const migratedCompletedSession = migration(
       mockCompletedSessionSavedObject,
@@ -138,7 +146,10 @@ describe('7.13.0 -> 7.14.0', () => {
     references: [],
   };
 
-  const migration = searchSessionSavedObjectMigrations['7.14.0'];
+  const migration = searchSessionSavedObjectMigrations['7.14.0'] as SavedObjectMigrationFn<
+    unknown,
+    SearchSessionSavedObjectAttributesPre$8$0$0
+  >;
   test('version is populated', () => {
     const migratedSession = migration(mockSessionSavedObject, {} as SavedObjectMigrationContext);
 
@@ -169,7 +180,10 @@ describe('7.13.0 -> 7.14.0', () => {
 });
 
 describe('7.14.0 -> 8.0.0', () => {
-  const migration = searchSessionSavedObjectMigrations['8.0.0'];
+  const migration = searchSessionSavedObjectMigrations['8.0.0'] as SavedObjectMigrationFn<
+    unknown,
+    SearchSessionSavedObjectAttributesPre$8$6$0
+  >;
 
   test('Discover app URL generator migrates to locator', () => {
     const mockSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$8$0$0> = {
@@ -359,7 +373,10 @@ describe('7.14.0 -> 8.0.0', () => {
 });
 
 describe('8.0.0 -> 8.6.0', () => {
-  const migration = searchSessionSavedObjectMigrations['8.6.0'];
+  const migration = searchSessionSavedObjectMigrations['8.6.0'] as SavedObjectMigrationFn<
+    unknown,
+    SearchSessionSavedObjectAttributes
+  >;
 
   const mockSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$8$6$0> = {
     id: 'id',

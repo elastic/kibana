@@ -47,6 +47,33 @@ export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes
   context: SavedObjectMigrationContext
 ) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
 
+/**
+ * Saved Objects migration with parameters.
+ * @public
+ */
+export interface SavedObjectMigrationParams<
+  InputAttributes = unknown,
+  MigratedAttributes = unknown
+> {
+  /**
+   * A flag that can defer the migration until either an object is accessed (read) or if there is another non-deferred migration with a higher version.
+   * @default false
+   */
+  deferred?: boolean;
+
+  /** {@inheritDoc SavedObjectMigrationFn} */
+  transform: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>;
+}
+
+/**
+ * Saved Objects migration.
+ * It can be either a {@link SavedObjectMigrationFn | migration function} or a {@link SavedObjectMigrationParams | migration object}.
+ * @public
+ */
+export type SavedObjectMigration<InputAttributes = unknown, MigratedAttributes = unknown> =
+  | SavedObjectMigrationFn<InputAttributes, MigratedAttributes>
+  | SavedObjectMigrationParams<InputAttributes, MigratedAttributes>;
+
 /** @public */
 export interface SavedObjectsMigrationLogger {
   debug: (msg: string) => void;
@@ -81,7 +108,7 @@ export interface SavedObjectMigrationContext {
 }
 
 /**
- * A map of {@link SavedObjectMigrationFn | migration functions} to be used for a given type.
+ * A map of {@link SavedObjectMigration | migrations} to be used for a given type.
  * The map's keys must be valid semver versions, and they cannot exceed the current Kibana version.
  *
  * For a given document, only migrations with a higher version number than that of the document will be applied.
@@ -98,5 +125,5 @@ export interface SavedObjectMigrationContext {
  * @public
  */
 export interface SavedObjectMigrationMap {
-  [version: string]: SavedObjectMigrationFn<any, any>;
+  [version: string]: SavedObjectMigration<any, any>;
 }

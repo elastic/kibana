@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { isFunction } from 'lodash';
 import Semver from 'semver';
-import {
-  SavedObjectMigrationFn,
+import type {
+  SavedObjectMigration,
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
@@ -31,7 +32,7 @@ const TRANSFORM_PRIORITY = [
 export function convertMigrationFunction(
   version: string,
   type: SavedObjectsType,
-  migrationFn: SavedObjectMigrationFn,
+  migration: SavedObjectMigration,
   log: Logger
 ): TransformFn {
   const context = Object.freeze({
@@ -43,7 +44,8 @@ export function convertMigrationFunction(
 
   return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
     try {
-      const result = migrationFn(doc, context);
+      const transformFn = isFunction(migration) ? migration : migration.transform;
+      const result = transformFn(doc, context);
 
       // A basic check to help migration authors detect basic errors
       // (e.g. forgetting to return the transformed doc)

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { mergeWith } from 'lodash';
+import { isFunction, mergeWith } from 'lodash';
 import type {
   SavedObjectMigrationContext,
-  SavedObjectMigrationFn,
+  SavedObjectMigration,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
@@ -36,12 +36,33 @@ export const mergeSavedObjectMigrationMaps = (
   map1: SavedObjectMigrationMap,
   map2: SavedObjectMigrationMap
 ): SavedObjectMigrationMap => {
-  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
-    if (!srcValue || !objValue) {
-      return srcValue || objValue;
+  const customizer = (outer: SavedObjectMigration, inner: SavedObjectMigration) => {
+    if (!inner || !outer) {
+      return inner || outer;
     }
-    return (state: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
-      objValue(srcValue(state, context), context);
+
+    const merged = mergeWith(
+      { ...(isFunction(inner) ? { transform: inner } : inner) },
+      isFunction(outer) ? { transform: outer } : outer,
+      (innerValue, outerValue, key) => {
+        if (key === 'deferred') {
+          return !!(innerValue && outerValue);
+        }
+
+        if (key === 'transform') {
+          return (state: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
+            outerValue(innerValue(state, context), context);
+        }
+
+        return inner ?? outer;
+      }
+    );
+
+    if (isFunction(inner) && isFunction(outer)) {
+      return merged.transform;
+    }
+
+    return merged;
   };
 
   return mergeWith({ ...map1 }, map2, customizer);

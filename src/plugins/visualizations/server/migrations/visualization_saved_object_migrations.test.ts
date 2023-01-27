@@ -12,6 +12,7 @@ import {
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
+import type { VisualizationSavedObjectAttributes } from '../../common';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 
@@ -64,10 +65,12 @@ describe('migration visualization', () => {
 
   describe('6.7.2', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['6.7.2'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['6.7.2'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
     let doc: any;
 
     describe('migrateMatchAllQuery', () => {
@@ -158,35 +161,35 @@ describe('migration visualization', () => {
 
       it('should remove time_zone from date_histogram aggregations', () => {
         const migratedDoc = migrate(doc);
-        const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+        const aggs = JSON.parse(migratedDoc.attributes.visState!).aggs;
 
         expect(aggs[1]).not.toHaveProperty('params.time_zone');
       });
 
       it('should not remove time_zone from non date_histogram aggregations', () => {
         const migratedDoc = migrate(doc);
-        const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+        const aggs = JSON.parse(migratedDoc.attributes.visState!).aggs;
 
         expect(aggs[0]).toHaveProperty('params.time_zone');
       });
 
       it('should remove time_zone from nested aggregations', () => {
         const migratedDoc = migrate(doc);
-        const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+        const aggs = JSON.parse(migratedDoc.attributes.visState!).aggs;
 
         expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
       });
 
       it('should not fail on date histograms without a time_zone', () => {
         const migratedDoc = migrate(doc);
-        const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+        const aggs = JSON.parse(migratedDoc.attributes.visState!).aggs;
 
         expect(aggs[2]).not.toHaveProperty('params.time_zone');
       });
 
       it('should be able to apply the migration twice, since we need it for 6.7.2 and 7.0.1', () => {
         const migratedDoc = migrate(doc);
-        const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+        const aggs = JSON.parse(migratedDoc.attributes.visState!).aggs;
 
         expect(aggs[1]).not.toHaveProperty('params.time_zone');
         expect(aggs[0]).toHaveProperty('params.time_zone');
@@ -198,10 +201,12 @@ describe('migration visualization', () => {
 
   describe('7.0.0', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.0.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.0.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const generateDoc = (type: any, aggs: any) => ({
       attributes: {
@@ -733,7 +738,7 @@ describe('migration visualization', () => {
       ];
       const expected = ['metric', 'split', 'bucket', 'bucket'];
       const migrated = migrate(generateDoc('table', aggs));
-      const actual = JSON.parse(migrated.attributes.visState);
+      const actual = JSON.parse(migrated.attributes.visState!);
 
       expect(actual.aggs.map((agg: any) => agg.schema)).toEqual(expected);
     });
@@ -758,7 +763,7 @@ describe('migration visualization', () => {
       ];
       const expected = [{}, { foo: 'bar' }, { hey: 'ya' }];
       const migrated = migrate(generateDoc('table', aggs));
-      const actual = JSON.parse(migrated.attributes.visState);
+      const actual = JSON.parse(migrated.attributes.visState!);
 
       expect(actual.aggs.map((agg: any) => agg.params)).toEqual(expected);
     });
@@ -783,10 +788,12 @@ describe('migration visualization', () => {
   describe('7.2.0', () => {
     describe('date histogram custom interval removal', () => {
       const migrate = (doc: any) =>
-        visualizationSavedObjectTypeMigrations['7.2.0'](
-          doc as Parameters<SavedObjectMigrationFn>[0],
-          savedObjectMigrationContext
-        );
+        (
+          visualizationSavedObjectTypeMigrations['7.2.0'] as SavedObjectMigrationFn<
+            unknown,
+            VisualizationSavedObjectAttributes
+          >
+        )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
       let doc: any;
 
       beforeEach(() => {
@@ -869,14 +876,14 @@ describe('migration visualization', () => {
 
       it('should remove customInterval from date_histogram aggregations', () => {
         const migratedDoc = migrate(doc);
-        const { aggs } = JSON.parse(migratedDoc.attributes.visState);
+        const { aggs } = JSON.parse(migratedDoc.attributes.visState!);
 
         expect(aggs[1]).not.toHaveProperty('params.customInterval');
       });
 
       it('should not change interval from date_histogram aggregations', () => {
         const migratedDoc = migrate(doc);
-        const { aggs } = JSON.parse(migratedDoc.attributes.visState);
+        const { aggs } = JSON.parse(migratedDoc.attributes.visState!);
 
         expect(aggs[1].params.interval).toBe(
           JSON.parse(doc.attributes.visState).aggs[1].params.interval
@@ -885,14 +892,14 @@ describe('migration visualization', () => {
 
       it('should not remove customInterval from non date_histogram aggregations', () => {
         const migratedDoc = migrate(doc);
-        const { aggs } = JSON.parse(migratedDoc.attributes.visState);
+        const { aggs } = JSON.parse(migratedDoc.attributes.visState!);
 
         expect(aggs[0]).toHaveProperty('params.customInterval');
       });
 
       it('should set interval with customInterval value and remove customInterval when interval equals "custom"', () => {
         const migratedDoc = migrate(doc);
-        const { aggs } = JSON.parse(migratedDoc.attributes.visState);
+        const { aggs } = JSON.parse(migratedDoc.attributes.visState!);
 
         expect(aggs[2].params.interval).toBe(
           JSON.parse(doc.attributes.visState).aggs[2].params.customInterval
@@ -902,14 +909,14 @@ describe('migration visualization', () => {
 
       it('should remove customInterval from nested aggregations', () => {
         const migratedDoc = migrate(doc);
-        const { aggs } = JSON.parse(migratedDoc.attributes.visState);
+        const { aggs } = JSON.parse(migratedDoc.attributes.visState!);
 
         expect(aggs[3]).not.toHaveProperty('params.customBucket.params.customInterval');
       });
 
       it('should remove customInterval from nested aggregations and set interval with customInterval value', () => {
         const migratedDoc = migrate(doc);
-        const { aggs } = JSON.parse(migratedDoc.attributes.visState);
+        const { aggs } = JSON.parse(migratedDoc.attributes.visState!);
 
         expect(aggs[3].params.customBucket.params.interval).toBe(
           JSON.parse(doc.attributes.visState).aggs[3].params.customBucket.params.customInterval
@@ -919,7 +926,7 @@ describe('migration visualization', () => {
 
       it('should not fail on date histograms without a customInterval', () => {
         const migratedDoc = migrate(doc);
-        const { aggs } = JSON.parse(migratedDoc.attributes.visState);
+        const { aggs } = JSON.parse(migratedDoc.attributes.visState!);
 
         expect(aggs[3]).not.toHaveProperty('params.customInterval');
       });
@@ -935,10 +942,12 @@ describe('migration visualization', () => {
     } as unknown as SavedObjectMigrationContext;
 
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.3.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        logger
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.3.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], logger);
 
     it('migrates type = gauge verticalSplit: false to alignment: vertical', () => {
       const migratedDoc = migrate({
@@ -1111,7 +1120,7 @@ describe('migration visualization', () => {
 
       test('should add some necessary moving_fn fields', () => {
         const migratedDoc = migrate(doc);
-        const visState = JSON.parse(migratedDoc.attributes.visState);
+        const visState = JSON.parse(migratedDoc.attributes.visState!);
         const metric = visState.params.series[0].metrics[1];
 
         expect(metric).toHaveProperty('model_type');
@@ -1126,10 +1135,12 @@ describe('migration visualization', () => {
 
   describe('7.3.0 tsvb', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.3.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.3.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const generateDoc = (params: any) => ({
       attributes: {
@@ -1147,7 +1158,7 @@ describe('migration visualization', () => {
       const params = { type: 'metric', series: [{ filter: 'Filter Bytes Test:>1000' }] };
       const testDoc1 = generateDoc(params);
       const migratedTestDoc1 = migrate(testDoc1);
-      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+      const series = JSON.parse(migratedTestDoc1.attributes.visState!).params.series;
 
       expect(series[0].filter).toHaveProperty('query');
       expect(series[0].filter).toHaveProperty('language');
@@ -1164,7 +1175,7 @@ describe('migration visualization', () => {
       };
       const markdownDoc = generateDoc(markdownParams);
       const migratedMarkdownDoc = migrate(markdownDoc);
-      const markdownSeries = JSON.parse(migratedMarkdownDoc.attributes.visState).params.series;
+      const markdownSeries = JSON.parse(migratedMarkdownDoc.attributes.visState!).params.series;
 
       expect(markdownSeries[0].filter.query).toBe(
         JSON.parse(markdownDoc.attributes.visState).params.series[0].filter
@@ -1188,7 +1199,7 @@ describe('migration visualization', () => {
       };
       const timeSeriesDoc = generateDoc(params);
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
-      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState!).params;
 
       expect(Object.keys(timeSeriesParams.series[0].filter)).toEqual(
         expect.arrayContaining(['query', 'language'])
@@ -1205,7 +1216,7 @@ describe('migration visualization', () => {
       const params = { type: 'metric', series: [{}, {}, {}] };
       const testDoc1 = generateDoc(params);
       const migratedTestDoc1 = migrate(testDoc1);
-      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+      const series = JSON.parse(migratedTestDoc1.attributes.visState!).params.series;
 
       expect(series[2]).not.toHaveProperty('filter.query');
     });
@@ -1214,7 +1225,7 @@ describe('migration visualization', () => {
       const params = { type: 'unknown', series: [{ filter: 'foo:bar' }] };
       const doc = generateDoc(params);
       const migratedDoc = migrate(doc);
-      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+      const series = JSON.parse(migratedDoc.attributes.visState!).params.series;
 
       expect(series[0].filter).toEqual(params.series[0].filter);
     });
@@ -1222,10 +1233,12 @@ describe('migration visualization', () => {
 
   describe('7.3.1', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.3.1'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.3.1'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     it('should migrate filters agg query string queries', () => {
       const state = {
@@ -1266,10 +1279,12 @@ describe('migration visualization', () => {
 
   describe('7.4.2 tsvb split_filters migration', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.4.2'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.4.2'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
     const generateDoc = (params: any) => ({
       attributes: {
         title: 'My Vis',
@@ -1298,7 +1313,7 @@ describe('migration visualization', () => {
       };
       const timeSeriesDoc = generateDoc(params);
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
-      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState!).params;
 
       expect(Object.keys(timeSeriesParams.filter)).toEqual(
         expect.arrayContaining(['query', 'language'])
@@ -1332,7 +1347,7 @@ describe('migration visualization', () => {
       };
       const timeSeriesDoc = generateDoc(params);
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
-      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState!).params;
 
       expect(timeSeriesParams.series[0].split_filters[0].filter).toEqual({
         query: 'bytes:>1000',
@@ -1355,7 +1370,7 @@ describe('migration visualization', () => {
       };
       const timeSeriesDoc = generateDoc(params);
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
-      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState!).params;
 
       expect(timeSeriesParams.series[0].split_filters).not.toHaveProperty('query');
     });
@@ -1390,7 +1405,7 @@ describe('migration visualization', () => {
       };
       const timeSeriesDoc = generateDoc(params);
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
-      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState!).params;
 
       expect(timeSeriesParams.series[0].split_filters[0].filter.query).toEqual('bytes:>1000');
       expect(timeSeriesParams.series[0].split_filters[0].filter.language).toEqual('lucene');
@@ -1399,10 +1414,12 @@ describe('migration visualization', () => {
 
   describe('7.7.0 tsvb opperator typo migration', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.7.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.7.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
     const generateDoc = (visState: any) => ({
       attributes: {
         title: 'My Vis',
@@ -1435,7 +1452,7 @@ describe('migration visualization', () => {
       };
       const timeSeriesDoc = generateDoc({ params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
-      const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState!).params;
 
       expect(migratedParams.gauge_color_rules[0]).toMatchInlineSnapshot(`
         Object {
@@ -1472,7 +1489,7 @@ describe('migration visualization', () => {
       };
       const timeSeriesDoc = generateDoc({ params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
-      const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState!).params;
 
       expect(migratedParams.gauge_color_rules[1]).toEqual(params.gauge_color_rules[1]);
     });
@@ -1497,7 +1514,7 @@ describe('migration visualization', () => {
       };
 
       const migrated = migrate(generateDoc(visData));
-      const actual = JSON.parse(migrated.attributes.visState);
+      const actual = JSON.parse(migrated.attributes.visState!);
 
       expect(actual.aggs.filter((agg: any) => 'row' in agg.params)).toEqual([]);
       expect(actual.params.row).toBeTruthy();
@@ -1506,7 +1523,7 @@ describe('migration visualization', () => {
 
   describe('7.9.3', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.9.3'](
+      (visualizationSavedObjectTypeMigrations['7.9.3'] as SavedObjectMigrationFn)(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1518,10 +1535,12 @@ describe('migration visualization', () => {
 
   describe('7.8.0 tsvb split_color_mode', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.8.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.8.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const generateDoc = (params: any) => ({
       attributes: {
@@ -1541,7 +1560,7 @@ describe('migration visualization', () => {
       const params = { type: 'metrics', params: { series: [{}] } };
       const testDoc1 = generateDoc(params);
       const migratedTestDoc1 = migrate(testDoc1);
-      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+      const series = JSON.parse(migratedTestDoc1.attributes.visState!).params.series;
 
       expect(series[0].split_color_mode).toEqual('gradient');
     });
@@ -1550,7 +1569,7 @@ describe('migration visualization', () => {
       const params = { type: 'metrics', params: { series: [{ split_color_mode: 'gradient' }] } };
       const testDoc1 = generateDoc(params);
       const migratedTestDoc1 = migrate(testDoc1);
-      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+      const series = JSON.parse(migratedTestDoc1.attributes.visState!).params.series;
 
       expect(series[0].split_color_mode).toEqual('gradient');
     });
@@ -1559,7 +1578,7 @@ describe('migration visualization', () => {
       const params = { type: 'metrics', params: { series: [{ split_color_mode: 'rainbow' }] } };
       const testDoc1 = generateDoc(params);
       const migratedTestDoc1 = migrate(testDoc1);
-      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+      const series = JSON.parse(migratedTestDoc1.attributes.visState!).params.series;
 
       expect(series[0].split_color_mode).toEqual('rainbow');
     });
@@ -1568,7 +1587,7 @@ describe('migration visualization', () => {
       const params = { type: 'unknown', params: { series: [{}] } };
       const doc = generateDoc(params);
       const migratedDoc = migrate(doc);
-      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+      const series = JSON.parse(migratedDoc.attributes.visState!).params.series;
 
       expect(series[0].split_color_mode).toBeUndefined();
     });
@@ -1576,10 +1595,12 @@ describe('migration visualization', () => {
 
   describe('7.10.0 tsvb filter_ratio migration', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.10.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.10.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const testDoc1 = {
       attributes: {
@@ -1593,7 +1614,7 @@ describe('migration visualization', () => {
 
     it('should replace numerator string with a query object', () => {
       const migratedTestDoc1 = migrate(testDoc1);
-      const metric = JSON.parse(migratedTestDoc1.attributes.visState).params.series[0].metrics[0];
+      const metric = JSON.parse(migratedTestDoc1.attributes.visState!).params.series[0].metrics[0];
 
       expect(metric.numerator).toHaveProperty('query');
       expect(metric.numerator).toHaveProperty('language');
@@ -1601,7 +1622,7 @@ describe('migration visualization', () => {
 
     it('should replace denominator string with a query object', () => {
       const migratedTestDoc1 = migrate(testDoc1);
-      const metric = JSON.parse(migratedTestDoc1.attributes.visState).params.series[0].metrics[0];
+      const metric = JSON.parse(migratedTestDoc1.attributes.visState!).params.series[0].metrics[0];
 
       expect(metric.denominator).toHaveProperty('query');
       expect(metric.denominator).toHaveProperty('language');
@@ -1610,10 +1631,12 @@ describe('migration visualization', () => {
 
   describe('7.10.0 remove tsvb search source', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.10.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.10.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
     const generateDoc = (visState: any) => ({
       attributes: {
         title: 'My Vis',
@@ -1640,7 +1663,9 @@ describe('migration visualization', () => {
     it('should remove the search source JSON', () => {
       const timeSeriesDoc = generateDoc({ type: 'metrics' });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
-      expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON).toEqual('{}');
+      expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta?.searchSourceJSON).toEqual(
+        '{}'
+      );
       const { kibanaSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
       const { kibanaSavedObjectMeta: oldKibanaSavedObjectMeta, ...oldAttributes } =
         migratedtimeSeriesDoc.attributes;
@@ -1650,10 +1675,12 @@ describe('migration visualization', () => {
 
   describe('7.11.0 Data table vis - enable toolbar', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.11.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.11.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const testDoc = {
       attributes: {
@@ -1665,17 +1692,19 @@ describe('migration visualization', () => {
 
     it('should enable toolbar in visState.params', () => {
       const migratedDataTableVisDoc = migrate(testDoc);
-      const visState = JSON.parse(migratedDataTableVisDoc.attributes.visState);
+      const visState = JSON.parse(migratedDataTableVisDoc.attributes.visState!);
       expect(visState.params.showToolbar).toEqual(true);
     });
   });
 
   describe('7.12.0 update vislib visualization defaults', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.12.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.12.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
     const getTestDoc = (
       type = 'area',
       categoryAxes?: object[],
@@ -1735,35 +1764,35 @@ describe('migration visualization', () => {
 
     it('should decorate existing docs with isVislibVis flag', () => {
       const migratedTestDoc = migrate(getTestDoc());
-      const { isVislibVis } = JSON.parse(migratedTestDoc.attributes.visState).params;
+      const { isVislibVis } = JSON.parse(migratedTestDoc.attributes.visState!).params;
 
       expect(isVislibVis).toEqual(true);
     });
 
     it('should decorate existing docs without a predefined palette with the kibana legacy palette', () => {
       const migratedTestDoc = migrate(getTestDoc());
-      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState!).params;
 
       expect(palette.name).toEqual('kibana_palette');
     });
 
     it('should not overwrite the palette with the legacy one if the palette already exists in the saved object', () => {
       const migratedTestDoc = migrate(getTestDoc('area', undefined, undefined, true));
-      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState!).params;
 
       expect(palette.name).toEqual('default');
     });
 
     it("should decorate existing docs with the circlesRadius attribute if it doesn't exist", () => {
       const migratedTestDoc = migrate(getTestDoc());
-      const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.seriesParams;
+      const [result] = JSON.parse(migratedTestDoc.attributes.visState!).params.seriesParams;
 
       expect(result.circlesRadius).toEqual(1);
     });
 
     it('should not decorate existing docs with the circlesRadius attribute if it exists', () => {
       const migratedTestDoc = migrate(getTestDoc('area', undefined, undefined, true, true));
-      const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.seriesParams;
+      const [result] = JSON.parse(migratedTestDoc.attributes.visState!).params.seriesParams;
 
       expect(result.circlesRadius).toEqual(3);
     });
@@ -1771,7 +1800,7 @@ describe('migration visualization', () => {
     describe('labels.filter', () => {
       it('should keep existing categoryAxes labels.filter value', () => {
         const migratedTestDoc = migrate(getTestDoc('area', [{ labels: { filter: false } }]));
-        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState!).params.categoryAxes;
 
         expect(result.labels.filter).toEqual(false);
       });
@@ -1780,35 +1809,35 @@ describe('migration visualization', () => {
         const migratedTestDoc = migrate(
           getTestDoc('area', undefined, [{ labels: { filter: true } }])
         );
-        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState!).params.valueAxes;
 
         expect(result.labels.filter).toEqual(true);
       });
 
       it('should set categoryAxes labels.filter to true for non horizontal_bar', () => {
         const migratedTestDoc = migrate(getTestDoc());
-        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState!).params.categoryAxes;
 
         expect(result.labels.filter).toEqual(true);
       });
 
       it('should set categoryAxes labels.filter to false for horizontal_bar', () => {
         const migratedTestDoc = migrate(getTestDoc('horizontal_bar'));
-        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState!).params.categoryAxes;
 
         expect(result.labels.filter).toEqual(false);
       });
 
       it('should set valueAxes labels.filter to false for non horizontal_bar', () => {
         const migratedTestDoc = migrate(getTestDoc());
-        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState!).params.valueAxes;
 
         expect(result.labels.filter).toEqual(false);
       });
 
       it('should set valueAxes labels.filter to true for horizontal_bar', () => {
         const migratedTestDoc = migrate(getTestDoc('horizontal_bar'));
-        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState!).params.valueAxes;
 
         expect(result.labels.filter).toEqual(true);
       });
@@ -1817,10 +1846,12 @@ describe('migration visualization', () => {
 
   describe('7.12.0 update "schema" in aggregations', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.12.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.12.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
     const testDoc = {
       attributes: {
         title: 'My Vis',
@@ -1958,10 +1989,12 @@ describe('migration visualization', () => {
 
   describe('7.13.0 tsvb hide Last value indicator by default', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.13.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.13.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const createTestDocWithType = (type: string) => ({
       attributes: {
@@ -1973,7 +2006,7 @@ describe('migration visualization', () => {
 
     it('should set hide_last_value_indicator param to true', () => {
       const migratedTestDoc = migrate(createTestDocWithType('markdown'));
-      const hideLastValueIndicator = JSON.parse(migratedTestDoc.attributes.visState).params
+      const hideLastValueIndicator = JSON.parse(migratedTestDoc.attributes.visState!).params
         .hide_last_value_indicator;
 
       expect(hideLastValueIndicator).toBeTruthy();
@@ -1981,7 +2014,7 @@ describe('migration visualization', () => {
 
     it('should ignore timeseries type', () => {
       const migratedTestDoc = migrate(createTestDocWithType('timeseries'));
-      const hideLastValueIndicator = JSON.parse(migratedTestDoc.attributes.visState).params
+      const hideLastValueIndicator = JSON.parse(migratedTestDoc.attributes.visState!).params
         .hide_last_value_indicator;
 
       expect(hideLastValueIndicator).toBeUndefined();
@@ -1990,10 +2023,12 @@ describe('migration visualization', () => {
 
   describe('7.13.0 tsvb - remove default_index_pattern and default_timefield from Model', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.13.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.13.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const createTestDocWithType = () => ({
       attributes: {
@@ -2005,7 +2040,7 @@ describe('migration visualization', () => {
 
     it('should remove default_index_pattern and default_timefield', () => {
       const migratedTestDoc = migrate(createTestDocWithType());
-      const { params } = JSON.parse(migratedTestDoc.attributes.visState);
+      const { params } = JSON.parse(migratedTestDoc.attributes.visState!);
 
       expect(params).not.toHaveProperty('default_index_pattern');
       expect(params).not.toHaveProperty('default_timefield');
@@ -2014,16 +2049,20 @@ describe('migration visualization', () => {
 
   describe('7.13.0 and 7.13.1 tsvb migrations can run twice', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.13.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.13.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const migrateAgain = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.13.1'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.13.1'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const createTestDocWithType = (type: string) => ({
       attributes: {
@@ -2035,7 +2074,7 @@ describe('migration visualization', () => {
 
     it('the migrations can be applied twice without breaking anything', () => {
       const migratedTestDoc = migrate(createTestDocWithType('markdown'));
-      const { params } = JSON.parse(migratedTestDoc.attributes.visState);
+      const { params } = JSON.parse(migratedTestDoc.attributes.visState!);
 
       expect(params.hide_last_value_indicator).toBeTruthy();
       expect(params).not.toHaveProperty('default_index_pattern');
@@ -2043,7 +2082,7 @@ describe('migration visualization', () => {
       expect(params.use_kibana_indexes).toBeFalsy();
 
       const migratedTestDocNew = migrateAgain(migratedTestDoc);
-      const visState = JSON.parse(migratedTestDocNew.attributes.visState);
+      const visState = JSON.parse(migratedTestDocNew.attributes.visState!);
 
       expect(visState.params.hide_last_value_indicator).toBeTruthy();
       expect(visState.params).not.toHaveProperty('default_index_pattern');
@@ -2054,10 +2093,12 @@ describe('migration visualization', () => {
 
   describe('7.14.0 tsvb - add empty value rule to savedObjects with less and greater then zero rules', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.14.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.14.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const rule1 = { value: 0, operator: 'lte', color: 'rgb(145, 112, 184)' };
     const rule2 = { value: 0, operator: 'gte', color: 'rgb(96, 146, 192)' };
@@ -2113,7 +2154,7 @@ describe('migration visualization', () => {
         gauge_color_rules: [rule1],
       };
       const migratedTestDoc = migrate(createTestDocWithType(params));
-      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState!);
 
       checkEmptyRuleIsAddedToArray('bar_color_rules', params, migratedParams, rule1);
       checkEmptyRuleIsAddedToArray('background_color_rules', params, migratedParams, rule1);
@@ -2127,7 +2168,7 @@ describe('migration visualization', () => {
         gauge_color_rules: [rule2],
       };
       const migratedTestDoc = migrate(createTestDocWithType(params));
-      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState!);
 
       checkEmptyRuleIsAddedToArray('bar_color_rules', params, migratedParams, rule2);
       checkEmptyRuleIsAddedToArray('background_color_rules', params, migratedParams, rule2);
@@ -2141,7 +2182,7 @@ describe('migration visualization', () => {
         gauge_color_rules: [rule4],
       };
       const migratedTestDoc = migrate(createTestDocWithType(params));
-      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState!);
 
       checkRuleIsNotAddedToArray('bar_color_rules', params, migratedParams, rule3);
       checkRuleIsNotAddedToArray('background_color_rules', params, migratedParams, rule3);
@@ -2151,10 +2192,12 @@ describe('migration visualization', () => {
 
   describe('7.14.0 tsvb - add drop last bucket into TSVB model', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.14.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.14.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const createTestDocWithType = (params: any) => ({
       attributes: {
@@ -2170,7 +2213,7 @@ describe('migration visualization', () => {
     it('should add "drop_last_bucket" into model if it not exist', () => {
       const params = {};
       const migratedTestDoc = migrate(createTestDocWithType(params));
-      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState!);
 
       expect(migratedParams).toMatchInlineSnapshot(`
         Object {
@@ -2201,7 +2244,7 @@ describe('migration visualization', () => {
         ],
       };
       const migratedTestDoc = migrate(createTestDocWithType(params));
-      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState!);
 
       expect(migratedParams.series).toMatchInlineSnapshot(`
         Array [
@@ -2232,10 +2275,12 @@ describe('migration visualization', () => {
 
   describe('7.14.0 update pie visualization defaults', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.14.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.14.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
     const getTestDoc = (hasPalette = false) => ({
       attributes: {
         title: 'My Vis',
@@ -2258,21 +2303,21 @@ describe('migration visualization', () => {
 
     it('should decorate existing docs with the kibana legacy palette if the palette is not defined - pie', () => {
       const migratedTestDoc = migrate(getTestDoc());
-      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState!).params;
 
       expect(palette.name).toEqual('kibana_palette');
     });
 
     it('should not overwrite the palette with the legacy one if the palette already exists in the saved object', () => {
       const migratedTestDoc = migrate(getTestDoc(true));
-      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState!).params;
 
       expect(palette.name).toEqual('default');
     });
 
     it('should default the distinct colors per slice setting to true', () => {
       const migratedTestDoc = migrate(getTestDoc());
-      const { distinctColors } = JSON.parse(migratedTestDoc.attributes.visState).params;
+      const { distinctColors } = JSON.parse(migratedTestDoc.attributes.visState!).params;
 
       expect(distinctColors).toBe(true);
     });
@@ -2280,10 +2325,12 @@ describe('migration visualization', () => {
 
   describe('7.14.0 replaceIndexPatternReference', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.14.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.14.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     test('should replace index_pattern to index-pattern', () => {
       expect(
@@ -2310,10 +2357,12 @@ describe('migration visualization', () => {
 
   describe('7.14.0 update tagcloud defaults', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.14.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.14.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
     const getTestDoc = (hasPalette = false) => ({
       attributes: {
         title: 'My Vis',
@@ -2336,14 +2385,14 @@ describe('migration visualization', () => {
 
     it('should decorate existing docs with the kibana legacy palette if the palette is not defined - pie', () => {
       const migratedTestDoc = migrate(getTestDoc());
-      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState!).params;
 
       expect(palette.name).toEqual('kibana_palette');
     });
 
     it('should not overwrite the palette with the legacy one if the palette already exists in the saved object', () => {
       const migratedTestDoc = migrate(getTestDoc(true));
-      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState!).params;
 
       expect(palette.name).toEqual('default');
     });
@@ -2351,10 +2400,12 @@ describe('migration visualization', () => {
 
   describe('8.0.0 removeMarkdownLessFromTSVB', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['8.0.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['8.0.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
     const getTestDoc = () => ({
       attributes: {
         title: 'My Vis',
@@ -2374,7 +2425,7 @@ describe('migration visualization', () => {
 
     it('should remove markdown_less and id from markdown_css', () => {
       const migratedTestDoc = migrate(getTestDoc());
-      const params = JSON.parse(migratedTestDoc.attributes.visState).params;
+      const params = JSON.parse(migratedTestDoc.attributes.visState!).params;
 
       expect(params.mardwon_less).toBeUndefined();
       expect(params.markdown_css).toEqual('test { color: red }');
@@ -2383,16 +2434,20 @@ describe('migration visualization', () => {
 
   describe('7.17.0 tsvb - add drop last bucket into TSVB model', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.14.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.14.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const migrateAgain = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.17.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['7.17.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const createTestDocWithType = (params: any) => ({
       attributes: {
@@ -2408,7 +2463,7 @@ describe('migration visualization', () => {
     it('should add "drop_last_bucket" into model if it not exist and run twice', () => {
       const params = {};
       const migratedTestDoc = migrate(createTestDocWithType(params));
-      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState!);
 
       expect(migratedParams).toMatchInlineSnapshot(`
         Object {
@@ -2417,7 +2472,7 @@ describe('migration visualization', () => {
       `);
 
       const migratedTestDocNew = migrateAgain(migratedTestDoc);
-      const { params: migratedNewParams } = JSON.parse(migratedTestDocNew.attributes.visState);
+      const { params: migratedNewParams } = JSON.parse(migratedTestDocNew.attributes.visState!);
 
       expect(migratedNewParams).toMatchInlineSnapshot(`
         Object {
@@ -2429,7 +2484,7 @@ describe('migration visualization', () => {
     it('should not set "drop_last_bucket" to 1 into model if it exists', () => {
       const params = { drop_last_bucket: 0 };
       const migratedTestDoc = migrate(createTestDocWithType(params));
-      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState!);
 
       expect(migratedParams).toMatchInlineSnapshot(`
         Object {
@@ -2457,7 +2512,10 @@ describe('migration visualization', () => {
     });
 
     expect(
-      visMigrations[versionToTest](visualizationDoc, {} as SavedObjectMigrationContext)
+      (visMigrations[versionToTest] as SavedObjectMigrationFn)(
+        visualizationDoc,
+        {} as SavedObjectMigrationContext
+      )
     ).toEqual({
       attributes: {
         kibanaSavedObjectMeta: {
@@ -2485,7 +2543,10 @@ describe('migration visualization', () => {
     });
 
     expect(
-      visMigrations[versionToTest](visualizationDoc, {} as SavedObjectMigrationContext)
+      (visMigrations[versionToTest] as SavedObjectMigrationFn)(
+        visualizationDoc,
+        {} as SavedObjectMigrationContext
+      )
     ).toEqual({
       attributes: {
         kibanaSavedObjectMeta: {
@@ -2543,22 +2604,24 @@ describe('migration visualization', () => {
       },
     });
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['8.1.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['8.1.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     it('should migrate addLegend to legendDisplay', () => {
       const pie = getDoc(true);
       const migrated = migrate(pie);
-      const params = JSON.parse(migrated.attributes.visState).params;
+      const params = JSON.parse(migrated.attributes.visState!).params;
 
       expect(params.legendDisplay).toBe('show');
       expect(params.addLegend).toBeUndefined();
 
       const otherPie = getDoc(false);
       const otherMigrated = migrate(otherPie);
-      const otherParams = JSON.parse(otherMigrated.attributes.visState).params;
+      const otherParams = JSON.parse(otherMigrated.attributes.visState!).params;
 
       expect(otherParams.legendDisplay).toBe('hide');
       expect(otherParams.addLegend).toBeUndefined();
@@ -2580,10 +2643,12 @@ describe('migration visualization', () => {
       },
     });
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['8.3.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['8.3.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const autoLegendSize = 'auto';
     const largeLegendSize = 'large';
@@ -2610,7 +2675,7 @@ describe('migration visualization', () => {
         expectedLegendSize: string
       ) => {
         const visState = JSON.parse(
-          migrate(getDoc(visualizationType, currentLegendSize)).attributes.visState
+          migrate(getDoc(visualizationType, currentLegendSize)).attributes.visState!
         );
 
         expect(visState.params.legendSize).toBe(expectedLegendSize);
@@ -2618,7 +2683,7 @@ describe('migration visualization', () => {
     );
 
     test.each(['metric', 'gauge', 'table'])('leaves visualization without legend alone: %s', () => {
-      const visState = JSON.parse(migrate(getDoc('table', undefined)).attributes.visState);
+      const visState = JSON.parse(migrate(getDoc('table', undefined)).attributes.visState!);
 
       expect(visState.params.legendSize).toBeUndefined();
     });
@@ -2626,10 +2691,12 @@ describe('migration visualization', () => {
 
   describe('8.5.0 tsvb - remove exclamation circle icon', () => {
     const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['8.5.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
+      (
+        visualizationSavedObjectTypeMigrations['8.5.0'] as SavedObjectMigrationFn<
+          unknown,
+          VisualizationSavedObjectAttributes
+        >
+      )(doc as Parameters<SavedObjectMigrationFn>[0], savedObjectMigrationContext);
 
     const createTestDocWithType = (params: any) => ({
       attributes: {
@@ -2655,7 +2722,7 @@ describe('migration visualization', () => {
         type: 'timeseries',
       };
       const migratedTestDoc = migrate(createTestDocWithType(params));
-      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState!);
 
       expect(migratedParams).toEqual(params);
     });
@@ -2690,7 +2757,7 @@ describe('migration visualization', () => {
         type: 'timeseries',
       };
       const migratedTestDoc = migrate(createTestDocWithType(params));
-      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState!);
 
       expect(migratedParams.annotations).toMatchInlineSnapshot(`
         Array [

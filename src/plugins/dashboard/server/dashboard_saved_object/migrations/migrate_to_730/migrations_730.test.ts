@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 
@@ -87,8 +88,12 @@ test('dashboard migration 7.3.0 migrates filters to query on search source when 
     },
   };
 
-  const doc700 = migrations['7.0.0'](doc, mockContext);
-  const newDoc = migrations['7.3.0'](doc700, mockContext);
+  const doc700 = (
+    migrations['7.0.0'] as SavedObjectMigrationFn<unknown, DashboardDocPre700['attributes']>
+  )(doc, mockContext);
+  const newDoc = (
+    migrations['7.3.0'] as SavedObjectMigrationFn<unknown, DashboardDoc700To720['attributes']>
+  )(doc700, mockContext);
 
   const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
   expect(parsedSearchSource.filter.length).toBe(0);
@@ -119,8 +124,12 @@ test('dashboard migration works when panelsJSON is missing panelIndex', () => {
     },
   };
 
-  const doc700 = migrations['7.0.0'](doc, mockContext);
-  const newDoc = migrations['7.3.0'](doc700, mockContext);
+  const doc700 = (
+    migrations['7.0.0'] as SavedObjectMigrationFn<unknown, DashboardDocPre700['attributes']>
+  )(doc, mockContext);
+  const newDoc = (
+    migrations['7.3.0'] as SavedObjectMigrationFn<unknown, DashboardDoc700To720['attributes']>
+  )(doc700, mockContext);
 
   const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
   expect(parsedSearchSource.filter.length).toBe(0);

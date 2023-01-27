@@ -8,6 +8,7 @@
 
 import { SerializableRecord } from '@kbn/utility-types';
 import type {
+  SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
@@ -124,7 +125,12 @@ describe('migrations', () => {
       type: 'url',
     };
 
-    const doc2 = migrationFunction(doc1, {} as any);
+    const doc2 = (
+      migrationFunction as SavedObjectMigrationFn<
+        ShortUrlSavedObjectAttributes,
+        ShortUrlSavedObjectAttributes
+      >
+    )(doc1, {} as any);
 
     expect(doc2.id).toBe('foo');
     expect(doc2.type).toBe('url');

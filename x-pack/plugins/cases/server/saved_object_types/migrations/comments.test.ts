@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isFunction } from 'lodash';
 import {
   createCommentsMigrations,
   migrateByValueLensVisualizations,
@@ -245,7 +246,10 @@ describe('comments migrations', () => {
         });
 
         expect(migrations['7.14.0']).toBeDefined();
-        const result = migrations['7.14.0'](caseComment, contextMock);
+        const transform = isFunction(migrations['7.14.0'])
+          ? migrations['7.14.0']
+          : migrations['7.14.0'].transform;
+        const result = transform(caseComment, contextMock);
 
         const parsedComment = parseCommentString(result.attributes.comment);
         const lensVisualizations = getLensVisualizations(
@@ -330,7 +334,11 @@ describe('comments migrations', () => {
         };
 
         const mergedFunctions = mergeSavedObjectMigrationMaps(migrationObj1, migrationObj2);
-        mergedFunctions['1.0.0'](caseComment, contextMock);
+        const transform = isFunction(mergedFunctions['1.0.0'])
+          ? mergedFunctions['1.0.0']
+          : mergedFunctions['1.0.0'].transform;
+
+        transform(caseComment, contextMock);
 
         const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
         expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
@@ -359,8 +367,11 @@ describe('comments migrations', () => {
         };
 
         const mergedFunctions = mergeSavedObjectMigrationMaps(migrationObj1, migrationObj2);
+        const transform = isFunction(mergedFunctions['2.0.0'])
+          ? mergedFunctions['2.0.0']
+          : mergedFunctions['2.0.0'].transform;
 
-        expect(() => mergedFunctions['2.0.0'](caseComment, contextMock)).toThrow();
+        expect(() => transform(caseComment, contextMock)).toThrow();
 
         const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
         expect(log.error).not.toHaveBeenCalled();
@@ -586,7 +597,9 @@ describe('comments migrations', () => {
     });
 
     it('migrates a persistable state attachment correctly', () => {
-      const migrationFn = migrations['8.4.0'];
+      const migrationFn = isFunction(migrations['8.4.0'])
+        ? migrations['8.4.0']
+        : migrations['8.4.0'].transform;
       const res = migrationFn(
         {
           id: '123',
@@ -617,7 +630,9 @@ describe('comments migrations', () => {
     });
 
     it('should not change any other attribute expect persistableStateAttachmentState or put excess attributes', () => {
-      const migrationFn = migrations['8.4.0'];
+      const migrationFn = isFunction(migrations['8.4.0'])
+        ? migrations['8.4.0']
+        : migrations['8.4.0'].transform;
       const res = migrationFn(
         {
           id: '123',
@@ -655,7 +670,10 @@ describe('comments migrations', () => {
        * combined along with the persistable state attachment
        * migrations
        */
-      const migrationFn = migrations['7.14.0'];
+      const migrationFn = isFunction(migrations['7.14.0'])
+        ? migrations['7.14.0']
+        : migrations['7.14.0'].transform;
+
       const res = migrationFn(
         {
           id: '123',
@@ -688,7 +706,9 @@ describe('comments migrations', () => {
     });
 
     it('does not run persistable state migration on other attachments', () => {
-      const migrationFn = migrations['8.4.0'];
+      const migrationFn = isFunction(migrations['8.4.0'])
+        ? migrations['8.4.0']
+        : migrations['8.4.0'].transform;
       const res = migrationFn(
         {
           id: '123',

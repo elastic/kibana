@@ -9,7 +9,11 @@ import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from '.';
 import { RawRule, RawRuleAction } from '../../types';
-import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type {
+  SavedObjectMigrationContext,
+  SavedObjectMigrationFn,
+  SavedObjectUnsanitizedDoc,
+} from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
@@ -30,7 +34,7 @@ describe('successful migrations', () => {
     test('marks alerts as legacy', () => {
       const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
       const alert = getMockData({});
-      expect(migration710(alert, migrationContext)).toMatchObject({
+      expect((migration710 as SavedObjectMigrationFn)(alert, migrationContext)).toMatchObject({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -46,7 +50,7 @@ describe('successful migrations', () => {
       const alert = getMockData({
         consumer: 'metrics',
       });
-      expect(migration710(alert, migrationContext)).toMatchObject({
+      expect((migration710 as SavedObjectMigrationFn)(alert, migrationContext)).toMatchObject({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -63,7 +67,7 @@ describe('successful migrations', () => {
       const alert = getMockData({
         consumer: 'securitySolution',
       });
-      expect(migration710(alert, migrationContext)).toMatchObject({
+      expect((migration710 as SavedObjectMigrationFn)(alert, migrationContext)).toMatchObject({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -80,7 +84,7 @@ describe('successful migrations', () => {
       const alert = getMockData({
         consumer: 'alerting',
       });
-      expect(migration710(alert, migrationContext)).toMatchObject({
+      expect((migration710 as SavedObjectMigrationFn)(alert, migrationContext)).toMatchObject({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -108,7 +112,7 @@ describe('successful migrations', () => {
           },
         ],
       });
-      expect(migration710(alert, migrationContext)).toMatchObject({
+      expect((migration710 as SavedObjectMigrationFn)(alert, migrationContext)).toMatchObject({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -146,7 +150,7 @@ describe('successful migrations', () => {
           },
         ],
       });
-      expect(migration710(alert, migrationContext)).toMatchObject({
+      expect((migration710 as SavedObjectMigrationFn)(alert, migrationContext)).toMatchObject({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -183,7 +187,7 @@ describe('successful migrations', () => {
           },
         ],
       });
-      expect(migration710(alert, migrationContext)).toMatchObject({
+      expect((migration710 as SavedObjectMigrationFn)(alert, migrationContext)).toMatchObject({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -210,7 +214,10 @@ describe('successful migrations', () => {
       const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
       const alert = getMockData();
       const dateStart = Date.now();
-      const migratedAlert = migration710(alert, migrationContext);
+      const migratedAlert = (migration710 as SavedObjectMigrationFn<unknown, RawRule>)(
+        alert,
+        migrationContext
+      );
       const dateStop = Date.now();
       const dateExecutionStatus = Date.parse(
         migratedAlert.attributes.executionStatus.lastExecutionDate
@@ -237,7 +244,7 @@ describe('successful migrations', () => {
     test('add updatedAt field to alert - set to SavedObject updated_at attribute', () => {
       const migration711 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0'];
       const alert = getMockData({}, true);
-      expect(migration711(alert, migrationContext)).toEqual({
+      expect((migration711 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -250,7 +257,7 @@ describe('successful migrations', () => {
     test('add updatedAt field to alert - set to createdAt when SavedObject updated_at is not defined', () => {
       const migration711 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0'];
       const alert = getMockData({});
-      expect(migration711(alert, migrationContext)).toEqual({
+      expect((migration711 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -263,7 +270,7 @@ describe('successful migrations', () => {
     test('add notifyWhen=onActiveAlert when throttle is null', () => {
       const migration711 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0'];
       const alert = getMockData({});
-      expect(migration711(alert, migrationContext)).toEqual({
+      expect((migration711 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -276,7 +283,7 @@ describe('successful migrations', () => {
     test('add notifyWhen=onActiveAlert when throttle is set', () => {
       const migration711 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0'];
       const alert = getMockData({ throttle: '5m' });
-      expect(migration711(alert, migrationContext)).toEqual({
+      expect((migration711 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -358,7 +365,7 @@ describe('successful migrations', () => {
         ],
       });
 
-      expect(migration7112(alert, migrationContext)).toEqual({
+      expect((migration7112 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -450,7 +457,7 @@ describe('successful migrations', () => {
         ],
       });
 
-      expect(migration7112(alert, migrationContext)).toEqual(alert);
+      expect((migration7112 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual(alert);
     });
 
     test('it does not transforms other connectors', () => {
@@ -488,7 +495,7 @@ describe('successful migrations', () => {
         ],
       });
 
-      expect(migration7112(alert, migrationContext)).toEqual({
+      expect((migration7112 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -570,7 +577,7 @@ describe('successful migrations', () => {
         ],
       });
 
-      expect(migration7112(alert, migrationContext)).toEqual(alert);
+      expect((migration7112 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual(alert);
     });
 
     test('if incident attribute is an empty object, copy back the related attributes from subActionParams back to incident', () => {
@@ -608,7 +615,7 @@ describe('successful migrations', () => {
         ],
       });
 
-      expect(migration7112(alert, migrationContext)).toEqual({
+      expect((migration7112 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -663,7 +670,7 @@ describe('successful migrations', () => {
         ],
       });
 
-      expect(migration7112(alert, migrationContext)).toEqual(alert);
+      expect((migration7112 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual(alert);
     });
   });
 
@@ -718,7 +725,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration713(alert, migrationContext)).toEqual({
+      expect((migration713 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -826,7 +833,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration713(alert, migrationContext)).toEqual(alert);
+      expect((migration713 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual(alert);
     });
 
     test('security solution threshold alert with string in threshold.field is migrated to array', () => {
@@ -841,7 +848,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration713(alert, migrationContext)).toEqual({
+      expect((migration713 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -872,7 +879,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration713(alert, migrationContext)).toEqual({
+      expect((migration713 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -909,7 +916,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration713(alert, migrationContext)).toEqual({
+      expect((migration713 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -943,7 +950,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration713(alert, migrationContext)).toEqual({
+      expect((migration713 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -969,7 +976,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration713(alert, migrationContext)).toEqual({
+      expect((migration713 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -996,7 +1003,7 @@ describe('successful migrations', () => {
         params: {},
       });
 
-      expect(migration7141(alert, migrationContext)).toEqual({
+      expect((migration7141 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -1019,7 +1026,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration7141(alert, migrationContext)).toEqual({
+      expect((migration7141 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -1052,7 +1059,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration7150(alert, migrationContext)).toEqual({
+      expect((migration7150 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         references: [
           {
@@ -1089,7 +1096,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration7150(alert, migrationContext)).toEqual({
+      expect((migration7150 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         references: [
           {
@@ -1137,7 +1144,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration7150(alert, migrationContext)).toEqual({
+      expect((migration7150 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         references: [
           {
@@ -1170,7 +1177,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration7150(alert, migrationContext)).toEqual(alert);
+      expect((migration7150 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual(alert);
     });
 
     test('security solution will keep existing references if we do not have an exceptionsList but we do already have references', () => {
@@ -1193,7 +1200,7 @@ describe('successful migrations', () => {
         ],
       };
 
-      expect(migration7150(alert, migrationContext)).toEqual({
+      expect((migration7150 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         references: [
           {
@@ -1245,7 +1252,7 @@ describe('successful migrations', () => {
         ],
       };
 
-      expect(migration7150(alert, migrationContext)).toEqual({
+      expect((migration7150 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         references: [
           {
@@ -1311,7 +1318,7 @@ describe('successful migrations', () => {
         ],
       };
 
-      expect(migration7150(alert, migrationContext)).toEqual(alert);
+      expect((migration7150 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual(alert);
     });
 
     test('security solution will migrate with only missing data if we have partially migrated data', () => {
@@ -1348,7 +1355,7 @@ describe('successful migrations', () => {
         ],
       };
 
-      expect(migration7150(alert, migrationContext)).toEqual({
+      expect((migration7150 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         references: [
           {
@@ -1378,7 +1385,7 @@ describe('successful migrations', () => {
           },
         }),
       };
-      expect(migration7150(alert, migrationContext)).toEqual(alert);
+      expect((migration7150 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual(alert);
     });
 
     test('security solution will migrate valid data if it is mixed with invalid data', () => {
@@ -1408,7 +1415,7 @@ describe('successful migrations', () => {
           },
         }),
       };
-      expect(migration7150(alert, migrationContext)).toEqual({
+      expect((migration7150 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         references: [
           {
@@ -1445,7 +1452,7 @@ describe('successful migrations', () => {
           },
         ],
       };
-      expect(migration7150(alert, migrationContext)).toEqual({
+      expect((migration7150 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         references: [
           {
@@ -1462,7 +1469,7 @@ describe('successful migrations', () => {
     test('add legacyId field to alert - set to SavedObject id attribute', () => {
       const migration716 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0'];
       const alert = getMockData({}, true);
-      expect(migration716(alert, migrationContext)).toEqual({
+      expect((migration716 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -1511,7 +1518,7 @@ describe('successful migrations', () => {
           },
         ],
       };
-      expect(migration716(rule, migrationContext)).toEqual({
+      expect((migration716 as SavedObjectMigrationFn)(rule, migrationContext)).toEqual({
         ...rule,
         attributes: {
           ...rule.attributes,
@@ -1592,7 +1599,7 @@ describe('successful migrations', () => {
           },
         ],
       };
-      expect(migration716(rule, migrationContext)).toEqual({
+      expect((migration716 as SavedObjectMigrationFn)(rule, migrationContext)).toEqual({
         ...rule,
         attributes: {
           ...rule.attributes,
@@ -1659,7 +1666,7 @@ describe('successful migrations', () => {
         }),
         references: [],
       };
-      expect(migration716(rule, migrationContext)).toEqual({
+      expect((migration716 as SavedObjectMigrationFn)(rule, migrationContext)).toEqual({
         ...rule,
         attributes: {
           ...rule.attributes,
@@ -1701,7 +1708,7 @@ describe('successful migrations', () => {
           },
         ],
       };
-      expect(migration716(rule, migrationContext)).toEqual({
+      expect((migration716 as SavedObjectMigrationFn)(rule, migrationContext)).toEqual({
         ...rule,
         attributes: {
           ...rule.attributes,
@@ -1730,7 +1737,7 @@ describe('successful migrations', () => {
           },
         ],
       };
-      expect(migration716(rule, migrationContext)).toEqual({
+      expect((migration716 as SavedObjectMigrationFn)(rule, migrationContext)).toEqual({
         ...rule,
         attributes: {
           ...rule.attributes,
@@ -1750,7 +1757,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration7160(alert, migrationContext)).toEqual({
+      expect((migration7160 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -1777,7 +1784,7 @@ describe('successful migrations', () => {
         },
       });
 
-      expect(migration7160(alert, migrationContext)).toEqual({
+      expect((migration7160 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -1794,7 +1801,7 @@ describe('successful migrations', () => {
         params: {},
       });
 
-      expect(migration7160(alert, migrationContext)).toEqual({
+      expect((migration7160 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -1821,7 +1828,7 @@ describe('successful migrations', () => {
         ],
       };
 
-      expect(migration7160(alert, migrationContext)).toEqual({
+      expect((migration7160 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -1857,7 +1864,7 @@ describe('successful migrations', () => {
         ],
       };
 
-      expect(migration7160(alert, migrationContext)).toEqual({
+      expect((migration7160 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -1898,7 +1905,7 @@ describe('successful migrations', () => {
         ],
       };
 
-      expect(migration7160(alert, migrationContext)).toEqual({
+      expect((migration7160 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -1927,7 +1934,7 @@ describe('successful migrations', () => {
         }),
       };
 
-      expect(migration7160(alert, migrationContext)).toEqual({
+      expect((migration7160 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -1956,7 +1963,7 @@ describe('successful migrations', () => {
         ],
       };
 
-      expect(migration7160(alert, migrationContext)).toEqual({
+      expect((migration7160 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -1986,7 +1993,10 @@ describe('successful migrations', () => {
         }),
       };
 
-      const migratedAlert = migration7160(alert, migrationContext);
+      const migratedAlert = (migration7160 as SavedObjectMigrationFn<unknown, RawRule>)(
+        alert,
+        migrationContext
+      );
 
       expect(migratedAlert.references).toEqual([
         { id: 'foo', name: 'param:tracked_index_foo', type: 'index-pattern' },
@@ -2023,7 +2033,10 @@ describe('successful migrations', () => {
         ],
       };
 
-      const migratedAlert = migration7160(alert, migrationContext);
+      const migratedAlert = (migration7160 as SavedObjectMigrationFn<unknown, RawRule>)(
+        alert,
+        migrationContext
+      );
 
       expect(migratedAlert.references).toEqual([
         {
@@ -2061,7 +2074,10 @@ describe('successful migrations', () => {
         }),
       };
 
-      const migratedAlert = migration7160(alert, migrationContext);
+      const migratedAlert = (migration7160 as SavedObjectMigrationFn<unknown, Partial<RawRule>>)(
+        alert,
+        migrationContext
+      );
 
       expect(typeof migratedAlert.attributes.legacyId).toEqual('string'); // introduced by setLegacyId migration
       delete migratedAlert.attributes.legacyId;
@@ -2073,7 +2089,7 @@ describe('successful migrations', () => {
     test('no op migration for rules SO', () => {
       const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0'];
       const alert = getMockData({}, true);
-      expect(migration800(alert, migrationContext)).toEqual(alert);
+      expect((migration800 as SavedObjectMigrationFn)(alert, migrationContext)).toEqual(alert);
     });
 
     test('add threatIndicatorPath default value to threat match rules if missing', () => {
@@ -2082,9 +2098,10 @@ describe('successful migrations', () => {
         { params: { type: 'threat_match' }, alertTypeId: 'siem.signals' },
         true
       );
-      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
-        'threatintel.indicator'
-      );
+      expect(
+        (migration800 as SavedObjectMigrationFn<unknown, RawRule>)(alert, migrationContext)
+          .attributes.params.threatIndicatorPath
+      ).toEqual('threatintel.indicator');
     });
 
     test('doesnt change threatIndicatorPath value in threat match rules if value is present', () => {
@@ -2096,17 +2113,19 @@ describe('successful migrations', () => {
         },
         true
       );
-      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
-        'custom.indicator.path'
-      );
+      expect(
+        (migration800 as SavedObjectMigrationFn<unknown, RawRule>)(alert, migrationContext)
+          .attributes.params.threatIndicatorPath
+      ).toEqual('custom.indicator.path');
     });
 
     test('doesnt change threatIndicatorPath value in other rules', () => {
       const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0'];
       const alert = getMockData({ params: { type: 'eql' }, alertTypeId: 'siem.signals' }, true);
-      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
-        undefined
-      );
+      expect(
+        (migration800 as SavedObjectMigrationFn<unknown, RawRule>)(alert, migrationContext)
+          .attributes.params.threatIndicatorPath
+      ).toEqual(undefined);
     });
 
     test('doesnt change threatIndicatorPath value if not a siem.signals rule', () => {
@@ -2115,9 +2134,10 @@ describe('successful migrations', () => {
         { params: { type: 'threat_match' }, alertTypeId: 'not.siem.signals' },
         true
       );
-      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
-        undefined
-      );
+      expect(
+        (migration800 as SavedObjectMigrationFn<unknown, RawRule>)(alert, migrationContext)
+          .attributes.params.threatIndicatorPath
+      ).toEqual(undefined);
     });
 
     test('doesnt change AAD rule params if not a siem.signals rule', () => {
@@ -2126,7 +2146,10 @@ describe('successful migrations', () => {
         { params: { outputIndex: 'output-index', type: 'query' }, alertTypeId: 'not.siem.signals' },
         true
       );
-      const migratedAlert = migration800(alert, migrationContext);
+      const migratedAlert = (migration800 as SavedObjectMigrationFn<unknown, RawRule>)(
+        alert,
+        migrationContext
+      );
       expect(migratedAlert.attributes.alertTypeId).toEqual('not.siem.signals');
       expect(migratedAlert.attributes.enabled).toEqual(true);
       expect(migratedAlert.attributes.tags).toEqual(['foo']);
@@ -2143,7 +2166,10 @@ describe('successful migrations', () => {
           { params: { outputIndex: 'output-index', type: ruleType }, alertTypeId: 'siem.signals' },
           true
         );
-        const migratedAlert = migration800(alert, migrationContext);
+        const migratedAlert = (migration800 as SavedObjectMigrationFn<unknown, RawRule>)(
+          alert,
+          migrationContext
+        );
         expect(migratedAlert.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
         expect(migratedAlert.attributes.enabled).toEqual(false);
         expect(migratedAlert.attributes.tags).toEqual(['foo']);
@@ -2189,14 +2215,20 @@ describe('successful migrations', () => {
           const migration801 = migrations['8.0.1'];
 
           // migrate to 8.0.0
-          const migratedAlert800 = migration800(alert717Enabled, migrationContext);
+          const migratedAlert800 = (migration800 as SavedObjectMigrationFn<unknown, RawRule>)(
+            alert717Enabled,
+            migrationContext
+          );
           expect(migratedAlert800.attributes.enabled).toEqual(false);
 
           // reenable rule
           migratedAlert800.attributes.enabled = true;
 
           // migrate to 8.0.1
-          const migratedAlert801 = migration801(migratedAlert800, migrationContext);
+          const migratedAlert801 = (migration801 as SavedObjectMigrationFn<unknown, RawRule>)(
+            migratedAlert800,
+            migrationContext
+          );
 
           expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
           expect(migratedAlert801.attributes.enabled).toEqual(true);
@@ -2212,11 +2244,17 @@ describe('successful migrations', () => {
           const migration801 = migrations['8.0.1'];
 
           // migrate to 8.0.0
-          const migratedAlert800 = migration800(alert717Disabled, migrationContext);
+          const migratedAlert800 = (migration800 as SavedObjectMigrationFn<unknown, RawRule>)(
+            alert717Disabled,
+            migrationContext
+          );
           expect(migratedAlert800.attributes.enabled).toEqual(false);
 
           // migrate to 8.0.1
-          const migratedAlert801 = migration801(migratedAlert800, migrationContext);
+          const migratedAlert801 = (migration801 as SavedObjectMigrationFn<unknown, RawRule>)(
+            migratedAlert800,
+            migrationContext
+          );
 
           expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
           expect(migratedAlert801.attributes.enabled).toEqual(false);
@@ -2232,11 +2270,17 @@ describe('successful migrations', () => {
           const migration801 = migrations['8.0.1'];
 
           // migrate to 8.0.0
-          const migratedAlert800 = migration800(alert717Enabled, migrationContext);
+          const migratedAlert800 = (migration800 as SavedObjectMigrationFn<unknown, RawRule>)(
+            alert717Enabled,
+            migrationContext
+          );
           expect(migratedAlert800.attributes.enabled).toEqual(false);
 
           // migrate to 8.0.1
-          const migratedAlert801 = migration801(migratedAlert800, migrationContext);
+          const migratedAlert801 = (migration801 as SavedObjectMigrationFn<unknown, RawRule>)(
+            migratedAlert800,
+            migrationContext
+          );
 
           expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
           expect(migratedAlert801.attributes.enabled).toEqual(false);
@@ -2259,7 +2303,10 @@ describe('successful migrations', () => {
           };
 
           // migrate to 8.0.1
-          const migratedAlert801 = migration801(alert, migrationContext);
+          const migratedAlert801 = (migration801 as SavedObjectMigrationFn<unknown, RawRule>)(
+            alert,
+            migrationContext
+          );
 
           expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
           expect(migratedAlert801.attributes.enabled).toEqual(false);
@@ -2282,7 +2329,10 @@ describe('successful migrations', () => {
           };
 
           // migrate to 8.0.1
-          const migratedAlert801 = migration801(alert, migrationContext);
+          const migratedAlert801 = (migration801 as SavedObjectMigrationFn<unknown, RawRule>)(
+            alert,
+            migrationContext
+          );
 
           expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
           expect(migratedAlert801.attributes.enabled).toEqual(false);
@@ -2310,7 +2360,10 @@ describe('successful migrations', () => {
         true
       );
 
-      const migratedAlert820 = migration820(alert, migrationContext);
+      const migratedAlert820 = (migration820 as SavedObjectMigrationFn<unknown, RawRule>)(
+        alert,
+        migrationContext
+      );
 
       expect(migratedAlert820.attributes.mapped_params).toEqual({
         risk_score: 60,
@@ -2329,13 +2382,16 @@ describe('successful migrations', () => {
         },
         true
       );
-      const migratedMutedAlert830 = migration830(mutedAlert, migrationContext);
+      const migratedMutedAlert830 = (migration830 as SavedObjectMigrationFn<unknown, RawRule>)(
+        mutedAlert,
+        migrationContext
+      );
 
-      expect(migratedMutedAlert830.attributes.snoozeSchedule.length).toEqual(1);
-      expect(migratedMutedAlert830.attributes.snoozeSchedule[0].rRule.dtstart).toEqual(
+      expect(migratedMutedAlert830.attributes.snoozeSchedule?.length).toEqual(1);
+      expect(migratedMutedAlert830.attributes.snoozeSchedule?.[0].rRule.dtstart).toEqual(
         '1970-01-01T00:00:00.000Z'
       );
-      expect(migratedMutedAlert830.attributes.snoozeSchedule[0].duration).toEqual(86400000);
+      expect(migratedMutedAlert830.attributes.snoozeSchedule?.[0].duration).toEqual(86400000);
       fakeTimer.restore();
     });
 
@@ -2348,7 +2404,10 @@ describe('successful migrations', () => {
         },
         true
       );
-      const migratedAlert820 = migration830(alert, migrationContext);
+      const migratedAlert820 = (migration830 as SavedObjectMigrationFn<unknown, RawRule>)(
+        alert,
+        migrationContext
+      );
 
       expect(migratedAlert820.attributes.params).toEqual({
         esQuery: '{ "query": "test-query" }',
@@ -2370,7 +2429,10 @@ describe('successful migrations', () => {
         true
       );
 
-      const migratedAlert830 = migration830(alert, migrationContext);
+      const migratedAlert830 = (migration830 as SavedObjectMigrationFn<unknown, RawRule>)(
+        alert,
+        migrationContext
+      );
 
       expect(migratedAlert830.attributes.tags).toEqual(['test-tag']);
     });
@@ -2384,7 +2446,10 @@ describe('successful migrations', () => {
         true
       );
 
-      const migratedAlert830 = migration830(alert, migrationContext);
+      const migratedAlert830 = (migration830 as SavedObjectMigrationFn<unknown, RawRule>)(
+        alert,
+        migrationContext
+      );
 
       expect(migratedAlert830.attributes.tags).toEqual(['__internal_immutable:false', 'tag-1']);
     });
@@ -2400,7 +2465,10 @@ describe('successful migrations', () => {
         true
       );
       expect(mutedAlert.attributes.isSnoozedUntil).toBeTruthy();
-      const migratedAlert841 = migration841(mutedAlert, migrationContext);
+      const migratedAlert841 = (migration841 as SavedObjectMigrationFn<unknown, RawRule>)(
+        mutedAlert,
+        migrationContext
+      );
 
       expect(migratedAlert841.attributes.isSnoozedUntil).toBeFalsy();
     });
@@ -2409,7 +2477,9 @@ describe('successful migrations', () => {
       const migration841 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.4.1'];
       const mutedAlert = getMockData({}, true);
       expect(mutedAlert.attributes.isSnoozedUntil).toBeFalsy();
-      expect(() => migration841(mutedAlert, migrationContext)).not.toThrowError();
+      expect(() =>
+        (migration841 as SavedObjectMigrationFn<unknown, RawRule>)(mutedAlert, migrationContext)
+      ).not.toThrowError();
     });
   });
 
@@ -2425,9 +2495,12 @@ describe('successful migrations', () => {
         },
       });
 
-      let migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
-      expect(migratedRule.attributes.lastRun.outcome).toEqual('succeeded');
-      expect(migratedRule.attributes.lastRun.warning).toEqual(null);
+      let migratedRule = (migration860 as SavedObjectMigrationFn<unknown, RawRule>)(
+        ruleWithExecutionStatus,
+        migrationContext
+      );
+      expect(migratedRule.attributes.lastRun?.outcome).toEqual('succeeded');
+      expect(migratedRule.attributes.lastRun?.warning).toEqual(null);
       ruleWithExecutionStatus = getMockData({
         executionStatus: {
           status: 'active',
@@ -2436,9 +2509,12 @@ describe('successful migrations', () => {
         },
       });
 
-      migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
-      expect(migratedRule.attributes.lastRun.outcome).toEqual('succeeded');
-      expect(migratedRule.attributes.lastRun.warning).toEqual(null);
+      migratedRule = (migration860 as SavedObjectMigrationFn<unknown, RawRule>)(
+        ruleWithExecutionStatus,
+        migrationContext
+      );
+      expect(migratedRule.attributes.lastRun?.outcome).toEqual('succeeded');
+      expect(migratedRule.attributes.lastRun?.warning).toEqual(null);
     });
 
     test('migrates executionStatus warning and error', () => {
@@ -2456,10 +2532,13 @@ describe('successful migrations', () => {
         },
       });
 
-      let migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
-      expect(migratedRule.attributes.lastRun.outcome).toEqual('warning');
-      expect(migratedRule.attributes.lastRun.outcomeMsg).toEqual('warning message');
-      expect(migratedRule.attributes.lastRun.warning).toEqual('warning reason');
+      let migratedRule = (migration860 as SavedObjectMigrationFn<unknown, RawRule>)(
+        ruleWithExecutionStatus,
+        migrationContext
+      );
+      expect(migratedRule.attributes.lastRun?.outcome).toEqual('warning');
+      expect(migratedRule.attributes.lastRun?.outcomeMsg).toEqual('warning message');
+      expect(migratedRule.attributes.lastRun?.warning).toEqual('warning reason');
 
       ruleWithExecutionStatus = getMockData({
         executionStatus: {
@@ -2473,17 +2552,23 @@ describe('successful migrations', () => {
         },
       });
 
-      migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
-      expect(migratedRule.attributes.lastRun.outcome).toEqual('failed');
-      expect(migratedRule.attributes.lastRun.outcomeMsg).toEqual('failed message');
-      expect(migratedRule.attributes.lastRun.warning).toEqual('failed reason');
+      migratedRule = (migration860 as SavedObjectMigrationFn<unknown, RawRule>)(
+        ruleWithExecutionStatus,
+        migrationContext
+      );
+      expect(migratedRule.attributes.lastRun?.outcome).toEqual('failed');
+      expect(migratedRule.attributes.lastRun?.outcomeMsg).toEqual('failed message');
+      expect(migratedRule.attributes.lastRun?.warning).toEqual('failed reason');
     });
 
     test('migrates empty monitoring', () => {
       const migration860 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.6.0'];
 
       const ruleWithoutMonitoring = getMockData();
-      const migratedRule = migration860(ruleWithoutMonitoring, migrationContext);
+      const migratedRule = (migration860 as SavedObjectMigrationFn<unknown, RawRule>)(
+        ruleWithoutMonitoring,
+        migrationContext
+      );
 
       expect(migratedRule.attributes.monitoring).toBeUndefined();
     });
@@ -2498,13 +2583,16 @@ describe('successful migrations', () => {
           lastDuration: 60000,
         },
       });
-      const migratedRule = migration860(ruleWithMonitoring, migrationContext);
+      const migratedRule = (migration860 as SavedObjectMigrationFn<unknown, RawRule>)(
+        ruleWithMonitoring,
+        migrationContext
+      );
 
-      expect(migratedRule.attributes.monitoring.run.history).toEqual([]);
-      expect(migratedRule.attributes.monitoring.run.last_run.timestamp).toEqual(
+      expect(migratedRule.attributes.monitoring?.run.history).toEqual([]);
+      expect(migratedRule.attributes.monitoring?.run.last_run.timestamp).toEqual(
         '2022-01-02T00:00:00.000Z'
       );
-      expect(migratedRule.attributes.monitoring.run.last_run.metrics.duration).toEqual(60000);
+      expect(migratedRule.attributes.monitoring?.run.last_run.metrics.duration).toEqual(60000);
     });
   });
 
@@ -2521,7 +2609,10 @@ describe('successful migrations', () => {
           },
           true
         );
-        const migratedAlert870 = migration870(rule, migrationContext);
+        const migratedAlert870 = (migration870 as SavedObjectMigrationFn<unknown, RawRule>)(
+          rule,
+          migrationContext
+        );
 
         expect(migratedAlert870.attributes.params).toEqual({
           esQuery: '{ "query": "test-query" }',
@@ -2542,7 +2633,10 @@ describe('successful migrations', () => {
           },
           true
         );
-        const migratedAlert870 = migration870(rule, migrationContext);
+        const migratedAlert870 = (migration870 as SavedObjectMigrationFn<unknown, RawRule>)(
+          rule,
+          migrationContext
+        );
 
         expect(migratedAlert870.attributes.params).toEqual({ foo: true });
       });
@@ -2586,7 +2680,10 @@ describe('successful migrations', () => {
           '8.7.0'
         ];
         const rule = getMockData({ params, alertTypeId: logThresholdAlertTypeId }, true);
-        const migratedAlert870 = migration870(rule, migrationContext);
+        const migratedAlert870 = (migration870 as SavedObjectMigrationFn<unknown, RawRule>)(
+          rule,
+          migrationContext
+        );
 
         expect(migratedAlert870.attributes.params).toEqual({
           ...params,
@@ -2600,7 +2697,10 @@ describe('successful migrations', () => {
           '8.7.0'
         ];
         const rule = getMockData({ params, alertTypeId: `not-${logThresholdAlertTypeId}` }, true);
-        const migratedAlert870 = migration870(rule, migrationContext);
+        const migratedAlert870 = (migration870 as SavedObjectMigrationFn<unknown, RawRule>)(
+          rule,
+          migrationContext
+        );
 
         expect(migratedAlert870.attributes.params).toEqual(params);
         expect(migratedAlert870.references).toEqual([]);
@@ -2612,17 +2712,26 @@ describe('successful migrations', () => {
 
       // Failed rule
       const failedRule = getMockData({ lastRun: { outcome: 'failed' } });
-      const failedRule870 = migration870(failedRule, migrationContext);
+      const failedRule870 = (migration870 as SavedObjectMigrationFn<unknown, RawRule>)(
+        failedRule,
+        migrationContext
+      );
       expect(failedRule870.attributes.lastRun).toEqual({ outcome: 'failed', outcomeOrder: 20 });
 
       // Rule with warnings
       const warningRule = getMockData({ lastRun: { outcome: 'warning' } });
-      const warningRule870 = migration870(warningRule, migrationContext);
+      const warningRule870 = (migration870 as SavedObjectMigrationFn<unknown, RawRule>)(
+        warningRule,
+        migrationContext
+      );
       expect(warningRule870.attributes.lastRun).toEqual({ outcome: 'warning', outcomeOrder: 10 });
 
       // Succeeded rule
       const succeededRule = getMockData({ lastRun: { outcome: 'succeeded' } });
-      const succeededRule870 = migration870(succeededRule, migrationContext);
+      const succeededRule870 = (migration870 as SavedObjectMigrationFn<unknown, RawRule>)(
+        succeededRule,
+        migrationContext
+      );
       expect(succeededRule870.attributes.lastRun).toEqual({
         outcome: 'succeeded',
         outcomeOrder: 0,
@@ -2640,7 +2749,10 @@ describe('successful migrations', () => {
         },
         true
       );
-      const migratedAlert880 = migration880(rule, migrationContext);
+      const migratedAlert880 = (migration880 as SavedObjectMigrationFn<unknown, RawRule>)(
+        rule,
+        migrationContext
+      );
 
       expect(migratedAlert880.attributes.actions).toEqual([
         {
@@ -2660,7 +2772,10 @@ describe('successful migrations', () => {
         ];
 
         const rule = getMockData();
-        const migratedAlert880 = migration880(rule, migrationContext);
+        const migratedAlert880 = (migration880 as SavedObjectMigrationFn<unknown, RawRule>)(
+          rule,
+          migrationContext
+        );
         expect(migratedAlert880.attributes.revision).toEqual(0);
       });
 
@@ -2670,7 +2785,10 @@ describe('successful migrations', () => {
         ];
 
         const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, params: { version: 2 } });
-        const migratedAlert880 = migration880(rule, migrationContext);
+        const migratedAlert880 = (migration880 as SavedObjectMigrationFn<unknown, RawRule>)(
+          rule,
+          migrationContext
+        );
         expect(migratedAlert880.attributes.revision).toEqual(2);
       });
     });
@@ -2679,35 +2797,35 @@ describe('successful migrations', () => {
       test('Add frequency when throttle is null', () => {
         const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
           '8.8.0'
-        ];
+        ] as SavedObjectMigrationFn<unknown, RawRule>;
 
         const rule = getMockData({ alertTypeId: ruleTypeMappings.eql });
         const migratedAlert880 = migration880(rule, migrationContext);
-        expect(migratedAlert880.attributes.actions[0].frequency.summary).toEqual(true);
-        expect(migratedAlert880.attributes.actions[0].frequency.notifyWhen).toEqual(
+        expect(migratedAlert880.attributes.actions[0].frequency?.summary).toEqual(true);
+        expect(migratedAlert880.attributes.actions[0].frequency?.notifyWhen).toEqual(
           'onActiveAlert'
         );
-        expect(migratedAlert880.attributes.actions[0].frequency.throttle).toEqual(null);
+        expect(migratedAlert880.attributes.actions[0].frequency?.throttle).toEqual(null);
       });
 
       test('Add frequency when throttle is 1h', () => {
         const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
           '8.8.0'
-        ];
+        ] as SavedObjectMigrationFn<unknown, RawRule>;
 
         const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, throttle: '1h' });
         const migratedAlert880 = migration880(rule, migrationContext);
-        expect(migratedAlert880.attributes.actions[0].frequency.summary).toEqual(true);
-        expect(migratedAlert880.attributes.actions[0].frequency.notifyWhen).toEqual(
+        expect(migratedAlert880.attributes.actions[0].frequency?.summary).toEqual(true);
+        expect(migratedAlert880.attributes.actions[0].frequency?.notifyWhen).toEqual(
           'onThrottleInterval'
         );
-        expect(migratedAlert880.attributes.actions[0].frequency.throttle).toEqual('1h');
+        expect(migratedAlert880.attributes.actions[0].frequency?.throttle).toEqual('1h');
       });
 
       test('Do not migrate action when alert does NOT belong to security solution', () => {
         const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
           '8.8.0'
-        ];
+        ] as SavedObjectMigrationFn<unknown, RawRule>;
 
         const rule = getMockData();
         const migratedAlert880 = migration880(rule, migrationContext);
@@ -2730,7 +2848,10 @@ describe('successful migrations', () => {
           ];
 
           const rule = getMockData({ alertTypeId: ruleType, muteAll: true });
-          const migratedAlert880 = migration880(rule, migrationContext);
+          const migratedAlert880 = (migration880 as SavedObjectMigrationFn<unknown, RawRule>)(
+            rule,
+            migrationContext
+          );
 
           expect(migratedAlert880.attributes.muteAll).toBeFalsy();
         }
@@ -2745,7 +2866,10 @@ describe('successful migrations', () => {
           alertTypeId: 'unknown',
           muteAll: true,
         });
-        const migratedAlert880 = migration880(rule, migrationContext);
+        const migratedAlert880 = (migration880 as SavedObjectMigrationFn<unknown, RawRule>)(
+          rule,
+          migrationContext
+        );
 
         expect(migratedAlert880.attributes.muteAll).toBeTruthy();
       });
@@ -2771,7 +2895,7 @@ describe('successful migrations', () => {
 
       const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
 
-      expect(migration800(alert, migrationContext)).toMatchObject({
+      expect((migration800 as SavedObjectMigrationFn)(alert, migrationContext)).toMatchObject({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -2798,7 +2922,7 @@ describe('successful migrations', () => {
 
       const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
 
-      expect(migration800(alert, migrationContext)).toMatchObject({
+      expect((migration800 as SavedObjectMigrationFn)(alert, migrationContext)).toMatchObject({
         ...alert,
         attributes: {
           ...alert.attributes,
@@ -2832,7 +2956,10 @@ describe('search source migration', () => {
     );
 
     expect(
-      migrations[versionToTest](esQueryRuleSavedObject, {} as SavedObjectMigrationContext)
+      (migrations[versionToTest] as SavedObjectMigrationFn)(
+        esQueryRuleSavedObject,
+        {} as SavedObjectMigrationContext
+      )
     ).toEqual({
       attributes: {
         params: {
@@ -2864,7 +2991,10 @@ describe('search source migration', () => {
     );
 
     expect(
-      migrations[versionToTest](esQueryRuleSavedObject, {} as SavedObjectMigrationContext)
+      (migrations[versionToTest] as SavedObjectMigrationFn)(
+        esQueryRuleSavedObject,
+        {} as SavedObjectMigrationContext
+      )
     ).toEqual({
       attributes: {
         params: {
@@ -2889,7 +3019,7 @@ describe('handles errors during migrations', () => {
         consumer: 'alerting',
       });
       expect(() => {
-        migration710(alert, migrationContext);
+        (migration710 as SavedObjectMigrationFn<unknown, RawRule>)(alert, migrationContext);
       }).toThrowError(`Can't migrate!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.10.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
@@ -2914,7 +3044,7 @@ describe('handles errors during migrations', () => {
         consumer: 'alerting',
       });
       expect(() => {
-        migration711(alert, migrationContext);
+        (migration711 as SavedObjectMigrationFn<unknown, RawRule>)(alert, migrationContext);
       }).toThrowError(`Can't migrate!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.11.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
@@ -2941,7 +3071,7 @@ describe('handles errors during migrations', () => {
         consumer: 'alerting',
       });
       expect(() => {
-        migration7112(alert, migrationContext);
+        (migration7112 as SavedObjectMigrationFn<unknown, RawRule>)(alert, migrationContext);
       }).toThrowError(`Can't migrate!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.11.2 migration failed for alert ${alert.id} with error: Can't migrate!`,
@@ -2968,7 +3098,7 @@ describe('handles errors during migrations', () => {
         consumer: 'alerting',
       });
       expect(() => {
-        migration7130(alert, migrationContext);
+        (migration7130 as SavedObjectMigrationFn<unknown, RawRule>)(alert, migrationContext);
       }).toThrowError(`Can't migrate!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.13.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
@@ -2993,7 +3123,7 @@ describe('handles errors during migrations', () => {
       ];
       const rule = getMockData();
       expect(() => {
-        migration7160(rule, migrationContext);
+        (migration7160 as SavedObjectMigrationFn<unknown, RawRule>)(rule, migrationContext);
       }).toThrowError(`Can't migrate!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.16.0 migration failed for alert ${rule.id} with error: Can't migrate!`,
@@ -3040,7 +3170,7 @@ describe('handles errors during migrations', () => {
       )[versionToTest];
 
       expect(() => {
-        migration830(rule, migrationContext);
+        (migration830 as SavedObjectMigrationFn<unknown, RawRule>)(rule, migrationContext);
       }).toThrowError(`Can't migrate search source!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject ${versionToTest} migration failed for alert ${rule.id} with error: Can't migrate search source!`,
