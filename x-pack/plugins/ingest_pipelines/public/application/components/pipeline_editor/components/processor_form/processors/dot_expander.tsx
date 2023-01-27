@@ -8,13 +8,14 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { FieldConfig, FIELD_TYPES, UseField, Field } from '../../../../../../shared_imports';
+import { FIELD_TYPES, UseField, Field, ToggleField } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
 
-import { from } from './shared';
+import { FieldsConfig, from, to } from './shared';
 
-const fieldsConfig: Record<string, FieldConfig> = {
+const fieldsConfig: FieldsConfig = {
+  /* Optional fields config */
   path: {
     type: FIELD_TYPES.TEXT,
     serializer: from.emptyStringToUndefined,
@@ -25,6 +26,25 @@ const fieldsConfig: Record<string, FieldConfig> = {
       defaultMessage:
         'Output field. Only required if the field to expand is part another object field.',
     }),
+  },
+  override: {
+    type: FIELD_TYPES.TOGGLE,
+    defaultValue: false,
+    deserializer: to.booleanOrUndef,
+    serializer: from.undefinedIfValue(false),
+    label: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.dotExpanderForm.overrideFieldLabel',
+      {
+        defaultMessage: 'Override',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.dotExpanderForm.overrideFieldHelpText',
+      {
+        defaultMessage:
+          'Controls the behavior when there is already an existing nested object that conflicts with the expanded field. When disabled, the processor will merge conflicts by combining the old and the new values into an array. If enabled, the value from the expanded field will overwrite the existing value.',
+      }
+    ),
   },
 };
 
@@ -63,6 +83,13 @@ export const DotExpander: FunctionComponent = () => {
         config={fieldsConfig.path}
         component={Field}
         path="fields.path"
+      />
+
+      <UseField
+        data-test-subj="overrideField"
+        config={fieldsConfig.override}
+        component={ToggleField}
+        path="fields.override"
       />
     </>
   );

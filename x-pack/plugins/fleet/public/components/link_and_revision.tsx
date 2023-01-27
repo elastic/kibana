@@ -33,31 +33,40 @@ export const AgentPolicySummaryLine = memo<{
       alignItems="baseline"
       style={MIN_WIDTH}
       responsive={false}
+      justifyContent={'flexStart'}
     >
-      <EuiFlexItem grow={false} className="eui-textTruncate">
-        <EuiLink
-          className={`eui-textTruncate`}
-          href={getHref('policy_details', { policyId: id })}
-          title={name || id}
-          data-test-subj="agentPolicyNameLink"
-        >
-          {name || id}
-        </EuiLink>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup style={MIN_WIDTH} gutterSize="s" alignItems="baseline" responsive={false}>
+          <EuiFlexItem grow={false} className="eui-textTruncate">
+            <EuiLink
+              className={`eui-textTruncate`}
+              href={getHref('policy_details', { policyId: id })}
+              title={name || id}
+              data-test-subj="agentPolicyNameLink"
+            >
+              {name || id}
+            </EuiLink>
+          </EuiFlexItem>
+
+          {isManaged && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                title="Hosted agent policy"
+                content={i18n.translate('xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip', {
+                  defaultMessage:
+                    'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
+                })}
+                type="lock"
+                size="m"
+                color="subdued"
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
-      {isManaged && (
-        <EuiIconTip
-          title="Hosted agent policy"
-          content={i18n.translate('xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip', {
-            defaultMessage:
-              'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
-          })}
-          type="lock"
-          size="m"
-          color="subdued"
-        />
-      )}
+
       {revision && (
-        <EuiFlexItem grow={direction === 'column' ? false : true}>
+        <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs" style={NO_WRAP_WHITE_SPACE}>
             <FormattedMessage
               id="xpack.fleet.agentPolicySummaryLine.revisionNumber"
