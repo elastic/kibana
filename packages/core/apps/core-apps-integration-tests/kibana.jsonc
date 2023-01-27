@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "devOnly": true,
+  "id": "@kbn/core-apps-integration-tests",
+  "owner": "@elastic/kibana-core"
+}

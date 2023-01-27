@@ -2929,6 +2929,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-apps-integration-tests@link:packages/core/apps/core-apps-integration-tests":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-apps-server-internal@link:packages/core/apps/core-apps-server-internal":
   version "0.0.0"
   uid ""
@@ -2969,6 +2973,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-capabilities-integration-tests@link:packages/core/capabilities/core-capabilities-integration-tests":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-capabilities-server-internal@link:packages/core/capabilities/core-capabilities-server-internal":
   version "0.0.0"
   uid ""
@@ -2990,6 +2998,10 @@
   uid ""
 
 "@kbn/core-chrome-browser@link:packages/core/chrome/core-chrome-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-config-integration-tests@link:packages/core/config/core-config-integration-tests":
   version "0.0.0"
   uid ""
 
