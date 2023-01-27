@@ -25,15 +25,7 @@ export interface RulesListNotifyBadgeProps {
   showOnHover?: boolean;
 }
 
-export type RulesListNotifyBadgePropsWithApi = Omit<
+export type RulesListNotifyBadgePropsWithApi = Pick<
   RulesListNotifyBadgeProps,
-  | 'isOpen'
-  | 'previousSnoozeInterval'
-  | 'onClick'
-  | 'onClose'
-  | 'onLoading'
-  | 'showOnHover'
-  | 'showTooltipInline'
-  | 'snoozeRule'
-  | 'unsnoozeRule'
+  'rule' | 'isLoading' | 'onRuleChanged'
 >;
