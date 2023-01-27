@@ -99,6 +99,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('project monitors - returns 404 for non-existing spaces', async () => {
+      const project = `test-project-${uuidv4()}`;
+      await supertest
+        .put(
+          `/s/i_dont_exist${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+            '{projectName}',
+            project
+          )}`
+        )
+        .set('kbn-xsrf', 'true')
+        .send(projectMonitors)
+        .expect(404);
+    });
+
     it('project monitors - handles browser monitors', async () => {
       const successfulMonitors = [projectMonitors.monitors[0]];
       const project = `test-project-${uuidv4()}`;
@@ -742,6 +756,102 @@ export default function ({ getService }: FtrProviderContext) {
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
         expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(formatKibanaNamespace(SPACE_ID));
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      }
+    });
+
+    it('project monitors - handles editing with spaces', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const username = 'admin';
+      const roleName = `synthetics_admin`;
+      const password = `${username}-password`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send(projectMonitors)
+          .expect(200);
+        // expect monitor not to have been deleted
+        const getResponse = await supertestWithoutAuth
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const decryptedCreatedMonitor = await supertest
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${getResponse.body.monitors[0].id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors } = getResponse.body;
+        expect(monitors.length).eql(1);
+        expect(decryptedCreatedMonitor.body.attributes[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(
+          projectMonitors.monitors[0].content
+        );
+
+        const updatedSource = 'updatedSource';
+        // update monitor
+        await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [{ ...projectMonitors.monitors[0], content: updatedSource }],
+          })
+          .expect(200);
+        const getResponseUpdated = await supertestWithoutAuth
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors: monitorsUpdated } = getResponseUpdated.body;
+        expect(monitorsUpdated.length).eql(1);
+
+        const decryptedUpdatedMonitor = await supertest
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorsUpdated[0].id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        expect(decryptedUpdatedMonitor.body.attributes[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(
+          updatedSource
+        );
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
         await security.user.delete(username);
