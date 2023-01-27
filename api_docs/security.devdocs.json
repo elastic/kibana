@@ -1319,7 +1319,13 @@
             "text": "AuditHttp"
           },
           " extends ",
-          "EcsHttp"
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsHttp",
+            "text": "EcsHttp"
+          }
         ],
         "path": "x-pack/plugins/security/server/audit/audit_events.ts",
         "deprecated": false,
@@ -1604,7 +1610,7 @@
             "section": "def-server.AuditRequest",
             "text": "AuditRequest"
           },
-          " extends Request"
+          " extends { body?: { bytes?: number | undefined; content?: string | undefined; } | undefined; bytes?: number | undefined; id?: string | undefined; method?: string | undefined; mime_type?: string | undefined; referrer?: string | undefined; }"
         ],
         "path": "x-pack/plugins/security/server/audit/audit_events.ts",
         "deprecated": false,
