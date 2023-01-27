@@ -88,7 +88,7 @@ export const MetricRowWithAgg = ({
   );
 
   const isAggInvalid = get(errors, ['customMetrics', name, 'aggType']) != null;
-  const isFieldInvalid = get(errors, ['customMetrics', name, 'field']) != null;
+  const isFieldInvalid = get(errors, ['customMetrics', name, 'field']) != null || !field;
 
   return (
     <>
