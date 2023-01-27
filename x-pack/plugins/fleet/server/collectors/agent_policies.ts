@@ -48,53 +48,48 @@ export const getAgentPoliciesUsage = async (
   esClient: ElasticsearchClient,
   abortController: AbortController
 ): Promise<AgentPoliciesUsage> => {
-  try {
-    const res = await esClient.search<{}, AgentPoliciesUsageAggs>(
-      {
-        index: AGENT_POLICY_INDEX,
-        size: 0,
-        aggregations: {
-          unique_policies: {
-            terms: {
-              field: 'policy_id',
-              size: ES_SEARCH_LIMIT,
-            },
-            aggregations: {
-              output_types: {
-                top_hits: {
-                  size: 1,
-                  sort: {
-                    revision_idx: 'desc',
-                  },
-                  _source: ['data.outputs.*.type'],
+  const res = await esClient.search<{}, AgentPoliciesUsageAggs>(
+    {
+      index: AGENT_POLICY_INDEX,
+      size: 0,
+      ignore_unavailable: true,
+      aggregations: {
+        unique_policies: {
+          terms: {
+            field: 'policy_id',
+            size: ES_SEARCH_LIMIT,
+          },
+          aggregations: {
+            output_types: {
+              top_hits: {
+                size: 1,
+                sort: {
+                  revision_idx: 'desc',
                 },
+                _source: ['data.outputs.*.type'],
               },
             },
           },
         },
       },
-      { signal: abortController.signal }
-    );
-    const agentPolicyCount = res?.aggregations?.unique_policies?.buckets?.length;
+    },
+    { signal: abortController.signal }
+  );
 
-    const allOutputs = (res?.aggregations?.unique_policies?.buckets ?? [])?.flatMap((bucket) =>
-      bucket.output_types.hits.hits.flatMap((hit) =>
-        Object.values(hit._source?.data?.outputs || {})
-      )
-    );
+  const agentPolicyCount = res?.aggregations?.unique_policies?.buckets?.length ?? 0;
 
-    const uniqueOutputs = new Set(allOutputs.flatMap((output) => output.type));
-
-    return {
-      count: agentPolicyCount as number,
-      output_types: Array.from(uniqueOutputs),
-    };
-  } catch (error) {
-    if (error.statusCode === 404) {
-      appContextService.getLogger().debug('Index .fleet-policies does not exist yet.');
-    } else {
-      throw error;
-    }
+  if (agentPolicyCount === 0) {
     return DEFAULT_AGENT_POLICIES_USAGE;
   }
+
+  const allOutputs = res.aggregations!.unique_policies.buckets.flatMap((bucket) =>
+    bucket.output_types.hits.hits.flatMap((hit) => Object.values(hit._source?.data?.outputs || {}))
+  );
+
+  const uniqueOutputs = new Set(allOutputs.flatMap((output) => output.type));
+
+  return {
+    count: agentPolicyCount as number,
+    output_types: Array.from(uniqueOutputs),
+  };
 };

@@ -309,4 +309,16 @@ describe('fleet usage telemetry', () => {
       })
     );
   });
+
+  it('should fetch agent policies usage telemetry if .fleet-policies index does not exist', async () => {
+    const esClient = kbnServer.coreStart.elasticsearch.client.asInternalUser;
+    const res = await esClient.indices.resolveIndex({ name: '.fleet-policies' });
+    for (const index of res.aliases) {
+      await esClient.indices.delete({ index: index.indices! });
+    }
+
+    const usage = await fetchFleetUsage(core, { agents: { enabled: true } }, new AbortController());
+
+    expect(usage?.agent_policies).toEqual({ count: 0, output_types: [] });
+  });
 });
