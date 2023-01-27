@@ -276,6 +276,8 @@
       "@kbn/core-execution-context-browser-mocks/*": ["packages/core/execution-context/core-execution-context-browser-mocks/*"],
       "@kbn/core-execution-context-common": ["packages/core/execution-context/core-execution-context-common"],
       "@kbn/core-execution-context-common/*": ["packages/core/execution-context/core-execution-context-common/*"],
+      "@kbn/core-execution-context-integration-tests": ["packages/core/execution-context/core-execution-context-integration-tests"],
+      "@kbn/core-execution-context-integration-tests/*": ["packages/core/execution-context/core-execution-context-integration-tests/*"],
       "@kbn/core-execution-context-server": ["packages/core/execution-context/core-execution-context-server"],
       "@kbn/core-execution-context-server/*": ["packages/core/execution-context/core-execution-context-server/*"],
       "@kbn/core-execution-context-server-internal": ["packages/core/execution-context/core-execution-context-server-internal"],

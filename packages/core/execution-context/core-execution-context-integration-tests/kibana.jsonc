@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "devOnly": true,
+  "id": "@kbn/core-execution-context-integration-tests",
+  "owner": "@elastic/kibana-core"
+}

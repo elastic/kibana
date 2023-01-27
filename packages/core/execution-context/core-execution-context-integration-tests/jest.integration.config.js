@@ -12,8 +12,8 @@ module.exports = {
   // to do so, we must fix all integration tests first
   // see https://github.com/elastic/kibana/pull/130255/
   preset: '@kbn/test/jest_integration',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/core/server/integration_tests/execution_context'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/execution-context/core-execution-context-integration-tests'],
   // must override to match all test given there is no `integration_tests` subfolder
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
 };
