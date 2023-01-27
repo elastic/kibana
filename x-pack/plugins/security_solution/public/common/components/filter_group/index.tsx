@@ -338,6 +338,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             id="filter-group__context-menu"
             button={
               <EuiButtonIcon
+                aria-label="Filter group menu"
                 display="empty"
                 size="s"
                 iconType="boxesHorizontal"

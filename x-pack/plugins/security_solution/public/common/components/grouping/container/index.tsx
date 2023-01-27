@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elast
 import type { Filter } from '@kbn/es-query';
 import { isArray } from 'lodash/fp';
 import React, { useMemo, useState } from 'react';
+import { tableDefaults } from '../../../store/data_table/defaults';
 import { defaultUnit } from '../../toolbar/unit';
 import type { BadgeMetric, CustomMetric } from '../accordion_panel';
 import { GroupPanel } from '../accordion_panel';
@@ -157,11 +158,13 @@ const GroupingContainerComponent = ({
       trigger,
     ]
   );
-
+  const pageCount = useMemo(
+    () => (groupsNumber && pagination.pageSize ? Math.ceil(groupsNumber / pagination.pageSize) : 1),
+    [groupsNumber, pagination.pageSize]
+  );
   return (
     <>
       <EuiFlexGroup
-        data-test-subj="grouping-container-header"
         justifyContent="spaceBetween"
         alignItems="center"
         style={{ paddingBottom: 20, paddingTop: 20 }}
@@ -187,24 +190,18 @@ const GroupingContainerComponent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <GroupingStyledContainer data-test-subj="grouping-container">
-        {data?.groupsNumber?.value === 0 ? <EmptyGroupingComponent /> : groupPanels}
+      <GroupingStyledContainer>
+        {groupsNumber > 0 ? groupPanels : <EmptyGroupingComponent />}
         <EuiSpacer size="m" />
         <EuiTablePagination
-          data-test-subj="hostTablePaginator"
           activePage={pagination.pageIndex}
-          showPerPageOptions={true}
+          data-test-subj="grouping-table-pagination"
           itemsPerPage={pagination.pageSize}
-          onChangeItemsPerPage={(pageSize) => {
-            pagination.onChangeItemsPerPage(pageSize);
-          }}
-          pageCount={
-            groupsNumber && pagination.pageSize ? Math.ceil(groupsNumber / pagination.pageSize) : 1
-          }
-          onChangePage={(pageNumber) => {
-            pagination.onChangePage(pageNumber);
-          }}
-          itemsPerPageOptions={[10, 25, 50, 100]}
+          itemsPerPageOptions={tableDefaults.itemsPerPageOptions}
+          onChangeItemsPerPage={pagination.onChangeItemsPerPage}
+          onChangePage={pagination.onChangePage}
+          pageCount={pageCount}
+          showPerPageOptions
         />
       </GroupingStyledContainer>
     </>

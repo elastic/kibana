@@ -26,7 +26,7 @@ export const EmptyGroupingComponent: React.FC<{ height?: keyof typeof heights }>
   const { http } = useKibana<CoreStart>().services;
 
   return (
-    <EuiPanel color="subdued" data-test-subj="tGridEmptyState">
+    <EuiPanel color="subdued" data-test-subj="empty-results-panel">
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={true} style={panelStyle}>

@@ -113,19 +113,17 @@ describe('grouping container', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('Renders grouping counts containers', () => {
+  it('Renders group counts when groupsNumber > 0', () => {
     const { getByTestId } = render(
       <TestProviders>
         <GroupingContainer {...testProps} />
       </TestProviders>
     );
-    expect(getByTestId('grouping-container-header')).toBeInTheDocument();
-    expect(getByTestId('grouping-container')).toBeInTheDocument();
     expect(getByTestId('alert-count').textContent).toBe('2 alerts');
     expect(getByTestId('groups-count').textContent).toBe('2 groups');
   });
 
-  it('Does not render counts if groupsNumber = 0', () => {
+  it('Does not render group counts when groupsNumber = 0', () => {
     const data = {
       groupsNumber: {
         value: 0,
@@ -141,12 +139,13 @@ describe('grouping container', () => {
         buckets: [],
       },
     };
-    const { queryByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <GroupingContainer {...testProps} data={data} />
       </TestProviders>
     );
     expect(queryByTestId('alert-count')).not.toBeInTheDocument();
     expect(queryByTestId('groups-count')).not.toBeInTheDocument();
+    expect(getByTestId('empty-results-panel')).toBeInTheDocument();
   });
 });
