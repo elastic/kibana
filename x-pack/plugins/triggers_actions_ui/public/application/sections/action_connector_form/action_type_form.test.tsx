@@ -253,7 +253,7 @@ describe('action_type_form', () => {
 
     // Verify that the tooltip renders
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     wrapper.find('[data-test-subj="action-group-error-icon"]').first().simulate('mouseOver');
     // Run the timers so the EuiTooltip will be visible
     jest.runAllTimers();
@@ -351,6 +351,7 @@ function getActionTypeForm(
       onConnectorSelected={onConnectorSelected ?? jest.fn()}
       defaultActionGroupId={defaultActionGroupId ?? 'default'}
       setActionParamsProperty={jest.fn()}
+      setActionFrequencyProperty={jest.fn()}
       index={index ?? 1}
       actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
       actionTypeRegistry={actionTypeRegistry}

@@ -54,6 +54,7 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
                 endpointPrivileges,
               }),
               'data-test-subj': 'endpointResponseActionsConsole',
+              storagePrefix: 'xpack.securitySolution.Responder',
               TitleComponent: () => <HeaderEndpointInfo endpointId={endpointAgentId} />,
             },
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,

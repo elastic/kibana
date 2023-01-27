@@ -24,6 +24,8 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { getDuplicates } from './get_duplicates';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
+import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
 
 import {
   transformBulkError,
@@ -90,6 +92,19 @@ export const bulkCreateRulesRoute = (
             }
 
             try {
+              validateRulesWithDuplicatedDefaultExceptionsList({
+                allRules: request.body,
+                exceptionsList: payloadRule.exceptions_list,
+                ruleId: payloadRule.rule_id,
+              });
+
+              await validateRuleDefaultExceptionList({
+                exceptionsList: payloadRule.exceptions_list,
+                rulesClient,
+                ruleRuleId: payloadRule.rule_id,
+                ruleId: undefined,
+              });
+
               const validationErrors = validateCreateRuleProps(payloadRule);
               if (validationErrors.length) {
                 return createBulkErrorObject({

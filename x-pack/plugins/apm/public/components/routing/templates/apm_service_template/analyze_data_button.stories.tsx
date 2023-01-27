@@ -14,6 +14,7 @@ import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 interface Args {
   agentName: string;
@@ -51,6 +52,7 @@ export default {
                 transactionTypes: [],
                 serviceName,
                 fallbackToTransactions: false,
+                serviceAgentStatus: FETCH_STATUS.SUCCESS,
               }}
             >
               <KibanaContext.Provider>

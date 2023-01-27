@@ -7,7 +7,7 @@
  */
 
 import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
@@ -36,6 +36,7 @@ const previouslyRegisteredTypes = [
   'cases-user-actions',
   'cases-telemetry',
   'config',
+  'config-global',
   'connector_token',
   'core-usage-stats',
   'csp-rule-template',
@@ -59,9 +60,11 @@ const previouslyRegisteredTypes = [
   'fleet-enrollment-api-keys',
   'fleet-preconfiguration-deletion-record',
   'fleet-fleet-server-host',
+  'fleet-proxy',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
+  'guided-onboarding-plugin-state',
   'index-pattern',
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
@@ -89,6 +92,7 @@ const previouslyRegisteredTypes = [
   'osquery-usage-metric',
   'osquery-manager-usage-metric',
   'query',
+  'rules-settings',
   'sample-data-telemetry',
   'search',
   'search-session',
@@ -105,6 +109,7 @@ const previouslyRegisteredTypes = [
   'space',
   'spaces-usage-stats',
   'synthetics-monitor',
+  'synthetics-param',
   'synthetics-privates-locations',
   'tag',
   'task',
@@ -126,7 +131,7 @@ const previouslyRegisteredTypes = [
 
 describe('SO type registrations', () => {
   it('does not remove types from registrations without updating excludeOnUpgradeQuery', async () => {
-    const root = kbnTestServer.createRoot({}, { oss: false });
+    const root = createRoot({}, { oss: false });
     await root.preboot();
     const setup = await root.setup();
     const currentlyRegisteredTypes = setup.savedObjects

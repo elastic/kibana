@@ -11,5 +11,5 @@ export const combineFiltersAndUserSearch = (filters: string, search: string) => 
   }
   if (!filters) return search;
   if (!search) return filters;
-  return `(${filters}) and (${search})`;
+  return `(${filters}) AND (${search})`;
 };

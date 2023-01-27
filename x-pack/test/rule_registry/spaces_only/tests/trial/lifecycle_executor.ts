@@ -170,7 +170,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         });
 
         // Returns the current state of the alert
-        return Promise.resolve(state);
+        return Promise.resolve({ state });
       });
 
       const ruleId = 'rule-id';
@@ -201,8 +201,8 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
       >;
 
       // Execute the rule the first time
-      const results = await executor(options);
-      expect(results.wrapped).to.eql({
+      const executorResult = await executor(options);
+      expect(executorResult.state.wrapped).to.eql({
         testObject: {
           host: { name: 'host-01' },
           id: 'host-01',
@@ -210,12 +210,15 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         },
       });
 
+      const alertUuid = executorResult.state.trackedAlerts['host-01'].alertUuid;
+      expect(alertUuid).to.be('uuid-1');
+
       // We need to refresh the index so the data is available for the next call
       await es.indices.refresh({ index: `${ruleDataClient.indexName}*` });
 
       // Execute again to ensure that we read the object and write it again with the updated state
-      const nextResults = await executor({ ...options, state: results });
-      expect(nextResults.wrapped).to.eql({
+      const nextExecutorResult = await executor({ ...options, state: executorResult.state });
+      expect(nextExecutorResult.state.wrapped).to.eql({
         testObject: {
           host: { name: 'host-01' },
           id: 'host-01',
@@ -229,9 +232,6 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
       // Refresh again so we can query the data to check it was written properly
       await es.indices.refresh({ index: `${ruleDataClient.indexName}*` });
 
-      const alertUuid = nextResults.trackedAlerts['host-01'].alertUuid;
-      expect(alertUuid).to.be('uuid-1');
-
       // Use the ruleDataClient to read the results from the index
       const response = await ruleDataClient.getReader().search({
         body: {
@@ -240,7 +240,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
               filter: [
                 {
                   term: {
-                    [ALERT_UUID]: alertUuid,
+                    [ALERT_UUID]: nextExecutorResult.state.trackedAlerts['host-01'].alertUuid,
                   },
                 },
               ],
@@ -251,7 +251,9 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
       const source = response.hits.hits[0]._source as any;
 
       // The state in Elasticsearch should match the state returned from the executor
-      expect(source.testObject).to.eql(nextResults.wrapped && nextResults.wrapped.testObject);
+      expect(source.testObject).to.eql(
+        nextExecutorResult.state.wrapped && nextExecutorResult.state.wrapped.testObject
+      );
     });
   });
 }

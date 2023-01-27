@@ -443,7 +443,7 @@ export const CodeEditor: React.FC<Props> = ({
           </div>
         ) : null}
         <MonacoEditor
-          theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
+          theme={options?.theme ?? (transparentBackground ? 'euiColorsTransparent' : 'euiColors')}
           language={languageId}
           value={value}
           onChange={onChange}

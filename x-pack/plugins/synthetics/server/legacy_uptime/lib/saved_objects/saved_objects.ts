@@ -8,14 +8,20 @@
 import { SavedObjectsErrorHelpers, SavedObjectsServiceSetup } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
+import {
+  SYNTHETICS_SECRET_ENCRYPTED_TYPE,
+  syntheticsParamSavedObjectType,
+} from './synthetics_param';
 import { privateLocationsSavedObject } from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { secretKeys } from '../../../../common/constants/monitor_management';
-import { DynamicSettings } from '../../../../common/runtime_types';
+import { ConfigKey, DynamicSettings } from '../../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../adapters';
 import { UptimeConfig } from '../../../../common/config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';
-import { syntheticsMonitorType, getSyntheticsMonitorSavedObjectType } from './synthetics_monitor';
+import {
+  getSyntheticsMonitorSavedObjectType,
+  SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
+} from './synthetics_monitor';
 import { syntheticsServiceApiKey } from './service_api_key';
 
 export const registerUptimeSavedObjects = (
@@ -27,25 +33,16 @@ export const registerUptimeSavedObjects = (
 
   savedObjectsService.registerType(getSyntheticsMonitorSavedObjectType(encryptedSavedObjects));
   savedObjectsService.registerType(syntheticsServiceApiKey);
+  savedObjectsService.registerType(syntheticsParamSavedObjectType);
 
   encryptedSavedObjects.registerType({
     type: syntheticsServiceApiKey.name,
     attributesToEncrypt: new Set(['apiKey']),
+    attributesToExcludeFromAAD: new Set([ConfigKey.ALERT_CONFIG]),
   });
 
-  encryptedSavedObjects.registerType({
-    type: syntheticsMonitorType,
-    attributesToEncrypt: new Set([
-      'secrets',
-      /* adding secretKeys to the list of attributes to encrypt ensures
-       * that secrets are never stored on the resulting saved object,
-       * even in the presence of developer error.
-       *
-       * In practice, all secrets should be stored as a single JSON
-       * payload on the `secrets` key. This ensures performant decryption. */
-      ...secretKeys,
-    ]),
-  });
+  encryptedSavedObjects.registerType(SYNTHETICS_MONITOR_ENCRYPTED_TYPE);
+  encryptedSavedObjects.registerType(SYNTHETICS_SECRET_ENCRYPTED_TYPE);
 };
 
 export interface UMSavedObjectsAdapter {

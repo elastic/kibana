@@ -8,6 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { ApiStatus, Status, HttpError } from '../../../../common/types/api';
+import { clearFlashMessages, flashAPIErrors, flashSuccessToast } from '../flash_messages';
 
 export interface Values<T> {
   apiStatus: ApiStatus<T>;
@@ -23,11 +24,26 @@ export interface Actions<Args, Result> {
   makeRequest(args: Args): Args;
 }
 
+export interface CreateApiOptions<Result> {
+  clearFlashMessagesOnMakeRequest: boolean;
+  requestBreakpointMS?: number;
+  showErrorFlash: boolean;
+  showSuccessFlashFn?: (result: Result) => string;
+}
+
+const DEFAULT_CREATE_API_OPTIONS = {
+  clearFlashMessagesOnMakeRequest: true,
+  showErrorFlash: true,
+};
+
 export const createApiLogic = <Result, Args>(
   path: string[],
-  apiFunction: (args: Args) => Promise<Result>
-) =>
-  kea<MakeLogicType<Values<Result>, Actions<Args, Result>>>({
+  apiFunction: (args: Args) => Promise<Result>,
+  incomingOptions: Partial<CreateApiOptions<Result>> = {}
+) => {
+  const options = { ...DEFAULT_CREATE_API_OPTIONS, ...incomingOptions };
+
+  return kea<MakeLogicType<Values<Result>, Actions<Args, Result>>>({
     actions: {
       apiError: (error) => error,
       apiReset: true,
@@ -35,7 +51,23 @@ export const createApiLogic = <Result, Args>(
       makeRequest: (args) => args,
     },
     listeners: ({ actions }) => ({
-      makeRequest: async (args) => {
+      apiError: (error) => {
+        if (options.showErrorFlash) {
+          flashAPIErrors(error);
+        }
+      },
+      apiSuccess: (result) => {
+        if (options.showSuccessFlashFn) {
+          flashSuccessToast(options.showSuccessFlashFn(result));
+        }
+      },
+      makeRequest: async (args, breakpoint) => {
+        if (options.clearFlashMessagesOnMakeRequest) {
+          clearFlashMessages();
+        }
+        if (options.requestBreakpointMS) {
+          await breakpoint(options.requestBreakpointMS);
+        }
         try {
           const result = await apiFunction(args);
           actions.apiSuccess(result);
@@ -75,3 +107,4 @@ export const createApiLogic = <Result, Args>(
       status: [() => [selectors.apiStatus], (apiStatus: ApiStatus<Result>) => apiStatus.status],
     }),
   });
+};

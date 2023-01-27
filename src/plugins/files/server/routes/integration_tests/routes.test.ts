@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { CreateFileKindHttpEndpoint } from '../../../common/api_routes';
+import { TypeOf } from '@kbn/config-schema';
+import type { FileJSON } from '../../../common';
+import type { rt } from '../file_kind/create';
 import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../test_utils';
 
 describe('File HTTP API', () => {
@@ -27,7 +29,7 @@ describe('File HTTP API', () => {
 
   describe('find', () => {
     beforeEach(async () => {
-      const args: Array<CreateFileKindHttpEndpoint['inputs']['body']> = [
+      const args: Array<TypeOf<typeof rt.body>> = [
         {
           name: 'firstFile',
           alt: 'my first alt',
@@ -54,7 +56,7 @@ describe('File HTTP API', () => {
         },
       ];
 
-      const files = await Promise.all(args.map((arg) => createFile(arg)));
+      const files = await Promise.all(args.map((arg) => createFile(arg as any)));
 
       for (const file of files.slice(0, 2)) {
         await request
@@ -197,6 +199,32 @@ describe('File HTTP API', () => {
             },
           },
         });
+      }
+    });
+  });
+
+  describe('bulk delete', () => {
+    afterEach(async () => {
+      await testHarness.cleanupAfterEach();
+    });
+    it('bulk deletes files', async () => {
+      const [file1] = await Promise.all([
+        createFile({}, { deleteAfterTest: false }),
+        createFile(),
+        createFile(),
+      ]);
+      {
+        const { body: response } = await request
+          .delete(root, `/api/files/blobs`)
+          .send({ ids: [file1.id, 'unknown'] })
+          .expect(200);
+        expect(response.succeeded).toEqual([file1.id]);
+        expect(response.failed).toEqual([['unknown', 'File not found']]);
+      }
+      {
+        const { body: response } = await request.post(root, `/api/files/find`).send({}).expect(200);
+        expect(response.files).toHaveLength(2);
+        expect(response.files.find((file: FileJSON) => file.id === file1.id)).toBeUndefined();
       }
     });
   });

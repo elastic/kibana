@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Switch, Route } from 'react-router-dom';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
-import { getPackageReleaseLabel } from '../../../../../../services/package_prerelease';
+import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
-import { isPackageUnverified } from '../../../../services';
+import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
 
@@ -28,8 +28,6 @@ import type {
 
 import { useGetPackages } from '../../../../hooks';
 
-import type { Section } from '../../..';
-
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
 import { InstalledPackages } from './installed_packages';
@@ -37,14 +35,15 @@ import { AvailablePackages } from './available_packages';
 
 export interface CategoryParams {
   category?: ExtendedIntegrationCategory;
+  subcategory?: string;
 }
 
 export const getParams = (params: CategoryParams, search: string) => {
-  const { category } = params;
+  const { category, subcategory } = params;
   const selectedCategory: ExtendedIntegrationCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam };
+  return { selectedCategory, searchParam, selectedSubcategory: subcategory };
 };
 
 export const categoryExists = (category: string, categories: CategoryFacet[]) => {
@@ -70,24 +69,23 @@ export const mapToCard = ({
 
   let isUnverified = false;
 
-  let version = 'version' in item ? item.version || '' : '';
+  const version = 'version' in item ? item.version || '' : '';
 
+  let isUpdateAvailable = false;
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.id.includes('language_client.')
       ? addBasePath(item.uiInternalPath)
       : item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
-    // installed package
-    if (
-      ['updates_available', 'installed'].includes(selectedCategory ?? '') &&
-      'savedObject' in item
-    ) {
-      version = item.savedObject.attributes.version || item.version;
+    let urlVersion = item.version;
+    if ('savedObject' in item) {
+      urlVersion = item.savedObject.attributes.version || item.version;
       isUnverified = isPackageUnverified(item, packageVerificationKeyId);
+      isUpdateAvailable = isPackageUpdatable(item);
     }
 
     const url = getHref('integration_details_overview', {
-      pkgkey: `${item.name}-${version}`,
+      pkgkey: `${item.name}-${urlVersion}`,
       ...(item.integration ? { integration: item.integration } : {}),
     });
 
@@ -109,13 +107,16 @@ export const mapToCard = ({
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
     isUnverified,
+    isUpdateAvailable,
   };
 };
 
 export const EPMHomePage: React.FC = () => {
+  const [prereleaseEnabled, setPrereleaseEnabled] = useState<boolean>(false);
+
   // loading packages to find installed ones
   const { data: allPackages, isLoading } = useGetPackages({
-    prerelease: true,
+    prerelease: prereleaseEnabled,
   });
 
   const installedPackages = useMemo(
@@ -124,21 +125,25 @@ export const EPMHomePage: React.FC = () => {
     [allPackages?.response]
   );
 
-  const atLeastOneUnverifiedPackageInstalled = installedPackages.some(
+  const unverifiedPackageCount = installedPackages.filter(
     (pkg) => 'savedObject' in pkg && pkg.savedObject.attributes.verification_status === 'unverified'
-  );
+  ).length;
 
-  const sectionsWithWarning = (atLeastOneUnverifiedPackageInstalled ? ['manage'] : []) as Section[];
+  const upgradeablePackageCount = installedPackages.filter(isPackageUpdatable).length;
+
+  const notificationsBySection = {
+    manage: unverifiedPackageCount + upgradeablePackageCount,
+  };
   return (
     <Switch>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
-        <DefaultLayout section="manage" sectionsWithWarning={sectionsWithWarning}>
+        <DefaultLayout section="manage" notificationsBySection={notificationsBySection}>
           <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
         </DefaultLayout>
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
-        <DefaultLayout section="browse" sectionsWithWarning={sectionsWithWarning}>
-          <AvailablePackages />
+        <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
+          <AvailablePackages setPrereleaseEnabled={setPrereleaseEnabled} />
         </DefaultLayout>
       </Route>
     </Switch>

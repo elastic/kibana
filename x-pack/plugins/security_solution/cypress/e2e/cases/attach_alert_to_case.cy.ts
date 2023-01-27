@@ -10,7 +10,7 @@ import { ROLES } from '../../../common/test';
 
 import { expandFirstAlertActions } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
-import { cleanKibana, waitForPageToBeLoaded } from '../../tasks/common';
+import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login, visit, waitForPageWithoutDateRange } from '../../tasks/login';
 
@@ -37,7 +37,6 @@ describe('Alerts timeline', () => {
     beforeEach(() => {
       login(ROLES.reader);
       loadDetectionsPage(ROLES.reader);
-      waitForPageToBeLoaded();
     });
 
     it('should not allow user with read only privileges to attach alerts to existing cases', () => {

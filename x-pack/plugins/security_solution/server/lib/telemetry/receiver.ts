@@ -58,6 +58,7 @@ import type {
   ValueListIndicatorMatchResponseAggregation,
 } from './types';
 import { telemetryConfiguration } from './configuration';
+import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 
 export interface ITelemetryReceiver {
   start(
@@ -192,8 +193,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   ) {
     this.kibanaIndex = kibanaIndex;
     this.alertsIndex = alertsIndex;
-    this.agentClient = endpointContextService?.getAgentService()?.asInternalUser;
-    this.agentPolicyService = endpointContextService?.getAgentPolicyService();
+    this.agentClient = endpointContextService?.getInternalFleetServices().agent;
+    this.agentPolicyService = endpointContextService?.getInternalFleetServices().agentPolicy;
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
     this.soClient =
@@ -277,7 +278,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `.ds-metrics-endpoint.metrics-*`,
+      index: ENDPOINT_METRICS_INDEX,
       ignore_unavailable: false,
       body: {
         size: 0, // no query results required - only aggregation quantity

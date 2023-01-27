@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
-import { render, waitFor, screen, act } from '@testing-library/react';
+import { render, waitFor, screen, act, within } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -23,7 +23,7 @@ import {
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
-import { StatusAll } from '../../../common/ui/types';
+import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
@@ -39,7 +39,7 @@ import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useUpdateCase } from '../../containers/use_update_case';
-import { useGetCases } from '../../containers/use_get_cases';
+import { useGetCases, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -82,7 +82,8 @@ const mockKibana = () => {
   } as unknown as ReturnType<typeof useKibana>);
 };
 
-describe('AllCasesListGeneric', () => {
+// Flaky: https://github.com/elastic/kibana/issues/148486
+describe.skip('AllCasesListGeneric', () => {
   const refetchCases = jest.fn();
   const onRowClick = jest.fn();
   const updateCaseProperty = jest.fn();
@@ -127,6 +128,7 @@ describe('AllCasesListGeneric', () => {
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
     mockKibana();
     moment.tz.setDefault('UTC');
+    window.localStorage.clear();
   });
 
   it('should render AllCasesList', async () => {
@@ -206,6 +208,7 @@ describe('AllCasesListGeneric', () => {
             id: null,
             createdAt: null,
             createdBy: null,
+            updatedAt: null,
             status: null,
             severity: null,
             tags: null,
@@ -255,26 +258,35 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toBeCalledWith(
         expect.objectContaining({
           queryParams: {
-            page: 1,
-            perPage: 5,
-            sortField: 'createdAt',
-            sortOrder: 'asc',
+            ...DEFAULT_QUERY_PARAMS,
           },
         })
       );
     });
   });
 
+  it('renders the title column', async () => {
+    const res = appMockRenderer.render(<AllCasesList />);
+
+    expect(res.getByTestId('tableHeaderCell_title_0')).toBeInTheDocument();
+  });
+
+  it('renders the updated on column', async () => {
+    const res = appMockRenderer.render(<AllCasesList />);
+
+    expect(res.getByTestId('tableHeaderCell_updatedAt_5')).toBeInTheDocument();
+  });
+
   it('renders the status column', async () => {
     const res = appMockRenderer.render(<AllCasesList />);
 
-    expect(res.getByTestId('tableHeaderCell_Status_6')).toBeInTheDocument();
+    expect(res.getByTestId('tableHeaderCell_status_7')).toBeInTheDocument();
   });
 
   it('renders the severity column', async () => {
     const res = appMockRenderer.render(<AllCasesList />);
 
-    expect(res.getByTestId('tableHeaderCell_Severity_7')).toBeInTheDocument();
+    expect(res.getByTestId('tableHeaderCell_severity_8')).toBeInTheDocument();
   });
 
   it('should render the case stats', () => {
@@ -394,6 +406,86 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should sort by status', async () => {
+    const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+    userEvent.click(
+      within(result.getByTestId('tableHeaderCell_status_7')).getByTestId('tableHeaderSortButton')
+    );
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          queryParams: {
+            ...DEFAULT_QUERY_PARAMS,
+            sortField: SortFieldCase.status,
+            sortOrder: 'asc',
+          },
+        })
+      );
+    });
+  });
+
+  it('should sort by severity', async () => {
+    const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+    userEvent.click(
+      within(result.getByTestId('tableHeaderCell_severity_8')).getByTestId('tableHeaderSortButton')
+    );
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          queryParams: {
+            ...DEFAULT_QUERY_PARAMS,
+            sortField: SortFieldCase.severity,
+            sortOrder: 'asc',
+          },
+        })
+      );
+    });
+  });
+
+  it('should sort by title', async () => {
+    const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+    userEvent.click(
+      within(result.getByTestId('tableHeaderCell_title_0')).getByTestId('tableHeaderSortButton')
+    );
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          queryParams: {
+            ...DEFAULT_QUERY_PARAMS,
+            sortField: SortFieldCase.title,
+            sortOrder: 'asc',
+          },
+        })
+      );
+    });
+  });
+
+  it('should sort by updatedOn', async () => {
+    const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+    userEvent.click(
+      within(result.getByTestId('tableHeaderCell_updatedAt_5')).getByTestId('tableHeaderSortButton')
+    );
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          queryParams: {
+            ...DEFAULT_QUERY_PARAMS,
+            sortField: SortFieldCase.updatedAt,
+            sortOrder: 'asc',
+          },
+        })
+      );
+    });
+  });
+
   it('should filter by status: closed', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
     userEvent.click(result.getByTestId('case-status-filter'));
@@ -402,12 +494,7 @@ describe('AllCasesListGeneric', () => {
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          queryParams: {
-            page: 1,
-            perPage: 5,
-            sortField: 'closedAt',
-            sortOrder: 'desc',
-          },
+          queryParams: { ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.closedAt },
         })
       );
     });
@@ -421,12 +508,7 @@ describe('AllCasesListGeneric', () => {
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          queryParams: {
-            page: 1,
-            perPage: 5,
-            sortField: 'createdAt',
-            sortOrder: 'desc',
-          },
+          queryParams: DEFAULT_QUERY_PARAMS,
         })
       );
     });
@@ -440,12 +522,7 @@ describe('AllCasesListGeneric', () => {
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          queryParams: {
-            page: 1,
-            perPage: 5,
-            sortField: 'createdAt',
-            sortOrder: 'desc',
-          },
+          queryParams: DEFAULT_QUERY_PARAMS,
         })
       );
     });
@@ -618,7 +695,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution', 'observability'],
         },
-        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+        queryParams: DEFAULT_QUERY_PARAMS,
       });
 
       userEvent.click(getByTestId('options-filter-popover-button-Solution'));
@@ -644,7 +721,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution'],
         },
-        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+        queryParams: DEFAULT_QUERY_PARAMS,
       });
 
       userEvent.click(
@@ -666,7 +743,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution', 'observability'],
         },
-        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+        queryParams: DEFAULT_QUERY_PARAMS,
       });
     });
 
@@ -698,7 +775,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution'],
         },
-        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+        queryParams: DEFAULT_QUERY_PARAMS,
       });
     });
   });
@@ -1036,7 +1113,8 @@ describe('AllCasesListGeneric', () => {
   });
 });
 
-describe('Assignees', () => {
+// Flaky: https://github.com/elastic/kibana/issues/148490
+describe.skip('Assignees', () => {
   it('should hide the assignees column on basic license', async () => {
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
 

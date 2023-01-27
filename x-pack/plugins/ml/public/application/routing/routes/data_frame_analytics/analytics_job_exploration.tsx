@@ -9,6 +9,7 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { useUrlState } from '@kbn/ml-url-state';
 import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -17,7 +18,6 @@ import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_exploration';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
-import { useUrlState } from '../../../util/url_state';
 
 export const analyticsJobExplorationRouteFactory = (
   navigateToPath: NavigateToPath,

@@ -9,18 +9,25 @@ import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiButton, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-plugin/public';
+import { useSelector } from 'react-redux';
 import { getHasZipUrlMonitors } from '../../../state/api/has_zip_url_monitors';
 import { getDocLinks } from '../../../../kibana_services';
+import { monitorListSelector } from '../../../state/selectors';
 
 export const ZIP_URL_DEPRECATION_SESSION_STORAGE_KEY =
   'SYNTHETICS_ZIP_URL_DEPRECATION_HAS_BEEN_DISMISSED';
 
 export const ZipUrlDeprecation = () => {
+  const monitorList = useSelector(monitorListSelector);
   const noticeHasBeenDismissed =
     window.sessionStorage.getItem(ZIP_URL_DEPRECATION_SESSION_STORAGE_KEY) === 'true';
   const { data, loading } = useFetcher(() => {
-    return getHasZipUrlMonitors();
-  }, []);
+    // load it when list is loaded
+    if (!noticeHasBeenDismissed && monitorList.isLoaded) {
+      return getHasZipUrlMonitors();
+    }
+    return undefined;
+  }, [monitorList.isLoaded]);
   const hasZipUrlMonitors = !loading && data && data.hasZipUrlMonitors;
   const [shouldShowNotice, setShouldShowNotice] = useState(
     Boolean(hasZipUrlMonitors && !noticeHasBeenDismissed)

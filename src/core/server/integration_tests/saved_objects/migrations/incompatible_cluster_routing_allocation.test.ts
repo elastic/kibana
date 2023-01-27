@@ -9,8 +9,12 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { Root } from '../../../root';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
+import { Root } from '@kbn/core-root-server-internal';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { LogRecord } from '@kbn/logging';
 import { getDocVersion } from './test_utils';
@@ -24,7 +28,7 @@ async function removeLogFile() {
   await fs.unlink(logFilePath).catch(() => void 0);
 }
 
-const { startES } = kbnTestServer.createTestServers({
+const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
@@ -39,7 +43,7 @@ const { startES } = kbnTestServer.createTestServers({
 });
 
 function createKbnRoot() {
-  return kbnTestServer.createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       migrations: {
         skip: false,
@@ -79,7 +83,7 @@ const getClusterRoutingAllocations = (settings: Record<string, any>) => {
     [...routingAllocations].every((s: string) => s === 'all')
   ); // if set, only allow 'all';
 };
-let esServer: kbnTestServer.TestElasticsearchUtils;
+let esServer: TestElasticsearchUtils;
 
 async function updateRoutingAllocations(
   esClient: ElasticsearchClient,

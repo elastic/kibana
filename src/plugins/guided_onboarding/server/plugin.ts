@@ -8,17 +8,21 @@
 
 import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 
+import type { GuideId, GuideConfig } from '@kbn/guided-onboarding';
 import { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
 import { defineRoutes } from './routes';
-import { guidedSetupSavedObjects } from './saved_objects';
+import { guideStateSavedObjects, pluginStateSavedObjects } from './saved_objects';
+import type { GuidesConfig } from '../common';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
 {
   private readonly logger: Logger;
+  private readonly guidesConfig: GuidesConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.guidesConfig = {} as GuidesConfig;
   }
 
   public setup(core: CoreSetup) {
@@ -26,12 +30,22 @@ export class GuidedOnboardingPlugin
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router);
+    defineRoutes(router, this.guidesConfig);
 
     // register saved objects
-    core.savedObjects.registerType(guidedSetupSavedObjects);
+    core.savedObjects.registerType(guideStateSavedObjects);
+    core.savedObjects.registerType(pluginStateSavedObjects);
 
-    return {};
+    return {
+      registerGuideConfig: (guideId: GuideId, guideConfig: GuideConfig) => {
+        if (this.guidesConfig[guideId]) {
+          throw new Error(
+            `Unable to register a config with the guideId ${guideId} because it already exists`
+          );
+        }
+        this.guidesConfig[guideId] = guideConfig;
+      },
+    };
   }
 
   public start() {

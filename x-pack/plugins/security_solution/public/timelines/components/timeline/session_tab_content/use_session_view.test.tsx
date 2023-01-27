@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import { TableId, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -18,6 +18,7 @@ import {
   useGlobalFullScreen,
 } from '../../../../common/containers/use_full_screen';
 import { useSessionView, useSessionViewNavigation } from './use_session_view';
+import { TableId } from '../../../../../common/types';
 
 const mockDispatch = jest.fn();
 jest.mock('../../../../common/hooks/use_selector');
@@ -61,11 +62,6 @@ jest.mock('../../../../common/lib/kibana', () => {
         timelines: {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
-          getUseDraggableKeyboardWrapper: () =>
-            jest.fn().mockReturnValue({
-              onBlur: jest.fn(),
-              onKeyDown: jest.fn(),
-            }),
         },
       },
     }),

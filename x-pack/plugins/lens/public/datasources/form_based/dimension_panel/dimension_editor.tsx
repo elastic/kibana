@@ -328,6 +328,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         field: currentField || undefined,
         filterOperations: props.filterOperations,
         visualizationGroups: dimensionGroups,
+        dateRange,
       }),
       disabledStatus:
         definition.getDisabledStatus &&
@@ -396,7 +397,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         );
       } else if (!compatibleWithCurrentField) {
         label = (
-          <EuiFlexGroup gutterSize="none" alignItems="center">
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
               {label}
             </EuiFlexItem>
@@ -651,7 +652,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     <>
       <EuiFormRow
         label={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
                 defaultMessage: 'Functions',
@@ -664,10 +665,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 isOpen={isHelpOpen}
                 display="inlineBlock"
                 panelPaddingSize="none"
-                className="dscFieldTypesHelp__popover"
-                panelClassName="dscFieldTypesHelp__panel"
                 closePopover={closeHelp}
-                initialFocus="#dscFieldTypesHelpBasicTableId"
+                initialFocus="#functionsHelpBasicTableId"
               >
                 <EuiPopoverTitle paddingSize="s">
                   {i18n.translate('xpack.lens.indexPattern.quickFunctions.popoverTitle', {
@@ -681,7 +680,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   paddingSize="s"
                 >
                   <EuiBasicTable
-                    id="dscFieldTypesHelpBasicTableId"
+                    id="functionsHelpBasicTableId"
                     style={{ width: 350 }}
                     tableCaption={i18n.translate(
                       'xpack.lens.indexPattern.quickFunctions.tableTitle',

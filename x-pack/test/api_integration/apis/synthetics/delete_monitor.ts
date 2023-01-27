@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -13,7 +13,8 @@ import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[DELETE] /internal/uptime/service/monitors', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/147990
+  describe.skip('DeleteMonitorRoute', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -41,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
       _httpMonitorJson = getFixtureJson('http_monitor');
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.10.3')
+        .post('/api/fleet/epm/packages/synthetics/0.11.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -101,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles private location errors and does not delete the monitor if integration policy is unable to be deleted', async () => {
-      const name = `Monitor with a private location ${uuid.v4()}`;
+      const name = `Monitor with a private location ${uuidv4()}`;
       const newMonitor = {
         name,
         type: 'http',
@@ -118,8 +119,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       let monitorId = '';
 
       try {

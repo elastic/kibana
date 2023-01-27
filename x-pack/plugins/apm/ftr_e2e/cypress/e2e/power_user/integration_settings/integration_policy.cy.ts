@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-const integrationsPoliciesPath = '/app/integrations/detail/apm/policies';
-const policyName = 'apm-integration';
-const description = 'integration description';
-const host = 'myhost:8200';
-const url = 'http://myhost:8200';
-
 const policyFormFields = [
   {
     selector: 'packagePolicyNameInput',
@@ -34,24 +28,6 @@ const policyFormFields = [
   },
 ];
 
-const apisToIntercept = [
-  {
-    endpoint: 'api/fleet/agent_policies*',
-    name: 'fleetAgentPolicies',
-    method: 'POST',
-  },
-  {
-    endpoint: 'api/fleet/agent_status*',
-    name: 'fleetAgentStatus',
-    method: 'GET',
-  },
-  {
-    endpoint: 'api/fleet/package_policies',
-    name: 'fleetPackagePolicies',
-    method: 'POST',
-  },
-];
-
 describe('when navigating to integration page', () => {
   beforeEach(() => {
     const integrationsPath = '/app/integrations/browse';
@@ -66,7 +42,7 @@ describe('when navigating to integration page', () => {
     cy.getByTestSubj('addIntegrationPolicyButton').click();
   });
 
-  it.skip('checks validators for required fields', () => {
+  it('checks validators for required fields', () => {
     const requiredFields = policyFormFields.filter((field) => field.required);
 
     requiredFields.map((field) => {
@@ -76,7 +52,7 @@ describe('when navigating to integration page', () => {
     });
   });
 
-  it.skip('should display Tail-based section on latest version', () => {
+  it('should display Tail-based section on latest version', () => {
     cy.visitKibana('/app/fleet/integrations/apm/add-integration');
     cy.contains('Tail-based sampling').should('exist');
   });

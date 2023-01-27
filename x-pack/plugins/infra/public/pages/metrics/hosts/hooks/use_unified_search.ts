@@ -6,98 +6,137 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import { useCallback, useReducer } from 'react';
+import { useCallback, useEffect } from 'react';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import DateMath from '@kbn/datemath';
 import type { SavedQuery } from '@kbn/data-plugin/public';
+import { debounce } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
-import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
-
-const DEFAULT_FROM_MINUTES_VALUE = 15;
+import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
+import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_unified_search_url_state';
 
 export const useUnifiedSearch = () => {
-  const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
-
+  const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
   const { metricsDataView } = useMetricsDataViewContext();
   const { services } = useKibana<InfraClientStartDeps>();
   const {
     data: { query: queryManager },
   } = services;
 
-  const [getTime, setTime] = useKibanaTimefilterTime({
-    from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`,
-    to: 'now',
+  useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, {
+    from: state.dateRange.from,
+    to: state.dateRange.to,
   });
-  const { queryString, filterManager } = queryManager;
 
-  const currentDate = new Date();
-  const fromTS =
-    DateMath.parse(getTime().from)?.valueOf() ??
-    new Date(currentDate.getMinutes() - DEFAULT_FROM_MINUTES_VALUE).getTime();
-  const toTS = DateMath.parse(getTime().to)?.valueOf() ?? currentDate.getTime();
+  const { filterManager } = queryManager;
 
-  const currentTimeRange = {
-    from: fromTS,
-    to: toTS,
-  };
+  useEffect(() => {
+    const { filters } = state;
+    if (!deepEqual(filters, filterManager.getFilters())) {
+      filterManager.setFilters(filters);
+    }
+  }, [filterManager, state]);
 
-  const submitFilterChange = useCallback(
-    (query?: Query, dateRange?: TimeRange, filters?: Filter[]) => {
-      if (filters) {
-        filterManager.setFilters(filters);
-      }
-
-      setTime({
-        ...getTime(),
-        ...dateRange,
+  // This will listen and react to all changes in filterManager and timefilter values,
+  // to allow other components in the page to communicate with the unified search
+  useEffect(() => {
+    const next = () => {
+      const globalFilters = filterManager.getFilters();
+      debounceOnSubmit({
+        filters: globalFilters,
+        dateRange: getTime(),
       });
+    };
 
-      queryString.setQuery({ ...queryString.getQuery(), ...query });
-      // Unified search holds the all state, we need to force the hook to rerender so that it can return the most recent values
-      // This can be removed once we get the state from the URL
-      forceUpdate();
+    const filterSubscription = filterManager.getUpdates$().subscribe({
+      next,
+    });
+    const timeSubscription = queryManager.timefilter.timefilter.getTimeUpdate$().subscribe({
+      next,
+    });
+
+    return () => {
+      filterSubscription.unsubscribe();
+      timeSubscription.unsubscribe();
+    };
+  });
+
+  const onSubmit = useCallback(
+    (data?: {
+      query?: Query;
+      dateRange?: TimeRange;
+      filters?: Filter[];
+      panelFilters?: Filter[];
+    }) => {
+      const { query, dateRange, filters, panelFilters } = data ?? {};
+      const newDateRange = dateRange ?? getTime();
+
+      dispatch({
+        type: 'setQuery',
+        payload: {
+          query,
+          filters,
+          dateRange: newDateRange,
+          dateRangeTimestamp: getRangeInTimestamp(newDateRange),
+          panelFilters,
+        },
+      });
     },
-    [filterManager, queryString, getTime, setTime]
+    [getTime, dispatch, getRangeInTimestamp]
   );
+
+  // This won't prevent onSubmit from being fired twice when `clear filters` is clicked,
+  // that happens because both onQuerySubmit and onFiltersUpdated are internally triggered on same event by SearchBar.
+  // This just delays potential duplicate onSubmit calls
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debounceOnSubmit = useCallback(debounce(onSubmit, 100), [onSubmit]);
 
   const saveQuery = useCallback(
     (newSavedQuery: SavedQuery) => {
       const savedQueryFilters = newSavedQuery.attributes.filters ?? [];
       const globalFilters = filterManager.getGlobalFilters();
-      filterManager.setFilters([...savedQueryFilters, ...globalFilters]);
 
-      // Unified search holds the all state, we need to force the hook to rerender so that it can return the most recent values
-      // This can be removed once we get the state from the URL
-      forceUpdate();
+      const query = newSavedQuery.attributes.query;
+
+      dispatch({
+        type: 'setQuery',
+        payload: {
+          query,
+          filters: [...savedQueryFilters, ...globalFilters],
+        },
+      });
     },
-    [filterManager]
+    [filterManager, dispatch]
   );
 
-  const clearSavedQUery = useCallback(() => {
-    filterManager.setFilters(filterManager.getGlobalFilters());
-
-    // Unified search holds the all state, we need to force the hook to rerender so that it can return the most recent values
-    // This can be removed once we get the state from the URL
-    forceUpdate();
-  }, [filterManager]);
+  const clearSavedQuery = useCallback(() => {
+    dispatch({
+      type: 'setFilter',
+      payload: filterManager.getGlobalFilters(),
+    });
+  }, [filterManager, dispatch]);
 
   const buildQuery = useCallback(() => {
     if (!metricsDataView) {
       return null;
     }
-    return buildEsQuery(metricsDataView, queryString.getQuery(), filterManager.getFilters());
-  }, [filterManager, metricsDataView, queryString]);
+    return buildEsQuery(metricsDataView, state.query, [
+      ...state.filters,
+      ...(state.panelFilters ?? []),
+    ]);
+  }, [metricsDataView, state.query, state.filters, state.panelFilters]);
 
   return {
-    dateRangeTimestamp: currentTimeRange,
-    esQuery: buildQuery(),
-    submitFilterChange,
+    buildQuery,
+    clearSavedQuery,
+    controlPanelFilters: state.panelFilters,
+    dateRangeTimestamp: state.dateRangeTimestamp,
+    onSubmit: debounceOnSubmit,
     saveQuery,
-    clearSavedQUery,
-    unifiedSearchQuery: queryString.getQuery() as Query,
-    unifiedSearchDateRange: getTime(),
-    unifiedSearchFilters: filterManager.getFilters(),
+    unifiedSearchQuery: state.query,
+    unifiedSearchDateRange: state.dateRange,
+    unifiedSearchFilters: state.filters,
   };
 };
 

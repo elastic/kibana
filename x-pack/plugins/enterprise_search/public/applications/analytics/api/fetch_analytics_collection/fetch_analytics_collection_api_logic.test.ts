@@ -19,15 +19,15 @@ describe('FetchAnalyticsCollectionApiLogic', () => {
 
   describe('FetchAnalyticsCollectionsApiLogic', () => {
     it('calls the analytics collections list api', async () => {
-      const promise = Promise.resolve({ name: 'result' });
-      const name = 'collection';
+      const promise = Promise.resolve({ id: 'collection', name: 'result' });
+      const id = 'collection';
       http.get.mockReturnValue(promise);
-      const result = fetchAnalyticsCollection({ name });
+      const result = fetchAnalyticsCollection({ id });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
-        `/internal/enterprise_search/analytics/collections/${name}`
+        `/internal/enterprise_search/analytics/collections/${id}`
       );
-      await expect(result).resolves.toEqual({ name: 'result' });
+      await expect(result).resolves.toEqual({ id: 'collection', name: 'result' });
     });
   });
 });

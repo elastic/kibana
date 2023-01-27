@@ -462,6 +462,14 @@ class BrowserService extends FtrService {
   }
 
   /**
+   * Opens a blank new tab.
+   * @return {Promise<string>}
+   */
+  public async openNewTab() {
+    await this.driver.switchTo().newWindow('tab');
+  }
+
+  /**
    * Sets a value in local storage for the focused window/frame.
    *
    * @param {string} key
@@ -502,6 +510,16 @@ class BrowserService extends FtrService {
    */
   public async clearSessionStorage(): Promise<void> {
     await this.driver.executeScript('return window.sessionStorage.clear();');
+  }
+
+  /**
+   * Get from the "local storage" by key
+   *
+   * @param {string} key
+   * @return {Promise<string>}
+   */
+  public async getLocalStorageItem(key: string): Promise<string | null> {
+    return await this.driver.executeScript<string>(`return window.localStorage.getItem("${key}");`);
   }
 
   /**

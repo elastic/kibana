@@ -198,7 +198,7 @@ export class Home extends Component<HomeProps, State> {
       if (isNewKibanaInstance) {
         if (isCloudEnabled) {
           application.navigateToUrl('./home#/getting_started');
-          return;
+          return null;
         }
         return this.renderWelcome();
       }

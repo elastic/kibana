@@ -7,13 +7,13 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { kibanaPackageJson } from '@kbn/utils';
-import type { KibanaRequest } from '@kbn/core/server';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
   HttpServiceSetup,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
@@ -28,13 +28,16 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+
 import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
-  PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '../types';
@@ -161,7 +164,7 @@ class AppContextService {
   public getInternalUserSOClient(request: KibanaRequest) {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      excludedWrappers: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
 
@@ -209,8 +212,10 @@ class AppContextService {
     | Set<
         T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
-          : T extends 'postPackagePolicyDelete'
+          : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostDelete'
+          ? PostPackagePolicyPostDeleteCallback
           : T extends 'packagePolicyPostCreate'
           ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
@@ -220,8 +225,10 @@ class AppContextService {
       return this.externalCallbacks.get(type) as Set<
         T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
-          : T extends 'postPackagePolicyDelete'
+          : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostDelete'
+          ? PostPackagePolicyPostDeleteCallback
           : T extends 'packagePolicyPostCreate'
           ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback

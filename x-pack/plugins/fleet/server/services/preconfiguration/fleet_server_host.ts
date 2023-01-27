@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { isEqual } from 'lodash';
 
 import { decodeCloudId, normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
@@ -23,6 +22,8 @@ import {
   getDefaultFleetServerHost,
 } from '../fleet_server_host';
 import { agentPolicyService } from '../agent_policy';
+
+import { isDifferent } from './utils';
 
 export function getCloudFleetServersHosts() {
   const cloudSetup = appContextService.getCloud();
@@ -101,14 +102,15 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
 
       const isCreate = !existingHost;
       const isUpdateWithNewData =
-        existingHost &&
-        (!existingHost.is_preconfigured ||
-          existingHost.is_default !== preconfiguredFleetServerHost.is_default ||
-          existingHost.name !== preconfiguredFleetServerHost.name ||
-          !isEqual(
-            existingHost.host_urls.map(normalizeHostsForAgents),
-            preconfiguredFleetServerHost.host_urls.map(normalizeHostsForAgents)
-          ));
+        (existingHost &&
+          (!existingHost.is_preconfigured ||
+            existingHost.is_default !== preconfiguredFleetServerHost.is_default ||
+            existingHost.name !== preconfiguredFleetServerHost.name ||
+            isDifferent(
+              existingHost.host_urls.map(normalizeHostsForAgents),
+              preconfiguredFleetServerHost.host_urls.map(normalizeHostsForAgents)
+            ))) ||
+        isDifferent(existingHost?.proxy_id, preconfiguredFleetServerHost.proxy_id);
 
       if (isCreate) {
         await createFleetServerHost(

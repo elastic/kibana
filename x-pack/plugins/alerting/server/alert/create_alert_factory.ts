@@ -52,6 +52,7 @@ export interface CreateAlertFactoryOpts<
   alerts: Record<string, Alert<State, Context>>;
   logger: Logger;
   maxAlerts: number;
+  autoRecoverAlerts: boolean;
   canSetRecoveryContext?: boolean;
 }
 
@@ -63,6 +64,7 @@ export function createAlertFactory<
   alerts,
   logger,
   maxAlerts,
+  autoRecoverAlerts,
   canSetRecoveryContext = false,
 }: CreateAlertFactoryOpts<State, Context>): AlertFactory<State, Context, ActionGroupIds> {
   // Keep track of which alerts we started with so we can determine which have recovered
@@ -128,17 +130,30 @@ export function createAlertFactory<
             );
             return [];
           }
+          if (!autoRecoverAlerts) {
+            logger.debug(
+              `Set autoRecoverAlerts to true on rule type to get access to recovered alerts.`
+            );
+            return [];
+          }
 
-          const { recoveredAlerts } = processAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
-            {
-              alerts,
-              existingAlerts: originalAlerts,
-              hasReachedAlertLimit,
-              alertLimit: maxAlerts,
-            }
-          );
-          return Object.keys(recoveredAlerts ?? {}).map(
-            (alertId: string) => recoveredAlerts[alertId]
+          const { currentRecoveredAlerts } = processAlerts<
+            State,
+            Context,
+            ActionGroupIds,
+            ActionGroupIds
+          >({
+            alerts,
+            existingAlerts: originalAlerts,
+            previouslyRecoveredAlerts: {},
+            hasReachedAlertLimit,
+            alertLimit: maxAlerts,
+            autoRecoverAlerts,
+            // setFlapping is false, as we only want to use this function to get the recovered alerts
+            setFlapping: false,
+          });
+          return Object.keys(currentRecoveredAlerts ?? {}).map(
+            (alertId: string) => currentRecoveredAlerts[alertId]
           );
         },
       };

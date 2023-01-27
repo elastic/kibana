@@ -12,7 +12,7 @@ import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
+import { AUTO_UPDATE_PACKAGES, FILE_STORAGE_INTEGRATION_NAMES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
 import type {
   DefaultPackagesInstallationError,
@@ -29,6 +29,10 @@ import {
   ensurePreconfiguredOutputs,
   getPreconfiguredOutputFromConfig,
 } from './preconfiguration/outputs';
+import {
+  ensurePreconfiguredFleetProxies,
+  getPreconfiguredFleetProxiesFromConfig,
+} from './preconfiguration/fleet_proxies';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
@@ -36,7 +40,10 @@ import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
-import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
+import {
+  ensureDefaultComponentTemplates,
+  ensureFileUploadWriteIndices,
+} from './epm/elasticsearch/template/install';
 import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
@@ -49,6 +56,7 @@ import {
   ensurePreconfiguredFleetServerHosts,
   getPreconfiguredFleetServerHostFromConfig,
 } from './preconfiguration/fleet_server_host';
+import { getInstallationsByName } from './epm/packages/get';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -82,6 +90,13 @@ async function createSetupSideEffects(
   await migrateSettingsToFleetServerHost(soClient);
   logger.debug('Setting up Fleet download source');
   const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
+  // Need to be done before outputs and fleet server hosts as these object can reference a proxy
+  logger.debug('Setting up Proxy');
+  await ensurePreconfiguredFleetProxies(
+    soClient,
+    esClient,
+    getPreconfiguredFleetProxiesFromConfig(appContextService.getConfig())
+  );
 
   logger.debug('Setting up Fleet Sever Hosts');
   await ensurePreconfiguredFleetServerHosts(
@@ -108,6 +123,7 @@ async function createSetupSideEffects(
     await ensureFleetGlobalEsAssets(soClient, esClient);
   }
 
+  await ensureFleetFileUploadIndices(soClient, esClient);
   // Ensure that required packages are always installed even if they're left out of the config
   const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
 
@@ -168,6 +184,30 @@ async function createSetupSideEffects(
   };
 }
 
+/**
+ * Ensure ES assets shared by all Fleet index template are installed
+ */
+export async function ensureFleetFileUploadIndices(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) {
+  const { diagnosticFileUploadEnabled } = appContextService.getExperimentalFeatures();
+  if (!diagnosticFileUploadEnabled) return;
+  const logger = appContextService.getLogger();
+  const installedFileUploadIntegrations = await getInstallationsByName({
+    savedObjectsClient: soClient,
+    pkgNames: [...FILE_STORAGE_INTEGRATION_NAMES],
+  });
+
+  if (!installedFileUploadIntegrations.length) return [];
+  const integrationNames = installedFileUploadIntegrations.map(({ name }) => name);
+  logger.debug(`Ensuring file upload write indices for ${integrationNames}`);
+  return ensureFileUploadWriteIndices({
+    esClient,
+    logger,
+    integrationNames,
+  });
+}
 /**
  * Ensure ES assets shared by all Fleet index template are installed
  */

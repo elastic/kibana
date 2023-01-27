@@ -5,36 +5,51 @@
  * 2.0.
  */
 import '../_index.scss';
+import { pick } from 'lodash';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  toMountPoint,
+  wrapWithTheme,
+} from '@kbn/kibana-react-plugin/public';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import {
+  Provider as UrlStateContextProvider,
+  parseUrlState,
+  isRisonSerializationRequired,
+  type Accessor,
+  type Dictionary,
+  type SetUrlState,
+} from '@kbn/ml-url-state';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_data_visualizer_view';
-import {
-  Accessor,
-  Provider as UrlStateContextProvider,
-  Dictionary,
-  parseUrlState,
-  SetUrlState,
-  getNestedProperty,
-  isRisonSerializationRequired,
-} from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
+import { DV_STORAGE_KEYS } from './types/storage';
 
-export interface DataVisualizerUrlStateContextProviderProps {
+const XXL_BREAKPOINT = 1400;
+
+const localStorage = new Storage(window.localStorage);
+
+export interface DataVisualizerStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
   getAdditionalLinks?: GetAdditionalLinks;
 }
@@ -70,9 +85,10 @@ export const getLocatorParams = (params: {
   return locatorParams;
 };
 
-export const DataVisualizerUrlStateContextProvider: FC<
-  DataVisualizerUrlStateContextProviderProps
-> = ({ IndexDataVisualizerComponent, getAdditionalLinks }) => {
+export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
+  IndexDataVisualizerComponent,
+  getAdditionalLinks,
+}) => {
   const { services } = useDataVisualizerKibana();
   const {
     data: { dataViews, search },
@@ -289,14 +305,31 @@ export const IndexDataVisualizer: FC<{
     unifiedSearch,
     ...coreStart,
   };
+  const datePickerDeps = {
+    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
+  };
 
   return (
-    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+    <KibanaThemeProvider
+      theme$={coreStart.theme.theme$}
+      modify={{
+        breakpoint: {
+          xxl: XXL_BREAKPOINT,
+        },
+      }}
+    >
       <KibanaContextProvider services={{ ...services }}>
-        <DataVisualizerUrlStateContextProvider
-          IndexDataVisualizerComponent={IndexDataVisualizerView}
-          getAdditionalLinks={getAdditionalLinks}
-        />
+        <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
+          <DatePickerContextProvider {...datePickerDeps}>
+            <DataVisualizerStateContextProvider
+              IndexDataVisualizerComponent={IndexDataVisualizerView}
+              getAdditionalLinks={getAdditionalLinks}
+            />
+          </DatePickerContextProvider>
+        </StorageContextProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );

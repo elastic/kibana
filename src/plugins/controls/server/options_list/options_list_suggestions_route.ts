@@ -40,6 +40,7 @@ export const setupOptionsListSuggestionsRoute = (
         body: schema.object(
           {
             fieldName: schema.string(),
+            sort: schema.maybe(schema.any()),
             filters: schema.maybe(schema.any()),
             fieldSpec: schema.maybe(schema.any()),
             searchString: schema.maybe(schema.string()),
@@ -85,8 +86,7 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, fieldName } = request;
-
+    const { runPastTimeout, filters, fieldName, runtimeFieldMap } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
@@ -124,6 +124,9 @@ export const setupOptionsListSuggestionsRoute = (
           },
         },
       },
+      runtime_mappings: {
+        ...runtimeFieldMap,
+      },
     };
 
     /**
@@ -141,6 +144,7 @@ export const setupOptionsListSuggestionsRoute = (
       suggestions,
       totalCardinality,
       invalidSelections,
+      rejected: false,
     };
   };
 };

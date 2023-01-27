@@ -59,9 +59,9 @@ const createConnector = async (
   const result = await client.asCurrentUser.index({
     document,
     index: CONNECTORS_INDEX,
+    refresh: true,
   });
   await createIndex(client, document.index_name, language, false);
-  await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
 
   return { id: result._id, index_name: document.index_name };
 };
@@ -95,6 +95,7 @@ export const addConnector = async (
     configuration: {},
     description: null,
     error: null,
+    features: null,
     filtering: [
       {
         active: {

@@ -18,7 +18,8 @@ export type GetUrlParams = () => SyntheticsUrlParams;
 export type UpdateUrlParams = (
   updatedParams: {
     [key: string]: string | number | boolean | undefined;
-  } | null
+  } | null,
+  replaceState?: boolean
 ) => void;
 
 export type SyntheticsUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
@@ -34,7 +35,7 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
   const history = useHistory();
 
   const updateUrlParams: UpdateUrlParams = useCallback(
-    (updatedParams, clearAllParams = false) => {
+    (updatedParams, replaceState = false) => {
       const currentParams = getParsedParams(search);
       const mergedParams = {
         ...currentParams,
@@ -60,7 +61,14 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
 
       // only update the URL if the search has actually changed
       if (search !== updatedSearch) {
-        history.push({ pathname, search: updatedSearch || undefined });
+        if (replaceState) {
+          history.replace({
+            pathname,
+            search: updatedSearch || undefined,
+          });
+        } else {
+          history.push({ pathname, search: updatedSearch || undefined });
+        }
       }
     },
     [history, pathname, search]

@@ -824,7 +824,8 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async setMetricsGroupBy(option: string) {
     const groupBy = await this.testSubjects.find('groupBySelect');
-    await this.comboBox.setElement(groupBy, option, { clickWithMouse: true });
+    await this.comboBox.setElement(groupBy, option);
+    return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setMetricsGroupByTerms(

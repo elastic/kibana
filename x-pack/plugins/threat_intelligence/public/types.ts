@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentType, ReactElement, ReactNode, VFC } from 'react';
+import { ComponentType, NamedExoticComponent, ReactElement, ReactNode, VFC } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
@@ -21,6 +21,8 @@ import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { Store } from 'redux';
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public/types';
+import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: Array<FieldSpec & DataViewField>;
@@ -28,6 +30,10 @@ export interface SecuritySolutionDataViewBase extends DataViewBase {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ThreatIntelligencePluginSetup {}
+
+export interface SetupPlugins {
+  cases: CasesUiSetup;
+}
 
 export interface ThreatIntelligencePluginStart {
   getComponent: () => (props: {
@@ -40,6 +46,7 @@ export interface ThreatIntelligencePluginStartDeps {
 }
 
 export type Services = {
+  cases: CasesUiStart;
   data: DataPublicPluginStart;
   storage: Storage;
   dataViews: DataViewsPublicPluginStart;
@@ -51,6 +58,7 @@ export type Services = {
 
 export interface LicenseAware {
   isEnterprise(): boolean;
+  isPlatinumPlus(): boolean;
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
@@ -66,6 +74,18 @@ export interface UseInvestigateInTimelineProps {
   dataProviders: DataProvider[];
   from: string;
   to: string;
+}
+
+export interface BlockListFlyoutProps {
+  apiClient: unknown;
+  item: CreateExceptionListItemSchema;
+  policies: unknown[];
+  FormComponent: NamedExoticComponent<BlockListFormProps>;
+  onClose: () => void;
+}
+
+export interface BlockListFormProps {
+  item: CreateExceptionListItemSchema;
 }
 
 /**
@@ -93,7 +113,7 @@ export interface SecuritySolutionPluginContext {
   /**
    * Security Solution store
    */
-  getSecuritySolutionStore: Store;
+  securitySolutionStore: Store;
   /**
    * Pass UseInvestigateInTimeline functionality to TI plugin
    */
@@ -108,4 +128,24 @@ export interface SecuritySolutionPluginContext {
   useGlobalTime: () => TimeRange;
 
   SiemSearchBar: VFC<any>;
+
+  /**
+   * Register query in security solution store for tracking and centralized refresh support
+   */
+  registerQuery: (query: { id: string; loading: boolean; refetch: VoidFunction }) => void;
+
+  /**
+   * Deregister stale query
+   */
+  deregisterQuery: (query: { id: string }) => void;
+
+  blockList: {
+    exceptionListApiClient: unknown;
+    useSetUrlParams: () => (
+      params: Record<string, string | number | null | undefined>,
+      replace?: boolean | undefined
+    ) => void;
+    getFlyoutComponent: () => NamedExoticComponent<BlockListFlyoutProps>;
+    getFormComponent: () => NamedExoticComponent<BlockListFormProps>;
+  };
 }

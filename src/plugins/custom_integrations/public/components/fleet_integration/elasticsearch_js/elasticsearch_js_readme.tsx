@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import cuid from 'cuid';
 
 import {
-  EuiButton,
   EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -65,8 +63,6 @@ const TopFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const ElasticsearchJsClientReadme = () => {
-  const [apiKey, setApiKey] = useState<string | null>(null);
-
   return (
     <>
       <FixedHeader>
@@ -128,42 +124,6 @@ export const ElasticsearchJsClientReadme = () => {
                 <EuiTitle>
                   <h2>
                     <FormattedMessage
-                      id="customIntegrations.languageClients.JavascriptElasticsearch.readme.createApiKey"
-                      defaultMessage="Create an API key"
-                    />
-                  </h2>
-                </EuiTitle>
-
-                <EuiText>
-                  <FormattedMessage
-                    id="customIntegrations.languageClients.JavascriptElasticsearch.readme.apiKey"
-                    defaultMessage="Use the button bellow to generate an API key. You'll need this set up your client in the next step."
-                  />
-                </EuiText>
-
-                <EuiSpacer size="m" />
-
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => setApiKey(cuid())} disabled={!!apiKey}>
-                      Generate API key
-                    </EuiButton>
-                  </EuiFlexItem>
-
-                  {apiKey && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCodeBlock paddingSize="s" isCopyable className="eui-displayInline">
-                        {apiKey}
-                      </EuiCodeBlock>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiPageSection>
-
-              <EuiPageSection>
-                <EuiTitle>
-                  <h2>
-                    <FormattedMessage
                       id="customIntegrations.languageClients.JavascriptElasticsearch.readme.configure"
                       defaultMessage="Configure the Elasticsearch JavaScript Client"
                     />
@@ -189,7 +149,7 @@ const { Client } = require('@elastic/elasticsearch');
 
 // Instantiate the client with an API key
 const client = new Client({
-  auth: { apiKey: '${apiKey || 'YOUR_API_KEY'}' }
+  auth: { apiKey: 'YOUR_API_KEY' }
 })
 
           `}

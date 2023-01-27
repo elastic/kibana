@@ -235,17 +235,17 @@
               "{ mode: Readonly<",
               {
                 "pluginId": "@kbn/config",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-server.EnvironmentMode",
+                "section": "def-common.EnvironmentMode",
                 "text": "EnvironmentMode"
               },
               ">; packageInfo: Readonly<",
               {
                 "pluginId": "@kbn/config",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-server.PackageInfo",
+                "section": "def-common.PackageInfo",
                 "text": "PackageInfo"
               },
               ">; }"
@@ -264,9 +264,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LoggerFactory",
+                "section": "def-common.LoggerFactory",
                 "text": "LoggerFactory"
               }
             ],

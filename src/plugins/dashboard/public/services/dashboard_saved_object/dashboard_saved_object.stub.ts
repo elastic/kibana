@@ -8,10 +8,10 @@
 
 import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { DashboardAttributes } from '../../application';
 import { FindDashboardSavedObjectsResponse } from './lib/find_dashboard_saved_objects';
 
 import { DashboardSavedObjectService } from './types';
+import { DashboardAttributes } from '../../../common';
 import { LoadDashboardFromSavedObjectReturn } from './lib/load_dashboard_state_from_saved_object';
 
 type DashboardSavedObjectServiceFactory = PluginServiceFactory<DashboardSavedObjectService>;
@@ -21,7 +21,7 @@ export const dashboardSavedObjectServiceFactory: DashboardSavedObjectServiceFact
   return {
     loadDashboardStateFromSavedObject: jest.fn().mockImplementation(() =>
       Promise.resolve({
-        dashboardState: {},
+        dashboardInput: {},
       } as LoadDashboardFromSavedObjectReturn)
     ),
     saveDashboardStateToSavedObject: jest.fn(),

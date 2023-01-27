@@ -12,7 +12,7 @@ import { MonitorDetailFlyout } from './monitor_detail_flyout';
 import * as observabilityPublic from '@kbn/observability-plugin/public';
 import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
-import * as monitorDetailLocator from '../../hooks/use_monitor_detail_locator';
+import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 
 jest.mock('@kbn/observability-plugin/public');
 
@@ -23,6 +23,9 @@ describe('Monitor Detail Flyout', () => {
       data: null,
       refetch: () => null,
     });
+    jest
+      .spyOn(observabilityPublic, 'useTheme')
+      .mockReturnValue({ eui: { euiColorVis0: 'red', euiColorVis9: 'red' } } as any);
     jest.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
       data: {
         docId: 'docId',
@@ -36,6 +39,7 @@ describe('Monitor Detail Flyout', () => {
         url: {
           full: 'https://www.elastic.co',
         },
+        tags: ['tag1', 'tag2'],
       },
     });
     jest.spyOn(statusByLocation, 'useStatusByLocation').mockReturnValue({
@@ -50,8 +54,10 @@ describe('Monitor Detail Flyout', () => {
     const onCloseMock = jest.fn();
     const { getByLabelText } = render(
       <MonitorDetailFlyout
+        configId="test-id"
         id="test-id"
         location="US East"
+        locationId="us-east"
         onClose={onCloseMock}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
@@ -72,8 +78,10 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByText } = render(
       <MonitorDetailFlyout
+        configId="test-id"
         id="test-id"
         location="US East"
+        locationId="us-east"
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
@@ -90,8 +98,10 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByRole } = render(
       <MonitorDetailFlyout
+        configId="test-id"
         id="test-id"
         location="US East"
+        locationId="us-east"
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
@@ -112,8 +122,8 @@ describe('Monitor Detail Flyout', () => {
             number: '1',
             unit: 'm',
           },
+          tags: ['prod'],
         },
-        tags: ['prod'],
         type: 'browser',
         updated_at: '1996-02-27',
       },
@@ -121,11 +131,14 @@ describe('Monitor Detail Flyout', () => {
     });
     const detailLink = '/app/synthetics/monitor/test-id';
     jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
+    jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
 
     const { getByRole, getByText, getAllByRole } = render(
       <MonitorDetailFlyout
+        configId="test-id"
         id="test-id"
         location="US East"
+        locationId="us-east"
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
@@ -134,7 +147,7 @@ describe('Monitor Detail Flyout', () => {
 
     expect(getByText('Every 1 minute'));
     expect(getByText('test-id'));
-    expect(getByText('Up'));
+    expect(getByText('Pending'));
     expect(
       getByRole('heading', {
         level: 2,

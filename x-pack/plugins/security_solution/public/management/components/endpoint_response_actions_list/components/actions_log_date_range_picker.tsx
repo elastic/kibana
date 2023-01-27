@@ -30,7 +30,7 @@ export interface DateRangePickerValues {
 }
 
 const DatePickerWrapper = euiStyled.div`
-  padding-bottom: ${(props) => `${props.theme.eui.euiCodeBlockPaddingModifiers.paddingLarge}`};
+  padding-bottom: ${(props) => `${props.theme.eui.euiSizeL}`};
 `;
 
 export const ActionLogDateRangePicker = memo(

@@ -15,18 +15,7 @@ properties:
         - version
       properties:
         assignees:
-          type: array
-          description: An array containing users that are assigned to the case.
-          nullable: true
-          items:
-            type: object
-            required:
-             - uid
-            properties:
-              uid:
-                type: string
-                description: A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.
-                example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
+          $ref: 'assignees.yaml'
         connector:
           oneOf:
             - $ref: 'connector_properties_none.yaml'

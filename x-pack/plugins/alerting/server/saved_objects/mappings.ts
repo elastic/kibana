@@ -56,6 +56,22 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           enabled: false,
           type: 'object',
         },
+        frequency: {
+          properties: {
+            summary: {
+              index: false,
+              type: 'boolean',
+            },
+            notifyWhen: {
+              index: false,
+              type: 'keyword',
+            },
+            throttle: {
+              index: false,
+              type: 'keyword',
+            },
+          },
+        },
       },
     },
     params: {
@@ -114,7 +130,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     },
     monitoring: {
       properties: {
-        execution: {
+        run: {
           properties: {
             history: {
               properties: {
@@ -126,6 +142,9 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
                 },
                 timestamp: {
                   type: 'date',
+                },
+                outcome: {
+                  type: 'keyword',
                 },
               },
             },
@@ -145,41 +164,34 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
                 },
               },
             },
-          },
-        },
-      },
-    },
-    executionStatus: {
-      properties: {
-        numberOfTriggeredActions: {
-          type: 'long',
-        },
-        status: {
-          type: 'keyword',
-        },
-        lastExecutionDate: {
-          type: 'date',
-        },
-        lastDuration: {
-          type: 'long',
-        },
-        error: {
-          properties: {
-            reason: {
-              type: 'keyword',
-            },
-            message: {
-              type: 'keyword',
-            },
-          },
-        },
-        warning: {
-          properties: {
-            reason: {
-              type: 'keyword',
-            },
-            message: {
-              type: 'keyword',
+            last_run: {
+              properties: {
+                timestamp: {
+                  type: 'date',
+                },
+                metrics: {
+                  properties: {
+                    duration: {
+                      type: 'long',
+                    },
+                    total_search_duration_ms: {
+                      type: 'long',
+                    },
+                    total_indexing_duration_ms: {
+                      type: 'long',
+                    },
+                    total_alerts_detected: {
+                      type: 'float',
+                    },
+                    total_alerts_created: {
+                      type: 'float',
+                    },
+                    gap_duration_s: {
+                      type: 'float',
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -254,6 +266,81 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           },
         },
       },
+    },
+    nextRun: {
+      type: 'date',
+    },
+    // Deprecated, if you need to add new property please do it in `last_run`
+    executionStatus: {
+      properties: {
+        numberOfTriggeredActions: {
+          type: 'long',
+        },
+        status: {
+          type: 'keyword',
+        },
+        lastExecutionDate: {
+          type: 'date',
+        },
+        lastDuration: {
+          type: 'long',
+        },
+        error: {
+          properties: {
+            reason: {
+              type: 'keyword',
+            },
+            message: {
+              type: 'keyword',
+            },
+          },
+        },
+        warning: {
+          properties: {
+            reason: {
+              type: 'keyword',
+            },
+            message: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+    lastRun: {
+      properties: {
+        outcome: {
+          type: 'keyword',
+        },
+        outcomeOrder: {
+          type: 'float',
+        },
+        warning: {
+          type: 'text',
+        },
+        outcomeMsg: {
+          type: 'text',
+        },
+        alertsCount: {
+          properties: {
+            active: {
+              type: 'float',
+            },
+            new: {
+              type: 'float',
+            },
+            recovered: {
+              type: 'float',
+            },
+            ignored: {
+              type: 'float',
+            },
+          },
+        },
+      },
+    },
+    running: {
+      type: 'boolean',
     },
   },
 };

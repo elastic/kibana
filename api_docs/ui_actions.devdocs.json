@@ -104,15 +104,7 @@
             "signature": [
               "Map<string, ",
               "ActionInternal",
-              "<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<object>>>"
+              "<object>>"
             ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -258,7 +250,7 @@
             "label": "registerAction",
             "description": [],
             "signature": [
-              "<A extends ",
+              "<Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -266,7 +258,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>>(definition: A) => ",
+              "<Context>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -274,9 +266,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<A>>"
+              "<Context>"
             ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -285,12 +275,19 @@
               {
                 "parentPluginId": "uiActions",
                 "id": "def-public.UiActionsService.registerAction.$1",
-                "type": "Uncategorized",
+                "type": "Object",
                 "tags": [],
                 "label": "definition",
                 "description": [],
                 "signature": [
-                  "A"
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<Context>"
                 ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
@@ -476,7 +473,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>) => void"
+              "<any>) => void"
             ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -512,7 +509,7 @@
                     "section": "def-public.ActionDefinition",
                     "text": "ActionDefinition"
                   },
-                  "<object>"
+                  "<any>"
                 ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
@@ -530,15 +527,7 @@
             "label": "getAction",
             "description": [],
             "signature": [
-              "<T extends ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<object>>(id: string) => ",
+              "(id: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -546,9 +535,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<T>>"
+              "<object>"
             ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -704,6 +691,10 @@
                 "path": "src/plugins/discover/public/plugin.tsx"
               },
               {
+                "plugin": "imageEmbeddable",
+                "path": "src/plugins/image_embeddable/public/image_embeddable/image_embeddable_factory.tsx"
+              },
+              {
                 "plugin": "embeddable",
                 "path": "src/plugins/embeddable/public/tests/container.test.ts"
               },
@@ -847,6 +838,76 @@
       },
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.CellActions",
+        "type": "Function",
+        "tags": [],
+        "label": "CellActions",
+        "description": [],
+        "signature": [
+          "({ field, triggerId, children, mode, showActionTooltips, visibleCellActions, metadata, }: React.PropsWithChildren<",
+          "CellActionsProps",
+          ">) => JSX.Element"
+        ],
+        "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  field,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  metadata,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "CellActionsProps",
+              ">"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.CellActionsContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "CellActionsContextProvider",
+        "description": [],
+        "signature": [
+          "({ children, getTriggerCompatibleActions, }: React.PropsWithChildren<CellActionsContextProviderProps>) => JSX.Element"
+        ],
+        "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActionsContextProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  getTriggerCompatibleActions,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<CellActionsContextProviderProps>"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.createAction",
         "type": "Function",
         "tags": [],
@@ -920,10 +981,10 @@
           },
           "<Context> extends Partial<",
           {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Presentable",
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
             "text": "Presentable"
           },
           "<",
@@ -1079,37 +1140,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.Action.MenuItem",
-            "type": "Function",
-            "tags": [],
-            "label": "MenuItem",
-            "description": [
-              "\n`UiComponent` to render when displaying this action as a context menu item.\nIf not provided, `getDisplayName` will be used instead."
-            ],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponent",
-                "text": "UiComponent"
-              },
-              "<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionMenuItemProps",
-                "text": "ActionMenuItemProps"
-              },
-              "<Context>> | undefined"
-            ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActions",
@@ -1322,6 +1352,22 @@
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.Action.showNotification",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showNotification",
+            "description": [
+              "\nDetermines if notification should be shown in menu for that action\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1345,10 +1391,10 @@
           },
           "<Context> extends Partial<",
           {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Presentable",
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
             "text": "Presentable"
           },
           "<",
@@ -1551,6 +1597,22 @@
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.ActionDefinition.showNotification",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showNotification",
+            "description": [
+              "\nDetermines if notification should be shown in menu for that action\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1640,6 +1702,100 @@
       },
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.CellActionExecutionContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "CellActionExecutionContext",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.CellActionExecutionContext",
+            "text": "CellActionExecutionContext"
+          },
+          " extends ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.ActionExecutionContext",
+            "text": "ActionExecutionContext"
+          },
+          "<object>"
+        ],
+        "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActionExecutionContext.extraContentNodeRef",
+            "type": "Object",
+            "tags": [],
+            "label": "extraContentNodeRef",
+            "description": [
+              "\nRef to a DOM node where the action can add custom HTML."
+            ],
+            "signature": [
+              "React.MutableRefObject<HTMLDivElement | null>"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActionExecutionContext.nodeRef",
+            "type": "Object",
+            "tags": [],
+            "label": "nodeRef",
+            "description": [
+              "\nRef to the node where the cell action are rendered."
+            ],
+            "signature": [
+              "React.MutableRefObject<HTMLDivElement | null>"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActionExecutionContext.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [
+              "\nExtra configurations for actions."
+            ],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActionExecutionContext.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "CellActionField"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.Presentable",
         "type": "Interface",
         "tags": [],
@@ -1649,15 +1805,15 @@
         ],
         "signature": [
           {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Presentable",
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
             "text": "Presentable"
           },
           "<Context>"
         ],
-        "path": "src/plugins/ui_actions/public/util/presentable.ts",
+        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1670,7 +1826,7 @@
             "description": [
               "\nID that uniquely identifies this object."
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1683,7 +1839,7 @@
             "description": [
               "\nDetermines the display order in relation to other items. Higher numbers are\ndisplayed first."
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1694,19 +1850,12 @@
             "tags": [],
             "label": "MenuItem",
             "description": [
-              "\n`UiComponent` to render when displaying this entity as a context menu item.\nIf not provided, `getDisplayName` will be used instead."
+              "\nComponent to render when displaying this entity as a context menu item.\nIf not provided, `getDisplayName` will be used instead."
             ],
             "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponent",
-                "text": "UiComponent"
-              },
-              "<{ context: Context; }> | undefined"
+              "React.FC<{ context: Context; }> | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1722,7 +1871,7 @@
             "signature": [
               "(context: Context) => string | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1736,7 +1885,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1756,7 +1905,7 @@
             "signature": [
               "(context: Context) => string"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1770,7 +1919,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1790,7 +1939,7 @@
             "signature": [
               "((context: Context) => string) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1804,7 +1953,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1824,7 +1973,7 @@
             "signature": [
               "((context: Context) => Promise<string | undefined>) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1838,7 +1987,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1858,7 +2007,7 @@
             "signature": [
               "(context: Context) => Promise<boolean>"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1872,7 +2021,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1891,15 +2040,15 @@
             ],
             "signature": [
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.PresentableGrouping",
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.PresentableGrouping",
                 "text": "PresentableGrouping"
               },
               "<Context> | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2143,9 +2292,9 @@
               "<{}, ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ">> | undefined; runtimeFieldMap?: Record<string, ",
@@ -2223,7 +2372,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.CellActionsMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "CellActionsMode",
+        "description": [],
+        "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "uiActions",
@@ -2302,10 +2464,16 @@
         "label": "PresentableGrouping",
         "description": [],
         "signature": [
-          "PresentableGroup",
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.PresentableGroup",
+            "text": "PresentableGroup"
+          },
           "<Context>[]"
         ],
-        "path": "src/plugins/ui_actions/public/util/presentable.ts",
+        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2521,7 +2689,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+        "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2529,7 +2697,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<object>>(definition: A) => ",
+        "<Context>) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2537,9 +2705,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<",
-        "ActionContext",
-        "<A>>; readonly registerTrigger: (trigger: ",
+        "<Context>; readonly registerTrigger: (trigger: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2571,7 +2737,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+        "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2579,7 +2745,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<object>>(definition: A) => ",
+        "<Context>) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2587,9 +2753,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<",
-        "ActionContext",
-        "<A>>; readonly registerTrigger: (trigger: ",
+        "<Context>; readonly registerTrigger: (trigger: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2599,15 +2763,7 @@
         },
         ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
         "TriggerContract",
-        "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: <T extends ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
-        },
-        "<object>>(id: string) => ",
+        "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2615,9 +2771,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<",
-        "ActionContext",
-        "<T>>; readonly getTriggerActions: (triggerId: string) => ",
+        "<object>; readonly getTriggerActions: (triggerId: string) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",

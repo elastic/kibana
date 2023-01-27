@@ -5,58 +5,100 @@
  * 2.0.
  */
 
-import { login, visit } from '../../tasks/login';
-import { completeTour, goToNextStep, skipTour } from '../../tasks/guided_onboarding';
-import { OVERVIEW_URL } from '../../urls/navigation';
+import { navigateFromHeaderTo } from '../../tasks/security_header';
+import { ALERTS, TIMELINES } from '../../screens/security_header';
+import { closeAlertFlyout, expandFirstAlert } from '../../tasks/alerts';
 import {
-  WELCOME_STEP,
-  MANAGE_STEP,
-  ALERTS_STEP,
-  CASES_STEP,
-  DATA_STEP,
-} from '../../screens/guided_onboarding';
+  assertTourStepExist,
+  assertTourStepNotExist,
+  closeCreateCaseFlyout,
+  completeTourWithActions,
+  completeTourWithNextButton,
+  addToCase,
+  finishTour,
+  goToStep,
+  startTour,
+} from '../../tasks/guided_onboarding';
+import { cleanKibana } from '../../tasks/common';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { getNewRule } from '../../objects/rule';
+import { ALERTS_URL, DASHBOARDS_URL } from '../../urls/navigation';
+import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { login, visit } from '../../tasks/login';
+import { quitGlobalTour, startAlertsCasesTour } from '../../tasks/api_calls/tour';
+import { AlertsCasesTourSteps } from '../../../public/common/components/guided_onboarding_tour/tour_config';
 
-before(() => {
-  login();
-});
+describe('Guided onboarding tour', () => {
+  before(() => {
+    cleanKibana();
+    login();
+    createCustomRuleEnabled({ ...getNewRule(), customQuery: 'user.name:*' });
+  });
+  beforeEach(() => {
+    startAlertsCasesTour();
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
+  });
+  after(() => {
+    quitGlobalTour();
+  });
+  it('Completes the tour with next button clicks', () => {
+    startTour();
+    completeTourWithNextButton();
+    finishTour();
+    cy.url().should('include', DASHBOARDS_URL);
+  });
 
-// need to redo these tests for new implementation
-describe.skip('Guided onboarding tour', () => {
-  describe('Tour is enabled', () => {
-    beforeEach(() => {
-      visit(OVERVIEW_URL);
+  it('Completes the tour with action clicks', () => {
+    startTour();
+    completeTourWithActions();
+    finishTour();
+    cy.url().should('include', DASHBOARDS_URL);
+  });
+
+  // unhappy paths
+  it('Resets the tour to step 1 when we navigate away', () => {
+    startTour();
+    goToStep(AlertsCasesTourSteps.expandEvent);
+    assertTourStepExist(AlertsCasesTourSteps.expandEvent);
+    assertTourStepNotExist(AlertsCasesTourSteps.pointToAlertName);
+    navigateFromHeaderTo(TIMELINES);
+    navigateFromHeaderTo(ALERTS);
+    assertTourStepNotExist(AlertsCasesTourSteps.expandEvent);
+    assertTourStepExist(AlertsCasesTourSteps.pointToAlertName);
+  });
+
+  describe('persists tour steps in flyout on flyout toggle', () => {
+    const stepsInAlertsFlyout = [
+      AlertsCasesTourSteps.reviewAlertDetailsFlyout,
+      AlertsCasesTourSteps.addAlertToCase,
+      AlertsCasesTourSteps.viewCase,
+    ];
+
+    const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
+
+    stepsInAlertsFlyout.forEach((step) => {
+      it(`step: ${step}, resets to ${step}`, () => {
+        startTour();
+        goToStep(step);
+        assertTourStepExist(step);
+        closeAlertFlyout();
+        assertTourStepNotExist(step);
+        expandFirstAlert();
+        assertTourStepExist(step);
+      });
     });
 
-    it('can be completed', () => {
-      // Step 1: Overview
-      cy.get(WELCOME_STEP).should('be.visible');
-      goToNextStep(WELCOME_STEP);
-
-      // Step 2: Manage
-      cy.get(MANAGE_STEP).should('be.visible');
-      goToNextStep(MANAGE_STEP);
-
-      // Step 3: Alerts
-      cy.get(ALERTS_STEP).should('be.visible');
-      goToNextStep(ALERTS_STEP);
-
-      // Step 4: Cases
-      cy.get(CASES_STEP).should('be.visible');
-      goToNextStep(CASES_STEP);
-
-      // Step 5: Add data
-      cy.get(DATA_STEP).should('be.visible');
-      completeTour();
-    });
-
-    it('can be skipped', () => {
-      cy.get(WELCOME_STEP).should('be.visible');
-
-      skipTour();
-      // step 1 is not displayed
-      cy.get(WELCOME_STEP).should('not.exist');
-      // step 2 is not displayed
-      cy.get(MANAGE_STEP).should('not.exist');
+    stepsInCasesFlyout.forEach((step) => {
+      it(`step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`, () => {
+        startTour();
+        goToStep(step);
+        assertTourStepExist(step);
+        closeCreateCaseFlyout();
+        assertTourStepNotExist(step);
+        addToCase();
+        assertTourStepExist(AlertsCasesTourSteps.createCase);
+      });
     });
   });
 });

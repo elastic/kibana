@@ -32,6 +32,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
     },
     async (context, request, response) => {
       const [coreStartServices] = await osqueryContext.getStartServices();
+      const soClient = (await context.core).savedObjects.client;
 
       const {
         osquery: { writeLiveQueries, runSavedQueries },
@@ -85,7 +86,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         const { response: osqueryAction } = await createActionHandler(
           osqueryContext,
           request.body,
-          { currentUser }
+          { soClient, metadata: { currentUser } }
         );
 
         return response.ok({

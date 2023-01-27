@@ -7,6 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { FAILED_TESTS_LABEL } from './failed_tests';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
@@ -16,6 +17,10 @@ export const FailedTestsCount = (time: { to: string; from: string }) => {
   const { ExploratoryViewEmbeddable } = observability;
 
   const monitorId = useMonitorQueryId();
+
+  if (!monitorId) {
+    return null;
+  }
 
   return (
     <ExploratoryViewEmbeddable
@@ -28,7 +33,7 @@ export const FailedTestsCount = (time: { to: string; from: string }) => {
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_failed_tests',
-          name: 'synthetics-series-1',
+          name: FAILED_TESTS_LABEL,
         },
       ]}
     />

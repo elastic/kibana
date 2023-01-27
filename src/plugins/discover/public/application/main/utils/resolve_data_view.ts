@@ -34,46 +34,6 @@ interface DataViewData {
   stateValFound: boolean;
 }
 
-export function findDataViewById(
-  dataViews: DataViewListItem[],
-  id: string
-): DataViewListItem | undefined {
-  if (!Array.isArray(dataViews) || !id) {
-    return;
-  }
-  return dataViews.find((o) => o.id === id);
-}
-
-/**
- * Checks if the given defaultIndex exists and returns
- * the first available data view id if not
- */
-export function getFallbackDataViewId(
-  dataViews: DataViewListItem[],
-  defaultIndex: string = ''
-): string {
-  if (defaultIndex && findDataViewById(dataViews, defaultIndex)) {
-    return defaultIndex;
-  }
-  return dataViews && dataViews[0]?.id ? dataViews[0].id : '';
-}
-
-/**
- * A given data view id is checked for existence and a fallback is provided if it doesn't exist
- * The provided defaultIndex is usually configured in Advanced Settings, if it's also invalid
- * the first entry of the given list of dataViews is used
- */
-export function getDataViewId(
-  id: string = '',
-  dataViews: DataViewListItem[] = [],
-  defaultIndex: string = ''
-): string {
-  if (!id || !findDataViewById(dataViews, id)) {
-    return getFallbackDataViewId(dataViews, defaultIndex);
-  }
-  return id;
-}
-
 /**
  * Function to load the given data view by id, providing a fallback if it doesn't exist
  */
@@ -104,9 +64,10 @@ export async function loadDataView(
     fetchId = dataViewSpec.id!;
   }
 
+  let fetchedDataView: DataView | undefined;
   // try to fetch adhoc data view first
   try {
-    const fetchedDataView = fetchId ? await dataViews.get(fetchId) : undefined;
+    fetchedDataView = fetchId ? await dataViews.get(fetchId) : undefined;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
         list: dataViewList || [],
@@ -122,12 +83,14 @@ export async function loadDataView(
   } catch (e) {}
 
   // fetch persisted data view
-  const actualId = getDataViewId(fetchId, dataViewList, config.get('defaultIndex'));
   return {
     list: dataViewList || [],
-    loaded: await dataViews.get(actualId),
+    loaded: fetchedDataView
+      ? fetchedDataView
+      : // we can be certain that the data view exists due to an earlier hasData check
+        ((await dataViews.getDefaultDataView()) as DataView),
     stateVal: fetchId,
-    stateValFound: !!fetchId && actualId === fetchId,
+    stateValFound: !!fetchId && !!fetchedDataView,
   };
 }
 
@@ -138,7 +101,8 @@ export async function loadDataView(
 export function resolveDataView(
   ip: DataViewData,
   searchSource: ISearchSource,
-  toastNotifications: ToastsStart
+  toastNotifications: ToastsStart,
+  isTextBasedQuery?: boolean
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
 
@@ -170,19 +134,20 @@ export function resolveDataView(
       });
       return ownDataView;
     }
-
-    toastNotifications.addWarning({
-      title: warningTitle,
-      text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
-        defaultMessage:
-          'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
-        values: {
-          loadedDataViewTitle: loadedDataView.getIndexPattern(),
-          loadedDataViewId: loadedDataView.id,
-        },
-      }),
-      'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
-    });
+    if (!Boolean(isTextBasedQuery)) {
+      toastNotifications.addWarning({
+        title: warningTitle,
+        text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
+          defaultMessage:
+            'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
+          values: {
+            loadedDataViewTitle: loadedDataView.getIndexPattern(),
+            loadedDataViewId: loadedDataView.id,
+          },
+        }),
+        'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
+      });
+    }
   }
 
   return loadedDataView;

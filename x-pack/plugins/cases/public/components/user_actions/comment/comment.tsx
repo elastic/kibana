@@ -60,6 +60,7 @@ const getDeleteCommentUserAction = ({
 };
 
 const getCreateCommentUserAction = ({
+  appId,
   userAction,
   userProfiles,
   caseData,
@@ -90,12 +91,14 @@ const getCreateCommentUserAction = ({
   switch (comment.type) {
     case CommentType.user:
       const userBuilder = createUserAttachmentUserActionBuilder({
+        appId,
         userProfiles,
         comment,
         outlined: comment.id === selectedOutlineCommentId,
         isEdit: manageMarkdownEditIds.includes(comment.id),
         commentRefs,
         isLoading: loadingCommentIds.includes(comment.id),
+        caseId: caseData.id,
         handleManageMarkdownEditId,
         handleSaveComment,
         handleManageQuote,
@@ -161,6 +164,7 @@ const getCreateCommentUserAction = ({
 };
 
 export const createCommentUserActionBuilder: UserActionBuilder = ({
+  appId,
   caseData,
   userProfiles,
   externalReferenceAttachmentTypeRegistry,
@@ -201,6 +205,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
 
     if (commentUserAction.action === Actions.create) {
       const commentAction = getCreateCommentUserAction({
+        appId,
         caseData,
         userProfiles,
         userAction: commentUserAction,

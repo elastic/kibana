@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type ExperimentalFeatures = typeof allowedExperimentalValues;
+export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
 
 /**
  * A list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.
@@ -64,23 +64,37 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables endpoint package level rbac
    */
-  endpointRbacEnabled: false,
+  endpointRbacEnabled: true,
 
   /**
    * Enables endpoint package level rbac for response actions only.
    * if endpointRbacEnabled is enabled, it will take precedence.
    */
-  endpointRbacV1Enabled: false,
-
-  /**
-   * Enables the Guided Onboarding tour in security
-   */
-  guidedOnboarding: false,
-
+  endpointRbacV1Enabled: true,
   /**
    * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
    */
   alertDetailsPageEnabled: false,
+
+  /**
+   * Enables the `get-file` endpoint response action
+   */
+  responseActionGetFileEnabled: false,
+
+  /**
+   * Enables top charts on Alerts Page
+   */
+  alertsPageChartsEnabled: false,
+
+  /**
+   * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
+   * https://www.elastic.co/guide/en/security/current/user-risk-score.html
+   * https://www.elastic.co/guide/en/security/current/host-risk-score.html
+   *
+   * Issue: https://github.com/elastic/kibana/issues/146777
+   */
+  riskyHostsEnabled: false, // DEPRECATED
+  riskyUsersEnabled: false, // DEPRECATED
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -113,7 +127,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
   };
 };
 
-export const isValidExperimentalValue = (value: string): boolean => {
+export const isValidExperimentalValue = (value: string): value is keyof ExperimentalFeatures => {
   return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
 

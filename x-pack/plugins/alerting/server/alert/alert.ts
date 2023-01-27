@@ -15,6 +15,7 @@ import {
   rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
+  LastScheduledActions,
 } from '../../common';
 
 import { parseDuration } from '../lib';
@@ -62,6 +63,10 @@ export class Alert<
     this.context = {} as Context;
     this.meta = meta;
     this.meta.uuid = this.uuid = meta.uuid ?? uuidV4();
+
+    if (!this.meta.flappingHistory) {
+      this.meta.flappingHistory = [];
+    }
   }
 
   getId() {
@@ -76,7 +81,7 @@ export class Alert<
     return this.scheduledExecutionOptions !== undefined;
   }
 
-  isThrottled(throttle: string | null) {
+  isThrottled({ throttle, actionHash }: { throttle: string | null; actionHash?: string }) {
     if (this.scheduledExecutionOptions === undefined) {
       return false;
     }
@@ -86,10 +91,17 @@ export class Alert<
       this.scheduledActionGroupIsUnchanged(
         this.meta.lastScheduledActions,
         this.scheduledExecutionOptions
-      ) &&
-      this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now()
+      )
     ) {
-      return true;
+      if (actionHash) {
+        if (this.meta.lastScheduledActions.actions) {
+          const lastTriggerDate = this.meta.lastScheduledActions.actions[actionHash]?.date;
+          return !!(lastTriggerDate && lastTriggerDate.getTime() + throttleMills > Date.now());
+        }
+        return false;
+      } else {
+        return this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now();
+      }
     }
     return false;
   }
@@ -171,8 +183,22 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(group: ActionGroupIds) {
-    this.meta.lastScheduledActions = { group, date: new Date() };
+  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null) {
+    if (!this.meta.lastScheduledActions) {
+      this.meta.lastScheduledActions = {} as LastScheduledActions;
+    }
+    const date = new Date();
+    this.meta.lastScheduledActions.group = group;
+    this.meta.lastScheduledActions.date = date;
+
+    if (this.meta.lastScheduledActions.group !== group) {
+      this.meta.lastScheduledActions.actions = {};
+    } else if (actionHash) {
+      if (!this.meta.lastScheduledActions.actions) {
+        this.meta.lastScheduledActions.actions = {};
+      }
+      this.meta.lastScheduledActions.actions[actionHash] = { date };
+    }
   }
 
   /**
@@ -182,10 +208,50 @@ export class Alert<
     return rawAlertInstance.encode(this.toRaw());
   }
 
-  toRaw(): RawAlertInstance {
-    return {
-      state: this.state,
-      meta: this.meta,
-    };
+  toRaw(recovered: boolean = false): RawAlertInstance {
+    return recovered
+      ? {
+          // for a recovered alert, we only care to track the flappingHistory
+          // and the flapping flag
+          meta: {
+            flappingHistory: this.meta.flappingHistory,
+            flapping: this.meta.flapping,
+          },
+        }
+      : {
+          state: this.state,
+          meta: this.meta,
+        };
+  }
+
+  setFlappingHistory(fh: boolean[] = []) {
+    this.meta.flappingHistory = fh;
+  }
+
+  getFlappingHistory() {
+    return this.meta.flappingHistory;
+  }
+
+  setFlapping(f: boolean) {
+    this.meta.flapping = f;
+  }
+
+  getFlapping() {
+    return this.meta.flapping || false;
+  }
+
+  incrementPendingRecoveredCount() {
+    if (!this.meta.pendingRecoveredCount) {
+      this.meta.pendingRecoveredCount = 0;
+    }
+    this.meta.pendingRecoveredCount++;
+  }
+
+  getPendingRecoveredCount() {
+    return this.meta.pendingRecoveredCount || 0;
+  }
+
+  resetPendingRecoveredCount() {
+    this.meta.pendingRecoveredCount = 0;
   }
 }

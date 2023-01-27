@@ -23,7 +23,12 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { FleetError, PackageFailedVerificationError, PackageNotFoundError } from '../../../errors';
+import {
+  FleetError,
+  PackageFailedVerificationError,
+  PackageNotFoundError,
+  RegistryResponseError,
+} from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
@@ -305,8 +310,16 @@ export async function getPackageFromSource(options: {
     if (res) {
       logger.debug(`retrieved package ${pkgName}-${pkgVersion} from cache`);
     } else {
-      res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
-      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      try {
+        res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+        logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      } catch (err) {
+        if (err instanceof RegistryResponseError && err.status === 404) {
+          res = await Registry.getBundledArchive(pkgName, pkgVersion);
+        } else {
+          throw err;
+        }
+      }
     }
   }
   if (!res) {
@@ -330,6 +343,18 @@ export async function getInstallationObject(options: {
   });
 }
 
+export async function getInstallationObjects(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgNames: string[];
+}) {
+  const { savedObjectsClient, pkgNames } = options;
+  const res = await savedObjectsClient.bulkGet<Installation>(
+    pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
+  );
+
+  return res.saved_objects.filter((so) => so?.attributes);
+}
+
 export async function getInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -337,6 +362,14 @@ export async function getInstallation(options: {
 }) {
   const savedObject = await getInstallationObject(options);
   return savedObject?.attributes;
+}
+
+export async function getInstallationsByName(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgNames: string[];
+}) {
+  const savedObjects = await getInstallationObjects(options);
+  return savedObjects.map((so) => so.attributes);
 }
 
 function sortByName(a: { name: string }, b: { name: string }) {

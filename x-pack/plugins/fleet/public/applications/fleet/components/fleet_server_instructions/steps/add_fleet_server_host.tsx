@@ -14,7 +14,7 @@ import {
   EuiCode,
   EuiForm,
   EuiFormErrorText,
-  EuiLink,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiText,
   EuiFormRow,
@@ -33,9 +33,11 @@ import { FleetServerHostSelect } from '../components';
 export const getAddFleetServerHostStep = ({
   fleetServerHostForm,
   disabled,
+  onClose,
 }: {
   fleetServerHostForm: FleetServerHostForm;
   disabled: boolean;
+  onClose: () => void;
 }): EuiStepProps => {
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostStepTitle', {
@@ -43,15 +45,17 @@ export const getAddFleetServerHostStep = ({
     }),
     status: disabled ? 'disabled' : undefined,
     children: disabled ? null : (
-      <AddFleetServerHostStepContent fleetServerHostForm={fleetServerHostForm} />
+      <AddFleetServerHostStepContent fleetServerHostForm={fleetServerHostForm} onClose={onClose} />
     ),
   };
 };
 
 export const AddFleetServerHostStepContent = ({
   fleetServerHostForm,
+  onClose,
 }: {
   fleetServerHostForm: FleetServerHostForm;
+  onClose: () => void;
 }) => {
   const {
     setFleetServerHost,
@@ -79,10 +83,10 @@ export const AddFleetServerHostStepContent = ({
         id: 'fleet-server-host',
         is_preconfigured: false,
       };
-      setFleetServerHost(newFleetServerHost);
+
       if (validate()) {
-        setSubmittedFleetServerHost(newFleetServerHost);
         setFleetServerHost(await saveFleetServerHost(newFleetServerHost));
+        setSubmittedFleetServerHost(newFleetServerHost);
       }
     } catch (err) {
       notifications.toasts.addError(err, {
@@ -159,6 +163,7 @@ export const AddFleetServerHostStepContent = ({
                     defaultMessage: 'Specify host URL',
                   }
                 )}
+                isUrl
               />
               {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
             </>
@@ -210,12 +215,13 @@ export const AddFleetServerHostStepContent = ({
               values={{
                 host: submittedFleetServerHost.host_urls[0],
                 fleetSettingsLink: (
-                  <EuiLink href={getHref('settings')}>
+                  // eslint-disable-next-line @elastic/eui/href-or-on-click
+                  <EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
                     <FormattedMessage
                       id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                       defaultMessage="Fleet Settings"
                     />
-                  </EuiLink>
+                  </EuiButtonEmpty>
                 ),
               }}
             />

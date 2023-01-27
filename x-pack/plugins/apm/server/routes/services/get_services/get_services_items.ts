@@ -16,14 +16,17 @@ import { mergeServiceStats } from './merge_service_stats';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getServicesAlerts } from './get_service_alerts';
+import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 
-const MAX_NUMBER_OF_SERVICES = 500;
+export const MAX_NUMBER_OF_SERVICES = 500;
 
 export async function getServicesItems({
   environment,
   kuery,
   mlClient,
   apmEventClient,
+  apmAlertsClient,
   searchAggregatedTransactions,
   searchAggregatedServiceMetrics,
   logger,
@@ -36,6 +39,7 @@ export async function getServicesItems({
   kuery: string;
   mlClient?: MlClient;
   apmEventClient: APMEventClient;
+  apmAlertsClient: ApmAlertsClient;
   searchAggregatedTransactions: boolean;
   searchAggregatedServiceMetrics: boolean;
   logger: Logger;
@@ -61,6 +65,7 @@ export async function getServicesItems({
       transactionStats,
       servicesFromErrorAndMetricDocuments,
       healthStatuses,
+      alertCounts,
     ] = await Promise.all([
       searchAggregatedServiceMetrics
         ? getServiceAggregatedTransactionStats({
@@ -79,12 +84,17 @@ export async function getServicesItems({
         logger.error(err);
         return [];
       }),
+      getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
+        logger.error(err);
+        return [];
+      }),
     ]);
 
     return mergeServiceStats({
       transactionStats,
       servicesFromErrorAndMetricDocuments,
       healthStatuses,
+      alertCounts,
     });
   });
 }

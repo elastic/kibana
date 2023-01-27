@@ -43,6 +43,8 @@ export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditional
             </EuiFlexItem>
           </EuiFlexGroup>
 
+          <EuiSpacer />
+
           <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
             <EuiFlexItem>
               <CalendarsSelection />

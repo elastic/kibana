@@ -10,7 +10,7 @@ import { map, filter, ignoreElements, tap, withLatestFrom, delay } from 'rxjs/op
 import type { Epic } from 'redux-observable';
 import { get } from 'lodash/fp';
 
-import type { TableIdLiteral } from '../../../../common/types/timeline';
+import type { TableIdLiteral } from '../../../../common/types';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 
 import {

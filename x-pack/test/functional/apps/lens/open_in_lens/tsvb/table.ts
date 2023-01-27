@@ -82,13 +82,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await visualize.hasNavigateToLensButton()).to.be(false);
     });
 
-    it('should not allow converting series with different aggregation fucntion or aggregation by', async () => {
+    it('should not allow converting series with different aggregation function or aggregation by', async () => {
       await visualBuilder.createNewAggSeries();
       await visualBuilder.selectAggType('Static Value', 1);
       await visualBuilder.setStaticValue(10);
+      await header.waitUntilLoadingHasFinished();
       await visualBuilder.clickSeriesOption();
       await visualBuilder.setFieldForAggregateBy('bytes');
       await visualBuilder.setFunctionForAggregateFunction('Sum');
+      await header.waitUntilLoadingHasFinished();
       await visualBuilder.clickSeriesOption(1);
       await visualBuilder.setFieldForAggregateBy('bytes');
       await visualBuilder.setFunctionForAggregateFunction('Min');

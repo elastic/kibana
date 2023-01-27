@@ -27,24 +27,22 @@ put:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/update_package_policy.yaml
+          $ref: ../components/schemas/package_policy_request.yaml
   responses:
     '200':
       description: OK
       content:
         application/json:
           schema:
-            oneOf:
-              - $ref: ../components/schemas/simplified_package_policy.yaml
-              - type: object
-                properties:
-                  item:
-                    $ref: ../components/schemas/package_policy.yaml
-                  sucess:
-                    type: boolean
-                required:
-                  - item
-                  - sucess
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/package_policy.yaml
+              sucess:
+                type: boolean
+            required:
+              - item
+              - sucess
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
 delete:

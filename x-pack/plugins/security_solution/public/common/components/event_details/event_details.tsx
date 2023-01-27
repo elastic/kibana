@@ -8,7 +8,6 @@
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingContent,
   EuiLoadingSpinner,
@@ -21,6 +20,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -38,7 +38,6 @@ import { ThreatSummaryView } from './cti_details/threat_summary_view';
 import { ThreatDetailsView } from './cti_details/threat_details_view';
 import * as i18n from './translations';
 import { AlertSummaryView } from './alert_summary_view';
-import type { Ecs } from '../../../../common/ecs';
 import type { BrowserFields } from '../../containers/source';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
@@ -337,26 +336,17 @@ const EventDetailsComponent: React.FC<Props> = ({
         ? {
             id: EventsViewType.threatIntelView,
             'data-test-subj': 'threatIntelTab',
-            name: (
-              <EuiFlexGroup
-                direction="row"
-                alignItems={'center'}
-                justifyContent={'spaceAround'}
-                gutterSize="xs"
-              >
-                <EuiFlexItem>
-                  <span>{i18n.THREAT_INTEL}</span>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {isEnrichmentsLoading ? (
-                    <EuiLoadingSpinner />
-                  ) : (
-                    <EuiNotificationBadge data-test-subj="enrichment-count-notification">
-                      {enrichmentCount}
-                    </EuiNotificationBadge>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
+            name: i18n.THREAT_INTEL,
+            append: (
+              <>
+                {isEnrichmentsLoading ? (
+                  <EuiLoadingSpinner />
+                ) : (
+                  <EuiNotificationBadge data-test-subj="enrichment-count-notification">
+                    {enrichmentCount}
+                  </EuiNotificationBadge>
+                )}
+              </>
             ),
             content: (
               <ThreatDetailsView
@@ -455,14 +445,17 @@ const EventDetailsComponent: React.FC<Props> = ({
       step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
       tourId={SecurityStepId.alertsCases}
     >
-      <StyledEuiTabbedContent
-        {...tourAnchor}
-        data-test-subj="eventDetails"
-        tabs={tabs}
-        selectedTab={selectedTab}
-        onTabClick={handleTabClick}
-        key="event-summary-tabs"
-      />
+      <>
+        <EuiSpacer size="s" />
+        <StyledEuiTabbedContent
+          {...tourAnchor}
+          data-test-subj="eventDetails"
+          tabs={tabs}
+          selectedTab={selectedTab}
+          onTabClick={handleTabClick}
+          key="event-summary-tabs"
+        />
+      </>
     </GuidedOnboardingTourStep>
   );
 };

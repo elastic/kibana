@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import type { FunctionComponent, ReactElement } from 'react';
 import type { EuiTourStepProps } from '@elastic/eui';
-import { EuiButton, EuiText, EuiTourStep } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 type TourType = 'addIntegrationButton' | 'integrationCard' | 'agentModalButton';
@@ -20,7 +20,7 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
       }),
       description: i18n.translate('xpack.fleet.guidedOnboardingTour.endpointButton.description', {
         defaultMessage:
-          'In just a few steps, configure your data with our recommended defaults. You can change this later.',
+          'In just a few steps, add your data with our recommended defaults. You can change this later.',
       }),
     };
   }
@@ -31,7 +31,7 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
         defaultMessage: 'Select Elastic Defend',
       }),
       description: i18n.translate('xpack.fleet.guidedOnboardingTour.endpointCard.description', {
-        defaultMessage: 'The best way to get data quickly in to your SIEM.',
+        defaultMessage: 'The best way to get data quickly into your SIEM.',
       }),
     };
   }
@@ -45,7 +45,7 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
         'xpack.fleet.guidedOnboardingTour.kubernetesButton.tourDescription',
         {
           defaultMessage:
-            'In just a few steps, configure your data with our recommended defaults. You can change this later.',
+            'In just a few steps, add your data with our recommended defaults. You can change this later.',
         }
       ),
     };
@@ -85,7 +85,7 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
 
   return config ? (
     <EuiTourStep
-      content={<EuiText>{config.description}</EuiText>}
+      content={<EuiText size="s">{config.description}</EuiText>}
       isStepOpen={isGuidedOnboardingTourOpen}
       maxWidth={350}
       onFinish={() => setIsGuidedOnboardingTourOpen(false)}
@@ -95,11 +95,16 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
       title={config.title}
       anchorPosition={tourPosition ? tourPosition : 'rightUp'}
       footerAction={
-        <EuiButton onClick={() => setIsGuidedOnboardingTourOpen(false)} size="s" color="success">
+        <EuiButtonEmpty
+          onClick={() => setIsGuidedOnboardingTourOpen(false)}
+          size="xs"
+          color="text"
+          flush="right"
+        >
           {i18n.translate('xpack.fleet.guidedOnboardingTour.nextButtonLabel', {
-            defaultMessage: 'Got it',
+            defaultMessage: 'Continue',
           })}
-        </EuiButton>
+        </EuiButtonEmpty>
       }
       isOpen={isGuidedOnboardingTourOpen}
       // Close the tour when the user clicks outside of the tour. This is a workaround for

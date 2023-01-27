@@ -90,14 +90,12 @@ export function logAlerts<
     ruleRunMetricsStore.setNumberOfNewAlerts(newAlertIds.length);
     ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
     ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
-
     for (const id of recoveredAlertIds) {
       const alert = recoveredAlerts[id];
       const { group: actionGroup } = alert.getLastScheduledActions() ?? {};
       const uuid = alert.getUuid();
       const state = recoveredAlerts[id].getState();
       const message = `${ruleLogPrefix} alert '${id}' has recovered`;
-
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         id,
@@ -105,7 +103,7 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: false,
+        flapping: recoveredAlerts[id].getFlapping(),
       });
     }
 
@@ -122,7 +120,7 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: false,
+        flapping: activeAlerts[id].getFlapping(),
       });
     }
 
@@ -139,7 +137,7 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: false,
+        flapping: activeAlerts[id].getFlapping(),
       });
     }
   }

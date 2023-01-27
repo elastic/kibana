@@ -11,19 +11,37 @@ import {
   Provider,
   useAlertSearchBarStateContainer,
 } from './containers';
-import { AlertSearchBar } from './alert_search_bar';
+import { ObservabilityAlertSearchBar } from './alert_search_bar';
 import { AlertSearchBarWithUrlSyncProps } from './types';
+import { useKibana } from '../../../utils/kibana_react';
+import { ObservabilityAppServices } from '../../../application/types';
+import { useToasts } from '../../../hooks/use_toast';
 
-function InternalAlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
-  const stateProps = useAlertSearchBarStateContainer();
+function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
+  const { urlStorageKey, ...searchBarProps } = props;
+  const stateProps = useAlertSearchBarStateContainer(urlStorageKey);
+  const {
+    data: {
+      query: {
+        timefilter: { timefilter: timeFilterService },
+      },
+    },
+    triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
+  } = useKibana<ObservabilityAppServices>().services;
 
-  return <AlertSearchBar {...props} {...stateProps} />;
+  return (
+    <ObservabilityAlertSearchBar
+      {...stateProps}
+      {...searchBarProps}
+      services={{ timeFilterService, AlertsSearchBar, useToasts }}
+    />
+  );
 }
 
-export function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
+export function ObservabilityAlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
   return (
     <Provider value={alertSearchBarStateContainer}>
-      <InternalAlertSearchbarWithUrlSync {...props} />
+      <AlertSearchbarWithUrlSync {...props} />
     </Provider>
   );
 }

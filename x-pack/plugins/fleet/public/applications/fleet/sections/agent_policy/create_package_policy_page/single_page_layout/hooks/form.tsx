@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
@@ -22,15 +22,23 @@ import {
   sendCreateAgentPolicy,
   sendCreatePackagePolicy,
   sendBulkInstallPackages,
+  sendGetPackagePolicies,
 } from '../../../../../hooks';
-import { isVerificationError } from '../../../../../services';
-import { FLEET_ELASTIC_AGENT_PACKAGE, FLEET_SYSTEM_PACKAGE } from '../../../../../../../../common';
+import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
+import {
+  FLEET_ELASTIC_AGENT_PACKAGE,
+  FLEET_SYSTEM_PACKAGE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../../../../../../common';
+import { getMaxPackageName } from '../../../../../../../../common/services';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 import type { PackagePolicyFormState } from '../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
+import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -56,10 +64,23 @@ async function createAgentPolicy({
 }
 
 async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) {
-  const result = await sendCreatePackagePolicy(pkgPolicy);
+  const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
+  const result = await sendCreatePackagePolicy({
+    ...policy,
+    ...(forceCreateNeeded && { force: true }),
+  });
 
   return result;
 }
+
+const DEFAULT_PACKAGE_POLICY = {
+  name: '',
+  description: '',
+  namespace: 'default',
+  policy_id: '',
+  enabled: true,
+  inputs: [],
+};
 
 export function useOnSubmit({
   agentCount,
@@ -68,6 +89,7 @@ export function useOnSubmit({
   withSysMonitoring,
   queryParamsPolicyId,
   packageInfo,
+  integrationToEnable,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -75,6 +97,7 @@ export function useOnSubmit({
   selectedPolicyTab: SelectedPolicyTab;
   agentCount: number;
   queryParamsPolicyId: string | undefined;
+  integrationToEnable?: string;
 }) {
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
@@ -83,15 +106,11 @@ export function useOnSubmit({
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
 
+  const isInitializedRef = useRef(false);
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
-    name: '',
-    description: '',
-    namespace: 'default',
-    policy_id: '',
-    enabled: true,
-    inputs: [],
+    ...DEFAULT_PACKAGE_POLICY,
   });
 
   // Validation state
@@ -164,6 +183,36 @@ export function useOnSubmit({
     },
     [packagePolicy, setFormState, updatePackagePolicyValidation, selectedPolicyTab]
   );
+
+  // Initial loading of package info
+  useEffect(() => {
+    async function init() {
+      if (isInitializedRef.current || !packageInfo) {
+        return;
+      }
+
+      // Fetch all packagePolicies having the package name
+      const { data: packagePolicyData } = await sendGetPackagePolicies({
+        perPage: SO_SEARCH_LIMIT,
+        page: 1,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
+      });
+      const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
+
+      isInitializedRef.current = true;
+      updatePackagePolicy(
+        packageToPackagePolicy(
+          packageInfo,
+          agentPolicy?.id || '',
+          DEFAULT_PACKAGE_POLICY.namespace,
+          DEFAULT_PACKAGE_POLICY.name || incrementedName,
+          DEFAULT_PACKAGE_POLICY.description,
+          integrationToEnable
+        )
+      );
+    }
+    init();
+  }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable]);
 
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
@@ -311,6 +360,7 @@ export function useOnSubmit({
     setValidationResults,
     hasAgentPolicyError,
     setHasAgentPolicyError,
+    isInitialized: isInitializedRef.current,
     // TODO check
     navigateAddAgent,
     navigateAddAgentHelp,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { DecoratorFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { HttpStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
@@ -15,7 +15,7 @@ import {
 } from '../../public/application/sections/rule_details/components/test_helpers';
 
 const getMockRule = () => {
-  const id = uuid.v4();
+  const id = uuidv4();
   return {
     id,
     name: `test rule - ${id}`,
@@ -40,7 +40,7 @@ const getMockRule = () => {
       error: null,
     },
     monitoring: {
-      execution: {
+      run: {
         history: [
           {
             success: true,

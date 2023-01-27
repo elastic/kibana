@@ -35,7 +35,6 @@ describe('addConnector lib function', () => {
         create: jest.fn(),
         exists: jest.fn(),
         getMapping: jest.fn(),
-        refresh: jest.fn(),
       },
     },
     asInternalUser: {},
@@ -88,6 +87,7 @@ describe('addConnector lib function', () => {
         configuration: {},
         description: null,
         error: null,
+        features: null,
         filtering: [
           {
             active: {
@@ -159,6 +159,7 @@ describe('addConnector lib function', () => {
         sync_now: false,
       },
       index: CONNECTORS_INDEX,
+      refresh: true,
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'index_name',
@@ -270,6 +271,7 @@ describe('addConnector lib function', () => {
         configuration: {},
         description: null,
         error: null,
+        features: null,
         filtering: [
           {
             active: {
@@ -341,6 +343,7 @@ describe('addConnector lib function', () => {
         sync_now: false,
       },
       index: CONNECTORS_INDEX,
+      refresh: true,
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'index_name',
@@ -374,6 +377,7 @@ describe('addConnector lib function', () => {
         configuration: {},
         description: null,
         error: null,
+        features: null,
         filtering: [
           {
             active: {
@@ -445,6 +449,7 @@ describe('addConnector lib function', () => {
         sync_now: false,
       },
       index: CONNECTORS_INDEX,
+      refresh: true,
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'search-index_name',

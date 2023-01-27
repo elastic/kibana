@@ -224,6 +224,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -252,6 +253,7 @@ describe('disable()', () => {
                 group: 'default',
                 date: new Date().toISOString(),
               },
+              uuid: 'uuid-1',
             },
             state: { bar: false },
           },
@@ -294,6 +296,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -311,7 +314,7 @@ describe('disable()', () => {
       },
       kibana: {
         alert: {
-          uuid: expect.any(String),
+          uuid: 'uuid-1',
           rule: {
             consumer: 'myApp',
             rule_type_id: '123',
@@ -376,6 +379,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -419,6 +423,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -510,6 +515,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -557,6 +563,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',

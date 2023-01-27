@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -15,10 +15,8 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import {
-  comparePolicies,
-  getTestProjectSyntheticsPolicy,
-} from '../uptime/rest/sample_data/test_policy';
+import { comparePolicies } from './sample_data/test_policy';
+import { getTestProjectSyntheticsPolicy } from './sample_data/test_project_monitor_policy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddProjectMonitors', function () {
@@ -40,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
         ...request,
-        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuid.v4() })),
+        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
       };
     };
 
@@ -72,9 +70,10 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.10.3')
+        .post('/api/fleet/epm/packages/synthetics/0.11.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -100,9 +99,23 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('project monitors - returns 404 for non-existing spaces', async () => {
+      const project = `test-project-${uuidv4()}`;
+      await supertest
+        .put(
+          `/s/i_dont_exist${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+            '{projectName}',
+            project
+          )}`
+        )
+        .set('kbn-xsrf', 'true')
+        .send(projectMonitors)
+        .expect(404);
+    });
+
     it('project monitors - handles browser monitors', async () => {
       const successfulMonitors = [projectMonitors.monitors[0]];
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         const { body } = await supertest
@@ -140,6 +153,11 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             'filter_journeys.match': 'check if title is present',
             'filter_journeys.tags': [],
             form_monitor_type: 'multistep',
@@ -152,11 +170,8 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
             ],
             name: 'check if title is present',
@@ -212,33 +227,23 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - handles http monitors', async () => {
-      const kibanaVersion = await kibanaServer.version.get();
-      const successfulMonitors = [httpProjectMonitors.monitors[1]];
-      const project = `test-project-${uuid.v4()}`;
+    it('project monitors - allows throttling false for browser monitors', async () => {
+      const successfulMonitors = [projectMonitors.monitors[0]];
+      const project = `test-project-${uuidv4()}`;
 
       try {
         const { body } = await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
-          .send(httpProjectMonitors)
+          .send({
+            ...projectMonitors,
+            monitors: [{ ...projectMonitors.monitors[0], throttling: false }],
+          })
           .expect(200);
-
         expect(body).eql({
           updatedMonitors: [],
           createdMonitors: successfulMonitors.map((monitor) => monitor.id),
-          failedMonitors: [
-            {
-              id: httpProjectMonitors.monitors[0].id,
-              details: `Multiple urls are not supported for http project monitors in ${kibanaVersion}. Please set only 1 url per monitor. You monitor was not created or updated.`,
-              reason: 'Unsupported Heartbeat option',
-            },
-            {
-              id: httpProjectMonitors.monitors[0].id,
-              details: `The following Heartbeat options are not supported for ${httpProjectMonitors.monitors[0].type} project monitors in ${kibanaVersion}: check.response.body|unsupportedKey.nestedUnsupportedKey. You monitor was not created or updated.`,
-              reason: 'Unsupported Heartbeat option',
-            },
-          ],
+          failedMonitors: [],
         });
 
         for (const monitor of successfulMonitors) {
@@ -254,9 +259,63 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
+          expect(decryptedCreatedMonitor.body.attributes['throttling.is_enabled']).to.eql(false);
+        }
+      } finally {
+        await Promise.all([
+          successfulMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id, project);
+          }),
+        ]);
+      }
+    });
+
+    it('project monitors - handles http monitors', async () => {
+      const kibanaVersion = await kibanaServer.version.get();
+      const successfulMonitors = [httpProjectMonitors.monitors[1]];
+      const project = `test-project-${uuidv4()}`;
+
+      try {
+        const { body } = await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send(httpProjectMonitors)
+          .expect(200);
+
+        expect(body).eql({
+          updatedMonitors: [],
+          createdMonitors: successfulMonitors.map((monitor) => monitor.id),
+          failedMonitors: [
+            {
+              id: httpProjectMonitors.monitors[0].id,
+              details: `\`http\` project monitors must have exactly one value for field \`urls\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+              reason: 'Invalid Heartbeat configuration',
+            },
+            {
+              id: httpProjectMonitors.monitors[0].id,
+              details: `The following Heartbeat options are not supported for ${httpProjectMonitors.monitors[0].type} project monitors in ${kibanaVersion}: check.response.body|unsupportedKey.nestedUnsupportedKey. You monitor was not created or updated.`,
+              reason: 'Unsupported Heartbeat option',
+            },
+          ],
+        });
+
+        for (const monitor of successfulMonitors) {
+          const journeyId = monitor.id;
+          const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
+          const createdMonitorsResponse = await supertest
+            .get(API_URLS.SYNTHETICS_MONITORS)
+            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          const decryptedCreatedMonitor = await supertest
+            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_tls_enabled: false,
+              is_tls_enabled: isTLSEnabled,
             },
             'check.request.method': 'POST',
             'check.response.status': ['200'],
@@ -273,6 +332,11 @@ export default function ({ getService }: FtrProviderContext) {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
             enabled: false,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'http',
             journey_id: journeyId,
             locations: [
@@ -282,11 +346,8 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
             ],
             max_redirects: '0',
@@ -309,7 +370,7 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-            'ssl.verification_mode': 'full',
+            'ssl.verification_mode': isTLSEnabled ? 'strict' : 'full',
             'ssl.key': '',
             'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
@@ -333,7 +394,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('project monitors - handles tcp monitors', async () => {
       const successfulMonitors = [tcpProjectMonitors.monitors[0], tcpProjectMonitors.monitors[1]];
       const kibanaVersion = await kibanaServer.version.get();
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         const { body } = await supertest
@@ -348,8 +409,8 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               id: tcpProjectMonitors.monitors[2].id,
-              details: `Multiple hosts are not supported for tcp project monitors in ${kibanaVersion}. Please set only 1 host per monitor. You monitor was not created or updated.`,
-              reason: 'Unsupported Heartbeat option',
+              details: `\`tcp\` project monitors must have exactly one value for field \`hosts\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+              reason: 'Invalid Heartbeat configuration',
             },
             {
               id: tcpProjectMonitors.monitors[2].id,
@@ -361,6 +422,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const monitor of successfulMonitors) {
           const journeyId = monitor.id;
+          const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
           const createdMonitorsResponse = await supertest
             .get(API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
@@ -374,13 +436,18 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_tls_enabled: false,
+              is_tls_enabled: isTLSEnabled,
             },
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             'check.receive': '',
             'check.send': '',
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'tcp',
             journey_id: journeyId,
             locations: [
@@ -390,11 +457,8 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
             ],
             name: monitor.name,
@@ -413,7 +477,7 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-            'ssl.verification_mode': 'full',
+            'ssl.verification_mode': isTLSEnabled ? 'strict' : 'full',
             'ssl.key': '',
             'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
@@ -438,7 +502,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('project monitors - handles icmp monitors', async () => {
       const successfulMonitors = [icmpProjectMonitors.monitors[0], icmpProjectMonitors.monitors[1]];
       const kibanaVersion = await kibanaServer.version.get();
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         const { body } = await supertest
@@ -452,8 +516,8 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               id: icmpProjectMonitors.monitors[2].id,
-              details: `Multiple hosts are not supported for icmp project monitors in ${kibanaVersion}. Please set only 1 host per monitor. You monitor was not created or updated.`,
-              reason: 'Unsupported Heartbeat option',
+              details: `\`icmp\` project monitors must have exactly one value for field \`hosts\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+              reason: 'Invalid Heartbeat configuration',
             },
             {
               id: icmpProjectMonitors.monitors[2].id,
@@ -480,6 +544,11 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'icmp',
             journey_id: journeyId,
             locations: [
@@ -489,21 +558,15 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
               {
-                agentPolicyId: testPolicyId,
-                concurrentMonitors: 1,
                 geo: {
                   lat: '',
                   lon: '',
                 },
                 id: testPolicyId,
-                isInvalid: false,
                 isServiceManaged: false,
                 label: 'Test private location 0',
               },
@@ -541,7 +604,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - returns a list of successfully created monitors', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       try {
         const { body } = await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
@@ -564,7 +627,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - returns a list of successfully updated monitors', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest
@@ -593,7 +656,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - validates monitor type', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         const { body } = await supertest
@@ -647,12 +710,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - saves space as data stream namespace', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {
@@ -700,13 +763,109 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - formats custom id appropriately', async () => {
-      const project = `test project ${uuid.v4()}`;
+    it('project monitors - handles editing with spaces', async () => {
+      const project = `test-project-${uuidv4()}`;
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send(projectMonitors)
+          .expect(200);
+        // expect monitor not to have been deleted
+        const getResponse = await supertestWithoutAuth
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const decryptedCreatedMonitor = await supertest
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${getResponse.body.monitors[0].id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors } = getResponse.body;
+        expect(monitors.length).eql(1);
+        expect(decryptedCreatedMonitor.body.attributes[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(
+          projectMonitors.monitors[0].content
+        );
+
+        const updatedSource = 'updatedSource';
+        // update monitor
+        await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [{ ...projectMonitors.monitors[0], content: updatedSource }],
+          })
+          .expect(200);
+        const getResponseUpdated = await supertestWithoutAuth
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors: monitorsUpdated } = getResponseUpdated.body;
+        expect(monitorsUpdated.length).eql(1);
+
+        const decryptedUpdatedMonitor = await supertest
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorsUpdated[0].id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        expect(decryptedUpdatedMonitor.body.attributes[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(
+          updatedSource
+        );
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      }
+    });
+
+    it('project monitors - formats custom id appropriately', async () => {
+      const project = `test project ${uuidv4()}`;
+      const username = 'admin';
+      const roleName = `synthetics_admin`;
+      const password = `${username}-password`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {
@@ -756,7 +915,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - is able to decrypt monitor when updated after hydration', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       try {
         await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
@@ -816,7 +975,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - is able to enable and disable monitors', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest
@@ -856,7 +1015,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - returns a failed monitor when user defines a private location without fleet permissions', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       const secondMonitor = {
         ...projectMonitors.monitors[0],
@@ -939,7 +1098,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - returns a successful monitor when user defines a private location with fleet permissions', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       const secondMonitor = {
         ...projectMonitors.monitors[0],
         id: 'test-id-2',
@@ -990,7 +1149,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('creates integration policies for project monitors with private locations', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest
@@ -1039,6 +1198,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
       } finally {
@@ -1052,7 +1212,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('deletes integration policies for project monitors when private location is removed from the monitor - lightweight', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       const monitorRequest = {
         monitors: [
@@ -1115,7 +1275,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('deletes integration policies for project monitors when private location is removed from the monitor', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest
@@ -1161,6 +1321,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1196,7 +1357,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles updating package policies when project monitors are updated', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest
@@ -1241,6 +1402,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1277,6 +1439,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: id2,
             configId: configId2,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
       } finally {
@@ -1290,7 +1453,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles location formatting for both private and public locations', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       try {
         await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
@@ -1317,22 +1480,16 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'localhost',
               label: 'Local Synthetics Service',
               geo: { lat: 0, lon: 0 },
-              url: 'mockDevUrl',
               isServiceManaged: true,
-              status: 'experimental',
-              isInvalid: false,
             },
             {
               label: 'Test private location 0',
               isServiceManaged: false,
-              isInvalid: false,
-              agentPolicyId: testPolicyId,
               id: testPolicyId,
               geo: {
                 lat: '',
                 lon: '',
               },
-              concurrentMonitors: 1,
             },
           ]);
         });
@@ -1346,7 +1503,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('only allows 250 requests at a time', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       const monitors = [];
       for (let i = 0; i < 251; i++) {
         monitors.push({
@@ -1377,7 +1534,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - cannot update a monitor of one type to another type', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
 
       try {
         await supertest
@@ -1425,6 +1582,7 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'http',
                 tags: 'tag2,tag2',
                 urls: ['http://localhost:9200'],
+                'ssl.verification_mode': 'strict',
               },
               reason: 'Cannot update monitor to different type.',
             },

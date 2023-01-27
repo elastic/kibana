@@ -24,6 +24,7 @@ import { buildRouteValidation } from '../../../../../../utils/build_validation/r
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
+import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 
 export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.put(
@@ -57,6 +58,13 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
         throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
 
         checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
+
+        await validateRuleDefaultExceptionList({
+          exceptionsList: request.body.exceptions_list,
+          rulesClient,
+          ruleRuleId: request.body.rule_id,
+          ruleId: request.body.id,
+        });
 
         const existingRule = await readRules({
           rulesClient,

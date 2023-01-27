@@ -1,12 +1,127 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`HeaderMenu should not render icon 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      >
+        <div
+          class="euiPopover emotion-euiPopover"
+          data-test-subj="Items"
+        >
+          <div
+            class="euiPopover__anchor css-16vtueo-render"
+          >
+            <button
+              aria-label="Header menu Button Icon"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+              data-test-subj="ButtonIcon"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="boxesHorizontal"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+    >
+      <div
+        class="euiPopover emotion-euiPopover"
+        data-test-subj="Items"
+      >
+        <div
+          class="euiPopover__anchor css-16vtueo-render"
+        >
+          <button
+            aria-label="Header menu Button Icon"
+            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+            data-test-subj="ButtonIcon"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="boxesHorizontal"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
 exports[`HeaderMenu should render button icon disabled 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -61,7 +176,7 @@ Object {
           </p>
           <div>
             <div
-              class="euiContextMenuPanel"
+              class="euiContextMenuPanel eui-scrollBar css-zos0rl"
               data-test-subj="MenuPanel"
               tabindex="-1"
             >
@@ -116,7 +231,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -202,7 +317,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -231,7 +346,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -317,7 +432,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -352,7 +467,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -444,7 +559,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -479,7 +594,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -571,7 +686,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -607,7 +722,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -700,7 +815,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -735,7 +850,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"

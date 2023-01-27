@@ -89,9 +89,16 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           type: 'json',
           content: {
             code: 'ra_get-file_success_done',
-            path: '/some/path/bad_file.txt',
-            size: 1234,
             zip_size: 123,
+            contents: [
+              {
+                type: 'file',
+                path: '/some/path/bad_file.txt',
+                size: 1234,
+                file_name: 'bad_file.txt',
+                sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
+              },
+            ],
           },
         };
       }

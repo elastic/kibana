@@ -47,6 +47,9 @@ const mockClusterBuckets: ClusterBucket[] = [
           passed_findings: {
             doc_count: 3,
           },
+          score: {
+            value: 0.5,
+          },
         },
         {
           key: 'boo_type',
@@ -56,6 +59,9 @@ const mockClusterBuckets: ClusterBucket[] = [
           },
           passed_findings: {
             doc_count: 3,
+          },
+          score: {
+            value: 0.5,
           },
         },
       ],
@@ -87,12 +93,14 @@ describe('getClustersFromAggs', () => {
             totalFindings: 6,
             totalFailed: 3,
             totalPassed: 3,
+            postureScore: 50.0,
           },
           {
             name: 'boo_type',
             totalFindings: 6,
             totalFailed: 3,
             totalPassed: 3,
+            postureScore: 50.0,
           },
         ],
       },

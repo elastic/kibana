@@ -38,6 +38,7 @@ class OptionsListService implements ControlsOptionsListService {
 
   private optionsListCacheResolver = (request: OptionsListRequest) => {
     const {
+      sort,
       query,
       filters,
       timeRange,
@@ -53,6 +54,7 @@ class OptionsListService implements ControlsOptionsListService {
       selectedOptions?.join(','),
       JSON.stringify(filters),
       JSON.stringify(query),
+      JSON.stringify(sort),
       runPastTimeout,
       dataViewTitle,
       searchString,
@@ -89,6 +91,7 @@ class OptionsListService implements ControlsOptionsListService {
       fieldName: field.name,
       fieldSpec: field,
       textFieldName: (field as OptionsListField).textFieldName,
+      runtimeFieldMap: dataView.toSpec().runtimeFieldMap,
     };
   };
 
@@ -98,8 +101,12 @@ class OptionsListService implements ControlsOptionsListService {
     } catch (error) {
       // Remove rejected results from memoize cache
       this.cachedOptionsListRequest.cache.delete(this.optionsListCacheResolver(request));
-      return {} as OptionsListResponse;
+      return { rejected: true } as OptionsListResponse;
     }
+  };
+
+  public clearOptionsListCache = () => {
+    this.cachedOptionsListRequest.cache = new memoize.Cache();
   };
 }
 

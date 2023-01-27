@@ -48,6 +48,8 @@ import type { RequestHandlerContext } from '@kbn/core-http-request-handler-conte
 import type { HttpResources } from '@kbn/core-http-resources-server';
 import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-server-internal';
 
+export { bootstrap } from '@kbn/core-root-server-internal';
+
 export type { PluginOpaqueId } from '@kbn/core-base-common';
 export type {
   CoreUsageStats,
@@ -65,8 +67,6 @@ export type {
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
-
-export { bootstrap } from './bootstrap';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   CapabilitiesProvider,
@@ -194,6 +194,8 @@ export type {
   HttpServerInfo,
   HttpServicePreboot,
   HttpServiceStart,
+  RawRequest,
+  FakeRawRequest,
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
@@ -212,18 +214,8 @@ export type {
   LoggerConfigType,
   AppenderConfigType,
 } from '@kbn/core-logging-server';
-export type {
-  Logger,
-  LoggerFactory,
-  Ecs,
-  EcsEventCategory,
-  EcsEventKind,
-  EcsEventOutcome,
-  EcsEventType,
-  LogMeta,
-  LogRecord,
-  LogLevel,
-} from '@kbn/logging';
+export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
+export type { Ecs, EcsEvent } from '@kbn/ecs';
 
 export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 
@@ -245,12 +237,8 @@ export type {
 
 export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
+export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type {
-  SavedObject,
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectAttributeSingle,
-  SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,
@@ -265,6 +253,7 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectTypeIdTuple,
 } from '@kbn/core-saved-objects-common';
 export type {
   SavedObjectsBulkCreateObject,
@@ -314,15 +303,24 @@ export type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsPointInTimeFinderClient,
+  SavedObjectsBulkDeleteStatus,
 } from '@kbn/core-saved-objects-api-server';
 export type {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
   SavedObjectsClientProviderOptions,
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensionFactory,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
   SavedObjectsExportResultDetails,
   SavedObjectsExportExcludedObject,
@@ -358,6 +356,23 @@ export type {
   SavedObjectsValidationSpec,
   ISavedObjectsSerializer,
   SavedObjectsRequestHandlerContext,
+  EncryptedObjectDescriptor,
+  ISavedObjectsEncryptionExtension,
+  PerformAuthorizationParams,
+  AuthorizationTypeEntry,
+  AuthorizationTypeMap,
+  CheckAuthorizationResult,
+  EnforceAuthorizationParams,
+  AddAuditEventParams,
+  RedactNamespacesParams,
+  ISavedObjectsSecurityExtension,
+  ISavedObjectsSpacesExtension,
+  SavedObjectsExtensions,
+} from '@kbn/core-saved-objects-server';
+export {
+  ENCRYPTION_EXTENSION_ID,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
 } from '@kbn/core-saved-objects-server';
 export {
   SavedObjectsErrorHelpers,
@@ -406,7 +421,11 @@ export type {
   DeprecationsClient,
   DeprecationsRequestHandlerContext,
 } from '@kbn/core-deprecations-server';
-export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
+export type {
+  DeprecationsDetails,
+  DomainDeprecationDetails,
+  DeprecationsGetResponse,
+} from '@kbn/core-deprecations-common';
 
 export type { AppCategory } from '@kbn/core-application-common';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';

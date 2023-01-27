@@ -15,7 +15,7 @@ export const OverviewLoader = () => {
   const loaders = Array(ROWS * COLUMNS).fill(null);
   return (
     <>
-      <EuiFlexGrid columns={COLUMNS}>
+      <EuiFlexGrid gutterSize="m" columns={COLUMNS}>
         {loaders.map((_, i) => (
           <EuiFlexItem key={i}>
             <OverviewGridItemLoader />

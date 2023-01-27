@@ -16,11 +16,7 @@ import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/commo
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-  ROLES,
-} from '../../../common/services/security_solution';
+import { ROLE } from '../../services/roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -34,18 +30,12 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       // Create an endpoint policy in fleet we can work with
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
-
-      // create role/user
-      await createUserAndRole(getService, ROLES.detections_admin);
     });
 
     after(async () => {
       if (fleetEndpointPolicy) {
         await fleetEndpointPolicy.cleanup();
       }
-
-      // delete role/user
-      await deleteUserAndRole(getService, ROLES.detections_admin);
     });
 
     const anEndpointArtifactError = (res: { body: { message: string } }) => {
@@ -93,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
       > = [
         {
           method: 'post',
+          info: 'create single item',
           path: EXCEPTION_LIST_ITEM_URL,
           getBody: () => {
             return exceptionsGenerator.generateBlocklistForCreate({ tags: [GLOBAL_ARTIFACT_TAG] });
@@ -100,6 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           method: 'put',
+          info: 'update single item',
           path: EXCEPTION_LIST_ITEM_URL,
           getBody: () =>
             exceptionsGenerator.generateBlocklistForUpdate({
@@ -110,13 +102,60 @@ export default function ({ getService }: FtrProviderContext) {
         },
       ];
 
+      const needsWritePrivilege: BlocklistApiCallsInterface = [
+        {
+          method: 'delete',
+          info: 'delete single item',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}?item_id=${blocklistData.artifact.item_id}&namespace_type=${blocklistData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+      ];
+
+      const needsReadPrivilege: BlocklistApiCallsInterface = [
+        {
+          method: 'get',
+          info: 'single item',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}?item_id=${blocklistData.artifact.item_id}&namespace_type=${blocklistData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'get',
+          info: 'list summary',
+          get path() {
+            return `${EXCEPTION_LIST_URL}/summary?list_id=${blocklistData.artifact.list_id}&namespace_type=${blocklistData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'get',
+          info: 'find items',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${blocklistData.artifact.list_id}&namespace_type=${blocklistData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'post',
+          info: 'list export',
+          get path() {
+            return `${EXCEPTION_LIST_URL}/_export?list_id=${blocklistData.artifact.list_id}&namespace_type=${blocklistData.artifact.namespace_type}&id=${blocklistData.artifact.id}`;
+          },
+          getBody: () => undefined,
+        },
+      ];
+
       describe('and has authorization to manage endpoint security', () => {
         for (const blocklistApiCall of blocklistApiCalls) {
           it(`should error on [${blocklistApiCall.method}] if invalid condition entry fields are used`, async () => {
             const body = blocklistApiCall.getBody();
 
             body.entries[0].field = 'some.invalid.field';
-            await supertest[blocklistApiCall.method](blocklistApiCall.path)
+            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
+              .auth(ROLE.analyst_hunter, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -136,7 +175,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertest[blocklistApiCall.method](blocklistApiCall.path)
+            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
+              .auth(ROLE.analyst_hunter, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -156,7 +196,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertest[blocklistApiCall.method](blocklistApiCall.path)
+            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
+              .auth(ROLE.analyst_hunter, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -182,7 +223,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertest[blocklistApiCall.method](blocklistApiCall.path)
+            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
+              .auth(ROLE.analyst_hunter, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -215,7 +257,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertest[blocklistApiCall.method](blocklistApiCall.path)
+            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
+              .auth(ROLE.analyst_hunter, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -228,7 +271,8 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.os_types = ['linux', 'windows'];
 
-            await supertest[blocklistApiCall.method](blocklistApiCall.path)
+            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
+              .auth(ROLE.analyst_hunter, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -241,6 +285,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`];
 
+            // Using superuser here as we need custom license for this action
             await supertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
@@ -249,57 +294,51 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/invalid policy ids/));
           });
         }
+        for (const blocklistApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
+          it(`should not error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
+            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
+              .auth(ROLE.analyst_hunter, 'changeme')
+              .set('kbn-xsrf', 'true')
+              .send(blocklistApiCall.getBody())
+              .expect(200);
+          });
+        }
       });
 
-      describe('and user DOES NOT have authorization to manage endpoint security', () => {
-        const allblocklistApiCalls: BlocklistApiCallsInterface = [
-          ...blocklistApiCalls,
-          {
-            method: 'get',
-            info: 'single item',
-            get path() {
-              return `${EXCEPTION_LIST_ITEM_URL}?item_id=${blocklistData.artifact.item_id}&namespace_type=${blocklistData.artifact.namespace_type}`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'get',
-            info: 'list summary',
-            get path() {
-              return `${EXCEPTION_LIST_URL}/summary?list_id=${blocklistData.artifact.list_id}&namespace_type=${blocklistData.artifact.namespace_type}`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'delete',
-            info: 'single item',
-            get path() {
-              return `${EXCEPTION_LIST_ITEM_URL}?item_id=${blocklistData.artifact.item_id}&namespace_type=${blocklistData.artifact.namespace_type}`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'post',
-            info: 'list export',
-            get path() {
-              return `${EXCEPTION_LIST_URL}/_export?list_id=${blocklistData.artifact.list_id}&namespace_type=${blocklistData.artifact.namespace_type}&id=1`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'get',
-            info: 'single items',
-            get path() {
-              return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${blocklistData.artifact.list_id}&namespace_type=${blocklistData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
-            },
-            getBody: () => undefined,
-          },
-        ];
-
-        for (const blocklistApiCall of allblocklistApiCalls) {
-          it(`should error on [${blocklistApiCall.method}]`, async () => {
+      describe('and user has authorization to read blocklist', () => {
+        for (const blocklistApiCall of [...blocklistApiCalls, ...needsWritePrivilege]) {
+          it(`should error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLES.detections_admin, 'changeme')
+              .auth(ROLE.t2_analyst, 'changeme')
+              .set('kbn-xsrf', 'true')
+              .send(blocklistApiCall.getBody())
+              .expect(403, {
+                status_code: 403,
+                message: 'EndpointArtifactError: Endpoint authorization failure',
+              });
+          });
+        }
+
+        for (const blocklistApiCall of needsReadPrivilege) {
+          it(`should not error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
+            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
+              .auth(ROLE.t2_analyst, 'changeme')
+              .set('kbn-xsrf', 'true')
+              .send(blocklistApiCall.getBody())
+              .expect(200);
+          });
+        }
+      });
+
+      describe('and user has no authorization to blocklist', () => {
+        for (const blocklistApiCall of [
+          ...blocklistApiCalls,
+          ...needsWritePrivilege,
+          ...needsReadPrivilege,
+        ]) {
+          it(`should error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
+            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
+              .auth(ROLE.t1_analyst, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody())
               .expect(403, {

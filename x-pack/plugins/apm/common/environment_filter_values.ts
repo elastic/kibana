@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SERVICE_ENVIRONMENT } from './elasticsearch_fieldnames';
+import { SERVICE_ENVIRONMENT } from './es_fields/apm';
 import { Environment } from './environment_rt';
 
 const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;

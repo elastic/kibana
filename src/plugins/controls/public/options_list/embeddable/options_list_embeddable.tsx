@@ -137,6 +137,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         exclude: newInput.exclude,
         filters: newInput.filters,
         query: newInput.query,
+        sort: newInput.sort,
       })),
       distinctUntilChanged(diffDataFetchProps)
     );
@@ -284,7 +285,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     const {
       componentState: { searchString },
-      explicitInput: { selectedOptions, runPastTimeout, existsSelected },
+      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
     } = getState();
     dispatch(setLoading(true));
     if (searchString.valid) {
@@ -296,7 +297,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         timeRange: globalTimeRange,
         timeslice,
       } = this.getInput();
-
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
       const timeRange =
@@ -307,9 +307,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               mode: 'absolute' as 'absolute',
             }
           : globalTimeRange;
-      const { suggestions, invalidSelections, totalCardinality } =
+      const { suggestions, invalidSelections, totalCardinality, rejected } =
         await this.optionsListService.runOptionsListRequest(
           {
+            sort,
             field,
             query,
             filters,
@@ -321,6 +322,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           },
           this.abortController.signal
         );
+      if (rejected) {
+        // This prevents a rejected request (which can happen, for example, when a user types a search string too quickly)
+        // from prematurely setting loading to `false` and updating the suggestions to show "No results"
+        return;
+      }
+
       if (
         (!selectedOptions && !existsSelected) ||
         isEmpty(invalidSelections) ||
@@ -361,7 +368,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       batch(() => {
         dispatch(
           updateQueryResults({
-            availableOptions: [],
+            availableOptions: {},
           })
         );
         dispatch(setLoading(false));
@@ -399,6 +406,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   };
 
   reload = () => {
+    // clear cache when reload is requested
+    this.optionsListService.clearOptionsListCache();
     this.runOptionsListQuery();
   };
 

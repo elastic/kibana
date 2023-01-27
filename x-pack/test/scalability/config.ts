@@ -8,13 +8,19 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import fs from 'fs';
 import path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { v4 as uuidV4 } from 'uuid';
 import { ScalabilityTestRunner } from './runner';
 import { FtrProviderContext } from './ftr_provider_context';
+import { ScalabilityJourney } from './types';
 
 // These "secret" values are intentionally written in the source.
+const APM_SERVER_URL = 'https://142fea2d3047486e925eb8b223559cae.apm.europe-west1.gcp.cloud.es.io';
+const APM_PUBLIC_TOKEN = 'pWFFEym07AKBBhUE2i';
+
 const AGGS_SHARD_DELAY = process.env.LOAD_TESTING_SHARD_DELAY;
 const DISABLE_PLUGINS = process.env.LOAD_TESTING_DISABLE_PLUGINS;
 const scalabilityJsonPath = process.env.SCALABILITY_JOURNEY_PATH;
@@ -34,6 +40,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       `Set path to scalability journey json using 'SCALABILITY_JOURNEY_PATH' env var`
     );
   }
+
+  const journey: ScalabilityJourney = JSON.parse(fs.readFileSync(scalabilityJsonPath, 'utf8'));
 
   const baseConfig = (
     await readConfigFile(require.resolve('../../performance/journeys/login.ts'))
@@ -62,8 +70,29 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...(!!AGGS_SHARD_DELAY ? ['--data.search.aggs.shardDelay.enabled=true'] : []),
         ...(!!DISABLE_PLUGINS ? ['--plugins.initialize=false'] : []),
       ],
-      // delay shutdown to ensure that APM can report the data it collects during test execution
-      delayShutdown: 90_000,
+      env: {
+        ELASTIC_APM_ACTIVE: true,
+        ELASTIC_APM_CENTRAL_CONFIG: false,
+        ELASTIC_APM_TRANSACTION_SAMPLE_RATE: '0.1',
+        ELASTIC_APM_BREAKDOWN_METRICS: false,
+        ELASTIC_APM_CAPTURE_SPAN_STACK_TRACES: false,
+        ELASTIC_APM_METRICS_INTERVAL: '120s',
+        ELASTIC_APM_MAX_QUEUE_SIZE: 20480,
+        ELASTIC_APM_ENVIRONMENT: process.env.CI ? 'ci' : 'development',
+        ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
+        ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
+        ELASTIC_APM_GLOBAL_LABELS: Object.entries({
+          testBuildId: process.env.BUILDKITE_BUILD_ID ?? `local-${uuidV4()}`,
+          testJobId: process.env.BUILDKITE_JOB_ID ?? `local-${uuidV4()}`,
+          journeyName: journey.journeyName,
+          ftrConfig: path.basename(scalabilityJsonPath),
+          branch: process.env.BUILDKITE_BRANCH,
+          gitRev: process.env.BUILDKITE_COMMIT,
+          ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
+        })
+          .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
+          .join(','),
+      },
     },
   };
 }

@@ -5,15 +5,25 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutSize } from '@elastic/eui';
-
 import React, { useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { TimeBuckets, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  loadRuleAggregations,
+  AlertSummaryTimeRange,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { ObservabilityAlertSearchbarWithUrlSync } from '../../../../components/shared/alert_search_bar';
+import { useToasts } from '../../../../hooks/use_toast';
+import {
+  alertSearchBarStateContainer,
+  Provider,
+  useAlertSearchBarStateContainer,
+} from '../../../../components/shared/alert_search_bar/containers';
+import { getAlertSummaryTimeRange } from '../../../rule_details/helpers';
+import { ObservabilityAlertSearchBar } from '../../../../components/shared/alert_search_bar';
 import { observabilityAlertFeatureIds } from '../../../../config';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
@@ -25,19 +35,41 @@ import { LoadingObservability } from '../../../overview';
 import './styles.scss';
 import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
-import { ALERTS_PER_PAGE, ALERTS_SEARCH_BAR_ID, ALERTS_TABLE_ID } from './constants';
+import {
+  ALERTS_PER_PAGE,
+  ALERTS_SEARCH_BAR_ID,
+  ALERTS_TABLE_ID,
+  URL_STORAGE_KEY,
+} from './constants';
 import { RuleStatsState } from './types';
 
-export function AlertsPage() {
+function InternalAlertsPage() {
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const {
     cases,
+    charts,
+    data: {
+      query: {
+        timefilter: { timefilter: timeFilterService },
+      },
+    },
     docLinks,
     http,
     notifications: { toasts },
-    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
+    triggersActionsUi: {
+      alertsTableConfigurationRegistry,
+      getAlertsSearchBar: AlertsSearchBar,
+      getAlertsStateTable: AlertsStateTable,
+      getAlertSummaryWidget: AlertSummaryWidget,
+    },
+    uiSettings,
   } = useKibana<ObservabilityAppServices>().services;
+  const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY);
 
+  const chartThemes = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
     total: 0,
@@ -48,6 +80,19 @@ export function AlertsPage() {
   });
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
+  const timeBuckets = new TimeBuckets({
+    'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+    'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+    dateFormat: uiSettings.get('dateFormat'),
+    'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+  });
+  const alertSummaryTimeRange: AlertSummaryTimeRange = getAlertSummaryTimeRange(
+    {
+      from: alertSearchBarStateProps.rangeFrom,
+      to: alertSearchBarStateProps.rangeTo,
+    },
+    timeBuckets
+  );
 
   useBreadcrumbs([
     {
@@ -127,14 +172,24 @@ export function AlertsPage() {
         rightSideItems: renderRuleStats(ruleStats, manageRulesHref, ruleStatsLoading),
       }}
     >
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <ObservabilityAlertSearchbarWithUrlSync
+          <ObservabilityAlertSearchBar
+            {...alertSearchBarStateProps}
             appName={ALERTS_SEARCH_BAR_ID}
-            setEsQuery={setEsQuery}
+            onEsQueryChange={setEsQuery}
+            services={{ timeFilterService, AlertsSearchBar, useToasts }}
           />
         </EuiFlexItem>
-
+        <EuiFlexItem>
+          <AlertSummaryWidget
+            featureIds={observabilityAlertFeatureIds}
+            filter={esQuery}
+            fullSize
+            timeRange={alertSummaryTimeRange}
+            chartThemes={chartThemes}
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <CasesContext
             owner={[observabilityFeatureId]}
@@ -146,7 +201,7 @@ export function AlertsPage() {
                 alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                 configurationId={AlertConsumers.OBSERVABILITY}
                 id={ALERTS_TABLE_ID}
-                flyoutSize={'s' as EuiFlyoutSize}
+                flyoutSize="s"
                 featureIds={observabilityAlertFeatureIds}
                 query={esQuery}
                 showExpandToDetails={false}
@@ -157,5 +212,13 @@ export function AlertsPage() {
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
+  );
+}
+
+export function AlertsPage() {
+  return (
+    <Provider value={alertSearchBarStateContainer}>
+      <InternalAlertsPage />
+    </Provider>
   );
 }

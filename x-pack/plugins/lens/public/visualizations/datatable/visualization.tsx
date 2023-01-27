@@ -226,7 +226,7 @@ export const getDatatableVisualization = ({
             )
             .map((accessor) => ({
               columnId: accessor,
-              triggerIcon: columnMap[accessor].hidden
+              triggerIconType: columnMap[accessor].hidden
                 ? 'invisible'
                 : columnMap[accessor].collapseFn
                 ? 'aggregate'
@@ -289,7 +289,7 @@ export const getDatatableVisualization = ({
 
               return {
                 columnId: accessor,
-                triggerIcon: columnConfig?.hidden
+                triggerIconType: columnConfig?.hidden
                   ? 'invisible'
                   : hasColoring
                   ? 'colorBy'
@@ -499,10 +499,6 @@ export const getDatatableVisualization = ({
     };
   },
 
-  getErrorMessages(state) {
-    return undefined;
-  },
-
   getRenderEventCounters(state) {
     const events = {
       color_by_value: false,
@@ -612,6 +608,43 @@ export const getDatatableVisualization = ({
       },
     };
     return suggestion;
+  },
+
+  getVisualizationInfo(state: DatatableVisualizationState) {
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: 'table',
+          ...this.getDescription(state),
+          dimensions: state.columns.map((column) => {
+            let name = i18n.translate('xpack.lens.datatable.metric', {
+              defaultMessage: 'Metric',
+            });
+            let dimensionType = 'Metric';
+            if (!column.transposable) {
+              if (column.isTransposed) {
+                name = i18n.translate('xpack.lens.datatable.breakdownColumns', {
+                  defaultMessage: 'Split metrics by',
+                });
+                dimensionType = 'split_metrics';
+              } else {
+                name = i18n.translate('xpack.lens.datatable.breakdownRow', {
+                  defaultMessage: 'Row',
+                });
+                dimensionType = 'split_rows';
+              }
+            }
+            return {
+              dimensionType,
+              id: column.columnId,
+              name,
+            };
+          }),
+        },
+      ],
+    };
   },
 });
 

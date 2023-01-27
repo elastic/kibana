@@ -191,6 +191,24 @@ describe('Screenshot Observable Pipeline', () => {
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchSnapshot();
     });
+
+    it("initial page is create with layout's width and deviceScaleFactor", async () => {
+      const result = await lastValueFrom(
+        screenshots.getScreenshots(options as PngScreenshotOptions)
+      );
+
+      expect(driverFactory.createPage).toBeCalledWith(
+        expect.objectContaining({
+          defaultViewport: {
+            width: layout.width,
+            deviceScaleFactor: layout.getBrowserZoom(),
+          },
+        }), // config with layout
+        expect.anything() // logger
+      );
+
+      expect(result).toHaveProperty('results');
+    });
   });
 
   describe('cloud', () => {

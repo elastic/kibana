@@ -113,12 +113,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('lnsFieldListPanel-buttonGroup-topValuesButton');
         });
 
-        it('should show a placeholder message about geo points field', async () => {
+        it('should show examples for geo points field', async () => {
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('geo_point');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
-          const message = await testSubjects.getVisibleText('lnsFieldListPanel-missingFieldStats');
-          expect(message).to.eql('Analysis is not available for this field.');
+          // check for top values chart
+          await testSubjects.existOrFail('lnsFieldListPanel-topValues');
+          const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
+          expect(topValuesRows.length).to.eql(11);
         });
 
         it('should show stats for a numeric runtime field', async () => {
@@ -177,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             10
           );
           // define a filter
-          await filterBar.addFilter('geo.src', 'is', 'CN');
+          await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'CN' });
           await retry.waitFor('Wait for the filter to take effect', async () => {
             await testSubjects.click(fieldId);
             // check for top values chart has changed compared to the previous test
@@ -194,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // One Fields cap's limitation is to not know when an index has no fields based on filters
         it('should detect fields have no data in popup if filter excludes them', async () => {
           await filterBar.removeAllFilters();
-          await filterBar.addFilter('bytes', 'is', '-1');
+          await filterBar.addFilter({ field: 'bytes', operation: 'is', value: '-1' });
           // check via popup fields have no data
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('string');
           await log.debug(`Opening field stats for ${fieldId}`);

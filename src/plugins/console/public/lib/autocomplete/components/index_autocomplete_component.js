@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { getAutocompleteInfo } from '../../../services';
+import { getAutocompleteInfo, ENTITIES } from '../../../services';
 import { ListComponent } from './list_component';
 
 function nonValidIndexType(token) {
@@ -16,7 +16,7 @@ function nonValidIndexType(token) {
 
 export class IndexAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {
-    super(name, getAutocompleteInfo().getEntityProvider('indices'), parent, multiValued);
+    super(name, getAutocompleteInfo().getEntityProvider(ENTITIES.INDICES), parent, multiValued);
   }
   validateTokens(tokens) {
     if (!this.multiValued && tokens.length > 1) {

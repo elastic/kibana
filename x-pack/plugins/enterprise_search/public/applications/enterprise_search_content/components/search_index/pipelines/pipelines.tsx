@@ -28,8 +28,8 @@ import { isApiIndex } from '../../../utils/indices';
 import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
 import { IngestPipelinesCard } from './ingest_pipelines/ingest_pipelines_card';
+import { AddInferencePipelineFlyout } from './ml_inference/add_inference_pipeline_flyout';
 import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
-import { AddMLInferencePipelineModal } from './ml_inference/add_ml_inference_pipeline_modal';
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
 import { PipelinesJSONConfigurations } from './pipelines_json_configurations';
 import { PipelinesLogic } from './pipelines_logic';
@@ -175,7 +175,7 @@ export const SearchIndexPipelines: React.FC = () => {
       </EuiFlexGroup>
       <InferenceErrors />
       {showAddMlInferencePipelineModal && (
-        <AddMLInferencePipelineModal onClose={closeAddMlInferencePipelineModal} />
+        <AddInferencePipelineFlyout onClose={closeAddMlInferencePipelineModal} />
       )}
     </>
   );

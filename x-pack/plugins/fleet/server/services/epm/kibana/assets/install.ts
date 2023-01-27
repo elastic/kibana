@@ -12,9 +12,10 @@ import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
   ISavedObjectsImporter,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
-import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from '@kbn/core/server/types';
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
@@ -163,7 +164,7 @@ export async function installKibanaAssetsAndReferences({
     kibanaAssets
   );
 
-  await installKibanaAssets({
+  const importedAssets = await installKibanaAssets({
     logger,
     savedObjectsImporter,
     pkgName,
@@ -177,6 +178,7 @@ export async function installKibanaAssetsAndReferences({
       pkgTitle,
       pkgName,
       spaceId,
+      importedAssets,
     })
   );
 

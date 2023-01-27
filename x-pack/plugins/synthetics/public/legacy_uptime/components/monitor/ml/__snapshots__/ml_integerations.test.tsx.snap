@@ -9,7 +9,7 @@ exports[`ML Integrations renders without errors 1`] = `
   >
     <button
       aria-label="You can enable anomaly detection job or if job is already there you can manage the job or alert."
-      class="euiButton emotion-euiButtonDisplay-s-isDisabled-s-base-disabled"
+      class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-isDisabled-s-base-disabled"
       data-test-subj="uptimeEnableAnomalyBtn"
       disabled=""
       type="button"

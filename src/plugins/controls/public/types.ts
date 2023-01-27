@@ -57,6 +57,7 @@ export interface IEditableControlFactory<T extends ControlInput = ControlInput> 
 
 export interface ControlEditorProps<T extends ControlInput = ControlInput> {
   initialInput?: Partial<T>;
+  fieldType: string;
   onChange: (partial: Partial<T>) => void;
 }
 

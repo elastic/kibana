@@ -95,11 +95,12 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
         durationToDate?: string;
         uuid?: string;
       } = {};
-
+      const flapping = [];
       for (let i = 0; i < instanceEvents.length; ++i) {
         expect(typeof instanceEvents[i]?.kibana?.alert?.uuid).to.be('string');
         const uuid = instanceEvents[i]?.kibana?.alert?.uuid!;
 
+        flapping.push(instanceEvents[i]?.kibana?.alert?.flapping);
         switch (instanceEvents[i]?.event?.action) {
           case 'new-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
@@ -119,7 +120,6 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
 
           case 'active-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
-            expect(instanceEvents[i]?.kibana?.alert?.flapping).to.equal(false);
             expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
             expect(instanceEvents[i]?.event?.end).to.be(undefined);
             expect(instanceEvents[i]?.kibana?.alert?.uuid).to.be(currentAlertSpan.uuid);
@@ -135,7 +135,6 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
 
           case 'recovered-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
-            expect(instanceEvents[i]?.kibana?.alert?.flapping).to.equal(false);
             expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
             expect(instanceEvents[i]?.event?.end).not.to.be(undefined);
             expect(instanceEvents[i]?.kibana?.alert?.uuid).to.be(currentAlertSpan.uuid);
@@ -147,6 +146,9 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             break;
         }
       }
+      expect(flapping).to.eql(
+        new Array(instanceEvents.length - 4).fill(false).concat([true, true, true, true])
+      );
     });
   });
 }

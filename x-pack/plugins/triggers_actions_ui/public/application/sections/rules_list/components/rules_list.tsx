@@ -8,27 +8,26 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { capitalize, isEmpty, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
+import React, {
+  lazy,
+  useEffect,
+  useState,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  Suspense,
+} from 'react';
 import {
-  EuiButton,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFilterGroup,
   EuiSpacer,
-  EuiLink,
-  EuiEmptyPrompt,
-  EuiHealth,
+  EuiPageTemplate,
   EuiTableSortingType,
   EuiButtonIcon,
   EuiSelectableOption,
-  EuiIcon,
   EuiDescriptionList,
-  EuiCallOut,
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useHistory } from 'react-router-dom';
@@ -37,63 +36,74 @@ import {
   RuleExecutionStatus,
   ALERTS_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
+  RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
-import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
 import {
-  ActionType,
   Rule,
   RuleTableItem,
   RuleType,
-  RuleTypeIndex,
   RuleStatus,
   Pagination,
   Percentiles,
-  TriggersActionsUiConfig,
   SnoozeSchedule,
+  RulesListFilters,
+  UpdateFiltersProps,
+  BulkEditActions,
+  UpdateRulesToBulkEditProps,
 } from '../../../../types';
-import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
-import { TypeFilter } from './type_filter';
-import { ActionTypeFilter } from './action_type_filter';
-import { RuleExecutionStatusFilter } from './rule_execution_status_filter';
+import { RulesListFiltersBar } from './rules_list_filters_bar';
 import {
-  loadRuleTypes,
-  disableRule,
-  enableRule,
   snoozeRule,
   unsnoozeRule,
-  deleteRules,
   bulkUpdateAPIKey,
+  bulkDisableRules,
+  bulkEnableRules,
+  cloneRule,
 } from '../../../lib/rule_api';
-import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
-import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
-import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
+import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
+import { RulesListPrompts } from './rules_list_prompts';
 import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import './rules_list.scss';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
-import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
-import { RuleTagFilter } from './rule_tag_filter';
-import { RuleStatusFilter } from './rule_status_filter';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { useLoadRules } from '../../../hooks/use_load_rules';
-import { useLoadTags } from '../../../hooks/use_load_tags';
-import { useLoadRuleAggregations } from '../../../hooks/use_load_rule_aggregations';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
-import { RulesListAutoRefresh } from './rules_list_auto_refresh';
+import { RulesListDocLink } from './rules_list_doc_link';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { RulesListVisibleColumns } from './rules_list_column_selector';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
 import { runRule } from '../../../lib/run_rule';
+import { bulkDeleteRules } from '../../../lib/rule_api';
 
-const ENTER_KEY = 13;
+import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_query';
+import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
+import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
+import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
+import { useLoadTagsQuery } from '../../../hooks/use_load_tags_query';
+import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
+
+import {
+  getConfirmDeletionButtonText,
+  getConfirmDeletionModalText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
+} from '../translations';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
+import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
+
+// Directly lazy import the flyouts because the suspendedComponentWithProps component
+// cause a visual hitch due to the loading spinner
+const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
+const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 interface RulesPageContainerState {
   lastResponse: string[];
@@ -105,25 +115,23 @@ export interface RulesListProps {
   showActionFilter?: boolean;
   ruleDetailsRoute?: string;
   showCreateRuleButton?: boolean;
+  showCreateRuleButtonInPrompt?: boolean;
+  setHeaderActions?: (components?: React.ReactNode[]) => void;
   statusFilter?: RuleStatus[];
   onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
   lastResponseFilter?: string[];
   onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
+  lastRunOutcomeFilter?: string[];
+  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
   refresh?: Date;
   rulesListKey?: string;
-  visibleColumns?: RulesListVisibleColumns[];
-}
-
-interface RuleTypeState {
-  isLoading: boolean;
-  isInitialized: boolean;
-  data: RuleTypeIndex;
+  visibleColumns?: string[];
 }
 
 export const percentileFields = {
-  [Percentiles.P50]: 'monitoring.execution.calculated_metrics.p50',
-  [Percentiles.P95]: 'monitoring.execution.calculated_metrics.p95',
-  [Percentiles.P99]: 'monitoring.execution.calculated_metrics.p99',
+  [Percentiles.P50]: 'monitoring.run.calculated_metrics.p50',
+  [Percentiles.P95]: 'monitoring.run.calculated_metrics.p95',
+  [Percentiles.P99]: 'monitoring.run.calculated_metrics.p99',
 };
 
 const initialPercentileOptions = Object.values(Percentiles).map((percentile) => ({
@@ -132,15 +140,21 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
   key: percentile,
 }));
 
+const EMPTY_ARRAY: string[] = [];
+
 export const RulesList = ({
-  filteredRuleTypes = [],
+  filteredRuleTypes = EMPTY_ARRAY,
   showActionFilter = true,
   ruleDetailsRoute,
   showCreateRuleButton = true,
+  showCreateRuleButtonInPrompt = false,
   statusFilter,
   onStatusFilterChange,
   lastResponseFilter,
   onLastResponseFilterChange,
+  lastRunOutcomeFilter,
+  onLastRunOutcomeFilterChange,
+  setHeaderActions,
   refresh,
   rulesListKey,
   visibleColumns,
@@ -155,21 +169,20 @@ export const RulesList = ({
     kibanaFeatures,
   } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
-
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
-  const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [searchText, setSearchText] = useState<string | undefined>();
-  const [inputText, setInputText] = useState<string | undefined>();
-  const [typesFilter, setTypesFilter] = useState<string[]>([]);
-  const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
-  const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>(
-    lastResponseFilter || []
-  );
-  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>(statusFilter || []);
+  const [inputText, setInputText] = useState<string>('');
 
-  const [tagsFilter, setTagsFilter] = useState<string[]>([]);
+  const [filters, setFilters] = useState<RulesListFilters>(() => ({
+    searchText: '',
+    types: [],
+    actionTypes: [],
+    ruleExecutionStatuses: lastResponseFilter || [],
+    ruleLastRunOutcomes: lastRunOutcomeFilter || [],
+    ruleStatuses: statusFilter || [],
+    tags: [],
+  }));
+
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
@@ -177,16 +190,9 @@ export const RulesList = ({
     {}
   );
   const [showErrors, setShowErrors] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<string>('');
+  const cloneRuleId = useRef<null | string>(null);
 
-  const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
-
-  useEffect(() => {
-    (async () => {
-      setConfig(await triggersActionsUiConfig({ http }));
-    })();
-  }, [http]);
 
   const [percentileOptions, setPercentileOptions] =
     useState<EuiSelectableOption[]>(initialPercentileOptions);
@@ -199,95 +205,88 @@ export const RulesList = ({
     licenseType: string;
     ruleTypeId: string;
   } | null>(null);
-  const [ruleTypesState, setRuleTypesState] = useState<RuleTypeState>({
-    isLoading: false,
-    isInitialized: false,
-    data: new Map(),
-  });
 
-  const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
+  const [isEnablingRules, setIsEnablingRules] = useState<boolean>(false);
+  const [isDisablingRules, setIsDisablingRules] = useState<boolean>(false);
 
-  // TODO - tech debt: Right now we're using null and undefined to determine if we should
-  // render the bulk edit modal. Refactor this to only keep track of 1 set of rules and types
-  // to determine which modal to show
-  const [rulesToSnooze, setRulesToSnooze] = useState<RuleTableItem[]>([]);
-  const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<KueryNode | null | undefined>();
-
-  const [rulesToUnsnooze, setRulesToUnsnooze] = useState<RuleTableItem[]>([]);
-  const [rulesToUnsnoozeFilter, setRulesToUnsnoozeFilter] = useState<
-    KueryNode | null | undefined
+  const [rulesToBulkEdit, setRulesToBulkEdit] = useState<RuleTableItem[]>([]);
+  const [rulesToBulkEditFilter, setRulesToBulkEditFilter] = useState<
+    KueryNode | undefined | null
   >();
+  const [bulkEditAction, setBulkEditAction] = useState<BulkEditActions | undefined>();
+  const [isBulkEditing, setIsBulkEditing] = useState<boolean>(false);
 
-  const [rulesToSchedule, setRulesToSchedule] = useState<RuleTableItem[]>([]);
-  const [rulesToScheduleFilter, setRulesToScheduleFilter] = useState<
-    KueryNode | null | undefined
-  >();
+  const [isCloningRule, setIsCloningRule] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [rulesToUnschedule, setRulesToUnschedule] = useState<RuleTableItem[]>([]);
-  const [rulesToUnscheduleFilter, setRulesToUnscheduleFilter] = useState<
-    KueryNode | null | undefined
-  >();
+  // Fetch config
+  const { config } = useLoadConfigQuery();
+  // Fetch rule types
+  const {
+    ruleTypesState,
+    hasAnyAuthorizedRuleType,
+    authorizedRuleTypes,
+    authorizedToCreateAnyRules,
+    isSuccess: isLoadRuleTypesSuccess,
+  } = useLoadRuleTypesQuery({ filteredRuleTypes });
+  // Fetch action types
+  const { actionTypes } = useLoadActionTypesQuery();
 
-  const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
-  const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<
-    KueryNode | null | undefined
-  >();
+  const rulesTypesFilter = isEmpty(filters.types)
+    ? authorizedRuleTypes.map((art) => art.id)
+    : filters.types;
+  const hasDefaultRuleTypesFiltersOn = isEmpty(filters.types);
 
-  const [isSnoozingRules, setIsSnoozingRules] = useState<boolean>(false);
-  const [isSchedulingRules, setIsSchedulingRules] = useState<boolean>(false);
-  const [isUnsnoozingRules, setIsUnsnoozingRules] = useState<boolean>(false);
-  const [isUnschedulingRules, setIsUnschedulingRules] = useState<boolean>(false);
-  const [isUpdatingRuleAPIKeys, setIsUpdatingRuleAPIKeys] = useState<boolean>(false);
+  const computedFilter = useMemo(() => {
+    return {
+      ...filters,
+      types: rulesTypesFilter,
+    };
+  }, [filters, rulesTypesFilter]);
 
-  const hasAnyAuthorizedRuleType = useMemo(() => {
-    return ruleTypesState.isInitialized && ruleTypesState.data.size > 0;
-  }, [ruleTypesState]);
+  const canLoadRules = isLoadRuleTypesSuccess && hasAnyAuthorizedRuleType;
 
-  const onError = useCallback(
-    (message: string) => {
-      toasts.addDanger(message);
-    },
-    [toasts]
-  );
-
-  const authorizedRuleTypes = useMemo(() => [...ruleTypesState.data.values()], [ruleTypesState]);
-  const authorizedToCreateAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
-  );
-
-  const [rulesTypesFilter, hasDefaultRuleTypesFiltersOn] = useMemo(() => {
-    if (isEmpty(typesFilter) && !isEmpty(filteredRuleTypes)) {
-      return [authorizedRuleTypes.map((art) => art.id), true];
-    }
-    return [typesFilter, false];
-  }, [typesFilter, filteredRuleTypes, authorizedRuleTypes]);
-
-  const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
+  // Fetch rules
+  const { rulesState, loadRules, hasData, lastUpdate } = useLoadRulesQuery({
+    filters: computedFilter,
+    hasDefaultRuleTypesFiltersOn,
     page,
-    searchText,
-    typesFilter: rulesTypesFilter,
-    actionTypesFilter,
-    ruleExecutionStatusesFilter,
-    ruleStatusesFilter,
-    tagsFilter,
     sort,
     onPage: setPage,
-    onError,
+    enabled: canLoadRules,
+    refresh,
+  });
+
+  // Fetch status aggregation
+  const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
+    useLoadRuleAggregationsQuery({
+      filters: computedFilter,
+      enabled: canLoadRules,
+      refresh,
+    });
+
+  // Fetch tags
+  const { tags, loadTags } = useLoadTagsQuery({
+    enabled: isRuleStatusFilterEnabled && canLoadRules,
+    refresh,
+  });
+
+  const {
+    showSpinner,
+    showRulesList,
+    showNoAuthPrompt,
+    showCreateFirstRulePrompt,
+    showHeaderWithCreateButton,
+    showHeaderWithoutCreateButton,
+  } = useUiState({
+    authorizedToCreateAnyRules,
+    filters,
     hasDefaultRuleTypesFiltersOn,
-  });
-
-  const { tags, loadTags } = useLoadTags({
-    onError,
-  });
-
-  const { loadRuleAggregations, rulesStatusesTotal } = useLoadRuleAggregations({
-    searchText,
-    typesFilter,
-    actionTypesFilter,
-    ruleExecutionStatusesFilter,
-    ruleStatusesFilter,
-    tagsFilter,
-    onError,
+    isLoadingRuleTypes: ruleTypesState.isLoading,
+    isLoadingRules: rulesState.isLoading,
+    hasData,
+    isInitialLoadingRuleTypes: ruleTypesState.initialLoad,
+    isInitialLoadingRules: rulesState.initialLoad,
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
@@ -302,7 +301,7 @@ export const RulesList = ({
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
-  const loadData = useCallback(async () => {
+  const refreshRules = useCallback(async () => {
     if (!ruleTypesState || !hasAnyAuthorizedRuleType) {
       return;
     }
@@ -311,106 +310,111 @@ export const RulesList = ({
     if (isRuleStatusFilterEnabled) {
       await loadTags();
     }
-    setLastUpdate(moment().format());
   }, [
     loadRules,
     loadTags,
     loadRuleAggregations,
-    setLastUpdate,
     isRuleStatusFilterEnabled,
     hasAnyAuthorizedRuleType,
     ruleTypesState,
   ]);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData, refresh, percentileOptions]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setRuleTypesState({ ...ruleTypesState, isLoading: true });
-        const ruleTypes = await loadRuleTypes({ http });
-        const index: RuleTypeIndex = new Map();
-        for (const ruleType of ruleTypes) {
-          index.set(ruleType.id, ruleType);
-        }
-        let filteredIndex = index;
-        if (filteredRuleTypes && filteredRuleTypes.length > 0) {
-          filteredIndex = new Map(
-            [...index].filter(([k, v]) => {
-              return filteredRuleTypes.includes(v.id);
-            })
-          );
-        }
-        setRuleTypesState({ isLoading: false, data: filteredIndex, isInitialized: true });
-      } catch (e) {
-        toasts.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleTypesMessage',
-            { defaultMessage: 'Unable to load rule types' }
-          ),
-        });
-        setRuleTypesState({ ...ruleTypesState, isLoading: false });
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const result = await loadActionTypes({ http, featureId: AlertingConnectorFeatureId });
-        const sortedResult = result
-          .filter(({ id }) => actionTypeRegistry.has(id))
-          .sort((a, b) => a.name.localeCompare(b.name));
-        setActionTypes(sortedResult);
-      } catch (e) {
-        toasts.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.unableToLoadConnectorTypesMessage',
-            { defaultMessage: 'Unable to load connector types' }
-          ),
-        });
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    if (onStatusFilterChange) {
-      onStatusFilterChange(ruleStatusesFilter);
+  const tableItems = useMemo(() => {
+    if (ruleTypesState.initialLoad) {
+      return [];
     }
-  }, [ruleStatusesFilter]);
+    return convertRulesToTableItems({
+      rules: rulesState.data,
+      ruleTypeIndex: ruleTypesState.data,
+      canExecuteActions,
+      config,
+    });
+  }, [ruleTypesState, rulesState.data, canExecuteActions, config]);
+
+  const {
+    isAllSelected,
+    selectedIds,
+    isPageSelected,
+    numberOfSelectedItems,
+    isRowSelected,
+    getFilter,
+    onSelectRow,
+    onSelectAll,
+    onSelectPage,
+    onClearSelection,
+  } = useBulkEditSelect({
+    totalItemCount: rulesState.totalItemCount,
+    items: tableItems,
+    ...filters,
+    typesFilter: rulesTypesFilter,
+  });
+
+  const handleUpdateFiltersEffect = useCallback(
+    (updateFilterProps: UpdateFiltersProps) => {
+      const { filter, value } = updateFilterProps;
+      onClearSelection();
+      switch (filter) {
+        case 'ruleStatuses':
+          onStatusFilterChange?.(value as RuleStatus[]);
+          break;
+        case 'ruleExecutionStatuses':
+          onLastResponseFilterChange?.(value as string[]);
+          break;
+        case 'ruleLastRunOutcomes':
+          onLastRunOutcomeFilterChange?.(value as string[]);
+          break;
+        default:
+          break;
+      }
+    },
+    [
+      onStatusFilterChange,
+      onLastResponseFilterChange,
+      onLastRunOutcomeFilterChange,
+      onClearSelection,
+    ]
+  );
+
+  const updateFilters = useCallback(
+    (updateFiltersProps: UpdateFiltersProps) => {
+      const { filter, value } = updateFiltersProps;
+      setFilters((prev) => ({
+        ...prev,
+        [filter]: value,
+      }));
+      handleUpdateFiltersEffect(updateFiltersProps);
+    },
+    [setFilters, handleUpdateFiltersEffect]
+  );
 
   useEffect(() => {
     if (statusFilter) {
-      setRuleStatusesFilter(statusFilter);
+      updateFilters({ filter: 'ruleStatuses', value: statusFilter });
     }
   }, [statusFilter]);
 
   useEffect(() => {
     if (lastResponseFilter) {
-      setRuleExecutionStatusesFilter(lastResponseFilter);
+      updateFilters({ filter: 'ruleExecutionStatuses', value: lastResponseFilter });
     }
   }, [lastResponseFilter]);
 
   useEffect(() => {
-    if (onLastResponseFilterChange) {
-      onLastResponseFilterChange(ruleExecutionStatusesFilter);
+    if (lastRunOutcomeFilter) {
+      updateFilters({ filter: 'ruleLastRunOutcomes', value: lastRunOutcomeFilter });
     }
-  }, [ruleExecutionStatusesFilter]);
+  }, [lastResponseFilter]);
 
-  // Clear bulk selection anytime the filters change
   useEffect(() => {
-    onClearSelection();
-  }, [
-    searchText,
-    rulesTypesFilter,
-    actionTypesFilter,
-    ruleExecutionStatusesFilter,
-    ruleStatusesFilter,
-    tagsFilter,
-    hasDefaultRuleTypesFiltersOn,
-  ]);
+    if (cloneRuleId.current) {
+      const ruleItem = tableItems.find((ti) => ti.id === cloneRuleId.current);
+      cloneRuleId.current = null;
+      setIsCloningRule(false);
+      if (ruleItem) {
+        onRuleEdit(ruleItem);
+      }
+    }
+  }, [tableItems]);
 
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
@@ -456,7 +460,11 @@ export const RulesList = ({
     setShowErrors((prevValue) => {
       if (!prevValue) {
         const rulesToExpand = rulesState.data.reduce((acc, ruleItem) => {
-          if (ruleItem.executionStatus.status === 'error') {
+          // Check both outcome and executionStatus for now until we deprecate executionStatus
+          if (
+            ruleItem.lastRun?.outcome === RuleLastRunOutcomeValues[2] ||
+            ruleItem.executionStatus.status === 'error'
+          ) {
             return {
               ...acc,
               [ruleItem.id]: (
@@ -501,31 +509,19 @@ export const RulesList = ({
     );
   };
 
-  const getRuleTagFilter = () => {
-    if (isRuleTagFilterEnabled) {
-      return [
-        <RuleTagFilter isGrouped tags={tags} selectedTags={tagsFilter} onChange={setTagsFilter} />,
-      ];
-    }
-    return [];
-  };
+  const onDisableRule = useCallback(
+    async (rule: RuleTableItem) => {
+      await bulkDisableRules({ http, ids: [rule.id] });
+    },
+    [bulkDisableRules]
+  );
 
-  const renderRuleStatusFilter = () => {
-    if (isRuleStatusFilterEnabled) {
-      return (
-        <RuleStatusFilter selectedStatuses={ruleStatusesFilter} onChange={setRuleStatusesFilter} />
-      );
-    }
-    return null;
-  };
-
-  const onDisableRule = (rule: RuleTableItem) => {
-    return disableRule({ http, id: rule.id });
-  };
-
-  const onEnableRule = (rule: RuleTableItem) => {
-    return enableRule({ http, id: rule.id });
-  };
+  const onEnableRule = useCallback(
+    async (rule: RuleTableItem) => {
+      await bulkEnableRules({ http, ids: [rule.id] });
+    },
+    [bulkEnableRules]
+  );
 
   const onSnoozeRule = (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => {
     return snoozeRule({ http, id: rule.id, snoozeSchedule });
@@ -537,7 +533,7 @@ export const RulesList = ({
 
   const onSearchPopulate = (value: string) => {
     setInputText(value);
-    setSearchText(value);
+    updateFilters({ filter: 'searchText', value });
   };
 
   const filterOptions = sortBy(Object.entries(groupRuleTypesByProducer())).map(
@@ -547,600 +543,435 @@ export const RulesList = ({
     })
   );
 
-  const toolsRight = [
-    <TypeFilter
-      key="type-filter"
-      onChange={setTypesFilter}
-      options={filterOptions}
-      filters={typesFilter}
-    />,
-    showActionFilter && (
-      <ActionTypeFilter
-        key="action-type-filter"
-        actionTypes={actionTypes}
-        onChange={setActionTypesFilter}
-        filters={typesFilter}
-      />
-    ),
-    <RuleExecutionStatusFilter
-      key="rule-status-filter"
-      selectedStatuses={ruleExecutionStatusesFilter}
-      onChange={setRuleExecutionStatusesFilter}
-    />,
-    ...getRuleTagFilter(),
-  ];
-
-  const tableItems = useMemo(() => {
-    if (ruleTypesState.isInitialized === false) {
-      return [];
-    }
-    return convertRulesToTableItems({
-      rules: rulesState.data,
-      ruleTypeIndex: ruleTypesState.data,
-      canExecuteActions,
-      config,
-    });
-  }, [ruleTypesState, rulesState, canExecuteActions, config]);
-
-  const {
-    isAllSelected,
-    selectedIds,
-    isPageSelected,
-    numberOfSelectedItems,
-    isRowSelected,
-    getFilter,
-    onSelectRow,
-    onSelectAll,
-    onSelectPage,
-    onClearSelection,
-  } = useBulkEditSelect({
-    totalItemCount: rulesState.totalItemCount,
-    items: tableItems,
-    searchText,
-    typesFilter: rulesTypesFilter,
-    actionTypesFilter,
-    ruleExecutionStatusesFilter,
-    ruleStatusesFilter,
-    tagsFilter,
-  });
-
   const authorizedToModifySelectedRules = useMemo(() => {
     if (isAllSelected) {
       return true;
     }
-    const selectedIdsArray = [...selectedIds];
-    return selectedIdsArray.length
-      ? filterRulesById(rulesState.data, selectedIdsArray).every((selectedRule) =>
-          hasAllPrivilege(selectedRule, ruleTypesState.data.get(selectedRule.ruleTypeId))
+
+    return selectedIds.length
+      ? filterRulesById(rulesState.data, selectedIds).every((selectedRule) =>
+          hasAllPrivilege(selectedRule.consumer, ruleTypesState.data.get(selectedRule.ruleTypeId))
         )
       : false;
   }, [selectedIds, rulesState.data, ruleTypesState.data, isAllSelected]);
 
-  const clearRulesToSnooze = () => {
-    setRulesToSnooze([]);
-    setRulesToSnoozeFilter(undefined);
-  };
-
-  const clearRulesToUnsnooze = () => {
-    setRulesToUnsnooze([]);
-    setRulesToUnsnoozeFilter(undefined);
-  };
-
-  const clearRulesToSchedule = () => {
-    setRulesToSchedule([]);
-    setRulesToScheduleFilter(undefined);
-  };
-
-  const clearRulesToUnschedule = () => {
-    setRulesToUnschedule([]);
-    setRulesToUnscheduleFilter(undefined);
-  };
-
-  const clearRulesToUpdateAPIKey = () => {
-    setRulesToUpdateAPIKey([]);
-    setRulesToUpdateAPIKeyFilter(undefined);
-  };
-
-  const isRulesTableLoading = useMemo(() => {
-    return (
-      rulesState.isLoading ||
-      ruleTypesState.isLoading ||
-      isPerformingAction ||
-      isSnoozingRules ||
-      isUnsnoozingRules ||
-      isSchedulingRules ||
-      isUnschedulingRules ||
-      isUpdatingRuleAPIKeys
-    );
-  }, [
-    rulesState,
-    ruleTypesState,
-    isPerformingAction,
-    isSnoozingRules,
-    isUnsnoozingRules,
-    isSchedulingRules,
-    isUnschedulingRules,
-    isUpdatingRuleAPIKeys,
-  ]);
-
-  const table = (
-    <>
-      {rulesStatusesTotal.error > 0 ? (
-        <>
-          <EuiCallOut color="danger" size="s" data-test-subj="rulesErrorBanner">
-            <p>
-              <EuiIcon color="danger" type="alert" />
-              &nbsp;
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.rulesList.attentionBannerTitle"
-                defaultMessage="Error found in {totalStatusesError, plural, one {# rule} other {# rules}}."
-                values={{
-                  totalStatusesError: rulesStatusesTotal.error,
-                }}
-              />
-              &nbsp;
-              <EuiLink color="primary" onClick={() => setRuleExecutionStatusesFilter(['error'])}>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel"
-                  defaultMessage="Show {totalStatusesError, plural, one {rule} other {rules}} with error"
-                  values={{
-                    totalStatusesError: rulesStatusesTotal.error,
-                  }}
-                />
-              </EuiLink>
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-        </>
-      ) : null}
-      <EuiFlexGroup gutterSize="s">
-        {authorizedToCreateAnyRules && showCreateRuleButton ? (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              key="create-rule"
-              data-test-subj="createRuleButton"
-              fill
-              onClick={() => setRuleFlyoutVisibility(true)}
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.rulesList.addRuleButtonLabel"
-                defaultMessage="Create rule"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem>
-          <EuiFieldSearch
-            fullWidth
-            isClearable
-            data-test-subj="ruleSearchField"
-            value={inputText}
-            onChange={(e) => {
-              setInputText(e.target.value);
-              if (e.target.value === '') {
-                setSearchText(e.target.value);
-              }
-            }}
-            onKeyUp={(e) => {
-              if (e.keyCode === ENTER_KEY) {
-                setSearchText(inputText);
-              }
-            }}
-            placeholder={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.searchPlaceholderTitle',
-              { defaultMessage: 'Search' }
-            )}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{renderRuleStatusFilter()}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
-            {toolsRight.map((tool, index: number) => (
-              <React.Fragment key={index}>{tool}</React.Fragment>
-            ))}
-          </EuiFilterGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="refreshRulesButton"
-            iconType="refresh"
-            onClick={() => {
-              onClearSelection();
-              loadData();
-            }}
-            name="refresh"
-            color="primary"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel"
-              defaultMessage="Refresh"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="success" data-test-subj="totalActiveRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesActiveDescription"
-                  defaultMessage="Active: {totalStatusesActive}"
-                  values={{
-                    totalStatusesActive: rulesStatusesTotal.active,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="danger" data-test-subj="totalErrorRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesErrorDescription"
-                  defaultMessage="Error: {totalStatusesError}"
-                  values={{ totalStatusesError: rulesStatusesTotal.error }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="warning" data-test-subj="totalWarningRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription"
-                  defaultMessage="Warning: {totalStatusesWarning}"
-                  values={{
-                    totalStatusesWarning: rulesStatusesTotal.warning,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="primary" data-test-subj="totalOkRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesOkDescription"
-                  defaultMessage="Ok: {totalStatusesOk}"
-                  values={{ totalStatusesOk: rulesStatusesTotal.ok }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="accent" data-test-subj="totalPendingRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesPendingDescription"
-                  defaultMessage="Pending: {totalStatusesPending}"
-                  values={{
-                    totalStatusesPending: rulesStatusesTotal.pending,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="subdued" data-test-subj="totalUnknownRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesUnknownDescription"
-                  defaultMessage="Unknown: {totalStatusesUnknown}"
-                  values={{
-                    totalStatusesUnknown: rulesStatusesTotal.unknown,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={loadData} />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {rulesStatusesTotal.error > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="expandRulesError" color="primary" onClick={toggleRuleErrors}>
-              {!showErrors && (
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
-                  defaultMessage="Show {totalStatusesError, plural, one {error} other {errors}}"
-                  values={{
-                    totalStatusesError: rulesStatusesTotal.error,
-                  }}
-                />
-              )}
-              {showErrors && (
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.hideAllErrors"
-                  defaultMessage="Hide {totalStatusesError, plural, one {error} other {errors}}"
-                  values={{
-                    totalStatusesError: rulesStatusesTotal.error,
-                  }}
-                />
-              )}
-            </EuiLink>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <RulesListTable
-        items={tableItems}
-        isLoading={isRulesTableLoading}
-        rulesState={rulesState}
-        ruleTypesState={ruleTypesState}
-        ruleTypeRegistry={ruleTypeRegistry}
-        isPageSelected={isPageSelected}
-        isAllSelected={isAllSelected}
-        numberOfSelectedRules={numberOfSelectedItems}
-        sort={sort}
-        page={page}
-        percentileOptions={percentileOptions}
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        onSort={setSort}
-        onPage={setPage}
-        onRuleChanged={() => loadData()}
-        onRuleClick={(rule) => {
-          const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : routeToRuleDetails;
-          history.push(detailsRoute.replace(`:ruleId`, rule.id));
-        }}
-        onRuleEditClick={(rule) => {
-          if (rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)) {
-            onRuleEdit(rule);
-          }
-        }}
-        onRuleDeleteClick={(rule) => setRulesToDelete([rule.id])}
-        onManageLicenseClick={(rule) =>
-          setManageLicenseModalOpts({
-            licenseType: ruleTypesState.data.get(rule.ruleTypeId)?.minimumLicenseRequired!,
-            ruleTypeId: rule.ruleTypeId,
-          })
-        }
-        onPercentileOptionsChange={setPercentileOptions}
-        onDisableRule={onDisableRule}
-        onEnableRule={onEnableRule}
-        onSnoozeRule={onSnoozeRule}
-        onUnsnoozeRule={onUnsnoozeRule}
-        onSelectAll={onSelectAll}
-        onSelectPage={onSelectPage}
-        onSelectRow={onSelectRow}
-        isRowSelected={isRowSelected}
-        renderCollapsedItemActions={(rule, onLoading) => (
-          <CollapsedItemActions
-            key={rule.id}
-            item={rule}
-            onLoading={onLoading}
-            onRuleChanged={() => loadData()}
-            setRulesToDelete={setRulesToDelete}
-            onEditRule={() => onRuleEdit(rule)}
-            onUpdateAPIKey={setRulesToUpdateAPIKey}
-            onRunRule={() => onRunRule(rule.id)}
-          />
-        )}
-        renderRuleError={(rule) => {
-          const _executionStatus = rule.executionStatus;
-          const hasErrorMessage = _executionStatus.status === 'error';
-          const isLicenseError =
-            _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
-
-          return isLicenseError || hasErrorMessage ? (
-            <EuiButtonIcon
-              onClick={() => toggleErrorMessage(_executionStatus, rule)}
-              aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
-              iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
-            />
-          ) : null;
-        }}
-        renderSelectAllDropdown={() => {
-          return (
-            <BulkOperationPopover
-              numberOfSelectedRules={numberOfSelectedItems}
-              canModifySelectedRules={authorizedToModifySelectedRules}
-            >
-              <RuleQuickEditButtons
-                selectedItems={convertRulesToTableItems({
-                  rules: filterRulesById(rulesState.data, [...selectedIds]),
-                  ruleTypeIndex: ruleTypesState.data,
-                  canExecuteActions,
-                  config,
-                })}
-                isAllSelected={isAllSelected}
-                getFilter={getFilter}
-                onPerformingAction={() => setIsPerformingAction(true)}
-                onActionPerformed={() => {
-                  loadData();
-                  setIsPerformingAction(false);
-                }}
-                isSnoozingRules={isSnoozingRules}
-                isUnsnoozingRules={isUnsnoozingRules}
-                isSchedulingRules={isSchedulingRules}
-                isUnschedulingRules={isUnschedulingRules}
-                isUpdatingRuleAPIKeys={isUpdatingRuleAPIKeys}
-                setRulesToDelete={setRulesToDelete}
-                setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
-                setRulesToSnooze={setRulesToSnooze}
-                setRulesToUnsnooze={setRulesToUnsnooze}
-                setRulesToSchedule={setRulesToSchedule}
-                setRulesToUnschedule={setRulesToUnschedule}
-                setRulesToSnoozeFilter={setRulesToSnoozeFilter}
-                setRulesToUnsnoozeFilter={setRulesToUnsnoozeFilter}
-                setRulesToScheduleFilter={setRulesToScheduleFilter}
-                setRulesToUnscheduleFilter={setRulesToUnscheduleFilter}
-                setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
-              />
-            </BulkOperationPopover>
-          );
-        }}
-        rulesListKey={rulesListKey}
-        config={config}
-        visibleColumns={visibleColumns}
-      />
-      {manageLicenseModalOpts && (
-        <ManageLicenseModal
-          licenseType={manageLicenseModalOpts.licenseType}
-          ruleTypeId={manageLicenseModalOpts.ruleTypeId}
-          onConfirm={() => {
-            window.open(`${http.basePath.get()}/app/management/stack/license_management`, '_blank');
-            setManageLicenseModalOpts(null);
-          }}
-          onCancel={() => setManageLicenseModalOpts(null)}
-        />
-      )}
-    </>
+  const updateRulesToBulkEdit = useCallback(
+    ({ action, rules, filter }: UpdateRulesToBulkEditProps) => {
+      setBulkEditAction(action);
+      if (rules) {
+        setRulesToBulkEdit(rules);
+      }
+      if (filter) {
+        setRulesToBulkEditFilter(filter);
+      }
+      if (action === 'delete') {
+        setIsDeleteModalVisibility((rules && rules.length > 0) || Boolean(filter));
+      }
+    },
+    []
   );
-  // if initial load, show spinner
-  const getRulesList = () => {
-    if (noData && !rulesState.isLoading && !ruleTypesState.isLoading) {
-      return authorizedToCreateAnyRules ? (
-        <EmptyPrompt
-          showCreateRuleButton={showCreateRuleButton}
-          onCTAClicked={() => setRuleFlyoutVisibility(true)}
-        />
-      ) : (
-        noPermissionPrompt
+
+  const clearRulesToBulkEdit = useCallback(() => {
+    if (bulkEditAction === 'delete') {
+      setIsDeleteModalVisibility(false);
+    }
+    setRulesToBulkEdit([]);
+    setRulesToBulkEditFilter(undefined);
+    setBulkEditAction(undefined);
+  }, []);
+
+  const isRulesTableLoading =
+    isLoading ||
+    rulesState.isLoading ||
+    ruleTypesState.isLoading ||
+    isBulkEditing ||
+    isPerformingAction ||
+    isEnablingRules ||
+    isDisablingRules ||
+    isCloningRule;
+
+  const onCloneRule = async (ruleId: string) => {
+    setIsCloningRule(true);
+    try {
+      const RuleCloned = await cloneRule({ http, ruleId });
+      cloneRuleId.current = RuleCloned.id;
+      await loadRules();
+    } catch {
+      cloneRuleId.current = null;
+      setIsCloningRule(false);
+      toasts.addDanger(
+        i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
+          defaultMessage: 'Unable to clone rule',
+        })
       );
     }
-
-    if (initialLoad) {
-      return <CenterJustifiedSpinner />;
-    }
-
-    return table;
   };
 
-  return (
-    <section data-test-subj="rulesList">
-      <DeleteModalConfirmation
-        onDeleted={async () => {
-          setRulesToDelete([]);
-          onClearSelection();
-          await loadData();
-        }}
-        onErrors={async () => {
-          // Refresh the rules from the server, some rules may have beend deleted
-          await loadData();
-          setRulesToDelete([]);
-        }}
-        onCancel={() => {
-          setRulesToDelete([]);
-        }}
-        apiDeleteCall={deleteRules}
-        idsToDelete={rulesToDelete}
-        singleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
-          defaultMessage: 'rule',
-        })}
-        multipleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.multipleTitle', {
-          defaultMessage: 'rules',
-        })}
-        setIsLoadingState={(isLoading: boolean) => {
-          setRulesState({ ...rulesState, isLoading });
-        }}
-      />
-      <BulkSnoozeModal
-        rulesToSnooze={rulesToSnooze}
-        rulesToUnsnooze={rulesToUnsnooze}
-        rulesToSnoozeFilter={rulesToSnoozeFilter}
-        rulesToUnsnoozeFilter={rulesToUnsnoozeFilter}
-        numberOfSelectedRules={numberOfSelectedItems}
-        setIsSnoozingRule={setIsSnoozingRules}
-        setIsUnsnoozingRule={setIsUnsnoozingRules}
-        onClose={() => {
-          clearRulesToSnooze();
-          clearRulesToUnsnooze();
-        }}
-        onSave={async () => {
-          clearRulesToSnooze();
-          clearRulesToUnsnooze();
-          onClearSelection();
-          await loadData();
-        }}
-        onSearchPopulate={onSearchPopulate}
-      />
-      <BulkSnoozeScheduleModal
-        rulesToSchedule={rulesToSchedule}
-        rulesToUnschedule={rulesToUnschedule}
-        rulesToScheduleFilter={rulesToScheduleFilter}
-        rulesToUnscheduleFilter={rulesToUnscheduleFilter}
-        numberOfSelectedRules={numberOfSelectedItems}
-        setIsSchedulingRule={setIsSchedulingRules}
-        setIsUnschedulingRule={setIsUnschedulingRules}
-        onClose={() => {
-          clearRulesToSchedule();
-          clearRulesToUnschedule();
-        }}
-        onSave={async () => {
-          clearRulesToSchedule();
-          clearRulesToUnschedule();
-          onClearSelection();
-          await loadData();
-        }}
-        onSearchPopulate={onSearchPopulate}
-      />
-      <UpdateApiKeyModalConfirmation
-        onCancel={() => {
-          clearRulesToUpdateAPIKey();
-        }}
-        idsToUpdate={rulesToUpdateAPIKey}
-        idsToUpdateFilter={rulesToUpdateAPIKeyFilter}
-        numberOfSelectedRules={numberOfSelectedItems}
-        apiUpdateApiKeyCall={bulkUpdateAPIKey}
-        setIsLoadingState={(isLoading: boolean) => {
-          setIsUpdatingRuleAPIKeys(isLoading);
-          setRulesState({ ...rulesState, isLoading });
-        }}
-        onUpdated={async () => {
-          clearRulesToUpdateAPIKey();
-          onClearSelection();
-          await loadData();
-        }}
-        onSearchPopulate={onSearchPopulate}
-      />
-      <EuiSpacer size="xs" />
-      {getRulesList()}
-      {ruleFlyoutVisible && (
-        <RuleAdd
-          consumer={ALERTS_FEATURE_ID}
-          onClose={() => {
-            setRuleFlyoutVisibility(false);
-          }}
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          ruleTypeIndex={ruleTypesState.data}
-          onSave={loadData}
-        />
-      )}
-      {editFlyoutVisible && currentRuleToEdit && (
-        <RuleEdit
-          initialRule={currentRuleToEdit}
-          onClose={() => {
-            setEditFlyoutVisibility(false);
-          }}
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          ruleType={
-            ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
+  const openFlyout = useCallback(() => {
+    setRuleFlyoutVisibility(true);
+  }, []);
+
+  useEffect(() => {
+    if (!setHeaderActions) return;
+
+    if (showHeaderWithoutCreateButton) {
+      setHeaderActions([<RulesListDocLink />, <RulesSettingsLink />]);
+      return;
+    }
+    if (showHeaderWithCreateButton) {
+      setHeaderActions([
+        <CreateRuleButton openFlyout={openFlyout} />,
+        <RulesSettingsLink />,
+        <RulesListDocLink />,
+      ]);
+      return;
+    }
+    setHeaderActions();
+  }, [showHeaderWithCreateButton, showHeaderWithoutCreateButton]);
+
+  useEffect(() => {
+    return () => setHeaderActions?.();
+  }, []);
+
+  const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
+
+  const { showToast } = useBulkOperationToast({ onSearchPopulate });
+
+  const onEnable = async () => {
+    setIsEnablingRules(true);
+
+    const { errors, total } = isAllSelected
+      ? await bulkEnableRules({ http, filter: getFilter() })
+      : await bulkEnableRules({ http, ids: selectedIds });
+
+    setIsEnablingRules(false);
+    showToast({ action: 'ENABLE', errors, total });
+    await refreshRules();
+    onClearSelection();
+  };
+
+  const onDisable = async () => {
+    setIsDisablingRules(true);
+
+    const { errors, total } = isAllSelected
+      ? await bulkDisableRules({ http, filter: getFilter() })
+      : await bulkDisableRules({ http, ids: selectedIds });
+
+    setIsDisablingRules(false);
+    showToast({ action: 'DISABLE', errors, total });
+    await refreshRules();
+    onClearSelection();
+  };
+
+  const onDeleteCancel = () => {
+    setIsDeleteModalVisibility(false);
+    clearRulesToBulkEdit();
+  };
+  const onDeleteConfirm = async () => {
+    if (bulkEditAction !== 'delete') {
+      return;
+    }
+    setIsDeleteModalVisibility(false);
+    setIsBulkEditing(true);
+
+    const bulkDeleteRulesArguments =
+      isAllSelected && rulesToBulkEditFilter
+        ? {
+            filter: rulesToBulkEditFilter,
+            http,
           }
-          onSave={loadData}
+        : {
+            ids: rulesToBulkEdit.map((rule) => rule.id),
+            http,
+          };
+    const { errors, total } = await bulkDeleteRules(bulkDeleteRulesArguments);
+
+    setIsBulkEditing(false);
+    showToast({ action: 'DELETE', errors, total });
+    clearRulesToBulkEdit();
+    onClearSelection();
+    refreshRules();
+  };
+
+  const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
+  return (
+    <>
+      <RulesListPrompts
+        showNoAuthPrompt={showNoAuthPrompt}
+        showCreateFirstRulePrompt={showCreateFirstRulePrompt}
+        showCreateRuleButtonInPrompt={showCreateRuleButtonInPrompt}
+        showSpinner={showSpinner}
+        onCreateRulesClick={openFlyout}
+      />
+      <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
+        {isDeleteModalFlyoutVisible && (
+          <RulesDeleteModalConfirmation
+            onConfirm={onDeleteConfirm}
+            onCancel={onDeleteCancel}
+            confirmButtonText={getConfirmDeletionButtonText(
+              numberRulesToDelete,
+              SINGLE_RULE_TITLE,
+              MULTIPLE_RULE_TITLE
+            )}
+            confirmModalText={getConfirmDeletionModalText(
+              numberRulesToDelete,
+              SINGLE_RULE_TITLE,
+              MULTIPLE_RULE_TITLE
+            )}
+          />
+        )}
+        <BulkSnoozeModal
+          rules={rulesToBulkEdit}
+          filter={rulesToBulkEditFilter}
+          bulkEditAction={bulkEditAction}
+          numberOfSelectedRules={numberOfSelectedItems}
+          setIsBulkEditing={setIsBulkEditing}
+          onClose={() => {
+            // Don't clear the bulk edit action yet since we need it for loading indicator
+            setRulesToBulkEdit([]);
+            setRulesToBulkEditFilter(undefined);
+          }}
+          onSave={async () => {
+            clearRulesToBulkEdit();
+            onClearSelection();
+            await refreshRules();
+          }}
+          onSearchPopulate={onSearchPopulate}
         />
-      )}
-    </section>
+        <BulkSnoozeScheduleModal
+          rules={rulesToBulkEdit}
+          filter={rulesToBulkEditFilter}
+          bulkEditAction={bulkEditAction}
+          numberOfSelectedRules={numberOfSelectedItems}
+          setIsBulkEditing={setIsBulkEditing}
+          onClose={() => {
+            // Don't clear the bulk edit action yet since we need it for loading indicator
+            setRulesToBulkEdit([]);
+            setRulesToBulkEditFilter(undefined);
+          }}
+          onSave={async () => {
+            clearRulesToBulkEdit();
+            onClearSelection();
+            await refreshRules();
+          }}
+          onSearchPopulate={onSearchPopulate}
+        />
+        {bulkEditAction === 'updateApiKey' && (
+          <UpdateApiKeyModalConfirmation
+            onCancel={() => {
+              clearRulesToBulkEdit();
+            }}
+            rulesToUpdate={rulesToBulkEdit}
+            idsToUpdateFilter={rulesToBulkEditFilter}
+            numberOfSelectedRules={numberOfSelectedItems}
+            apiUpdateApiKeyCall={bulkUpdateAPIKey}
+            setIsLoadingState={(newIsLoading: boolean) => {
+              setIsBulkEditing(newIsLoading);
+              setIsLoading(newIsLoading);
+            }}
+            onUpdated={async () => {
+              clearRulesToBulkEdit();
+              onClearSelection();
+              await refreshRules();
+            }}
+            onSearchPopulate={onSearchPopulate}
+          />
+        )}
+        <EuiSpacer size="xs" />
+        {showRulesList && (
+          <>
+            <RulesListFiltersBar
+              inputText={inputText}
+              filters={filters}
+              showActionFilter={showActionFilter}
+              rulesStatusesTotal={rulesStatusesTotal}
+              rulesLastRunOutcomesTotal={rulesLastRunOutcomesTotal}
+              tags={tags}
+              filterOptions={filterOptions}
+              actionTypes={actionTypes}
+              authorizedToCreateAnyRules={authorizedToCreateAnyRules}
+              showCreateRuleButton={showCreateRuleButton}
+              lastUpdate={lastUpdate}
+              showErrors={showErrors}
+              openFlyout={openFlyout}
+              updateFilters={updateFilters}
+              setInputText={setInputText}
+              onClearSelection={onClearSelection}
+              onRefreshRules={refreshRules}
+              onToggleRuleErrors={toggleRuleErrors}
+            />
+            <EuiSpacer size="s" />
+            <RulesListTable
+              items={tableItems}
+              isLoading={isRulesTableLoading}
+              rulesState={rulesState}
+              ruleTypesState={ruleTypesState}
+              ruleTypeRegistry={ruleTypeRegistry}
+              isPageSelected={isPageSelected}
+              isAllSelected={isAllSelected}
+              numberOfSelectedRules={numberOfSelectedItems}
+              sort={sort}
+              page={page}
+              percentileOptions={percentileOptions}
+              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+              onSort={setSort}
+              onPage={setPage}
+              onRuleChanged={() => refreshRules()}
+              onRuleClick={(rule) => {
+                const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : commonRuleDetailsRoute;
+                history.push(detailsRoute.replace(`:ruleId`, rule.id));
+              }}
+              onRuleEditClick={(rule) => {
+                if (rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)) {
+                  onRuleEdit(rule);
+                }
+              }}
+              onRuleDeleteClick={(rule) =>
+                updateRulesToBulkEdit({
+                  action: 'delete',
+                  rules: [rule],
+                })
+              }
+              onManageLicenseClick={(rule) =>
+                setManageLicenseModalOpts({
+                  licenseType: ruleTypesState.data.get(rule.ruleTypeId)?.minimumLicenseRequired!,
+                  ruleTypeId: rule.ruleTypeId,
+                })
+              }
+              onPercentileOptionsChange={setPercentileOptions}
+              onDisableRule={onDisableRule}
+              onEnableRule={onEnableRule}
+              onSnoozeRule={onSnoozeRule}
+              onUnsnoozeRule={onUnsnoozeRule}
+              onSelectAll={onSelectAll}
+              onSelectPage={onSelectPage}
+              onSelectRow={onSelectRow}
+              isRowSelected={isRowSelected}
+              renderCollapsedItemActions={(rule, onLoading) => (
+                <CollapsedItemActions
+                  key={rule.id}
+                  item={rule}
+                  onLoading={onLoading}
+                  onRuleChanged={() => refreshRules()}
+                  onDeleteRule={() =>
+                    updateRulesToBulkEdit({
+                      action: 'delete',
+                      rules: [rule],
+                    })
+                  }
+                  onEditRule={() => onRuleEdit(rule)}
+                  onUpdateAPIKey={() =>
+                    updateRulesToBulkEdit({
+                      action: 'updateApiKey',
+                      rules: [rule],
+                    })
+                  }
+                  onRunRule={() => onRunRule(rule.id)}
+                  onCloneRule={onCloneRule}
+                />
+              )}
+              renderRuleError={(rule) => {
+                const _executionStatus = rule.executionStatus;
+                const hasErrorMessage = _executionStatus.status === 'error';
+                const isLicenseError =
+                  _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
+
+                return isLicenseError || hasErrorMessage ? (
+                  <EuiButtonIcon
+                    onClick={() => toggleErrorMessage(_executionStatus, rule)}
+                    aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
+                    iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
+                  />
+                ) : null;
+              }}
+              renderSelectAllDropdown={() => {
+                return (
+                  <BulkOperationPopover
+                    numberOfSelectedRules={numberOfSelectedItems}
+                    canModifySelectedRules={authorizedToModifySelectedRules}
+                  >
+                    <RuleQuickEditButtons
+                      selectedItems={convertRulesToTableItems({
+                        rules: filterRulesById(rulesState.data, selectedIds),
+                        ruleTypeIndex: ruleTypesState.data,
+                        canExecuteActions,
+                        config,
+                      })}
+                      isBulkEditing={isBulkEditing}
+                      bulkEditAction={bulkEditAction}
+                      updateRulesToBulkEdit={updateRulesToBulkEdit}
+                      isAllSelected={isAllSelected}
+                      getFilter={getFilter}
+                      onPerformingAction={() => setIsPerformingAction(true)}
+                      onActionPerformed={() => {
+                        refreshRules();
+                        setIsPerformingAction(false);
+                      }}
+                      isEnablingRules={isEnablingRules}
+                      isDisablingRules={isDisablingRules}
+                      onEnable={onEnable}
+                      onDisable={onDisable}
+                    />
+                  </BulkOperationPopover>
+                );
+              }}
+              rulesListKey={rulesListKey}
+              config={config}
+              visibleColumns={visibleColumns}
+            />
+            {manageLicenseModalOpts && (
+              <ManageLicenseModal
+                licenseType={manageLicenseModalOpts.licenseType}
+                ruleTypeId={manageLicenseModalOpts.ruleTypeId}
+                onConfirm={() => {
+                  window.open(
+                    `${http.basePath.get()}/app/management/stack/license_management`,
+                    '_blank'
+                  );
+                  setManageLicenseModalOpts(null);
+                }}
+                onCancel={() => setManageLicenseModalOpts(null)}
+              />
+            )}
+          </>
+        )}
+        {ruleFlyoutVisible && (
+          <Suspense fallback={<div />}>
+            <RuleAdd
+              consumer={ALERTS_FEATURE_ID}
+              onClose={() => {
+                setRuleFlyoutVisibility(false);
+              }}
+              actionTypeRegistry={actionTypeRegistry}
+              ruleTypeRegistry={ruleTypeRegistry}
+              ruleTypeIndex={ruleTypesState.data}
+              onSave={refreshRules}
+            />
+          </Suspense>
+        )}
+        {editFlyoutVisible && currentRuleToEdit && (
+          <Suspense fallback={<div />}>
+            <RuleEdit
+              initialRule={currentRuleToEdit}
+              onClose={() => {
+                setEditFlyoutVisibility(false);
+              }}
+              actionTypeRegistry={actionTypeRegistry}
+              ruleTypeRegistry={ruleTypeRegistry}
+              ruleType={
+                ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
+              }
+              onSave={refreshRules}
+            />
+          </Suspense>
+        )}
+      </EuiPageTemplate.Section>
+    </>
   );
 };
 
 // eslint-disable-next-line import/no-default-export
 export { RulesList as default };
-
-const noPermissionPrompt = (
-  <EuiEmptyPrompt
-    data-test-subj="noPermissionPrompt"
-    iconType="securityApp"
-    title={
-      <h1>
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.rulesList.noPermissionToCreateTitle"
-          defaultMessage="No permissions to create rules"
-        />
-      </h1>
-    }
-    body={
-      <p data-test-subj="permissionDeniedMessage">
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.rulesList.noPermissionToCreateDescription"
-          defaultMessage="Contact your system administrator."
-        />
-      </p>
-    }
-  />
-);
 
 function filterRulesById(rules: Rule[], ids: string[]): Rule[] {
   return rules.filter((rule) => ids.includes(rule.id));

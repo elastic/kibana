@@ -49,7 +49,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
         timeFrom: new Date(timeRange.start).getTime() / 1000,
         timeTo: new Date(timeRange.end).getTime() / 1000,
         startIndex: 0,
-        endIndex: 1000,
+        endIndex: 100000,
         kuery,
       });
     },
@@ -66,7 +66,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
         timeFrom: new Date(comparisonTimeRange.start).getTime() / 1000,
         timeTo: new Date(comparisonTimeRange.end).getTime() / 1000,
         startIndex: 0,
-        endIndex: 1000,
+        endIndex: 100000,
         kuery: comparisonKuery,
       });
     },

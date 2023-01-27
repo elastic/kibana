@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Auditbeat - Detect unusually high number of authentication attempts.",
   "groups": [
     "security",
@@ -30,7 +29,8 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "created_by": "ml-module-siem-auditbeat",
+    "created_by": "ml-module-security-auth",
+    "security_app_display_name": "Unusual Login Activity",
     "custom_urls": [
       {
         "url_name": "IP Address Details",

@@ -21,9 +21,21 @@ Any modifications made to this file will be overwritten.
   <li><a href="#addCaseComment"><code><span class="http-method">post</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
   <li><a href="#createCase"><code><span class="http-method">post</span> /s/{spaceId}/api/cases</code></a></li>
   <li><a href="#deleteCase"><code><span class="http-method">delete</span> /s/{spaceId}/api/cases</code></a></li>
+  <li><a href="#deleteCaseComment"><code><span class="http-method">delete</span> /s/{spaceId}/api/cases/{caseId}/comments/{commentId}</code></a></li>
   <li><a href="#deleteCaseComments"><code><span class="http-method">delete</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
+  <li><a href="#findCaseActivity"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/user_actions/_find</code></a></li>
   <li><a href="#getAllCaseComments"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
+  <li><a href="#getCase"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}</code></a></li>
+  <li><a href="#getCaseActivity"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/user_actions</code></a></li>
+  <li><a href="#getCaseAlerts"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/alerts</code></a></li>
+  <li><a href="#getCaseComment"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/comments/{commentId}</code></a></li>
   <li><a href="#getCaseConfiguration"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/configure</code></a></li>
+  <li><a href="#getCaseConnectors"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/configure/connectors/_find</code></a></li>
+  <li><a href="#getCaseReporters"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/reporters</code></a></li>
+  <li><a href="#getCaseStatus"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/status</code></a></li>
+  <li><a href="#getCaseTags"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/tags</code></a></li>
+  <li><a href="#getCases"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/_find</code></a></li>
+  <li><a href="#getCasesByAlert"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/alerts/{alertId}</code></a></li>
   <li><a href="#pushCase"><code><span class="http-method">post</span> /s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push</code></a></li>
   <li><a href="#setCaseConfiguration"><code><span class="http-method">post</span> /s/{spaceId}/api/cases/configure</code></a></li>
   <li><a href="#updateCase"><code><span class="http-method">patch</span> /s/{spaceId}/api/cases</code></a></li>
@@ -37,7 +49,7 @@ Any modifications made to this file will be overwritten.
     <a class="up" href="#__Methods">Up</a>
     <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/cases/{caseId}/comments</code></pre></div>
     <div class="method-summary">Adds a comment or alert to a case. (<span class="nickname">addCaseComment</span>)</div>
-    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're creating.</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're creating. NOTE: Each case can have a maximum of 1,000 alerts.</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
@@ -149,6 +161,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="createCase"/>
@@ -266,6 +281,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="deleteCase"/>
@@ -304,11 +322,70 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
 
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
 
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">204</h4>
     Indicates a successful call.
         <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteCaseComment"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /s/{spaceId}/api/cases/{caseId}/comments/{commentId}</code></pre></div>
+    <div class="method-summary">Deletes a comment or alert from a case. (<span class="nickname">deleteCaseComment</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases you're deleting.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">caseId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">commentId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the comment. To retrieve comment IDs, use the get case or find cases APIs. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="deleteCaseComments"/>
@@ -343,11 +420,116 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
 
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
 
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">204</h4>
     Indicates a successful call.
         <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="findCaseActivity"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/user_actions/_find</code></pre></div>
+    <div class="method-summary">Finds user activity for a case. (<span class="nickname">findCaseActivity</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're seeking.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">caseId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of user actions to return per page. default: 20 </div><div class="param">sortOrder (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: asc </div><div class="param">types (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the types of user actions to return. default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#findCaseActivity_200_response">findCaseActivity_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "userActions" : [ {
+    "owner" : "cases",
+    "case_id" : "22df07d0-03b1-11ed-920c-974bfa104448",
+    "action" : "create",
+    "created_at" : "2022-05-13T09:16:17.416Z",
+    "id" : "22fd3e30-03b1-11ed-920c-974bfa104448",
+    "comment_id" : "578608d0-03b1-11ed-920c-974bfa104448",
+    "type" : "create_case",
+    "created_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "version" : "WzM1ODg4LDFd"
+  }, {
+    "owner" : "cases",
+    "case_id" : "22df07d0-03b1-11ed-920c-974bfa104448",
+    "action" : "create",
+    "created_at" : "2022-05-13T09:16:17.416Z",
+    "id" : "22fd3e30-03b1-11ed-920c-974bfa104448",
+    "comment_id" : "578608d0-03b1-11ed-920c-974bfa104448",
+    "type" : "create_case",
+    "created_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "version" : "WzM1ODg4LDFd"
+  } ],
+  "total" : 1,
+  "perPage" : 6,
+  "page" : 0
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#findCaseActivity_200_response">findCaseActivity_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getAllCaseComments"/>
@@ -448,6 +630,285 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getCase"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}</code></pre></div>
+    <div class="method-summary">Retrieves information about a case. (<span class="nickname">getCase</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're seeking.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">caseId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">includeComments (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines whether case comments are returned. default: true </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#case_response_properties">case_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "owner" : "cases",
+  "totalComment" : 0,
+  "settings" : {
+    "syncAlerts" : true
+  },
+  "totalAlerts" : 0,
+  "closed_at" : "2000-01-23T04:56:07.000+00:00",
+  "comments" : [ null, null ],
+  "assignees" : [ {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  }, {
+    "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+  } ],
+  "created_at" : "2022-05-13T09:16:17.416Z",
+  "description" : "A case description.",
+  "title" : "Case title 1",
+  "created_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "version" : "WzUzMiwxXQ==",
+  "closed_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "tags" : [ "tag-1" ],
+  "duration" : 120,
+  "updated_at" : "2000-01-23T04:56:07.000+00:00",
+  "updated_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "id" : "66b9aa00-94fa-11ea-9f74-e7e108796192",
+  "external_service" : {
+    "external_title" : "external_title",
+    "pushed_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "external_url" : "external_url",
+    "pushed_at" : "2000-01-23T04:56:07.000+00:00",
+    "connector_id" : "connector_id",
+    "external_id" : "external_id",
+    "connector_name" : "connector_name"
+  }
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getCaseActivity"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/user_actions</code></pre></div>
+    <div class="method-summary">Returns all user activity for a case. (<span class="nickname">getCaseActivity</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're seeking.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">caseId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#user_actions_response_properties">user_actions_response_properties</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "owner" : "cases",
+  "action_id" : "22fd3e30-03b1-11ed-920c-974bfa104448",
+  "case_id" : "22df07d0-03b1-11ed-920c-974bfa104448",
+  "action" : "create",
+  "created_at" : "2022-05-13T09:16:17.416Z",
+  "comment_id" : "578608d0-03b1-11ed-920c-974bfa104448",
+  "type" : "create_case",
+  "created_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  }
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getCaseAlerts"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/alerts</code></pre></div>
+    <div class="method-summary">Gets all alerts attached to a case. (<span class="nickname">getCaseAlerts</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases you're seeking.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">caseId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#alert_response_properties">alert_response_properties</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "index" : "index",
+  "id" : "id",
+  "attached_at" : "2000-01-23T04:56:07.000+00:00"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getCaseComment"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/comments/{commentId}</code></pre></div>
+    <div class="method-summary">Retrieves a comment from a case. (<span class="nickname">getCaseComment</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">caseId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">commentId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the comment. To retrieve comment IDs, use the get case or find cases APIs. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#getCaseComment_200_response">getCaseComment_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>null</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#getCaseComment_200_response">getCaseComment_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getCaseConfiguration"/>
@@ -484,7 +945,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "closure_type" : "close-by-user",
   "owner" : "cases",
@@ -506,6 +967,7 @@ Any modifications made to this file will be overwritten.
   "updated_at" : "2022-06-01T19:58:48.169Z",
   "updated_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -514,6 +976,7 @@ Any modifications made to this file will be overwritten.
   "error" : "error",
   "created_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -524,13 +987,500 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getCaseConnectors"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/configure/connectors/_find</code></pre></div>
+    <div class="method-summary">Retrieves information about connectors. (<span class="nickname">getCaseConnectors</span>)</div>
+    <div class="method-notes">In particular, only the connectors that are supported for use in cases are returned. You must have <code>read</code> privileges for the <strong>Actions and Connectors</strong> feature in the <strong>Management</strong> section of the Kibana feature privileges.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#getCaseConnectors_200_response_inner">getCaseConnectors_200_response_inner</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "isPreconfigured" : true,
+  "isDeprecated" : true,
+  "actionTypeId" : ".none",
+  "referencedByCount" : 0,
+  "name" : "name",
+  "id" : "id",
+  "config" : {
+    "projectKey" : "projectKey",
+    "apiUrl" : "apiUrl"
+  },
+  "isMissingSecrets" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getCaseReporters"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/reporters</code></pre></div>
+    <div class="method-summary">Returns information about the users who opened cases. (<span class="nickname">getCaseReporters</span>)</div>
+    <div class="method-notes">You must have read privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases. The API returns information about the users as they existed at the time of the case creation, including their name, full name, and email address. If any of those details change thereafter or if a user is deleted, the information returned by this API is unchanged.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">owner (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read. default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#getCaseConfiguration_200_response_inner_created_by">getCaseConfiguration_200_response_inner_created_by</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "full_name" : "full_name",
+  "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+  "email" : "email",
+  "username" : "elastic"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getCaseStatus"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/status</code></pre></div>
+    <div class="method-summary">Returns the number of cases that are open, closed, and in progress. (<span class="nickname">getCaseStatus</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases you're seeking.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">owner (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read. default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#getCaseStatus_200_response">getCaseStatus_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "count_in_progress_cases" : 6,
+  "count_open_cases" : 1,
+  "count_closed_cases" : 0
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#getCaseStatus_200_response">getCaseStatus_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getCaseTags"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/tags</code></pre></div>
+    <div class="method-summary">Aggregates and returns a list of case tags. (<span class="nickname">getCaseTags</span>)</div>
+    <div class="method-notes">You must have read privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases you're seeking.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">owner (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; A filter to limit the retrieved case statistics to a specific set of applications. If this parameter is omitted, the response contains tags from all cases that the user has access to read. default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      array[String]
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getCases"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/_find</code></pre></div>
+    <div class="method-summary">Retrieves a paginated subset of cases. (<span class="nickname">getCases</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases you're seeking.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">assignees (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by assignees. Valid values are <code>none</code> or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API. default: null </div><div class="param">defaultSearchOperator (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The default operator to use for the simple_query_string. default: OR </div><div class="param">fields (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The fields in the entity to return in the response. default: null </div><div class="param">from (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; [preview] Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. default: null </div><div class="param">owner (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read. default: null </div><div class="param">page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of cases to return per page. default: 20 </div><div class="param">reporters (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by the user name of the reporter. default: null </div><div class="param">search (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; An Elasticsearch simple_query_string query that filters the objects in the response. default: null </div><div class="param">searchFields (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The fields to perform the simple_query_string parsed query against. default: null </div><div class="param">severity (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The severity of the case. default: null </div><div class="param">sortField (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines which field is used to sort the results. default: createdAt </div><div class="param">sortOrder (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div><div class="param">status (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by state. default: null </div><div class="param">tags (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by tags. default: null </div><div class="param">to (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; [preview] Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#getCases_200_response">getCases_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "count_in_progress_cases" : 6,
+  "per_page" : 5,
+  "total" : 2,
+  "cases" : [ {
+    "owner" : "cases",
+    "totalComment" : 0,
+    "settings" : {
+      "syncAlerts" : true
+    },
+    "totalAlerts" : 0,
+    "closed_at" : "2000-01-23T04:56:07.000+00:00",
+    "comments" : [ null, null ],
+    "assignees" : [ {
+      "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+    }, {
+      "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+    } ],
+    "created_at" : "2022-05-13T09:16:17.416Z",
+    "description" : "A case description.",
+    "title" : "Case title 1",
+    "created_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "version" : "WzUzMiwxXQ==",
+    "closed_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "tags" : [ "tag-1" ],
+    "duration" : 120,
+    "updated_at" : "2000-01-23T04:56:07.000+00:00",
+    "updated_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "id" : "66b9aa00-94fa-11ea-9f74-e7e108796192",
+    "external_service" : {
+      "external_title" : "external_title",
+      "pushed_by" : {
+        "full_name" : "full_name",
+        "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+        "email" : "email",
+        "username" : "elastic"
+      },
+      "external_url" : "external_url",
+      "pushed_at" : "2000-01-23T04:56:07.000+00:00",
+      "connector_id" : "connector_id",
+      "external_id" : "external_id",
+      "connector_name" : "connector_name"
+    }
+  }, {
+    "owner" : "cases",
+    "totalComment" : 0,
+    "settings" : {
+      "syncAlerts" : true
+    },
+    "totalAlerts" : 0,
+    "closed_at" : "2000-01-23T04:56:07.000+00:00",
+    "comments" : [ null, null ],
+    "assignees" : [ {
+      "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+    }, {
+      "uid" : "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+    } ],
+    "created_at" : "2022-05-13T09:16:17.416Z",
+    "description" : "A case description.",
+    "title" : "Case title 1",
+    "created_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "version" : "WzUzMiwxXQ==",
+    "closed_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "tags" : [ "tag-1" ],
+    "duration" : 120,
+    "updated_at" : "2000-01-23T04:56:07.000+00:00",
+    "updated_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "id" : "66b9aa00-94fa-11ea-9f74-e7e108796192",
+    "external_service" : {
+      "external_title" : "external_title",
+      "pushed_by" : {
+        "full_name" : "full_name",
+        "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+        "email" : "email",
+        "username" : "elastic"
+      },
+      "external_url" : "external_url",
+      "pushed_at" : "2000-01-23T04:56:07.000+00:00",
+      "connector_id" : "connector_id",
+      "external_id" : "external_id",
+      "connector_name" : "connector_name"
+    }
+  } ],
+  "count_open_cases" : 1,
+  "count_closed_cases" : 0,
+  "page" : 5
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#getCases_200_response">getCases_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getCasesByAlert"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/alerts/{alertId}</code></pre></div>
+    <div class="method-summary">Returns the cases associated with a specific alert. (<span class="nickname">getCasesByAlert</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases you're seeking.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the alert. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">owner (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read. default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#getCasesByAlert_200_response_inner">getCasesByAlert_200_response_inner</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "id" : "06116b80-e1c3-11ec-be9b-9b1838238ee6",
+  "title" : "security_case"
+} ]</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="pushCase"/>
@@ -652,6 +1602,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="setCaseConfiguration"/>
@@ -701,7 +1654,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "closure_type" : "close-by-user",
   "owner" : "cases",
@@ -723,6 +1676,7 @@ Any modifications made to this file will be overwritten.
   "updated_at" : "2022-06-01T19:58:48.169Z",
   "updated_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -731,6 +1685,7 @@ Any modifications made to this file will be overwritten.
   "error" : "error",
   "created_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -741,13 +1696,16 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#getCaseConfiguration_200_response_inner">getCaseConfiguration_200_response_inner</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateCase"/>
@@ -865,6 +1823,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateCaseComment"/>
@@ -984,6 +1945,9 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#case_response_properties">case_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateCaseConfiguration"/>
@@ -1035,7 +1999,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "closure_type" : "close-by-user",
   "owner" : "cases",
@@ -1057,6 +2021,7 @@ Any modifications made to this file will be overwritten.
   "updated_at" : "2022-06-01T19:58:48.169Z",
   "updated_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -1065,6 +2030,7 @@ Any modifications made to this file will be overwritten.
   "error" : "error",
   "created_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -1075,13 +2041,16 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
   </div> <!-- method -->
   <hr/>
 
@@ -1090,21 +2059,23 @@ Any modifications made to this file will be overwritten.
 
   <h3>Table of Contents</h3>
   <ol>
+    <li><a href="#4xx_response"><code>4xx_response</code> - Unsuccessful cases API response</a></li>
     <li><a href="#Case_response_properties_for_comments_inner"><code>Case_response_properties_for_comments_inner</code> - </a></li>
     <li><a href="#Case_response_properties_for_connectors"><code>Case_response_properties_for_connectors</code> - Case response properties for connectors</a></li>
+    <li><a href="#action_types"><code>action_types</code> - </a></li>
+    <li><a href="#actions"><code>actions</code> - </a></li>
     <li><a href="#add_alert_comment_request_properties"><code>add_alert_comment_request_properties</code> - Add case comment request properties for alerts</a></li>
     <li><a href="#add_case_comment_request"><code>add_case_comment_request</code> - Add case comment request</a></li>
     <li><a href="#add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - Add case comment request properties for user comments</a></li>
     <li><a href="#alert_comment_response_properties"><code>alert_comment_response_properties</code> - Add case comment response properties for alerts</a></li>
-    <li><a href="#alert_comment_response_properties_created_by"><code>alert_comment_response_properties_created_by</code> - </a></li>
-    <li><a href="#alert_comment_response_properties_pushed_by"><code>alert_comment_response_properties_pushed_by</code> - </a></li>
     <li><a href="#alert_comment_response_properties_rule"><code>alert_comment_response_properties_rule</code> - </a></li>
     <li><a href="#alert_identifiers"><code>alert_identifiers</code> - Alert identifiers</a></li>
     <li><a href="#alert_indices"><code>alert_indices</code> - Alert indices</a></li>
+    <li><a href="#alert_response_properties"><code>alert_response_properties</code> - </a></li>
+    <li><a href="#assignees_inner"><code>assignees_inner</code> - </a></li>
     <li><a href="#case_response_closed_by_properties"><code>case_response_closed_by_properties</code> - Case response properties for closed_by</a></li>
     <li><a href="#case_response_created_by_properties"><code>case_response_created_by_properties</code> - Case response properties for created_by</a></li>
     <li><a href="#case_response_properties"><code>case_response_properties</code> - Case response properties</a></li>
-    <li><a href="#case_response_properties_assignees_inner"><code>case_response_properties_assignees_inner</code> - </a></li>
     <li><a href="#case_response_pushed_by_properties"><code>case_response_pushed_by_properties</code> - Case response properties for pushed_by</a></li>
     <li><a href="#case_response_updated_by_properties"><code>case_response_updated_by_properties</code> - Case response properties for updated_by</a></li>
     <li><a href="#closure_types"><code>closure_types</code> - </a></li>
@@ -1122,16 +2093,41 @@ Any modifications made to this file will be overwritten.
     <li><a href="#connector_properties_swimlane_fields"><code>connector_properties_swimlane_fields</code> - </a></li>
     <li><a href="#connector_types"><code>connector_types</code> - </a></li>
     <li><a href="#create_case_request"><code>create_case_request</code> - Create case request</a></li>
-    <li><a href="#create_case_request_assignees_inner"><code>create_case_request_assignees_inner</code> - </a></li>
     <li><a href="#create_case_request_connector"><code>create_case_request_connector</code> - </a></li>
     <li><a href="#external_service"><code>external_service</code> - </a></li>
+    <li><a href="#findCaseActivity_200_response"><code>findCaseActivity_200_response</code> - </a></li>
+    <li><a href="#getCaseComment_200_response"><code>getCaseComment_200_response</code> - </a></li>
     <li><a href="#getCaseConfiguration_200_response_inner"><code>getCaseConfiguration_200_response_inner</code> - </a></li>
     <li><a href="#getCaseConfiguration_200_response_inner_connector"><code>getCaseConfiguration_200_response_inner_connector</code> - </a></li>
     <li><a href="#getCaseConfiguration_200_response_inner_created_by"><code>getCaseConfiguration_200_response_inner_created_by</code> - </a></li>
     <li><a href="#getCaseConfiguration_200_response_inner_mappings_inner"><code>getCaseConfiguration_200_response_inner_mappings_inner</code> - </a></li>
     <li><a href="#getCaseConfiguration_200_response_inner_updated_by"><code>getCaseConfiguration_200_response_inner_updated_by</code> - </a></li>
-    <li><a href="#getCaseConfiguration_owner_parameter"><code>getCaseConfiguration_owner_parameter</code> - </a></li>
+    <li><a href="#getCaseConnectors_200_response_inner"><code>getCaseConnectors_200_response_inner</code> - </a></li>
+    <li><a href="#getCaseConnectors_200_response_inner_config"><code>getCaseConnectors_200_response_inner_config</code> - </a></li>
+    <li><a href="#getCaseStatus_200_response"><code>getCaseStatus_200_response</code> - </a></li>
+    <li><a href="#getCasesByAlert_200_response_inner"><code>getCasesByAlert_200_response_inner</code> - </a></li>
+    <li><a href="#getCases_200_response"><code>getCases_200_response</code> - </a></li>
+    <li><a href="#getCases_assignees_parameter"><code>getCases_assignees_parameter</code> - </a></li>
+    <li><a href="#getCases_owner_parameter"><code>getCases_owner_parameter</code> - </a></li>
     <li><a href="#owners"><code>owners</code> - </a></li>
+    <li><a href="#payload_alert_comment"><code>payload_alert_comment</code> - </a></li>
+    <li><a href="#payload_alert_comment_comment"><code>payload_alert_comment_comment</code> - </a></li>
+    <li><a href="#payload_alert_comment_comment_alertId"><code>payload_alert_comment_comment_alertId</code> - </a></li>
+    <li><a href="#payload_alert_comment_comment_index"><code>payload_alert_comment_comment_index</code> - </a></li>
+    <li><a href="#payload_assignees"><code>payload_assignees</code> - </a></li>
+    <li><a href="#payload_connector"><code>payload_connector</code> - </a></li>
+    <li><a href="#payload_connector_connector"><code>payload_connector_connector</code> - </a></li>
+    <li><a href="#payload_connector_connector_fields"><code>payload_connector_connector_fields</code> - </a></li>
+    <li><a href="#payload_create_case"><code>payload_create_case</code> - </a></li>
+    <li><a href="#payload_description"><code>payload_description</code> - </a></li>
+    <li><a href="#payload_pushed"><code>payload_pushed</code> - </a></li>
+    <li><a href="#payload_settings"><code>payload_settings</code> - </a></li>
+    <li><a href="#payload_severity"><code>payload_severity</code> - </a></li>
+    <li><a href="#payload_status"><code>payload_status</code> - </a></li>
+    <li><a href="#payload_tags"><code>payload_tags</code> - </a></li>
+    <li><a href="#payload_title"><code>payload_title</code> - </a></li>
+    <li><a href="#payload_user_comment"><code>payload_user_comment</code> - </a></li>
+    <li><a href="#payload_user_comment_comment"><code>payload_user_comment_comment</code> - </a></li>
     <li><a href="#rule"><code>rule</code> - Alerting rule</a></li>
     <li><a href="#setCaseConfiguration_request"><code>setCaseConfiguration_request</code> - </a></li>
     <li><a href="#setCaseConfiguration_request_connector"><code>setCaseConfiguration_request_connector</code> - </a></li>
@@ -1145,9 +2141,22 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_case_request"><code>update_case_request</code> - Update case request</a></li>
     <li><a href="#update_case_request_cases_inner"><code>update_case_request_cases_inner</code> - </a></li>
     <li><a href="#update_user_comment_request_properties"><code>update_user_comment_request_properties</code> - Update case comment request properties for user comments</a></li>
+    <li><a href="#user_actions_find_response_properties"><code>user_actions_find_response_properties</code> - </a></li>
+    <li><a href="#user_actions_response_properties"><code>user_actions_response_properties</code> - </a></li>
+    <li><a href="#user_actions_response_properties_created_by"><code>user_actions_response_properties_created_by</code> - </a></li>
+    <li><a href="#user_actions_response_properties_payload"><code>user_actions_response_properties_payload</code> - </a></li>
     <li><a href="#user_comment_response_properties"><code>user_comment_response_properties</code> - Case response properties for user comments</a></li>
   </ol>
 
+  <div class="model">
+    <h3><a name="4xx_response"><code>4xx_response</code> - Unsuccessful cases API response</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
   <div class="model">
     <h3><a name="Case_response_properties_for_comments_inner"><code>Case_response_properties_for_comments_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
@@ -1181,6 +2190,18 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.swimlane</div>
     </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="action_types"><code>action_types</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The type of action.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions"><code>actions</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="add_alert_comment_request_properties"><code>add_alert_comment_request_properties</code> - Add case comment request properties for alerts</a> <a class="up" href="#__Models">Up</a></h3>
@@ -1226,39 +2247,19 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">alertId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">created_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">created_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_created_by">alert_comment_response_properties_created_by</a></span>  </div>
+<div class="param">created_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_created_by">getCaseConfiguration_200_response_inner_created_by</a></span>  </div>
 <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
 <div class="param">pushed_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_pushed_by">alert_comment_response_properties_pushed_by</a></span>  </div>
+<div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_updated_by">getCaseConfiguration_200_response_inner_updated_by</a></span>  </div>
 <div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_rule">alert_comment_response_properties_rule</a></span>  </div>
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">alert</div>
 <div class="param">updated_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_created_by">alert_comment_response_properties_created_by</a></span>  </div>
+<div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_created_by">getCaseConfiguration_200_response_inner_created_by</a></span>  </div>
 <div class="param">version (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="alert_comment_response_properties_created_by"><code>alert_comment_response_properties_created_by</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="alert_comment_response_properties_pushed_by"><code>alert_comment_response_properties_pushed_by</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1271,15 +2272,31 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="alert_identifiers"><code>alert_identifiers</code> - Alert identifiers</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class='model-description'>The alert identifiers. It is required only when <code>type</code> is <code>alert</code>. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; <code>index</code> must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
     <div class="field-items">
           </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="alert_indices"><code>alert_indices</code> - Alert indices</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class='model-description'>The alert indices. It is required only when <code>type</code> is <code>alert</code>.  If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the <code>alertId</code> array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
     <div class="field-items">
           </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="alert_response_properties"><code>alert_response_properties</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">attached_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The alert identifier. </div>
+<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The alert index. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="assignees_inner"><code>assignees_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">uid </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API. </div>
+    </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="case_response_closed_by_properties"><code>case_response_closed_by_properties</code> - Case response properties for closed_by</a> <a class="up" href="#__Models">Up</a></h3>
@@ -1305,7 +2322,7 @@ Any modifications made to this file will be overwritten.
     <h3><a name="case_response_properties"><code>case_response_properties</code> - Case response properties</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#case_response_properties_assignees_inner">array[case_response_properties_assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#assignees_inner">array[assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
 <div class="param">closed_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">closed_by </div><div class="param-desc"><span class="param-type"><a href="#case_response_closed_by_properties">case_response_closed_by_properties</a></span>  </div>
 <div class="param">comments </div><div class="param-desc"><span class="param-type"><a href="#Case_response_properties_for_comments_inner">array[Case_response_properties_for_comments_inner]</a></span> An array of comment objects for the case. </div>
@@ -1327,13 +2344,6 @@ Any modifications made to this file will be overwritten.
 <div class="param">updated_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">updated_by </div><div class="param-desc"><span class="param-type"><a href="#case_response_updated_by_properties">case_response_updated_by_properties</a></span>  </div>
 <div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="case_response_properties_assignees_inner"><code>case_response_properties_assignees_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">uid </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A unique identifier for the user profile. You can use the get user profile API to retrieve more details. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1504,7 +2514,7 @@ Any modifications made to this file will be overwritten.
     <h3><a name="create_case_request"><code>create_case_request</code> - Create case request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The create case API request body varies depending on the type of connector.</div>
     <div class="field-items">
-      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#create_case_request_assignees_inner">array[create_case_request_assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#assignees_inner">array[assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
 <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#create_case_request_connector">create_case_request_connector</a></span>  </div>
 <div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
 <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
@@ -1512,13 +2522,6 @@ Any modifications made to this file will be overwritten.
 <div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
 <div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
 <div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="create_case_request_assignees_inner"><code>create_case_request_assignees_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">uid </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1543,7 +2546,39 @@ Any modifications made to this file will be overwritten.
 <div class="param">external_title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">external_url (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">pushed_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_pushed_by">alert_comment_response_properties_pushed_by</a></span>  </div>
+<div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_updated_by">getCaseConfiguration_200_response_inner_updated_by</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findCaseActivity_200_response"><code>findCaseActivity_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">page (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">perPage (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">total (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">userActions (optional)</div><div class="param-desc"><span class="param-type"><a href="#user_actions_find_response_properties">array[user_actions_find_response_properties]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCaseComment_200_response"><code>getCaseComment_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">alertId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">created_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">created_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#case_response_created_by_properties">case_response_created_by_properties</a></span>  </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">pushed_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#case_response_pushed_by_properties">case_response_pushed_by_properties</a></span>  </div>
+<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_rule">alert_comment_response_properties_rule</a></span>  </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">user</div>
+<div class="param">updated_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#case_response_updated_by_properties">case_response_updated_by_properties</a></span>  </div>
+<div class="param">version (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">comment (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1580,6 +2615,7 @@ Any modifications made to this file will be overwritten.
       <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1598,10 +2634,69 @@ Any modifications made to this file will be overwritten.
       <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="getCaseConfiguration_owner_parameter"><code>getCaseConfiguration_owner_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="getCaseConnectors_200_response_inner"><code>getCaseConnectors_200_response_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actionTypeId (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
+<div class="param">config (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConnectors_200_response_inner_config">getCaseConnectors_200_response_inner_config</a></span>  </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">isDeprecated (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">isMissingSecrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">isPreconfigured (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">referencedByCount (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCaseConnectors_200_response_inner_config"><code>getCaseConnectors_200_response_inner_config</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">apiUrl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">projectKey (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCaseStatus_200_response"><code>getCaseStatus_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">count_closed_cases (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">count_in_progress_cases (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">count_open_cases (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCasesByAlert_200_response_inner"><code>getCasesByAlert_200_response_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The case identifier. </div>
+<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The case title. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCases_200_response"><code>getCases_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">cases (optional)</div><div class="param-desc"><span class="param-type"><a href="#case_response_properties">array[case_response_properties]</a></span>  </div>
+<div class="param">count_closed_cases (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">count_in_progress_cases (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">count_open_cases (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">page (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">per_page (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">total (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCases_assignees_parameter"><code>getCases_assignees_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getCases_owner_parameter"><code>getCases_owner_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
           </div>  <!-- field-items -->
@@ -1613,8 +2708,167 @@ Any modifications made to this file will be overwritten.
           </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="payload_alert_comment"><code>payload_alert_comment</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">comment (optional)</div><div class="param-desc"><span class="param-type"><a href="#payload_alert_comment_comment">payload_alert_comment_comment</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_alert_comment_comment"><code>payload_alert_comment_comment</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">alertId (optional)</div><div class="param-desc"><span class="param-type"><a href="#payload_alert_comment_comment_alertId">payload_alert_comment_comment_alertId</a></span>  </div>
+<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#payload_alert_comment_comment_index">payload_alert_comment_comment_index</a></span>  </div>
+<div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_rule">alert_comment_response_properties_rule</a></span>  </div>
+<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">alert</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_alert_comment_comment_alertId"><code>payload_alert_comment_comment_alertId</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_alert_comment_comment_index"><code>payload_alert_comment_comment_index</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_assignees"><code>payload_assignees</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#assignees_inner">array[assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_connector"><code>payload_connector</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#payload_connector_connector">payload_connector_connector</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_connector_connector"><code>payload_connector_connector</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">fields (optional)</div><div class="param-desc"><span class="param-type"><a href="#payload_connector_connector_fields">payload_connector_connector_fields</a></span>  </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. To create a case without a connector, use <code>none</code>. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector. To create a case without a connector, use <code>none</code>. </div>
+<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_types">connector_types</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_connector_connector_fields"><code>payload_connector_connector_fields</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.</div>
+    <div class="field-items">
+      <div class="param">caseId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The case identifier for Swimlane connectors. </div>
+<div class="param">category (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors. </div>
+<div class="param">destIp (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors. </div>
+<div class="param">impact (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The effect an incident had on business for ServiceNow ITSM connectors. </div>
+<div class="param">issueType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of issue for Jira connectors. </div>
+<div class="param">issueTypes (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The type of incident for IBM Resilient connectors. </div>
+<div class="param">malwareHash (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors. </div>
+<div class="param">malwareUrl (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors. </div>
+<div class="param">parent (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The key of the parent issue, when the issue type is sub-task for Jira connectors. </div>
+<div class="param">priority (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The priority of the issue for Jira and ServiceNow SecOps connectors. </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The severity of the incident for ServiceNow ITSM connectors. </div>
+<div class="param">severityCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The severity code of the incident for IBM Resilient connectors. </div>
+<div class="param">sourceIp (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors. </div>
+<div class="param">subcategory (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The subcategory of the incident for ServiceNow ITSM connectors. </div>
+<div class="param">urgency (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_create_case"><code>payload_create_case</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#assignees_inner">array[assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+<div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#payload_connector_connector">payload_connector_connector</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_description"><code>payload_description</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_pushed"><code>payload_pushed</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">externalService (optional)</div><div class="param-desc"><span class="param-type"><a href="#external_service">external_service</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_settings"><code>payload_settings</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_severity"><code>payload_severity</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_status"><code>payload_status</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_tags"><code>payload_tags</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_title"><code>payload_title</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_user_comment"><code>payload_user_comment</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">comment (optional)</div><div class="param-desc"><span class="param-type"><a href="#payload_user_comment_comment">payload_user_comment_comment</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="payload_user_comment_comment"><code>payload_user_comment_comment</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">comment (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">user</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="rule"><code>rule</code> - Alerting rule</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The rule that is associated with the alert. It is required only when <code>type</code> is <code>alert</code>. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class='model-description'>The rule that is associated with the alerts. It is required only when <code>type</code> is <code>alert</code>. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule identifier. </div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule name. </div>
@@ -1717,7 +2971,7 @@ Any modifications made to this file will be overwritten.
     <h3><a name="update_case_request_cases_inner"><code>update_case_request_cases_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#create_case_request_assignees_inner">array[create_case_request_assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+      <div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#assignees_inner">array[assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
 <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#create_case_request_connector">create_case_request_connector</a></span>  </div>
 <div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
 <div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
@@ -1740,6 +2994,64 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">user</div>
 <div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current comment version. To retrieve version values, use the get comments API. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="user_actions_find_response_properties"><code>user_actions_find_response_properties</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">action </div><div class="param-desc"><span class="param-type"><a href="#actions">actions</a></span>  </div>
+<div class="param">case_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">comment_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">created_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">created_by </div><div class="param-desc"><span class="param-type"><a href="#user_actions_response_properties_created_by">user_actions_response_properties_created_by</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">payload </div><div class="param-desc"><span class="param-type"><a href="#user_actions_response_properties_payload">user_actions_response_properties_payload</a></span>  </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#action_types">action_types</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="user_actions_response_properties"><code>user_actions_response_properties</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">action </div><div class="param-desc"><span class="param-type"><a href="#actions">actions</a></span>  </div>
+<div class="param">action_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">case_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">comment_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">created_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">created_by </div><div class="param-desc"><span class="param-type"><a href="#user_actions_response_properties_created_by">user_actions_response_properties_created_by</a></span>  </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">payload </div><div class="param-desc"><span class="param-type"><a href="#user_actions_response_properties_payload">user_actions_response_properties_payload</a></span>  </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#action_types">action_types</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="user_actions_response_properties_created_by"><code>user_actions_response_properties_created_by</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">full_name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">username </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="user_actions_response_properties_payload"><code>user_actions_response_properties_payload</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">comment (optional)</div><div class="param-desc"><span class="param-type"><a href="#payload_user_comment_comment">payload_user_comment_comment</a></span>  </div>
+<div class="param">assignees (optional)</div><div class="param-desc"><span class="param-type"><a href="#assignees_inner">array[assignees_inner]</a></span> An array containing users that are assigned to the case. </div>
+<div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#payload_connector_connector">payload_connector_connector</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">externalService (optional)</div><div class="param-desc"><span class="param-type"><a href="#external_service">external_service</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

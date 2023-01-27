@@ -67,10 +67,12 @@ function GroupSelection(props: GroupSelectionProps) {
     <>
       <EuiModalHeader>
         <EuiModalHeaderTitle data-test-subj="groupModalHeader">
-          <FormattedMessage
-            id="visualizations.newVisWizard.title"
-            defaultMessage="New visualization"
-          />
+          <h1>
+            <FormattedMessage
+              id="visualizations.newVisWizard.title"
+              defaultMessage="New visualization"
+            />
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody className="visNewVisDialogGroupSelection__body">

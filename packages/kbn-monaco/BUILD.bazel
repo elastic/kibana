@@ -1,15 +1,11 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config")
-load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
+load("@npm//webpack-cli:index.bzl", "webpack_cli")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-monaco"
-PKG_REQUIRE_NAME = "@kbn/monaco"
-
-SOURCE_FILES = glob(
+SRCS = glob(
   [
     "src/**/*",
-    "**/*.ts",
+    "index.ts",
+    "server.ts",
   ],
   exclude = [
     "**/*.config.js",
@@ -27,56 +23,24 @@ SOURCE_FILES = glob(
   ],
 )
 
-SRCS = SOURCE_FILES
-
-filegroup(
-  name = "srcs",
-  srcs = SRCS,
-)
-
-NPM_MODULE_EXTRA_FILES = [
-  "package.json",
-  "README.md"
-]
-
-RUNTIME_DEPS = [
-  "//packages/kbn-babel-preset",
+SHARED_DEPS = [
   "//packages/kbn-i18n",
-  "@npm//@babel/runtime",
-  "@npm//antlr4ts",
-  "@npm//babel-loader",
-  "@npm//monaco-editor",
-  "@npm//raw-loader",
-  "@npm//rxjs",
-]
-
-TYPES_DEPS = [
-  "//packages/kbn-i18n:npm_module_types",
+  "//packages/kbn-ui-theme",
   "@npm//antlr4ts",
   "@npm//monaco-editor",
-  "@npm//rxjs",
-  "@npm//tslib",
-  "@npm//@types/jest",
-  "@npm//@types/node",
+  "@npm//monaco-yaml",
 ]
 
-jsts_transpiler(
-  name = "target_node",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-)
-
-jsts_transpiler(
-  name = "target_web",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-  web = True,
-)
-
-webpack(
+webpack_cli(
   name = "target_workers",
-  data = RUNTIME_DEPS + [
-    ":src",
+  data = SRCS + SHARED_DEPS + [
+    "//:.browserslistrc",
+    "//packages/kbn-babel-preset",
+    "@npm//@babel/runtime",
+    "@npm//babel-loader",
+    "@npm//raw-loader",
+    "@npm//rxjs",
+
     "webpack.config.js",
   ],
   output_dir = True,
@@ -87,61 +51,23 @@ webpack(
     "$(@D)",
     "--env",
     "prod",
-    "--no-stats"
+    "--stats=errors-only"
   ],
-)
-
-ts_config(
-  name = "tsconfig",
-  src = "tsconfig.json",
-  deps = [
-    "//:tsconfig.base.json",
-    "//:tsconfig.bazel.json",
-  ],
-)
-
-ts_project(
-  name = "tsc_types",
-  args = ['--pretty'],
-  srcs = SRCS,
-  deps = TYPES_DEPS,
-  declaration = True,
-  emit_declaration_only = True,
-  out_dir = "target_types",
-  tsconfig = ":tsconfig",
-)
-
-js_library(
-  name = PKG_DIRNAME,
-  srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":target_workers"],
-  package_name = PKG_REQUIRE_NAME,
+  env = select({
+    "//:dist": {
+      "NODE_ENV": "production",
+    },
+    "//conditions:default": {
+      "NODE_ENV": "development",
+    },
+  }),
   visibility = ["//visibility:public"],
 )
 
 js_library(
-  name = "npm_module_types",
-  srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":target_workers", ":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "npm_module",
-  deps = [":" + PKG_DIRNAME],
-)
-
-filegroup(
-  name = "build",
-  srcs = [
-    ":npm_module",
-  ],
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "build_types",
-  deps = [":npm_module_types"],
+  name = "kbn-monaco",
+  package_name = "@kbn/monaco",
+  srcs = ["package.json"] + SRCS,
+  deps = SHARED_DEPS,
   visibility = ["//visibility:public"],
 )

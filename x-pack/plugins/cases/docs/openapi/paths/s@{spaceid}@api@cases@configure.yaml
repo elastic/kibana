@@ -14,13 +14,19 @@ get:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
             type: array
             items: 
               type: object
               properties:
                 $ref: '../components/schemas/case_configure_response_properties.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
         - url: https://localhost:5601
 
@@ -82,7 +88,7 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-         application/json; charset=utf-8:
+         application/json:
           schema:
             type: object
             properties:
@@ -90,8 +96,13 @@ post:
           examples:
             setCaseConfigResponse:
               $ref: '../components/examples/set_case_configuration_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
      - url: https://localhost:5601
-
 servers:
       - url: https://localhost:5601

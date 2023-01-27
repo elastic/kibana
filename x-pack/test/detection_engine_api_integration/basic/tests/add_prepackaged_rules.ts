@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import {
-  PREBUILT_RULES_STATUS_URL,
-  PREBUILT_RULES_URL,
-  InstallPrebuiltRulesAndTimelinesResponse,
-} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
-
+import { PREBUILT_RULES_STATUS_URL } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
+import expect from 'expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -42,35 +37,22 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should create the prepackaged rules and return a count greater than zero, rules_updated to be zero, and contain the correct keys', async () => {
-        let responseBody: unknown;
-        await waitFor(
-          async () => {
-            const { body, status } = await supertest
-              .put(PREBUILT_RULES_URL)
-              .set('kbn-xsrf', 'true')
-              .send();
-            if (status === 200) {
-              responseBody = body;
-            }
-            return status === 200;
-          },
-          PREBUILT_RULES_URL,
-          log
-        );
+        const response = await installPrePackagedRules(supertest, es, log);
 
-        const prepackagedRules = responseBody as InstallPrebuiltRulesAndTimelinesResponse;
-        expect(prepackagedRules.rules_installed).to.be.greaterThan(0);
-        expect(prepackagedRules.rules_updated).to.eql(0);
-        expect(Object.keys(prepackagedRules)).to.eql([
-          'rules_installed',
-          'rules_updated',
-          'timelines_installed',
-          'timelines_updated',
-        ]);
+        expect(response?.rules_installed).toBeGreaterThan(0);
+        expect(response?.rules_updated).toBe(0);
+        expect(response).toEqual(
+          expect.objectContaining({
+            rules_installed: expect.any(Number),
+            rules_updated: expect.any(Number),
+            timelines_installed: expect.any(Number),
+            timelines_updated: expect.any(Number),
+          })
+        );
       });
 
       it('should be possible to call the API twice and the second time the number of rules installed should be zero as well as timeline', async () => {
-        await installPrePackagedRules(supertest, log);
+        await installPrePackagedRules(supertest, es, log);
 
         // NOTE: I call the GET call until eventually it becomes consistent and that the number of rules to install are zero.
         // This is to reduce flakiness where it can for a short period of time try to install the same rule twice.
@@ -86,25 +68,10 @@ export default ({ getService }: FtrProviderContext): void => {
           log
         );
 
-        let responseBody: unknown;
-        await waitFor(
-          async () => {
-            const { body, status } = await supertest
-              .put(PREBUILT_RULES_URL)
-              .set('kbn-xsrf', 'true')
-              .send();
-            if (status === 200) {
-              responseBody = body;
-            }
-            return status === 200;
-          },
-          PREBUILT_RULES_URL,
-          log
-        );
+        const response = await installPrePackagedRules(supertest, es, log);
 
-        const prepackagedRules = responseBody as InstallPrebuiltRulesAndTimelinesResponse;
-        expect(prepackagedRules.rules_installed).to.eql(0);
-        expect(prepackagedRules.timelines_installed).to.eql(0);
+        expect(response?.rules_installed).toBe(0);
+        expect(response?.timelines_installed).toBe(0);
       });
     });
   });

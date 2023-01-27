@@ -84,7 +84,7 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel size="s" items={items} style={{ minWidth: 160 }} />
     </EuiPopover>
   );
 };
@@ -102,15 +102,16 @@ const ContextMenuItem = ({
 
   return (
     <EuiContextMenuItem
+      size="s"
       key={option.value}
       icon={getIconType(option.checked)}
       onClick={() => {
         onClosePopover();
         option.onClick();
       }}
-      style={{
-        marginRight: 24,
-      }}
+      // style={{
+      //   marginRight: 24,
+      // }}
     >
       {option.label}
     </EuiContextMenuItem>

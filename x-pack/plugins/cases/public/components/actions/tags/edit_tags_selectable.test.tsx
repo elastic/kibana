@@ -10,7 +10,6 @@ import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { EditTagsSelectable } from './edit_tags_selectable';
 import { basicCase } from '../../../containers/mock';
-import { waitForComponentToUpdate } from '../../../common/test_utils';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 
@@ -61,8 +60,6 @@ describe('EditTagsSelectable', () => {
     for (const tag of props.tags) {
       expect(result.getByText(tag)).toBeInTheDocument();
     }
-
-    await waitForComponentToUpdate();
   });
 
   it('renders the selected tags label correctly', async () => {
@@ -74,8 +71,6 @@ describe('EditTagsSelectable', () => {
     for (const tag of props.tags) {
       expect(result.getByText(tag)).toBeInTheDocument();
     }
-
-    await waitForComponentToUpdate();
   });
 
   it('renders the tags icons correctly', async () => {
@@ -91,8 +86,6 @@ describe('EditTagsSelectable', () => {
       const iconDataTestSubj = `cases-actions-tags-edit-selectable-tag-${tag}-icon-${icon}`;
       expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
     }
-
-    await waitForComponentToUpdate();
   });
 
   it('selects and unselects correctly tags with one case', async () => {
@@ -104,11 +97,9 @@ describe('EditTagsSelectable', () => {
 
     expect(props.onChangeTags).toBeCalledTimes(props.tags.length);
     expect(props.onChangeTags).nthCalledWith(props.tags.length, {
-      selectedTags: ['one', 'two'],
-      unSelectedTags: ['coke', 'pepsi'],
+      selectedItems: ['one', 'two'],
+      unSelectedItems: ['coke', 'pepsi'],
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('selects and unselects correctly tags with multiple cases', async () => {
@@ -120,11 +111,9 @@ describe('EditTagsSelectable', () => {
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(propsMultipleCases.tags.length);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(propsMultipleCases.tags.length, {
-      selectedTags: ['two', 'three', 'coke', 'pepsi'],
-      unSelectedTags: ['one'],
+      selectedItems: ['two', 'three', 'coke', 'pepsi'],
+      unSelectedItems: ['one'],
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('renders the icons correctly after selecting and deselecting tags', async () => {
@@ -147,11 +136,9 @@ describe('EditTagsSelectable', () => {
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(propsMultipleCases.tags.length);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(propsMultipleCases.tags.length, {
-      selectedTags: ['two', 'three', 'coke', 'pepsi'],
-      unSelectedTags: ['one'],
+      selectedItems: ['two', 'three', 'coke', 'pepsi'],
+      unSelectedItems: ['one'],
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('adds a new tag correctly', async () => {
@@ -169,12 +156,10 @@ describe('EditTagsSelectable', () => {
 
     userEvent.click(addNewTagButton);
 
-    await waitForComponentToUpdate();
-
     expect(props.onChangeTags).toBeCalledTimes(1);
     expect(props.onChangeTags).nthCalledWith(1, {
-      selectedTags: ['not-exist', 'coke', 'pepsi'],
-      unSelectedTags: [],
+      selectedItems: ['not-exist', 'coke', 'pepsi'],
+      unSelectedItems: [],
     });
   });
 
@@ -186,11 +171,9 @@ describe('EditTagsSelectable', () => {
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
-      selectedTags: propsMultipleCases.tags,
-      unSelectedTags: [],
+      selectedItems: propsMultipleCases.tags,
+      unSelectedItems: [],
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('unselects all tags correctly', async () => {
@@ -201,11 +184,9 @@ describe('EditTagsSelectable', () => {
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
-      selectedTags: [],
-      unSelectedTags: ['one', 'three', 'coke', 'pepsi'],
+      selectedItems: [],
+      unSelectedItems: ['one', 'three', 'coke', 'pepsi'],
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('unselects correctly with the new item presented', async () => {
@@ -228,16 +209,14 @@ describe('EditTagsSelectable', () => {
 
     userEvent.click(result.getByTestId(iconDataTestSubj));
 
-    await waitForComponentToUpdate();
-
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
-      selectedTags: [],
-      unSelectedTags: ['one'],
+      selectedItems: [],
+      unSelectedItems: ['one'],
     });
   });
 
-  it('adds a partial match correctly', async () => {
+  it('adds a partial match correctly and does not show the no match label', async () => {
     const result = appMock.render(<EditTagsSelectable {...props} />);
 
     /**
@@ -252,16 +231,18 @@ describe('EditTagsSelectable', () => {
       ).toBeInTheDocument();
     });
 
+    expect(
+      result.queryByTestId('cases-actions-tags-edit-selectable-no-match-label')
+    ).not.toBeInTheDocument();
+
     const addNewTagButton = result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
 
     userEvent.click(addNewTagButton);
 
-    await waitForComponentToUpdate();
-
     expect(props.onChangeTags).toBeCalledTimes(1);
     expect(props.onChangeTags).nthCalledWith(1, {
-      selectedTags: ['on', 'coke', 'pepsi'],
-      unSelectedTags: [],
+      selectedItems: ['on', 'coke', 'pepsi'],
+      unSelectedItems: [],
     });
   });
 
@@ -269,10 +250,43 @@ describe('EditTagsSelectable', () => {
     const result = appMock.render(<EditTagsSelectable {...props} />);
 
     await userEvent.type(result.getByPlaceholderText('Search'), 'one', { delay: 1 });
-    await waitForComponentToUpdate();
 
     expect(
       result.queryByTestId('cases-actions-tags-edit-selectable-add-new-tag')
     ).not.toBeInTheDocument();
+  });
+
+  it('does not show the no match label when the initial tags are empty', async () => {
+    const result = appMock.render(<EditTagsSelectable {...props} tags={[]} />);
+
+    expect(
+      result.queryByTestId('cases-actions-tags-edit-selectable-no-match-label')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the no match label when there is no match', async () => {
+    const result = appMock.render(<EditTagsSelectable {...props} />);
+
+    await userEvent.type(result.getByPlaceholderText('Search'), 'not-exist', { delay: 1 });
+
+    expect(
+      result.getByTestId('cases-actions-tags-edit-selectable-no-match-label')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the no match label and the add new item when there is space in the search term', async () => {
+    const result = appMock.render(<EditTagsSelectable {...props} />);
+
+    await userEvent.type(result.getByPlaceholderText('Search'), 'test tag', { delay: 1 });
+
+    await waitFor(() => {
+      expect(
+        result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+      ).toBeInTheDocument();
+    });
+
+    expect(
+      result.getByTestId('cases-actions-tags-edit-selectable-no-match-label')
+    ).toBeInTheDocument();
   });
 });

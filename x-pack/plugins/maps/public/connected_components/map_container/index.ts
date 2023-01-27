@@ -9,7 +9,11 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { MapContainer } from './map_container';
-import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
+import {
+  getFlyoutDisplay,
+  getIsFullScreen,
+  getIsTimesliderOpen,
+} from '../../selectors/ui_selectors';
 import { cancelAllInFlightRequests, exitFullScreen } from '../../actions';
 import {
   areLayersLoaded,
@@ -22,6 +26,7 @@ import { MapStoreState } from '../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {
+    isTimesliderOpen: getIsTimesliderOpen(state),
     areLayersLoaded: areLayersLoaded(state),
     flyoutDisplay: getFlyoutDisplay(state),
     isFullScreen: getIsFullScreen(state),

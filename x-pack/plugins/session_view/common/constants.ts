@@ -67,3 +67,10 @@ export const TTY_LINE_SPLITTER_REGEX = /(\r?\n|\r\n?|\x1b\[\d+;\d*[Hf]?)/gi;
 // when showing the count of alerts in details panel tab, if the number
 // exceeds ALERT_COUNT_THRESHOLD we put a + next to it, e.g  999+
 export const ALERT_COUNT_THRESHOLD = 999;
+export const ALERT_ICONS: { [key: string]: string } = {
+  process: 'gear',
+  file: 'document',
+  network: 'globe',
+};
+export const DEFAULT_ALERT_FILTER_VALUE = 'all';
+export const ALERT = 'alert';

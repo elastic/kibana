@@ -12,15 +12,10 @@ import { useRouteMatch } from 'react-router-dom';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-ignore
 import { List } from '../../../components/logstash/pipeline_viewer/models/list';
-// @ts-ignore
 import { PipelineViewer } from '../../../components/logstash/pipeline_viewer';
-// @ts-ignore
 import { Pipeline } from '../../../components/logstash/pipeline_viewer/models/pipeline';
-// @ts-ignore
 import { PipelineState } from '../../../components/logstash/pipeline_viewer/models/pipeline_state';
-// @ts-ignore
 import { vertexFactory } from '../../../components/logstash/pipeline_viewer/models/graph/vertex_factory';
 import { LogstashTemplate } from './logstash_template';
 import { useTable } from '../../hooks/use_table';

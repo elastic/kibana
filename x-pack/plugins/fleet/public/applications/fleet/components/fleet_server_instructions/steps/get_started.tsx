@@ -14,7 +14,7 @@ import {
   EuiCode,
   EuiForm,
   EuiFormErrorText,
-  EuiLink,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiText,
   EuiFormRow,
@@ -49,6 +49,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
   error,
   inputs,
   submit,
+  onClose,
 }) => {
   const { getHref } = useLink();
 
@@ -71,12 +72,13 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
             values={{
               hostUrl: <EuiCode>{selectedFleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
-                <EuiLink href={getHref('settings')}>
+                // eslint-disable-next-line @elastic/eui/href-or-on-click
+                <EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                     defaultMessage="Fleet Settings"
                   />
-                </EuiLink>
+                </EuiButtonEmpty>
               ),
             }}
           />
@@ -145,6 +147,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
                       defaultMessage: 'Specify host URL',
                     }
                   )}
+                  isUrl
                 />
                 {status === 'error' && <EuiFormErrorText>{error}</EuiFormErrorText>}
               </>

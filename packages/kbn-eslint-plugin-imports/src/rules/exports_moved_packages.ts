@@ -13,8 +13,8 @@ import { TSESTree } from '@typescript-eslint/typescript-estree';
 import { visitAllImportStatements, Importer } from '../helpers/visit_all_import_statements';
 
 export interface MovedExportsRule {
-  fromPackage: string;
-  toPackage: string;
+  from: string;
+  to: string;
   exportNames: string[];
 }
 
@@ -71,7 +71,7 @@ function getBadImports(imported: Imported[], rules: MovedExportsRule[]): BadImpo
       node: i.node,
       id: i.id,
       name: i.name,
-      newPkg: match.toPackage,
+      newPkg: match.to,
     };
   });
 }
@@ -203,10 +203,10 @@ export const ExportsMovedPackagesRule: Rule.RuleModule = {
         items: {
           type: 'object',
           properties: {
-            fromPackage: {
+            from: {
               type: 'string',
             },
-            toPackage: {
+            to: {
               type: 'string',
             },
             exportNames: {
@@ -268,7 +268,7 @@ export const ExportsMovedPackagesRule: Rule.RuleModule = {
         return;
       }
 
-      const rulesForRightPackage = rules.filter((m) => m.fromPackage === req);
+      const rulesForRightPackage = rules.filter((m) => m.from === req);
       if (!rulesForRightPackage.length) {
         return;
       }

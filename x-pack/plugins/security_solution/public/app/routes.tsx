@@ -11,11 +11,13 @@ import React, { memo, useEffect } from 'react';
 import { Router, Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { useDispatch } from 'react-redux';
-
 import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
-import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
+
+import { APP_ID } from '../../common/constants';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
+import { useGetUserCasesPermissions, useKibana } from '../common/lib/kibana';
 import type { AppAction } from '../common/store/actions';
+import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { NotFoundPage } from './404';
 import { HomePage } from './home';
 
@@ -32,6 +34,9 @@ const PageRouterComponent: FC<RouterProps> = ({
   onAppLeave,
   setHeaderActionMenu,
 }) => {
+  const { cases } = useKibana().services;
+  const CasesContext = cases.ui.getCasesContext();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const dispatch = useDispatch<(action: AppAction) => void>();
   useEffect(() => {
     return () => {
@@ -50,7 +55,9 @@ const PageRouterComponent: FC<RouterProps> = ({
         <RouteCapture>
           <Switch>
             <Route path="/">
-              <HomePage setHeaderActionMenu={setHeaderActionMenu}>{children}</HomePage>
+              <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
+                <HomePage setHeaderActionMenu={setHeaderActionMenu}>{children}</HomePage>
+              </CasesContext>
             </Route>
             <Route>
               <NotFoundPage />

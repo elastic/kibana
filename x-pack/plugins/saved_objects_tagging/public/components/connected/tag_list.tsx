@@ -19,16 +19,22 @@ interface SavedObjectTagListProps {
   object: { references: SavedObjectReference[] };
   tags: Tag[];
   onClick?: (tag: TagWithOptionalId) => void;
+  tagRender?: (tag: TagWithOptionalId) => JSX.Element;
 }
 
-const SavedObjectTagList: FC<SavedObjectTagListProps> = ({ object, tags: allTags, onClick }) => {
+const SavedObjectTagList: FC<SavedObjectTagListProps> = ({
+  object,
+  tags: allTags,
+  onClick,
+  tagRender,
+}) => {
   const objectTags = useMemo(() => {
     const { tags } = getObjectTags(object, allTags);
     tags.sort(byNameTagSorter);
     return tags;
   }, [object, allTags]);
 
-  return <TagList tags={objectTags} onClick={onClick} />;
+  return <TagList tags={objectTags} onClick={onClick} tagRender={tagRender} />;
 };
 
 interface GetConnectedTagListOptions {

@@ -16,6 +16,7 @@ import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 import { JobCreatorType } from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';
+import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
@@ -26,6 +27,7 @@ import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 interface Props {
   jobCreator: JobCreatorType;
   chartLoader: ChartLoader;
+  mapLoader: MapLoader;
   resultsLoader: ResultsLoader;
   chartInterval: TimeBuckets;
   jobValidator: JobValidator;
@@ -36,6 +38,7 @@ interface Props {
 export const Wizard: FC<Props> = ({
   jobCreator,
   chartLoader,
+  mapLoader,
   resultsLoader,
   chartInterval,
   jobValidator,
@@ -57,6 +60,7 @@ export const Wizard: FC<Props> = ({
     jobCreatorUpdate,
     jobCreator,
     chartLoader,
+    mapLoader,
     resultsLoader,
     chartInterval,
     jobValidator,

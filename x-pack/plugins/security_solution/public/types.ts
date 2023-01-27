@@ -47,9 +47,6 @@ import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
-import type { Hosts } from './hosts';
-import type { Users } from './users';
-import type { Network } from './network';
 import type { Kubernetes } from './kubernetes';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
@@ -59,6 +56,7 @@ import type { LandingPages } from './landing_pages';
 import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
+import type { Explore } from './explore';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -104,6 +102,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 export type StartServices = CoreStart &
   StartPlugins & {
     storage: Storage;
+    sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
     onAppLeave: (handler: AppLeaveHandler) => void;
@@ -135,9 +134,7 @@ export interface SubPlugins {
   rules: Rules;
   exceptions: Exceptions;
   [CASES_SUB_PLUGIN_KEY]: Cases;
-  hosts: Hosts;
-  users: Users;
-  network: Network;
+  explore: Explore;
   kubernetes: Kubernetes;
   overview: Overview;
   timelines: Timelines;
@@ -153,9 +150,7 @@ export interface StartedSubPlugins {
   rules: ReturnType<Rules['start']>;
   exceptions: ReturnType<Exceptions['start']>;
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
-  hosts: ReturnType<Hosts['start']>;
-  users: ReturnType<Users['start']>;
-  network: ReturnType<Network['start']>;
+  explore: ReturnType<Explore['start']>;
   kubernetes: ReturnType<Kubernetes['start']>;
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;

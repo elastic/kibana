@@ -29,6 +29,7 @@ interface Props {
   intl: InjectedIntl;
   fullWidth?: boolean;
   compressed?: boolean;
+  disabled?: boolean;
 }
 
 export function isRangeParams(params: any): params is RangeParams {
@@ -66,6 +67,7 @@ function RangeValueInputUI(props: Props) {
   return (
     <div>
       <EuiFormControlLayoutDelimited
+        compressed={props.compressed}
         fullWidth={props.fullWidth}
         aria-label={props.intl.formatMessage({
           id: 'unifiedSearch.filter.filterEditor.rangeInputLabel',
@@ -83,8 +85,10 @@ function RangeValueInputUI(props: Props) {
             }}
             placeholder={props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.rangeStartInputPlaceholder',
-              defaultMessage: 'Start of the range',
+              defaultMessage: 'Start',
             })}
+            disabled={props.disabled}
+            dataTestSubj="range-start"
           />
         }
         endControl={
@@ -99,8 +103,10 @@ function RangeValueInputUI(props: Props) {
             }}
             placeholder={props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.rangeEndInputPlaceholder',
-              defaultMessage: 'End of the range',
+              defaultMessage: 'End',
             })}
+            disabled={props.disabled}
+            dataTestSubj="range-end"
           />
         }
       />

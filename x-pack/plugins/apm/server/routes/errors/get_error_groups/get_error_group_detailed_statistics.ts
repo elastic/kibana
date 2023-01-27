@@ -14,10 +14,7 @@ import {
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../../typings/timeseries';
-import {
-  ERROR_GROUP_ID,
-  SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';

@@ -20,6 +20,6 @@ describe('AnomalyThresholdSlider', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive().find('EuiRange')).toHaveLength(1);
+    expect(wrapper.dive().find('EuiRangeClass')).toHaveLength(1);
   });
 });

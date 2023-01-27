@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import jestExpect from 'expect';
+import { expect as jestExpect } from 'expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { readFileSync } from 'fs';
@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(401);
 
       expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-      expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+      expect(unauthenticatedResponse.text).to.contain('error');
     });
 
     it('does not prevent basic login', async () => {

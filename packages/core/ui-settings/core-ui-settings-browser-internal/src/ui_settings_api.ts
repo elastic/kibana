@@ -10,6 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 
 import type { UiSettingsState } from '@kbn/core-ui-settings-browser';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 export interface UiSettingsApiResponse {
   settings: UiSettingsState;
@@ -64,7 +65,32 @@ export class UiSettingsApi {
         },
       };
 
-      this.flushPendingChanges();
+      this.flushPendingChanges('namespace');
+    });
+  }
+
+  public batchSetGlobal(key: string, value: any) {
+    return new Promise<UiSettingsApiResponse>((resolve, reject) => {
+      const prev = this.pendingChanges || NOOP_CHANGES;
+
+      this.pendingChanges = {
+        values: {
+          ...prev.values,
+          [key]: value,
+        },
+
+        callback(error, resp) {
+          prev.callback(error, resp);
+
+          if (error) {
+            reject(error);
+          } else {
+            resolve(resp!);
+          }
+        },
+      };
+
+      this.flushPendingChanges('global');
     });
   }
 
@@ -97,7 +123,7 @@ export class UiSettingsApi {
    * progress) then another request will be started until all pending changes have been
    * sent to the server.
    */
-  private async flushPendingChanges() {
+  private async flushPendingChanges(scope: UiSettingsScope) {
     if (!this.pendingChanges) {
       return;
     }
@@ -111,10 +137,10 @@ export class UiSettingsApi {
 
     try {
       this.sendInProgress = true;
-
+      const path = scope === 'namespace' ? '/api/kibana/settings' : '/api/kibana/global_settings';
       changes.callback(
         undefined,
-        await this.sendRequest('POST', '/api/kibana/settings', {
+        await this.sendRequest('POST', path, {
           changes: changes.values,
         })
       );
@@ -122,7 +148,7 @@ export class UiSettingsApi {
       changes.callback(error);
     } finally {
       this.sendInProgress = false;
-      this.flushPendingChanges();
+      this.flushPendingChanges(scope);
     }
   }
 

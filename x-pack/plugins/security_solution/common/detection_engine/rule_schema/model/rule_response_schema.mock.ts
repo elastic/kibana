@@ -75,6 +75,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryRule 
   filters: undefined,
   saved_id: undefined,
   response_actions: undefined,
+  alert_suppression: undefined,
 });
 
 export const getSavedQuerySchemaMock = (anchorDate: string = ANCHOR_DATE): SavedQueryRule => ({
@@ -87,6 +88,7 @@ export const getSavedQuerySchemaMock = (anchorDate: string = ANCHOR_DATE): Saved
   data_view_id: undefined,
   filters: undefined,
   response_actions: undefined,
+  alert_suppression: undefined,
 });
 
 export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): MachineLearningRule => {

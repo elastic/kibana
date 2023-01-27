@@ -18,6 +18,7 @@ export async function loadRulesWithKueryFilter({
   typesFilter,
   actionTypesFilter,
   ruleExecutionStatusesFilter,
+  ruleLastRunOutcomesFilter,
   ruleStatusesFilter,
   tagsFilter,
   sort = { field: 'name', direction: 'asc' },
@@ -32,11 +33,12 @@ export async function loadRulesWithKueryFilter({
     actionTypesFilter,
     tagsFilter,
     ruleExecutionStatusesFilter,
+    ruleLastRunOutcomesFilter,
     ruleStatusesFilter,
     searchText,
   });
 
-  const res = await http.get<
+  const res = await http.post<
     AsApiContract<{
       page: number;
       perPage: number;
@@ -44,14 +46,15 @@ export async function loadRulesWithKueryFilter({
       data: Array<AsApiContract<Rule>>;
     }>
   >(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`, {
-    query: {
+    body: JSON.stringify({
       page: page.index + 1,
       per_page: page.size,
       ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
       sort_field: sort.field,
       sort_order: sort.direction,
-    },
+    }),
   });
+
   return {
     page: res.page,
     perPage: res.per_page,

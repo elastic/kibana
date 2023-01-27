@@ -7,7 +7,7 @@
 
 import { partition } from 'lodash/fp';
 import pMap from 'p-map';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -16,12 +16,15 @@ import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server
 
 import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
 import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
+import type {
+  AlertSuppression,
+  RuleResponse,
+} from '../../../../../common/detection_engine/rule_schema';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
 import type { RuleExecutionSummariesByRuleId } from '../../rule_monitoring';
-import type { RuleAlertType, RuleParams } from '../../rule_schema';
+import type { AlertSuppressionCamel, RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
@@ -136,12 +139,12 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {
       if (parsedRule instanceof Error) {
-        acc.rulesAcc.set(uuid.v4(), parsedRule);
+        acc.rulesAcc.set(uuidv4(), parsedRule);
       } else {
         const { rule_id: ruleId } = parsedRule;
         if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
           acc.errors.set(
-            uuid.v4(),
+            uuidv4(),
             createBulkErrorObject({
               ruleId,
               statusCode: 400,
@@ -299,7 +302,7 @@ export const getInvalidConnectors = async (
   } catch (exc) {
     if (exc?.output?.statusCode === 403) {
       reducerAccumulator.errors.set(
-        uuid.v4(),
+        uuidv4(),
         createBulkErrorObject({
           statusCode: exc.output.statusCode,
           message: `You may not have actions privileges required to import rules with actions: ${exc.output.payload.message}`,
@@ -307,7 +310,7 @@ export const getInvalidConnectors = async (
       );
     } else {
       reducerAccumulator.errors.set(
-        uuid.v4(),
+        uuidv4(),
         createBulkErrorObject({
           statusCode: 404,
           message: JSON.stringify(exc),
@@ -319,7 +322,7 @@ export const getInvalidConnectors = async (
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {
       if (parsedRule instanceof Error) {
-        acc.rulesAcc.set(uuid.v4(), parsedRule);
+        acc.rulesAcc.set(uuidv4(), parsedRule);
       } else {
         const { rule_id: ruleId, actions } = parsedRule;
         const missingActionIds = actions
@@ -339,7 +342,7 @@ export const getInvalidConnectors = async (
               ? 'connectors are missing. Connector ids missing are:'
               : 'connector is missing. Connector id missing is:';
           acc.errors.set(
-            uuid.v4(),
+            uuidv4(),
             createBulkErrorObject({
               ruleId,
               statusCode: 404,
@@ -355,3 +358,21 @@ export const getInvalidConnectors = async (
 
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
+
+export const convertAlertSuppressionToCamel = (
+  input: AlertSuppression | undefined
+): AlertSuppressionCamel | undefined =>
+  input
+    ? {
+        groupBy: input.group_by,
+      }
+    : undefined;
+
+export const convertAlertSuppressionToSnake = (
+  input: AlertSuppressionCamel | undefined
+): AlertSuppression | undefined =>
+  input
+    ? {
+        group_by: input.groupBy,
+      }
+    : undefined;

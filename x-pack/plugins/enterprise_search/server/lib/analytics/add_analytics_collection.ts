@@ -5,32 +5,35 @@
  * 2.0.
  */
 import { IScopedClusterClient } from '@kbn/core/server';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
+
 import { AnalyticsCollectionDocument, AnalyticsCollection } from '../../../common/types/analytics';
 import { ErrorCode } from '../../../common/types/error_codes';
-import { isAlphaNumericOrUnderscore } from '../../../common/utils/is_alphanumeric_underscore';
+import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 
-import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
+import { fetchAnalyticsCollectionById } from './fetch_analytics_collection';
 import { setupAnalyticsCollectionIndex } from './setup_indices';
+
+interface AddAnalyticsCollectionRequestBody {
+  name: string;
+}
 
 const createAnalyticsCollection = async (
   client: IScopedClusterClient,
-  document: AnalyticsCollectionDocument
+  document: AnalyticsCollectionDocument,
+  id: string
 ): Promise<AnalyticsCollection> => {
-  const analyticsCollection = await fetchAnalyticsCollectionByName(client, document.name);
+  const analyticsCollection = await fetchAnalyticsCollectionById(client, id);
 
   if (analyticsCollection) {
     throw new Error(ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS);
   }
 
-  if (!isAlphaNumericOrUnderscore(document.name)) {
-    throw new Error(ErrorCode.ANALYTICS_COLLECTION_NAME_INVALID);
-  }
-
-  // index the document
   const result = await client.asCurrentUser.index({
     document,
+    id,
     index: ANALYTICS_COLLECTIONS_INDEX,
   });
 
@@ -42,13 +45,41 @@ const createAnalyticsCollection = async (
   };
 };
 
+const getDataViewName = (collectionId: string): string => {
+  return `elastic_analytics.events-${collectionId}`;
+};
+
+const getDataStreamName = (collectionId: string): string => {
+  return `logs-${getDataViewName(collectionId)}`;
+};
+
+const createDataView = async (
+  dataViewsService: DataViewsService,
+  analyticsCollection: AnalyticsCollection
+): Promise<DataView> => {
+  return dataViewsService.createAndSave(
+    {
+      allowNoIndex: true,
+      title: getDataStreamName(analyticsCollection.id),
+      name: getDataViewName(analyticsCollection.id),
+      timeFieldName: '@timestamp',
+    },
+    true
+  );
+};
+
 export const addAnalyticsCollection = async (
   client: IScopedClusterClient,
-  input: { name: string }
+  dataViewsService: DataViewsService,
+  { name: collectionName }: AddAnalyticsCollectionRequestBody
 ): Promise<AnalyticsCollection> => {
+  const id = toAlphanumeric(collectionName);
+  const eventsDataStreamName = getDataStreamName(id);
+
   const document: AnalyticsCollectionDocument = {
     event_retention_day_length: 180,
-    name: input.name,
+    events_datastream: eventsDataStreamName,
+    name: collectionName,
   };
 
   const analyticsCollectionIndexExists = await client.asCurrentUser.indices.exists({
@@ -59,5 +90,9 @@ export const addAnalyticsCollection = async (
     await setupAnalyticsCollectionIndex(client.asCurrentUser);
   }
 
-  return await createAnalyticsCollection(client, document);
+  const analyticsCollection = await createAnalyticsCollection(client, document, id);
+
+  await createDataView(dataViewsService, analyticsCollection);
+
+  return analyticsCollection;
 };

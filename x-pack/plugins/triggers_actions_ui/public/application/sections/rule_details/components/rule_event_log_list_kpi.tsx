@@ -8,14 +8,15 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiIconTip, EuiStat, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiSpacer } from '@elastic/eui';
 import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RuleEventLogListStatus } from './rule_event_log_list_status';
+import { EventLogListStatus, EventLogStat } from '../../common/components/event_log';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -52,31 +53,6 @@ const ACTIONS_TOOLTIP = i18n.translate(
   }
 );
 
-const Stat = ({
-  title,
-  tooltip,
-  children,
-}: {
-  title: string;
-  tooltip: string;
-  children?: JSX.Element;
-}) => {
-  return (
-    <EuiPanel color="subdued">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <b>{title}</b>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={tooltip} position="top" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      {children}
-    </EuiPanel>
-  );
-};
-
 export type RuleEventLogListKPIProps = {
   ruleId: string;
   dateStart: string;
@@ -104,6 +80,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   } = useKibana().services;
 
   const isInitialized = useRef(false);
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [kpi, setKpi] = useState<IExecutionKPIResult>();
@@ -163,12 +140,17 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={4}>
-        <Stat title="Response" tooltip={RESPONSE_TOOLTIP}>
+        <EventLogStat title="Responses" tooltip={RESPONSE_TOOLTIP}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiStat
                 data-test-subj="ruleEventLogKpi-successOutcome"
-                description={getStatDescription(<RuleEventLogListStatus status="success" />)}
+                description={getStatDescription(
+                  <EventLogListStatus
+                    status="success"
+                    useExecutionStatus={isRuleUsingExecutionStatus}
+                  />
+                )}
                 titleSize="s"
                 title={kpi?.success ?? 0}
                 isLoading={isLoadingData}
@@ -177,7 +159,12 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
             <EuiFlexItem>
               <EuiStat
                 data-test-subj="ruleEventLogKpi-warningOutcome"
-                description={getStatDescription(<RuleEventLogListStatus status="warning" />)}
+                description={getStatDescription(
+                  <EventLogListStatus
+                    status="warning"
+                    useExecutionStatus={isRuleUsingExecutionStatus}
+                  />
+                )}
                 titleSize="s"
                 title={kpi?.warning ?? 0}
                 isLoading={isLoadingData}
@@ -186,17 +173,22 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
             <EuiFlexItem>
               <EuiStat
                 data-test-subj="ruleEventLogKpi-failureOutcome"
-                description={getStatDescription(<RuleEventLogListStatus status="failure" />)}
+                description={getStatDescription(
+                  <EventLogListStatus
+                    status="failure"
+                    useExecutionStatus={isRuleUsingExecutionStatus}
+                  />
+                )}
                 titleSize="s"
                 title={kpi?.failure ?? 0}
                 isLoading={isLoadingData}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </Stat>
+        </EventLogStat>
       </EuiFlexItem>
       <EuiFlexItem grow={4}>
-        <Stat title="Alerts" tooltip={ALERTS_TOOLTIP}>
+        <EventLogStat title="Alerts" tooltip={ALERTS_TOOLTIP}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiStat
@@ -226,10 +218,10 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </Stat>
+        </EventLogStat>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <Stat title="Actions" tooltip={ACTIONS_TOOLTIP}>
+        <EventLogStat title="Actions" tooltip={ACTIONS_TOOLTIP}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiStat
@@ -250,7 +242,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </Stat>
+        </EventLogStat>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

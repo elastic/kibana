@@ -11,6 +11,9 @@ import type { Settings } from '../../../common/types';
 
 import type { Installation } from '../../../common';
 import { FLEET_CLOUD_SECURITY_POSTURE_PACKAGE } from '../../../common/constants';
+import type { PackagePolicy } from '../../../common';
+
+import { migratePackagePolicyToV860 as SecSolMigratePackagePolicyToV860 } from './security_solution';
 
 export const migrateSettingsToV860: SavedObjectMigrationFn<Settings, Settings> = (
   settingsDoc,
@@ -31,4 +34,18 @@ export const migrateInstallationToV860: SavedObjectMigrationFn<Installation, Ins
     installationDoc.attributes.keep_policies_up_to_date = true;
   }
   return installationDoc;
+};
+
+export const migratePackagePolicyToV860: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
+  packagePolicyDoc,
+  migrationContext
+) => {
+  let updatedPackagePolicyDoc = packagePolicyDoc;
+
+  // Endpoint specific migrations
+  if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
+    updatedPackagePolicyDoc = SecSolMigratePackagePolicyToV860(packagePolicyDoc, migrationContext);
+  }
+
+  return updatedPackagePolicyDoc;
 };

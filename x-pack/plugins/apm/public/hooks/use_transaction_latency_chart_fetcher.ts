@@ -13,7 +13,7 @@ import { useLegacyUrlParams } from '../context/url_params_context/use_url_params
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTimeRange } from './use_time_range';
-import { useApmParams } from './use_apm_params';
+import { useAnyOfApmParams } from './use_apm_params';
 
 export function useTransactionLatencyChartsFetcher({
   kuery,
@@ -29,7 +29,10 @@ export function useTransactionLatencyChartsFetcher({
 
   const {
     query: { rangeFrom, rangeTo, offset, comparisonEnabled },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

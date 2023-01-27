@@ -33,6 +33,7 @@ interface SyncJobFlyoutProps {
 }
 
 export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }) => {
+  const filtering = syncJob?.connector.filtering ? syncJob.connector.filtering[0] : null;
   const visible = !!syncJob;
   return visible ? (
     <EuiFlyout onClose={onClose}>
@@ -88,13 +89,13 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
           </EuiFlexItem>
           <EuiFlexItem>
             <FilteringPanel
-              advancedSnippet={syncJob.filtering?.advanced_snippet}
-              filteringRules={syncJob.filtering?.rules ?? []}
+              advancedSnippet={filtering?.advanced_snippet}
+              filteringRules={filtering?.rules ?? []}
             />
           </EuiFlexItem>
-          {syncJob.pipeline && (
+          {syncJob.connector?.pipeline && (
             <EuiFlexItem>
-              <PipelinePanel pipeline={syncJob.pipeline} />
+              <PipelinePanel pipeline={syncJob.connector.pipeline} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

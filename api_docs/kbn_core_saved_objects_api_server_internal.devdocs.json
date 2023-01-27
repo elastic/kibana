@@ -9,28 +9,38 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-        "id": "def-server.SavedObjectsRepository",
+        "id": "def-common.SavedObjectsRepository",
         "type": "Class",
         "tags": [],
         "label": "SavedObjectsRepository",
-        "description": [],
+        "description": [
+          "\nSaved Objects Respositiry - the client entry point for saved object manipulation.\n\nThe SOR calls the Elasticsearch client and leverages extension implementations to\nsupport spaces, security, and encryption features.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsApiServerInternalPluginApi",
-            "section": "def-server.SavedObjectsRepository",
+            "section": "def-common.SavedObjectsRepository",
             "text": "SavedObjectsRepository"
           },
           " implements ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.ISavedObjectsRepository",
+            "section": "def-common.ISavedObjectsRepository",
             "text": "ISavedObjectsRepository"
           }
         ],
@@ -40,7 +50,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.create",
+            "id": "def-common.SavedObjectsRepository.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -51,9 +61,9 @@
               "<T = unknown>(type: string, attributes: T, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
+                "section": "def-common.SavedObjectsCreateOptions",
                 "text": "SavedObjectsCreateOptions"
               },
               ") => Promise<",
@@ -72,7 +82,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.create.$1",
+                "id": "def-common.SavedObjectsRepository.create.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -87,7 +97,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.create.$2",
+                "id": "def-common.SavedObjectsRepository.create.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "attributes",
@@ -102,7 +112,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.create.$3",
+                "id": "def-common.SavedObjectsRepository.create.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -110,9 +120,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsCreateOptions",
+                    "section": "def-common.SavedObjectsCreateOptions",
                     "text": "SavedObjectsCreateOptions"
                   }
                 ],
@@ -126,7 +136,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.bulkCreate",
+            "id": "def-common.SavedObjectsRepository.bulkCreate",
             "type": "Function",
             "tags": [],
             "label": "bulkCreate",
@@ -137,25 +147,25 @@
               "<T = unknown>(objects: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkCreateObject",
+                "section": "def-common.SavedObjectsBulkCreateObject",
                 "text": "SavedObjectsBulkCreateObject"
               },
               "<T>[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
+                "section": "def-common.SavedObjectsCreateOptions",
                 "text": "SavedObjectsCreateOptions"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
+                "section": "def-common.SavedObjectsBulkResponse",
                 "text": "SavedObjectsBulkResponse"
               },
               "<T>>"
@@ -166,7 +176,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.bulkCreate.$1",
+                "id": "def-common.SavedObjectsRepository.bulkCreate.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
@@ -174,9 +184,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBulkCreateObject",
+                    "section": "def-common.SavedObjectsBulkCreateObject",
                     "text": "SavedObjectsBulkCreateObject"
                   },
                   "<T>[]"
@@ -188,7 +198,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.bulkCreate.$2",
+                "id": "def-common.SavedObjectsRepository.bulkCreate.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -196,9 +206,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsCreateOptions",
+                    "section": "def-common.SavedObjectsCreateOptions",
                     "text": "SavedObjectsCreateOptions"
                   }
                 ],
@@ -212,7 +222,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.checkConflicts",
+            "id": "def-common.SavedObjectsRepository.checkConflicts",
             "type": "Function",
             "tags": [],
             "label": "checkConflicts",
@@ -223,25 +233,25 @@
               "(objects?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsObject",
+                "section": "def-common.SavedObjectsCheckConflictsObject",
                 "text": "SavedObjectsCheckConflictsObject"
               },
               "[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
+                "section": "def-common.SavedObjectsBaseOptions",
                 "text": "SavedObjectsBaseOptions"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsResponse",
+                "section": "def-common.SavedObjectsCheckConflictsResponse",
                 "text": "SavedObjectsCheckConflictsResponse"
               },
               ">"
@@ -252,7 +262,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.checkConflicts.$1",
+                "id": "def-common.SavedObjectsRepository.checkConflicts.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
@@ -260,9 +270,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsCheckConflictsObject",
+                    "section": "def-common.SavedObjectsCheckConflictsObject",
                     "text": "SavedObjectsCheckConflictsObject"
                   },
                   "[]"
@@ -274,7 +284,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.checkConflicts.$2",
+                "id": "def-common.SavedObjectsRepository.checkConflicts.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -282,9 +292,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
+                    "section": "def-common.SavedObjectsBaseOptions",
                     "text": "SavedObjectsBaseOptions"
                   }
                 ],
@@ -298,7 +308,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.delete",
+            "id": "def-common.SavedObjectsRepository.delete",
             "type": "Function",
             "tags": [],
             "label": "delete",
@@ -309,9 +319,9 @@
               "(type: string, id: string, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsDeleteOptions",
+                "section": "def-common.SavedObjectsDeleteOptions",
                 "text": "SavedObjectsDeleteOptions"
               },
               ") => Promise<{}>"
@@ -322,7 +332,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.delete.$1",
+                "id": "def-common.SavedObjectsRepository.delete.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -337,7 +347,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.delete.$2",
+                "id": "def-common.SavedObjectsRepository.delete.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -352,7 +362,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.delete.$3",
+                "id": "def-common.SavedObjectsRepository.delete.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -360,9 +370,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsDeleteOptions",
+                    "section": "def-common.SavedObjectsDeleteOptions",
                     "text": "SavedObjectsDeleteOptions"
                   }
                 ],
@@ -376,7 +386,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.bulkDelete",
+            "id": "def-common.SavedObjectsRepository.bulkDelete",
             "type": "Function",
             "tags": [],
             "label": "bulkDelete",
@@ -387,25 +397,25 @@
               "(objects: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkDeleteObject",
+                "section": "def-common.SavedObjectsBulkDeleteObject",
                 "text": "SavedObjectsBulkDeleteObject"
               },
               "[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkDeleteOptions",
+                "section": "def-common.SavedObjectsBulkDeleteOptions",
                 "text": "SavedObjectsBulkDeleteOptions"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkDeleteResponse",
+                "section": "def-common.SavedObjectsBulkDeleteResponse",
                 "text": "SavedObjectsBulkDeleteResponse"
               },
               ">"
@@ -416,7 +426,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.bulkDelete.$1",
+                "id": "def-common.SavedObjectsRepository.bulkDelete.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
@@ -424,9 +434,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBulkDeleteObject",
+                    "section": "def-common.SavedObjectsBulkDeleteObject",
                     "text": "SavedObjectsBulkDeleteObject"
                   },
                   "[]"
@@ -438,7 +448,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.bulkDelete.$2",
+                "id": "def-common.SavedObjectsRepository.bulkDelete.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -446,9 +456,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBulkDeleteOptions",
+                    "section": "def-common.SavedObjectsBulkDeleteOptions",
                     "text": "SavedObjectsBulkDeleteOptions"
                   }
                 ],
@@ -462,7 +472,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.deleteByNamespace",
+            "id": "def-common.SavedObjectsRepository.deleteByNamespace",
             "type": "Function",
             "tags": [],
             "label": "deleteByNamespace",
@@ -473,9 +483,9 @@
               "(namespace: string, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsDeleteByNamespaceOptions",
+                "section": "def-common.SavedObjectsDeleteByNamespaceOptions",
                 "text": "SavedObjectsDeleteByNamespaceOptions"
               },
               ") => Promise<any>"
@@ -486,7 +496,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.deleteByNamespace.$1",
+                "id": "def-common.SavedObjectsRepository.deleteByNamespace.$1",
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
@@ -501,7 +511,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.deleteByNamespace.$2",
+                "id": "def-common.SavedObjectsRepository.deleteByNamespace.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -509,9 +519,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsDeleteByNamespaceOptions",
+                    "section": "def-common.SavedObjectsDeleteByNamespaceOptions",
                     "text": "SavedObjectsDeleteByNamespaceOptions"
                   }
                 ],
@@ -525,7 +535,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.find",
+            "id": "def-common.SavedObjectsRepository.find",
             "type": "Function",
             "tags": [],
             "label": "find",
@@ -536,17 +546,19 @@
               "<T = unknown, A = unknown>(options: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
+                "section": "def-common.SavedObjectsFindOptions",
                 "text": "SavedObjectsFindOptions"
               },
+              ", internalOptions?: ",
+              "SavedObjectsFindInternalOptions",
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
+                "section": "def-common.SavedObjectsFindResponse",
                 "text": "SavedObjectsFindResponse"
               },
               "<T, A>>"
@@ -557,7 +569,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.find.$1",
+                "id": "def-common.SavedObjectsRepository.find.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -565,11 +577,26 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
+                    "section": "def-common.SavedObjectsFindOptions",
                     "text": "SavedObjectsFindOptions"
                   }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-common.SavedObjectsRepository.find.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "internalOptions",
+                "description": [],
+                "signature": [
+                  "SavedObjectsFindInternalOptions"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
                 "deprecated": false,
@@ -581,7 +608,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.bulkGet",
+            "id": "def-common.SavedObjectsRepository.bulkGet",
             "type": "Function",
             "tags": [],
             "label": "bulkGet",
@@ -592,25 +619,25 @@
               "<T = unknown>(objects?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkGetObject",
+                "section": "def-common.SavedObjectsBulkGetObject",
                 "text": "SavedObjectsBulkGetObject"
               },
               "[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
+                "section": "def-common.SavedObjectsBaseOptions",
                 "text": "SavedObjectsBaseOptions"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
+                "section": "def-common.SavedObjectsBulkResponse",
                 "text": "SavedObjectsBulkResponse"
               },
               "<T>>"
@@ -621,7 +648,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.bulkGet.$1",
+                "id": "def-common.SavedObjectsRepository.bulkGet.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
@@ -629,9 +656,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBulkGetObject",
+                    "section": "def-common.SavedObjectsBulkGetObject",
                     "text": "SavedObjectsBulkGetObject"
                   },
                   "[]"
@@ -643,7 +670,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.bulkGet.$2",
+                "id": "def-common.SavedObjectsRepository.bulkGet.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -651,9 +678,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
+                    "section": "def-common.SavedObjectsBaseOptions",
                     "text": "SavedObjectsBaseOptions"
                   }
                 ],
@@ -667,7 +694,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.bulkResolve",
+            "id": "def-common.SavedObjectsRepository.bulkResolve",
             "type": "Function",
             "tags": [],
             "label": "bulkResolve",
@@ -678,25 +705,25 @@
               "<T = unknown>(objects: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkResolveObject",
+                "section": "def-common.SavedObjectsBulkResolveObject",
                 "text": "SavedObjectsBulkResolveObject"
               },
               "[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
+                "section": "def-common.SavedObjectsBaseOptions",
                 "text": "SavedObjectsBaseOptions"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkResolveResponse",
+                "section": "def-common.SavedObjectsBulkResolveResponse",
                 "text": "SavedObjectsBulkResolveResponse"
               },
               "<T>>"
@@ -707,7 +734,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.bulkResolve.$1",
+                "id": "def-common.SavedObjectsRepository.bulkResolve.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
@@ -715,9 +742,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBulkResolveObject",
+                    "section": "def-common.SavedObjectsBulkResolveObject",
                     "text": "SavedObjectsBulkResolveObject"
                   },
                   "[]"
@@ -729,7 +756,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.bulkResolve.$2",
+                "id": "def-common.SavedObjectsRepository.bulkResolve.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -737,9 +764,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
+                    "section": "def-common.SavedObjectsBaseOptions",
                     "text": "SavedObjectsBaseOptions"
                   }
                 ],
@@ -753,7 +780,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.get",
+            "id": "def-common.SavedObjectsRepository.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -764,9 +791,9 @@
               "<T = unknown>(type: string, id: string, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
+                "section": "def-common.SavedObjectsBaseOptions",
                 "text": "SavedObjectsBaseOptions"
               },
               ") => Promise<",
@@ -785,7 +812,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.get.$1",
+                "id": "def-common.SavedObjectsRepository.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -800,7 +827,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.get.$2",
+                "id": "def-common.SavedObjectsRepository.get.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -815,7 +842,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.get.$3",
+                "id": "def-common.SavedObjectsRepository.get.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -823,9 +850,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
+                    "section": "def-common.SavedObjectsBaseOptions",
                     "text": "SavedObjectsBaseOptions"
                   }
                 ],
@@ -839,7 +866,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.resolve",
+            "id": "def-common.SavedObjectsRepository.resolve",
             "type": "Function",
             "tags": [],
             "label": "resolve",
@@ -850,17 +877,17 @@
               "<T = unknown>(type: string, id: string, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
+                "section": "def-common.SavedObjectsBaseOptions",
                 "text": "SavedObjectsBaseOptions"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsResolveResponse",
+                "section": "def-common.SavedObjectsResolveResponse",
                 "text": "SavedObjectsResolveResponse"
               },
               "<T>>"
@@ -871,7 +898,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.resolve.$1",
+                "id": "def-common.SavedObjectsRepository.resolve.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -886,7 +913,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.resolve.$2",
+                "id": "def-common.SavedObjectsRepository.resolve.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -901,7 +928,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.resolve.$3",
+                "id": "def-common.SavedObjectsRepository.resolve.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -909,9 +936,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
+                    "section": "def-common.SavedObjectsBaseOptions",
                     "text": "SavedObjectsBaseOptions"
                   }
                 ],
@@ -925,7 +952,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.update",
+            "id": "def-common.SavedObjectsRepository.update",
             "type": "Function",
             "tags": [],
             "label": "update",
@@ -936,17 +963,17 @@
               "<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateOptions",
+                "section": "def-common.SavedObjectsUpdateOptions",
                 "text": "SavedObjectsUpdateOptions"
               },
               "<T>) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
+                "section": "def-common.SavedObjectsUpdateResponse",
                 "text": "SavedObjectsUpdateResponse"
               },
               "<T>>"
@@ -957,7 +984,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.update.$1",
+                "id": "def-common.SavedObjectsRepository.update.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -972,7 +999,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.update.$2",
+                "id": "def-common.SavedObjectsRepository.update.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -987,7 +1014,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.update.$3",
+                "id": "def-common.SavedObjectsRepository.update.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "attributes",
@@ -1002,7 +1029,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.update.$4",
+                "id": "def-common.SavedObjectsRepository.update.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1010,9 +1037,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsUpdateOptions",
+                    "section": "def-common.SavedObjectsUpdateOptions",
                     "text": "SavedObjectsUpdateOptions"
                   },
                   "<T>"
@@ -1027,7 +1054,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.collectMultiNamespaceReferences",
+            "id": "def-common.SavedObjectsRepository.collectMultiNamespaceReferences",
             "type": "Function",
             "tags": [],
             "label": "collectMultiNamespaceReferences",
@@ -1038,25 +1065,25 @@
               "(objects: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
+                "section": "def-common.SavedObjectsCollectMultiNamespaceReferencesObject",
                 "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
               },
               "[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
+                "section": "def-common.SavedObjectsCollectMultiNamespaceReferencesOptions",
                 "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
               },
-              " | undefined) => Promise<",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                "section": "def-common.SavedObjectsCollectMultiNamespaceReferencesResponse",
                 "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
               },
               ">"
@@ -1067,7 +1094,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.collectMultiNamespaceReferences.$1",
+                "id": "def-common.SavedObjectsRepository.collectMultiNamespaceReferences.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
@@ -1075,9 +1102,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
+                    "section": "def-common.SavedObjectsCollectMultiNamespaceReferencesObject",
                     "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
                   },
                   "[]"
@@ -1089,7 +1116,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.collectMultiNamespaceReferences.$2",
+                "id": "def-common.SavedObjectsRepository.collectMultiNamespaceReferences.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1097,24 +1124,23 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
+                    "section": "def-common.SavedObjectsCollectMultiNamespaceReferencesOptions",
                     "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
-                  },
-                  " | undefined"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.updateObjectsSpaces",
+            "id": "def-common.SavedObjectsRepository.updateObjectsSpaces",
             "type": "Function",
             "tags": [],
             "label": "updateObjectsSpaces",
@@ -1125,25 +1151,25 @@
               "(objects: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
+                "section": "def-common.SavedObjectsUpdateObjectsSpacesObject",
                 "text": "SavedObjectsUpdateObjectsSpacesObject"
               },
               "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
+                "section": "def-common.SavedObjectsUpdateObjectsSpacesOptions",
                 "text": "SavedObjectsUpdateObjectsSpacesOptions"
               },
-              " | undefined) => Promise<",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
+                "section": "def-common.SavedObjectsUpdateObjectsSpacesResponse",
                 "text": "SavedObjectsUpdateObjectsSpacesResponse"
               },
               ">"
@@ -1154,7 +1180,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$1",
+                "id": "def-common.SavedObjectsRepository.updateObjectsSpaces.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
@@ -1162,9 +1188,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
+                    "section": "def-common.SavedObjectsUpdateObjectsSpacesObject",
                     "text": "SavedObjectsUpdateObjectsSpacesObject"
                   },
                   "[]"
@@ -1176,7 +1202,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$2",
+                "id": "def-common.SavedObjectsRepository.updateObjectsSpaces.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "spacesToAdd",
@@ -1191,7 +1217,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$3",
+                "id": "def-common.SavedObjectsRepository.updateObjectsSpaces.$3",
                 "type": "Array",
                 "tags": [],
                 "label": "spacesToRemove",
@@ -1206,7 +1232,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$4",
+                "id": "def-common.SavedObjectsRepository.updateObjectsSpaces.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1214,24 +1240,23 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
+                    "section": "def-common.SavedObjectsUpdateObjectsSpacesOptions",
                     "text": "SavedObjectsUpdateObjectsSpacesOptions"
-                  },
-                  " | undefined"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.bulkUpdate",
+            "id": "def-common.SavedObjectsRepository.bulkUpdate",
             "type": "Function",
             "tags": [],
             "label": "bulkUpdate",
@@ -1242,25 +1267,25 @@
               "<T = unknown>(objects: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateObject",
+                "section": "def-common.SavedObjectsBulkUpdateObject",
                 "text": "SavedObjectsBulkUpdateObject"
               },
               "<T>[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateOptions",
+                "section": "def-common.SavedObjectsBulkUpdateOptions",
                 "text": "SavedObjectsBulkUpdateOptions"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateResponse",
+                "section": "def-common.SavedObjectsBulkUpdateResponse",
                 "text": "SavedObjectsBulkUpdateResponse"
               },
               "<T>>"
@@ -1271,7 +1296,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.bulkUpdate.$1",
+                "id": "def-common.SavedObjectsRepository.bulkUpdate.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
@@ -1279,9 +1304,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBulkUpdateObject",
+                    "section": "def-common.SavedObjectsBulkUpdateObject",
                     "text": "SavedObjectsBulkUpdateObject"
                   },
                   "<T>[]"
@@ -1293,7 +1318,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.bulkUpdate.$2",
+                "id": "def-common.SavedObjectsRepository.bulkUpdate.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1301,9 +1326,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBulkUpdateOptions",
+                    "section": "def-common.SavedObjectsBulkUpdateOptions",
                     "text": "SavedObjectsBulkUpdateOptions"
                   }
                 ],
@@ -1317,7 +1342,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.removeReferencesTo",
+            "id": "def-common.SavedObjectsRepository.removeReferencesTo",
             "type": "Function",
             "tags": [],
             "label": "removeReferencesTo",
@@ -1328,17 +1353,17 @@
               "(type: string, id: string, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToOptions",
+                "section": "def-common.SavedObjectsRemoveReferencesToOptions",
                 "text": "SavedObjectsRemoveReferencesToOptions"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToResponse",
+                "section": "def-common.SavedObjectsRemoveReferencesToResponse",
                 "text": "SavedObjectsRemoveReferencesToResponse"
               },
               ">"
@@ -1349,7 +1374,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$1",
+                "id": "def-common.SavedObjectsRepository.removeReferencesTo.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -1364,7 +1389,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$2",
+                "id": "def-common.SavedObjectsRepository.removeReferencesTo.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -1379,7 +1404,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$3",
+                "id": "def-common.SavedObjectsRepository.removeReferencesTo.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1387,9 +1412,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsRemoveReferencesToOptions",
+                    "section": "def-common.SavedObjectsRemoveReferencesToOptions",
                     "text": "SavedObjectsRemoveReferencesToOptions"
                   }
                 ],
@@ -1403,7 +1428,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.incrementCounter",
+            "id": "def-common.SavedObjectsRepository.incrementCounter",
             "type": "Function",
             "tags": [],
             "label": "incrementCounter",
@@ -1414,17 +1439,17 @@
               "<T = unknown>(type: string, id: string, counterFields: (string | ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsIncrementCounterField",
+                "section": "def-common.SavedObjectsIncrementCounterField",
                 "text": "SavedObjectsIncrementCounterField"
               },
               ")[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsIncrementCounterOptions",
+                "section": "def-common.SavedObjectsIncrementCounterOptions",
                 "text": "SavedObjectsIncrementCounterOptions"
               },
               "<T> | undefined) => Promise<",
@@ -1443,7 +1468,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.incrementCounter.$1",
+                "id": "def-common.SavedObjectsRepository.incrementCounter.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -1458,7 +1483,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.incrementCounter.$2",
+                "id": "def-common.SavedObjectsRepository.incrementCounter.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -1473,7 +1498,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.incrementCounter.$3",
+                "id": "def-common.SavedObjectsRepository.incrementCounter.$3",
                 "type": "Array",
                 "tags": [],
                 "label": "counterFields",
@@ -1482,9 +1507,9 @@
                   "(string | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsIncrementCounterField",
+                    "section": "def-common.SavedObjectsIncrementCounterField",
                     "text": "SavedObjectsIncrementCounterField"
                   },
                   ")[]"
@@ -1496,7 +1521,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.incrementCounter.$4",
+                "id": "def-common.SavedObjectsRepository.incrementCounter.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1504,9 +1529,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsIncrementCounterOptions",
+                    "section": "def-common.SavedObjectsIncrementCounterOptions",
                     "text": "SavedObjectsIncrementCounterOptions"
                   },
                   "<T> | undefined"
@@ -1521,7 +1546,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.openPointInTimeForType",
+            "id": "def-common.SavedObjectsRepository.openPointInTimeForType",
             "type": "Function",
             "tags": [],
             "label": "openPointInTimeForType",
@@ -1529,20 +1554,22 @@
               "\n{@inheritDoc ISavedObjectsRepository.openPointInTimeForType}"
             ],
             "signature": [
-              "(type: string | string[], { keepAlive, preference }?: ",
+              "(type: string | string[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeOptions",
+                "section": "def-common.SavedObjectsOpenPointInTimeOptions",
                 "text": "SavedObjectsOpenPointInTimeOptions"
               },
+              ", internalOptions?: ",
+              "SavedObjectsFindInternalOptions",
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeResponse",
+                "section": "def-common.SavedObjectsOpenPointInTimeResponse",
                 "text": "SavedObjectsOpenPointInTimeResponse"
               },
               ">"
@@ -1553,7 +1580,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.$1",
+                "id": "def-common.SavedObjectsRepository.openPointInTimeForType.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "type",
@@ -1568,19 +1595,34 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.$2",
+                "id": "def-common.SavedObjectsRepository.openPointInTimeForType.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ keepAlive = '5m', preference }",
+                "label": "options",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsOpenPointInTimeOptions",
+                    "section": "def-common.SavedObjectsOpenPointInTimeOptions",
                     "text": "SavedObjectsOpenPointInTimeOptions"
                   }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-common.SavedObjectsRepository.openPointInTimeForType.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "internalOptions",
+                "description": [],
+                "signature": [
+                  "SavedObjectsFindInternalOptions"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
                 "deprecated": false,
@@ -1592,7 +1634,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.closePointInTime",
+            "id": "def-common.SavedObjectsRepository.closePointInTime",
             "type": "Function",
             "tags": [],
             "label": "closePointInTime",
@@ -1603,17 +1645,19 @@
               "(id: string, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
+                "section": "def-common.SavedObjectsBaseOptions",
                 "text": "SavedObjectsBaseOptions"
               },
-              " | undefined) => Promise<",
+              " | undefined, internalOptions?: ",
+              "SavedObjectsFindInternalOptions",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClosePointInTimeResponse",
+                "section": "def-common.SavedObjectsClosePointInTimeResponse",
                 "text": "SavedObjectsClosePointInTimeResponse"
               },
               ">"
@@ -1624,7 +1668,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.closePointInTime.$1",
+                "id": "def-common.SavedObjectsRepository.closePointInTime.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -1639,7 +1683,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.closePointInTime.$2",
+                "id": "def-common.SavedObjectsRepository.closePointInTime.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1647,9 +1691,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
+                    "section": "def-common.SavedObjectsBaseOptions",
                     "text": "SavedObjectsBaseOptions"
                   },
                   " | undefined"
@@ -1658,13 +1702,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-common.SavedObjectsRepository.closePointInTime.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "internalOptions",
+                "description": [],
+                "signature": [
+                  "SavedObjectsFindInternalOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-            "id": "def-server.SavedObjectsRepository.createPointInTimeFinder",
+            "id": "def-common.SavedObjectsRepository.createPointInTimeFinder",
             "type": "Function",
             "tags": [],
             "label": "createPointInTimeFinder",
@@ -1675,25 +1734,27 @@
               "<T = unknown, A = unknown>(findOptions: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                "section": "def-common.SavedObjectsCreatePointInTimeFinderOptions",
                 "text": "SavedObjectsCreatePointInTimeFinderOptions"
               },
               ", dependencies?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
+                "section": "def-common.SavedObjectsCreatePointInTimeFinderDependencies",
                 "text": "SavedObjectsCreatePointInTimeFinderDependencies"
               },
+              " | undefined, internalOptions?: ",
+              "SavedObjectsFindInternalOptions",
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "section": "def-common.ISavedObjectsPointInTimeFinder",
                 "text": "ISavedObjectsPointInTimeFinder"
               },
               "<T, A>"
@@ -1704,7 +1765,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.$1",
+                "id": "def-common.SavedObjectsRepository.createPointInTimeFinder.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "findOptions",
@@ -1712,9 +1773,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                    "section": "def-common.SavedObjectsCreatePointInTimeFinderOptions",
                     "text": "SavedObjectsCreatePointInTimeFinderOptions"
                   }
                 ],
@@ -1725,7 +1786,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
-                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.$2",
+                "id": "def-common.SavedObjectsRepository.createPointInTimeFinder.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "dependencies",
@@ -1733,11 +1794,27 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
+                    "section": "def-common.SavedObjectsCreatePointInTimeFinderDependencies",
                     "text": "SavedObjectsCreatePointInTimeFinderDependencies"
                   },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-common.SavedObjectsRepository.createPointInTimeFinder.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "internalOptions",
+                "description": [],
+                "signature": [
+                  "SavedObjectsFindInternalOptions",
                   " | undefined"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
@@ -1752,14 +1829,6 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

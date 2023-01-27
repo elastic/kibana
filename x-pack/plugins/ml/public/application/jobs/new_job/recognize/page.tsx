@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, Fragment, useEffect } from 'react';
+import React, { FC, useState, Fragment, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,11 +17,11 @@ import {
   EuiCallOut,
   EuiPanel,
 } from '@elastic/eui';
-import { merge } from 'lodash';
+import { isEqual, merge } from 'lodash';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
-import { ml } from '../../../services/ml_api_service';
 import { useMlContext } from '../../../contexts/ml';
 import {
   DatafeedResponse,
@@ -42,7 +42,6 @@ import { ML_PAGES } from '../../../../../common/constants/locator';
 import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { RuntimeMappings } from '../../../../../common/types/fields';
-import { addExcludeFrozenToQuery } from '../../../../../common/util/query_utils';
 import { MlPageHeader } from '../../../components/page_header';
 
 export interface ModuleJobUI extends ModuleJob {
@@ -73,7 +72,12 @@ export enum SAVE_STATE {
 
 export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      mlServices: {
+        mlApiServices: { getTimeFieldRange, setupDataRecognizerConfig, getDataRecognizerModule },
+      },
+    },
   } = useMlKibana();
   const locator = useMlLocator();
 
@@ -109,9 +113,9 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   /**
    * Loads recognizer module configuration.
    */
-  const loadModule = async () => {
+  const loadModule = useCallback(async () => {
     try {
-      const response = await ml.getDataRecognizerModule({ moduleId });
+      const response = await getDataRecognizerModule({ moduleId });
       setJobs(response.jobs);
 
       const kibanaObjectsResult = await checkForSavedObjects(response.kibana as KibanaObjects);
@@ -121,137 +125,157 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
       // mix existing groups from the server with the groups used across all jobs in the module.
       const moduleGroups = [...response.jobs.map((j) => j.config.groups || [])].flat();
-      setExistingGroups([...new Set([...existingGroups, ...moduleGroups])]);
+      const newGroups = [...new Set([...existingGroups, ...moduleGroups])].sort();
+      if (!isEqual(newGroups, existingGroups)) {
+        setExistingGroups(newGroups);
+      }
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
     }
-  };
+  }, [existingGroups, getDataRecognizerModule, moduleId]);
 
-  const getTimeRange = async (
-    useFullIndexData: boolean,
-    timeRange: TimeRange
-  ): Promise<TimeRange> => {
-    if (useFullIndexData) {
-      const runtimeMappings = dataView.getComputedFields().runtimeFields as RuntimeMappings;
-      const { start, end } = await ml.getTimeFieldRange({
-        index: dataView.title,
-        timeFieldName: dataView.timeFieldName,
-        // By default we want to use full non-frozen time range
-        query: addExcludeFrozenToQuery(combinedQuery),
-        ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
-      });
-      return {
-        start,
-        end,
-      };
-    } else {
-      return Promise.resolve(timeRange);
-    }
-  };
+  const getTimeRange = useCallback(
+    async (useFullIndexData: boolean, timeRange: TimeRange): Promise<TimeRange> => {
+      if (useFullIndexData) {
+        const runtimeMappings = dataView.getComputedFields().runtimeFields as RuntimeMappings;
+        const { start, end } = await getTimeFieldRange({
+          index: dataView.getIndexPattern(),
+          timeFieldName: dataView.timeFieldName,
+          // By default we want to use full non-frozen time range
+          query: addExcludeFrozenToQuery(combinedQuery),
+          ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
+        });
+        return {
+          start,
+          end,
+        };
+      } else {
+        return Promise.resolve(timeRange);
+      }
+    },
+    [combinedQuery, dataView, getTimeFieldRange]
+  );
 
   useEffect(() => {
     loadModule();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadModule]);
 
   /**
    * Sets up recognizer module configuration.
    */
-  const save = async (formValues: JobSettingsFormValues) => {
-    setSaveState(SAVE_STATE.SAVING);
-    const {
-      jobPrefix: resultJobPrefix,
-      startDatafeedAfterSave,
-      useDedicatedIndex,
-      useFullIndexData,
-      timeRange,
-    } = formValues;
-
-    const resultTimeRange = await getTimeRange(useFullIndexData, timeRange);
-
-    try {
-      let jobOverridesPayload: JobOverride[] | null = Object.values(jobOverrides);
-      jobOverridesPayload = jobOverridesPayload.length > 0 ? jobOverridesPayload : null;
-
-      const response = await ml.setupDataRecognizerConfig({
-        moduleId,
-        prefix: resultJobPrefix,
-        query: tempQuery,
-        indexPatternName: dataView.title,
+  const save = useCallback(
+    async (formValues: JobSettingsFormValues) => {
+      setSaveState(SAVE_STATE.SAVING);
+      const {
+        jobPrefix: resultJobPrefix,
+        startDatafeedAfterSave,
         useDedicatedIndex,
-        startDatafeed: startDatafeedAfterSave,
-        ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
-        ...resultTimeRange,
-      });
-      const { datafeeds: datafeedsResponse, jobs: jobsResponse, kibana: kibanaResponse } = response;
+        useFullIndexData,
+        timeRange,
+      } = formValues;
 
-      setJobs(
-        jobs.map((job) => {
-          return {
-            ...job,
-            datafeedResult: datafeedsResponse.find(({ id }) => id.endsWith(job.id)),
-            setupResult: jobsResponse.find(({ id }) => id === resultJobPrefix + job.id),
-          };
-        })
-      );
-      setKibanaObjects(merge(kibanaObjects, kibanaResponse));
+      const resultTimeRange = await getTimeRange(useFullIndexData, timeRange);
 
-      if (locator) {
-        const url = await locator.getUrl({
-          page: ML_PAGES.ANOMALY_EXPLORER,
-          pageState: {
-            jobIds: jobsResponse.filter(({ success }) => success).map(({ id }) => id),
-            timeRange: {
-              from: moment(resultTimeRange.start).format(TIME_FORMAT),
-              to: moment(resultTimeRange.end).format(TIME_FORMAT),
-              mode: 'absolute',
-            },
-          },
+      try {
+        let jobOverridesPayload: JobOverride[] | null = Object.values(jobOverrides);
+        jobOverridesPayload = jobOverridesPayload.length > 0 ? jobOverridesPayload : null;
+
+        const response = await setupDataRecognizerConfig({
+          moduleId,
+          prefix: resultJobPrefix,
+          query: tempQuery,
+          indexPatternName: dataView.getIndexPattern(),
+          useDedicatedIndex,
+          startDatafeed: startDatafeedAfterSave,
+          ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
+          ...resultTimeRange,
         });
-        setResultsUrl(url);
+        const {
+          datafeeds: datafeedsResponse,
+          jobs: jobsResponse,
+          kibana: kibanaResponse,
+        } = response;
+
+        setJobs(
+          jobs.map((job) => {
+            return {
+              ...job,
+              datafeedResult: datafeedsResponse.find(({ id }) => id.endsWith(job.id)),
+              setupResult: jobsResponse.find(({ id }) => id === resultJobPrefix + job.id),
+            };
+          })
+        );
+        setKibanaObjects(merge(kibanaObjects, kibanaResponse));
+
+        if (locator) {
+          const url = await locator.getUrl({
+            page: ML_PAGES.ANOMALY_EXPLORER,
+            pageState: {
+              jobIds: jobsResponse.filter(({ success }) => success).map(({ id }) => id),
+              timeRange: {
+                from: moment(resultTimeRange.start).format(TIME_FORMAT),
+                to: moment(resultTimeRange.end).format(TIME_FORMAT),
+                mode: 'absolute',
+              },
+            },
+          });
+          setResultsUrl(url);
+        }
+
+        const failedJobsCount = jobsResponse.reduce(
+          (count, { success }) => (success ? count : count + 1),
+          0
+        );
+
+        const lazyJobsCount = datafeedsResponse.reduce(
+          (count, { awaitingMlNodeAllocation }) =>
+            awaitingMlNodeAllocation === true ? count + 1 : count,
+          0
+        );
+
+        setJobsAwaitingNodeCount(lazyJobsCount);
+
+        setSaveState(
+          failedJobsCount === 0
+            ? SAVE_STATE.SAVED
+            : failedJobsCount === jobs.length
+            ? SAVE_STATE.FAILED
+            : SAVE_STATE.PARTIAL_FAILURE
+        );
+      } catch (e) {
+        setSaveState(SAVE_STATE.FAILED);
+        // eslint-disable-next-line no-console
+        console.error('Error setting up module', e);
+        const { toasts } = notifications;
+        toasts.addDanger({
+          title: i18n.translate('xpack.ml.newJob.recognize.moduleSetupFailedWarningTitle', {
+            defaultMessage: 'Error setting up module {moduleId}',
+            values: { moduleId },
+          }),
+          text: i18n.translate('xpack.ml.newJob.recognize.moduleSetupFailedWarningDescription', {
+            defaultMessage:
+              'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
+            values: {
+              count: jobs.length,
+            },
+          }),
+        });
       }
-
-      const failedJobsCount = jobsResponse.reduce(
-        (count, { success }) => (success ? count : count + 1),
-        0
-      );
-
-      const lazyJobsCount = datafeedsResponse.reduce(
-        (count, { awaitingMlNodeAllocation }) =>
-          awaitingMlNodeAllocation === true ? count + 1 : count,
-        0
-      );
-
-      setJobsAwaitingNodeCount(lazyJobsCount);
-
-      setSaveState(
-        failedJobsCount === 0
-          ? SAVE_STATE.SAVED
-          : failedJobsCount === jobs.length
-          ? SAVE_STATE.FAILED
-          : SAVE_STATE.PARTIAL_FAILURE
-      );
-    } catch (e) {
-      setSaveState(SAVE_STATE.FAILED);
-      // eslint-disable-next-line no-console
-      console.error('Error setting up module', e);
-      const { toasts } = notifications;
-      toasts.addDanger({
-        title: i18n.translate('xpack.ml.newJob.recognize.moduleSetupFailedWarningTitle', {
-          defaultMessage: 'Error setting up module {moduleId}',
-          values: { moduleId },
-        }),
-        text: i18n.translate('xpack.ml.newJob.recognize.moduleSetupFailedWarningDescription', {
-          defaultMessage:
-            'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
-          values: {
-            count: jobs.length,
-          },
-        }),
-      });
-    }
-  };
+    },
+    [
+      dataView,
+      getTimeRange,
+      jobOverrides,
+      jobs,
+      kibanaObjects,
+      locator,
+      moduleId,
+      notifications,
+      setupDataRecognizerConfig,
+      tempQuery,
+    ]
+  );
 
   const onJobOverridesChange = (job: JobOverride) => {
     setJobOverrides({
@@ -321,9 +345,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
             {isFormVisible && (
               <JobSettingsForm
                 onSubmit={save}
-                onChange={(formValues) => {
-                  setJobPrefix(formValues.jobPrefix);
-                }}
+                onJobPrefixChange={setJobPrefix}
                 saveState={saveState}
                 jobs={jobs}
               />

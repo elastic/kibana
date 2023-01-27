@@ -17,6 +17,7 @@ export const FLEET_APM_PACKAGE = 'apm';
 export const FLEET_SYNTHETICS_PACKAGE = 'synthetics';
 export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
 export const FLEET_CLOUD_SECURITY_POSTURE_PACKAGE = 'cloud_security_posture';
+export const FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE = 'kspm';
 
 export const PACKAGE_TEMPLATE_SUFFIX = '@package';
 export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';

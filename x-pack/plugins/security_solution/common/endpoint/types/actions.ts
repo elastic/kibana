@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { FileJSON } from '@kbn/files-plugin/common';
+import type { FileJSON, BaseFileMetadata, FileCompression } from '@kbn/files-plugin/common';
 import type {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
@@ -53,9 +53,15 @@ export interface KillProcessActionOutputContent {
 
 export interface ResponseActionGetFileOutputContent {
   code: string;
-  path: string;
-  size: number;
   zip_size: number;
+  /** The contents of the zip file. One entry per file */
+  contents: Array<{
+    path: string;
+    sha256: string;
+    size: number;
+    file_name: string;
+    type: string;
+  }>;
 }
 
 export const ActivityLogItemTypes = {
@@ -362,10 +368,60 @@ export interface ActionListApiResponse {
   total: number;
 }
 
+/**
+ * File upload metadata information. Stored by endpoint/fleet-server when a file is uploaded to ES in connection with
+ * a response action
+ */
+export interface FileUploadMetadata {
+  action_id: string;
+  agent_id: string;
+  src: string; // The agent name. `endpoint` for security solution files
+  upload_id: string;
+  upload_start: number;
+  contents: Array<
+    Partial<{
+      accessed: string; // ISO date
+      created: string; // ISO date
+      directory: string;
+      file_extension: string;
+      file_name: string;
+      gid: number;
+      inode: number;
+      mode: string;
+      mountpoint: string;
+      mtime: string;
+      path: string;
+      sha256: string;
+      size: number;
+      target_path: string;
+      type: string;
+      uid: number;
+    }>
+  >;
+  file: Pick<
+    Required<BaseFileMetadata>,
+    'name' | 'size' | 'Status' | 'ChunkSize' | 'mime_type' | 'extension'
+  > &
+    Omit<BaseFileMetadata, 'name' | 'size' | 'Status' | 'ChunkSize' | 'mime_type' | 'extension'> & {
+      compression: FileCompression;
+      attributes: string[];
+      type: string;
+    };
+  host: {
+    hostname: string;
+  };
+  transithash: {
+    sha256: string;
+  };
+}
+
 export type UploadedFileInfo = Pick<
   FileJSON,
   'name' | 'id' | 'mimeType' | 'size' | 'status' | 'created'
->;
+> & {
+  actionId: string;
+  agentId: string;
+};
 
 export interface ActionFileInfoApiResponse {
   data: UploadedFileInfo;

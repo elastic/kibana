@@ -57,6 +57,44 @@ const testDatasets: SampleDatasetSchema[] = [
       },
     ],
   },
+  {
+    id: 'test_tsdb_data_index',
+    name: 'Test with a tsdb data index',
+    description: 'See name',
+    previewImagePath: 'previewImagePath',
+    darkPreviewImagePath: 'darkPreviewImagePath',
+    overviewDashboard: 'overviewDashboard',
+    defaultIndex: 'defaultIndex',
+    savedObjects: [
+      {
+        id: 'some-dashboard',
+        type: 'dashboard',
+        attributes: {
+          hello: 'dolly',
+        },
+        references: [],
+      },
+      {
+        id: 'another-dashboard',
+        type: 'dashboard',
+        attributes: {
+          foo: 'bar',
+        },
+        references: [],
+      },
+    ],
+    dataIndices: [
+      {
+        id: 'test_tsdb_data_index',
+        dataPath: '/dataPath',
+        fields: { someField: { type: 'keyword' } },
+        currentTimeMarker: '2018-01-09T00:00:00',
+        timeFields: ['@timestamp'],
+        isDataStream: true,
+        preserveDayOfWeekTimeOfDay: true,
+      },
+    ],
+  },
 ];
 
 describe('SampleDataInstaller', () => {
@@ -105,6 +143,8 @@ describe('SampleDataInstaller', () => {
     it('cleanups the data index before installing', async () => {
       await installer.install('test_single_data_index');
 
+      expect(esClient.asCurrentUser.indices.deleteIndexTemplate).toHaveBeenCalledTimes(1);
+      expect(esClient.asCurrentUser.indices.deleteDataStream).toHaveBeenCalledTimes(1);
       expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledTimes(1);
       expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
         index: 'kibana_sample_data_test_single_data_index',
@@ -114,6 +154,7 @@ describe('SampleDataInstaller', () => {
     it('creates the data index', async () => {
       await installer.install('test_single_data_index');
 
+      expect(esClient.asCurrentUser.indices.putIndexTemplate).toHaveBeenCalledTimes(0);
       expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledTimes(1);
       expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
         index: 'kibana_sample_data_test_single_data_index',
@@ -122,6 +163,13 @@ describe('SampleDataInstaller', () => {
           mappings: { properties: { someField: { type: 'keyword' } } },
         },
       });
+    });
+
+    it('creates index template and datastream in datastream mode', async () => {
+      await installer.install('test_tsdb_data_index');
+      expect(esClient.asCurrentUser.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+      expect(esClient.asCurrentUser.indices.createDataStream).toHaveBeenCalledTimes(1);
+      expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledTimes(0);
     });
 
     it('inserts the data into the index', async () => {

@@ -77,6 +77,7 @@ export const ruleOutput = (): RuleResponse => ({
   namespace: undefined,
   data_view_id: undefined,
   saved_id: undefined,
+  alert_suppression: undefined,
 });
 
 describe('validate', () => {

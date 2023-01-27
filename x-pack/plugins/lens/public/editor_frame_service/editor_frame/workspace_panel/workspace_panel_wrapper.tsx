@@ -11,7 +11,12 @@ import React, { useCallback } from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
+import {
+  DatasourceMap,
+  FramePublicAPI,
+  UserMessagesGetter,
+  VisualizationMap,
+} from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { NativeRenderer } from '../../../native_renderer';
 import { ChartSwitch } from './chart_switch';
@@ -21,7 +26,6 @@ import {
   updateVisualizationState,
   DatasourceStates,
   VisualizationState,
-  updateDatasourceState,
   useLensSelector,
   selectChangesApplied,
   applyChanges,
@@ -43,6 +47,7 @@ export interface WorkspacePanelWrapperProps {
   datasourceStates: DatasourceStates;
   isFullscreen: boolean;
   lensInspector: LensInspector;
+  getUserMessages: UserMessagesGetter;
 }
 
 export function WorkspacePanelWrapper({
@@ -52,9 +57,8 @@ export function WorkspacePanelWrapper({
   visualizationId,
   visualizationMap,
   datasourceMap,
-  datasourceStates,
   isFullscreen,
-  lensInspector,
+  getUserMessages,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
 
@@ -77,42 +81,24 @@ export function WorkspacePanelWrapper({
     },
     [dispatchLens, activeVisualization]
   );
-  const setDatasourceState = useCallback(
-    (updater: unknown, datasourceId: string) => {
-      dispatchLens(
-        updateDatasourceState({
-          updater,
-          datasourceId,
-        })
-      );
-    },
-    [dispatchLens]
-  );
 
   const warningMessages: React.ReactNode[] = [];
-  if (activeVisualization?.getWarningMessages) {
-    warningMessages.push(
-      ...(activeVisualization.getWarningMessages(visualizationState, framePublicAPI) || [])
-    );
-  }
-  Object.entries(datasourceStates).forEach(([datasourceId, datasourceState]) => {
-    const datasource = datasourceMap[datasourceId];
-    if (!datasourceState.isLoading && datasource.getWarningMessages) {
-      warningMessages.push(
-        ...(datasource.getWarningMessages(
-          datasourceState.state,
-          framePublicAPI,
-          lensInspector.adapters,
-          (updater) => setDatasourceState(updater, datasourceId)
-        ) || [])
-      );
-    }
-  });
+
+  warningMessages.push(
+    ...getUserMessages('toolbar', { severity: 'warning' }).map(({ longMessage }) => longMessage)
+  );
+
   if (requestWarnings) {
     warningMessages.push(...requestWarnings);
   }
   return (
-    <EuiPageTemplate direction="column" offset={0} minHeight={0} restrictWidth={false}>
+    <EuiPageTemplate
+      direction="column"
+      offset={0}
+      minHeight={0}
+      restrictWidth={false}
+      mainProps={{ component: 'div' } as unknown as {}}
+    >
       {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (
         <EuiPageTemplate.Section paddingSize="none" color="transparent">
           <EuiFlexGroup

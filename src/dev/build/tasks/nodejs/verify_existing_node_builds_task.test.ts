@@ -9,7 +9,7 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createAnyInstanceSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 
@@ -46,7 +46,9 @@ async function setup(actualShaSums?: Record<string, string>) {
     targetAllPlatforms: true,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
+    dockerNamespace: null,
     dockerPush: false,
+    dockerTag: '',
     dockerTagQualifier: '',
   });
 

@@ -9,10 +9,12 @@ import { ShapeTreeNode } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import type { PaletteRegistry, SeriesLayer, PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { lightenColor } from '@kbn/charts-plugin/public';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { DistinctSeries, getDistinctSeries } from '../get_distinct_series';
+import { getNodeLabel } from './get_node_labels';
 
 const isTreemapOrMosaicChart = (shape: ChartTypes) =>
   [ChartTypes.MOSAIC, ChartTypes.TREEMAP].includes(shape);
@@ -109,15 +111,24 @@ const getDistinctColor = (
 const createSeriesLayers = (
   d: ShapeTreeNode,
   parentSeries: DistinctSeries['parentSeries'],
-  isSplitChart: boolean
+  isSplitChart: boolean,
+  formatters: Record<string, FieldFormat | undefined>,
+  formatter: FieldFormatsStart,
+  column: Partial<BucketColumns>
 ) => {
   const seriesLayers: SeriesLayer[] = [];
   let tempParent: typeof d | typeof d['parent'] = d;
   while (tempParent.parent && tempParent.depth > 0) {
     const seriesName = String(tempParent.parent.children[tempParent.sortIndex][0]);
     const isSplitParentLayer = isSplitChart && parentSeries.includes(seriesName);
+    const formattedName = getNodeLabel(
+      tempParent.parent.children[tempParent.sortIndex][0],
+      column,
+      formatters,
+      formatter.deserialize
+    );
     seriesLayers.unshift({
-      name: seriesName,
+      name: formattedName ?? seriesName,
       rankAtDepth: isSplitParentLayer
         ? parentSeries.findIndex((name) => name === seriesName)
         : tempParent.sortIndex,
@@ -130,15 +141,13 @@ const createSeriesLayers = (
   return seriesLayers;
 };
 
-const overrideColorForOldVisualization = (
+const overrideColors = (
   seriesLayers: SeriesLayer[],
   overwriteColors: { [key: string]: string },
   name: string
 ) => {
   let overwriteColor;
-  // this is for supporting old visualizations (created by vislib plugin)
-  // it seems that there for some aggs, the uiState saved from vislib is
-  // different than the es-charts handle it
+
   if (overwriteColors.hasOwnProperty(name)) {
     overwriteColor = overwriteColors[name];
   }
@@ -166,7 +175,8 @@ export const getColor = (
   syncColors: boolean,
   isDarkMode: boolean,
   formatter: FieldFormatsStart,
-  format?: BucketColumns['format']
+  column: Partial<BucketColumns>,
+  formatters: Record<string, FieldFormat | undefined>
 ) => {
   const distinctSeries = getDistinctSeries(rows, columns);
   const { parentSeries } = distinctSeries;
@@ -177,8 +187,8 @@ export const getColor = (
   const defaultColor = isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
 
   let name = '';
-  if (format) {
-    name = formatter.deserialize(format).convert(dataName) ?? '';
+  if (column.format) {
+    name = formatter.deserialize(column.format).convert(dataName) ?? '';
   }
 
   if (visParams.distinctColors) {
@@ -196,11 +206,19 @@ export const getColor = (
     );
   }
 
-  const seriesLayers = createSeriesLayers(d, parentSeries, isSplitChart);
+  const seriesLayers = createSeriesLayers(
+    d,
+    parentSeries,
+    isSplitChart,
+    formatters,
+    formatter,
+    column
+  );
 
-  const overwriteColor = overrideColorForOldVisualization(seriesLayers, overwriteColors, name);
-  if (overwriteColor) {
-    return lightenColor(overwriteColor, seriesLayers.length, columns.length);
+  const overriddenColor = overrideColors(seriesLayers, overwriteColors, name);
+  if (overriddenColor) {
+    // this is necessary for supporting some old visualizations that defined their own colors (created by vislib plugin)
+    return lightenColor(overriddenColor, seriesLayers.length, columns.length);
   }
 
   if (chartType === ChartTypes.MOSAIC && byDataPalette && seriesLayers[1]) {

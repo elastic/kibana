@@ -30,7 +30,7 @@ describe('MetricsService', () => {
   let metricsService: MetricsService;
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const configService = configServiceMock.create({
       atPath: { interval: moment.duration(testInterval) },

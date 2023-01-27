@@ -11,21 +11,14 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiTitle } 
 import { i18n } from '@kbn/i18n';
 
 import { MLInferencePipelineOption } from './ml_inference_logic';
-import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD } from './utils';
+import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD, MODEL_REDACTED_VALUE } from './utils';
 
 export interface PipelineSelectOptionProps {
   pipeline: MLInferencePipelineOption;
 }
 
-const REDACTED_MODE_ID_DISPLAY = i18n.translate(
-  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.redactedModel',
-  {
-    defaultMessage: 'Trained model not available in this space',
-  }
-);
-
 export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipeline }) => {
-  const modelIdDisplay = pipeline.modelId.length > 0 ? pipeline.modelId : REDACTED_MODE_ID_DISPLAY;
+  const modelIdDisplay = pipeline.modelId.length > 0 ? pipeline.modelId : MODEL_REDACTED_VALUE;
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       {pipeline.disabled && (

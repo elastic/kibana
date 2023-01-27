@@ -100,7 +100,166 @@ Object {
 }
 `;
 
-exports[`KQL Custom Transform Generator returns the correct transform params with every specified indicator params 1`] = `
+exports[`KQL Custom Transform Generator returns the expected transform params for timeslices slo 1`] = `
+Object {
+  "_meta": Object {
+    "version": 1,
+  },
+  "dest": Object {
+    "index": "slo-observability.sli-v1",
+    "pipeline": "slo-observability.sli.monthly",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "slo.denominator": Object {
+        "filter": Object {
+          "match_all": Object {},
+        },
+      },
+      "slo.isGoodSlice": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "goodEvents": "slo.numerator>_count",
+            "totalEvents": "slo.denominator>_count",
+          },
+          "script": "params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0",
+        },
+      },
+      "slo.numerator": Object {
+        "filter": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "range": Object {
+                  "latency": Object {
+                    "lt": "300",
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "@timestamp",
+          "fixed_interval": "2m",
+        },
+      },
+      "slo._internal.budgeting_method": Object {
+        "terms": Object {
+          "field": "slo._internal.budgeting_method",
+        },
+      },
+      "slo._internal.name": Object {
+        "terms": Object {
+          "field": "slo._internal.name",
+        },
+      },
+      "slo._internal.objective.target": Object {
+        "terms": Object {
+          "field": "slo._internal.objective.target",
+        },
+      },
+      "slo._internal.time_window.duration": Object {
+        "terms": Object {
+          "field": "slo._internal.time_window.duration",
+        },
+      },
+      "slo._internal.time_window.is_rolling": Object {
+        "terms": Object {
+          "field": "slo._internal.time_window.is_rolling",
+        },
+      },
+      "slo.id": Object {
+        "terms": Object {
+          "field": "slo.id",
+        },
+      },
+      "slo.revision": Object {
+        "terms": Object {
+          "field": "slo.revision",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+  },
+  "source": Object {
+    "index": "my-index*",
+    "query": Object {
+      "bool": Object {
+        "minimum_should_match": 1,
+        "should": Array [
+          Object {
+            "match": Object {
+              "labels.groupId": "group-3",
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {
+      "slo._internal.budgeting_method": Object {
+        "script": Object {
+          "source": "emit('timeslices')",
+        },
+        "type": "keyword",
+      },
+      "slo._internal.name": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo._internal.objective.target": Object {
+        "script": Object {
+          "source": "emit(0.98)",
+        },
+        "type": "double",
+      },
+      "slo._internal.time_window.duration": Object {
+        "script": Object {
+          "source": "emit('7d')",
+        },
+        "type": "keyword",
+      },
+      "slo._internal.time_window.is_rolling": Object {
+        "script": Object {
+          "source": "emit(true)",
+        },
+        "type": "boolean",
+      },
+      "slo.id": Object {
+        "script": Object {
+          "source": Any<String>,
+        },
+        "type": "keyword",
+      },
+      "slo.revision": Object {
+        "script": Object {
+          "source": "emit(1)",
+        },
+        "type": "long",
+      },
+    },
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "1m",
+      "field": "@timestamp",
+    },
+  },
+  "transform_id": Any<String>,
+}
+`;
+
+exports[`KQL Custom Transform Generator returns the expected transform params with every specified indicator params 1`] = `
 Object {
   "_meta": Object {
     "version": 1,
@@ -137,8 +296,8 @@ Object {
     "group_by": Object {
       "@timestamp": Object {
         "date_histogram": Object {
-          "calendar_interval": "1m",
           "field": "@timestamp",
+          "fixed_interval": "1m",
         },
       },
       "slo._internal.budgeting_method": Object {
@@ -242,7 +401,7 @@ Object {
   },
   "sync": Object {
     "time": Object {
-      "delay": "60s",
+      "delay": "1m",
       "field": "@timestamp",
     },
   },

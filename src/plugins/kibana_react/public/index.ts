@@ -75,8 +75,6 @@ export { createNotifications } from './notifications';
 /** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
 export { Markdown, MarkdownSimple } from './markdown';
 
-export { reactToUiComponent, uiToReactComponent } from './adapters';
-
 export { toMountPoint, MountPointPortal } from './util';
 export type { ToMountPointOptions } from './util';
 

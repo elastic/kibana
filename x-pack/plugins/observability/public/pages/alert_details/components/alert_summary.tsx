@@ -5,7 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiBadge,
+  EuiBadgeGroup,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import {
@@ -13,22 +21,21 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { formatAlertEvaluationValue } from '../../../utils/format_alert_evaluation_value';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSummaryProps } from '../types';
-import { useKibana } from '../../../utils/kibana_react';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
 import { DEFAULT_DATE_FORMAT } from '../constants';
 
 export function AlertSummary({ alert }: AlertSummaryProps) {
-  const { triggersActionsUi } = useKibana().services;
   const tags = alert?.fields[ALERT_RULE_TAGS];
-
   return (
     <div data-test-subj="alert-summary-container">
       <EuiFlexGroup>
@@ -43,7 +50,10 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {alert?.fields[ALERT_EVALUATION_VALUE] ?? '-'}
+            {formatAlertEvaluationValue(
+              alert?.fields[ALERT_RULE_TYPE_ID],
+              alert?.fields[ALERT_EVALUATION_VALUE]
+            )}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -57,7 +67,10 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {alert?.fields[ALERT_EVALUATION_THRESHOLD] ?? '-'}
+            {formatAlertEvaluationValue(
+              alert?.fields[ALERT_RULE_TYPE_ID],
+              alert?.fields[ALERT_EVALUATION_THRESHOLD]
+            )}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -86,8 +99,9 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           <EuiSpacer size="s" />
           {alert?.fields[ALERT_STATUS] ? (
             <AlertStatusIndicator
+              textSize="s"
               alertStatus={
-                alert?.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE
+                alert.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE
                   ? ALERT_STATUS_ACTIVE
                   : ALERT_STATUS_RECOVERED
               }
@@ -97,6 +111,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xxs">
@@ -151,13 +166,17 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <div>
-            <EuiSpacer size="s" />
-            {tags &&
-              tags.length > 0 &&
-              triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
-                tagsOutPopover: true,
-                tags,
-              })}
+            {tags && tags.length > 0 ? (
+              <EuiBadgeGroup>
+                {tags.map((tag, index) => (
+                  <EuiBadge data-test-subj={`ruleTagBadge-${tag}`} key={index} color="hollow">
+                    <EuiText size="s">{tag}</EuiText>
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            ) : (
+              <div data-test-subj="noRuleTags">-</div>
+            )}
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

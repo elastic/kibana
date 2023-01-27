@@ -7,15 +7,6 @@
   height: 100%;
 }
 
-.optionsList__items {
-  @include euiScrollBar;
-
-  overflow-y: auto;
-  max-height: $euiSize * 30;
-  width: $euiSize * 25;
-  max-width: 100%;
-}
-
 .optionsList__actions {
   padding: $euiSizeS;
   border-bottom: $euiBorderThin;
@@ -86,4 +77,12 @@
 
 .optionsList--filterGroup {
   width: 100%;
+}
+
+.optionsList--hiddenEditorForm {
+  margin-left: $euiSizeXXL + $euiSizeM;
+}
+
+.optionsList--sortPopover {
+  width: $euiSizeXL * 7;
 }

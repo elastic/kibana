@@ -38,7 +38,7 @@ jest.mock('../../services');
 const mockGetActionList = getActionList as jest.Mock;
 const mockGetActionListByStatus = getActionListByStatus as jest.Mock;
 
-describe(' Action List Handler', () => {
+describe('Action List Handler', () => {
   let endpointAppContextService: EndpointAppContextService;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
 

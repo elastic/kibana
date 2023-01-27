@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { EntityAnalyticsAnomalies } from '.';
 import type { AnomaliesCount } from '../../../../common/components/ml/anomaly/use_anomalies_search';
@@ -13,6 +13,15 @@ import { AnomalyEntity } from '../../../../common/components/ml/anomaly/use_anom
 
 import { TestProviders } from '../../../../common/mock';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
+
+// Query toggle only works if pageName.lenght > 0
+jest.mock('../../../../common/utils/route/use_route_spy', () => ({
+  useRouteSpy: jest.fn().mockReturnValue([
+    {
+      pageName: 'not_empty',
+    },
+  ]),
+}));
 
 const mockUseNotableAnomaliesSearch = jest.fn().mockReturnValue({
   isLoading: false,
@@ -231,5 +240,35 @@ describe('EntityAnalyticsAnomalies', () => {
     );
 
     expect(getByTestId('incompatible_jobs_warnings')).toBeInTheDocument();
+  });
+
+  it("doesn't render the warning message when header is collapsed", () => {
+    const jobCount: AnomaliesCount = {
+      job: {
+        isInstalled: true,
+        datafeedState: 'started',
+        jobState: 'opened',
+        isCompatible: false,
+      } as SecurityJob,
+      name: 'v3_windows_anomalous_script',
+      count: 0,
+      entity: AnomalyEntity.User,
+    };
+
+    mockUseNotableAnomaliesSearch.mockReturnValue({
+      isLoading: false,
+      data: [jobCount],
+      refetch: jest.fn(),
+    });
+
+    const { queryByTestId, getByTestId } = render(
+      <TestProviders>
+        <EntityAnalyticsAnomalies />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('query-toggle-header'));
+
+    expect(queryByTestId('incompatible_jobs_warnings')).not.toBeInTheDocument();
   });
 });

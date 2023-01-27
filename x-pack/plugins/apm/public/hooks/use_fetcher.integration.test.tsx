@@ -23,7 +23,7 @@ describe('when simulating race condition', () => {
   let renderSpy: jest.Mock;
 
   beforeEach(async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     renderSpy = jest.fn();
     requestCallOrder = [];

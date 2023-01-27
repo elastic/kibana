@@ -20,6 +20,8 @@ import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../../../components/endpoint_response_actions_list/mocks';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
+jest.mock('../../../../common/experimental_features_service');
+
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
   isFetching?: boolean;

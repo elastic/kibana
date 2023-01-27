@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
@@ -82,6 +82,7 @@ import {
   transformToAlertThrottle,
   transformToNotifyWhen,
 } from './rule_actions';
+import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -137,6 +138,7 @@ export const typeSpecificSnakeToCamel = (
         filters: params.filters,
         savedId: params.saved_id,
         responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'saved_query': {
@@ -149,6 +151,7 @@ export const typeSpecificSnakeToCamel = (
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
         responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'threshold': {
@@ -243,6 +246,7 @@ const patchQueryParams = (
     responseActions:
       params.response_actions?.map(transformRuleToAlertResponseAction) ??
       existingRule.responseActions,
+    alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
   };
 };
 
@@ -261,6 +265,7 @@ const patchSavedQueryParams = (
     responseActions:
       params.response_actions?.map(transformRuleToAlertResponseAction) ??
       existingRule.responseActions,
+    alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
   };
 };
 
@@ -462,10 +467,10 @@ export const convertPatchAPIToInternalSchema = (
       : existingRule.actions,
     throttle: nextParams.throttle
       ? transformToAlertThrottle(nextParams.throttle)
-      : existingRule.throttle,
+      : existingRule.throttle ?? null,
     notifyWhen: nextParams.throttle
       ? transformToNotifyWhen(nextParams.throttle)
-      : existingRule.notifyWhen,
+      : existingRule.notifyWhen ?? null,
   };
 };
 
@@ -480,7 +485,7 @@ export const convertCreateAPIToInternalSchema = (
   defaultEnabled = true
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
-  const newRuleId = input.rule_id ?? uuid.v4();
+  const newRuleId = input.rule_id ?? uuidv4();
   return {
     name: input.name,
     tags: input.tags ?? [],
@@ -572,6 +577,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): TypeSp
         filters: params.filters,
         saved_id: params.savedId,
         response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'saved_query': {
@@ -584,6 +590,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): TypeSp
         saved_id: params.savedId,
         data_view_id: params.dataViewId,
         response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'threshold': {

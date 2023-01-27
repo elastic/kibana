@@ -7,102 +7,93 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiBasicTable,
   EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
   EuiLink,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
-import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 
 export interface RisksTableProps {
   data: ComplianceDashboardData['groupedFindingsEvaluation'];
   maxItems: number;
   onCellClick: (name: string) => void;
   onViewAllClick: () => void;
+  viewAllButtonTitle: string;
+  compact?: boolean;
 }
 
 export const getTopRisks = (
   groupedFindingsEvaluation: ComplianceDashboardData['groupedFindingsEvaluation'],
   maxItems: number
 ) => {
-  const filtered = groupedFindingsEvaluation.filter((x) => x.totalFailed > 0);
-  const sorted = filtered.slice().sort((first, second) => second.totalFailed - first.totalFailed);
+  const sorted = groupedFindingsEvaluation
+    .slice()
+    .sort((first, second) => first.postureScore - second.postureScore);
 
   return sorted.slice(0, maxItems);
 };
 
 export const RisksTable = ({
-  data: resourcesTypes,
+  data: cisSectionsEvaluations,
   maxItems,
   onCellClick,
   onViewAllClick,
+  viewAllButtonTitle,
+  compact,
 }: RisksTableProps) => {
   const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
       {
         field: 'name',
         truncateText: true,
-        name: i18n.translate('xpack.csp.dashboard.risksTable.cisSectionColumnLabel', {
-          defaultMessage: 'CIS Section',
-        }),
+        name: compact
+          ? ''
+          : i18n.translate('xpack.csp.dashboard.risksTable.cisSectionColumnLabel', {
+              defaultMessage: 'CIS Section',
+            }),
         render: (name: GroupedFindingsEvaluation['name']) => (
-          <EuiLink onClick={() => onCellClick(name)} className="eui-textTruncate">
+          <EuiLink onClick={() => onCellClick(name)} className="eui-textTruncate" color="text">
             {name}
           </EuiLink>
         ),
       },
       {
-        field: 'totalFailed',
-        name: i18n.translate('xpack.csp.dashboard.risksTable.findingsColumnLabel', {
-          defaultMessage: 'Findings',
-        }),
-        render: (
-          totalFailed: GroupedFindingsEvaluation['totalFailed'],
-          resource: GroupedFindingsEvaluation
-        ) => (
-          <>
-            <EuiText size="s" color="danger">
-              <CompactFormattedNumber number={resource.totalFailed} />
-            </EuiText>
-            <EuiText size="s">
-              {'/'}
-              <CompactFormattedNumber number={resource.totalFindings} />
-            </EuiText>
-          </>
+        field: 'postureScore',
+        width: '115px',
+        name: compact
+          ? ''
+          : i18n.translate('xpack.csp.dashboard.risksTable.complianceColumnLabel', {
+              defaultMessage: 'Compliance',
+            }),
+        render: (postureScore: GroupedFindingsEvaluation['postureScore'], data) => (
+          <ComplianceScoreBar totalPassed={data.totalPassed} totalFailed={data.totalFailed} />
         ),
       },
     ],
-    [onCellClick]
+    [compact, onCellClick]
   );
 
-  const items = useMemo(() => getTopRisks(resourcesTypes, maxItems), [resourcesTypes, maxItems]);
+  const sortedByComplianceScore = getTopRisks(cisSectionsEvaluations, maxItems);
 
   return (
-    <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
+    <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="none">
       <EuiFlexItem>
-        <EuiBasicTable<GroupedFindingsEvaluation>
-          rowHeader="name"
-          items={items}
+        <EuiInMemoryTable<GroupedFindingsEvaluation>
+          items={sortedByComplianceScore}
           columns={columns}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="center" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onViewAllClick} iconType="search">
-              <FormattedMessage
-                id="xpack.csp.dashboard.risksTable.viewAllButtonTitle"
-                defaultMessage="View all failed findings"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <div>
+          <EuiButtonEmpty onClick={onViewAllClick} iconType="search">
+            {viewAllButtonTitle}
+          </EuiButtonEmpty>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

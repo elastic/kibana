@@ -16,7 +16,9 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { InfraPluginSetup } from '@kbn/infra-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -35,6 +37,8 @@ import {
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
 } from '../common/constants';
+
+import { searchGuideId, searchGuideConfig } from '../common/guided_onboarding/search_guide_config';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
@@ -55,6 +59,7 @@ import { registerConfigDataRoute } from './routes/enterprise_search/config_data'
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerCreateAPIKeyRoute } from './routes/enterprise_search/create_api_key';
+import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -73,11 +78,13 @@ interface PluginsSetup {
   infra: InfraPluginSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   ml?: MlPluginSetup;
+  guidedOnboarding: GuidedOnboardingPluginSetup;
 }
 
 interface PluginsStart {
   spaces: SpacesPluginStart;
   security: SecurityPluginStart;
+  data: DataPluginStart;
 }
 
 export interface RouteDependencies {
@@ -100,7 +107,15 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public setup(
     { capabilities, http, savedObjects, getStartServices, uiSettings }: CoreSetup<PluginsStart>,
-    { usageCollection, security, features, infra, customIntegrations, ml }: PluginsSetup
+    {
+      usageCollection,
+      security,
+      features,
+      infra,
+      customIntegrations,
+      ml,
+      guidedOnboarding,
+    }: PluginsSetup
   ) {
     const config = this.config;
     const log = this.logger;
@@ -188,7 +203,12 @@ export class EnterpriseSearchPlugin implements Plugin {
     // Enterprise Search Routes
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
-    registerAnalyticsRoutes(dependencies);
+    registerStatsRoutes(dependencies);
+
+    // Analytics Routes (stand-alone product)
+    getStartServices().then(([coreStart, { data }]) => {
+      registerAnalyticsRoutes({ ...dependencies, data, savedObjects: coreStart.savedObjects });
+    });
 
     getStartServices().then(([, { security: securityStart }]) => {
       registerCreateAPIKeyRoute(dependencies, securityStart);
@@ -217,29 +237,34 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register logs source configuration, used by LogStream components
      * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
-    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Search Relevance Logs',
+    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
       logIndices: {
-        type: 'index_name',
         indexName: 'logs-app_search.search_relevance_suggestions-*',
+        type: 'index_name',
       },
+      name: 'Enterprise Search Search Relevance Logs',
     });
 
-    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Audit Logs',
+    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
       logIndices: {
-        type: 'index_name',
         indexName: 'logs-enterprise_search*',
+        type: 'index_name',
       },
+      name: 'Enterprise Search Audit Logs',
     });
 
-    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Behaviorial Analytics Logs',
+    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
       logIndices: {
-        type: 'index_name',
         indexName: 'logs-elastic_analytics.events-*',
+        type: 'index_name',
       },
+      name: 'Enterprise Search Behavioral Analytics Logs',
     });
+
+    /**
+     * Register a config for the search guide
+     */
+    guidedOnboarding.registerGuideConfig(searchGuideId, searchGuideConfig);
   }
 
   public start() {}

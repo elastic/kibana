@@ -6,8 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import { MONITOR_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
 import { PLUGIN } from '../../../../../../common/constants/plugin';
 
@@ -18,6 +20,7 @@ export const useTestRunDetailsBreadcrumbs = (
   const appPath = kibana.services.application?.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID) ?? '';
 
   const { monitor } = useSelectedMonitor();
+  const selectedLocation = useSelectedLocation();
 
   useBreadcrumbs([
     {
@@ -26,7 +29,10 @@ export const useTestRunDetailsBreadcrumbs = (
     },
     {
       text: monitor?.name ?? '',
-      href: `${appPath}${MONITOR_ROUTE.replace(':monitorId', monitor?.id ?? '')}`,
+      href: `${appPath}${MONITOR_ROUTE.replace(
+        ':monitorId',
+        monitor?.[ConfigKey.CONFIG_ID] ?? ''
+      )}?locationId=${selectedLocation?.id ?? ''}`,
     },
     ...(extraCrumbs ?? []),
   ]);

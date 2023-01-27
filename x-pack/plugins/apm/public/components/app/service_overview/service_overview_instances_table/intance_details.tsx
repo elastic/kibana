@@ -18,19 +18,22 @@ import {
   CLOUD_PROVIDER,
   CONTAINER_ID,
   HOST_NAME,
+  SERVICE_VERSION,
   SERVICE_NODE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
-  SERVICE_VERSION,
-  KUBERNETES_CONTAINER_NAME,
-  KUBERNETES_NAMESPACE,
   KUBERNETES_POD_NAME,
   KUBERNETES_POD_UID,
+} from '../../../../../common/es_fields/apm';
+
+import {
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/infra_metrics';
 
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { isPending } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getAgentIcon } from '../../../shared/agent_icon/get_agent_icon';
@@ -103,10 +106,7 @@ export function InstanceDetails({
     serviceNodeName,
   });
 
-  if (
-    status === FETCH_STATUS.LOADING ||
-    status === FETCH_STATUS.NOT_INITIATED
-  ) {
+  if (isPending(status)) {
     return (
       <div style={{ width: '50%' }}>
         <EuiLoadingContent data-test-subj="loadingSpinner" />

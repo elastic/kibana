@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { FilesClient } from '../../../../common/files_client';
 import { FileShareNotFoundError } from '../../../file_share_service/errors';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../../api_routes';
 import type { FileKind, FileShareJSON } from '../../../../common/types';
@@ -22,7 +23,11 @@ const rt = {
   }),
 };
 
-export type Endpoint = CreateRouteDefinition<typeof rt, { share: FileShareJSON }>;
+export type Endpoint = CreateRouteDefinition<
+  typeof rt,
+  { share: FileShareJSON },
+  FilesClient['getShare']
+>;
 
 export const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const { fileService } = await files;

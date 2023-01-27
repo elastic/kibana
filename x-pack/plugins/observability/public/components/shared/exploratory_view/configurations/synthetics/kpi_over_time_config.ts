@@ -97,15 +97,37 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
       },
       {
         label: 'Monitor Errors',
-        id: 'state.id',
-        // columnType: FORMULA_COLUMN,
-        // formula: "unique_count(state.id, kql='status.up: 0')",
+        id: 'monitor_errors',
+        columnType: OPERATION_COLUMN,
         field: 'state.id',
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `summary.down > 0`,
+          },
+        ],
+      },
+      {
+        label: 'Monitor Complete',
+        id: 'state.up',
+        field: 'state.up',
         columnType: OPERATION_COLUMN,
         columnFilters: [
           {
             language: 'kuery',
-            query: `state.id: * and state.up: 0`,
+            query: `summary: * and summary.down: 0 and monitor.status: "up"`,
+          },
+        ],
+      },
+      {
+        label: 'Total runs',
+        id: 'monitor.check_group',
+        field: 'monitor.check_group',
+        columnType: OPERATION_COLUMN,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `summary: *`,
           },
         ],
       },

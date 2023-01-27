@@ -24,17 +24,17 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverVisualize,
+  FieldIcon,
+  getFieldIconProps,
+  wrapFieldNameOnDot,
 } from '@kbn/unified-field-list-plugin/public';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DragDrop } from '../../drag_drop';
-import { DatasourceDataPanelProps, DataType } from '../../types';
+import { DatasourceDataPanelProps } from '../../types';
 import { DOCUMENT_FIELD_NAME } from '../../../common';
 import type { IndexPattern, IndexPatternField } from '../../types';
-import { LensFieldIcon } from '../../shared_components/field_picker/lens_field_icon';
 import type { LensAppServices } from '../../app_plugin/types';
-import { debouncedComponent } from '../../debounced_component';
 import { APP_ID } from '../../../common/constants';
-import { getFieldType } from './pure_utils';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 
 export interface FieldItemProps {
@@ -56,13 +56,6 @@ export interface FieldItemProps {
   removeField?: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
   uiActions: UiActionsStart;
-}
-
-function wrapOnDot(str?: string) {
-  // u200B is a non-width white-space character, which allows
-  // the browser to efficiently word-wrap right after the dot
-  // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
 export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
@@ -157,7 +150,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
-  const lensFieldIcon = <LensFieldIcon type={getFieldType(field) as DataType} />;
+  const lensFieldIcon = <FieldIcon {...getFieldIconProps(field)} />;
   const lensInfoIcon = (
     <EuiIconTip
       anchorClassName="lnsFieldItem__infoIcon"
@@ -222,8 +215,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               }}
               fieldIcon={lensFieldIcon}
               fieldName={
-                <EuiHighlight search={wrapOnDot(highlight)}>
-                  {wrapOnDot(field.displayName)}
+                <EuiHighlight search={wrapFieldNameOnDot(highlight)}>
+                  {wrapFieldNameOnDot(field.displayName)}
                 </EuiHighlight>
               }
               fieldInfoIcon={lensInfoIcon}
@@ -239,9 +232,9 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
                   field: value.field.name,
                 },
               })
-            : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceDisabled', {
+            : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceNotAvailable', {
                 defaultMessage:
-                  "This field can't be added to the workspace automatically. You can still use it directly in the configuration panel.",
+                  'To visualize this field, please add it directly to the desired layer. Adding this field to the workspace is not supported based on your current configuration.',
               });
 
           return (
@@ -275,7 +268,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   );
 };
 
-export const FieldItem = debouncedComponent(InnerFieldItem);
+export const FieldItem = React.memo(InnerFieldItem);
 
 function FieldItemPopoverContents(
   props: FieldItemProps & {
@@ -283,8 +276,7 @@ function FieldItemPopoverContents(
     onAddFilter: AddFieldFilterHandler | undefined;
   }
 ) {
-  const { query, filters, indexPattern, dataViewField, dateRange, core, onAddFilter, uiActions } =
-    props;
+  const { query, filters, indexPattern, dataViewField, dateRange, onAddFilter, uiActions } = props;
   const services = useKibana<LensAppServices>().services;
 
   const exploreInDiscover = useMemo(() => {
@@ -309,10 +301,11 @@ function FieldItemPopoverContents(
       [indexPattern],
       getEsQueryConfig(services.uiSettings)
     );
-    if (!services.discover || !services.application.capabilities.discover.show) {
+    const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
+    if (!discoverLocator || !services.application.capabilities.discover.show) {
       return;
     }
-    return services.discover.locator!.getRedirectUrl({
+    return discoverLocator.getRedirectUrl({
       dataViewSpec: indexPattern?.spec,
       timeRange: services.data.query.timefilter.timefilter.getTime(),
       filters: newFilters,
@@ -336,18 +329,12 @@ function FieldItemPopoverContents(
         overrideMissingContent={(params) => {
           if (params.reason === 'no-data') {
             // TODO: should we replace this with a default message "Analysis is not available for this field?"
-            const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
             return (
               <EuiText size="s" data-test-subj="lnsFieldListPanel-missingFieldStats">
-                {isUsingSampling
-                  ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
-                      defaultMessage:
-                        'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
-                    })
-                  : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-                      defaultMessage:
-                        'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
-                    })}
+                {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+                  defaultMessage:
+                    'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
+                })}
               </EuiText>
             );
           }
@@ -382,7 +369,7 @@ function FieldItemPopoverContents(
             data-test-subj={`lnsFieldListPanel-exploreInDiscover-${dataViewField.name}`}
           >
             {i18n.translate('xpack.lens.indexPattern.fieldExploreInDiscover', {
-              defaultMessage: 'Explore values in Discover',
+              defaultMessage: 'Explore in Discover',
             })}
           </EuiButton>
         </EuiPopoverFooter>

@@ -8,6 +8,11 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
+import { useUrlParams } from '../../../hooks';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 export const MonitorFailedTests = ({ time }: { time: { to: string; from: string } }) => {
@@ -15,25 +20,62 @@ export const MonitorFailedTests = ({ time }: { time: { to: string; from: string 
 
   const { ExploratoryViewEmbeddable } = observability;
 
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const monitorId = useMonitorQueryId();
+
+  const { errorStateId } = useParams<{ errorStateId: string }>();
+
+  const [, updateUrl] = useUrlParams();
+
+  if (!monitorId && !errorStateId) {
+    return null;
+  }
 
   return (
-    <ExploratoryViewEmbeddable
-      customHeight={'120px'}
-      reportType="heatmap"
-      axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
-      legendIsVisible={false}
-      attributes={[
-        {
-          time,
-          reportDefinitions: {
-            'monitor.id': [monitorId],
+    <>
+      <ExploratoryViewEmbeddable
+        customHeight={'120px'}
+        reportType="heatmap"
+        axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
+        legendIsVisible={false}
+        attributes={[
+          {
+            time,
+            reportDefinitions: {
+              ...(monitorId ? { 'monitor.id': [monitorId] } : { 'state.id': [errorStateId] }),
+            },
+            dataType: 'synthetics',
+            selectedMetricField: 'failed_tests',
+            name: FAILED_TESTS_LABEL,
           },
-          dataType: 'synthetics',
-          selectedMetricField: 'failed_tests',
-          name: 'synthetics-series-1',
-        },
-      ]}
-    />
+        ]}
+        onBrushEnd={({ range }) => {
+          updateUrl({
+            dateRangeStart: moment(range[0]).toISOString(),
+            dateRangeEnd: moment(range[1]).toISOString(),
+          });
+        }}
+      />
+      <EuiFlexGroup>
+        <EuiFlexItem grow style={{ marginLeft: 10 }}>
+          <EuiHealth color="danger">{FAILED_TESTS_LABEL}</EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="s">
+            {BRUSH_LABEL}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
+
+export const FAILED_TESTS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.failedTests',
+  {
+    defaultMessage: 'Failed tests',
+  }
+);
+
+export const BRUSH_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.brushArea', {
+  defaultMessage: 'Brush an area for higher fidelity',
+});

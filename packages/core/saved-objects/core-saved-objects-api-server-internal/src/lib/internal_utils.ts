@@ -7,7 +7,7 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
   ISavedObjectTypeRegistry,
   SavedObjectsRawDoc,
@@ -72,7 +72,7 @@ export function getBulkOperationError(
   id: string,
   rawResponse: {
     status: number;
-    error?: { type: string; reason: string; index: string };
+    error?: { type: string; reason?: string; index: string };
     // Other fields are present on a bulk operation result but they are irrelevant for this function
   }
 ): Payload | undefined {

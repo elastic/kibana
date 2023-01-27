@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-        "id": "def-server.extractMigrationInfo",
+        "id": "def-common.extractMigrationInfo",
         "type": "Function",
         "tags": [],
         "label": "extractMigrationInfo",
@@ -24,17 +32,17 @@
           "(soType: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
+            "section": "def-common.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>) => ",
           {
             "pluginId": "@kbn/core-test-helpers-so-type-serializer",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreTestHelpersSoTypeSerializerPluginApi",
-            "section": "def-server.SavedObjectTypeMigrationInfo",
+            "section": "def-common.SavedObjectTypeMigrationInfo",
             "text": "SavedObjectTypeMigrationInfo"
           }
         ],
@@ -44,7 +52,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-            "id": "def-server.extractMigrationInfo.$1",
+            "id": "def-common.extractMigrationInfo.$1",
             "type": "Object",
             "tags": [],
             "label": "soType",
@@ -52,9 +60,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
+                "section": "def-common.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>"
@@ -70,7 +78,7 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-        "id": "def-server.getMigrationHash",
+        "id": "def-common.getMigrationHash",
         "type": "Function",
         "tags": [],
         "label": "getMigrationHash",
@@ -79,9 +87,9 @@
           "(soType: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
+            "section": "def-common.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>) => string"
@@ -92,7 +100,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-            "id": "def-server.getMigrationHash.$1",
+            "id": "def-common.getMigrationHash.$1",
             "type": "Object",
             "tags": [],
             "label": "soType",
@@ -100,9 +108,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
+                "section": "def-common.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>"
@@ -120,7 +128,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-        "id": "def-server.SavedObjectTypeMigrationInfo",
+        "id": "def-common.SavedObjectTypeMigrationInfo",
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectTypeMigrationInfo",
@@ -131,7 +139,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-            "id": "def-server.SavedObjectTypeMigrationInfo.name",
+            "id": "def-common.SavedObjectTypeMigrationInfo.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -142,7 +150,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-            "id": "def-server.SavedObjectTypeMigrationInfo.namespaceType",
+            "id": "def-common.SavedObjectTypeMigrationInfo.namespaceType",
             "type": "CompoundType",
             "tags": [],
             "label": "namespaceType",
@@ -156,7 +164,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-            "id": "def-server.SavedObjectTypeMigrationInfo.convertToAliasScript",
+            "id": "def-common.SavedObjectTypeMigrationInfo.convertToAliasScript",
             "type": "string",
             "tags": [],
             "label": "convertToAliasScript",
@@ -170,7 +178,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-            "id": "def-server.SavedObjectTypeMigrationInfo.convertToMultiNamespaceTypeVersion",
+            "id": "def-common.SavedObjectTypeMigrationInfo.convertToMultiNamespaceTypeVersion",
             "type": "string",
             "tags": [],
             "label": "convertToMultiNamespaceTypeVersion",
@@ -184,7 +192,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-            "id": "def-server.SavedObjectTypeMigrationInfo.migrationVersions",
+            "id": "def-common.SavedObjectTypeMigrationInfo.migrationVersions",
             "type": "Array",
             "tags": [],
             "label": "migrationVersions",
@@ -198,7 +206,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-            "id": "def-server.SavedObjectTypeMigrationInfo.schemaVersions",
+            "id": "def-common.SavedObjectTypeMigrationInfo.schemaVersions",
             "type": "Array",
             "tags": [],
             "label": "schemaVersions",
@@ -212,7 +220,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-            "id": "def-server.SavedObjectTypeMigrationInfo.mappings",
+            "id": "def-common.SavedObjectTypeMigrationInfo.mappings",
             "type": "Object",
             "tags": [],
             "label": "mappings",
@@ -226,7 +234,7 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
-            "id": "def-server.SavedObjectTypeMigrationInfo.hasExcludeOnUpgrade",
+            "id": "def-common.SavedObjectTypeMigrationInfo.hasExcludeOnUpgrade",
             "type": "boolean",
             "tags": [],
             "label": "hasExcludeOnUpgrade",
@@ -239,14 +247,6 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

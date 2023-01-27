@@ -5,7 +5,7 @@
  * 2.0.
  */
 // copy this one
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,6 +17,7 @@ import {
   useInput,
   useStartServices,
   useSwitchInput,
+  validateInputs,
 } from '../../../../hooks';
 import { isDiffPathProtocol } from '../../../../../../../common/services';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -133,11 +134,19 @@ export function useFleetServerHostsForm(
     validateFleetServerHosts,
     isPreconfigured
   );
+  const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isPreconfigured);
 
-  const validate = useCallback(
-    () => hostUrlsInput.validate() && nameInput.validate(),
-    [hostUrlsInput, nameInput]
+  const inputs = useMemo(
+    () => ({
+      nameInput,
+      isDefaultInput,
+      hostUrlsInput,
+      proxyIdInput,
+    }),
+    [nameInput, isDefaultInput, hostUrlsInput, proxyIdInput]
   );
+
+  const validate = useCallback(() => validateInputs(inputs), [inputs]);
 
   const submit = useCallback(async () => {
     try {
@@ -148,21 +157,19 @@ export function useFleetServerHostsForm(
         return;
       }
       setIsLoading(true);
+      const data = {
+        name: nameInput.value,
+        host_urls: hostUrlsInput.value,
+        is_default: isDefaultInput.value,
+        proxy_id: proxyIdInput.value !== '' ? proxyIdInput.value : null,
+      };
       if (fleetServerHost) {
-        const res = await sendPutFleetServerHost(fleetServerHost.id, {
-          name: nameInput.value,
-          host_urls: hostUrlsInput.value,
-          is_default: isDefaultInput.value,
-        });
+        const res = await sendPutFleetServerHost(fleetServerHost.id, data);
         if (res.error) {
           throw res.error;
         }
       } else {
-        const res = await sendPostFleetServerHost({
-          name: nameInput.value,
-          host_urls: hostUrlsInput.value,
-          is_default: isDefaultInput.value,
-        });
+        const res = await sendPostFleetServerHost(data);
         if (res.error) {
           throw res.error;
         }
@@ -187,6 +194,7 @@ export function useFleetServerHostsForm(
     nameInput.value,
     hostUrlsInput.value,
     isDefaultInput.value,
+    proxyIdInput.value,
     validate,
     notifications,
     confirm,
@@ -195,7 +203,10 @@ export function useFleetServerHostsForm(
 
   const isDisabled =
     isLoading ||
-    (!hostUrlsInput.hasChanged && !isDefaultInput.hasChanged && !nameInput.hasChanged) ||
+    (!hostUrlsInput.hasChanged &&
+      !isDefaultInput.hasChanged &&
+      !nameInput.hasChanged &&
+      !proxyIdInput.hasChanged) ||
     hostUrlsInput.props.isInvalid ||
     nameInput.props.isInvalid;
 
@@ -203,10 +214,6 @@ export function useFleetServerHostsForm(
     isLoading,
     isDisabled,
     submit,
-    inputs: {
-      hostUrlsInput,
-      nameInput,
-      isDefaultInput,
-    },
+    inputs,
   };
 }

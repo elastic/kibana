@@ -31,7 +31,6 @@ import {
   createPrepackagedRules,
   importRules,
   exportRules,
-  fetchTags,
   getPrePackagedRulesStatus,
   previewRule,
   findRuleExceptionReferences,
@@ -627,26 +626,6 @@ describe('Detections Rules API', () => {
         signal: abortCtrl.signal,
       });
       expect(resp).toEqual(blob);
-    });
-  });
-
-  describe('fetchTags', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(['some', 'tags']);
-    });
-
-    test('check parameter url when fetching tags', async () => {
-      await fetchTags({ signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/tags', {
-        signal: abortCtrl.signal,
-        method: 'GET',
-      });
-    });
-
-    test('happy path', async () => {
-      const resp = await fetchTags({ signal: abortCtrl.signal });
-      expect(resp).toEqual(['some', 'tags']);
     });
   });
 

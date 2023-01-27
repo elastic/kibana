@@ -12,7 +12,7 @@ export type RulesClientMock = jest.Mocked<Schema>;
 
 const createRulesClientMock = () => {
   const mocked: RulesClientMock = {
-    aggregate: jest.fn(),
+    aggregate: jest.fn().mockReturnValue({ alertExecutionStatus: {}, ruleLastRunOutcome: {} }),
     create: jest.fn(),
     get: jest.fn(),
     resolve: jest.fn(),
@@ -38,11 +38,14 @@ const createRulesClientMock = () => {
     getSpaceId: jest.fn(),
     bulkEdit: jest.fn(),
     bulkDeleteRules: jest.fn(),
+    bulkEnableRules: jest.fn(),
+    bulkDisableRules: jest.fn(),
     snooze: jest.fn(),
     unsnooze: jest.fn(),
-    calculateIsSnoozedUntil: jest.fn(),
     clearExpiredSnoozes: jest.fn(),
     runSoon: jest.fn(),
+    clone: jest.fn(),
+    getAlertFromRaw: jest.fn(),
   };
   return mocked;
 };
