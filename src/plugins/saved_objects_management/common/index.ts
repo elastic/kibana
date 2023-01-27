@@ -14,7 +14,7 @@ export type {
   SavedObjectInvalidRelation,
   SavedObjectGetRelationshipsResponse,
   SavedObjectManagementTypeInfo,
-  BulkGetHTTPBodyV1,
+  BulkGetBodyHTTPV1,
   BulkGetResponseHTTPV1,
   BulkDeleteBodyHTTPV1,
   BulkDeleteResponseHTTPV1,

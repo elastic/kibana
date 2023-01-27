@@ -17,7 +17,7 @@ export type {
 } from './types';
 
 export type {
-  BulkGetHTTPBodyV1,
+  BulkGetBodyHTTPV1,
   BulkGetResponseHTTPV1,
   BulkDeleteBodyHTTPV1,
   BulkDeleteResponseHTTPV1,

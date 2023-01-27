@@ -96,7 +96,7 @@ export type SavedObjectManagementTypeInfo = SavedObjectManagementTypeInfoV1;
 
 /** HTTP API interfaces */
 
-export type BulkGetHTTPBodyV1 = Array<{
+export type BulkGetBodyHTTPV1 = Array<{
   id: string;
   type: string;
 }>;

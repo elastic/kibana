@@ -7,11 +7,11 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { BulkGetHTTPBodyV1, BulkGetResponseHTTPV1 } from '../../common/types';
+import { BulkGetBodyHTTPV1, BulkGetResponseHTTPV1 } from '../../common/types';
 
 export async function bulkGetObjects(
   http: HttpStart,
-  objects: BulkGetHTTPBodyV1
+  objects: BulkGetBodyHTTPV1
 ): Promise<BulkGetResponseHTTPV1> {
   return await http.post<BulkGetResponseHTTPV1>(`/api/kibana/management/saved_objects/_bulk_get`, {
     body: JSON.stringify(objects),
