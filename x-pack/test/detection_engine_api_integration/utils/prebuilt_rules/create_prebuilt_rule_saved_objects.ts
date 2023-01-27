@@ -9,7 +9,7 @@ import { Client } from '@elastic/elasticsearch';
 import {
   getPrebuiltRuleMock,
   getPrebuiltRuleWithExceptionsMock,
-} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/model/prebuilt_rule.mock';
+} from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { PrebuiltRuleToInstall } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 
 /**

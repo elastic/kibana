@@ -6,4 +6,5 @@
  */
 
 export { createPrepackagedRules } from './api/install_prebuilt_rules_and_timelines/route';
-export * from './api/register_routes';
+export { registerPrebuiltRulesRoutes } from './api/register_routes';
+export { prebuiltRuleAssetType } from './logic/rule_assets/prebuilt_rule_assets_type';

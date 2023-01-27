@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { PrebuiltRuleToInstall } from './prebuilt_rule';
+import type { PrebuiltRuleAsset } from './prebuilt_rule_asset';
 
-export const getPrebuiltRuleMock = (): PrebuiltRuleToInstall => ({
+export const getPrebuiltRuleMock = (): PrebuiltRuleAsset => ({
   description: 'some description',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -19,7 +19,7 @@ export const getPrebuiltRuleMock = (): PrebuiltRuleToInstall => ({
   version: 1,
 });
 
-export const getPrebuiltRuleWithExceptionsMock = (): PrebuiltRuleToInstall => ({
+export const getPrebuiltRuleWithExceptionsMock = (): PrebuiltRuleAsset => ({
   description: 'A rule with an exception list',
   name: 'A rule with an exception list',
   query: 'user.name: root or user.name: admin',
@@ -39,7 +39,7 @@ export const getPrebuiltRuleWithExceptionsMock = (): PrebuiltRuleToInstall => ({
   version: 2,
 });
 
-export const getPrebuiltThreatMatchRuleMock = (): PrebuiltRuleToInstall => ({
+export const getPrebuiltThreatMatchRuleMock = (): PrebuiltRuleAsset => ({
   description: 'some description',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',

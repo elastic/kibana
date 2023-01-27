@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { PrebuiltRuleToInstall } from './prebuilt_rule';
-import { addPrepackagedRuleValidateTypeDependents } from './prebuilt_rule_validate_type_dependents';
-import { getPrebuiltRuleMock } from './prebuilt_rule.mock';
+import type { PrebuiltRuleAsset } from './prebuilt_rule_asset';
+import { addPrepackagedRuleValidateTypeDependents } from './prebuilt_rule_asset_validate_type_dependents';
+import { getPrebuiltRuleMock } from './prebuilt_rule_asset.mock';
 
 describe('addPrepackagedRuleValidateTypeDependents', () => {
   test('You cannot omit timeline_title when timeline_id is present', () => {
-    const schema: PrebuiltRuleToInstall = {
+    const schema: PrebuiltRuleAsset = {
       ...getPrebuiltRuleMock(),
       timeline_id: '123',
     };
@@ -21,7 +21,7 @@ describe('addPrepackagedRuleValidateTypeDependents', () => {
   });
 
   test('You cannot have empty string for timeline_title when timeline_id is present', () => {
-    const schema: PrebuiltRuleToInstall = {
+    const schema: PrebuiltRuleAsset = {
       ...getPrebuiltRuleMock(),
       timeline_id: '123',
       timeline_title: '',
@@ -31,7 +31,7 @@ describe('addPrepackagedRuleValidateTypeDependents', () => {
   });
 
   test('You cannot have timeline_title with an empty timeline_id', () => {
-    const schema: PrebuiltRuleToInstall = {
+    const schema: PrebuiltRuleAsset = {
       ...getPrebuiltRuleMock(),
       timeline_id: '',
       timeline_title: 'some-title',
@@ -41,7 +41,7 @@ describe('addPrepackagedRuleValidateTypeDependents', () => {
   });
 
   test('You cannot have timeline_title without timeline_id', () => {
-    const schema: PrebuiltRuleToInstall = {
+    const schema: PrebuiltRuleAsset = {
       ...getPrebuiltRuleMock(),
       timeline_title: 'some-title',
     };
@@ -59,7 +59,7 @@ describe('addPrepackagedRuleValidateTypeDependents', () => {
         value: -1,
       },
     };
-    const errors = addPrepackagedRuleValidateTypeDependents(schema as PrebuiltRuleToInstall);
+    const errors = addPrepackagedRuleValidateTypeDependents(schema as PrebuiltRuleAsset);
     expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
   });
 
@@ -72,7 +72,7 @@ describe('addPrepackagedRuleValidateTypeDependents', () => {
         value: 1,
       },
     };
-    const errors = addPrepackagedRuleValidateTypeDependents(schema as PrebuiltRuleToInstall);
+    const errors = addPrepackagedRuleValidateTypeDependents(schema as PrebuiltRuleAsset);
     expect(errors).toEqual(['Number of fields must be 3 or less']);
   });
 
@@ -91,7 +91,7 @@ describe('addPrepackagedRuleValidateTypeDependents', () => {
         ],
       },
     };
-    const errors = addPrepackagedRuleValidateTypeDependents(schema as PrebuiltRuleToInstall);
+    const errors = addPrepackagedRuleValidateTypeDependents(schema as PrebuiltRuleAsset);
     expect(errors).toEqual(['Cardinality of a field that is being aggregated on is always 1']);
   });
 });
