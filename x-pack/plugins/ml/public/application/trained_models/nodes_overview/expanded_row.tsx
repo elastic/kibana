@@ -24,15 +24,20 @@ import { NodeItem } from './nodes_list';
 import { useListItemsFormatter } from '../models_management/expanded_row';
 import { AllocatedModels } from './allocated_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import { JobMemoryTreeMap } from '../memory_tree_map';
+import { JobMemoryTreeMap } from '../../memory_usage/memory_tree_map';
 
 interface ExpandedRowProps {
   item: NodeItem;
 }
 
+enum TAB {
+  DETAILS,
+  MEMORY_USAGE,
+}
+
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
-  const [selectedTab, setSelectedTab] = useState<'details' | 'memory'>('details');
+  const [selectedTab, setSelectedTab] = useState<TAB>(TAB.DETAILS);
 
   const formatToListItems = useListItemsFormatter();
 
@@ -55,13 +60,19 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       `}
     >
       <EuiTabs>
-        <EuiTab isSelected={selectedTab === 'details'} onClick={() => setSelectedTab('details')}>
+        <EuiTab
+          isSelected={selectedTab === TAB.DETAILS}
+          onClick={() => setSelectedTab(TAB.DETAILS)}
+        >
           <FormattedMessage
             id="xpack.ml.trainedModels.nodesList.expandedRow.detailsTabTitle"
             defaultMessage="Details"
           />
         </EuiTab>
-        <EuiTab isSelected={selectedTab === 'memory'} onClick={() => setSelectedTab('memory')}>
+        <EuiTab
+          isSelected={selectedTab === TAB.MEMORY_USAGE}
+          onClick={() => setSelectedTab(TAB.MEMORY_USAGE)}
+        >
           <FormattedMessage
             id="xpack.ml.trainedModels.nodesList.expandedRow.memoryTabTitle"
             defaultMessage="Memory usage"
@@ -69,7 +80,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         </EuiTab>
       </EuiTabs>
 
-      {selectedTab === 'details' ? (
+      {selectedTab === TAB.DETAILS ? (
         <>
           <EuiSpacer size="s" />
           <EuiFlexGrid columns={2} gutterSize={'s'}>
@@ -132,7 +143,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         </>
       ) : (
         <>
-          <JobMemoryTreeMap height="400px" node={item.name} />
+          <JobMemoryTreeMap node={item.name} />
         </>
       )}
     </div>

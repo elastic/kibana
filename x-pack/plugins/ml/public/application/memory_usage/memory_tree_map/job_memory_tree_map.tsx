@@ -44,25 +44,30 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { JobMemorySize } from '../../../../common/types/trained_models';
 import { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { LoadingWrapper } from '../../jobs/new_job/pages/components/charts/loading_wrapper';
 import { useFieldFormatter } from '../../contexts/kibana';
-import { getMemoryItemColor } from '../nodes_overview/memory_item_colors';
+
 import { useRefresh } from '../../routing/use_refresh';
+import { getMemoryItemColor } from '../memory_item_colors';
 
 interface Props {
   node?: string;
   type?: MlSavedObjectType;
-  height: string;
+  height?: string;
 }
+
+const DEFAULT_CHART_HEIGHT = '400px';
 
 type TreeMapOptions = EuiComboBoxOptionOption & { objectType: MlSavedObjectType };
 
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const refresh = useRefresh();
+  const chartHeight = height ?? DEFAULT_CHART_HEIGHT;
 
   const trainedModelsApiService = useTrainedModelsApiService();
   const [allData, setAllData] = useState<JobMemorySize[]>([]);
@@ -71,17 +76,23 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
 
   const TYPE_OPTIONS: TreeMapOptions[] = [
     {
-      label: 'Anomaly detection jobs',
+      label: i18n.translate('xpack.ml.memoryUsage.treeMap.adLabel', {
+        defaultMessage: 'Anomaly detection jobs',
+      }),
       objectType: 'anomaly-detector',
       color: getMemoryItemColor('anomaly-detector'),
     },
     {
-      label: 'Data frame analytics jobs',
+      label: i18n.translate('xpack.ml.memoryUsage.treeMap.dfaLabel', {
+        defaultMessage: 'Data frame analytics jobs',
+      }),
       objectType: 'data-frame-analytics',
       color: getMemoryItemColor('data-frame-analytics'),
     },
     {
-      label: 'Trained models',
+      label: i18n.translate('xpack.ml.memoryUsage.treeMap.modelsLabel', {
+        defaultMessage: 'Trained models',
+      }),
       objectType: 'trained-model',
       color: getMemoryItemColor('trained-model'),
     },
@@ -124,16 +135,17 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   );
 
   return (
-    <div style={{ height }} data-test-subj={`mlJobTreeMap ${data.length ? 'withData' : 'empty'}`}>
+    <div
+      style={{ height: chartHeight }}
+      data-test-subj={`mlJobTreeMap ${data.length ? 'withData' : 'empty'}`}
+    >
       <EuiSpacer size="s" />
-      <LoadingWrapper height={height} hasData={data.length > 0} loading={loading}>
+      <LoadingWrapper height={chartHeight} hasData={data.length > 0} loading={loading}>
         <EuiFlexGroup>
           <EuiFlexItem />
           <EuiFlexItem>
             <EuiComboBox
               fullWidth
-              aria-label="Accessible screen reader label"
-              placeholder="Select or create options"
               options={TYPE_OPTIONS as EuiComboBoxOptionOption[]}
               selectedOptions={selectedOptions}
               onChange={onTypeChange}

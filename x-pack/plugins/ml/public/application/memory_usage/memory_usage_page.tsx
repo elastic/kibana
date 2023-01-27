@@ -13,7 +13,7 @@ import { isServerless } from '../../../common/util/serverless';
 import { NodesList } from '../trained_models/nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
-import { JobMemoryTreeMap } from '../trained_models/memory_tree_map';
+import { JobMemoryTreeMap } from './memory_tree_map';
 
 enum TAB {
   NODES,
@@ -32,7 +32,7 @@ export const MemoryUsagePage: FC = () => {
         <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
           <EuiFlexItem grow={false}>
             <FormattedMessage
-              id="xpack.ml.modelManagement.memoryUsageHeader"
+              id="xpack.ml.memoryUsage.memoryUsageHeader"
               defaultMessage="Memory Usage"
             />
           </EuiFlexItem>
@@ -43,7 +43,7 @@ export const MemoryUsagePage: FC = () => {
       </MlPageHeader>
 
       {serverless ? (
-        <JobMemoryTreeMap height="400px" />
+        <JobMemoryTreeMap />
       ) : (
         <>
           <EuiTabs>
@@ -51,19 +51,16 @@ export const MemoryUsagePage: FC = () => {
               isSelected={selectedTab === TAB.NODES}
               onClick={() => setSelectedTab(TAB.NODES)}
             >
-              <FormattedMessage id="xpack.ml.modelManagement.nodesTab" defaultMessage="Nodes" />
+              <FormattedMessage id="xpack.ml.memoryUsage.nodesTab" defaultMessage="Nodes" />
             </EuiTab>
             <EuiTab
               isSelected={selectedTab === TAB.MEMORY_USAGE}
               onClick={() => setSelectedTab(TAB.MEMORY_USAGE)}
             >
-              <FormattedMessage
-                id="xpack.ml.modelManagement.memoryTab"
-                defaultMessage="Memory usage"
-              />
+              <FormattedMessage id="xpack.ml.memoryUsage.memoryTab" defaultMessage="Memory usage" />
             </EuiTab>
           </EuiTabs>
-          {selectedTab === TAB.NODES ? <NodesList /> : <JobMemoryTreeMap height="400px" />}
+          {selectedTab === TAB.NODES ? <NodesList /> : <JobMemoryTreeMap />}
         </>
       )}
     </>
