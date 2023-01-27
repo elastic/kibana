@@ -20,7 +20,8 @@ import { getComparisonEnabled } from '../../../time_comparison/get_comparison_en
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
 import { APMQueryParams } from '../../url_helpers';
 import { APMLinkExtendProps, getLegacyApmHref } from '../apm_link';
-import { txGroupsDroppedBucketName } from './transaction_detail_max_groups_message';
+
+export const txGroupsDroppedBucketName = '_other';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;

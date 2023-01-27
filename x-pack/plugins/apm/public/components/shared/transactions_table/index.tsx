@@ -28,6 +28,7 @@ import {
   useFetcher,
 } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { txGroupsDroppedBucketName } from '../links/apm/transaction_detail_link';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { OverviewTableContainer } from '../overview_table_container';
@@ -49,6 +50,7 @@ const INITIAL_STATE: InitialState = {
   mainStatisticsData: {
     transactionGroups: [],
     maxTransactionGroupsExceeded: true,
+    overflowCount: 0,
     transactionGroupsTotalItems: 0,
   },
 };
@@ -151,8 +153,12 @@ export function TransactionsTable({
       ).then((response) => {
         const currentPageTransactionGroups = orderBy(
           response.transactionGroups,
-          ['overflowCount', field],
-          ['desc', direction]
+          [
+            (transactionItem) =>
+              transactionItem.name === txGroupsDroppedBucketName ? -1 : 0,
+            field,
+          ],
+          ['asc', direction]
         ).slice(index * size, (index + 1) * size);
 
         return {
@@ -191,6 +197,7 @@ export function TransactionsTable({
     mainStatisticsData: {
       transactionGroups,
       maxTransactionGroupsExceeded,
+      overflowCount,
       transactionGroupsTotalItems,
     },
   } = data;
@@ -250,6 +257,7 @@ export function TransactionsTable({
     comparisonEnabled,
     shouldShowSparkPlots,
     offset,
+    overflowCount,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;

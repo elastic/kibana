@@ -99,6 +99,11 @@ export async function getServiceTransactionGroups({
         },
         aggs: {
           total_duration: { sum: { field } },
+          overflow_count: {
+            max: {
+              field: 'transaction.aggregation.overflow_count',
+            },
+          },
           transaction_groups: {
             terms: {
               field: TRANSACTION_NAME,
@@ -106,11 +111,6 @@ export async function getServiceTransactionGroups({
               order: { _count: 'desc' },
             },
             aggs: {
-              overflow_count: {
-                max: {
-                  field: 'transaction.aggregation.overflow_count',
-                },
-              },
               transaction_group_total_duration: {
                 sum: { field },
               },
@@ -152,7 +152,6 @@ export async function getServiceTransactionGroups({
         impact: totalDuration
           ? (transactionGroupTotalDuration * 100) / totalDuration
           : 0,
-        overflowCount: bucket.overflow_count.value ?? 0,
       };
     }) ?? [];
 
@@ -163,5 +162,6 @@ export async function getServiceTransactionGroups({
     })),
     maxTransactionGroupsExceeded:
       (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
+    overflowCount: response.aggregations?.overflow_count.value ?? 0,
   };
 }
