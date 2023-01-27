@@ -10,6 +10,7 @@ import type {
   CreateAgentPolicyResponse,
   PackagePolicy,
   GetPackagePoliciesResponse,
+  Output,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
@@ -18,13 +19,23 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import { APP_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
-import type { GenerateServiceTokenResponse } from '@kbn/fleet-plugin/common/types';
 import { spawn } from 'child_process';
+import type {
+  GetOutputsResponse,
+  PutOutputRequest,
+  GetOneOutputResponse,
+  GenerateServiceTokenResponse,
+} from '@kbn/fleet-plugin/common/types';
+import { outputRoutesService } from '@kbn/fleet-plugin/common/services';
+import { isLocalhost } from '../common/localhost_services';
 import { fetchFleetAgents } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
 export const runFleetServerIfNeeded = async () => {
-  const { log } = getRuntimeServices();
+  const {
+    log,
+    kibana: { isLocalhost: isKibanaOnLocalhost },
+  } = getRuntimeServices();
 
   log.info(`Setting up fleet server (if necessary)`);
   log.indent(4);
@@ -40,6 +51,10 @@ export const runFleetServerIfNeeded = async () => {
   try {
     const fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
     const serviceToken = await generateFleetServiceToken();
+
+    if (isKibanaOnLocalhost) {
+      await configureFleetIfNeeded();
+    }
 
     await startFleetServerWithDocker({
       policyId: fleetServerAgentPolicyId,
@@ -62,7 +77,7 @@ const isFleetServerEnrolled = async () => {
   }
 
   const fleetAgentsResponse = await fetchFleetAgents(kbnClient, {
-    kuery: `(policy_id: "${policyId}" and active : true)`,
+    kuery: `(policy_id: "${policyId}" and active : true) and (status:online)`,
     showInactive: false,
     perPage: 1,
   });
@@ -112,7 +127,7 @@ const getOrCreateFleetServerAgentPolicyId = async (): Promise<string> => {
       method: 'POST',
       path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
       body: {
-        name: 'Fleet Server policy',
+        name: `Fleet Server policy (${Math.random().toString(32).substring(2)})`,
         description: `Created by CLI Tool via: ${__filename}`,
         namespace: 'default',
         monitoring_enabled: ['logs', 'metrics'],
@@ -159,7 +174,7 @@ const startFleetServerWithDocker = async ({
   const {
     log,
     localhostRealIp,
-    elastic: { url: elasticUrl, isLocalhost },
+    elastic: { url: elasticUrl, isLocalhost: isElasticOnLocalhost },
   } = getRuntimeServices();
 
   log.info(`Starting a new fleet server using Docker`);
@@ -167,7 +182,7 @@ const startFleetServerWithDocker = async ({
 
   let esUrlWithRealIp: string = elasticUrl;
 
-  if (isLocalhost) {
+  if (isElasticOnLocalhost) {
     const esNewUrl = new URL(elasticUrl);
     esNewUrl.hostname = localhostRealIp;
     esUrlWithRealIp = esNewUrl.toString();
@@ -239,4 +254,68 @@ const getAgentVersionMatchingCurrentStack = async (): Promise<string> => {
   }
 
   return version;
+};
+
+const configureFleetIfNeeded = async () => {
+  const { log, kbnClient, localhostRealIp } = getRuntimeServices();
+
+  log.info('Checking if Fleet needs to be configured');
+  log.indent(4);
+
+  try {
+    // make sure that all ES hostnames are using localhost real IP
+    const fleetOutputs = await kbnClient
+      .request<GetOutputsResponse>({
+        method: 'GET',
+        path: outputRoutesService.getListPath(),
+      })
+      .then((response) => response.data);
+
+    for (const { id, ...output } of fleetOutputs.items) {
+      if (output.type === 'elasticsearch') {
+        if (output.hosts) {
+          let needsUpdating = false;
+          const updatedHosts: Output['hosts'] = [];
+
+          for (const host of output.hosts) {
+            const hostURL = new URL(host);
+
+            if (isLocalhost(hostURL.hostname)) {
+              needsUpdating = true;
+              hostURL.hostname = localhostRealIp;
+              updatedHosts.push(hostURL.toString());
+
+              log.verbose(
+                `Fleet Settings for Elasticsearch Output [Name: ${
+                  output.name
+                } (id: ${id})]: Host [${host}] updated to [${hostURL.toString()}]`
+              );
+            } else {
+              updatedHosts.push(host);
+            }
+          }
+
+          if (needsUpdating) {
+            const update: PutOutputRequest['body'] = {
+              ...(output as PutOutputRequest['body']), // cast needed to quite TS - looks like the types for Output in fleet differ a bit between create/update
+              hosts: updatedHosts,
+            };
+
+            log.info(`Updating Fleet Settings for Output [${output.name} (${id})]`);
+
+            await kbnClient.request<GetOneOutputResponse>({
+              method: 'PUT',
+              path: outputRoutesService.getUpdatePath(id),
+              body: update,
+            });
+          }
+        }
+      }
+    }
+  } catch (error) {
+    log.indent(-4);
+    throw error;
+  }
+
+  log.indent(-4);
 };
