@@ -10,22 +10,27 @@
 import sizeMe from 'react-sizeme';
 import React from 'react';
 
-import {
-  CONTACT_CARD_EMBEDDABLE,
-} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardGrid } from './dashboard_grid';
 import { DashboardContainer } from '../../embeddable/dashboard_container';
-import { getSampleDashboardInput, mockDashboardReduxEmbeddableTools } from '../../../mocks';
+import { getSampleDashboardInput } from '../../../mocks';
 
 jest.mock('./dashboard_grid_item', () => ({
   DashboardGridItem: require('react').forwardRef((props, ref) => {
-    const className = props.expandedPanelId === undefined
-      ? 'regularPanel'
-      : props.expandedPanelId === props.id ? 'expandedPanel' : 'hiddenPanel';
-    return <div className={className} id={`mockDashboardGridItem_${props.id}`} ref={ref}>mockDashboardGridItem</div>;
+    const className =
+      props.expandedPanelId === undefined
+        ? 'regularPanel'
+        : props.expandedPanelId === props.id
+        ? 'expandedPanel'
+        : 'hiddenPanel';
+    return (
+      <div className={className} id={`mockDashboardGridItem_${props.id}`} ref={ref}>
+        mockDashboardGridItem
+      </div>
+    );
   }),
 }));
 
@@ -131,21 +136,13 @@ test('DashboardGrid renders expanded panel', async () => {
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
   expect(component.find('GridItem').length).toBe(2);
 
-  expect(
-    (component.find('#mockDashboardGridItem_1').hasClass('expandedPanel'))
-  ).toBe(true);
-  expect(
-    (component.find('#mockDashboardGridItem_2').hasClass('hiddenPanel'))
-  ).toBe(true);
+  expect(component.find('#mockDashboardGridItem_1').hasClass('expandedPanel')).toBe(true);
+  expect(component.find('#mockDashboardGridItem_2').hasClass('hiddenPanel')).toBe(true);
 
   dashboardContainer.setExpandedPanelId();
   component.update();
   expect(component.find('GridItem').length).toBe(2);
 
-  expect(
-    (component.find('#mockDashboardGridItem_1').hasClass('regularPanel'))
-  ).toBe(true);
-  expect(
-    (component.find('#mockDashboardGridItem_2').hasClass('regularPanel'))
-  ).toBe(true);
+  expect(component.find('#mockDashboardGridItem_1').hasClass('regularPanel')).toBe(true);
+  expect(component.find('#mockDashboardGridItem_2').hasClass('regularPanel')).toBe(true);
 });
