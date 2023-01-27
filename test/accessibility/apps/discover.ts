@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const browser = getService('browser');
 
-  describe('Discover a11y tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/147186
+  describe.skip('Discover a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
