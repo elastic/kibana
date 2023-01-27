@@ -15,7 +15,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('transform', function () {
+  describe('transform - group 3', function () {
     this.tags('transform');
 
     before(async () => {
@@ -36,8 +36,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./full_transform_access'));
-    loadTestFile(require.resolve('./read_transform_access'));
+    loadTestFile(require.resolve('./cloning'));
+    loadTestFile(require.resolve('./editing'));
   });
 }
 export interface ComboboxOption {

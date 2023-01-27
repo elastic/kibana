@@ -11,8 +11,8 @@ import type {
   TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { getLatestTransformConfig, getPivotTransformConfig } from '.';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { getLatestTransformConfig, getPivotTransformConfig } from '../permissions';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

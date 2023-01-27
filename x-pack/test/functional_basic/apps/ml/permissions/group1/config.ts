@@ -9,7 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../../../functional/config.base.js')
+    require.resolve('../../../../../functional/config.base.js')
   );
 
   return {
@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     junit: {
       ...xpackFunctionalConfig.get('junit'),
-      reportName: 'Chrome X-Pack UI Functional Tests Basic License - transform',
+      reportName: 'Chrome X-Pack UI Functional Tests Basic License - permissions',
     },
   };
 }

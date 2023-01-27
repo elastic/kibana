@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-import { USER } from '../../../../functional/services/ml/security_common';
+import { USER } from '../../../../../functional/services/ml/security_common';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error']);

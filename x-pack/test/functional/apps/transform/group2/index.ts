@@ -9,13 +9,13 @@ import {
   TransformLatestConfig,
   TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('transform', function () {
+  describe('transform - group 2', function () {
     this.tags('transform');
 
     before(async () => {
@@ -36,13 +36,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./permissions'));
-    loadTestFile(require.resolve('./creation_index_pattern'));
-    loadTestFile(require.resolve('./creation_saved_search'));
-    loadTestFile(require.resolve('./creation_runtime_mappings'));
-    loadTestFile(require.resolve('./cloning'));
-    loadTestFile(require.resolve('./editing'));
-    loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./deleting'));
     loadTestFile(require.resolve('./resetting'));
     loadTestFile(require.resolve('./starting'));

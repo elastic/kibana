@@ -162,7 +162,11 @@ enabled:
   - x-pack/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/test/functional_basic/apps/ml/permissions/config.ts
   - x-pack/test/functional_basic/apps/ml/data_visualizer/config.ts
-  - x-pack/test/functional_basic/apps/transform/config.ts
+  - x-pack/test/functional_basic/apps/transform/group1/config.ts
+  - x-pack/test/functional_basic/apps/transform/group2/config.ts
+  - x-pack/test/functional_basic/apps/transform/group3/config.ts
+  - x-pack/test/functional_basic/apps/transform/permissions/config.ts
+  - x-pack/test/functional_basic/apps/transform/feature_controls/config.ts
   - x-pack/test/functional_cors/config.ts
   - x-pack/test/functional_embedded/config.ts
   - x-pack/test/functional_enterprise_search/without_host_configured.config.ts
@@ -217,7 +221,11 @@ enabled:
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
-  - x-pack/test/functional/apps/transform/config.ts
+  - x-pack/test/functional/apps/transform/group1/config.ts
+  - x-pack/test/functional/apps/transform/group2/config.ts
+  - x-pack/test/functional/apps/transform/group3/config.ts
+  - x-pack/test/functional/apps/transform/permissions/config.ts
+  - x-pack/test/functional/apps/transform/feature_controls/config.ts
   - x-pack/test/functional/apps/upgrade_assistant/config.ts
   - x-pack/test/functional/apps/uptime/config.ts
   - x-pack/test/functional/apps/visualize/config.ts

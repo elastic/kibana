@@ -7,21 +7,22 @@
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { getLatestTransformConfig, getPivotTransformConfig } from '.';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { getLatestTransformConfig, getPivotTransformConfig } from '../permissions';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('deleting', function () {
-    const PREFIX = 'deleting';
+  describe('resetting', function () {
+    const PREFIX = 'resetting';
 
     const testDataList = [
       {
         suiteTitle: 'batch transform with pivot configuration',
         originalConfig: getPivotTransformConfig(PREFIX, false),
         expected: {
+          messageText: 'reset transform.',
           row: {
             status: TRANSFORM_STATE.STOPPED,
             type: 'pivot',
@@ -34,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'continuous transform with pivot configuration',
         originalConfig: getPivotTransformConfig(PREFIX, true),
         expected: {
+          messageText: 'reset transform.',
           row: {
             status: TRANSFORM_STATE.STOPPED,
             type: 'pivot',
@@ -49,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         transformDocsPerSecond: '1000',
         transformFrequency: '10m',
         expected: {
-          messageText: 'updated transform.',
+          messageText: 'reset transform.',
           row: {
             status: TRANSFORM_STATE.STOPPED,
             type: 'latest',
@@ -86,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
-        it('delete transform', async () => {
+        it('reset transform', async () => {
           await transform.testExecution.logTestStep('should load the home page');
           await transform.navigation.navigateTo();
           await transform.management.assertTransformListPageExists();
@@ -95,10 +97,10 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.management.assertTransformsTableExists();
 
           if (testData.expected.row.mode === 'continuous') {
-            await transform.testExecution.logTestStep('should have the delete action disabled');
+            await transform.testExecution.logTestStep('should have the reset action disabled');
             await transform.table.assertTransformRowActionEnabled(
               testData.originalConfig.id,
-              'Delete',
+              'Reset',
               false
             );
 
@@ -116,18 +118,24 @@ export default function ({ getService }: FtrProviderContext) {
             progress: testData.expected.row.progress,
           });
 
-          await transform.testExecution.logTestStep('should show the delete modal');
+          await transform.testExecution.logTestStep('should show the reset modal');
           await transform.table.assertTransformRowActionEnabled(
             testData.originalConfig.id,
-            'Delete',
+            'Reset',
             true
           );
-          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Delete');
-          await transform.table.assertTransformDeleteModalExists();
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Reset');
+          await transform.table.assertTransformResetModalExists();
 
-          await transform.testExecution.logTestStep('should delete the transform');
-          await transform.table.confirmDeleteTransform();
-          await transform.table.assertTransformRowNotExists(testData.originalConfig.id);
+          await transform.testExecution.logTestStep('should reset the transform');
+          await transform.table.confirmResetTransform();
+
+          await transform.testExecution.logTestStep(
+            'should display the messages tab and include a reset message'
+          );
+          await transform.table.refreshTransformList();
+          await transform.table.filterWithSearchString(testData.originalConfig.id, 1);
+          await transform.table.assertTransformExpandedRowMessages(testData.expected.messageText);
         });
       });
     }

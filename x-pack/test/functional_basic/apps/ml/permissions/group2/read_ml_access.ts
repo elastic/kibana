@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../../functional/services/ml/security_common';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { USER } from '../../../../../functional/services/ml/security_common';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
         const ecExpectedTotalCount = '287';
 
         const uploadFilePath = require.resolve(
-          '../../../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
+          '../../../../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
         );
         const expectedUploadFileTitle = 'artificial_server_log';
 

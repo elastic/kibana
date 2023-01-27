@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning basic license - permissions', function () {
+  describe('machine learning basic license - permissions group 1', function () {
     this.tags(['skipFirefox', 'ml']);
 
     before(async () => {
@@ -35,7 +35,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./full_ml_access'));
-    loadTestFile(require.resolve('./read_ml_access'));
-    loadTestFile(require.resolve('./no_ml_access'));
   });
 }
