@@ -22,29 +22,60 @@ type LayoutProps = Pick<
   'services' | 'disableAutoFetching' | 'disableTriggers' | 'disabledActions'
 >;
 
+/**
+ * The props exposed by the container
+ */
 export type UnifiedHistogramContainerProps = Pick<
   UnifiedHistogramLayoutProps,
   'className' | 'resizeRef' | 'appendHitsCounter' | 'children'
 >;
 
-export interface UnifiedHistogramInitializeOptions
-  extends UnifiedHistogramStateOptions,
-    LayoutProps {
-  localStorageKeyPrefix?: string;
-}
+/**
+ * The options used to initialize the container
+ */
+export type UnifiedHistogramInitializeOptions = UnifiedHistogramStateOptions &
+  Omit<LayoutProps, 'services'>;
 
+/**
+ * The uninitialized API exposed by the container
+ */
 export interface UnifiedHistogramUninitializedApi {
+  /**
+   * Whether the container has been initialized
+   */
   initialized: false;
+  /**
+   * Initialize the container
+   */
   initialize: (options: UnifiedHistogramInitializeOptions) => void;
 }
 
+/**
+ * The initialized API exposed by the container
+ */
 export interface UnifiedHistogramInitializedApi {
+  /**
+   * Whether the container has been initialized
+   */
   initialized: true;
+  /**
+   * Get an observable to watch the container state, optionally providing a
+   * selector function which only gets triggered when the selected state changes
+   */
   getState$: UnifiedHistogramStateService['getState$'];
+  /**
+   * Update the container state my providing a partial state object
+   */
   updateState: UnifiedHistogramStateService['updateState'];
+  /**
+   * Manually trigger a refetch of the data
+   */
   refetch: () => void;
 }
 
+/**
+ * The API exposed by the container
+ */
 export type UnifiedHistogramApi = UnifiedHistogramUninitializedApi | UnifiedHistogramInitializedApi;
 
 export const UnifiedHistogramContainer = forwardRef<

@@ -53,7 +53,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   timeRange?: TimeRange;
   /**
-   * Context object for requests made by unified histogram components -- optional
+   * Context object for requests made by Unified Histogram components -- optional
    */
   request?: UnifiedHistogramRequestContext;
   /**

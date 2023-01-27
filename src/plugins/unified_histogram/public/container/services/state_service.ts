@@ -22,25 +22,79 @@ import {
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
 
+/**
+ * The current state of the container
+ */
 export interface UnifiedHistogramState {
+  /**
+   * The current field used for the breakdown
+   */
   breakdownField: string | undefined;
+  /**
+   * Whether or not the chart is hidden
+   */
   chartHidden: boolean;
+  /**
+   * The current data view
+   */
   dataView: DataView;
+  /**
+   * The current filters
+   */
   filters: Filter[];
+  /**
+   * The current Lens request adapter
+   */
   lensRequestAdapter: RequestAdapter | undefined;
+  /**
+   * The current query
+   */
   query: Query | AggregateQuery;
+  /**
+   * The current request adapter used for non-Lens requests
+   */
   requestAdapter: RequestAdapter | undefined;
+  /**
+   * The current search session ID
+   */
   searchSessionId: string | undefined;
+  /**
+   * The current time interval of the chart
+   */
   timeInterval: string;
+  /**
+   * The current time range
+   */
   timeRange: TimeRange;
+  /**
+   * The current top panel height
+   */
   topPanelHeight: number | undefined;
+  /**
+   * The current fetch status of the hits count request
+   */
   totalHitsStatus: UnifiedHistogramFetchStatus;
+  /**
+   * The current result of the hits count request
+   */
   totalHitsResult: number | Error | undefined;
 }
 
+/**
+ * The options used to initialize the comntainer state
+ */
 export interface UnifiedHistogramStateOptions {
+  /**
+   * The services required by the Unified Histogram components
+   */
   services: UnifiedHistogramServices;
+  /**
+   * The prefix for the keys used in local storage -- leave undefined to avoid using local storage
+   */
   localStorageKeyPrefix?: string;
+  /**
+   * The initial state of the container
+   */
   initialState: Partial<UnifiedHistogramState> & Pick<UnifiedHistogramState, 'dataView'>;
 }
 

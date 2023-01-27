@@ -19,7 +19,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 /**
- * The fetch status of a unified histogram request
+ * The fetch status of a Unified Histogram request
  */
 export enum UnifiedHistogramFetchStatus {
   uninitialized = 'uninitialized',
@@ -30,7 +30,7 @@ export enum UnifiedHistogramFetchStatus {
 }
 
 /**
- * The services required by the unified histogram components
+ * The services required by the Unified Histogram components
  */
 export interface UnifiedHistogramServices {
   data: DataPublicPluginStart;
@@ -51,6 +51,9 @@ export interface UnifiedHistogramBucketInterval {
   scale?: number;
 }
 
+/**
+ * The adapters passed up from Lens
+ */
 export type UnifiedHistogramAdapters = Partial<DefaultInspectorAdapters>;
 
 /**
@@ -64,7 +67,7 @@ export interface UnifiedHistogramChartLoadEvent {
 }
 
 /**
- * Context object for requests made by unified histogram components
+ * Context object for requests made by Unified Histogram components
  */
 export interface UnifiedHistogramRequestContext {
   /**

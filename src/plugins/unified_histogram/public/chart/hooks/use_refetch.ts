@@ -48,7 +48,7 @@ export const useRefetch = ({
 }) => {
   const refetchDeps = useRef<ReturnType<typeof getRefetchDeps>>();
 
-  // When the unified histogram props change, we must compare the current subset
+  // When the Unified Histogram props change, we must compare the current subset
   // that should trigger a histogram refetch against the previous subset. If they
   // are different, we must refetch the histogram to ensure it's up to date.
   useEffect(() => {
