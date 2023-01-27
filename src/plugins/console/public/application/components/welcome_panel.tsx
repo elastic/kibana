@@ -91,7 +91,7 @@ export function WelcomePanel(props: Props) {
           <p>
             <FormattedMessage
               id="console.welcomePage.addCommentsDescription"
-              defaultMessage="To add a single-line comment, use {hash} or {doubleSlash}. For a multiline comment, mark the beginninf with {slashAsterisk} and the end with {asteriskSlash}."
+              defaultMessage="To add a single-line comment, use {hash} or {doubleSlash}. For a multiline comment, mark the beginning with {slashAsterisk} and the end with {asteriskSlash}."
               values={{
                 hash: <EuiCode>#</EuiCode>,
                 doubleSlash: <EuiCode>//</EuiCode>,
