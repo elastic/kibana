@@ -16,6 +16,7 @@ import {
   useEuiTheme,
   EuiText,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import { EntityCell, EntityCellFilter } from '../entity_cell';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
@@ -30,6 +31,7 @@ import {
   getAnomalyScoreExplanationImpactValue,
   getSeverityColor,
 } from '../../../../common/util/anomaly_utils';
+import { useMlKibana } from '../../contexts/kibana';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -327,6 +329,11 @@ export const DetailsItems: FC<{
 };
 
 export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = ({ anomaly }) => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const docsUrl = docLinks.links.ml.anomalyDetectionScoreExplanation;
+
   const explanation = anomaly.source.anomaly_score_explanation;
   if (explanation === undefined) {
     return null;
@@ -509,14 +516,26 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
 
   return (
     <div>
-      <EuiText size="xs">
-        <h4>
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle"
-            defaultMessage="Anomaly explanation"
-          />
-        </h4>
-      </EuiText>
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem>
+          <EuiText size="xs">
+            <h4>
+              <FormattedMessage
+                id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle"
+                defaultMessage="Anomaly explanation"
+              />
+            </h4>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink href={docsUrl} target="_blank">
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanation.learnMoreLinkText"
+              defaultMessage="Learn more"
+            />
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
 
       {explanationDetails.map(({ title, description }) => (
