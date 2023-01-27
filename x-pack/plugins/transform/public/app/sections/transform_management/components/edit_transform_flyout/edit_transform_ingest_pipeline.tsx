@@ -17,12 +17,12 @@ import { useApi } from '../../../../hooks/use_api';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
-  useEditTransformFlyoutState,
+  useEditTransformFlyoutStateFormFieldDestinationIngestPipeline,
   useEditTransformFlyoutDispatch,
 } from './use_edit_transform_flyout';
 
 export const EditTransformIngestPipeline: FC = () => {
-  const { formFields } = useEditTransformFlyoutState();
+  const { errorMessages, value } = useEditTransformFlyoutStateFormFieldDestinationIngestPipeline();
   const dispatch = useEditTransformFlyoutDispatch();
 
   const api = useApi();
@@ -61,8 +61,8 @@ export const EditTransformIngestPipeline: FC = () => {
                 defaultMessage: 'Ingest Pipeline',
               }
             )}
-            isInvalid={formFields.destinationIngestPipeline.errorMessages.length > 0}
-            error={formFields.destinationIngestPipeline.errorMessages}
+            isInvalid={errorMessages.length > 0}
+            error={errorMessages}
           >
             <EuiComboBox
               data-test-subj="transformEditFlyoutDestinationIngestPipelineFieldSelect"
@@ -80,7 +80,7 @@ export const EditTransformIngestPipeline: FC = () => {
               )}
               singleSelection={{ asPlainText: true }}
               options={ingestPipelineNames.map((label: string) => ({ label }))}
-              selectedOptions={[{ label: formFields.destinationIngestPipeline.value }]}
+              selectedOptions={[{ label: value }]}
               onChange={(o) =>
                 dispatch({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
               }
@@ -89,15 +89,17 @@ export const EditTransformIngestPipeline: FC = () => {
         ) : (
           <EditTransformFlyoutFormTextInput
             dataTestSubj="transformEditFlyoutDestinationIngestPipelineInput"
-            errorMessages={formFields.destinationIngestPipeline.errorMessages}
+            errorMessages={errorMessages}
             label={i18n.translate(
               'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
               {
                 defaultMessage: 'Ingest Pipeline',
               }
             )}
-            onChange={(value) => dispatch({ field: 'destinationIngestPipeline', value })}
-            value={formFields.destinationIngestPipeline.value}
+            onChange={(valueUpdate) =>
+              dispatch({ field: 'destinationIngestPipeline', value: valueUpdate })
+            }
+            value={value}
           />
         )
       }

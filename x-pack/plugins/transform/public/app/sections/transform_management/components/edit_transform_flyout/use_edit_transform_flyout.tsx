@@ -551,19 +551,40 @@ export const useEditTransformFlyout = ({ config, dataViewId }: EditTransformFlyo
 
 export type UseEditTransformFlyoutReturnType = ReturnType<typeof useEditTransformFlyout>;
 
-// Wrap hook with the constate factory
+// wrap hook with the constate factory to create context provider and custom hooks based on selectors
 const [
   EditTransformFlyoutProvider,
   useEditTransformFlyoutConfig,
   useEditTransformFlyoutDataViewId,
   useEditTransformFlyoutDispatch,
   useEditTransformFlyoutState,
+  useEditTransformFlyoutStateFormSections,
+  useEditTransformFlyoutStateFormFieldDescription,
+  useEditTransformFlyoutStateFormFieldDestinationIndex,
+  useEditTransformFlyoutStateFormFieldDocsPerSecond,
+  useEditTransformFlyoutStateFormFieldFrequency,
+  useEditTransformFlyoutStateFormFieldDestinationIngestPipeline,
+  useEditTransformFlyoutStateFormFieldMaxPageSearchSize,
+  useEditTransformFlyoutStateFormFieldNumFailureRetries,
+  useEditTransformFlyoutStateFormFieldRetentionPolicy,
 ] = constate(
   useEditTransformFlyout,
   (value) => value.config,
   (value) => value.dataViewId,
   (value) => value.dispatch,
-  (value) => value.state
+  (value) => value.state,
+  (value) => value.state.formSections,
+  (value) => value.state.formFields.description,
+  (value) => value.state.formFields.destinationIndex,
+  (value) => value.state.formFields.docsPerSecond,
+  (value) => value.state.formFields.frequency,
+  (value) => value.state.formFields.destinationIngestPipeline,
+  (value) => value.state.formFields.maxPageSearchSize,
+  (value) => value.state.formFields.numFailureRetries,
+  (value) => ({
+    retentionPolicyField: value.state.formFields.retentionPolicyField,
+    retentionPolicyMaxAge: value.state.formFields.retentionPolicyMaxAge,
+  })
 );
 
 export {
@@ -572,4 +593,13 @@ export {
   useEditTransformFlyoutDataViewId,
   useEditTransformFlyoutDispatch,
   useEditTransformFlyoutState,
+  useEditTransformFlyoutStateFormSections,
+  useEditTransformFlyoutStateFormFieldDescription,
+  useEditTransformFlyoutStateFormFieldDestinationIndex,
+  useEditTransformFlyoutStateFormFieldDocsPerSecond,
+  useEditTransformFlyoutStateFormFieldFrequency,
+  useEditTransformFlyoutStateFormFieldDestinationIngestPipeline,
+  useEditTransformFlyoutStateFormFieldMaxPageSearchSize,
+  useEditTransformFlyoutStateFormFieldNumFailureRetries,
+  useEditTransformFlyoutStateFormFieldRetentionPolicy,
 };

@@ -11,18 +11,18 @@ import { i18n } from '@kbn/i18n';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
-  useEditTransformFlyoutState,
+  useEditTransformFlyoutStateFormFieldDocsPerSecond,
   useEditTransformFlyoutDispatch,
 } from './use_edit_transform_flyout';
 
 export const EditTransformDocsPerSecond: FC = () => {
-  const { formFields } = useEditTransformFlyoutState();
+  const { errorMessages, value } = useEditTransformFlyoutStateFormFieldDocsPerSecond();
   const dispatch = useEditTransformFlyoutDispatch();
 
   return (
     <EditTransformFlyoutFormTextInput
       dataTestSubj="transformEditFlyoutDocsPerSecondInput"
-      errorMessages={formFields.docsPerSecond.errorMessages}
+      errorMessages={errorMessages}
       helpText={i18n.translate(
         'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelpText',
         {
@@ -32,8 +32,8 @@ export const EditTransformDocsPerSecond: FC = () => {
       label={i18n.translate('xpack.transform.transformList.editFlyoutFormDocsPerSecondLabel', {
         defaultMessage: 'Documents per second',
       })}
-      onChange={(value) => dispatch({ field: 'docsPerSecond', value })}
-      value={formFields.docsPerSecond.value}
+      onChange={(valueUpdate) => dispatch({ field: 'docsPerSecond', value: valueUpdate })}
+      value={value}
     />
   );
 };

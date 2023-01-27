@@ -18,7 +18,8 @@ import { useAppDependencies } from '../../../../app_dependencies';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
   useEditTransformFlyoutDataViewId,
-  useEditTransformFlyoutState,
+  useEditTransformFlyoutStateFormFieldRetentionPolicy,
+  useEditTransformFlyoutStateFormSections,
   useEditTransformFlyoutDispatch,
 } from './use_edit_transform_flyout';
 
@@ -27,8 +28,9 @@ export const EditTransformRetentionPolicy: FC = () => {
   const dataViewsClient = appDeps.data.dataViews;
 
   const dataViewId = useEditTransformFlyoutDataViewId();
-
-  const { formFields, formSections } = useEditTransformFlyoutState();
+  const formSections = useEditTransformFlyoutStateFormSections();
+  const { retentionPolicyField, retentionPolicyMaxAge } =
+    useEditTransformFlyoutStateFormFieldRetentionPolicy();
   const dispatch = useEditTransformFlyoutDispatch();
 
   const [dateFieldNames, setDateFieldNames] = useState<string[]>([]);
@@ -97,8 +99,8 @@ export const EditTransformRetentionPolicy: FC = () => {
                     defaultMessage: 'Field',
                   }
                 )}
-                isInvalid={formFields.retentionPolicyField.errorMessages.length > 0}
-                error={formFields.retentionPolicyField.errorMessages}
+                isInvalid={retentionPolicyField.errorMessages.length > 0}
+                error={retentionPolicyField.errorMessages}
                 helpText={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyDateFieldHelpText',
                   {
@@ -116,43 +118,47 @@ export const EditTransformRetentionPolicy: FC = () => {
                   )}
                   data-test-subj="transformEditFlyoutRetentionPolicyFieldSelect"
                   options={retentionDateFieldOptions}
-                  value={formFields.retentionPolicyField.value}
+                  value={retentionPolicyField.value}
                   onChange={(e) =>
                     dispatch({ field: 'retentionPolicyField', value: e.target.value })
                   }
                   hasNoInitialSelection={
                     !retentionDateFieldOptions
                       .map((d) => d.text)
-                      .includes(formFields.retentionPolicyField.value)
+                      .includes(retentionPolicyField.value)
                   }
                 />
               </EuiFormRow>
             ) : (
               <EditTransformFlyoutFormTextInput
                 dataTestSubj="transformEditFlyoutRetentionPolicyFieldInput"
-                errorMessages={formFields.retentionPolicyField.errorMessages}
+                errorMessages={retentionPolicyField.errorMessages}
                 label={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
                   {
                     defaultMessage: 'Field',
                   }
                 )}
-                onChange={(value) => dispatch({ field: 'retentionPolicyField', value })}
-                value={formFields.retentionPolicyField.value}
+                onChange={(valueUpdate) =>
+                  dispatch({ field: 'retentionPolicyField', value: valueUpdate })
+                }
+                value={retentionPolicyField.value}
               />
             )
           }
           <EditTransformFlyoutFormTextInput
             dataTestSubj="transformEditFlyoutRetentionPolicyMaxAgeInput"
-            errorMessages={formFields.retentionPolicyMaxAge.errorMessages}
+            errorMessages={retentionPolicyMaxAge.errorMessages}
             label={i18n.translate(
               'xpack.transform.transformList.editFlyoutFormRetentionMaxAgeFieldLabel',
               {
                 defaultMessage: 'Max age',
               }
             )}
-            onChange={(value) => dispatch({ field: 'retentionPolicyMaxAge', value })}
-            value={formFields.retentionPolicyMaxAge.value}
+            onChange={(valueUpdate) =>
+              dispatch({ field: 'retentionPolicyMaxAge', value: valueUpdate })
+            }
+            value={retentionPolicyMaxAge.value}
           />
         </div>
       )}

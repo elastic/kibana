@@ -11,18 +11,19 @@ import { i18n } from '@kbn/i18n';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
-  useEditTransformFlyoutState,
+  useEditTransformFlyoutStateFormFieldMaxPageSearchSize,
   useEditTransformFlyoutDispatch,
 } from './use_edit_transform_flyout';
 
 export const EditTransformMaxPageSearchSize: FC = () => {
-  const { formFields } = useEditTransformFlyoutState();
+  const { defaultValue, errorMessages, value } =
+    useEditTransformFlyoutStateFormFieldMaxPageSearchSize();
   const dispatch = useEditTransformFlyoutDispatch();
 
   return (
     <EditTransformFlyoutFormTextInput
       dataTestSubj="transformEditFlyoutMaxPageSearchSizeInput"
-      errorMessages={formFields.maxPageSearchSize.errorMessages}
+      errorMessages={errorMessages}
       helpText={i18n.translate(
         'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelpText',
         {
@@ -33,13 +34,13 @@ export const EditTransformMaxPageSearchSize: FC = () => {
       label={i18n.translate('xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeLabel', {
         defaultMessage: 'Maximum page search size',
       })}
-      onChange={(value) => dispatch({ field: 'maxPageSearchSize', value })}
-      value={formFields.maxPageSearchSize.value}
+      onChange={(valueUpdate) => dispatch({ field: 'maxPageSearchSize', value: valueUpdate })}
+      value={value}
       placeholder={i18n.translate(
         'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizePlaceholderText',
         {
           defaultMessage: 'Default: {defaultValue}',
-          values: { defaultValue: formFields.maxPageSearchSize.defaultValue },
+          values: { defaultValue },
         }
       )}
     />

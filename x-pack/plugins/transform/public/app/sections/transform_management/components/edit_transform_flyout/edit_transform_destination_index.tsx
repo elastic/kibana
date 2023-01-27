@@ -11,23 +11,23 @@ import { i18n } from '@kbn/i18n';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
-  useEditTransformFlyoutState,
+  useEditTransformFlyoutStateFormFieldDestinationIndex,
   useEditTransformFlyoutDispatch,
 } from './use_edit_transform_flyout';
 
 export const EditTransformDestinationIndex: FC = () => {
-  const { formFields } = useEditTransformFlyoutState();
+  const { errorMessages, value } = useEditTransformFlyoutStateFormFieldDestinationIndex();
   const dispatch = useEditTransformFlyoutDispatch();
 
   return (
     <EditTransformFlyoutFormTextInput
       dataTestSubj="transformEditFlyoutDestinationIndexInput"
-      errorMessages={formFields.destinationIndex.errorMessages}
+      errorMessages={errorMessages}
       label={i18n.translate('xpack.transform.transformList.editFlyoutFormDestinationIndexLabel', {
         defaultMessage: 'Destination index',
       })}
-      onChange={(value) => dispatch({ field: 'destinationIndex', value })}
-      value={formFields.destinationIndex.value}
+      onChange={(valueUpdate) => dispatch({ field: 'destinationIndex', value: valueUpdate })}
+      value={value}
     />
   );
 };

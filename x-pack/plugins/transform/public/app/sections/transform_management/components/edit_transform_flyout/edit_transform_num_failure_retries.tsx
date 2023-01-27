@@ -11,18 +11,18 @@ import { i18n } from '@kbn/i18n';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
-  useEditTransformFlyoutState,
+  useEditTransformFlyoutStateFormFieldNumFailureRetries,
   useEditTransformFlyoutDispatch,
 } from './use_edit_transform_flyout';
 
 export const EditTransformNumFailureRetries: FC = () => {
-  const { formFields } = useEditTransformFlyoutState();
+  const { errorMessages, value } = useEditTransformFlyoutStateFormFieldNumFailureRetries();
   const dispatch = useEditTransformFlyoutDispatch();
 
   return (
     <EditTransformFlyoutFormTextInput
       dataTestSubj="transformEditFlyoutNumFailureRetriesInput"
-      errorMessages={formFields.numFailureRetries.errorMessages}
+      errorMessages={errorMessages}
       helpText={i18n.translate(
         'xpack.transform.transformList.editFlyoutFormNumFailureRetriesHelpText',
         {
@@ -33,8 +33,8 @@ export const EditTransformNumFailureRetries: FC = () => {
       label={i18n.translate('xpack.transform.transformList.numFailureRetriesLabel', {
         defaultMessage: 'Number of failure retries',
       })}
-      onChange={(value) => dispatch({ field: 'numFailureRetries', value })}
-      value={formFields.numFailureRetries.value}
+      onChange={(valueUpdate) => dispatch({ field: 'numFailureRetries', value: valueUpdate })}
+      value={value}
     />
   );
 };

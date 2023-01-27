@@ -11,18 +11,18 @@ import { i18n } from '@kbn/i18n';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
-  useEditTransformFlyoutState,
+  useEditTransformFlyoutStateFormFieldFrequency,
   useEditTransformFlyoutDispatch,
 } from './use_edit_transform_flyout';
 
 export const EditTransformFrequency: FC = () => {
-  const { formFields } = useEditTransformFlyoutState();
+  const { defaultValue, errorMessages, value } = useEditTransformFlyoutStateFormFieldFrequency();
   const dispatch = useEditTransformFlyoutDispatch();
 
   return (
     <EditTransformFlyoutFormTextInput
       dataTestSubj="transformEditFlyoutFrequencyInput"
-      errorMessages={formFields.frequency.errorMessages}
+      errorMessages={errorMessages}
       helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelpText', {
         defaultMessage:
           'The interval to check for changes in source indices when the transform runs continuously.',
@@ -30,15 +30,15 @@ export const EditTransformFrequency: FC = () => {
       label={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyLabel', {
         defaultMessage: 'Frequency',
       })}
-      onChange={(value) => dispatch({ field: 'frequency', value })}
+      onChange={(valueUpdate) => dispatch({ field: 'frequency', value: valueUpdate })}
       placeholder={i18n.translate(
         'xpack.transform.transformList.editFlyoutFormFrequencyPlaceholderText',
         {
           defaultMessage: 'Default: {defaultValue}',
-          values: { defaultValue: formFields.frequency.defaultValue },
+          values: { defaultValue },
         }
       )}
-      value={formFields.frequency.value}
+      value={value}
     />
   );
 };
