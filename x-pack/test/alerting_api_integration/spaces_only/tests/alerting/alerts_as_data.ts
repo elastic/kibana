@@ -500,7 +500,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       expect(source['kibana.alert.rule.name']).to.equal('abc');
       expect(source['kibana.alert.rule.producer']).to.equal('alertsFixture');
       expect(source['kibana.alert.rule.tags']).to.eql(['foo']);
-      expect(source['kibana.alert.rule.rule_type_id']).to.equal('test.patternFiring');
+      expect(source['kibana.alert.rule.rule_type_id']).to.equal('test.patternFiringAad');
       expect(source['kibana.alert.rule.uuid']).to.equal(ruleId);
       expect(source['kibana.alert.rule.parameters']).to.eql(ruleParameters);
       expect(source['kibana.space_ids']).to.eql(['space1']);
