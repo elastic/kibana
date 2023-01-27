@@ -385,7 +385,7 @@ experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web
 is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
 To disable, set to `null`. *Default:* `null`
 
-[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`:: 
+[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`::
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
 {kib} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors:
@@ -539,7 +539,7 @@ set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>>
 
 `telemetry.enabled`::
 Reporting your cluster statistics helps
-us improve your user experience. Your data is never shared with anyone. Set to
+us improve your user experience. Set to
 `false` to disable telemetry capabilities entirely. You can alternatively opt
 out through *Advanced Settings*. *Default: `true`*
 
@@ -554,7 +554,7 @@ Set this value to false to disable the Cross-Cluster Replication UI.
 [[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`::
 Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
 +
-When you create visualizations using the *Lens* drag-and-drop editor, you can use the toolbar to open and explore your data in *Discover*. For more information, check out <<explore-lens-data-in-discover, Explore the data in Discover>>. 
+When you create visualizations using the *Lens* drag-and-drop editor, you can use the toolbar to open and explore your data in *Discover*. For more information, check out <<explore-lens-data-in-discover, Explore the data in Discover>>.
 
 [[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.exploreDataInChart.enabled`::
 Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
