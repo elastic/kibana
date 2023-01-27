@@ -19,28 +19,28 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const timestamps = range.ratePerMinute(180);
 
       const cloudFields: ApmFields = {
-        'cloud.provider': 'aws',
-        'cloud.service.name': 'lambda',
-        'cloud.region': 'us-west-2',
+        'cloud.provider': 'azure',
+        'cloud.service.name': 'functions',
+        'cloud.region': 'Central US',
       };
 
-      const instanceALambdaPython = apm
+      const instanceALambdaDotnet = apm
         .serverlessFunction({
-          serviceName: 'aws-lambdas',
+          serviceName: 'azure-functions',
           environment: ENVIRONMENT,
-          agentName: 'python',
-          functionName: 'fn-python-1',
-          serverlessType: 'aws.lambda',
+          agentName: 'dotnet',
+          functionName: 'fn-dotnet-1',
+          serverlessType: 'azure.functions',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 
-      const instanceALambdaNode = apm
+      const instanceALambdaDotnet2 = apm
         .serverlessFunction({
-          serviceName: 'aws-lambdas',
+          serviceName: 'azure-functions',
           environment: ENVIRONMENT,
-          agentName: 'nodejs',
-          functionName: 'fn-node-1',
-          serverlessType: 'aws.lambda',
+          agentName: 'dotnet',
+          functionName: 'fn-dotnet-2',
+          serverlessType: 'azure.functions',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 
@@ -48,46 +48,16 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         .serverlessFunction({
           environment: ENVIRONMENT,
           agentName: 'nodejs',
-          functionName: 'fn-node-2',
-          serverlessType: 'aws.lambda',
+          functionName: 'fn-node-1',
+          serverlessType: 'azure.functions',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 
-      const memory = {
-        total: 536870912, // 0.5gb
-        free: 94371840, // ~0.08 gb
-      };
-
       const awsLambdaEvents = timestamps.generator((timestamp) => {
         return [
-          instanceALambdaPython
-            .invocation()
-            .duration(1000)
-            .timestamp(timestamp)
-            .coldStart(true)
-            .billedDuration(4000)
-            .faasTimeout(10000)
-            .memory(memory)
-            .coldStartDuration(4000)
-            .faasDuration(4000),
-          instanceALambdaNode
-            .invocation()
-            .duration(1000)
-            .timestamp(timestamp)
-            .coldStart(false)
-            .billedDuration(4000)
-            .faasTimeout(10000)
-            .memory(memory)
-            .faasDuration(4000),
-          instanceALambdaNode2
-            .invocation()
-            .duration(1000)
-            .timestamp(timestamp)
-            .coldStart(false)
-            .billedDuration(4000)
-            .faasTimeout(10000)
-            .memory(memory)
-            .faasDuration(4000),
+          instanceALambdaDotnet.invocation().duration(1000).timestamp(timestamp).coldStart(true),
+          instanceALambdaDotnet2.invocation().duration(1000).timestamp(timestamp).coldStart(false),
+          instanceALambdaNode2.invocation().duration(1000).timestamp(timestamp).coldStart(false),
         ];
       });
 

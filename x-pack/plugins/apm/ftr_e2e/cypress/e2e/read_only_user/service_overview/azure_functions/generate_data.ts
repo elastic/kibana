@@ -7,7 +7,7 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 const dataConfig = {
-  serviceName: 'synth-python',
+  serviceName: 'synth-dotnet',
   rate: 10,
   transaction: {
     name: 'GET /apple 🍎',
@@ -21,7 +21,7 @@ export function generateData({ start, end }: { start: number; end: number }) {
     .service({
       name: serviceName,
       environment: 'production',
-      agentName: 'python',
+      agentName: 'dotnet',
     })
     .instance('instance-a');
 
@@ -32,9 +32,9 @@ export function generateData({ start, end }: { start: number; end: number }) {
       instance
         .transaction({ transactionName: transaction.name })
         .defaults({
-          'service.runtime.name': 'AWS_Lambda_python3.8',
-          'cloud.provider': 'aws',
-          'cloud.service.name': 'lambda',
+          'service.runtime.name': 'dotnet-isolated',
+          'cloud.provider': 'azure',
+          'cloud.service.name': 'functions',
           'faas.coldstart': true,
         })
         .timestamp(timestamp)
