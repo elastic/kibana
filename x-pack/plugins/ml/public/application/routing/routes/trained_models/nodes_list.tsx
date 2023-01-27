@@ -17,7 +17,6 @@ import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { NodesList } from '../../../trained_models/nodes_overview';
 import { MlPageHeader } from '../../../components/page_header';
-import { TechnicalPreviewBadge } from '../../../components/technical_preview_badge';
 
 export const nodesListRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -58,9 +57,6 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
               id="xpack.ml.modelManagement.nodesOverviewHeader"
               defaultMessage="Nodes"
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TechnicalPreviewBadge />
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
