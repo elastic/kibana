@@ -15,8 +15,6 @@ type CustomBrandingServiceFactory = PluginServiceFactory<DashboardCustomBranding
 export const customBrandingServiceFactory: CustomBrandingServiceFactory = () => {
   const pluginMock = coreMock.createStart();
   return {
-    customBranding: {
-      hasCustomBranding$: pluginMock.customBranding.hasCustomBranding$,
-    },
+    hasCustomBranding$: pluginMock.customBranding.hasCustomBranding$,
   };
 };
