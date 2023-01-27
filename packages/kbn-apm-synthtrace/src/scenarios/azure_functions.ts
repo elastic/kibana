@@ -30,6 +30,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           environment: ENVIRONMENT,
           agentName: 'dotnet',
           functionName: 'fn-dotnet-1',
+          serverlessType: 'azure.functions',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 
@@ -39,6 +40,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           environment: ENVIRONMENT,
           agentName: 'dotnet',
           functionName: 'fn-dotnet-2',
+          serverlessType: 'azure.functions',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 
@@ -47,6 +49,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           environment: ENVIRONMENT,
           agentName: 'nodejs',
           functionName: 'fn-node-1',
+          serverlessType: 'azure.functions',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 

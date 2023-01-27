@@ -34,7 +34,7 @@ export function serverlessFunction({
   agentName: string;
   serviceName?: string;
   architecture?: string;
-  serverlessType?: string;
+  serverlessType?: 'aws.lambda' | 'azure.functions';
 }) {
   const faasId =
     serverlessType === 'aws.lambda'
