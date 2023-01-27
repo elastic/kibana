@@ -55,7 +55,7 @@ describe('Core app routes', () => {
     });
 
     it('URI encodes redirect path', async () => {
-      const response = await request.get(root, '/%5Csome-path/').expect(302);
+      const response = await kbnTestServer.request.get(root, '/%5Csome-path/').expect(302);
       expect(response.get('location')).toEqual('/base-path/%5Csome-path');
     });
   });
