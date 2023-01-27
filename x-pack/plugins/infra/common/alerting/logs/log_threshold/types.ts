@@ -332,8 +332,8 @@ export const UnoptimizedGroupedSearchQueryResponseRT = rt.intersection([
                   doc_count: rt.number,
                 }),
                 ChartPreviewBucketsRT,
+                additionalContextRT
               ]),
-              ...additionalContextRT.props,
             })
           ),
         }),

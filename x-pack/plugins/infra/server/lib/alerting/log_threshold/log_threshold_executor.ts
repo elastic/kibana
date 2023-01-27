@@ -493,7 +493,7 @@ const getReducedGroupByResults = (
   } else {
     for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
-      const additionalContextHits = groupBucket.additionalContext?.hits?.hits;
+      const additionalContextHits = groupBucket.filtered_results.additionalContext?.hits?.hits;
       reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
@@ -776,8 +776,10 @@ export const getGroupedESQuery = (
                 ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
               },
             },
+            aggregations: {
+              ...getContextAggregation(params),
+            }
           },
-          ...getContextAggregation(params),
         },
       },
     };
