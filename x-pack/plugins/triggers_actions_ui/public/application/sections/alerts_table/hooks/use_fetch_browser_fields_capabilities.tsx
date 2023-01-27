@@ -49,7 +49,10 @@ export const useFetchBrowserFieldCapabilities = ({
   }, [featureIds, http, toasts]);
 
   useEffect(() => {
-    if (isLoading !== undefined || featureIds.includes(INVALID_FEATURE_ID)) return;
+    if (isLoading !== undefined || featureIds.includes(INVALID_FEATURE_ID)) {
+      setIsLoading(false);
+      return;
+    }
 
     setIsLoading(true);
 

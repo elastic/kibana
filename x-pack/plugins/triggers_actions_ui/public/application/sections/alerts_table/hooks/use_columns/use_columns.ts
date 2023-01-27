@@ -150,19 +150,20 @@ export const useColumns = ({
   const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
 
   const defaultColumnsRef = useRef<typeof defaultColumns>();
-  const [areColumnsChange, setColumnsChange] = useState(false);
 
   useEffect(() => {
+    // check if default set of columns have changed
     const defaultColumnsEqual = isEqual(defaultColumns, defaultColumnsRef.current);
 
     if (!defaultColumnsEqual && isColumnsPopulated) {
+      // if changed, populate the columns again
       setColumnsPopulated(false);
       return;
     }
 
     const isApiNeverCalled = isBrowserFieldDataLoading !== false; // loading, undefined
 
-    const noOp = isApiNeverCalled && isColumnsPopulated;
+    const noOp = isApiNeverCalled || isColumnsPopulated;
 
     if (noOp) return;
 
@@ -171,16 +172,8 @@ export const useColumns = ({
 
     const populatedColumns = populateColumns(columnsToPopulate, browserFields, defaultColumns);
     setColumnsPopulated(true);
-    setColumnsChange(false);
     setColumns(populatedColumns);
-  }, [
-    browserFields,
-    columns,
-    defaultColumns,
-    isBrowserFieldDataLoading,
-    isColumnsPopulated,
-    areColumnsChange,
-  ]);
+  }, [browserFields, columns, defaultColumns, isBrowserFieldDataLoading, isColumnsPopulated]);
 
   const setColumnsAndSave = useCallback(
     (newColumns: EuiDataGridColumn[]) => {
