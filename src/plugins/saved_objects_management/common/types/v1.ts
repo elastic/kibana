@@ -146,6 +146,8 @@ export interface FindQueryHTTPV1 {
 export interface FindResponseHTTPV1 {
   saved_objects: SavedObjectWithMetadataV1[];
   total: number;
+  page: number;
+  per_page: number;
 }
 
 export interface GetAllowedTypesResponseHTTPV1 {

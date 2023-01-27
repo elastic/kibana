@@ -91,6 +91,8 @@ export const registerFindRoute = (
           return result;
         }),
         total: findResponse.total,
+        per_page: findResponse.per_page,
+        page: findResponse.page,
       };
 
       return res.ok({ body: response });
