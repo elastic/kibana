@@ -6,7 +6,6 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBox } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
@@ -25,7 +24,6 @@ import { HeaderSection } from '../header_section';
 import { InspectButtonContainer } from '../inspect';
 import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from '../alerts_treemap/query';
 import type { AlertsTreeMapAggregation } from '../alerts_treemap/types';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
 
@@ -37,11 +35,10 @@ export interface Props {
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
-  extraActions?: Action[];
-  filters?: Filter[];
-  height?: number;
   inspectTitle: string;
   isPanelExpanded: boolean;
+  filters?: Filter[];
+  height?: number;
   query?: Query;
   riskSubAggregationField: string;
   runtimeMappings?: MappingRuntimeFields;
@@ -63,11 +60,10 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   addFilter,
   alignHeader,
   chartOptionsContextMenu,
-  extraActions,
-  filters,
-  height = DEFAULT_HEIGHT,
   inspectTitle,
   isPanelExpanded,
+  filters,
+  height = DEFAULT_HEIGHT,
   query,
   riskSubAggregationField,
   runtimeMappings,
@@ -88,7 +84,6 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
 
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuidv4()}`, []);
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
 
   const additionalFilters = useMemo(() => {
     try {
@@ -152,10 +147,10 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   useInspectButton({
     deleteQuery,
     loading: isLoadingAlerts,
-    refetch,
-    request,
     response,
     setQuery,
+    refetch,
+    request,
     uniqueQueryId,
   });
 
@@ -183,9 +178,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
         >
           {isPanelExpanded && (
             <FieldSelection
-              chartOptionsContextMenu={
-                isChartEmbeddablesEnabled ? undefined : chartOptionsContextMenu
-              }
+              chartOptionsContextMenu={chartOptionsContextMenu}
               setStackByField0={setStackByField0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={setStackByField1}
@@ -200,23 +193,21 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
           )}
         </HeaderSection>
 
-        {isPanelExpanded ? (
-          isLoadingAlerts ? (
-            <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
-          ) : (
-            <>
-              {alertsData != null && isPanelExpanded && (
-                <AlertsTreemap
-                  addFilter={addFilter}
-                  data={alertsData}
-                  maxBuckets={DEFAULT_STACK_BY_FIELD0_SIZE}
-                  stackByField0={stackByField0}
-                  stackByField1={stackByField1}
-                />
-              )}
-            </>
-          )
-        ) : null}
+        {isLoadingAlerts && isPanelExpanded ? (
+          <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
+        ) : (
+          <>
+            {alertsData != null && isPanelExpanded && (
+              <AlertsTreemap
+                addFilter={addFilter}
+                data={alertsData}
+                maxBuckets={DEFAULT_STACK_BY_FIELD0_SIZE}
+                stackByField0={stackByField0}
+                stackByField1={stackByField1}
+              />
+            )}
+          </>
+        )}
       </KpiPanel>
     </InspectButtonContainer>
   );

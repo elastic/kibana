@@ -87,6 +87,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<null | ParsedSeverityData>(null);
+
   const additionalFilters = useMemo(() => {
     try {
       return [

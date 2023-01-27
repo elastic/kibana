@@ -99,10 +99,10 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
         <EuiFlexGroup data-test-subj="alerts-charts-container">
           <PlaceHolder title={i18n.DETECTIONS_TITLE} />
           <SeverityLevelChart
-            addFilter={addFilter}
             data={severityData}
             isLoading={isSeverityLoading}
             uniqueQueryId={uniqueQueryId}
+            addFilter={addFilter}
           />
           <PlaceHolder title={i18n.ALERT_BY_HOST_TITLE} />
         </EuiFlexGroup>
