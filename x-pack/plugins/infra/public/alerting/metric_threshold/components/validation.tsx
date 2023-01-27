@@ -164,7 +164,7 @@ export function validateMetricThreshold({
         errors[id].customMetricsError = i18n.translate(
           'xpack.infra.metrics.alertFlyout.error.customMetricsError',
           {
-            defaultMessage: 'You must defined at least 1 custom metric',
+            defaultMessage: 'You must define at least 1 custom metric',
           }
         );
       } else {
