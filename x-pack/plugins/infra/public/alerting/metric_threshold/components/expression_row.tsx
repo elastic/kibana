@@ -225,7 +225,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 onChangeSelectedAggType={updateAggType}
               />
             </StyledExpression>
-            {['count', 'custom'].includes(aggType) !== true && (
+            {!['count', 'custom'].includes(aggType) && (
               <StyledExpression>
                 <OfExpression
                   customAggTypesOptions={aggregationType}
