@@ -7,9 +7,16 @@
 
 import { ALERT_ACTION_GROUP } from '@kbn/rule-data-utils';
 
+export const getOriginalActionGroup = (
+  alertHits: Array<{ [id: string]: any }> | null | undefined
+) => {
+  const source = alertHits && alertHits.length > 0 ? alertHits[0]._source : undefined;
+  return source?.[ALERT_ACTION_GROUP];
+};
+
 export const createGetOriginalAlertState =
-  (actionGroupToAlertState: (actionGroup: string | undefined) => string | undefined) =>
+  (translateActionGroupToAlertState: (actionGroup: string | undefined) => string | undefined) =>
   (alertHits: Array<{ [id: string]: any }> | null | undefined) => {
-    const source = alertHits && alertHits.length > 0 ? alertHits[0]._source : undefined;
-    return actionGroupToAlertState(source?.[ALERT_ACTION_GROUP]);
+    const source = getOriginalActionGroup(alertHits);
+    return translateActionGroupToAlertState(source?.[ALERT_ACTION_GROUP]);
   };

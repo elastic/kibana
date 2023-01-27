@@ -15,7 +15,7 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { createGetOriginalAlertState } from '../../../utils/get_original_alert_state';
+import { getOriginalActionGroup } from '../../../utils/get_original_alert_state';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
@@ -46,6 +46,11 @@ type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
 
+export const FIRED_ACTIONS_ID = 'metrics.inventory_threshold.fired';
+export const WARNING_ACTIONS_ID = 'metrics.inventory_threshold.warning';
+
+type InventoryThrehsoldActionGroup = typeof FIRED_ACTIONS_ID | typeof WARNING_ACTIONS_ID;
+
 export type InventoryMetricThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type InventoryMetricThresholdAlertState = AlertState; // no specific state used
 export type InventoryMetricThresholdAlertContext = AlertContext; // no specific instance context used
@@ -58,7 +63,7 @@ type InventoryMetricThresholdAlert = Alert<
 type InventoryMetricThresholdAlertFactory = (
   id: string,
   reason: string,
-  actionGroup: string,
+  actionGroup: InventoryThrehsoldActionGroup,
   additionalContext?: AdditionalContext | null,
   threshold?: number | undefined,
   value?: number | undefined
@@ -220,7 +225,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       }
       if (reason) {
         const actionGroupId =
-          nextState === AlertStates.WARNING ? WARNING_ACTIONS.id : FIRED_ACTIONS.id;
+          nextState === AlertStates.WARNING ? WARNING_ACTIONS_ID : FIRED_ACTIONS_ID;
 
         const additionalContext = results && results.length > 0 ? results[0][group].context : null;
 
@@ -263,8 +268,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       const alertUuid = getAlertUuid(recoveredAlertId);
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
-      const getOriginalAlertState = createGetOriginalAlertState(actionGroupToAlertState);
-      const originalAlertState = getOriginalAlertState(alertHits);
+      const originalActionGroup = getOriginalActionGroup(alertHits);
 
       alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
@@ -280,10 +284,9 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           timestamp: indexedStartedDate,
           spaceId,
         }),
-        originalAlertState,
-        originalAlertStateWasALERT: originalAlertState === stateToAlertMessage[AlertStates.ALERT],
-        originalAlertStateWasWARNING:
-          originalAlertState === stateToAlertMessage[AlertStates.WARNING],
+        originalAlertState: translateActionGroupToAlertState(originalActionGroup),
+        originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS_ID,
+        originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS_ID,
         ...additionalContext,
       });
     }
@@ -349,14 +352,12 @@ const mapToConditionsLookup = (
       {}
     );
 
-export const FIRED_ACTIONS_ID = 'metrics.inventory_threshold.fired';
 export const FIRED_ACTIONS: ActionGroup<typeof FIRED_ACTIONS_ID> = {
   id: FIRED_ACTIONS_ID,
   name: i18n.translate('xpack.infra.metrics.alerting.inventory.threshold.fired', {
     defaultMessage: 'Alert',
   }),
 };
-export const WARNING_ACTIONS_ID = 'metrics.inventory_threshold.warning';
 export const WARNING_ACTIONS = {
   id: WARNING_ACTIONS_ID,
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.warning', {
@@ -364,7 +365,9 @@ export const WARNING_ACTIONS = {
   }),
 };
 
-const actionGroupToAlertState = (actionGroupId: string | undefined): string | undefined => {
+const translateActionGroupToAlertState = (
+  actionGroupId: string | undefined
+): string | undefined => {
   if (actionGroupId === FIRED_ACTIONS.id) {
     return stateToAlertMessage[AlertStates.ALERT];
   }
