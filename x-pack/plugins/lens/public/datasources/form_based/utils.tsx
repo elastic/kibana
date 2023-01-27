@@ -26,7 +26,13 @@ import {
 
 import { estypes } from '@elastic/elasticsearch';
 import type { DateRange } from '../../../common/types';
-import type { FramePublicAPI, IndexPattern, IndexPatternField, StateSetter, UserMessage } from '../../types';
+import type {
+  FramePublicAPI,
+  IndexPattern,
+  IndexPatternField,
+  StateSetter,
+  UserMessage,
+} from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type {
