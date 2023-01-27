@@ -3133,6 +3133,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-execution-context-integration-tests@link:packages/core/execution-context/core-execution-context-integration-tests":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-execution-context-server-internal@link:packages/core/execution-context/core-execution-context-server-internal":
   version "0.0.0"
   uid ""

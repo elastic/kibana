@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "devOnly": true,
+  "id": "@kbn/core-elasticsearch-integration-tests",
+  "owner": "@elastic/kibana-core"
+}

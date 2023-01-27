@@ -258,6 +258,8 @@
       "@kbn/core-elasticsearch-client-server-internal/*": ["packages/core/elasticsearch/core-elasticsearch-client-server-internal/*"],
       "@kbn/core-elasticsearch-client-server-mocks": ["packages/core/elasticsearch/core-elasticsearch-client-server-mocks"],
       "@kbn/core-elasticsearch-client-server-mocks/*": ["packages/core/elasticsearch/core-elasticsearch-client-server-mocks/*"],
+      "@kbn/core-elasticsearch-integration-tests": ["packages/core/elasticsearch/core-elasticsearch-integration-tests"],
+      "@kbn/core-elasticsearch-integration-tests/*": ["packages/core/elasticsearch/core-elasticsearch-integration-tests/*"],
       "@kbn/core-elasticsearch-server": ["packages/core/elasticsearch/core-elasticsearch-server"],
       "@kbn/core-elasticsearch-server/*": ["packages/core/elasticsearch/core-elasticsearch-server/*"],
       "@kbn/core-elasticsearch-server-internal": ["packages/core/elasticsearch/core-elasticsearch-server-internal"],
