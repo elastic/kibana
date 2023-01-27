@@ -13,9 +13,28 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertSummaryTimeRange } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useMemo, useRef, useCallback, useState } from 'react';
 
+import { observabilityFeatureId } from '../../../../../common';
+
+import { EmptySections } from '../../../../components/app/empty_sections';
+import { ObservabilityHeaderMenu } from '../../../../components/app/header';
+import { Resources } from '../../../../components/app/resources';
+import { NewsFeed } from '../../../../components/app/news_feed';
+import { SectionContainer } from '../../../../components/app/section';
+import { ObservabilityStatusProgress } from '../../../../components/app/observability_status/observability_status_progress';
+import { observabilityAlertFeatureIds, paths } from '../../../../config';
+import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
+import { useGuidedSetupProgress } from '../../../../hooks/use_guided_setup_progress';
+import { useHasData } from '../../../../hooks/use_has_data';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
-import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
-import { calculateBucketSize, useOverviewMetrics } from './helpers';
+import { getNewsFeed } from '../../../../services/get_news_feed';
+import { buildEsQuery } from '../../../../utils/build_es_query';
+import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
+
+import type { ObservabilityAppServices } from '../../../../application/types';
 
 import {
   DataSections,
@@ -24,28 +43,8 @@ import {
   DataAssistantFlyout,
 } from '../../components';
 
-import { buildEsQuery } from '../../../../utils/build_es_query';
-import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
-import { getNewsFeed } from '../../../../services/get_news_feed';
-import { EmptySections } from '../../../../components/app/empty_sections';
-import { ObservabilityHeaderMenu } from '../../../../components/app/header';
-import { Resources } from '../../../../components/app/resources';
-import { NewsFeed } from '../../../../components/app/news_feed';
-import { SectionContainer } from '../../../../components/app/section';
-import { ObservabilityStatusProgress } from '../../../../components/app/observability_status/observability_status_progress';
-
-import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
-import { useGuidedSetupProgress } from '../../../../hooks/use_guided_setup_progress';
-import { useHasData } from '../../../../hooks/use_has_data';
-import { observabilityAlertFeatureIds, paths } from '../../../../config';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
-
-import type { ObservabilityAppServices } from '../../../../application/types';
-
-import { observabilityFeatureId } from '../../../../../common';
+import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
+import { calculateBucketSize, useOverviewMetrics } from './helpers';
 
 export function OverviewPage() {
   const {

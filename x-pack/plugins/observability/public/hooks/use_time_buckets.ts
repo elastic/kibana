@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemo } from 'react';
 import { TimeBuckets, UI_SETTINGS } from '@kbn/data-plugin/common';
-import { ObservabilityAppServices } from '../application/types';
+import { useKibana } from '../utils/kibana_react';
 
 export const useTimeBuckets = () => {
-  const { uiSettings } = useKibana<ObservabilityAppServices>().services;
+  const { uiSettings } = useKibana().services;
 
   return useMemo(() => {
     return new TimeBuckets({
