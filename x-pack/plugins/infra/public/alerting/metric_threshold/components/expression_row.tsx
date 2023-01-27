@@ -260,7 +260,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             {!displayWarningThreshold && criticalThresholdExpression}
             {!displayWarningThreshold && (
               <>
-                {' '}
                 <EuiSpacer size={'xs'} />
                 <StyledExpressionRow>
                   <EuiButtonEmpty

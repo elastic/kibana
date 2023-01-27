@@ -27,7 +27,7 @@ interface MetricRowWithAggProps extends MetricRowBaseProps {
   fields: NormalizedFields;
 }
 
-export const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
+export const MetricRowWithAgg = ({
   name,
   aggType = Aggregators.AVERAGE,
   field,
@@ -37,7 +37,7 @@ export const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
   aggregationTypes,
   onChange,
   errors,
-}) => {
+}: MetricRowWithAggProps) => {
   const handleDelete = useCallback(() => {
     onDelete(name);
   }, [name, onDelete]);

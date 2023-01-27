@@ -42,15 +42,18 @@ export interface CustomEquationEditorProps {
 }
 
 const NEW_METRIC = { name: 'A', aggType: Aggregators.AVERAGE as CustomMetricAggTypes };
-const VAR_NAMES = range(65, 65 + 26).map((c) => String.fromCharCode(c));
+const MAX_VARIABLES = 26;
+const CHAR_CODE_FOR_A = 65;
+const CHAR_CODE_FOR_Z = CHAR_CODE_FOR_A + MAX_VARIABLES;
+const VAR_NAMES = range(CHAR_CODE_FOR_A, CHAR_CODE_FOR_Z).map((c) => String.fromCharCode(c));
 
-export const CustomEquationEditor: React.FC<CustomEquationEditorProps> = ({
+export const CustomEquationEditor = ({
   onChange,
   expression,
   fields,
   aggregationTypes,
   errors,
-}) => {
+}: CustomEquationEditorProps) => {
   const [customMetrics, setCustomMetrics] = useState<CustomMetrics>(
     expression?.customMetrics ?? [NEW_METRIC]
   );
@@ -107,12 +110,12 @@ export const CustomEquationEditor: React.FC<CustomEquationEditorProps> = ({
     [debouncedOnChange, expression, customMetrics, equation]
   );
 
-  const disableAdd = useMemo(() => customMetrics?.length === 26, [customMetrics]);
+  const disableAdd = customMetrics?.length === MAX_VARIABLES;
+  const disableDelete = customMetrics?.length === 1;
 
   const filteredAggregationTypes = omit(aggregationTypes, OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS);
 
   const metricRows = customMetrics?.map((row) => {
-    const disableDelete = customMetrics?.length === 1;
     if (row.aggType === Aggregators.COUNT) {
       return (
         <MetricRowWithCount

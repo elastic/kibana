@@ -23,7 +23,7 @@ interface MetricRowWithCountProps extends MetricRowBaseProps {
   filter?: string;
 }
 
-export const MetricRowWithCount: React.FC<MetricRowWithCountProps> = ({
+export const MetricRowWithCount = ({
   name,
   agg,
   filter,
@@ -31,7 +31,7 @@ export const MetricRowWithCount: React.FC<MetricRowWithCountProps> = ({
   disableDelete,
   onChange,
   aggregationTypes,
-}) => {
+}: MetricRowWithCountProps) => {
   const aggOptions = useMemo(
     () =>
       Object.values(aggregationTypes)

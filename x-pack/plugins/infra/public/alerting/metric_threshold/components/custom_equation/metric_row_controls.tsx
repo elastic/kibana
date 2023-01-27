@@ -13,7 +13,7 @@ interface MetricRowControlProps {
   disableDelete: boolean;
 }
 
-export const MetricRowControls: React.FC<MetricRowControlProps> = ({ onDelete, disableDelete }) => {
+export const MetricRowControls = ({ onDelete, disableDelete }: MetricRowControlProps) => {
   return (
     <>
       <EuiFlexItem grow={0}>
