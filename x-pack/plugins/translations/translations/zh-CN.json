@@ -3975,7 +3975,6 @@
     "indexPatternFieldEditor.editor.form.advancedSettings.hideButtonLabel": "隐藏高级设置",
     "indexPatternFieldEditor.editor.form.advancedSettings.showButtonLabel": "显示高级设置",
     "indexPatternFieldEditor.editor.form.changeWarning": "更改名称或类型会中断依赖此字段的搜索和可视化。",
-    "indexPatternFieldEditor.editor.form.customLabelDescription": "創建一個標籤以代替 Discover、Maps、Lens、Visualize 和 TSVB 中的字段名稱顯示。用於縮短長字段名稱。查詢和過濾器使用原始字段名稱。",
     "indexPatternFieldEditor.editor.form.customLabelLabel": "定制标签",
     "indexPatternFieldEditor.editor.form.customLabelTitle": "设置定制标签",
     "indexPatternFieldEditor.editor.form.defineFieldLabel": "定义脚本",
