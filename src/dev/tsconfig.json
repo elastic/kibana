@@ -24,7 +24,6 @@
     "@kbn/jest-serializers",
     "@kbn/i18n",
     "@kbn/storybook",
-    "@kbn/bazel-packages",
     "@kbn/std",
     "@kbn/dev-utils",
     "@kbn/utils",
@@ -35,5 +34,6 @@
     "@kbn/import-resolver",
     "@kbn/find-used-node-modules",
     "@kbn/ts-projects",
+    "@kbn/repo-packages",
   ]
 }

@@ -356,7 +356,9 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
                   .span({
                     spanName: 'onCreate',
                     spanType: 'app',
-                    spanSubtype: 'internal',
+                    spanSubtype: 'external',
+                    'service.target.type': 'http',
+                    'span.destination.service.resource': 'external',
                   })
                   .duration(50)
                   .success()
@@ -368,7 +370,7 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
                     httpUrl: 'https://backend:1234/api/start',
                   })
                   .duration(800)
-                  .success()
+                  .failure()
                   .timestamp(timestamp + 400)
               ),
             device

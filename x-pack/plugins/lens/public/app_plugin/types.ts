@@ -13,6 +13,7 @@ import type {
   ApplicationStart,
   AppMountParameters,
   ChromeStart,
+  CoreStart,
   CoreTheme,
   ExecutionContextStart,
   HttpStart,
@@ -50,12 +51,14 @@ import type {
   VisualizeEditorContext,
   LensTopNavMenuEntryGenerator,
   VisualizationMap,
+  UserMessagesGetter,
 } from '../types';
 import type { LensAttributeService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { LensInspector } from '../lens_inspector_service';
 import { IndexPatternServiceAPI } from '../data_views_service/service';
 import { Document } from '../persistence/saved_object_store';
+import { type LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
 
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;
@@ -81,6 +84,7 @@ export interface LensAppProps {
   contextOriginatingApp?: string;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   theme$: Observable<CoreTheme>;
+  coreStart: CoreStart;
 }
 
 export type RunSave = (
@@ -120,6 +124,9 @@ export interface LensTopNavMenuProps {
   theme$: Observable<CoreTheme>;
   indexPatternService: IndexPatternServiceAPI;
   onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
+  getUserMessages: UserMessagesGetter;
+  shortUrlService: (params: LensAppLocatorParams) => Promise<string>;
+  isCurrentStateDirty: boolean;
 }
 
 export interface HistoryLocationState {
@@ -160,20 +167,24 @@ export interface LensAppServices {
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
   dataViewEditor: DataViewEditorStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  locator?: LensAppLocator;
 }
 
-export interface LensTopNavTooltips {
-  showExportWarning: () => string | undefined;
-  showUnderlyingDataWarning: () => string | undefined;
+interface TopNavAction {
+  visible: boolean;
+  enabled?: boolean;
+  execute: (anchorElement: HTMLElement) => void;
+  getLink?: () => string | undefined;
+  tooltip?: () => string | undefined;
 }
 
-export interface LensTopNavActions {
-  inspect: () => void;
-  saveAndReturn: () => void;
-  showSaveModal: () => void;
-  goBack: () => void;
-  cancel: () => void;
-  exportToCSV: () => void;
-  getUnderlyingDataUrl: () => string | undefined;
-  openSettings: (anchorElement: HTMLElement) => void;
-}
+type AvailableTopNavActions =
+  | 'inspect'
+  | 'saveAndReturn'
+  | 'showSaveModal'
+  | 'goBack'
+  | 'cancel'
+  | 'share'
+  | 'getUnderlyingDataUrl'
+  | 'openSettings';
+export type LensTopNavActions = Record<AvailableTopNavActions, TopNavAction>;

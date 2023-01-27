@@ -22,6 +22,7 @@
     "@kbn/es-query",
     "@kbn/unified-search-plugin",
     "@kbn/ui-actions-plugin",
+    "@kbn/image-embeddable-plugin"
   ],
   "exclude": [
     "target/**/*",

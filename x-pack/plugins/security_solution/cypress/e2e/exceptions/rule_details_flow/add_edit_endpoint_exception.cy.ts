@@ -56,9 +56,6 @@ describe('Add endpoint exception from rule details', () => {
     esArchiverResetKibana();
     esArchiverLoad('auditbeat');
     login();
-  });
-
-  before(() => {
     deleteAlertsAndRules();
     // create rule with exception
     createEndpointExceptionList().then((response) => {
@@ -79,7 +76,9 @@ describe('Add endpoint exception from rule details', () => {
         '2'
       );
     });
+  });
 
+  beforeEach(() => {
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     goToEndpointExceptionsTab();

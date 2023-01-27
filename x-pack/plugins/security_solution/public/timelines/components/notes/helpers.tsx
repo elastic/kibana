@@ -9,7 +9,7 @@ import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Note } from '../../../common/lib/note';
 
@@ -73,7 +73,7 @@ NotesCount.displayName = 'NotesCount';
 /** Creates a new instance of a `note` */
 export const createNote = ({ newNote, user }: { newNote: string; user: string }): Note => ({
   created: moment.utc().toDate(),
-  id: uuid.v4(),
+  id: uuidv4(),
   lastEdit: null,
   note: newNote,
   saveObjectId: null,

@@ -14,6 +14,8 @@ steps:
     env:
       # ensure that the FTR logs all output for these tests
       DISABLE_CI_LOG_OUTPUT_CAPTURE: 'true'
+      # disable downloading a kibana build, this step does not use it
+      KIBANA_BUILD_ID: 'false'
     timeout_in_minutes: 90
 
   - wait: ~

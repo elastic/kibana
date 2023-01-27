@@ -1,0 +1,220 @@
+{
+  "id": "@kbn/ml-query-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.addExcludeFrozenToQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "addExcludeFrozenToQuery",
+        "description": [
+          "\nExtends an existing query with a clause to exclude the frozen tier.\n"
+        ],
+        "signature": [
+          "(originalQuery: ",
+          "QueryDslQueryContainer",
+          " | undefined) => ",
+          "QueryDslQueryContainer",
+          " | { bool: { must_not: { term: { _tier: { value: string; }; }; }[]; }; }"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/add_exclude_frozen_to_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.addExcludeFrozenToQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "originalQuery",
+            "description": [
+              "- the original query"
+            ],
+            "signature": [
+              "QueryDslQueryContainer",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/add_exclude_frozen_to_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "the original query exluding the frozen tier"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.buildBaseFilterCriteria",
+        "type": "Function",
+        "tags": [],
+        "label": "buildBaseFilterCriteria",
+        "description": [
+          "\nBuilds the base filter criteria used in queries,\nadding criteria for the time range and an optional query.\n"
+        ],
+        "signature": [
+          "(timeFieldName: string | undefined, earliestMs: number | undefined, latestMs: number | undefined, query: string | { [key: string]: any; } | undefined) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.buildBaseFilterCriteria.$1",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [
+              "- optional time field name of the data view"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.buildBaseFilterCriteria.$2",
+            "type": "number",
+            "tags": [],
+            "label": "earliestMs",
+            "description": [
+              "- optional earliest timestamp of the selected time range"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.buildBaseFilterCriteria.$3",
+            "type": "number",
+            "tags": [],
+            "label": "latestMs",
+            "description": [
+              "- optional latest timestamp of the selected time range"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.buildBaseFilterCriteria.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "- optional query"
+            ],
+            "signature": [
+              "string | { [key: string]: any; } | undefined"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "filter criteria"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.getSafeAggregationName",
+        "type": "Function",
+        "tags": [],
+        "label": "getSafeAggregationName",
+        "description": [
+          "\nReturns a name which is safe to use in elasticsearch aggregations for the supplied\nfield name. Aggregation names must be alpha-numeric and can only contain '_' and '-' characters,\nso if the supplied field names contains disallowed characters, the provided index\nidentifier is used to return a safe 'dummy' name in the format 'field_index' e.g. field_0, field_1\n"
+        ],
+        "signature": [
+          "(fieldName: string, index: number) => string"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/get_safe_aggregation_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.getSafeAggregationName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [
+              "- the field name to check"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/get_safe_aggregation_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.getSafeAggregationName.$2",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "- the index number to be used for the safe aggregation name"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/get_safe_aggregation_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "safe aggregation name"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

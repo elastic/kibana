@@ -336,6 +336,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed a case.
 | `failure` | User is not authorized to access a case.
 
+.2+| `case_bulk_get`
+| `success` | User has accessed multiple cases.
+| `failure` | User is not authorized to access multiple cases.
+
 .2+| `case_resolve`
 | `success` | User has accessed a case.
 | `failure` | User is not authorized to access a case.
@@ -396,9 +400,18 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed the user activity of a case.
 | `failure` | User is not authorized to access the user activity of a case.
 
+
+.2+| `case_user_actions_find`
+| `success` | User has accessed the user activity of a case as part of a search operation.
+| `failure` | User is not authorized to access the user activity of a case.
+
 .2+| `case_user_action_get_metrics`
 | `success` | User has accessed metrics for the user activity of a case.
 | `failure` | User is not authorized to access metrics for the user activity of a case.
+
+.2+| `case_connectors_get`
+| `success` | User has accessed the connectors of a case.
+| `failure` | User is not authorized to access the connectors of a case.
 
 3+a|
 ===== Category: web

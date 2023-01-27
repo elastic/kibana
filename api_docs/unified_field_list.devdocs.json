@@ -1484,7 +1484,7 @@
         "label": "useGroupedFields",
         "description": [],
         "signature": [
-          "({\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  onFilterField,\n}: ",
+          "({\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n}: ",
           {
             "pluginId": "unifiedFieldList",
             "scope": "public",
@@ -1511,7 +1511,7 @@
             "id": "def-public.useGroupedFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  onFilterField,\n}",
+            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n}",
             "description": [],
             "signature": [
               {
@@ -2682,6 +2682,20 @@
           },
           {
             "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldListGroupedProps.localStorageKeyPrefix",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_list_grouped/field_list_grouped.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
             "id": "def-public.FieldListGroupedProps.datatestsubj",
             "type": "string",
             "tags": [],
@@ -3796,7 +3810,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3804,7 +3818,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>>(definition: A) => ",
+              "<Context>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3812,9 +3826,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<A>>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly registerTrigger: (trigger: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3824,15 +3836,7 @@
               },
               ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
-              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: <T extends ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<object>>(id: string) => ",
+              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3840,9 +3844,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<T>>; readonly getTriggerActions: (triggerId: string) => ",
+              "<object>; readonly getTriggerActions: (triggerId: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4250,38 +4252,6 @@
               {
                 "parentPluginId": "unifiedFieldList",
                 "id": "def-public.GroupedFieldsParams.onSelectedFieldFilter.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "field",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedFieldList",
-            "id": "def-public.GroupedFieldsParams.onFilterField",
-            "type": "Function",
-            "tags": [],
-            "label": "onFilterField",
-            "description": [],
-            "signature": [
-              "((field: T) => boolean) | undefined"
-            ],
-            "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedFieldList",
-                "id": "def-public.GroupedFieldsParams.onFilterField.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "field",
@@ -5040,21 +5010,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "unifiedFieldList",
-        "id": "def-common.FIELD_EXISTENCE_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "FIELD_EXISTENCE_SETTING",
-        "description": [],
-        "signature": [
-          "\"lens:useFieldExistenceSampling\""
-        ],
-        "path": "src/plugins/unified_field_list/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "unifiedFieldList",
         "id": "def-common.PLUGIN_ID",

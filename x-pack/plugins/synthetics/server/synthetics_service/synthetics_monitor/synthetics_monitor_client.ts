@@ -24,6 +24,7 @@ import {
   PrivateLocation,
   EncryptedSyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
+  MonitorServiceLocation,
 } from '../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 
@@ -93,7 +94,8 @@ export class SyntheticsMonitorClient {
     monitors: Array<{
       monitor: MonitorFields;
       id: string;
-      previousMonitor?: SavedObject<EncryptedSyntheticsMonitor>;
+      previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
+      decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
     }>,
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract,
@@ -102,6 +104,7 @@ export class SyntheticsMonitorClient {
   ) {
     const privateConfigs: HeartbeatConfig[] = [];
     const publicConfigs: HeartbeatConfig[] = [];
+    const deletedPublicConfigs: HeartbeatConfig[] = [];
 
     const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
 
@@ -117,6 +120,15 @@ export class SyntheticsMonitorClient {
         publicConfigs.push(editedConfig);
       }
 
+      const deletedPublicConfig = this.hasDeletedPublicLocations(
+        publicLocations,
+        editedMonitor.decryptedPreviousMonitor
+      );
+
+      if (deletedPublicConfig) {
+        deletedPublicConfigs.push(deletedPublicConfig);
+      }
+
       if (privateLocations.length > 0 || this.hasPrivateLocations(editedMonitor.previousMonitor)) {
         privateConfigs.push(editedConfig);
       }
@@ -129,6 +141,10 @@ export class SyntheticsMonitorClient {
       allPrivateLocations,
       spaceId
     );
+
+    if (deletedPublicConfigs.length > 0) {
+      await this.syntheticsService.deleteConfigs(deletedPublicConfigs);
+    }
 
     if (publicConfigs.length > 0) {
       return await this.syntheticsService.editConfig(publicConfigs);
@@ -155,13 +171,34 @@ export class SyntheticsMonitorClient {
     return pubicResponse;
   }
 
-  hasPrivateLocations(previousMonitor?: SavedObject<EncryptedSyntheticsMonitor>) {
-    if (!previousMonitor) {
-      return false;
-    }
+  hasPrivateLocations(previousMonitor: SavedObject<EncryptedSyntheticsMonitor>) {
     const { locations } = previousMonitor.attributes;
 
     return locations.some((loc) => !loc.isServiceManaged);
+  }
+
+  hasDeletedPublicLocations(
+    updatedLocations: MonitorServiceLocation[],
+    decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>
+  ) {
+    const { locations } = decryptedPreviousMonitor.attributes;
+
+    const prevPublicLocations = locations.filter((loc) => loc.isServiceManaged);
+
+    const missingPublicLocations = prevPublicLocations.filter((prevLoc) => {
+      return !updatedLocations.some((updatedLoc) => updatedLoc.id === prevLoc.id);
+    });
+    if (missingPublicLocations.length > 0) {
+      const { attributes: normalizedPreviousMonitor } = normalizeSecrets(decryptedPreviousMonitor);
+      normalizedPreviousMonitor.locations = missingPublicLocations;
+
+      return formatHeartbeatRequest({
+        monitor: normalizedPreviousMonitor,
+        monitorId: normalizedPreviousMonitor.id,
+        heartbeatId: (normalizedPreviousMonitor as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
+        params: {},
+      });
+    }
   }
 
   parseLocations(config: HeartbeatConfig) {

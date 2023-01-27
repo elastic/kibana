@@ -146,8 +146,7 @@ Enables you to use {es} indices in *TSVB* visualizations.
 Affects the *TSVB* histogram density. Must be set higher than `histogram:maxBars`.
 
 [[query-allowleadingwildcards]]`query:allowLeadingWildcards`::
-Allows a wildcard (*) as the first character in a query clause. Only applies
-when experimental query features are enabled in the query bar. To disallow
+Allows a wildcard (*) as the first character in a query clause. To disallow
 leading wildcards in Lucene queries, use `query:queryString:options`.
 
 [[query-querystring-options]]`query:queryString:options`::
@@ -546,10 +545,6 @@ Disable this option if you prefer to use the new heatmap charts with improved pe
 [[visualize-enablelabs]]`visualize:enableLabs`::
 Enables users to create, view, and edit experimental visualizations. When disabled,
 only production-ready visualizations are available to users.
-
-[[lens-sampling]]`lens:useFieldExistenceSampling`::
-**This setting is deprecated and will not be supported as of 8.6.**
-If enabled, document sampling is used to determine field existence (available or empty) for the Lens field list instead of relying on index mappings.
 
 [float]
 [[kibana-telemetry-settings]]
