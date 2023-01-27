@@ -7,8 +7,9 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NavigateToPath, useTimefilter } from '../../../contexts/kibana';
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { NavigateToPath } from '../../../contexts/kibana';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { checkFullLicense } from '../../../license';
 import {
@@ -34,7 +35,7 @@ export const newCalendarRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/calendars_list/new_calendar',
+  path: createPath(ML_PAGES.CALENDARS_NEW),
   title: i18n.translate('xpack.ml.settings.createCalendar.docTitle', {
     defaultMessage: 'Create Calendar',
   }),
@@ -56,7 +57,7 @@ export const editCalendarRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/calendars_list/edit_calendar/:calendarId',
+  path: createPath(ML_PAGES.CALENDARS_EDIT, '/:calendarId'),
   title: i18n.translate('xpack.ml.settings.editCalendar.docTitle', {
     defaultMessage: 'Edit Calendar',
   }),

@@ -11,14 +11,15 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useUrlState } from '@kbn/ml-url-state';
-import { NavigateToPath, useMlKibana, useTimefilter } from '../../contexts/kibana';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_PAGES } from '../../../locator';
+import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
-import { MlRoute, PageLoader, PageProps } from '../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../router';
 import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
@@ -37,6 +38,7 @@ import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_upda
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
 import { MlPageHeader } from '../../components/page_header';
+import { PageTitle } from '../../components/page_title';
 import { AnomalyResultsViewSelector } from '../../components/anomaly_results_view_selector';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import {
@@ -49,7 +51,7 @@ export const explorerRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'explorer',
-  path: '/explorer',
+  path: createPath(ML_PAGES.ANOMALY_EXPLORER),
   title: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorer.docTitle', {
     defaultMessage: 'Anomaly Explorer',
   }),
@@ -262,7 +264,11 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />
+            <PageTitle
+              title={i18n.translate('xpack.ml.explorer.pageTitle', {
+                defaultMessage: 'Anomaly Explorer',
+              })}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>

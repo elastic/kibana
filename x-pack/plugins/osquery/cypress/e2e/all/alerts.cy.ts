@@ -35,6 +35,7 @@ describe('Alert Event Details', () => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'example_pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
   });
+
   beforeEach(() => {
     login(ROLES.soc_manager);
   });

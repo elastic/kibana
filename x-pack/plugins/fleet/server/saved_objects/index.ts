@@ -143,6 +143,10 @@ const getSavedObjectTypes = (
         is_preconfigured: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
         proxy_id: { type: 'keyword' },
+        shipper: {
+          dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+          properties: {},
+        },
       },
     },
     migrations: {
@@ -285,6 +289,7 @@ const getSavedObjectTypes = (
             data_stream: { type: 'keyword' },
             features: {
               type: 'nested',
+              dynamic: false,
               properties: {
                 synthetic_source: { type: 'boolean' },
                 tsdb: { type: 'boolean' },

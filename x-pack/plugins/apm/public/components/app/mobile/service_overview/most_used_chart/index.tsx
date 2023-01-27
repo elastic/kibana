@@ -13,14 +13,14 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLensAttributes } from './get_lens_attributes';
 import {
-  DEVICE_MODEL_NAME,
+  DEVICE_MODEL_IDENTIFIER,
   HOST_OS_VERSION,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
 } from '../../../../../../common/es_fields/apm';
 
 export type MostUsedMetricTypes =
-  | typeof DEVICE_MODEL_NAME
+  | typeof DEVICE_MODEL_IDENTIFIER
   | typeof SERVICE_VERSION
   | typeof HOST_OS_VERSION
   | typeof NETWORK_CONNECTION_TYPE;

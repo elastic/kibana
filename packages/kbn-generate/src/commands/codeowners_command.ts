@@ -10,7 +10,7 @@ import Fsp from 'fs/promises';
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { discoverBazelPackages } from '@kbn/bazel-packages';
+import { getPackages } from '@kbn/repo-packages';
 
 import type { GenerateCommand } from '../generate_command';
 
@@ -33,7 +33,7 @@ export const CodeownersCommand: GenerateCommand = {
   async run({ log }) {
     const coPath = Path.resolve(REPO_ROOT, REL);
     const codeowners = await Fsp.readFile(coPath, 'utf8');
-    const pkgs = await discoverBazelPackages(REPO_ROOT);
+    const pkgs = getPackages(REPO_ROOT);
 
     let genStart = codeowners.indexOf(GENERATED_START);
     if (genStart === -1) {

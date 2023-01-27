@@ -64,8 +64,9 @@ export const rewriteRule = ({
     ...(frequency
       ? {
           frequency: {
-            ...frequency,
+            summary: frequency.summary,
             notify_when: frequency.notifyWhen,
+            throttle: frequency.throttle,
           },
         }
       : {}),

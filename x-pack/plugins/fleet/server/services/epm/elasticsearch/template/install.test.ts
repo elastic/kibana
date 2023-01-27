@@ -201,6 +201,8 @@ describe('EPM index template install', () => {
         features: {
           synthetic_source: false,
           tsdb: false,
+          doc_value_only_numeric: false,
+          doc_value_only_other: false,
         },
       },
     });
@@ -241,6 +243,8 @@ describe('EPM index template install', () => {
         features: {
           synthetic_source: false,
           tsdb: false,
+          doc_value_only_numeric: false,
+          doc_value_only_other: false,
         },
       },
     });
@@ -279,7 +283,7 @@ describe('EPM index template install', () => {
     });
 
     expect(indexTemplate.indexTemplate.template.settings).toEqual({
-      index: { mode: 'time_series', routing_path: ['test_dimension'] },
+      index: { mode: 'time_series' },
     });
   });
 });

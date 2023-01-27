@@ -450,6 +450,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:profilingElasticsearchPlugin': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -511,10 +515,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   isDefaultIndexMigrated: {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'lens:useFieldExistenceSampling': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

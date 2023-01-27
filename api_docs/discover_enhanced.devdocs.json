@@ -647,7 +647,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -655,7 +655,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>>(definition: A) => ",
+              "<Context>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -663,9 +663,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<A>>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly registerTrigger: (trigger: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -770,7 +768,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -778,7 +776,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>>(definition: A) => ",
+              "<Context>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -786,9 +784,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<A>>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly registerTrigger: (trigger: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -798,15 +794,7 @@
               },
               ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
-              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: <T extends ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<object>>(id: string) => ",
+              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -814,9 +802,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<T>>; readonly getTriggerActions: (triggerId: string) => ",
+              "<object>; readonly getTriggerActions: (triggerId: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",

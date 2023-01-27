@@ -11,6 +11,12 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
   return (
     <KibanaContextProvider
       services={{
+        charts: {
+          theme: {
+            useChartsTheme: () => {},
+            useChartsBaseTheme: () => {},
+          },
+        },
         application: { navigateToUrl: () => {} },
         http: { basePath: { prepend: (_: string) => '' } },
         docLinks: { links: { query: {} } },

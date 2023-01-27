@@ -37,7 +37,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { VIEW_MODE } from '../../common/constants';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
-import { RecordRawType } from '../application/main/hooks/use_saved_search';
+import { RecordRawType } from '../application/main/services/discover_data_state_container';
 import { buildDataTableRecord } from '../utils/build_data_record';
 import { DataTableRecord, EsHitRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
@@ -145,7 +145,7 @@ export class SavedSearchEmbeddable
     this.inspectorAdapters = {
       requests: new RequestAdapter(),
     };
-    this.panelTitle = savedSearch.title ?? '';
+    this.panelTitle = this.input.title ? this.input.title : savedSearch.title ?? '';
     this.initializeSearchEmbeddableProps();
 
     this.subscription = this.getUpdated$().subscribe(() => {
@@ -240,8 +240,8 @@ export class SavedSearchEmbeddable
           loading: false,
         });
 
-        this.searchProps!.rows = result;
-        this.searchProps!.totalHitCount = result.length;
+        this.searchProps!.rows = result.records;
+        this.searchProps!.totalHitCount = result.records.length;
         this.searchProps!.isLoading = false;
         this.searchProps!.isPlainRecord = true;
         this.searchProps!.showTimeCol = false;
@@ -423,7 +423,6 @@ export class SavedSearchEmbeddable
     if (!searchProps || !searchProps.dataView) {
       return false;
     }
-
     return (
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
@@ -461,6 +460,7 @@ export class SavedSearchEmbeddable
     );
 
     searchProps.sharedItemTitle = this.panelTitle;
+    searchProps.searchTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
     searchProps.filters = this.savedSearch.searchSource.getField('filter') as Filter[];

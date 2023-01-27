@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import type { CaseUserActionsResponse, CaseUserActionResponse } from '../../../common/api';
+import type { CaseUserActionsResponse } from '../../../common/api';
 import { CaseUserActionsResponseRt } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import type { UserActionGet } from './client';
+import type { UserActionGet } from './types';
+import { extractAttributes } from './utils';
 
 export const get = async (
   { caseId }: UserActionGet,
@@ -45,9 +45,3 @@ export const get = async (
     });
   }
 };
-
-function extractAttributes(
-  userActions: SavedObjectsFindResponse<CaseUserActionResponse>
-): CaseUserActionsResponse {
-  return userActions.saved_objects.map((so) => so.attributes);
-}
