@@ -204,7 +204,6 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
             actions: [],
           })
         );
-      console.log(JSON.stringify(createdRule));
 
       expect(createdRule.status).to.eql(200);
       const ruleId = createdRule.body.id;
