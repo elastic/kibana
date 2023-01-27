@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it.only('should create an exception list item if we pass a Date string for expire_time', async () => {
+      it('should create an exception list item if we pass a Date string for expire_time', async () => {
         await supertest
           .post(EXCEPTION_LIST_URL)
           .set('kbn-xsrf', 'true')
