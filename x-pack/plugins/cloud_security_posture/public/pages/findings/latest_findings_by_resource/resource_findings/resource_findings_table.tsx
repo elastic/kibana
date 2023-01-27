@@ -25,8 +25,9 @@ import {
 } from '../../layout/findings_layout';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
 import { getSelectedRowStyle } from '../../utils/utils';
+import * as TEST_SUBJECTS from '../../test_subjects';
 
-interface Props {
+export interface ResourceFindingsTableProps {
   items: CspFinding[];
   loading: boolean;
   pagination: Pagination;
@@ -42,12 +43,13 @@ const ResourceFindingsTableComponent = ({
   sorting,
   setTableOptions,
   onAddFilter,
-}: Props) => {
+}: ResourceFindingsTableProps) => {
   const { euiTheme } = useEuiTheme();
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
   const getRowProps = (row: CspFinding) => ({
     style: getSelectedRowStyle(euiTheme, row, selectedFinding),
+    'data-test-subj': TEST_SUBJECTS.getResourceFindingsTableRowTestId(row.resource.id),
   });
 
   const columns: [
@@ -69,6 +71,7 @@ const ResourceFindingsTableComponent = ({
     return (
       <EuiEmptyPrompt
         iconType="logoKibana"
+        data-test-subj={TEST_SUBJECTS.RESOURCES_FINDINGS_TABLE_EMPTY_STATE}
         title={
           <h2>
             <FormattedMessage
@@ -83,6 +86,7 @@ const ResourceFindingsTableComponent = ({
   return (
     <>
       <EuiBasicTable
+        data-test-subj={TEST_SUBJECTS.RESOURCES_FINDINGS_TABLE}
         loading={loading}
         items={items}
         columns={columns}
