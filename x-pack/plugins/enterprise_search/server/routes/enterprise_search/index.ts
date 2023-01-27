@@ -9,7 +9,6 @@ import { RouteDependencies } from '../../plugin';
 
 import { registerDocumentRoute } from './documents';
 import { registerEnginesRoutes } from './engines';
-import { registerEnginesSearchRoutes } from './engines_search';
 import { registerIndexRoutes } from './indices';
 import { registerMappingRoute } from './mapping';
 import { registerSearchRoute } from './search';
@@ -20,5 +19,4 @@ export const registerEnterpriseSearchRoutes = (dependencies: RouteDependencies) 
   registerSearchRoute(dependencies);
   registerDocumentRoute(dependencies);
   registerEnginesRoutes(dependencies);
-  registerEnginesSearchRoutes(dependencies);
 };
