@@ -203,7 +203,7 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.processOperations.description',
       {
         defaultMessage:
-          'Allows a user to perform process-related response actions in the response console. This includes the "processes", "kill-process", and "suspend-process" actions.',
+          'Allows a user to perform process-related response actions in the response console.',
       }
     ),
     privilegeGroups: [
@@ -273,7 +273,7 @@ const subFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.endpointList.description',
       {
         defaultMessage:
-          'Controls access to the endpoints list. The endpoints list displays all hosts running Elastic Defend and their relevant integration details.',
+          'The endpoints list displays all hosts running Elastic Defend and their relevant integration details.',
       }
     ),
     privilegeGroups: [
@@ -321,7 +321,7 @@ const subFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.trustedApplications.description',
       {
         defaultMessage:
-          'Controls access to trusted applications. The trusted applications feature is used to help mitigate conflicts with other software, usually other antivirus or endpoint security applications.',
+          'The trusted applications feature is used to help mitigate conflicts with other software, usually other antivirus or endpoint security applications.',
       }
     ),
     privilegeGroups: [
@@ -378,7 +378,7 @@ const subFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions.description',
       {
         defaultMessage:
-          'Controls access to host isolation exceptions. Host isolation exceptions allow you to add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.',
+          'Host isolation exceptions allow you to add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.',
       }
     ),
     privilegeGroups: [
@@ -432,7 +432,7 @@ const subFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.blockList.description',
       {
         defaultMessage:
-          'Controls access to the blocklist. The blocklist feature allows you to extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.',
+          'The blocklist feature allows you to extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.',
       }
     ),
     privilegeGroups: [
@@ -486,7 +486,7 @@ const subFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.eventFilters.description',
       {
         defaultMessage:
-          'Controls access to event filters. Event filters allow you to filter out endpoint events that you do not need or want stored in Elasticsearch.',
+          'Event filters allow you to filter out endpoint events that you do not need or want stored in Elasticsearch.',
       }
     ),
     privilegeGroups: [
@@ -534,13 +534,13 @@ const subFeatures: SubFeatureConfig[] = [
       }
     ),
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.policyManagement', {
-      defaultMessage: 'Policy Management',
+      defaultMessage: 'Elastic Defend Policy Management',
     }),
     description: i18n.translate(
       'xpack.securitySolution.featureRegistry.subFeatures.policyManagement.description',
       {
         defaultMessage:
-          'Controls access to the Elastic Defend integration policy. The policy includes configuration of protections (such as malware, ransomware, memory threats, and malicious behavior) as well as event collection and advanced policy features.',
+          'Controls access to the Elastic Defend integration policy. The policy includes configuration of protections as well as event collection and advanced policy features.',
       }
     ),
     privilegeGroups: [
