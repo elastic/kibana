@@ -20,6 +20,7 @@ import {
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { ALERT_START } from '@kbn/rule-data-utils';
 import {
   createRule,
   createSignalsIndex,
@@ -237,6 +238,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.updated_at': updatedAt,
           'kibana.alert.rule.execution.uuid': executionUuid,
           'kibana.alert.uuid': alertId,
+          [ALERT_START]: alertStart,
           ...source
         } = hit._source!;
         expect(source).to.eql({
@@ -406,6 +408,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.updated_at': updatedAt,
           'kibana.alert.rule.execution.uuid': executionUuid,
           'kibana.alert.uuid': alertId,
+          [ALERT_START]: alertStart,
           ...source
         } = hit._source!;
         expect(source).to.eql({

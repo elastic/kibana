@@ -15,6 +15,7 @@ import {
   getNewTermsRuntimeMappings,
   AGG_FIELD_NAME,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/new_terms/utils';
+import { ALERT_START } from '@kbn/rule-data-utils';
 import {
   createRule,
   deleteAllAlerts,
@@ -42,6 +43,7 @@ const removeRandomValuedProperties = (alert: DetectionAlert | undefined) => {
     'kibana.alert.rule.created_at': createdAt,
     'kibana.alert.rule.updated_at': updatedAt,
     'kibana.alert.uuid': alertUuid,
+    [ALERT_START]: alertStart,
     ...restOfAlert
   } = alert;
   return restOfAlert;

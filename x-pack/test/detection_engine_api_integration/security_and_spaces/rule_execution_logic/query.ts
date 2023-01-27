@@ -786,11 +786,10 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
           });
 
-          const secondTimestamp = new Date();
-          const secondTimestampISOString = secondTimestamp.toISOString();
+          const secondTimestamp = new Date().toISOString();
           const secondDocument = {
             id,
-            '@timestamp': secondTimestampISOString,
+            '@timestamp': secondTimestamp,
             agent: {
               name: 'agent-1',
             },
@@ -800,6 +799,7 @@ export default ({ getService }: FtrProviderContext) => {
           await indexDocuments([secondDocument, secondDocument]);
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+          const afterTimestamp = new Date();
           const secondAlerts = await getOpenSignals(
             supertest,
             log,
@@ -807,7 +807,7 @@ export default ({ getService }: FtrProviderContext) => {
             createdRule,
             RuleExecutionStatus.succeeded,
             undefined,
-            secondTimestamp
+            afterTimestamp
           );
           expect(secondAlerts.hits.hits.length).eql(1);
           expect(secondAlerts.hits.hits[0]._source).to.eql({
@@ -821,7 +821,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
             [ALERT_SUPPRESSION_START]: firstTimestamp,
-            [ALERT_SUPPRESSION_END]: secondTimestampISOString,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
           });
         });
@@ -862,11 +862,10 @@ export default ({ getService }: FtrProviderContext) => {
             .send(setSignalStatus({ signalIds: alertIds, status: 'closed' }))
             .expect(200);
 
-          const secondTimestamp = new Date();
-          const secondTimestampISOString = secondTimestamp.toISOString();
+          const secondTimestamp = new Date().toISOString();
           const secondDocument = {
             id,
-            '@timestamp': secondTimestampISOString,
+            '@timestamp': secondTimestamp,
             agent: {
               name: 'agent-1',
             },
@@ -876,6 +875,7 @@ export default ({ getService }: FtrProviderContext) => {
           await indexDocuments([secondDocument, secondDocument]);
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+          const afterTimestamp = new Date();
           const secondAlerts = await getOpenSignals(
             supertest,
             log,
@@ -883,7 +883,7 @@ export default ({ getService }: FtrProviderContext) => {
             createdRule,
             RuleExecutionStatus.succeeded,
             undefined,
-            secondTimestamp
+            afterTimestamp
           );
           expect(secondAlerts.hits.hits.length).eql(2);
           expect(secondAlerts.hits.hits[0]._source).to.eql({
@@ -911,9 +911,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             [ALERT_WORKFLOW_STATUS]: 'open',
-            [ALERT_ORIGINAL_TIME]: secondTimestampISOString,
-            [ALERT_SUPPRESSION_START]: secondTimestampISOString,
-            [ALERT_SUPPRESSION_END]: secondTimestampISOString,
+            [ALERT_ORIGINAL_TIME]: secondTimestamp,
+            [ALERT_SUPPRESSION_START]: secondTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
           });
         });
