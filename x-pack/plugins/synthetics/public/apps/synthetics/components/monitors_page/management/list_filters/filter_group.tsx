@@ -13,7 +13,7 @@ import { ServiceLocations } from '../../../../../../../common/runtime_types';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
 import { selectServiceLocationsState } from '../../../../state';
-import { SyntheticsFilterItem, getSyntheticsFilterDisplayValues } from './filter_labels';
+import { SyntheticsFilterItem, getSyntheticsFilterDisplayValues } from './filter_fields';
 
 export const findLocationItem = (query: string, locations: ServiceLocations) => {
   return locations.find(({ id, label }) => query === id || label === query);

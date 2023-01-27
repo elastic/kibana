@@ -12,7 +12,7 @@ import {
   getSyntheticsFilterKeyForLabel,
   SyntheticsFilterItem,
   valueToLabelWithEmptyCount,
-} from './filter_labels';
+} from './filter_fields';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
 
 export const FilterButton = ({ filter }: { filter: SyntheticsFilterItem }) => {

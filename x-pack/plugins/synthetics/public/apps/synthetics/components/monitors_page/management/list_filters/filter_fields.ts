@@ -27,6 +27,10 @@ export interface SyntheticsFilterItem {
   field: SyntheticsFilterField;
 }
 
+export function getMonitorFilterFields(): SyntheticsFilterField[] {
+  return ['tags', 'locations', 'monitorTypes', 'projects', 'schedules'];
+}
+
 export function getSyntheticsFilterDisplayValues(
   values: LabelWithCountValue[],
   field: SyntheticsFilterField,

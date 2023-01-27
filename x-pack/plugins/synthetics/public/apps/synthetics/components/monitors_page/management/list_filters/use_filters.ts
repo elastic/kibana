@@ -8,9 +8,12 @@
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-plugin/public';
+
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../../../../../../common/types/saved_objects';
-import { SyntheticsFilterField } from './filter_labels';
+import { useGetUrlParams } from '../../../../hooks';
+
+import { SyntheticsFilterField, getMonitorFilterFields } from './filter_fields';
 
 const aggs = {
   monitorTypes: {
@@ -116,3 +119,33 @@ export const useFilters = (): Record<
     };
   }, [data]);
 };
+
+export function useGetMonitorEmbeddedFilters() {
+  const urlParams = useGetUrlParams();
+  const filterFields = getMonitorFilterFields();
+
+  const embeddableReportDefinitions: Record<string, string[]> = {};
+  if (urlParams.locations?.length) {
+    embeddableReportDefinitions['observer.geo.name'] = (
+      Array.isArray(urlParams.locations) ? urlParams.locations : [urlParams.locations]
+    ) as string[];
+  }
+
+  const embeddableFilters = [];
+  for (const filterField of filterFields) {
+    if (urlParams[filterField]?.length) {
+      const values: string[] = (
+        Array.isArray(urlParams[filterField]) ? urlParams[filterField] : [urlParams[filterField]]
+      ) as string[];
+      switch (filterField) {
+        case 'monitorTypes':
+          embeddableFilters.push({ field: 'monitor.type', values });
+          break;
+        case 'tags':
+          embeddableFilters.push({ field: 'tags', values });
+      }
+    }
+  }
+
+  return { embeddableReportDefinitions, embeddableFilters };
+}

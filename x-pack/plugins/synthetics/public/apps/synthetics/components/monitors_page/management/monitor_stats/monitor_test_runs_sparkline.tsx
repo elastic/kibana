@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-plugin/public';
 
 import { ClientPluginsStart } from '../../../../../../plugin';
+import { useGetMonitorEmbeddedFilters } from '../list_filters/use_filters';
 import * as labels from '../labels';
 
 interface Props {
@@ -23,6 +24,7 @@ export const MonitorTestRunsSparkline = ({ from = 'now-30d', to = 'now' }: Props
   const { ExploratoryViewEmbeddable } = observability;
 
   const theme = useTheme();
+  const { embeddableReportDefinitions, embeddableFilters } = useGetMonitorEmbeddedFilters();
 
   return (
     <ExploratoryViewEmbeddable
@@ -36,10 +38,11 @@ export const MonitorTestRunsSparkline = ({ from = 'now-30d', to = 'now' }: Props
           time: { from, to },
           reportDefinitions: {
             'monitor.id': [],
-            'observer.geo.name': [],
+            ...embeddableReportDefinitions,
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor.check_group',
+          filters: embeddableFilters,
           name: labels.TEST_RUNS_LABEL,
           color: theme.eui.euiColorVis1,
           operationType: 'unique_count',
