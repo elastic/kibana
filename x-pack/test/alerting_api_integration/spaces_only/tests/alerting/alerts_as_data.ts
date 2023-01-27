@@ -495,7 +495,9 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       const source: PatternFiringAlert = alertDocs[i]._source!;
 
       // Each doc should have a copy of the rule data
-      expect(source['kibana.alert.rule.category']).to.equal('Test: Firing on a Pattern');
+      expect(source['kibana.alert.rule.category']).to.equal(
+        'Test: Firing on a Pattern and writing Alerts as Data'
+      );
       expect(source['kibana.alert.rule.consumer']).to.equal('alertsFixture');
       expect(source['kibana.alert.rule.name']).to.equal('abc');
       expect(source['kibana.alert.rule.producer']).to.equal('alertsFixture');
