@@ -14,7 +14,7 @@ import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { RouteInitialization, SystemRouteDeps } from '../types';
 import { getMlNodeCount } from '../lib/node_utils';
 import { itemTypeLiterals } from './schemas/saved_objects';
-import { JobSizeService } from '../models/job_service/job_size';
+import { JobSizeService } from '../models/memory/memory_usage';
 
 /**
  * System routes
@@ -152,13 +152,13 @@ export function systemRoutes(
   /**
    * @apiGroup SystemRoutes
    *
-   * @api {get} /api/ml/ml_node_count Get the amount of ML nodes
+   * @api {get} /api/ml/memory_usage Get the amount of ML nodes
    * @apiName MlNodeCount
    * @apiDescription Returns the amount of ML nodes.
    */
   router.get(
     {
-      path: '/api/ml/job_size',
+      path: '/api/ml/memory_usage',
       validate: {
         query: schema.object({
           type: schema.maybe(itemTypeLiterals),

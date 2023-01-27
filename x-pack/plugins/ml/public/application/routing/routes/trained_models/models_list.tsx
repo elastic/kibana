@@ -15,7 +15,7 @@ import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { ModelsList } from '../../../trained_models/models_management';
+import { ModelsList } from '../../../model_management';
 import { MlPageHeader } from '../../../components/page_header';
 import { TechnicalPreviewBadge } from '../../../components/technical_preview_badge';
 
@@ -52,7 +52,6 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   );
   return (
     <PageLoader context={context}>
-      <ModelsList />
       <MlPageHeader>
         <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
           <EuiFlexItem grow={false}>
@@ -66,6 +65,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
+      <ModelsList />
     </PageLoader>
   );
 };

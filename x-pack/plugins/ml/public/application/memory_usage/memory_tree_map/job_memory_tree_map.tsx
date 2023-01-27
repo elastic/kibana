@@ -5,35 +5,6 @@
  * 2.0.
  */
 
-// import React, { FC, useEffect, useCallback } from 'react';
-// import { JobType } from '../../../../common/types/saved_objects';
-// import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
-
-// interface Props {
-//   jobType: JobType;
-// }
-
-// export const JobMemoryTreeMap: FC<Props> = ({ jobType }) => {
-//   const trainedModelsApiService = useTrainedModelsApiService();
-
-//   const loadJobMemorySize = useCallback(async () => {
-//     const resp = await trainedModelsApiService.jobMemorySize(jobType);
-//     console.log(resp);
-//   }, [jobType, trainedModelsApiService]);
-
-//   useEffect(() => {
-//     loadJobMemorySize();
-//   }, [loadJobMemorySize]);
-//   return <></>;
-// };
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import React, { FC, useEffect, useState, useCallback } from 'react';
 import { Chart, Settings, Partition, PartitionLayout, ShapeTreeNode } from '@elastic/charts';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -113,10 +84,8 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
 
   const loadJobMemorySize = useCallback(async () => {
     setLoading(true);
-    const resp = await trainedModelsApiService.jobMemorySize(type, node);
+    const resp = await trainedModelsApiService.memoryUsage(type, node);
     setAllData(resp);
-    // eslint-disable-next-line no-console
-    console.log(resp);
     setLoading(false);
   }, [trainedModelsApiService, type, node]);
 

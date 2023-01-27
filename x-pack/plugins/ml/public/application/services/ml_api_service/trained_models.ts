@@ -188,9 +188,9 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    jobMemorySize(type?: MlSavedObjectType, node?: string, showClosedJobs = false) {
+    memoryUsage(type?: MlSavedObjectType, node?: string, showClosedJobs = false) {
       return httpService.http<JobMemorySize[]>({
-        path: `${apiBasePath}/job_size`,
+        path: `${apiBasePath}/memory_usage`,
         method: 'GET',
         query: { type, node, showClosedJobs },
       });

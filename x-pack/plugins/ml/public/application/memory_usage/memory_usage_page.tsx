@@ -10,7 +10,7 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isServerless } from '../../../common/util/serverless';
-import { NodesList } from '../trained_models/nodes_overview';
+import { NodesList } from './nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { JobMemoryTreeMap } from './memory_tree_map';

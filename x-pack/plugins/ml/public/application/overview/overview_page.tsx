@@ -20,7 +20,7 @@ import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
-import { NodesList } from '../trained_models/nodes_overview';
+import { NodesList } from '../memory_usage/nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 
