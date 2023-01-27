@@ -161,6 +161,7 @@ const GroupingContainerComponent = ({
   return (
     <>
       <EuiFlexGroup
+        data-test-subj="grouping-container-header"
         justifyContent="spaceBetween"
         alignItems="center"
         style={{ paddingBottom: 20, paddingTop: 20 }}
