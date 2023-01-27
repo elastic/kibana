@@ -159,6 +159,7 @@ enabled:
   - x-pack/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.ts
   - x-pack/test/fleet_functional/config.ts
+  - x-pack/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/test/functional_basic/config.ts
   - x-pack/test/functional_cors/config.ts
   - x-pack/test/functional_embedded/config.ts
