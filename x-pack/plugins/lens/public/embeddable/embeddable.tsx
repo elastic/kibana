@@ -447,9 +447,11 @@ export class Embeddable
 
   private get activeVisualizationState() {
     if (!this.activeVisualization) return;
-    return this.activeVisualization.fromPersistableState?.(
-      this.savedVis?.state.visualization,
-      this.savedVis?.references
+    return (
+      this.activeVisualization.fromPersistableState?.(
+        this.savedVis?.state.visualization,
+        this.savedVis?.references
+      ) ?? this.activeVisualization.initialize(() => '', this.savedVis?.state.visualization)
     );
   }
 
