@@ -481,7 +481,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     const generateLinkAsHelp = this.isNotSaved() ? (
       <FormattedMessage
         id="share.urlPanel.canNotShareAsSavedObjectHelpText"
-        defaultMessage="Can't share as saved object until the {objectType} has been saved."
+        defaultMessage="To share as a saved object, save the {objectType}."
         values={{ objectType: this.props.objectType }}
       />
     ) : undefined;
