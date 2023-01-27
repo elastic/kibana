@@ -10,6 +10,7 @@ import type { Filter } from '@kbn/es-query';
 import { isArray } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import type { RawBucket } from '../types';
+import { createGroupFilter } from './helpers';
 
 export interface BadgeMetric {
   title: string;
@@ -48,31 +49,6 @@ const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
   </div>
 );
 
-export const createGroupQuery = (selectedGroup: string, groupFieldValue: string) =>
-  groupFieldValue && selectedGroup
-    ? [
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            key: selectedGroup,
-            negate: false,
-            params: {
-              query: groupFieldValue,
-            },
-            type: 'phrase',
-          },
-          query: {
-            match_phrase: {
-              [selectedGroup]: {
-                query: groupFieldValue,
-              },
-            },
-          },
-        },
-      ]
-    : [];
-
 const GroupPanelComponent = ({
   customAccordionButtonClassName = 'groupingAccordionForm__button',
   customAccordionClassName = 'groupingAccordionForm',
@@ -91,7 +67,7 @@ const GroupPanelComponent = ({
   );
 
   const groupFilters = useMemo(
-    () => createGroupQuery(selectedGroup, groupFieldValue),
+    () => createGroupFilter(selectedGroup, groupFieldValue),
     [groupFieldValue, selectedGroup]
   );
 

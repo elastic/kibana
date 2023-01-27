@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 import { GroupingContainer } from '..';
 import { TestProviders } from '../../../mock';
+import { createGroupFilter } from '../accordion_panel/helpers';
 
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn();
+const rule1Name = 'Rule 1 name';
+const rule1Desc = 'Rule 1 description';
+const rule2Name = 'Rule 2 name';
+const rule2Desc = 'Rule 2 description';
+
 const testProps = {
   data: {
     groupsNumber: {
@@ -22,8 +28,8 @@ const testProps = {
       sum_other_doc_count: 0,
       buckets: [
         {
-          key: ['has host name', 'f'],
-          key_as_string: 'has host name|f',
+          key: [rule1Name, rule1Desc],
+          key_as_string: `${rule1Name}|${rule1Desc}`,
           doc_count: 1,
           hostsCountAggregation: {
             value: 1,
@@ -54,8 +60,8 @@ const testProps = {
           },
         },
         {
-          key: ['has user name', 'f'],
-          key_as_string: 'has user name|f',
+          key: [rule2Name, rule2Desc],
+          key_as_string: `${rule2Name}|${rule2Desc}`,
           doc_count: 1,
           hostsCountAggregation: {
             value: 1,
@@ -114,13 +120,15 @@ describe('grouping container', () => {
     jest.clearAllMocks();
   });
   it('Renders group counts when groupsNumber > 0', () => {
-    const { getByTestId } = render(
+    const { getByTestId, getAllByTestId, queryByTestId } = render(
       <TestProviders>
         <GroupingContainer {...testProps} />
       </TestProviders>
     );
     expect(getByTestId('alert-count').textContent).toBe('2 alerts');
     expect(getByTestId('groups-count').textContent).toBe('2 groups');
+    expect(getAllByTestId('grouping-accordion').length).toBe(2);
+    expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
   });
 
   it('Does not render group counts when groupsNumber = 0', () => {
@@ -146,6 +154,27 @@ describe('grouping container', () => {
     );
     expect(queryByTestId('alert-count')).not.toBeInTheDocument();
     expect(queryByTestId('groups-count')).not.toBeInTheDocument();
+    expect(queryByTestId('grouping-accordion')).not.toBeInTheDocument();
     expect(getByTestId('empty-results-panel')).toBeInTheDocument();
+  });
+
+  it.only('Opens one group at a time when each group is clicked', () => {
+    const { getAllByTestId } = render(
+      <TestProviders>
+        <GroupingContainer {...testProps} />
+      </TestProviders>
+    );
+    const group1 = within(getAllByTestId('grouping-accordion')[0]).getAllByRole('button')[0];
+    const group2 = within(getAllByTestId('grouping-accordion')[1]).getAllByRole('button')[0];
+    fireEvent.click(group1);
+    expect(renderChildComponent).toHaveBeenNthCalledWith(
+      1,
+      createGroupFilter(testProps.selectedGroup, rule1Name)
+    );
+    fireEvent.click(group2);
+    expect(renderChildComponent).toHaveBeenNthCalledWith(
+      2,
+      createGroupFilter(testProps.selectedGroup, rule2Name)
+    );
   });
 });

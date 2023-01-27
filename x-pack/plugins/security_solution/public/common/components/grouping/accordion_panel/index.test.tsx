@@ -6,7 +6,8 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import { createGroupQuery, GroupPanel } from '.';
+import { GroupPanel } from '.';
+import { createGroupFilter } from './helpers';
 import React from 'react';
 
 const onToggleGroup = jest.fn();
@@ -62,7 +63,7 @@ describe('grouping accordion panel', () => {
     const { getByTestId } = render(<GroupPanel {...testProps} />);
     expect(getByTestId('grouping-accordion')).toBeInTheDocument();
     expect(renderChildComponent).toHaveBeenCalledWith(
-      createGroupQuery(testProps.selectedGroup, ruleName)
+      createGroupFilter(testProps.selectedGroup, ruleName)
     );
   });
   it('does not create query without a valid groupFieldValue', () => {

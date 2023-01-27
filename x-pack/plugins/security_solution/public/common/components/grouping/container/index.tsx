@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elast
 import type { Filter } from '@kbn/es-query';
 import { isArray } from 'lodash/fp';
 import React, { useMemo, useState } from 'react';
+import { createGroupFilter } from '../accordion_panel/helpers';
 import { tableDefaults } from '../../../store/data_table/defaults';
 import { defaultUnit } from '../../toolbar/unit';
 import type { BadgeMetric, CustomMetric } from '../accordion_panel';
@@ -88,61 +89,38 @@ const GroupingContainerComponent = ({
           isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key
         }`;
 
-        const groupFilters = [];
-        if (groupKey && selectedGroup) {
-          groupFilters.push({
-            meta: {
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: selectedGroup,
-              params: {
-                query: group,
-              },
-            },
-            query: {
-              match_phrase: {
-                [selectedGroup]: {
-                  query: group,
-                },
-              },
-            },
-          });
-        }
-        const panel = (
-          <GroupPanel
-            selectedGroup={selectedGroup}
-            groupBucket={groupBucket}
-            forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
-            renderChildComponent={
-              trigger[groupKey] && trigger[groupKey].state === 'open'
-                ? renderChildComponent
-                : () => null
-            }
-            onToggleGroup={(isOpen) => {
-              setTrigger({
-                // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
-                [groupKey]: {
-                  state: isOpen ? 'open' : 'closed',
-                  selectedBucket: groupBucket,
-                },
-              });
-            }}
-            extraAction={
-              <GroupStats
-                bucket={groupBucket}
-                takeActionItems={takeActionItems(groupFilters)}
-                badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
-                customMetricStats={customMetricStats && customMetricStats(groupBucket)}
-              />
-            }
-            groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
-          />
-        );
+        console.log('trigger[groupKey]', { trigger, groupKey, it: trigger[groupKey] });
+
         return (
           <span key={groupKey}>
-            {panel}
+            <GroupPanel
+              selectedGroup={selectedGroup}
+              groupBucket={groupBucket}
+              forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
+              renderChildComponent={
+                trigger[groupKey] && trigger[groupKey].state === 'open'
+                  ? renderChildComponent
+                  : () => null
+              }
+              onToggleGroup={(isOpen) => {
+                setTrigger({
+                  // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
+                  [groupKey]: {
+                    state: isOpen ? 'open' : 'closed',
+                    selectedBucket: groupBucket,
+                  },
+                });
+              }}
+              extraAction={
+                <GroupStats
+                  bucket={groupBucket}
+                  takeActionItems={takeActionItems(createGroupFilter(selectedGroup, group))}
+                  badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
+                  customMetricStats={customMetricStats && customMetricStats(groupBucket)}
+                />
+              }
+              groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
+            />
             <EuiSpacer size="s" />
           </span>
         );
