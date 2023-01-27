@@ -43,8 +43,8 @@ export const createClientForExecutors = (
   eventLog: IEventLogWriter,
   logger: Logger,
   context: RuleExecutionContext,
-  ruleMonitoringService?: PublicRuleMonitoringService,
-  ruleResultService?: PublicRuleResultService
+  ruleMonitoringService: PublicRuleMonitoringService,
+  ruleResultService: PublicRuleResultService
 ): IRuleExecutionLogForExecutors => {
   const baseCorrelationIds = getCorrelationIds(context);
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
@@ -174,24 +174,24 @@ export const createClientForExecutors = (
     } = metrics ?? {};
 
     if (totalSearchDurationMs) {
-      ruleMonitoringService?.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
+      ruleMonitoringService.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
     }
 
     if (totalIndexingDurationMs) {
-      ruleMonitoringService?.setLastRunMetricsTotalIndexingDurationMs(totalIndexingDurationMs);
+      ruleMonitoringService.setLastRunMetricsTotalIndexingDurationMs(totalIndexingDurationMs);
     }
 
     if (executionGapDurationS) {
-      ruleMonitoringService?.setLastRunMetricsGapDurationS(executionGapDurationS);
+      ruleMonitoringService.setLastRunMetricsGapDurationS(executionGapDurationS);
     }
 
     if (newStatus === RuleExecutionStatus.failed) {
-      ruleResultService?.addLastRunError(message);
+      ruleResultService.addLastRunError(message);
     } else if (newStatus === RuleExecutionStatus['partial failure']) {
-      ruleResultService?.addLastRunWarning(message);
+      ruleResultService.addLastRunWarning(message);
     }
 
-    ruleResultService?.setLastRunOutcomeMessage(message);
+    ruleResultService.setLastRunOutcomeMessage(message);
   };
 
   const writeStatusChangeToEventLog = (args: NormalizedStatusChangeArgs): void => {
