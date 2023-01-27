@@ -8,7 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { buildSlo } from '../../../fixtures/slo/slo';
+import { buildSlo } from '../../../data/slo/slo';
 import { SloDetails as Component, Props } from './slo_details';
 
 export default {

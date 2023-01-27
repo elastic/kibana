@@ -13,7 +13,7 @@ import {
   SloDeleteConfirmationModal as Component,
   SloDeleteConfirmationModalProps,
 } from './slo_delete_confirmation_modal';
-import { buildSlo } from '../../../fixtures/slo/slo';
+import { buildSlo } from '../../../data/slo/slo';
 
 export default {
   component: Component,

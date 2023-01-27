@@ -10,7 +10,7 @@ import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloTimeWindowBadge as Component, Props } from './slo_time_window_badge';
-import { buildSlo } from '../../../../fixtures/slo/slo';
+import { buildSlo } from '../../../../data/slo/slo';
 
 export default {
   component: Component,

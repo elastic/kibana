@@ -14,7 +14,7 @@ import { useLicense } from '../../hooks/use_license';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from '.';
-import { buildSlo } from '../../fixtures/slo/slo';
+import { buildSlo } from '../../data/slo/slo';
 import type { ConfigSchema } from '../../plugin';
 import type { Subset } from '../../typings';
 import { paths } from '../../config';

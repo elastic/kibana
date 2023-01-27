@@ -12,10 +12,10 @@ import {
   buildCustomKqlIndicator,
   buildApmAvailabilityIndicator,
   buildApmLatencyIndicator,
-} from '../../../../fixtures/slo/indicator';
+} from '../../../../data/slo/indicator';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloIndicatorTypeBadge as Component, Props } from './slo_indicator_type_badge';
-import { buildSlo } from '../../../../fixtures/slo/slo';
+import { buildSlo } from '../../../../data/slo/slo';
 
 export default {
   component: Component,

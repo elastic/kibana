@@ -21,7 +21,7 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { ConfigSchema } from '../../plugin';
 import { Subset } from '../../typings';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
-import { buildSlo } from '../../fixtures/slo/slo';
+import { buildSlo } from '../../data/slo/slo';
 import { paths } from '../../config';
 import { SloEditPage } from '.';
 
