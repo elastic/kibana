@@ -778,7 +778,7 @@ export const getGroupedESQuery = (
             },
             aggregations: {
               ...getContextAggregation(params),
-            }
+            },
           },
         },
       },
