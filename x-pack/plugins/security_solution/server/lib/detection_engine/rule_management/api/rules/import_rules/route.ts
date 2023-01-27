@@ -120,28 +120,6 @@ export const importRulesRoute = (
           overwrite: request.query.overwrite_exceptions,
           maxExceptionsImportSize: objectLimit,
         });
-
-        // import actions-connectors
-        const rulesActionsIds = rules.reduce((acc: string[], rule) => {
-          if (rule instanceof Error) return acc;
-
-          const actionIds = rule.actions?.length ? rule.actions.map(({ id }) => id) : [];
-
-          return [...new Set(actionIds)];
-        }, []);
-        const {
-          successCount: actionConnectorSuccessCount,
-          success: actionConnectorSuccess,
-          warnings: actionConnectorWarnings,
-          errors: actionConnectorErrors,
-        } = await importRuleActionConnectors({
-          actionConnectors,
-          actionsClient,
-          actionsImporter,
-          actionsIds: [...rulesActionsIds],
-          overwrite: request.query.overwrite_action_connectors,
-        });
-
         // report on duplicate rules
         const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
           getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
@@ -151,6 +129,19 @@ export const importRulesRoute = (
           actionSOClient
         );
 
+        // import actions-connectors
+        const {
+          successCount: actionConnectorSuccessCount,
+          success: actionConnectorSuccess,
+          warnings: actionConnectorWarnings,
+          errors: actionConnectorErrors,
+        } = await importRuleActionConnectors({
+          actionConnectors,
+          actionsClient,
+          actionsImporter,
+          rules: migratedParsedObjectsWithoutDuplicateErrors,
+          overwrite: request.query.overwrite_action_connectors,
+        });
         const parsedRules = actionConnectorErrors.length
           ? []
           : migratedParsedObjectsWithoutDuplicateErrors;

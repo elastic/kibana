@@ -210,7 +210,7 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               error: {
                 message:
-                  'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
+                  'You may not have actions privileges required to import rules with actions: Unable to bulk_create action',
                 status_code: 403,
               },
               rule_id: '(unknown id)',
@@ -635,7 +635,15 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_success_count: 0,
           action_connectors_success: true,
           action_connectors_success_count: 0,
-          action_connectors_errors: [],
+          action_connectors_errors: [
+            {
+              rule_id: 'rule-1',
+              error: {
+                status_code: 404,
+                message: '1 connector is missing. Connector id missing is: 123',
+              },
+            },
+          ],
           action_connectors_warnings: [],
         });
       });

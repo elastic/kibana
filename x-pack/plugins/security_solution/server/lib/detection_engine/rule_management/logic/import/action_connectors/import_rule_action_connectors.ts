@@ -9,13 +9,17 @@ import { Readable } from 'stream';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { RuleToImport } from '../../../../../../../common/detection_engine/rule_management';
 import type { WarningSchema } from '../../../../../../../common/detection_engine/schemas/response';
 import { mapSOErrorToRuleError } from './validate_action_connectors_import_result';
 import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
 import type { BulkError } from '../../../../routes/utils';
 import { createBulkErrorObject } from '../../../../routes/utils';
 
-const checkIfActionsHaveNoConnectors = (actionsIds: string[]): ImportRuleActionConnectorsResult => {
+const checkIfActionsHaveNoConnectors = (
+  actionsIds: string[],
+  ruleIds: string
+): ImportRuleActionConnectorsResult => {
   if (actionsIds && actionsIds.length) {
     const errors: BulkError[] = [];
     const errorMessage =
@@ -26,6 +30,7 @@ const checkIfActionsHaveNoConnectors = (actionsIds: string[]): ImportRuleActionC
       createBulkErrorObject({
         statusCode: 404,
         message: `${actionsIds.length} ${errorMessage} ${actionsIds.join(', ')}`,
+        ruleId: ruleIds,
       })
     );
     return {
@@ -73,15 +78,25 @@ const handleActionConnectorsErrors = (error: {
     warnings: [],
   };
 };
+const getActionConnectorRules = (rules: Array<RuleToImport | Error>) =>
+  rules.reduce((acc: { [actionsIds: string]: string[] }, rule) => {
+    if (rule instanceof Error) return acc;
+    rule.actions?.forEach(({ id }) => (acc[id] = [...(acc[id] || []), rule.rule_id]));
+    return acc;
+  }, {});
 
 export const importRuleActionConnectors = async ({
   actionConnectors,
   actionsClient,
   actionsImporter,
-  actionsIds,
+  rules,
   overwrite,
 }: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> => {
-  if (!actionConnectors.length) return checkIfActionsHaveNoConnectors(actionsIds);
+  const actionConnectorRules = getActionConnectorRules(rules);
+  const actionsIds: string[] = Object.keys(actionConnectorRules);
+  const ruleIds: string = [...new Set(...Object.values(actionConnectorRules))].join();
+
+  if (!actionConnectors.length) return checkIfActionsHaveNoConnectors(actionsIds, ruleIds);
 
   let actionConnectorsToImport: SavedObject[] = actionConnectors;
   let storedActionConnectors: ActionResult[] | [] = [];

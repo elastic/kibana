@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_warnings: [],
         });
       });
-      it('should successfully import rules with actions when user has "read" actions privileges', async () => {
+      it('should not import rules with actions when user has "read" actions privileges', async () => {
         // create a new action
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
@@ -159,18 +159,49 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         };
+        const ruleWithConnector = {
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+          type: 'action',
+          updated_at: '2023-01-25T14:35:52.852Z',
+          created_at: '2023-01-25T14:35:52.852Z',
+          version: 'WzUxNTksMV0=',
+          attributes: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            isMissingSecrets: true,
+            config: {},
+            secrets: {},
+          },
+          references: [],
+          migrationVersion: { action: '8.3.0' },
+          coreMigrationVersion: '8.7.0',
+        };
+
         const { body } = await supertestWithoutAuth
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .auth(ROLES.hunter, 'changeme')
           .set('kbn-xsrf', 'true')
-          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .attach(
+            'file',
+            Buffer.from(toNdJsonString([simpleRule, ruleWithConnector])),
+            'rules.ndjson'
+          )
           .expect(200);
 
         expect(body).to.eql({
-          errors: [],
+          errors: [
+            {
+              error: {
+                message:
+                  'You may not have actions privileges required to import rules with actions: Unable to bulk_create action',
+                status_code: 403,
+              },
+              rule_id: '(unknown id)',
+            },
+          ],
           success: false,
           success_count: 0,
-          rules_count: 0,
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -180,8 +211,8 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               error: {
                 message:
-                  '1 connector is missing. Connector id missing is: a52bee60-9be1-11ed-8d37-5538d9e066c5',
-                status_code: 404,
+                  'You may not have actions privileges required to import rules with actions: Unable to bulk_create action',
+                status_code: 403,
               },
               rule_id: '(unknown id)',
             },
@@ -207,11 +238,33 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         };
+        const ruleWithConnector = {
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+          type: 'action',
+          updated_at: '2023-01-25T14:35:52.852Z',
+          created_at: '2023-01-25T14:35:52.852Z',
+          version: 'WzUxNTksMV0=',
+          attributes: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            isMissingSecrets: true,
+            config: {},
+            secrets: {},
+          },
+          references: [],
+          migrationVersion: { action: '8.3.0' },
+          coreMigrationVersion: '8.7.0',
+        };
+
         const { body } = await supertestWithoutAuth
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .auth(ROLES.hunter_no_actions, 'changeme')
           .set('kbn-xsrf', 'true')
-          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .attach(
+            'file',
+            Buffer.from(toNdJsonString([simpleRule, ruleWithConnector])),
+            'rules.ndjson'
+          )
           .expect(200);
         expect(body).to.eql({
           success: false,
@@ -225,13 +278,6 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               rule_id: '(unknown id)',
             },
-            {
-              error: {
-                message: `1 connector is missing. Connector id missing is: ${hookAction.id}`,
-                status_code: 404,
-              },
-              rule_id: 'rule-1',
-            },
           ],
           rules_count: 1,
           exceptions_errors: [],
@@ -239,7 +285,16 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_success_count: 0,
           action_connectors_success: false,
           action_connectors_success_count: 0,
-          action_connectors_errors: [],
+          action_connectors_errors: [
+            {
+              error: {
+                message:
+                  'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
+                status_code: 403,
+              },
+              rule_id: '(unknown id)',
+            },
+          ],
           action_connectors_warnings: [],
         });
       });
@@ -741,10 +796,22 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: false,
+          action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [
+            {
+              rule_id: 'rule-1',
+              error: {
+                status_code: 404,
+                message: '1 connector is missing. Connector id missing is: 123',
+              },
+            },
+          ],
         });
       });
 
-      it('should be able to import a rule with an action connector that exists', async () => {
+      it('should be able to import a rule with an action connector that exists and return warning if there are missing secrets', async () => {
         // create a new action
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
@@ -762,10 +829,32 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         };
+        const ruleWithConnector = {
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+          type: 'action',
+          updated_at: '2023-01-25T14:35:52.852Z',
+          created_at: '2023-01-25T14:35:52.852Z',
+          version: 'WzUxNTksMV0=',
+          attributes: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            isMissingSecrets: true,
+            config: {},
+            secrets: {},
+          },
+          references: [],
+          migrationVersion: { action: '8.3.0' },
+          coreMigrationVersion: '8.7.0',
+        };
+
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .attach(
+            'file',
+            Buffer.from(toNdJsonString([simpleRule, ruleWithConnector])),
+            'rules.ndjson'
+          )
           .expect(200);
         expect(body).to.eql({
           success: true,
@@ -776,9 +865,16 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_success: true,
           exceptions_success_count: 0,
           action_connectors_success: true,
-          action_connectors_success_count: 0,
+          action_connectors_success_count: 1,
           action_connectors_errors: [],
-          action_connectors_warnings: [],
+          action_connectors_warnings: [
+            {
+              actionPath: '/app/management/insightsAndAlerting/triggersActionsConnectors',
+              buttonLabel: 'Go to connectors',
+              message: '1 connector has sensitive information that require updates.',
+              type: 'action_required',
+            },
+          ],
         });
       });
 
@@ -795,7 +891,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [
             {
               group: 'default',
-              id: hookAction.id,
+              id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
               action_type_id: hookAction.actionTypeId,
               params: {},
             },
@@ -807,32 +903,71 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [
             {
               group: 'default',
-              id: hookAction.id,
-              action_type_id: hookAction.actionTypeId,
+              id: 'f4e74ab0-9e59-11ed-a3db-f9134a9ce951',
+              action_type_id: '.index',
               params: {},
             },
           ],
         };
+
+        const connector1 = {
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+          type: 'action',
+          updated_at: '2023-01-25T14:35:52.852Z',
+          created_at: '2023-01-25T14:35:52.852Z',
+          version: 'WzUxNTksMV0=',
+          attributes: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            isMissingSecrets: false,
+            config: {},
+            secrets: {},
+          },
+          references: [],
+          migrationVersion: { action: '8.3.0' },
+          coreMigrationVersion: '8.7.0',
+        };
+        const connector2 = {
+          id: 'f4e74ab0-9e59-11ed-a3db-f9134a9ce951',
+          type: 'action',
+          updated_at: '2023-01-25T14:35:52.852Z',
+          created_at: '2023-01-25T14:35:52.852Z',
+          version: 'WzUxNTksMV0=',
+          attributes: {
+            actionTypeId: '.index',
+            name: 'index',
+            isMissingSecrets: false,
+            config: {},
+            secrets: {},
+          },
+          references: [],
+          migrationVersion: { action: '8.3.0' },
+          coreMigrationVersion: '8.7.0',
+        };
         const rule1String = JSON.stringify(rule1);
         const rule2String = JSON.stringify(rule2);
-        const buffer = Buffer.from(`${rule1String}\n${rule2String}\n`);
+        const connector12String = JSON.stringify(connector1);
+        const connector22String = JSON.stringify(connector2);
+        const buffer = Buffer.from(
+          `${rule1String}\n${rule2String}\n${connector12String}\n${connector22String}\n`
+        );
 
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
           .attach('file', buffer, 'rules.ndjson')
           .expect(200);
 
         expect(body).to.eql({
           success: true,
-          success_count: 2,
+          success_count: 4,
           rules_count: 2,
           errors: [],
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
           action_connectors_success: true,
-          action_connectors_success_count: 0,
+          action_connectors_success_count: 2,
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
@@ -851,7 +986,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [
             {
               group: 'default',
-              id: hookAction.id,
+              id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
               action_type_id: hookAction.actionTypeId,
               params: {},
             },
@@ -863,15 +998,35 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [
             {
               group: 'default',
-              id: '123', // <-- This does not exist
-              action_type_id: hookAction.actionTypeId,
+              id: 'cabc78e0-9031-11ed-b076-53cc4d57aa22', // <-- This does not exist
+              action_type_id: 'invalid type',
               params: {},
             },
           ],
         };
+
+        const connector = {
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+          type: 'action',
+          updated_at: '2023-01-25T14:35:52.852Z',
+          created_at: '2023-01-25T14:35:52.852Z',
+          version: 'WzUxNTksMV0=',
+          attributes: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            isMissingSecrets: false,
+            config: {},
+            secrets: {},
+          },
+          references: [],
+          migrationVersion: { action: '8.3.0' },
+          coreMigrationVersion: '8.7.0',
+        };
         const rule1String = JSON.stringify(rule1);
         const rule2String = JSON.stringify(rule2);
-        const buffer = Buffer.from(`${rule1String}\n${rule2String}\n`);
+        const connector2String = JSON.stringify(connector);
+
+        const buffer = Buffer.from(`${rule1String}\n${rule2String}\n${connector2String}\n`);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
@@ -885,7 +1040,7 @@ export default ({ getService }: FtrProviderContext): void => {
           rules_count: 2,
           errors: [
             {
-              rule_id: '(unknown id)', // 'rule-2' do we need the rule_id
+              rule_id: 'rule-2',
               error: {
                 status_code: 404,
                 message: '1 connector is missing. Connector id missing is: 123',
@@ -903,7 +1058,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 status_code: 404,
                 message: '1 connector is missing. Connector id missing is: 123',
               },
-              rule_id: '(unknown id)',
+              rule_id: 'rule-2',
             },
           ],
           action_connectors_warnings: [],
