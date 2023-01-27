@@ -577,30 +577,28 @@ export class DataViewsService {
    * @param displayErrors  - If set false, API consumer is responsible for displaying and handling errors.
    */
   refreshFields = async (dataView: DataView, displayErrors: boolean = true) => {
-    if (!displayErrors) {
-      return this.refreshFieldsFn(dataView);
-    }
-
     try {
       await this.refreshFieldsFn(dataView);
     } catch (err) {
-      if (err instanceof DataViewMissingIndices) {
-        this.onNotification(
-          { title: err.message, color: 'danger', iconType: 'alert' },
-          `refreshFields:${dataView.getIndexPattern()}`
+      if (displayErrors) {
+        if (err instanceof DataViewMissingIndices) {
+          this.onNotification(
+            { title: err.message, color: 'danger', iconType: 'alert' },
+            `refreshFields:${dataView.getIndexPattern()}`
+          );
+        }
+
+        this.onError(
+          err,
+          {
+            title: i18n.translate('dataViews.fetchFieldErrorTitle', {
+              defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+              values: { id: dataView.id, title: dataView.getIndexPattern() },
+            }),
+          },
+          dataView.getIndexPattern()
         );
       }
-
-      this.onError(
-        err,
-        {
-          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id: dataView.id, title: dataView.getIndexPattern() },
-          }),
-        },
-        dataView.getIndexPattern()
-      );
     }
   };
 

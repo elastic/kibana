@@ -355,6 +355,7 @@ export function ChangeDataView({
           </EuiFlexItem>
         </EuiFlexGroup>,
         <TextBasedLanguagesList
+          key="text-based-languages-list"
           textBasedLanguages={textBasedLanguages}
           selectedOption={triggerLabel}
           onChange={(lang) => {
