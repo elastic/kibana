@@ -30,6 +30,7 @@ import type {
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { type TypedLensByValueInput, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -80,6 +81,7 @@ export interface InfraClientStartDeps {
   share: SharePluginStart;
   storage: IStorageWrapper;
   lens: LensPublicStart;
+  charts: ChartsPluginStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;
