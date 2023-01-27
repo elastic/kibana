@@ -3317,6 +3317,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-logging-integration-tests@link:packages/core/logging/core-logging-integration-tests":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-logging-server-internal@link:packages/core/logging/core-logging-server-internal":
   version "0.0.0"
   uid ""
@@ -3334,6 +3338,10 @@
   uid ""
 
 "@kbn/core-metrics-collectors-server-mocks@link:packages/core/metrics/core-metrics-collectors-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-metrics-integration-tests@link:packages/core/metrics/core-metrics-integration-tests":
   version "0.0.0"
   uid ""
 

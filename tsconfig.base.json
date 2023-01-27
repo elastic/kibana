@@ -384,6 +384,8 @@
       "@kbn/core-metrics-collectors-server-internal/*": ["packages/core/metrics/core-metrics-collectors-server-internal/*"],
       "@kbn/core-metrics-collectors-server-mocks": ["packages/core/metrics/core-metrics-collectors-server-mocks"],
       "@kbn/core-metrics-collectors-server-mocks/*": ["packages/core/metrics/core-metrics-collectors-server-mocks/*"],
+      "@kbn/core-metrics-integration-tests": ["packages/core/metrics/core-metrics-integration-tests"],
+      "@kbn/core-metrics-integration-tests/*": ["packages/core/metrics/core-metrics-integration-tests/*"],
       "@kbn/core-metrics-server": ["packages/core/metrics/core-metrics-server"],
       "@kbn/core-metrics-server/*": ["packages/core/metrics/core-metrics-server/*"],
       "@kbn/core-metrics-server-internal": ["packages/core/metrics/core-metrics-server-internal"],
