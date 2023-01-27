@@ -243,7 +243,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     },
                     sort: [
                       {
-                        '@timestamp': {
+                        [ALERT_START]: {
                           order: 'desc' as const,
                         },
                       },
