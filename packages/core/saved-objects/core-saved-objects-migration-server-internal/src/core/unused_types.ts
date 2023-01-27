@@ -33,6 +33,8 @@ export const REMOVED_TYPES: string[] = [
   'osquery-usage-metric',
   // Was removed in 8.1 https://github.com/elastic/kibana/issues/91265
   'siem-detection-engine-rule-status',
+  // Was removed in 8.7 https://github.com/elastic/kibana/issues/130966
+  'siem-detection-engine-rule-execution-info',
   // Was removed in 7.16
   'timelion-sheet',
   // Removed in 8.3 https://github.com/elastic/kibana/issues/127745

@@ -87,7 +87,6 @@ const createPromises = (
       await deleteRules({
         ruleId: migratedRule.id,
         rulesClient,
-        ruleExecutionLog,
       });
 
       return createRules({
