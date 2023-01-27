@@ -51,7 +51,6 @@ import type {
   FleetServerPolicy,
   Installation,
   Output,
-  PostDeletePackagePoliciesResponse,
   PackageInfo,
 } from '../../common/types';
 import {
@@ -681,29 +680,15 @@ class AgentPolicyService {
         );
       }
 
-      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies, soClient, esClient);
-
-      const deletedPackagePolicies: PostDeletePackagePoliciesResponse =
-        await packagePolicyService.delete(
-          soClient,
-          esClient,
-          packagePolicies.map((p) => p.id),
-          {
-            force: options?.force,
-            skipUnassignFromAgentPolicies: true,
-          }
-        );
-      try {
-        await packagePolicyService.runPostDeleteExternalCallbacks(
-          deletedPackagePolicies,
-          soClient,
-          esClient
-        );
-      } catch (error) {
-        const logger = appContextService.getLogger();
-        logger.error(`An error occurred executing "packagePolicyPostDelete" callback: ${error}`);
-        logger.error(error);
-      }
+      await packagePolicyService.delete(
+        soClient,
+        esClient,
+        packagePolicies.map((p) => p.id),
+        {
+          force: options?.force,
+          skipUnassignFromAgentPolicies: true,
+        }
+      );
     }
 
     if (agentPolicy.is_preconfigured && !options?.force) {

@@ -765,8 +765,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     try {
-      await packagePolicyService.runExternalCallbacks(
-        'packagePolicyDelete',
+      await packagePolicyService.runDeleteExternalCallbacks(
         packagePolicies,
         soClient,
         esClient,
@@ -879,8 +878,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     try {
-      await packagePolicyService.runExternalCallbacks(
-        'packagePolicyPostDelete',
+      await packagePolicyService.runPostDeleteExternalCallbacks(
         result,
         soClient,
         esClient,
