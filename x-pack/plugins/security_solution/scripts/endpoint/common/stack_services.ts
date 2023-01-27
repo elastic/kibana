@@ -9,10 +9,8 @@ import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
-import { getLocalhostRealIp } from './localhost_services';
+import { getLocalhostRealIp, isLocalhost } from './localhost_services';
 import { createSecuritySuperuser } from './security_user_services';
-
-const POSSIBLE_LOCALHOST_VALUES: readonly string[] = ['localhost', '127.0.0.1', '0.0.0.0'];
 
 export interface RuntimeServices {
   kbnClient: KbnClient;
@@ -90,13 +88,13 @@ export const createRuntimeServices = async ({
       url: kibanaUrl,
       hostname: kbnURL.hostname,
       port: kbnURL.port,
-      isLocalhost: POSSIBLE_LOCALHOST_VALUES.includes(kbnURL.hostname),
+      isLocalhost: isLocalhost(kbnURL.hostname),
     },
     elastic: {
       url: elasticsearchUrl,
       hostname: esURL.hostname,
       port: esURL.port,
-      isLocalhost: POSSIBLE_LOCALHOST_VALUES.includes(esURL.hostname),
+      isLocalhost: isLocalhost(esURL.hostname),
     },
   };
 };
