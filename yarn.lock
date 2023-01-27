@@ -3201,6 +3201,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-resources-integration-tests@link:packages/core/http/core-http-resources-integration-tests":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-resources-server-internal@link:packages/core/http/core-http-resources-server-internal":
   version "0.0.0"
   uid ""

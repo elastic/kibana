@@ -314,6 +314,8 @@
       "@kbn/core-http-request-handler-context-server/*": ["packages/core/http/core-http-request-handler-context-server/*"],
       "@kbn/core-http-request-handler-context-server-internal": ["packages/core/http/core-http-request-handler-context-server-internal"],
       "@kbn/core-http-request-handler-context-server-internal/*": ["packages/core/http/core-http-request-handler-context-server-internal/*"],
+      "@kbn/core-http-resources-integration-tests": ["packages/core/http/core-http-resources-integration-tests"],
+      "@kbn/core-http-resources-integration-tests/*": ["packages/core/http/core-http-resources-integration-tests/*"],
       "@kbn/core-http-resources-server": ["packages/core/http/core-http-resources-server"],
       "@kbn/core-http-resources-server/*": ["packages/core/http/core-http-resources-server/*"],
       "@kbn/core-http-resources-server-internal": ["packages/core/http/core-http-resources-server-internal"],
