@@ -22,7 +22,7 @@ interface OptionalSubAggregation {
   };
 }
 
-interface CardinalitySubAggregation {
+export interface CardinalitySubAggregation {
   [category: string]: {
     cardinality: {
       field: string;
@@ -30,7 +30,7 @@ interface CardinalitySubAggregation {
   };
 }
 
-interface TermsSubAggregation {
+export interface TermsSubAggregation {
   [category: string]: {
     terms: {
       field: string;

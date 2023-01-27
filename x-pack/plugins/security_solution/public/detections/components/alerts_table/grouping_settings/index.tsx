@@ -9,6 +9,7 @@ import * as i18n from '../translations';
 export * from './group_stats';
 export * from './group_panel_renderers';
 export * from './group_take_action_items';
+export * from './query_builder';
 
 export const defaultGroupingOptions = [
   {
