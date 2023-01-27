@@ -13,7 +13,7 @@ export const DEFAULT_STACK_BY_FIELD0_SIZE = 10;
 export const DEFAULT_STACK_BY_FIELD1_SIZE = 10;
 
 interface OptionalSubAggregation {
-  stackByMupltipleFields1: {
+  stackByMultipleFields1: {
     multi_terms: {
       terms: Array<{
         field: string;
@@ -40,32 +40,32 @@ export interface TermsSubAggregation {
 }
 
 export const getOptionalSubAggregation = ({
-  stackByMupltipleFields1,
-  stackByMupltipleFields1Size,
-  stackByMupltipleFields1From = 0,
-  stackByMupltipleFields1Sort,
+  stackByMultipleFields1,
+  stackByMultipleFields1Size,
+  stackByMultipleFields1From = 0,
+  stackByMultipleFields1Sort,
   additionalStatsAggregationsFields1,
 }: {
-  stackByMupltipleFields1: string[] | undefined;
-  stackByMupltipleFields1Size: number;
-  stackByMupltipleFields1From?: number;
-  stackByMupltipleFields1Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
+  stackByMultipleFields1: string[] | undefined;
+  stackByMultipleFields1Size: number;
+  stackByMultipleFields1From?: number;
+  stackByMultipleFields1Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   additionalStatsAggregationsFields1: Array<CardinalitySubAggregation | TermsSubAggregation>;
 }): OptionalSubAggregation | {} =>
-  stackByMupltipleFields1 != null && !isEmpty(stackByMupltipleFields1)
+  stackByMultipleFields1 != null && !isEmpty(stackByMultipleFields1)
     ? {
-        stackByMupltipleFields1: {
+        stackByMultipleFields1: {
           multi_terms: {
-            terms: stackByMupltipleFields1.map((stackByMupltipleField1) => ({
-              field: stackByMupltipleField1,
+            terms: stackByMultipleFields1.map((stackByMultipleField1) => ({
+              field: stackByMultipleField1,
             })),
           },
           aggs: {
             bucket_truncate: {
               bucket_sort: {
-                sort: stackByMupltipleFields1Sort,
-                from: stackByMupltipleFields1From,
-                size: stackByMupltipleFields1Size,
+                sort: stackByMultipleFields1Sort,
+                from: stackByMultipleFields1From,
+                size: stackByMultipleFields1Size,
               },
             },
             ...additionalStatsAggregationsFields1.reduce(
@@ -84,14 +84,14 @@ export const getGroupingQuery = ({
   additionalStatsAggregationsFields1,
   from,
   runtimeMappings,
-  stackByMupltipleFields0,
-  stackByMupltipleFields0Size = DEFAULT_STACK_BY_FIELD0_SIZE,
-  stackByMupltipleFields0From,
-  stackByMupltipleFields0Sort,
-  stackByMupltipleFields1,
-  stackByMupltipleFields1Size = DEFAULT_STACK_BY_FIELD1_SIZE,
-  stackByMupltipleFields1From,
-  stackByMupltipleFields1Sort,
+  stackByMultipleFields0,
+  stackByMultipleFields0Size = DEFAULT_STACK_BY_FIELD0_SIZE,
+  stackByMultipleFields0From,
+  stackByMultipleFields0Sort,
+  stackByMultipleFields1,
+  stackByMultipleFields1Size = DEFAULT_STACK_BY_FIELD1_SIZE,
+  stackByMultipleFields1From,
+  stackByMultipleFields1Sort,
   to,
 }: {
   additionalFilters: Array<{
@@ -100,48 +100,48 @@ export const getGroupingQuery = ({
   from: string;
   runtimeMappings?: MappingRuntimeFields;
   additionalAggregationsRoot?: Array<CardinalitySubAggregation | TermsSubAggregation>;
-  stackByMupltipleFields0: string[];
-  stackByMupltipleFields0Size?: number;
-  stackByMupltipleFields0From?: number;
-  stackByMupltipleFields0Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
+  stackByMultipleFields0: string[];
+  stackByMultipleFields0Size?: number;
+  stackByMultipleFields0From?: number;
+  stackByMultipleFields0Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   additionalStatsAggregationsFields0: Array<CardinalitySubAggregation | TermsSubAggregation>;
-  stackByMupltipleFields1: string[] | undefined;
-  stackByMupltipleFields1Size?: number;
-  stackByMupltipleFields1From?: number;
-  stackByMupltipleFields1Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
+  stackByMultipleFields1: string[] | undefined;
+  stackByMultipleFields1Size?: number;
+  stackByMultipleFields1From?: number;
+  stackByMultipleFields1Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   additionalStatsAggregationsFields1: Array<CardinalitySubAggregation | TermsSubAggregation>;
   to: string;
 }) => ({
   size: 0,
   aggs: {
-    stackByMupltipleFields0: {
-      ...(stackByMupltipleFields0.length > 1
+    stackByMultipleFields0: {
+      ...(stackByMultipleFields0.length > 1
         ? {
             multi_terms: {
-              terms: stackByMupltipleFields0.map((stackByMupltipleField0) => ({
-                field: stackByMupltipleField0,
+              terms: stackByMultipleFields0.map((stackByMultipleField0) => ({
+                field: stackByMultipleField0,
               })),
             },
           }
         : {
             terms: {
-              field: stackByMupltipleFields0[0],
+              field: stackByMultipleFields0[0],
               size: 10000,
             },
           }),
       aggs: {
         ...getOptionalSubAggregation({
-          stackByMupltipleFields1,
-          stackByMupltipleFields1Size,
-          stackByMupltipleFields1From,
-          stackByMupltipleFields1Sort,
+          stackByMultipleFields1,
+          stackByMultipleFields1Size,
+          stackByMultipleFields1From,
+          stackByMultipleFields1Sort,
           additionalStatsAggregationsFields1,
         }),
         bucket_truncate: {
           bucket_sort: {
-            sort: stackByMupltipleFields0Sort,
-            from: stackByMupltipleFields0From,
-            size: stackByMupltipleFields0Size,
+            sort: stackByMultipleFields0Sort,
+            from: stackByMultipleFields0From,
+            size: stackByMultipleFields0Size,
           },
         },
         ...additionalStatsAggregationsFields0.reduce(

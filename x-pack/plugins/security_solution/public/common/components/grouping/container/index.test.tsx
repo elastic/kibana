@@ -17,7 +17,7 @@ const testProps = {
     groupsNumber: {
       value: 2,
     },
-    stackByMupltipleFields0: {
+    stackByMultipleFields0: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
       buckets: [
@@ -130,7 +130,7 @@ describe('grouping container', () => {
       groupsNumber: {
         value: 0,
       },
-      stackByMupltipleFields0: {
+      stackByMultipleFields0: {
         doc_count_error_upper_bound: 0,
         sum_other_doc_count: 0,
         buckets: [],

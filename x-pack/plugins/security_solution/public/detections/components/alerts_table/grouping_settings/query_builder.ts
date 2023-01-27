@@ -67,15 +67,15 @@ export const getAlertsGroupingQuery = ({
     ],
     from,
     runtimeMappings,
-    stackByMupltipleFields0: selectedGroup ? getGroupFields(selectedGroup) : [],
+    stackByMultipleFields0: selectedGroup ? getGroupFields(selectedGroup) : [],
     to,
     additionalStatsAggregationsFields0: selectedGroup
       ? getAggregationsByGroupField(selectedGroup)
       : [],
-    stackByMupltipleFields0Size: pageSize,
-    stackByMupltipleFields0From: pageIndex * pageSize,
+    stackByMultipleFields0Size: pageSize,
+    stackByMultipleFields0From: pageIndex * pageSize,
     additionalStatsAggregationsFields1: [],
-    stackByMupltipleFields1: [],
+    stackByMultipleFields1: [],
   });
 
 const getAggregationsByGroupField = (

@@ -42,7 +42,7 @@ export type RawBucket = GenericBuckets & {
 
 /** Defines the shape of the aggregation returned by Elasticsearch */
 export interface GroupingTableAggregation {
-  stackByMupltipleFields0?: {
+  stackByMultipleFields0?: {
     buckets?: RawBucket[];
   };
   groupsCount0?: {

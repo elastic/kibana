@@ -81,7 +81,7 @@ const GroupingContainerComponent = ({
 
   const groupPanels = useMemo(
     () =>
-      data.stackByMupltipleFields0?.buckets?.map((groupBucket) => {
+      data.stackByMultipleFields0?.buckets?.map((groupBucket) => {
         const group = isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key;
         const groupKey = `group0-${
           isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key
@@ -149,7 +149,7 @@ const GroupingContainerComponent = ({
     [
       badgeMetricStats,
       customMetricStats,
-      data.stackByMupltipleFields0?.buckets,
+      data.stackByMultipleFields0?.buckets,
       groupPanelRenderer,
       renderChildComponent,
       selectedGroup,
