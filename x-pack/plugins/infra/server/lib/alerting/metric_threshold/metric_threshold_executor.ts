@@ -27,7 +27,6 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import {
-  createScopedLogger,
   AdditionalContext,
   getAlertDetailsUrl,
   getContextForRecoveredAlerts,
@@ -81,23 +80,10 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   >(async function (options) {
     const startTime = Date.now();
 
-    const {
-      services,
-      params,
-      state,
-      startedAt,
-      executionId,
-      spaceId,
-      rule: { id: ruleId },
-    } = options;
+    const { services, params, state, startedAt, logger, spaceId } = options;
 
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
-
-    const logger = createScopedLogger(libs.logger, 'metricThresholdRule', {
-      alertId: ruleId,
-      executionId,
-    });
 
     const { alertWithLifecycle, savedObjectsClient, getAlertUuid, getAlertByAlertUuid } = services;
 
