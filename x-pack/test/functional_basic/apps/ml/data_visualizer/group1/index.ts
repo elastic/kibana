@@ -38,5 +38,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(
       require.resolve('../../../../../functional/apps/ml/data_visualizer/file_data_visualizer')
     );
+    loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));
   });
 }
