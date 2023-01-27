@@ -7,11 +7,13 @@
 
 import type {
   SavedObjectReferenceWithContext,
+  SavedObjectsFindResult,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
-import type { BulkResolveError } from '@kbn/core-saved-objects-common';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
+import type { BulkResolveError, LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
 import type {
@@ -1123,6 +1125,67 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       });
       return authorizationResult?.typeMap;
     } else return undefined;
+  }
+
+  async authorizeDisableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
+    const [uniqueSpaces, typesAndSpaces] = aliases.reduce(
+      ([spaces, typesAndSpacesMap], { targetSpace, targetType }) => {
+        const spacesForType = typesAndSpacesMap.get(targetType) ?? new Set();
+        return [
+          spaces.add(targetSpace),
+          typesAndSpacesMap.set(targetType, spacesForType.add(targetSpace)),
+        ];
+      },
+      [new Set<string>(), new Map<string, Set<string>>()]
+    );
+
+    let error: Error | undefined;
+    try {
+      await this.authorize({
+        actions: new Set([SecurityAction.BULK_UPDATE]),
+        types: new Set(typesAndSpaces.keys()),
+        spaces: uniqueSpaces,
+        enforceMap: typesAndSpaces,
+      });
+    } catch (err) {
+      error = this.errors.decorateForbiddenError(
+        new Error(`Unable to disable aliases: ${err.message}`)
+      );
+    }
+
+    for (const alias of aliases) {
+      const id = `${alias.targetSpace}:${alias.targetType}:${alias.sourceId}`;
+      this.addAuditEvent({
+        action: AuditAction.UPDATE,
+        savedObject: { type: LEGACY_URL_ALIAS_TYPE, id },
+        error,
+        ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the update operation has not occurred yet
+      });
+    }
+
+    if (error) {
+      throw error;
+    }
+  }
+
+  async auditObjectsForSpaceDeletion<T>(
+    spaceId: string,
+    resultObjects: Array<SavedObjectsFindResult<T>>
+  ) {
+    resultObjects.forEach((obj) => {
+      const { namespaces = [] } = obj;
+      const isOnlySpace = namespaces.length === 1; // We can always rely on the `namespaces` field having >=1 element
+      if (namespaces.includes(ALL_SPACES_ID) && !namespaces.includes(spaceId)) {
+        // This object exists in All Spaces and its `namespaces` field isn't going to change; there's nothing to audit
+        return;
+      }
+      this.addAuditEvent({
+        action: isOnlySpace ? AuditAction.DELETE : AuditAction.UPDATE_OBJECTS_SPACES,
+        outcome: 'unknown',
+        savedObject: { type: obj.type, id: obj.id },
+        ...(!isOnlySpace && { deleteFromSpaces: [spaceId] }),
+      });
+    });
   }
 }
 

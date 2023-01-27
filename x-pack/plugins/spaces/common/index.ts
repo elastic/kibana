@@ -13,5 +13,5 @@ export type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
-  LegacyUrlAliasTarget,
+  // LegacyUrlAliasTarget,
 } from './types';

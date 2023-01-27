@@ -8,9 +8,10 @@
 
 import {
   SavedObjectReferenceWithContext,
+  SavedObjectsFindResult,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { BulkResolveError } from '@kbn/core-saved-objects-common';
+import type { BulkResolveError, LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { EcsEventOutcome } from '@kbn/ecs';
 import { SavedObject } from '../..';
 
@@ -496,10 +497,6 @@ export interface AuthorizeCheckConflictsParams extends BaseAuthorizeParams {
 }
 
 export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
-// {
-//   namespaces: Set<string>;
-//   types: Set<string>;
-// }
 
 export interface AuthorizeFindParams {
   namespaces: Set<string>;
@@ -631,4 +628,11 @@ export interface ISavedObjectsSecurityExtension {
    * @returns SavedObject - saved object with filtered spaces
    */
   redactNamespaces: <T, A extends string>(params: RedactNamespacesParams<T, A>) => SavedObject<T>;
+
+  authorizeDisableLegacyUrlAliases: (aliases: LegacyUrlAliasTarget[]) => void;
+
+  auditObjectsForSpaceDeletion: <T = unknown>(
+    spaceId: string,
+    resultObjects: Array<SavedObjectsFindResult<T>>
+  ) => void;
 }

@@ -46,7 +46,7 @@ export const setupSpacesClient = ({ audit, authz, spaces }: Deps) => {
       request,
       authz,
       audit.asScoped(request),
-      SavedObjectsClient.errors,
+      // SavedObjectsClient.errors,
       securityExtension
     );
   });

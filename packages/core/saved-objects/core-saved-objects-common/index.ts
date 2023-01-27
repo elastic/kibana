@@ -32,7 +32,7 @@ export type {
   SavedObjectsImportConflictError,
 } from './src/saved_objects_imports';
 
-export type { SavedObjectTypeIdTuple } from './src/types';
+export type { SavedObjectTypeIdTuple, LegacyUrlAliasTarget } from './src/types';
 
 export {
   SavedObjectsErrorHelpers,
