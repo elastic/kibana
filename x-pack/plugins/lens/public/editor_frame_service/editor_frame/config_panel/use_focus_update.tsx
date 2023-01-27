@@ -38,8 +38,7 @@ export function useFocusUpdate(ids: string[]) {
   const registerNewRef = useCallback((id, el) => {
     if (el) {
       setRefsById((refs) => {
-        refs.set(id, el);
-        return refs;
+        return new Map(refs.set(id, el));
       });
     }
   }, []);
@@ -54,7 +53,7 @@ export function useFocusUpdate(ids: string[]) {
 
       setRefsById((refs) => {
         refs.delete(id);
-        return refs;
+        return new Map(refs);
       });
       const next = removedIndex === 0 ? ids[1] : ids[removedIndex - 1];
       return setNextFocusedId(next);
