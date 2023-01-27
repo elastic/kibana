@@ -306,6 +306,8 @@
       "@kbn/core-http-context-server-internal/*": ["packages/core/http/core-http-context-server-internal/*"],
       "@kbn/core-http-context-server-mocks": ["packages/core/http/core-http-context-server-mocks"],
       "@kbn/core-http-context-server-mocks/*": ["packages/core/http/core-http-context-server-mocks/*"],
+      "@kbn/core-http-integration-tests": ["packages/core/http/core-http-integration-tests"],
+      "@kbn/core-http-integration-tests/*": ["packages/core/http/core-http-integration-tests/*"],
       "@kbn/core-http-plugin": ["test/plugin_functional/plugins/core_http"],
       "@kbn/core-http-plugin/*": ["test/plugin_functional/plugins/core_http/*"],
       "@kbn/core-http-request-handler-context-server": ["packages/core/http/core-http-request-handler-context-server"],

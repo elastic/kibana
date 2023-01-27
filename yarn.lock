@@ -3097,6 +3097,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-elasticsearch-integration-tests@link:packages/core/elasticsearch/core-elasticsearch-integration-tests":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-elasticsearch-server-internal@link:packages/core/elasticsearch/core-elasticsearch-server-internal":
   version "0.0.0"
   uid ""
@@ -3182,6 +3186,10 @@
   uid ""
 
 "@kbn/core-http-context-server-mocks@link:packages/core/http/core-http-context-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-integration-tests@link:packages/core/http/core-http-integration-tests":
   version "0.0.0"
   uid ""
 

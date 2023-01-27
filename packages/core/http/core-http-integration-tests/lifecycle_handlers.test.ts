@@ -10,17 +10,15 @@ import supertest from 'supertest';
 import moment from 'moment';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { configServiceMock } from '@kbn/config-mocks';
+import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import type { IRouter, RouteRegistrar } from '@kbn/core-http-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { Env } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pkg = require('../../../../../package.json');
-
-const actualVersion = pkg.version;
 const versionHeader = 'kbn-version';
 const xsrfHeader = 'kbn-xsrf';
 const nameHeader = 'kbn-name';
@@ -36,6 +34,8 @@ describe('core lifecycle handlers', () => {
   let server: HttpService;
   let innerServer: HttpServerSetup['server'];
   let router: IRouter;
+  let actualVersion: string;
+  let env: Env;
 
   beforeEach(async () => {
     const configService = configServiceMock.create();
@@ -103,6 +103,9 @@ describe('core lifecycle handlers', () => {
     const testRoute = '/version_check/test/route';
 
     beforeEach(async () => {
+      env = Env.createDefault(REPO_ROOT, getEnvOptions());
+      actualVersion = env.packageInfo.version;
+
       router.get({ path: testRoute, validate: false }, (context, req, res) => {
         return res.ok({ body: 'ok' });
       });
@@ -219,6 +222,9 @@ describe('core lifecycle handlers', () => {
 
     destructiveMethods.forEach((method) => {
       describe(`When using destructive ${method} method`, () => {
+        env = Env.createDefault(REPO_ROOT, getEnvOptions());
+        actualVersion = env.packageInfo.version;
+
         it('accepts requests with the xsrf header', async () => {
           await getSupertest(method.toLowerCase(), testPath)
             .set(xsrfHeader, 'anything')
