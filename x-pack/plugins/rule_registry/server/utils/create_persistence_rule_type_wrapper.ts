@@ -12,11 +12,11 @@ import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_START,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
-  TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
@@ -29,13 +29,11 @@ const augmentAlerts = <T>({
   alerts,
   options,
   kibanaVersion,
-  includeLastDetected,
   currentTimeOverride,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
-  includeLastDetected: boolean;
   currentTimeOverride: Date | undefined;
 }) => {
   const commonRuleFields = getCommonAlertFields(options);
@@ -43,7 +41,8 @@ const augmentAlerts = <T>({
     return {
       ...alert,
       _source: {
-        [ALERT_LAST_DETECTED]: includeLastDetected ? currentTimeOverride ?? new Date() : undefined,
+        [ALERT_START]: currentTimeOverride ?? new Date(),
+        [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
         [VERSION]: kibanaVersion,
         ...commonRuleFields,
         ...alert._source,
@@ -149,7 +148,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
-                  includeLastDetected: false,
                   currentTimeOverride: undefined,
                 });
 
@@ -216,7 +214,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         filter: [
                           {
                             range: {
-                              [TIMESTAMP]: {
+                              [ALERT_START]: {
                                 gte: suppressionWindowStart.toISOString(),
                               },
                             },
@@ -315,7 +313,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
-                  includeLastDetected: true,
                   currentTimeOverride,
                 });
 

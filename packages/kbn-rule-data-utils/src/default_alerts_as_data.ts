@@ -34,6 +34,9 @@ const ALERT_FLAPPING = `${ALERT_NAMESPACE}.flapping` as const;
 // kibana.alert.id - alert ID, also known as alert instance ID
 const ALERT_ID = `${ALERT_NAMESPACE}.id` as const;
 
+// kibana.alert.last_detected - timestamp when the alert was last seen
+const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
+
 // kibana.alert.reason - human readable reason that this alert is active
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 
@@ -91,6 +94,7 @@ const fields = {
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_ID,
+  ALERT_LAST_DETECTED,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -116,6 +120,7 @@ export {
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_ID,
+  ALERT_LAST_DETECTED,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
