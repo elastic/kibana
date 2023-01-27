@@ -74,26 +74,14 @@ export function AlertsOverview() {
             <ObservabilityAlertSearchBar
               appName={'apmApp'}
               kuery={kuery}
-              onRangeFromChange={(rangeFrom) =>
-                push(history, {
-                  query: {
-                    rangeFrom,
-                  },
-                })
+              onRangeFromChange={(value) =>
+                push(history, { query: { rangeFrom: value } })
               }
-              onRangeToChange={(rangeTo) =>
-                push(history, {
-                  query: {
-                    rangeTo,
-                  },
-                })
+              onRangeToChange={(value) =>
+                push(history, { query: { rangeTo: value } })
               }
-              onKueryChange={(kuery) =>
-                push(history, {
-                  query: {
-                    kuery,
-                  },
-                })
+              onKueryChange={(value) =>
+                push(history, { query: { kuery: value } })
               }
               defaultSearchQueries={apmQueries}
               onStatusChange={setAlertStatusFilter}

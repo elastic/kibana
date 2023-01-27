@@ -234,7 +234,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         }
       );
     },
-    [serviceName, start, end]
+    [serviceName, start, end, environment]
   );
 
   const query = omit(
