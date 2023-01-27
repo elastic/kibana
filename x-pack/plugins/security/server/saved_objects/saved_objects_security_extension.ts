@@ -82,7 +82,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
 
-    // OPERATION                          ES AUTH ACTION          AUDIT ACTION
+    // Security Action                    ES AUTH ACTION          AUDIT ACTION
     // -----------------------------------------------------------------------------------------
     // Check Conflicts                    'bulk_create'           N/A
     // Close PIT                          N/A                     AuditAction.CLOSE_POINT_IN_TIME
@@ -337,6 +337,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
   }
 
+  // This method not marked as private, but not exposed via the interface
+  // This allows us to test it thoroughly in the unit test suite, but keep it from being exposed to consumers.
   async authorize<A extends string>(
     params: InternalAuthorizeParams<A>
   ): Promise<CheckAuthorizationResult<string>> {
@@ -417,7 +419,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeCreate<A extends string>(
     params: AuthorizeCreateParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     return this.internalAuthorizeCreate({
       namespace: params.namespace,
       objects: [params.object],
@@ -426,14 +428,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeBulkCreate<A extends string>(
     params: AuthorizeBulkCreateParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     return this.internalAuthorizeCreate(params, { forceBulkAction: true });
   }
 
   private async internalAuthorizeCreate<A extends string>(
     params: AuthorizeBulkCreateParams,
     options?: InternalAuthorizeOptions
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
 
@@ -481,7 +483,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeUpdate<A extends string>(
     params: AuthorizeUpdateParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     return this.internalAuthorizeUpdate({
       namespace: params.namespace,
       objects: [params.object],
@@ -490,14 +492,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeBulkUpdate<A extends string>(
     params: AuthorizeBulkUpdateParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     return this.internalAuthorizeUpdate(params, { forceBulkAction: true });
   }
 
   private async internalAuthorizeUpdate<A extends string>(
     params: AuthorizeBulkUpdateParams,
     options?: InternalAuthorizeOptions
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
 
@@ -548,7 +550,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeDelete<A extends string>(
     params: AuthorizeDeleteParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     return this.internalAuthorizeDelete({
       namespace: params.namespace,
       // force existing namespaces to be undefined because we do not want to
@@ -559,14 +561,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeBulkDelete<A extends string>(
     params: AuthorizeBulkDeleteParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     return this.internalAuthorizeDelete(params, { forceBulkAction: true });
   }
 
   private async internalAuthorizeDelete<A extends string>(
     params: AuthorizeBulkDeleteParams,
     options?: InternalAuthorizeOptions
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
     const enforceMap = new Map<string, Set<string>>();
@@ -603,7 +605,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeGet<A extends string>(
     params: AuthorizeGetParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     const { namespace, object, objectNotFound } = params;
     const spacesToEnforce = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
     const existingNamespaces = object.existingNamespaces ?? [];
@@ -619,7 +621,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeBulkGet<A extends string>(
     params: AuthorizeBulkGetParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     const action = SecurityAction.BULK_GET;
     const namespace = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
@@ -685,7 +687,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeCheckConflicts<A extends string>(
     params: AuthorizeCheckConflictsParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     const action = SecurityAction.CHECK_CONFLICTS;
     const { namespace, objects } = params;
     if (objects.length === 0) {
@@ -716,7 +718,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeRemoveReferences<A extends string>(
     params: AuthorizeDeleteParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     // TODO: Improve authorization and auditing (https://github.com/elastic/kibana/issues/135259)
     const { namespace, object } = params;
     const spaces = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
@@ -731,7 +733,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeOpenPointInTime<A extends string>(
     params: AuthorizeOpenPointInTimeParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     const { namespaces, types } = params;
 
     const preAuthorizationResult = await this.authorize({
@@ -771,12 +773,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
   }
 
-  /**
-   * Checks/enforces authorization, writes audit events, filters the object graph, and redacts spaces from the share_to_space/bulk_get
-   * response. In other SavedObjectsRepository functions we do this before decrypting attributes. However, because of the
-   * share_to_space/bulk_get response logic involved in deciding between the exact match or alias match, it's cleaner to do authorization,
-   * auditing, filtering, and redaction all afterwards.
-   */
   async authorizeAndRedactMultiNamespaceReferences(
     params: AuthorizeAndRedactMultiNamespaceReferencesParams
   ): Promise<SavedObjectReferenceWithContext[]> {
@@ -957,11 +953,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return filteredAndRedactedObjects;
   }
 
-  /**
-   * Checks authorization, writes audit events, and redacts namespaces from the bulkResolve response. In other SavedObjectsRepository
-   * functions we do this before decrypting attributes. However, because of the bulkResolve logic involved in deciding between the exact match
-   * or alias match, it's cleaner to do authorization, auditing, and redaction all afterwards.
-   */
   async authorizeAndRedactInternalBulkResolve<T = unknown>(
     params: AuthorizeAndRedactInternalBulkResolveParams<T>
   ): Promise<Array<SavedObjectsResolveResponse<T> | BulkResolveError>> {
@@ -1025,7 +1016,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeUpdateSpaces<A extends string>(
     params: AuthorizeUpdateSpacesParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     const action = SecurityAction.UPDATE_OBJECTS_SPACES;
     const { objects, spacesToAdd, spacesToRemove } = params;
 
@@ -1078,7 +1069,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeFind<A extends string>(
     params: AuthorizeFindParams
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+  ): Promise<CheckAuthorizationResult<A>> {
     const { types, namespaces } = params;
 
     const preAuthorizationResult = await this.authorize({
@@ -1104,7 +1095,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   async getFindRedactTypeMap<A extends string>(
     params: GetFindRedactTypeMapParams
   ): Promise<AuthorizationTypeMap<A> | undefined> {
-    const { previouslyCheckedNamespaces: authorizeNamespaces, types, objects } = params;
+    const { previouslyCheckedNamespaces: authorizeNamespaces, objects } = params;
 
     const spacesToAuthorize = new Set<string>(authorizeNamespaces); // only for namespace redaction
     for (const { type, id, existingNamespaces = [] } of objects) {
@@ -1121,7 +1112,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       // authorization check so we can correctly redact the object namespaces below.
       const authorizationResult = await this.authorize({
         actions: new Set([SecurityAction.FIND]),
-        types,
+        types: new Set(objects.map((obj) => obj.type)),
         spaces: spacesToAuthorize,
       });
       return authorizationResult?.typeMap;

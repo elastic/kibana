@@ -1453,7 +1453,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     // we need an updated authorization type map to pass on to the redact method
     const redactTypeMap = await this._securityExtension?.getFindRedactTypeMap({
       previouslyCheckedNamespaces: spacesToAuthorize,
-      types: typesToAuthorize,
       objects: result.saved_objects.map((obj) => {
         return {
           type: obj.type,
@@ -1698,16 +1697,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const objectNotFound =
       !isFoundGetResponse(body) || indexNotFound || !this.rawDocExistsInNamespace(body, namespace);
 
-    // const spacesToEnforce = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
-    // const existingNamespaces = body?._source?.namespaces || [];
-
-    // const authorizationResult = await this._securityExtension?.authorize({
-    //   actions: new Set([SecurityAction.GET]),
-    //   types: new Set([type]),
-    //   spaces: new Set([...spacesToEnforce, ...existingNamespaces]), // existing namespaces are included so we can later redact if necessary
-    //   enforceMap: new Map([[type, spacesToEnforce]]),
-    //   auditOptions: { objects: [{ type, id }], bypassOnSuccess: true }, // Audit event for success case is added separately below
-    // });
     const authorizationResult = await this._securityExtension?.authorizeGet({
       namespace,
       object: {
@@ -1722,11 +1711,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-    // Only log a success event if the object was actually found (and is being returned to the user)
-    // this._securityExtension?.addAuditEvent({
-    //   action: AuditAction.GET,
-    //   savedObject: { type, id },
-    // });
 
     const result = getSavedObjectFromSource<T>(this._registry, type, id, body);
 

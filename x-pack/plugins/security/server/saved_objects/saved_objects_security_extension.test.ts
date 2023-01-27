@@ -5672,20 +5672,6 @@ describe('find', () => {
       },
     } as CheckPrivilegesResponse;
 
-    test('throws an error when `types` is empty', async () => {
-      const { securityExtension, checkPrivileges } = setup();
-      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
-
-      await expect(
-        securityExtension.getFindRedactTypeMap({
-          previouslyCheckedNamespaces: expectedSpaces,
-          types: new Set(),
-          objects: [{ type: obj1.type, id: obj1.id, existingNamespaces }],
-        })
-      ).rejects.toThrowError('No types specified for authorization');
-      expect(checkPrivileges).not.toHaveBeenCalled();
-    });
-
     test('throws an error when checkAuthorization fails', async () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
@@ -5693,7 +5679,6 @@ describe('find', () => {
       await expect(
         securityExtension.getFindRedactTypeMap({
           previouslyCheckedNamespaces: expectedSpaces,
-          types: expectedTypes,
           objects: [{ type: obj1.type, id: obj1.id, existingNamespaces }],
         })
       ).rejects.toThrowError('Oh no!');
@@ -5705,7 +5690,6 @@ describe('find', () => {
 
       await securityExtension.getFindRedactTypeMap({
         previouslyCheckedNamespaces: expectedSpaces,
-        types: expectedTypes,
         objects,
       });
 
@@ -5741,7 +5725,6 @@ describe('find', () => {
 
       const result = await securityExtension.getFindRedactTypeMap({
         previouslyCheckedNamespaces: expectedSpaces,
-        types: expectedTypes,
         objects: [{ type: obj1.type, id: obj1.id, existingNamespaces: [namespace] }],
       });
       expect(result).toBeUndefined();
@@ -5753,7 +5736,6 @@ describe('find', () => {
 
       const result = await securityExtension.getFindRedactTypeMap({
         previouslyCheckedNamespaces: expectedSpaces,
-        types: expectedTypes,
         objects,
       });
 
@@ -5766,7 +5748,6 @@ describe('find', () => {
 
       const result = await securityExtension.getFindRedactTypeMap({
         previouslyCheckedNamespaces: expectedSpaces,
-        types: expectedTypes,
         objects,
       });
 
@@ -5784,7 +5765,6 @@ describe('find', () => {
 
       const result = await securityExtension.getFindRedactTypeMap({
         previouslyCheckedNamespaces: expectedSpaces,
-        types: expectedTypes,
         objects,
       });
 
@@ -5801,7 +5781,6 @@ describe('find', () => {
 
       await securityExtension.getFindRedactTypeMap({
         previouslyCheckedNamespaces: expectedSpaces,
-        types: expectedTypes,
         objects,
       });
 
@@ -5833,7 +5812,6 @@ describe('find', () => {
 
       await securityExtension.getFindRedactTypeMap({
         previouslyCheckedNamespaces: expectedSpaces,
-        types: expectedTypes,
         objects,
       });
 

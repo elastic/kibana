@@ -276,20 +276,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       const finder = this.spacesClient.createSavedObjectFinder(id);
       try {
         for await (const response of finder.find()) {
-          // response.saved_objects.forEach((savedObject) => {
-          //   const { namespaces = [] } = savedObject;
-          //   const isOnlySpace = namespaces.length === 1; // We can always rely on the `namespaces` field having >=1 element
-          //   if (namespaces.includes(ALL_SPACES_ID) && !namespaces.includes(id)) {
-          //     // This object exists in All Spaces and its `namespaces` field isn't going to change; there's nothing to audit
-          //     return;
-          //   }
-          //   securityExtension.addAuditEvent({
-          //     action: isOnlySpace ? AuditAction.DELETE : AuditAction.UPDATE_OBJECTS_SPACES,
-          //     outcome: 'unknown',
-          //     savedObject: { type: savedObject.type, id: savedObject.id },
-          //     ...(!isOnlySpace && { deleteFromSpaces: [id] }),
-          //   });
-          // });
           this.securityExtension?.auditObjectsForSpaceDeletion(id, response.saved_objects);
         }
       } finally {
@@ -309,47 +295,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
   }
 
   public async disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
-    // if (this.securityExtension)
-    // {
-    //   const [uniqueSpaces, typesAndSpaces] = aliases.reduce(
-    //     ([spaces, typesAndSpacesMap], { targetSpace, targetType }) => {
-    //       const spacesForType = typesAndSpacesMap.get(targetType) ?? new Set();
-    //       return [
-    //         spaces.add(targetSpace),
-    //         typesAndSpacesMap.set(targetType, spacesForType.add(targetSpace)),
-    //       ];
-    //     },
-    //     [new Set<string>(), new Map<string, Set<string>>()]
-    //   );
-
-    //   let error: Error | undefined;
-    //   try {
-    //     await this.securityExtension.authorize({
-    //       actions: new Set([SecurityAction.BULK_UPDATE]),
-    //       types: new Set(typesAndSpaces.keys()),
-    //       spaces: uniqueSpaces,
-    //       enforceMap: typesAndSpaces,
-    //     });
-    //   } catch (err) {
-    //     error = this.errors.decorateForbiddenError(
-    //       new Error(`Unable to disable aliases: ${err.message}`)
-    //     );
-    //   }
-
-    //   for (const alias of aliases) {
-    //     const id = getAliasId(alias);
-    //     this.securityExtension.addAuditEvent({
-    //       action: AuditAction.UPDATE,
-    //       savedObject: { type: LEGACY_URL_ALIAS_TYPE, id },
-    //       error,
-    //       ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the update operation has not occurred yet
-    //     });
-    //   }
-    //   if (error) {
-    //     throw error;
-    //   }
-    // }
-
     try {
       await this.securityExtension?.authorizeDisableLegacyUrlAliases(aliases); // will throw if unauthorized
     } catch (err) {

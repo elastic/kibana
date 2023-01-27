@@ -201,30 +201,6 @@ describe('SavedObjectsRepository Security Extension', () => {
         },
         objectNotFound: false,
       });
-      // const expectedActions = new Set([SecurityAction.GET]);
-      // const expectedSpaces = new Set(multiNamespaceObjNamespaces);
-      // const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
-      // const expectedEnforceMap = new Map<string, Set<string>>();
-      // expectedEnforceMap.set(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, new Set([namespace]));
-
-      // const {
-      //   actions: actualActions,
-      //   spaces: actualSpaces,
-      //   types: actualTypes,
-      //   enforceMap: actualEnforceMap,
-      //   options: actualOptions,
-      //   auditOptions: actualAuditOptions,
-      // } = mockSecurityExt.authorize.mock.calls[0][0];
-
-      // expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      // expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      // expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      // expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
-      // expect(actualOptions).toBeUndefined();
-      // expect(actualAuditOptions).toEqual({
-      //   bypassOnSuccess: true,
-      //   objects: [{ type: MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, id }],
-      // });
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
@@ -580,27 +556,6 @@ describe('SavedObjectsRepository Security Extension', () => {
           type,
         },
       });
-      // const expectedActions = new Set([SecurityAction.REMOVE_REFERENCES]);
-      // const expectedSpaces = new Set([namespace]);
-      // const expectedTypes = new Set([type]);
-      // const expectedEnforceMap = new Map<string, Set<string>>();
-      // expectedEnforceMap.set(type, new Set([namespace]));
-
-      // const {
-      //   actions: actualActions,
-      //   spaces: actualSpaces,
-      //   types: actualTypes,
-      //   enforceMap: actualEnforceMap,
-      //   options: actualOptions,
-      //   auditOptions: actualAuditOptions,
-      // } = mockSecurityExt.authorize.mock.calls[0][0];
-
-      // expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      // expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      // expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      // expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
-      // expect(actualOptions).toBeUndefined();
-      // expect(actualAuditOptions).toEqual({ objects: [{ type, id }] });
     });
   });
 
@@ -730,23 +685,6 @@ describe('SavedObjectsRepository Security Extension', () => {
         namespaces: new Set(namespaces),
         types: new Set([type]),
       });
-      // const expectedActions = new Set([SecurityAction.OPEN_POINT_IN_TIME]);
-      // const expectedSpaces = new Set([namespace]);
-      // const expectedTypes = new Set([type]);
-
-      // const {
-      //   actions: actualActions,
-      //   spaces: actualSpaces,
-      //   types: actualTypes,
-      //   enforceMap: actualEnforceMap,
-      //   options: actualOptions,
-      // } = mockSecurityExt.authorize.mock.calls[0][0];
-
-      // expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      // expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      // expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      // expect(actualEnforceMap).toBeUndefined();
-      // expect(actualOptions).toBeUndefined();
     });
   });
 
@@ -942,42 +880,6 @@ describe('SavedObjectsRepository Security Extension', () => {
         namespaces: new Set([namespace]),
         types: new Set(['index-pattern']),
       });
-      // const expectedActions = new Set([SecurityAction.FIND]);
-      // const expectedSpaces = new Set([namespace]);
-      // const expectedTypes = new Set([type]);
-
-      // const {
-      //   actions: actualActions,
-      //   spaces: actualSpaces,
-      //   types: actualTypes,
-      //   enforceMap: actualEnforceMap,
-      //   options: actualOptions,
-      //   auditOptions: actualAuditOptions,
-      // } = mockSecurityExt.authorizeFind.mock.calls[0][0];
-
-      // expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      // expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      // expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      // expect(actualEnforceMap).toBeUndefined();
-      // expect(actualOptions).toBeUndefined();
-      // expect(actualAuditOptions).toEqual({
-      //   bypassOnSuccess: true,
-      //   bypassOnFailure: true,
-      // });
-
-      // const {
-      //   actions: actualActions2,
-      //   spaces: actualSpaces2,
-      //   types: actualTypes2,
-      //   enforceMap: actualEnforceMap2,
-      //   options: actualOptions2,
-      // } = mockSecurityExt.authorize.mock.calls[1][0];
-
-      // expect(setsAreEqual(actualActions2, expectedActions)).toBeTruthy();
-      // expect(setsAreEqual(actualSpaces2, new Set([...expectedSpaces, 'ns-2']))).toBeTruthy();
-      // expect(setsAreEqual(actualTypes2, expectedTypes)).toBeTruthy();
-      // expect(actualEnforceMap2).toBeUndefined();
-      // expect(actualOptions2).toBeUndefined(); // ToDo: Is this true?
     });
 
     test(`calls GetFindRedactTypeMap with correct parameters`, async () => {
@@ -995,7 +897,6 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledWith({
         previouslyCheckedNamespaces: new Set([namespace]),
-        types: new Set(['index-pattern']),
         objects: generatedResults.hits.hits.map((obj) => {
           return {
             type: obj._source?.type,
@@ -1007,19 +908,6 @@ describe('SavedObjectsRepository Security Extension', () => {
           };
         }),
       });
-      // const {
-      //   actions: actualActions2,
-      //   spaces: actualSpaces2,
-      //   types: actualTypes2,
-      //   enforceMap: actualEnforceMap2,
-      //   options: actualOptions2,
-      // } = mockSecurityExt.authorize.mock.calls[1][0];
-
-      // expect(setsAreEqual(actualActions2, expectedActions)).toBeTruthy();
-      // expect(setsAreEqual(actualSpaces2, new Set([...expectedSpaces, 'ns-2']))).toBeTruthy();
-      // expect(setsAreEqual(actualTypes2, expectedTypes)).toBeTruthy();
-      // expect(actualEnforceMap2).toBeUndefined();
-      // expect(actualOptions2).toBeUndefined(); // ToDo: Is this true?
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {

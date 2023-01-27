@@ -694,18 +694,7 @@ describe('SecureSpacesClientWrapper', () => {
         type: 'space',
         id: space.id,
       });
-      // expect(securityExtension!.addAuditEvent).toHaveBeenCalledTimes(2);
-      // expect(securityExtension!.addAuditEvent).toHaveBeenCalledWith({
-      //   action: AuditAction.DELETE,
-      //   outcome: 'unknown',
-      //   savedObject: { type: 'dashboard', id: '2' },
-      // });
-      // expect(securityExtension!.addAuditEvent).toHaveBeenCalledWith({
-      //   action: AuditAction.UPDATE_OBJECTS_SPACES,
-      //   outcome: 'unknown',
-      //   savedObject: { type: 'dashboard', id: '3' },
-      //   deleteFromSpaces: [space.id],
-      // });
+
       expect(securityExtension!.auditObjectsForSpaceDeletion).toHaveBeenCalledTimes(1);
       expect(securityExtension!.auditObjectsForSpaceDeletion).toHaveBeenCalledWith(space.id, [
         { id: '1', namespaces: ['*'], type: 'dashboard' },
@@ -719,55 +708,15 @@ describe('SecureSpacesClientWrapper', () => {
     const alias1 = { targetSpace: 'space-1', targetType: 'type-1', sourceId: 'id' };
     const alias2 = { targetSpace: 'space-2', targetType: 'type-2', sourceId: 'id' };
 
-    // function expectAuditEvents(
-    //   securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>,
-    //   aliases: LegacyUrlAliasTarget[],
-    //   { error }: { error: boolean }
-    // ) {
-    //   aliases.forEach((alias) => {
-    //     expect(securityExtension!.addAuditEvent).toHaveBeenCalledWith({
-    //       action: AuditAction.UPDATE,
-    //       savedObject: { type: LEGACY_URL_ALIAS_TYPE, id: getAliasId(alias) },
-    //       ...(error ? { error: expect.anything() } : { outcome: 'unknown' }),
-    //     });
-    //   });
-    // }
-
     function expectAuthorizationCheck(
       securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>,
       aliases: Array<{ targetSpace: string; targetType: string }>
     ) {
-      // expect(securityExtension.authorize).toHaveBeenCalledTimes(1);
       expect(securityExtension.authorizeDisableLegacyUrlAliases).toHaveBeenCalledTimes(1);
       expect(securityExtension.authorizeDisableLegacyUrlAliases).toHaveBeenCalledWith([
         alias1,
         alias2,
       ]);
-
-      // const targetTypes = aliases.map((alias) => alias.targetType);
-      // const targetSpaces = aliases.map((alias) => alias.targetSpace);
-
-      // const expectedActions = new Set([SecurityAction.BULK_UPDATE]);
-      // const expectedSpaces = new Set(targetSpaces);
-      // const expectedTypes = new Set(targetTypes);
-      // const expectedEnforceMap = new Map<string, Set<string>>();
-      // aliases.forEach((alias) => {
-      //   expectedEnforceMap.set(alias.targetType, new Set([alias.targetSpace]));
-      // });
-
-      // const {
-      //   actions: actualActions,
-      //   spaces: actualSpaces,
-      //   types: actualTypes,
-      //   enforceMap: actualEnforceMap,
-      //   options: actualOptions,
-      // } = securityExtension.authorize.mock.calls[0][0];
-
-      // expect(setsAreEqual(expectedActions, actualActions)).toBeTruthy();
-      // expect(setsAreEqual(expectedSpaces, actualSpaces)).toBeTruthy();
-      // expect(setsAreEqual(expectedTypes, actualTypes)).toBeTruthy();
-      // expect(setMapsAreEqual(expectedEnforceMap, actualEnforceMap)).toBeTruthy();
-      // expect(actualOptions).toBeUndefined();
     }
 
     describe('when security is not enabled', () => {
@@ -800,23 +749,15 @@ describe('SecureSpacesClientWrapper', () => {
         );
 
         expectAuthorizationCheck(securityExtension!, aliases);
-        // expectAuditEvents(securityExtension!, aliases, { error: true });
         expect(baseClient.disableLegacyUrlAliases).not.toHaveBeenCalled();
       });
 
       it('updates the legacy URL aliases when authorized', async () => {
         const { wrapper, baseClient, securityExtension } = setup({ securityEnabled });
-        // securityExtension!.authorize.mockResolvedValue({
-        //   // These values don't actually matter, the call to enforceAuthorization matters
-        //   status: 'fully_authorized',
-        //   typeMap: new Map(),
-        // });
-        // enforceAuthorization does *not* throw an error by default
         const aliases = [alias1, alias2];
         await wrapper.disableLegacyUrlAliases(aliases);
 
         expectAuthorizationCheck(securityExtension!, aliases);
-        // expectAuditEvents(securityExtension!, aliases, { error: false });
         expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledTimes(1);
         expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledWith(aliases);
       });
