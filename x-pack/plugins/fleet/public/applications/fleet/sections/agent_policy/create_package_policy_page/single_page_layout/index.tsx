@@ -267,11 +267,34 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
+  const replaceDefineStepView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-replace-define-step'
+  );
+
+  if (replaceDefineStepView && extensionView) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      "'package-policy-create' is ignored when 'package-policy-replace-define-step' is defined"
+    );
+  }
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
       isPackageInfoLoading || !isInitialized ? (
         <Loading />
+      ) : replaceDefineStepView && packageInfo?.name ? (
+        <ExtensionWrapper>
+          <replaceDefineStepView.Component
+            agentPolicy={agentPolicy}
+            packageInfo={packageInfo}
+            newPolicy={packagePolicy}
+            onChange={handleExtensionViewOnChange}
+            validationResults={validationResults}
+            integrationInfo={integrationInfo}
+            isEditPage={false}
+          />
+        </ExtensionWrapper>
       ) : packageInfo ? (
         <>
           <StepDefinePackagePolicy
@@ -317,9 +340,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updatePackagePolicy,
       validationResults,
       formState,
-      integrationInfo?.name,
       extensionView,
       handleExtensionViewOnChange,
+      integrationInfo,
+      replaceDefineStepView,
     ]
   );
 
