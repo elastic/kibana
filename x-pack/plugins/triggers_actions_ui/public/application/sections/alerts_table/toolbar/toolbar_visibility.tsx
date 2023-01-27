@@ -10,7 +10,7 @@ import {
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import React, { Fragment, lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsCount } from './components/alerts_count/alerts_count';
 import { BulkActionsConfig, RowSelection } from '../../../../types';

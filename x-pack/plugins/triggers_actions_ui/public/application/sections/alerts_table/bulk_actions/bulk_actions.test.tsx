@@ -16,6 +16,7 @@ import {
   AlertsField,
   AlertsTableProps,
   BulkActionsState,
+  FetchAlertData,
   RowSelectionState,
 } from '../../../../types';
 import { bulkActionsReducer } from './reducer';
@@ -55,14 +56,15 @@ describe('AlertsTable.BulkActions', () => {
     },
   ] as unknown as EcsFieldsResponse[];
 
-  const alertsData = {
+  const alertsData: FetchAlertData = {
     activePage: 0,
     alerts,
+    ecsAlertsData: [],
+    oldAlertsData: [],
     alertsCount: alerts.length,
     isInitializing: false,
     isLoading: false,
     getInspectQuery: () => ({ request: {}, response: {} }),
-    onColumnsChange: () => {},
     onPageChange: () => {},
     onSortChange: () => {},
     refresh: () => {},
@@ -85,7 +87,7 @@ describe('AlertsTable.BulkActions', () => {
       }),
   };
 
-  const tableProps = {
+  const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
     columns,
     deletedEventIds: [],
@@ -95,7 +97,6 @@ describe('AlertsTable.BulkActions', () => {
     leadingControlColumns: [],
     showExpandToDetails: true,
     trailingControlColumns: [],
-    alerts,
     useFetchAlertsData: () => alertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
@@ -105,6 +106,7 @@ describe('AlertsTable.BulkActions', () => {
     onColumnsChange: () => {},
     onChangeVisibleColumns: () => {},
     browserFields: {},
+    query: {},
   };
 
   const tablePropsWithBulkActions = {

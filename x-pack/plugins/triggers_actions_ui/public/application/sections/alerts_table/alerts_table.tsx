@@ -6,7 +6,7 @@
  */
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { Suspense, lazy, useCallback, useMemo, useEffect, useRef, useState } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
@@ -39,7 +39,7 @@ const GridStyles: EuiDataGridStyle = {
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
+  const [_, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
   const alertsData = props.useFetchAlertsData();
   const {
     activePage,
@@ -58,7 +58,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
     useActionsColumn({
       options: props.alertsTableConfiguration.useActionsColumn,
-      params: [ecsAlertsData, oldAlertsData],
     });
 
   const {

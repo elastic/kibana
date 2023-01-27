@@ -208,8 +208,8 @@ const useFetchAlerts = ({
                 if (isCompleteResponse(response)) {
                   const { rawResponse } = response;
                   inspectQuery.current = {
-                    request: [request],
-                    response: [rawResponse],
+                    request: [],
+                    response: [],
                   };
                   let totalAlerts = 0;
                   if (rawResponse.hits.total && typeof rawResponse.hits.total === 'number') {

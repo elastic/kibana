@@ -21,6 +21,7 @@ import type {
   EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridProps,
   EuiDataGridRefProps,
+  EuiDataGridColumnCellAction,
 } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
@@ -502,7 +503,6 @@ export type AlertsTableProps = {
   onChangeVisibleColumns: (newColumns: string[]) => void;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
-  dataGridRef: EuiDataGridRefProps;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -545,7 +545,7 @@ export type UseBulkActionsRegistry = (
 export type UseCellActions = (props: {
   columns: EuiDataGridColumn[];
   data: unknown[][];
-  dataGridRef?: EuiDataGridRefProps;
+  dataGridRef?: EuiDataGridRefProps | null;
   ecsData: unknown[];
   pageSize: number;
 }) => {

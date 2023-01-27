@@ -13,10 +13,9 @@ const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
 
 interface UseActionsColumnProps {
   options?: UseActionsColumnRegistry;
-  params: Parameters<UseActionsColumnRegistry>;
 }
 
-export const useActionsColumn = ({ options, params }: UseActionsColumnProps) => {
+export const useActionsColumn = ({ options }: UseActionsColumnProps) => {
   const [, updateBulkActionsState] = useContext(BulkActionsContext);
 
   const useUserActionsColumn = options
@@ -27,7 +26,7 @@ export const useActionsColumn = ({ options, params }: UseActionsColumnProps) => 
       });
 
   const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
-    useUserActionsColumn(...params);
+    useUserActionsColumn();
 
   // we save the rowIndex when creating the function to be used by the clients
   // so they don't have to manage it

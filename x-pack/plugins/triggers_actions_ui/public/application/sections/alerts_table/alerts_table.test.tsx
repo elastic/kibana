@@ -12,7 +12,13 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 import { AlertsTable } from './alerts_table';
-import { AlertsField, AlertsTableProps, BulkActionsState, RowSelectionState } from '../../../types';
+import {
+  AlertsField,
+  AlertsTableProps,
+  BulkActionsState,
+  FetchAlertData,
+  RowSelectionState,
+} from '../../../types';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BulkActionsContext } from './bulk_actions/context';
@@ -46,18 +52,19 @@ describe('AlertsTable', () => {
     },
   ] as unknown as EcsFieldsResponse[];
 
-  const fetchAlertsData = {
+  const fetchAlertsData: FetchAlertData = {
     activePage: 0,
     alerts,
     alertsCount: alerts.length,
     isInitializing: false,
     isLoading: false,
     getInspectQuery: jest.fn().mockImplementation(() => ({ request: {}, response: {} })),
-    onColumnsChange: jest.fn(),
     onPageChange: jest.fn(),
     onSortChange: jest.fn(),
     refresh: jest.fn(),
     sort: [],
+    ecsAlertsData: [],
+    oldAlertsData: [],
   };
 
   const useFetchAlertsData = () => {
@@ -89,7 +96,7 @@ describe('AlertsTable', () => {
     ],
   };
 
-  const tableProps = {
+  const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
     columns,
     bulkActions: [],
@@ -110,6 +117,7 @@ describe('AlertsTable', () => {
     onColumnsChange: () => {},
     onChangeVisibleColumns: () => {},
     browserFields: {},
+    query: {},
   };
 
   const defaultBulkActionsState = {
