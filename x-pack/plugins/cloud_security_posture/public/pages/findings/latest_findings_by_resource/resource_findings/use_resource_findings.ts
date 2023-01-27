@@ -92,11 +92,10 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
       keepPreviousData: true,
       select: ({ rawResponse: { hits, aggregations } }: ResourceFindingsResponse) => {
         if (!aggregations) throw new Error('expected aggregations to exists');
-
-        assertNonEmptyArray(aggregations.count.buckets);
-        assertNonEmptyArray(aggregations.clusterId.buckets);
-        assertNonEmptyArray(aggregations.resourceSubType.buckets);
-        assertNonEmptyArray(aggregations.resourceName.buckets);
+        assertNonBucketsArray(aggregations.count.buckets);
+        assertNonBucketsArray(aggregations.clusterId.buckets);
+        assertNonBucketsArray(aggregations.resourceSubType.buckets);
+        assertNonBucketsArray(aggregations.resourceName.buckets);
 
         return {
           page: hits.hits.map((hit) => hit._source!),
@@ -112,11 +111,11 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
   );
 };
 
-function assertNonEmptyArray<T>(arr: unknown): asserts arr is T[] {
-  if (!Array.isArray(arr) || arr.length === 0) {
-    throw new Error('expected a non empty array');
+function assertNonBucketsArray<T>(arr: unknown): asserts arr is T[] {
+  if (!Array.isArray(arr)) {
+    throw new Error('expected buckets to be an array');
   }
 }
 
-const getFirstBucketKey = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) =>
-  buckets[0].key;
+const getFirstBucketKey = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]): string =>
+  buckets[0]?.key ?? '';
