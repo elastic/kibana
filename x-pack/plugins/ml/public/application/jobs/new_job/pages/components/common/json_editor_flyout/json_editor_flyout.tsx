@@ -314,7 +314,7 @@ const Contents: FC<{
       <MLJobEditor
         value={value}
         height={editorHeight}
-        mode={ML_EDITOR_MODE.XJSON}
+        mode={ML_EDITOR_MODE.JSON}
         readOnly={editJson === false}
         onChange={onChange}
         schema={schema}

@@ -49,7 +49,11 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
 
   return (
     <CodeEditor
-      languageId={'json'}
+      languageId={mode}
+      options={{
+        readOnly,
+        theme,
+      }}
       value={value}
       width={width}
       height={height}
