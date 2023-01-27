@@ -115,7 +115,7 @@ When date histograms use the `auto` interval, Kibana attempts to generate this
 number of bars.
 
 [[histogram-maxbars]]`histogram:maxBars`::
-Date histograms are not generated with more bars than the value of this property, 
+Date histograms are not generated with more bars than the value of this property,
 scaling values when necessary.
 
 [[history-limit]]`history:limit`::
@@ -480,4 +480,4 @@ user.
 ==== Usage data
 
 Helps improve the Elastic Stack by providing usage statistics for
-basic features. This data will not be shared outside of Elastic.
+basic features.

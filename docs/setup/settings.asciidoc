@@ -195,7 +195,7 @@ The default application to load. *Default: `"home"`*
 for more details. {kib} uses an index in {es} to store saved searches, visualizations, and
 dashboards. {kib} creates a new index if the index doesn’t already exist.
 If you configure a custom index, the name must be lowercase, and conform to the
-{es} {ref}/indices-create-index.html[index name limitations]. 
+{es} {ref}/indices-create-index.html[index name limitations].
 *Default: `".kibana"`*
 
 `kibana.autocompleteTimeout` {ess-icon}::
@@ -571,7 +571,7 @@ set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>>
 
 `telemetry.enabled`::
 Reporting your cluster statistics helps
-us improve your user experience. Your data is never shared with anyone. Set to
+us improve your user experience. Set to
 `false` to disable telemetry capabilities entirely. You can alternatively opt
 out through *Advanced Settings*. *Default: `true`*
 
