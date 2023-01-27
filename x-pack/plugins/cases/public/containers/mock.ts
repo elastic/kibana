@@ -28,7 +28,7 @@ import type {
   CommentResponse,
   UserAction,
   UserActionTypes,
-  UserActionWithResponseInjection,
+  UserActionWithResponse,
   CommentUserAction,
   UserActionFindResponse,
 } from '../../common/api';
@@ -791,7 +791,7 @@ export const jiraFields = { fields: { issueType: '10006', priority: null, parent
 
 export const getAlertUserAction = (
   overrides?: Record<string, unknown>
-): SnakeToCamelCase<UserActionWithResponseInjection<CommentUserAction>> => ({
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   id: 'alert-action-id',
   commentId: 'alert-comment-id',
@@ -813,7 +813,7 @@ export const getAlertUserAction = (
 
 export const getMultipleAlertsUserAction = (
   overrides?: Record<string, unknown>
-): SnakeToCamelCase<UserActionWithResponseInjection<CommentUserAction>> => ({
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   id: 'alert-action-id',
   commentId: 'alert-comment-id',
@@ -835,7 +835,7 @@ export const getMultipleAlertsUserAction = (
 
 export const getHostIsolationUserAction = (
   overrides?: Record<string, unknown>
-): SnakeToCamelCase<UserActionWithResponseInjection<CommentUserAction>> => ({
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   id: 'isolate-action-id',
   type: ActionTypes.comment,
@@ -910,7 +910,7 @@ export const basicCaseClosed: Case = {
 
 export const getExternalReferenceUserAction = (
   overrides?: Record<string, unknown>
-): SnakeToCamelCase<UserActionWithResponseInjection<CommentUserAction>> => ({
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   id: 'external-reference-action-id',
   type: ActionTypes.comment,
@@ -943,7 +943,7 @@ export const getExternalReferenceAttachment = (
 
 export const getPersistableStateUserAction = (
   overrides?: Record<string, unknown>
-): SnakeToCamelCase<UserActionWithResponseInjection<CommentUserAction>> => ({
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   id: 'persistable-state-action-id',
   type: ActionTypes.comment,

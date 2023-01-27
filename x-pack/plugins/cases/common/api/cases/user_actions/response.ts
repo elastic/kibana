@@ -10,7 +10,7 @@ import * as rt from 'io-ts';
 import type { ActionsRt, ActionTypeValues } from './common';
 import {
   CaseUserActionInjectedIdsRt,
-  CaseUserActionSavedObjectIdsRt,
+  CaseUserActionInjectedDeprecatedIdsRt,
   UserActionCommonAttributesRt,
 } from './common';
 import { CreateCaseUserActionRt } from './create_case';
@@ -61,19 +61,19 @@ const CaseUserActionBasicWithoutConnectorIdRt = rt.intersection([
 
 const CaseUserActionDeprecatedResponseRt = rt.intersection([
   CaseUserActionBasicRt,
-  CaseUserActionSavedObjectIdsRt,
+  CaseUserActionInjectedDeprecatedIdsRt,
 ]);
 
 /**
  * This includes the comment_id but not the action_id or case_id
  */
-const CaseUserActionInjectedAttributesWithoutActionIdRt = rt.intersection([
+const CaseUserActionInjectedAttributesRt = rt.intersection([
   CaseUserActionBasicRt,
   CaseUserActionInjectedIdsRt,
 ]);
 
 const CaseUserActionResponseRt = rt.intersection([
-  CaseUserActionInjectedAttributesWithoutActionIdRt,
+  CaseUserActionInjectedAttributesRt,
   rt.type({
     id: rt.string,
     version: rt.string,
@@ -81,8 +81,8 @@ const CaseUserActionResponseRt = rt.intersection([
 ]);
 
 export const CaseUserActionAttributesRt = CaseUserActionBasicRt;
-export const CaseUserActionsDeprecatedResponse = rt.array(CaseUserActionDeprecatedResponseRt);
 export const CaseUserActionsResponseRt = rt.array(CaseUserActionResponseRt);
+export const CaseUserActionsDeprecatedResponseRt = rt.array(CaseUserActionDeprecatedResponseRt);
 
 export type CaseUserActionAttributes = rt.TypeOf<typeof CaseUserActionAttributesRt>;
 export type CaseUserActionAttributesWithoutConnectorId = rt.TypeOf<
@@ -90,9 +90,11 @@ export type CaseUserActionAttributesWithoutConnectorId = rt.TypeOf<
 >;
 export type CaseUserActionsResponse = rt.TypeOf<typeof CaseUserActionsResponseRt>;
 export type CaseUserActionResponse = rt.TypeOf<typeof CaseUserActionResponseRt>;
-export type CaseUserActionInjectedAttributesWithoutActionId = rt.TypeOf<
-  typeof CaseUserActionInjectedAttributesWithoutActionIdRt
+export type CaseUserActionsDeprecatedResponse = rt.TypeOf<
+  typeof CaseUserActionsDeprecatedResponseRt
 >;
+export type CaseUserActionDeprecatedResponse = rt.TypeOf<typeof CaseUserActionDeprecatedResponseRt>;
+export type CaseUserActionInjectedAttributes = rt.TypeOf<typeof CaseUserActionInjectedAttributesRt>;
 
 export type UserAction = rt.TypeOf<typeof ActionsRt>;
 export type UserActionTypes = ActionTypeValues;

@@ -8,7 +8,7 @@
 import type { EuiCommentProps } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { SnakeToCamelCase } from '../../../common/types';
-import type { ActionTypes, UserActionWithResponseInjection } from '../../../common/api';
+import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
 import type { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
 import type { CaseServices } from '../../containers/use_find_case_user_actions';
 import type { AddCommentRefObject } from '../add_comment';
@@ -70,7 +70,7 @@ export interface UserActionBuilderArgs {
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
 }
 
-export type UserActionResponse<T> = SnakeToCamelCase<UserActionWithResponseInjection<T>>;
+export type UserActionResponse<T> = SnakeToCamelCase<UserActionWithResponse<T>>;
 export type UserActionBuilder = (args: UserActionBuilderArgs) => {
   build: () => EuiCommentProps[];
 };
