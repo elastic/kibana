@@ -205,9 +205,13 @@ export function DiscoverLayout({
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'none') {
+      const globalQueryState = data.query.getState();
+
       return (
         <DiscoverNoResults
           isTimeBased={isTimeBased}
+          query={globalQueryState.query}
+          filters={globalQueryState.filters}
           data={data}
           error={dataState.error}
           dataView={dataView}

@@ -17,18 +17,10 @@ import {
   stubDataView,
   stubDataViewWithoutTimeField,
 } from '@kbn/data-views-plugin/common/data_view.stub';
-import * as QueryApi from '@kbn/unified-field-list-plugin/public/hooks/use_query_subscriber';
+import { type Filter } from '@kbn/es-query';
 import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 
-const MOCK_DEFAULT_QUERY = {
-  query: { language: 'lucene', query: '' },
-  filters: [],
-  fromDate: 'now-15m',
-  toDate: 'now',
-};
-
-jest.spyOn(QueryApi, 'useQuerySubscriber').mockImplementation(() => MOCK_DEFAULT_QUERY);
 jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
   rawResponse: {
     aggregations: {
@@ -75,13 +67,12 @@ async function mountAndFindSubjects(
     adjustFilters: findTestSubject(component!, 'discoverNoResultsAdjustFilters').exists(),
     checkIndices: findTestSubject(component!, 'discoverNoResultsCheckIndices').exists(),
     disableFiltersButton: findTestSubject(component!, 'discoverNoResultsDisableFilters').exists(),
-    recentMatchesButton: findTestSubject(component!, 'discoverNoResultsViewAllMatches').exists(),
+    viewMatchesButton: findTestSubject(component!, 'discoverNoResultsViewAllMatches').exists(),
   };
 }
 
 describe('DiscoverNoResults', () => {
   beforeEach(() => {
-    (QueryApi.useQuerySubscriber as jest.Mock).mockClear();
     (RxApi.lastValueFrom as jest.Mock).mockClear();
   });
 
@@ -90,6 +81,8 @@ describe('DiscoverNoResults', () => {
       test('renders default feedback', async () => {
         const result = await mountAndFindSubjects({
           dataView: stubDataViewWithoutTimeField,
+          query: undefined,
+          filters: undefined,
         });
         expect(result).toMatchInlineSnapshot(`
           Object {
@@ -100,7 +93,7 @@ describe('DiscoverNoResults', () => {
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
-            "recentMatchesButton": false,
+            "viewMatchesButton": false,
           }
         `);
       });
@@ -109,6 +102,8 @@ describe('DiscoverNoResults', () => {
       test('renders time range feedback', async () => {
         const result = await mountAndFindSubjects({
           dataView: stubDataView,
+          query: { language: 'lucene', query: '' },
+          filters: [],
         });
         expect(result).toMatchInlineSnapshot(`
           Object {
@@ -119,36 +114,29 @@ describe('DiscoverNoResults', () => {
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
-            "recentMatchesButton": true,
+            "viewMatchesButton": true,
           }
         `);
-        expect(QueryApi.useQuerySubscriber).toHaveBeenCalled();
         expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('filter/query', () => {
       test('shows "adjust search" message when having query', async () => {
-        const mockNonEmptyQuery = {
-          ...MOCK_DEFAULT_QUERY,
+        const result = await mountAndFindSubjects({
+          dataView: stubDataView,
           query: { language: 'lucene', query: '*' },
-        };
-        (QueryApi.useQuerySubscriber as jest.Mock).mockReset();
-        (QueryApi.useQuerySubscriber as jest.Mock).mockImplementation(() => mockNonEmptyQuery);
-
-        const result = await mountAndFindSubjects({ dataView: stubDataView });
+          filters: undefined,
+        });
         expect(result).toHaveProperty('adjustSearch', true);
       });
 
       test('shows "adjust filters" message when having filters', async () => {
-        const mockQueryWithFilters = {
-          ...MOCK_DEFAULT_QUERY,
-          filters: [{}],
-        };
-        (QueryApi.useQuerySubscriber as jest.Mock).mockReset();
-        (QueryApi.useQuerySubscriber as jest.Mock).mockImplementation(() => mockQueryWithFilters);
-
-        const result = await mountAndFindSubjects({ dataView: stubDataView });
+        const result = await mountAndFindSubjects({
+          dataView: stubDataView,
+          query: { language: 'lucene', query: '' },
+          filters: [{} as Filter],
+        });
         expect(result).toHaveProperty('adjustFilters', true);
         expect(result).toHaveProperty('disableFiltersButton', true);
       });
@@ -160,6 +148,8 @@ describe('DiscoverNoResults', () => {
         const result = await mountAndFindSubjects({
           dataView: stubDataView,
           error,
+          query: { language: 'lucene', query: '' },
+          filters: [{} as Filter],
         });
         expect(result).toMatchInlineSnapshot(`
           Object {
@@ -170,7 +160,7 @@ describe('DiscoverNoResults', () => {
             "disableFiltersButton": false,
             "errorMsg": true,
             "mainMsg": false,
-            "recentMatchesButton": false,
+            "viewMatchesButton": false,
           }
         `);
       });

@@ -10,12 +10,15 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { NoResultsSuggestions } from './no_results_suggestions';
 import './_no_results.scss';
 
 export interface DiscoverNoResultsProps {
   isTimeBased?: boolean;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
   error?: Error;
   data: DataPublicPluginStart;
   dataView: DataView;
@@ -24,6 +27,8 @@ export interface DiscoverNoResultsProps {
 
 export function DiscoverNoResults({
   isTimeBased,
+  query,
+  filters,
   error,
   data,
   dataView,
@@ -33,6 +38,8 @@ export function DiscoverNoResults({
     <EuiFlexItem grow={false}>
       <NoResultsSuggestions
         isTimeBased={isTimeBased}
+        query={query}
+        filters={filters}
         dataView={dataView}
         onDisableFilters={onDisableFilters}
       />
