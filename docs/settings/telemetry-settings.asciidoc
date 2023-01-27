@@ -21,8 +21,7 @@ See our https://www.elastic.co/legal/privacy-statement[Privacy Statement] to lea
 |===
 | `telemetry.enabled`
   | Set to `true` to send cluster statistics to Elastic. Reporting your
-  cluster statistics helps us improve your user experience. Your data is never
-  shared with anyone. Set to `false` to disable statistics reporting from any
+  cluster statistics helps us improve your user experience. Set to `false` to disable statistics reporting from any
   browser connected to the {kib} instance. Defaults to `true`.
 
 | `telemetry.sendUsageFrom`

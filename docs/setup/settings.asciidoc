@@ -519,7 +519,7 @@ The unique identifier for this {kib} instance. It must be a valid UUIDv4. It get
 It is not recommended to disable protections for
 arbitrary API endpoints. Instead, supply the `kbn-xsrf` header.
 The `server.xsrf.whitelist` setting requires the following format:
-+ 
++
 [source,text]
 ----
 *Default: [ ]* An array of API endpoints which should be exempt from Cross-Site Request Forgery ("XSRF") protections.
@@ -549,7 +549,7 @@ set `telemetry.allowChangingOptInStatus` to `false` and `telemetry.optIn` to `tr
 
 `telemetry.enabled`::
 Reporting your cluster statistics helps
-us improve your user experience. Your data is never shared with anyone. Set to
+us improve your user experience. Set to
 `false` to disable telemetry capabilities entirely. You can alternatively opt
 out through *Advanced Settings*. *Default: `true`*
 
