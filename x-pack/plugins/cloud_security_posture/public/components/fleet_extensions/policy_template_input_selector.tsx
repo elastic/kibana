@@ -48,7 +48,7 @@ export const PolicyTemplateInputSelector = ({ input, disabled, setInput }: Props
         {input.policy_template === 'kspm' && <InputsLabelKSPM />}
         {input.policy_template === 'cspm' && <InputsLabelCSPM />}
       </EuiText>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       <RadioGroup
         disabled={disabled}
         idSelected={input.type}

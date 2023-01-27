@@ -16,10 +16,12 @@ export const PolicyTemplateSelector = ({
   policy,
   selectedTemplate,
   setPolicyTemplate,
+  disabled,
 }: {
   selectedTemplate: PosturePolicyTemplate;
   policy: NewPackagePolicy;
   setPolicyTemplate(template: PosturePolicyTemplate): void;
+  disabled: boolean;
 }) => {
   const policyTemplates = new Set(policy.inputs.map((input) => input.policy_template!));
 
@@ -31,13 +33,13 @@ export const PolicyTemplateSelector = ({
           defaultMessage="Select the type of security posture management integration you want to configure"
         />
       </EuiText>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       <RadioGroup
         options={Array.from(policyTemplates, (v) => ({ id: v, label: v.toUpperCase() }))}
         idSelected={selectedTemplate}
         onChange={(id) => setPolicyTemplate(id as PosturePolicyTemplate)}
+        disabled={disabled}
       />
-      <EuiSpacer size="xl" />
     </div>
   );
 };

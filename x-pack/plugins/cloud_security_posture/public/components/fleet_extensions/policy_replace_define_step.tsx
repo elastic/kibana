@@ -87,8 +87,10 @@ export const CspReplaceDefineStep = memo<PackagePolicyReplaceDefineStepExtension
             selectedTemplate={input.policy_template!}
             policy={newPolicy}
             setPolicyTemplate={(template) => setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template])}
+            disabled={!!isEditPage}
           />
         )}
+        <EuiSpacer />
         <PolicyTemplateInputSelector
           input={input}
           setInput={setEnabledPolicyInput}
