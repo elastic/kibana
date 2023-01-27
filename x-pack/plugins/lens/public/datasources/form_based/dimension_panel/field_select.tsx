@@ -50,16 +50,15 @@ export function FieldSelect({
   fieldIsInvalid,
   markAllFieldsCompatible,
   ['data-test-subj']: dataTestSub,
-  ...rest
 }: FieldSelectProps) {
   const { hasFieldData } = useExistingFieldsReader();
   const memoizedFieldOptions = useMemo(() => {
-    const fields = Object.keys(operationByField).sort();
+    const fields = [...operationByField.keys()].sort();
 
     const currentOperationType = incompleteOperation ?? selectedOperationType;
 
     function isCompatibleWithCurrentOperation(fieldName: string) {
-      return !currentOperationType || operationByField[fieldName]!.has(currentOperationType);
+      return !currentOperationType || operationByField.get(fieldName)!.has(currentOperationType);
     }
 
     const [specialFields, normalFields] = partition(
@@ -91,7 +90,7 @@ export function FieldSelect({
               operationType:
                 currentOperationType && isCompatibleWithCurrentOperation(field)
                   ? currentOperationType
-                  : operationByField[field]!.values().next().value,
+                  : operationByField.get(field)!.values().next().value, // TODO let's remove these non-null assertion, they are very dangerous
             },
             exists,
             compatible,
