@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(pushUserAction.type).to.eql('pushed');
       expect(pushUserAction.action).to.eql('push_to_service');
       expect(pushUserAction.created_by).to.eql(defaultUser);
-      expect(pushUserAction.case_id).to.eql('postedCase.id');
+      expect(pushUserAction.case_id).to.eql(postedCase.id);
       expect(pushUserAction.comment_id).to.eql(null);
       expect(pushUserAction.owner).to.eql('securitySolutionFixture');
       expect(pushUserAction.payload.externalService).to.eql({
