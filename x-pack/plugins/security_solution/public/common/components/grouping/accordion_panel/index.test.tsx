@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { createGroupQuery, GroupPanel } from '.';
 import React from 'react';
 
+const onToggleGroup = jest.fn();
 const renderChildComponent = jest.fn();
 const ruleName = 'Rule name';
 const ruleDesc = 'Rule description';
@@ -77,5 +78,15 @@ describe('grouping accordion panel', () => {
     );
     expect(queryByTestId('grouping-accordion')).not.toBeInTheDocument();
     expect(renderChildComponent).not.toHaveBeenCalled();
+  });
+  it('When onToggleGroup not defined, does nothing on toggle', () => {
+    const { container } = render(<GroupPanel {...testProps} />);
+    fireEvent.click(container.querySelector('[data-test-subj="grouping-accordion"] button')!);
+    expect(onToggleGroup).not.toHaveBeenCalled();
+  });
+  it('When onToggleGroup is defined, calls function with proper args on toggle', () => {
+    const { container } = render(<GroupPanel {...testProps} onToggleGroup={onToggleGroup} />);
+    fireEvent.click(container.querySelector('[data-test-subj="grouping-accordion"] button')!);
+    expect(onToggleGroup).toHaveBeenCalledWith(true, testProps.groupBucket);
   });
 });
