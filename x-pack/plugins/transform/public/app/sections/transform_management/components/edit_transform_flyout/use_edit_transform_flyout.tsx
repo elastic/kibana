@@ -6,7 +6,7 @@
  */
 
 import { isEqual, merge } from 'lodash';
-import { useReducer } from 'react';
+import { createContext, useContext, useReducer, type Dispatch } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { numberValidator } from '@kbn/ml-agg-utils';
@@ -543,3 +543,36 @@ export const useEditTransformFlyout = (config: TransformConfigUnion) => {
 };
 
 export type UseEditTransformFlyoutReturnType = ReturnType<typeof useEditTransformFlyout>;
+
+export const EditTransformFlyoutStateContext = createContext<
+  | {
+      formState: EditTransformFlyoutState;
+      closeFlyout: () => void;
+      config: TransformConfigUnion;
+      dataViewId?: string;
+    }
+  | undefined
+>(undefined);
+export const EditTransformFlyoutDispatchContext = createContext<Dispatch<Action> | undefined>(
+  undefined
+);
+
+export function useEditTransformFlyoutState() {
+  const state = useContext(EditTransformFlyoutStateContext);
+
+  if (state === undefined) {
+    throw new Error('EditTransformFlyoutContext not initialized');
+  }
+
+  return state;
+}
+
+export function useEditTransformFlyoutDispatch() {
+  const dispatch = useContext(EditTransformFlyoutDispatchContext);
+
+  if (dispatch === undefined) {
+    throw new Error('EditTransformFlyoutDispatchContext not initialized');
+  }
+
+  return dispatch;
+}

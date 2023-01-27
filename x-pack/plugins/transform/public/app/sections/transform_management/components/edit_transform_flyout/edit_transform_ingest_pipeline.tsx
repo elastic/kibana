@@ -1,0 +1,108 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useEffect, useState, type FC } from 'react';
+
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { isEsIngestPipelines } from '../../../../../../common/api_schemas/type_guards';
+
+import { useApi } from '../../../../hooks/use_api';
+
+import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
+import {
+  useEditTransformFlyoutState,
+  useEditTransformFlyoutDispatch,
+} from './use_edit_transform_flyout';
+
+export const EditTransformIngestPipeline: FC = () => {
+  const {
+    formState: { formFields },
+  } = useEditTransformFlyoutState();
+  const dispatch = useEditTransformFlyoutDispatch();
+
+  const api = useApi();
+
+  const [ingestPipelineNames, setIngestPipelineNames] = useState<string[]>([]);
+
+  useEffect(function fetchPipelinesOnMount() {
+    let unmounted = false;
+
+    async function getIngestPipelineNames() {
+      const ingestPipelines = await api.getEsIngestPipelines();
+
+      if (!unmounted && isEsIngestPipelines(ingestPipelines)) {
+        setIngestPipelineNames(ingestPipelines.map(({ name }) => name));
+      }
+    }
+
+    getIngestPipelineNames();
+
+    return () => {
+      unmounted = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <>
+      {
+        // If the list of ingest pipelines is not available
+        // gracefully defaults to text input
+        ingestPipelineNames ? (
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
+              {
+                defaultMessage: 'Ingest Pipeline',
+              }
+            )}
+            isInvalid={formFields.destinationIngestPipeline.errorMessages.length > 0}
+            error={formFields.destinationIngestPipeline.errorMessages}
+          >
+            <EuiComboBox
+              data-test-subj="transformEditFlyoutDestinationIngestPipelineFieldSelect"
+              aria-label={i18n.translate(
+                'xpack.transform.stepDetailsForm.editFlyoutFormDestinationIngestPipelineFieldSelectAriaLabel',
+                {
+                  defaultMessage: 'Select an ingest pipeline',
+                }
+              )}
+              placeholder={i18n.translate(
+                'xpack.transform.stepDetailsForm.editFlyoutFormDestinationIngestPipelineFieldSelectPlaceholder',
+                {
+                  defaultMessage: 'Select an ingest pipeline',
+                }
+              )}
+              singleSelection={{ asPlainText: true }}
+              options={ingestPipelineNames.map((label: string) => ({ label }))}
+              selectedOptions={[{ label: formFields.destinationIngestPipeline.value }]}
+              onChange={(o) =>
+                dispatch({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
+              }
+            />
+          </EuiFormRow>
+        ) : (
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutDestinationIngestPipelineInput"
+            errorMessages={formFields.destinationIngestPipeline.errorMessages}
+            label={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
+              {
+                defaultMessage: 'Ingest Pipeline',
+              }
+            )}
+            onChange={(value) => dispatch({ field: 'destinationIngestPipeline', value })}
+            value={formFields.destinationIngestPipeline.value}
+          />
+        )
+      }
+    </>
+  );
+};

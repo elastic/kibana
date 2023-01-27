@@ -25,21 +25,23 @@ import {
 
 import { isPostTransformsUpdateResponseSchema } from '../../../../../../common/api_schemas/type_guards';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
-
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
 import { useToastNotifications } from '../../../../app_dependencies';
 import { useApi } from '../../../../hooks/use_api';
+import { isManagedTransform } from '../../../../common/managed_transforms_utils';
+
+import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
 import {
   applyFormStateToTransformConfig,
   useEditTransformFlyout,
+  EditTransformFlyoutStateContext,
+  EditTransformFlyoutDispatchContext,
 } from './use_edit_transform_flyout';
-import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
-import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 interface EditTransformFlyoutProps {
   closeFlyout: () => void;
@@ -110,7 +112,13 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
         />
       ) : null}
       <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
-        <EditTransformFlyoutForm editTransformFlyout={[state, dispatch]} dataViewId={dataViewId} />
+        <EditTransformFlyoutStateContext.Provider
+          value={{ closeFlyout, config, formState: state, dataViewId }}
+        >
+          <EditTransformFlyoutDispatchContext.Provider value={dispatch}>
+            <EditTransformFlyoutForm />
+          </EditTransformFlyoutDispatchContext.Provider>
+        </EditTransformFlyoutStateContext.Provider>
         {errorMessage !== undefined && (
           <>
             <EuiSpacer size="m" />
