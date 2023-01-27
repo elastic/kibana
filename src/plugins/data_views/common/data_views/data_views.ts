@@ -897,7 +897,7 @@ export class DataViewsService {
   ): Promise<DataView> => {
     const dataViewFromCache = this.dataViewCache.get(id)?.then(async (dataView) => {
       if (dataView && refreshFields) {
-        await this.refreshFields(dataView);
+        await this.refreshFields(dataView, displayErrors);
       }
       return dataView;
     });
