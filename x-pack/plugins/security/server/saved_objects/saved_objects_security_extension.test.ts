@@ -13,7 +13,6 @@ import type {
   AuthorizeObjectWithExistingSpaces,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import type {
-  EcsEventOutcome,
   SavedObjectReferenceWithContext,
   SavedObjectsClient,
   SavedObjectsResolveResponse,
@@ -110,112 +109,7 @@ function setup() {
   return { actions, auditLogger, errors, checkPrivileges, securityExtension };
 }
 
-describe.skip('#enforceAuthorization (private)', () => {
-  test('fully authorized', () => {
-    const { securityExtension } = setup();
-
-    const authorizationResult = {
-      status: 'fully_authorized',
-      typeMap: new Map()
-        .set('a', {
-          create: { isGloballyAuthorized: true, authorizedSpaces: [] },
-          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-        })
-        .set('b', {
-          create: { authorizedSpaces: ['x', 'y'] },
-          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-        })
-        .set('c', {
-          create: { authorizedSpaces: ['y', 'z'] },
-          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-        }),
-    };
-
-    const spacesToEnforce = new Set(['x', 'y', 'z']);
-
-    expect(() =>
-      securityExtension.enforceAuthorization({
-        typesAndSpaces: new Map([
-          ['a', spacesToEnforce],
-          ['b', new Set(['x', 'y'])],
-          ['c', new Set(['y', 'z'])],
-        ]),
-        action: SecurityAction.CREATE,
-        typeMap: authorizationResult.typeMap,
-      })
-    ).not.toThrowError();
-  });
-
-  test('partially authorized', () => {
-    const { securityExtension } = setup();
-
-    const authorizationResult = {
-      status: 'partially_authorized',
-      typeMap: new Map()
-        .set('a', {
-          create: { isGloballyAuthorized: true, authorizedSpaces: [] },
-          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-        })
-        .set('b', {
-          create: { authorizedSpaces: ['x'] },
-          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-        })
-        .set('c', {
-          create: { authorizedSpaces: ['z'] },
-          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-        }),
-    };
-
-    const spacesToEnforce = new Set(['x', 'y', 'z']);
-
-    expect(() =>
-      securityExtension.enforceAuthorization({
-        typesAndSpaces: new Map([
-          ['a', spacesToEnforce],
-          ['b', new Set(['x', 'y'])],
-          ['c', new Set(['y', 'z'])],
-        ]),
-        action: SecurityAction.CREATE,
-        typeMap: authorizationResult.typeMap,
-      })
-    ).toThrowError('Unable to create b,c');
-  });
-
-  test('unauthorized', () => {
-    const { securityExtension } = setup();
-
-    const authorizationResult = {
-      status: 'unauthorized',
-      typeMap: new Map()
-        .set('a', {
-          create: { authorizedSpaces: ['x'] },
-          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-        })
-        .set('b', {
-          create: { authorizedSpaces: ['y'] },
-          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-        })
-        .set('c', {
-          create: { authorizedSpaces: ['z'] },
-          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-        }),
-    };
-
-    expect(() =>
-      securityExtension.enforceAuthorization({
-        typesAndSpaces: new Map([
-          ['a', new Set(['y', 'z'])],
-          ['b', new Set(['x', 'z'])],
-          ['c', new Set(['x', 'y'])],
-        ]),
-        action: SecurityAction.CREATE,
-        typeMap: authorizationResult.typeMap,
-      })
-    ).toThrowError('Unable to create a,b,c');
-  });
-});
-
-describe.skip('#authorize (private)', () => {
+describe('#authorize (unpublished by interface)', () => {
   beforeEach(() => {
     checkAuthorizationSpy.mockClear();
     enforceAuthorizationSpy.mockClear();
@@ -250,7 +144,7 @@ describe.skip('#authorize (private)', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       // ToDo: replace with call to authorizeUpdate
-      // Disable to test private method
+      // Disable to test method
       // eslint-disable-next-line dot-notation
       await securityExtension['authorize']({ types, spaces, actions });
       expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
@@ -277,17 +171,17 @@ describe.skip('#authorize (private)', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
 
-      // Disable to test private method
+      // Disable to test method
       // eslint-disable-next-line dot-notation
       await securityExtension['authorize']({ types, spaces, actions });
       expect(checkPrivileges).toHaveBeenCalledWith(
         [
-          'mock-saved_object:a/create',
-          'mock-saved_object:a/update',
-          'mock-saved_object:b/create',
-          'mock-saved_object:b/update',
-          'mock-saved_object:c/create',
-          'mock-saved_object:c/update',
+          // 'mock-saved_object:a/create',
+          'mock-saved_object:a/bulk_update',
+          // 'mock-saved_object:b/create',
+          'mock-saved_object:b/bulk_update',
+          // 'mock-saved_object:c/create',
+          'mock-saved_object:c/bulk_update',
           'login:',
         ],
         [...spaces]
@@ -298,7 +192,7 @@ describe.skip('#authorize (private)', () => {
       const { securityExtension, checkPrivileges } = setup();
 
       await expect(
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         securityExtension['authorize']({ types: new Set(), spaces, actions })
       ).rejects.toThrowError('No types specified for authorization');
@@ -310,7 +204,7 @@ describe.skip('#authorize (private)', () => {
       const { securityExtension, checkPrivileges } = setup();
 
       await expect(
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         securityExtension['authorize']({ types, spaces: new Set(), actions })
       ).rejects.toThrowError('No spaces specified for authorization');
@@ -321,7 +215,7 @@ describe.skip('#authorize (private)', () => {
       const { securityExtension, checkPrivileges } = setup();
 
       await expect(
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         securityExtension['authorize']({ types, spaces, actions: new Set() })
       ).rejects.toThrowError('No actions specified for authorization');
@@ -333,7 +227,7 @@ describe.skip('#authorize (private)', () => {
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
       await expect(
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         securityExtension['authorize']({ types, spaces, actions })
       ).rejects.toThrowError('Oh no!');
@@ -343,7 +237,7 @@ describe.skip('#authorize (private)', () => {
       const { securityExtension, checkPrivileges, auditLogger } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
-      // Disable to test private method
+      // Disable to test method
       // eslint-disable-next-line dot-notation
       const result = await securityExtension['authorize']({ types, spaces, actions });
       expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
@@ -353,21 +247,21 @@ describe.skip('#authorize (private)', () => {
         status: 'fully_authorized',
         typeMap: new Map()
           .set('a', {
-            create: { isGloballyAuthorized: true, authorizedSpaces: [] },
-            update: { isGloballyAuthorized: true, authorizedSpaces: [] },
+            // create: { isGloballyAuthorized: true, authorizedSpaces: [] },
+            bulk_update: { isGloballyAuthorized: true, authorizedSpaces: [] },
             // Technically, 'login:' is not a saved object action, it is a Kibana privilege -- however, we include it in the `typeMap` results
             // for ease of use with the `redactNamespaces` function. The user is never actually authorized to "login" for a given object type,
             // they are authorized to log in on a per-space basis, and this is applied to each object type in the typeMap result accordingly.
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           })
           .set('b', {
-            create: { authorizedSpaces: ['x', 'y'] },
-            update: { authorizedSpaces: ['x', 'y'] },
+            // create: { authorizedSpaces: ['x', 'y'] },
+            bulk_update: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           })
           .set('c', {
-            create: { authorizedSpaces: ['x', 'y'] },
-            update: { authorizedSpaces: ['x', 'y'] },
+            // create: { authorizedSpaces: ['x', 'y'] },
+            bulk_update: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
       });
@@ -382,21 +276,21 @@ describe.skip('#authorize (private)', () => {
             // For type 'a', the user is authorized to use 'create' action but not 'update' action (all spaces)
             // For type 'b', the user is authorized to use 'create' action but not 'update' action (both spaces)
             // For type 'c', the user is authorized to use both actions in space 'x' but not space 'y'
-            { privilege: 'mock-saved_object:a/create', authorized: true },
-            { privilege: 'mock-saved_object:a/update', authorized: false },
-            { privilege: 'mock-saved_object:a/update', authorized: true }, // fail-secure check
-            { resource: 'x', privilege: 'mock-saved_object:b/create', authorized: true },
-            { resource: 'x', privilege: 'mock-saved_object:b/update', authorized: false },
-            { resource: 'x', privilege: 'mock-saved_object:c/create', authorized: true },
-            { privilege: 'mock-saved_object:c/create', authorized: false }, // inverse fail-secure check
-            { resource: 'x', privilege: 'mock-saved_object:c/update', authorized: true },
+            // { privilege: 'mock-saved_object:a/create', authorized: true },
+            { privilege: 'mock-saved_object:a/bulk_update', authorized: false },
+            { privilege: 'mock-saved_object:a/bulk_update', authorized: true }, // fail-secure check
+            // { resource: 'x', privilege: 'mock-saved_object:b/create', authorized: true },
+            { resource: 'x', privilege: 'mock-saved_object:b/bulk_update', authorized: false },
+            // { resource: 'x', privilege: 'mock-saved_object:c/create', authorized: true },
+            // { privilege: 'mock-saved_object:c/create', authorized: false }, // inverse fail-secure check
+            { resource: 'x', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
             { resource: 'x', privilege: 'login:', authorized: true },
-            { resource: 'y', privilege: 'mock-saved_object:b/create', authorized: true },
-            { resource: 'y', privilege: 'mock-saved_object:b/update', authorized: false },
-            { resource: 'y', privilege: 'mock-saved_object:c/create', authorized: false },
-            { resource: 'y', privilege: 'mock-saved_object:c/update', authorized: false },
-            { privilege: 'mock-saved_object:c/update', authorized: true }, // fail-secure check
-            { resource: 'y', privilege: 'mock-saved_object:c/update', authorized: true }, // fail-secure check
+            // { resource: 'y', privilege: 'mock-saved_object:b/create', authorized: true },
+            { resource: 'y', privilege: 'mock-saved_object:b/bulk_update', authorized: false },
+            // { resource: 'y', privilege: 'mock-saved_object:c/create', authorized: false },
+            { resource: 'y', privilege: 'mock-saved_object:c/bulk_update', authorized: false },
+            { privilege: 'mock-saved_object:c/bulk_update', authorized: true }, // fail-secure check
+            { resource: 'y', privilege: 'mock-saved_object:c/bulk_update', authorized: true }, // fail-secure check
             { resource: 'y', privilege: 'login:', authorized: true },
             // The fail-secure checks are a contrived scenario, as we *shouldn't* get both an unauthorized and authorized result for a given resource...
             // However, in case we do, we should fail-secure (authorized + unauthorized = unauthorized)
@@ -404,7 +298,7 @@ describe.skip('#authorize (private)', () => {
         },
       } as CheckPrivilegesResponse);
 
-      // Disable to test private method
+      // Disable to test method
       // eslint-disable-next-line dot-notation
       const result = await securityExtension['authorize']({ types, spaces, actions });
       expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
@@ -414,16 +308,16 @@ describe.skip('#authorize (private)', () => {
         status: 'partially_authorized',
         typeMap: new Map()
           .set('a', {
-            create: { isGloballyAuthorized: true, authorizedSpaces: [] },
+            // bulk_update: { isGloballyAuthorized: true, authorizedSpaces: [] },
             ['login:']: { authorizedSpaces: ['x', 'y'] },
           })
           .set('b', {
-            create: { authorizedSpaces: ['x', 'y'] },
+            // bulk_update: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { authorizedSpaces: ['x', 'y'] },
           })
           .set('c', {
-            create: { authorizedSpaces: ['x'] },
-            update: { authorizedSpaces: ['x'] },
+            bulk_update: { authorizedSpaces: ['x'] },
+            // update: { authorizedSpaces: ['x'] },
             ['login:']: { authorizedSpaces: ['x', 'y'] },
           }),
       });
@@ -459,7 +353,7 @@ describe.skip('#authorize (private)', () => {
         },
       } as CheckPrivilegesResponse);
 
-      // Disable to test private method
+      // Disable to test method
       // eslint-disable-next-line dot-notation
       const result = await securityExtension['authorize']({ types, spaces, actions });
       expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
@@ -482,9 +376,9 @@ describe.skip('#authorize (private)', () => {
         privileges: {
           kibana: [
             // redundant conflicting privileges for space X, type B, action Create
-            { resource: 'x', privilege: 'mock-saved_object:b/create', authorized: true },
-            { resource: 'x', privilege: 'mock-saved_object:b/create', authorized: false },
-            { resource: 'y', privilege: 'mock-saved_object:b/create', authorized: true },
+            { resource: 'x', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
+            { resource: 'x', privilege: 'mock-saved_object:b/bulk_update', authorized: false },
+            { resource: 'y', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
           ],
         },
       } as CheckPrivilegesResponse;
@@ -492,13 +386,13 @@ describe.skip('#authorize (private)', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockResolvedValue(conflictingPrivilegesResponse);
 
-      // Disable to test private method
+      // Disable to test method
       // eslint-disable-next-line dot-notation
       const result = await securityExtension['authorize']({ types, spaces, actions });
       expect(result).toEqual({
         status: 'fully_authorized',
         typeMap: new Map().set('b', {
-          create: { authorizedSpaces: ['y'] }, // should NOT be authorized for conflicted privilege
+          bulk_update: { authorizedSpaces: ['y'] }, // should NOT be authorized for conflicted privilege
         }),
       });
     });
@@ -508,18 +402,18 @@ describe.skip('#authorize (private)', () => {
     // These arguments are used for all unit tests below
     const types = new Set(['a', 'b', 'c']);
     const spaces = new Set(['x', 'y']);
-    const actions = new Set([SecurityAction.CREATE]);
+    const actions = new Set([SecurityAction.BULK_UPDATE]);
 
     const fullyAuthorizedCheckPrivilegesResponse = {
       hasAllRequested: true,
       privileges: {
         kibana: [
-          { privilege: 'mock-saved_object:a/create', authorized: true },
+          { privilege: 'mock-saved_object:a/bulk_update', authorized: true },
           { privilege: 'login:', authorized: true },
-          { resource: 'x', privilege: 'mock-saved_object:b/create', authorized: true },
-          { resource: 'x', privilege: 'mock-saved_object:c/create', authorized: true },
-          { resource: 'y', privilege: 'mock-saved_object:b/create', authorized: true },
-          { resource: 'y', privilege: 'mock-saved_object:c/create', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
+          { resource: 'y', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
+          { resource: 'y', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
         ],
       },
     } as CheckPrivilegesResponse;
@@ -528,10 +422,10 @@ describe.skip('#authorize (private)', () => {
       hasAllRequested: false,
       privileges: {
         kibana: [
-          { privilege: 'mock-saved_object:a/create', authorized: true },
+          { privilege: 'mock-saved_object:a/bulk_update', authorized: true },
           { privilege: 'login:', authorized: true },
-          { resource: 'x', privilege: 'mock-saved_object:b/create', authorized: true },
-          { resource: 'y', privilege: 'mock-saved_object:c/create', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
+          { resource: 'y', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
         ],
       },
     } as CheckPrivilegesResponse;
@@ -541,9 +435,9 @@ describe.skip('#authorize (private)', () => {
       privileges: {
         kibana: [
           { privilege: 'login:', authorized: true },
-          { resource: 'x', privilege: 'mock-saved_object:a/create', authorized: true },
-          { resource: 'y', privilege: 'mock-saved_object:b/create', authorized: true },
-          { resource: 'z', privilege: 'mock-saved_object:c/create', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:a/bulk_update', authorized: true },
+          { resource: 'y', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
+          { resource: 'z', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
         ],
       },
     } as CheckPrivilegesResponse;
@@ -553,7 +447,7 @@ describe.skip('#authorize (private)', () => {
         const { securityExtension, checkPrivileges, auditLogger } = setup();
         checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         await securityExtension['authorize']({
           actions,
@@ -570,17 +464,17 @@ describe.skip('#authorize (private)', () => {
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: undefined,
           event: {
-            action: AuditAction.CREATE,
+            action: AuditAction.UPDATE,
             category: ['database'],
             outcome: 'unknown',
-            type: ['creation'],
+            type: ['change'],
           },
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
             saved_object: undefined,
           },
-          message: 'User is creating saved objects',
+          message: 'User is updating saved objects',
         });
       });
 
@@ -588,7 +482,7 @@ describe.skip('#authorize (private)', () => {
         const { securityExtension, checkPrivileges, auditLogger } = setup();
         checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         await securityExtension['authorize']({
           actions,
@@ -606,17 +500,17 @@ describe.skip('#authorize (private)', () => {
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: undefined,
           event: {
-            action: AuditAction.CREATE,
+            action: AuditAction.UPDATE,
             category: ['database'],
             outcome: 'success',
-            type: ['creation'],
+            type: ['change'],
           },
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
             saved_object: undefined,
           },
-          message: 'User has created saved objects',
+          message: 'User has updated saved objects',
         });
       });
 
@@ -630,7 +524,7 @@ describe.skip('#authorize (private)', () => {
           { type: 'c', id: '3' },
         ];
 
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         await securityExtension['authorize']({
           actions,
@@ -651,10 +545,10 @@ describe.skip('#authorize (private)', () => {
           expect(auditLogger.log).toHaveBeenCalledWith({
             error: undefined,
             event: {
-              action: AuditAction.CREATE,
+              action: AuditAction.UPDATE,
               category: ['database'],
               outcome: 'unknown',
-              type: ['creation'],
+              type: ['change'],
             },
             kibana: {
               add_to_spaces: undefined,
@@ -664,7 +558,7 @@ describe.skip('#authorize (private)', () => {
                 type: obj.type,
               },
             },
-            message: `User is creating ${obj.type} [id=${obj.id}]`,
+            message: `User is updating ${obj.type} [id=${obj.id}]`,
           });
         }
       });
@@ -679,7 +573,7 @@ describe.skip('#authorize (private)', () => {
           { type: 'c', id: '3' },
         ];
 
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         await securityExtension['authorize']({
           actions,
@@ -701,10 +595,10 @@ describe.skip('#authorize (private)', () => {
           expect(auditLogger.log).toHaveBeenCalledWith({
             error: undefined,
             event: {
-              action: AuditAction.CREATE,
+              action: AuditAction.UPDATE,
               category: ['database'],
               outcome: 'success',
-              type: ['creation'],
+              type: ['change'],
             },
             kibana: {
               add_to_spaces: undefined,
@@ -714,7 +608,7 @@ describe.skip('#authorize (private)', () => {
                 type: obj.type,
               },
             },
-            message: `User has created ${obj.type} [id=${obj.id}]`,
+            message: `User has updated ${obj.type} [id=${obj.id}]`,
           });
         }
       });
@@ -729,7 +623,7 @@ describe.skip('#authorize (private)', () => {
           { type: 'c', id: '3' },
         ];
 
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         await securityExtension['authorize']({
           actions,
@@ -753,7 +647,7 @@ describe.skip('#authorize (private)', () => {
         const { securityExtension, checkPrivileges, auditLogger } = setup();
         checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         await securityExtension['authorize']({
           actions,
@@ -771,17 +665,17 @@ describe.skip('#authorize (private)', () => {
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: undefined,
           event: {
-            action: AuditAction.CREATE,
+            action: AuditAction.UPDATE,
             category: ['database'],
             outcome: 'unknown',
-            type: ['creation'],
+            type: ['change'],
           },
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
             saved_object: undefined,
           },
-          message: 'User is creating saved objects',
+          message: 'User is updating saved objects',
         });
       });
     });
@@ -792,7 +686,7 @@ describe.skip('#authorize (private)', () => {
         checkPrivileges.mockResolvedValue(partiallyAuthorizedCheckPrivilegesResponse);
 
         await expect(() =>
-          // Disable to test private method
+          // Disable to test method
           // eslint-disable-next-line dot-notation
           securityExtension['authorize']({
             actions,
@@ -804,26 +698,26 @@ describe.skip('#authorize (private)', () => {
               ['c', new Set(['x', 'y'])],
             ]),
           })
-        ).rejects.toThrowError('Unable to create b,c');
+        ).rejects.toThrowError('Unable to bulk_update b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
-            message: 'Unable to create b,c',
+            message: 'Unable to bulk_update b,c',
           },
           event: {
-            action: AuditAction.CREATE,
+            action: AuditAction.UPDATE,
             category: ['database'],
             outcome: 'failure',
-            type: ['creation'],
+            type: ['change'],
           },
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
             saved_object: undefined,
           },
-          message: 'Failed attempt to create saved objects',
+          message: 'Failed attempt to update saved objects',
         });
       });
 
@@ -838,7 +732,7 @@ describe.skip('#authorize (private)', () => {
         ];
 
         await expect(() =>
-          // Disable to test private method
+          // Disable to test method
           // eslint-disable-next-line dot-notation
           securityExtension['authorize']({
             actions,
@@ -851,20 +745,20 @@ describe.skip('#authorize (private)', () => {
             ]),
             auditOptions: { objects: auditObjects },
           })
-        ).rejects.toThrowError('Unable to create b,c');
+        ).rejects.toThrowError('Unable to bulk_update b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
         for (const obj of auditObjects) {
           expect(auditLogger.log).toHaveBeenCalledWith({
             error: {
               code: 'Error',
-              message: 'Unable to create b,c',
+              message: 'Unable to bulk_update b,c',
             },
             event: {
-              action: AuditAction.CREATE,
+              action: AuditAction.UPDATE,
               category: ['database'],
               outcome: 'failure',
-              type: ['creation'],
+              type: ['change'],
             },
             kibana: {
               add_to_spaces: undefined,
@@ -874,7 +768,7 @@ describe.skip('#authorize (private)', () => {
                 type: obj.type,
               },
             },
-            message: `Failed attempt to create ${obj.type} [id=${obj.id}]`,
+            message: `Failed attempt to update ${obj.type} [id=${obj.id}]`,
           });
         }
       });
@@ -890,7 +784,7 @@ describe.skip('#authorize (private)', () => {
         ];
 
         await expect(() =>
-          // Disable to test private method
+          // Disable to test method
           // eslint-disable-next-line dot-notation
           securityExtension['authorize']({
             actions,
@@ -903,7 +797,7 @@ describe.skip('#authorize (private)', () => {
             ]),
             auditOptions: { objects: auditObjects, bypassOnFailure: true },
           })
-        ).rejects.toThrowError('Unable to create b,c');
+        ).rejects.toThrowError('Unable to bulk_update b,c');
 
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
@@ -913,7 +807,7 @@ describe.skip('#authorize (private)', () => {
         checkPrivileges.mockResolvedValue(partiallyAuthorizedCheckPrivilegesResponse);
 
         await expect(() =>
-          // Disable to test private method
+          // Disable to test method
           // eslint-disable-next-line dot-notation
           securityExtension['authorize']({
             actions,
@@ -926,26 +820,26 @@ describe.skip('#authorize (private)', () => {
             ]),
             auditOptions: { bypassOnSuccess: true },
           })
-        ).rejects.toThrowError('Unable to create b,c');
+        ).rejects.toThrowError('Unable to bulk_update b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
-            message: 'Unable to create b,c',
+            message: 'Unable to bulk_update b,c',
           },
           event: {
-            action: AuditAction.CREATE,
+            action: AuditAction.UPDATE,
             category: ['database'],
             outcome: 'failure',
-            type: ['creation'],
+            type: ['change'],
           },
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
             saved_object: undefined,
           },
-          message: 'Failed attempt to create saved objects',
+          message: 'Failed attempt to update saved objects',
         });
       });
     });
@@ -956,7 +850,7 @@ describe.skip('#authorize (private)', () => {
         checkPrivileges.mockResolvedValue(unauthorizedCheckPrivilegesResponse);
 
         await expect(() =>
-          // Disable to test private method
+          // Disable to test method
           // eslint-disable-next-line dot-notation
           securityExtension['authorize']({
             actions,
@@ -968,26 +862,26 @@ describe.skip('#authorize (private)', () => {
               ['c', new Set(['x', 'y'])],
             ]),
           })
-        ).rejects.toThrowError('Unable to create a,b,c');
+        ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
-            message: 'Unable to create a,b,c',
+            message: 'Unable to bulk_update a,b,c',
           },
           event: {
-            action: AuditAction.CREATE,
+            action: AuditAction.UPDATE,
             category: ['database'],
             outcome: 'failure',
-            type: ['creation'],
+            type: ['change'],
           },
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
             saved_object: undefined,
           },
-          message: 'Failed attempt to create saved objects',
+          message: 'Failed attempt to update saved objects',
         });
       });
 
@@ -1002,7 +896,7 @@ describe.skip('#authorize (private)', () => {
         ];
 
         await expect(() =>
-          // Disable to test private method
+          // Disable to test method
           // eslint-disable-next-line dot-notation
           securityExtension['authorize']({
             actions,
@@ -1015,20 +909,20 @@ describe.skip('#authorize (private)', () => {
             ]),
             auditOptions: { objects: auditObjects },
           })
-        ).rejects.toThrowError('Unable to create a,b,c');
+        ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
         for (const obj of auditObjects) {
           expect(auditLogger.log).toHaveBeenCalledWith({
             error: {
               code: 'Error',
-              message: 'Unable to create a,b,c',
+              message: 'Unable to bulk_update a,b,c',
             },
             event: {
-              action: AuditAction.CREATE,
+              action: AuditAction.UPDATE,
               category: ['database'],
               outcome: 'failure',
-              type: ['creation'],
+              type: ['change'],
             },
             kibana: {
               add_to_spaces: undefined,
@@ -1038,7 +932,7 @@ describe.skip('#authorize (private)', () => {
                 type: obj.type,
               },
             },
-            message: `Failed attempt to create ${obj.type} [id=${obj.id}]`,
+            message: `Failed attempt to update ${obj.type} [id=${obj.id}]`,
           });
         }
       });
@@ -1054,7 +948,7 @@ describe.skip('#authorize (private)', () => {
         ];
 
         await expect(() =>
-          // Disable to test private method
+          // Disable to test method
           // eslint-disable-next-line dot-notation
           securityExtension['authorize']({
             actions,
@@ -1067,7 +961,7 @@ describe.skip('#authorize (private)', () => {
             ]),
             auditOptions: { objects: auditObjects, bypassOnFailure: true },
           })
-        ).rejects.toThrowError('Unable to create a,b,c');
+        ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
@@ -1077,7 +971,7 @@ describe.skip('#authorize (private)', () => {
         checkPrivileges.mockResolvedValue(unauthorizedCheckPrivilegesResponse);
 
         await expect(() =>
-          // Disable to test private method
+          // Disable to test method
           // eslint-disable-next-line dot-notation
           securityExtension['authorize']({
             actions,
@@ -1090,26 +984,26 @@ describe.skip('#authorize (private)', () => {
             ]),
             auditOptions: { bypassOnSuccess: true },
           })
-        ).rejects.toThrowError('Unable to create a,b,c');
+        ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
-            message: 'Unable to create a,b,c',
+            message: 'Unable to bulk_update a,b,c',
           },
           event: {
-            action: AuditAction.CREATE,
+            action: AuditAction.UPDATE,
             category: ['database'],
             outcome: 'failure',
-            type: ['creation'],
+            type: ['change'],
           },
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
             saved_object: undefined,
           },
-          message: 'Failed attempt to create saved objects',
+          message: 'Failed attempt to update saved objects',
         });
       });
     });
@@ -1120,169 +1014,168 @@ describe.skip('#authorize (private)', () => {
     const types = new Set(['a', 'b', 'c']);
     const spaces = new Set(['x', 'y']);
 
-    test('does not check authorization', async () => {
-      const { securityExtension, checkPrivileges } = setup();
+    test('throws no actions error', async () => {
+      const { securityExtension } = setup();
 
-      // Disable to test private method
-      // eslint-disable-next-line dot-notation
-      await securityExtension['authorize']({
-        types,
-        spaces,
-        actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
-      });
-      expect(checkPrivileges).not.toHaveBeenCalled();
+      await expect(
+        // Disable to test method
+        // eslint-disable-next-line dot-notation
+        securityExtension['authorize']({
+          types,
+          spaces,
+          actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
+        })
+      ).rejects.toThrowError('No actions specified for authorization check');
     });
+    //   const { securityExtension, checkPrivileges, auditLogger } = setup();
 
-    test('adds an audit event by default', async () => {
-      const { securityExtension, checkPrivileges, auditLogger } = setup();
+    //   // Disable to test method
+    //   // eslint-disable-next-line dot-notation
+    //   securityExtension['authorize']({
+    //     types,
+    //     spaces,
+    //     actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
+    //   });
+    //   expect(checkPrivileges).not.toHaveBeenCalled();
+    //   expect(auditLogger.log).toBeCalledTimes(1);
+    //   expect(auditLogger.log).toHaveBeenCalledWith({
+    //     error: undefined,
+    //     event: {
+    //       action: AuditAction.CLOSE_POINT_IN_TIME,
+    //       category: ['database'],
+    //       outcome: 'unknown',
+    //       type: ['deletion'],
+    //     },
+    //     kibana: {
+    //       add_to_spaces: undefined,
+    //       delete_from_spaces: undefined,
+    //       saved_object: undefined,
+    //     },
+    //     message: 'User is closing point-in-time saved objects',
+    //   });
+    // });
 
-      // Disable to test private method
-      // eslint-disable-next-line dot-notation
-      securityExtension['authorize']({
-        types,
-        spaces,
-        actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
-      });
-      expect(checkPrivileges).not.toHaveBeenCalled();
-      expect(auditLogger.log).toBeCalledTimes(1);
-      expect(auditLogger.log).toHaveBeenCalledWith({
-        error: undefined,
-        event: {
-          action: AuditAction.CLOSE_POINT_IN_TIME,
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['deletion'],
-        },
-        kibana: {
-          add_to_spaces: undefined,
-          delete_from_spaces: undefined,
-          saved_object: undefined,
-        },
-        message: 'User is closing point-in-time saved objects',
-      });
-    });
+    // test(`adds an audit event with success outcome when 'useSuccessOutcome' is true`, async () => {
+    //   const { securityExtension, checkPrivileges, auditLogger } = setup();
 
-    test(`adds an audit event with success outcome when 'useSuccessOutcome' is true`, async () => {
-      const { securityExtension, checkPrivileges, auditLogger } = setup();
+    //   // Disable to test method
+    //   // eslint-disable-next-line dot-notation
+    //   await securityExtension['authorize']({
+    //     types,
+    //     spaces,
+    //     actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
+    //     auditOptions: { useSuccessOutcome: true },
+    //   });
+    //   expect(checkPrivileges).not.toHaveBeenCalled();
+    //   expect(auditLogger.log).toBeCalledTimes(1);
+    //   expect(auditLogger.log).toHaveBeenCalledWith({
+    //     error: undefined,
+    //     event: {
+    //       action: AuditAction.CLOSE_POINT_IN_TIME,
+    //       category: ['database'],
+    //       outcome: 'success',
+    //       type: ['deletion'],
+    //     },
+    //     kibana: {
+    //       add_to_spaces: undefined,
+    //       delete_from_spaces: undefined,
+    //       saved_object: undefined,
+    //     },
+    //     message: 'User has closed point-in-time saved objects',
+    //   });
+    // });
 
-      // Disable to test private method
-      // eslint-disable-next-line dot-notation
-      await securityExtension['authorize']({
-        types,
-        spaces,
-        actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
-        auditOptions: { useSuccessOutcome: true },
-      });
-      expect(checkPrivileges).not.toHaveBeenCalled();
-      expect(auditLogger.log).toBeCalledTimes(1);
-      expect(auditLogger.log).toHaveBeenCalledWith({
-        error: undefined,
-        event: {
-          action: AuditAction.CLOSE_POINT_IN_TIME,
-          category: ['database'],
-          outcome: 'success',
-          type: ['deletion'],
-        },
-        kibana: {
-          add_to_spaces: undefined,
-          delete_from_spaces: undefined,
-          saved_object: undefined,
-        },
-        message: 'User has closed point-in-time saved objects',
-      });
-    });
+    // test(`adds an audit event per object when 'objects' is populated`, async () => {
+    //   const { securityExtension, checkPrivileges, auditLogger } = setup();
 
-    test(`adds an audit event per object when 'objects' is populated`, async () => {
-      const { securityExtension, checkPrivileges, auditLogger } = setup();
+    //   const auditObjects = [
+    //     { type: 'a', id: '1' },
+    //     { type: 'b', id: '2' },
+    //     { type: 'c', id: '3' },
+    //   ];
 
-      const auditObjects = [
-        { type: 'a', id: '1' },
-        { type: 'b', id: '2' },
-        { type: 'c', id: '3' },
-      ];
+    //   // Disable to test method
+    //   // eslint-disable-next-line dot-notation
+    //   await securityExtension['authorize']({
+    //     types,
+    //     spaces,
+    //     actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
+    //     auditOptions: { objects: auditObjects },
+    //   });
+    //   expect(checkPrivileges).not.toHaveBeenCalled();
+    //   expect(auditLogger.log).toBeCalledTimes(3);
+    //   for (const obj of auditObjects) {
+    //     expect(auditLogger.log).toHaveBeenCalledWith({
+    //       error: undefined,
+    //       event: {
+    //         action: AuditAction.CLOSE_POINT_IN_TIME,
+    //         category: ['database'],
+    //         outcome: 'unknown',
+    //         type: ['deletion'],
+    //       },
+    //       kibana: {
+    //         add_to_spaces: undefined,
+    //         delete_from_spaces: undefined,
+    //         saved_object: {
+    //           id: obj.id,
+    //           type: obj.type,
+    //         },
+    //       },
+    //       message: `User is closing point-in-time ${obj.type} [id=${obj.id}]`,
+    //     });
+    //   }
+    // });
 
-      // Disable to test private method
-      // eslint-disable-next-line dot-notation
-      await securityExtension['authorize']({
-        types,
-        spaces,
-        actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
-        auditOptions: { objects: auditObjects },
-      });
-      expect(checkPrivileges).not.toHaveBeenCalled();
-      expect(auditLogger.log).toBeCalledTimes(3);
-      for (const obj of auditObjects) {
-        expect(auditLogger.log).toHaveBeenCalledWith({
-          error: undefined,
-          event: {
-            action: AuditAction.CLOSE_POINT_IN_TIME,
-            category: ['database'],
-            outcome: 'unknown',
-            type: ['deletion'],
-          },
-          kibana: {
-            add_to_spaces: undefined,
-            delete_from_spaces: undefined,
-            saved_object: {
-              id: obj.id,
-              type: obj.type,
-            },
-          },
-          message: `User is closing point-in-time ${obj.type} [id=${obj.id}]`,
-        });
-      }
-    });
+    // test(`adds an audit event per object with success outcome when 'objects' is populated and 'useSuccessOutcome' is true`, async () => {
+    //   const { securityExtension, checkPrivileges, auditLogger } = setup();
 
-    test(`adds an audit event per object with success outcome when 'objects' is populated and 'useSuccessOutcome' is true`, async () => {
-      const { securityExtension, checkPrivileges, auditLogger } = setup();
+    //   // Disable to test method
+    //   // eslint-disable-next-line dot-notation
+    //   await securityExtension['authorize']({
+    //     types,
+    //     spaces,
+    //     actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
+    //     auditOptions: { useSuccessOutcome: true },
+    //   });
+    //   expect(checkPrivileges).not.toHaveBeenCalled();
+    //   expect(auditLogger.log).toBeCalledTimes(1);
+    //   expect(auditLogger.log).toHaveBeenCalledWith({
+    //     error: undefined,
+    //     event: {
+    //       action: AuditAction.CLOSE_POINT_IN_TIME,
+    //       category: ['database'],
+    //       outcome: 'success',
+    //       type: ['deletion'],
+    //     },
+    //     kibana: {
+    //       add_to_spaces: undefined,
+    //       delete_from_spaces: undefined,
+    //       saved_object: undefined,
+    //     },
+    //     message: 'User has closed point-in-time saved objects',
+    //   });
+    // });
 
-      // Disable to test private method
-      // eslint-disable-next-line dot-notation
-      await securityExtension['authorize']({
-        types,
-        spaces,
-        actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
-        auditOptions: { useSuccessOutcome: true },
-      });
-      expect(checkPrivileges).not.toHaveBeenCalled();
-      expect(auditLogger.log).toBeCalledTimes(1);
-      expect(auditLogger.log).toHaveBeenCalledWith({
-        error: undefined,
-        event: {
-          action: AuditAction.CLOSE_POINT_IN_TIME,
-          category: ['database'],
-          outcome: 'success',
-          type: ['deletion'],
-        },
-        kibana: {
-          add_to_spaces: undefined,
-          delete_from_spaces: undefined,
-          saved_object: undefined,
-        },
-        message: 'User has closed point-in-time saved objects',
-      });
-    });
+    // test(`does not add an audit event when 'bypassOnSuccess' is true`, async () => {
+    //   const { securityExtension, checkPrivileges, auditLogger } = setup();
 
-    test(`does not add an audit event when 'bypassOnSuccess' is true`, async () => {
-      const { securityExtension, checkPrivileges, auditLogger } = setup();
+    //   const auditObjects = [
+    //     { type: 'a', id: '1' },
+    //     { type: 'b', id: '2' },
+    //     { type: 'c', id: '3' },
+    //   ];
 
-      const auditObjects = [
-        { type: 'a', id: '1' },
-        { type: 'b', id: '2' },
-        { type: 'c', id: '3' },
-      ];
-
-      // Disable to test private method
-      // eslint-disable-next-line dot-notation
-      await securityExtension['authorize']({
-        types,
-        spaces,
-        actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
-        auditOptions: { objects: auditObjects, bypassOnSuccess: true },
-      });
-      expect(checkPrivileges).not.toHaveBeenCalled();
-      expect(auditLogger.log).not.toHaveBeenCalled();
-    });
+    //   // Disable to test method
+    //   // eslint-disable-next-line dot-notation
+    //   await securityExtension['authorize']({
+    //     types,
+    //     spaces,
+    //     actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
+    //     auditOptions: { objects: auditObjects, bypassOnSuccess: true },
+    //   });
+    //   expect(checkPrivileges).not.toHaveBeenCalled();
+    //   expect(auditLogger.log).not.toHaveBeenCalled();
+    // });
   });
 
   describe('scecurity actions with no audit action', () => {
@@ -1339,7 +1232,7 @@ describe.skip('#authorize (private)', () => {
         { type: 'c', id: '3' },
       ];
 
-      // Disable to test private method
+      // Disable to test method
       // eslint-disable-next-line dot-notation
       await securityExtension['authorize']({
         actions,
@@ -1369,7 +1262,7 @@ describe.skip('#authorize (private)', () => {
       ];
 
       await expect(
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         securityExtension['authorize']({
           actions,
@@ -1400,7 +1293,7 @@ describe.skip('#authorize (private)', () => {
       ];
 
       await expect(
-        // Disable to test private method
+        // Disable to test method
         // eslint-disable-next-line dot-notation
         securityExtension['authorize']({
           actions,
@@ -1419,116 +1312,6 @@ describe.skip('#authorize (private)', () => {
 
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
-  });
-});
-
-describe.skip('#addAuditEvent (private)', () => {
-  test(`adds an unknown audit event`, async () => {
-    const { auditLogger, securityExtension } = setup();
-    const action = AuditAction.UPDATE_OBJECTS_SPACES;
-    const outcome: EcsEventOutcome = 'unknown';
-    const savedObject = { type: 'dashboard', id: '3' };
-    const spaces = ['space-id'];
-
-    const auditParams = {
-      action,
-      outcome,
-      savedObject,
-      deleteFromSpaces: spaces,
-    };
-
-    // Disable to test private method
-    // eslint-disable-next-line dot-notation
-    securityExtension['addAuditEvent'](auditParams);
-
-    expect(auditLogger.log).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: expect.objectContaining({
-          action,
-          outcome,
-        }),
-        kibana: savedObject
-          ? expect.objectContaining({
-              saved_object: savedObject,
-              delete_from_spaces: spaces,
-            })
-          : expect.anything(),
-        message: `User is updating spaces of ${savedObject.type} [id=${savedObject.id}]`,
-      })
-    );
-  });
-
-  test(`adds a success audit event`, async () => {
-    const { auditLogger, securityExtension } = setup();
-    const action = AuditAction.UPDATE_OBJECTS_SPACES;
-    const outcome: EcsEventOutcome = 'success';
-    const savedObject = { type: 'dashboard', id: '3' };
-    const spaces = ['space-id'];
-
-    const auditParams = {
-      action,
-      outcome,
-      savedObject,
-      addToSpaces: spaces,
-    };
-
-    // Disable to test private method
-    // eslint-disable-next-line dot-notation
-    securityExtension['addAuditEvent'](auditParams);
-
-    expect(auditLogger.log).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: expect.objectContaining({
-          action,
-          outcome,
-        }),
-        kibana: savedObject
-          ? expect.objectContaining({
-              saved_object: savedObject,
-              add_to_spaces: spaces,
-            })
-          : expect.anything(),
-        message: `User has updated spaces of ${savedObject.type} [id=${savedObject.id}]`,
-      })
-    );
-  });
-
-  test(`adds a failure audit event`, async () => {
-    const { auditLogger, securityExtension } = setup();
-    const action = AuditAction.DELETE;
-    const outcome: EcsEventOutcome = 'failure';
-    const savedObject = { type: 'dashboard', id: '3' };
-    const error: Error = {
-      name: 'test_error',
-      message: 'this is just a test',
-    };
-
-    const auditParams = {
-      action,
-      outcome,
-      savedObject,
-      error,
-    };
-
-    // Disable to test private method
-    // eslint-disable-next-line dot-notation
-    securityExtension['addAuditEvent'](auditParams);
-
-    expect(auditLogger.log).toHaveBeenCalledWith(
-      expect.objectContaining({
-        error: { code: error.name, message: error.message },
-        event: expect.objectContaining({
-          action,
-          outcome,
-        }),
-        kibana: savedObject
-          ? expect.objectContaining({
-              saved_object: savedObject,
-            })
-          : expect.anything(),
-        message: `Failed attempt to delete ${savedObject.type} [id=${savedObject.id}]`,
-      })
-    );
   });
 });
 
@@ -4197,7 +3980,7 @@ describe(`#authorizeOpenPointInTime`, () => {
         namespaces: expectedSpaces,
         types: expectedTypes,
       })
-    ).rejects.toThrow(`User is unauthorized for any requested types/spaces.`);
+    ).rejects.toThrow(`unauthorized`);
   });
 
   test(`adds audit event when unauthorized`, async () => {
@@ -4209,12 +3992,12 @@ describe(`#authorizeOpenPointInTime`, () => {
         namespaces: expectedSpaces,
         types: expectedTypes,
       })
-    ).rejects.toThrow(`User is unauthorized for any requested types/spaces.`);
+    ).rejects.toThrow(`unauthorized`);
     expect(auditHelperSpy).not.toHaveBeenCalled();
     expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
     expect(auditLogger.log).toHaveBeenCalledTimes(1);
     expect(auditLogger.log).toHaveBeenCalledWith({
-      error: { code: 'Error', message: `User is unauthorized for any requested types/spaces.` },
+      error: { code: 'Error', message: `User is unauthorized for any requested types/spaces` },
       event: {
         action: AuditAction.OPEN_POINT_IN_TIME,
         category: ['database'],
@@ -5850,7 +5633,7 @@ describe('find', () => {
       expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith({
-        error: { code: 'Error', message: `User is unauthorized for any requested types/spaces.` },
+        error: { code: 'Error', message: `User is unauthorized for any requested types/spaces` },
         event: {
           action: AuditAction.FIND,
           category: ['database'],
@@ -5894,7 +5677,7 @@ describe('find', () => {
 
       await expect(
         securityExtension.getFindRedactTypeMap({
-          authorizeNamespaces: expectedSpaces,
+          previouslyCheckedNamespaces: expectedSpaces,
           types: new Set(),
           objects: [{ type: obj1.type, id: obj1.id, existingNamespaces }],
         })
@@ -5908,7 +5691,7 @@ describe('find', () => {
 
       await expect(
         securityExtension.getFindRedactTypeMap({
-          authorizeNamespaces: expectedSpaces,
+          previouslyCheckedNamespaces: expectedSpaces,
           types: expectedTypes,
           objects: [{ type: obj1.type, id: obj1.id, existingNamespaces }],
         })
@@ -5920,7 +5703,7 @@ describe('find', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       await securityExtension.getFindRedactTypeMap({
-        authorizeNamespaces: expectedSpaces,
+        previouslyCheckedNamespaces: expectedSpaces,
         types: expectedTypes,
         objects,
       });
@@ -5956,7 +5739,7 @@ describe('find', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       const result = await securityExtension.getFindRedactTypeMap({
-        authorizeNamespaces: expectedSpaces,
+        previouslyCheckedNamespaces: expectedSpaces,
         types: expectedTypes,
         objects: [{ type: obj1.type, id: obj1.id, existingNamespaces: [namespace] }],
       });
@@ -5968,7 +5751,7 @@ describe('find', () => {
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
       const result = await securityExtension.getFindRedactTypeMap({
-        authorizeNamespaces: expectedSpaces,
+        previouslyCheckedNamespaces: expectedSpaces,
         types: expectedTypes,
         objects,
       });
@@ -5981,7 +5764,7 @@ describe('find', () => {
       checkPrivileges.mockResolvedValue(partiallyAuthorizedCheckPrivilegesResponse);
 
       const result = await securityExtension.getFindRedactTypeMap({
-        authorizeNamespaces: expectedSpaces,
+        previouslyCheckedNamespaces: expectedSpaces,
         types: expectedTypes,
         objects,
       });
@@ -5999,7 +5782,7 @@ describe('find', () => {
       setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'find', false);
 
       const result = await securityExtension.getFindRedactTypeMap({
-        authorizeNamespaces: expectedSpaces,
+        previouslyCheckedNamespaces: expectedSpaces,
         types: expectedTypes,
         objects,
       });
@@ -6016,7 +5799,7 @@ describe('find', () => {
       setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'find', false);
 
       await securityExtension.getFindRedactTypeMap({
-        authorizeNamespaces: expectedSpaces,
+        previouslyCheckedNamespaces: expectedSpaces,
         types: expectedTypes,
         objects,
       });
@@ -6048,7 +5831,7 @@ describe('find', () => {
       setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'find', true);
 
       await securityExtension.getFindRedactTypeMap({
-        authorizeNamespaces: expectedSpaces,
+        previouslyCheckedNamespaces: expectedSpaces,
         types: expectedTypes,
         objects,
       });

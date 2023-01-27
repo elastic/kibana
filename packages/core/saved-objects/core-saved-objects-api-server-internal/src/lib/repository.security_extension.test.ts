@@ -132,7 +132,6 @@ describe('SavedObjectsRepository Security Extension', () => {
   });
 
   afterEach(() => {
-    mockSecurityExt.authorize.mockClear();
     mockSecurityExt.redactNamespaces.mockClear();
     mockGetSearchDsl.mockClear();
   });
@@ -995,7 +994,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledWith({
-        authorizeNamespaces: new Set([namespace]),
+        previouslyCheckedNamespaces: new Set([namespace]),
         types: new Set(['index-pattern']),
         objects: generatedResults.hits.hits.map((obj) => {
           return {
@@ -1042,44 +1041,6 @@ describe('SavedObjectsRepository Security Extension', () => {
         })
       );
     });
-
-    // test(`adds audit per object event when successful`, async () => {
-    //   setupAuthorizeFullyAuthorized(mockSecurityExt);
-    //   setupRedactPassthrough(mockSecurityExt);
-
-    //   const { generatedResults } = await findSuccess(client, repository, {
-    //     type,
-    //     namespaces: [namespace],
-    //   });
-
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(
-    //     generatedResults.hits.hits.length
-    //   );
-
-    //   generatedResults.hits.hits.forEach((doc, i) => {
-    //     expect(mockSecurityExt.addAuditEvent.mock.calls[i]).toEqual([
-    //       {
-    //         action: AuditAction.FIND,
-    //         savedObject: {
-    //           type: doc._source!.type,
-    //           id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
-    //         },
-    //       },
-    //     ]);
-    //   });
-    // });
-
-    // test(`adds audit event when not successful`, async () => {
-    //   setupPerformAuthUnauthorized(mockSecurityExt);
-
-    //   await repository.find({ type });
-
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-    //     action: AuditAction.FIND,
-    //     error: new Error('User is unauthorized for any requested types/spaces.'),
-    //   });
-    // });
   });
 
   describe('#bulkGet', () => {

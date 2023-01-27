@@ -58,7 +58,7 @@ export default function (ftrContext: FtrProviderContext) {
         expectResponse: ({ body }) => {
           expect(body).to.eql({
             error: 'Forbidden',
-            message: 'User is unauthorized for any requested types/spaces.',
+            message: 'unauthorized',
             statusCode: 403,
           });
         },

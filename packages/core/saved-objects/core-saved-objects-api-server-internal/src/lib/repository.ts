@@ -1352,37 +1352,23 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       }
     }
 
-    // We have to first do a "pre-authorization" check so that we can construct the search DSL accordingly
-    const spacesToPreauthorize = new Set(namespaces);
+    // We have to first perform an initial authorization check so that we can construct the search DSL accordingly
+    const spacesToAuthorize = new Set(namespaces);
     const typesToAuthorize = new Set(types);
     let typeToNamespacesMap: Map<string, string[]> | undefined;
-    let preAuthorizationResult: CheckAuthorizationResult<string> | undefined;
+    let authorizationResult: CheckAuthorizationResult<string> | undefined;
     if (!disableExtensions && this._securityExtension) {
-      // preAuthorizationResult = await this._securityExtension.authorize({
-      //   actions: new Set([SecurityAction.FIND]),
-      //   types: new Set(types),
-      //   spaces: spacesToPreauthorize,
-      //   auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
-      // });
-      preAuthorizationResult = await this._securityExtension.authorizeFind({
-        namespaces: spacesToPreauthorize,
+      authorizationResult = await this._securityExtension.authorizeFind({
+        namespaces: spacesToAuthorize,
         types: typesToAuthorize,
       });
-      if (preAuthorizationResult?.status === 'unauthorized') {
+      if (authorizationResult?.status === 'unauthorized') {
         // If the user is unauthorized to find *anything* they requested, return an empty response
-        // This is one of the last remaining calls to addAuditEvent outside of the sec ext
-        // this._securityExtension.addAuditEvent({
-        //   action: AuditAction.FIND,
-        //   error: new Error(`User is unauthorized for any requested types/spaces.`),
-        //   // TODO: include object type(s) that were requested?
-        //   // requestedTypes: types,
-        //   // requestedSpaces: namespaces,
-        // });
         return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
       }
-      if (preAuthorizationResult?.status === 'partially_authorized') {
+      if (authorizationResult?.status === 'partially_authorized') {
         typeToNamespacesMap = new Map<string, string[]>();
-        for (const [objType, entry] of preAuthorizationResult.typeMap) {
+        for (const [objType, entry] of authorizationResult.typeMap) {
           if (!entry.find) continue;
           // This ensures that the query DSL can filter only for object types that the user is authorized to access for a given space
           const { authorizedSpaces, isGloballyAuthorized } = entry.find;
@@ -1463,29 +1449,10 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       return result;
     }
 
-    // const spacesToAuthorize = new Set<string>(spacesToPreauthorize); // only for namespace redaction
-    // for (const { type: objType, id, namespaces: objectNamespaces = [] } of result.saved_objects) {
-    //   for (const space of objectNamespaces) {
-    //     spacesToAuthorize.add(space);
-    //   }
-    //   this._securityExtension?.addAuditEvent({
-    //     action: AuditAction.FIND,
-    //     savedObject: { type: objType, id },
-    //   });
-    // }
-    // const authorizationResult =
-    //   spacesToAuthorize.size > spacesToPreauthorize.size
-    //     ? // If there are any namespaces in the object results that were not already checked during pre-authorization, we need *another*
-    //       // authorization check so we can correctly redact the object namespaces below.
-    //       await this._securityExtension?.authorize({
-    //         actions: new Set([SecurityAction.FIND]),
-    //         types: new Set(types),
-    //         spaces: spacesToAuthorize,
-    //       })
-    //     : undefined;
-
+    // Now that we have a full set of results with all existing namespaces for each object,
+    // we need an updated authorization type map to pass on to the redact method
     const redactTypeMap = await this._securityExtension?.getFindRedactTypeMap({
-      authorizeNamespaces: spacesToPreauthorize,
+      previouslyCheckedNamespaces: spacesToAuthorize,
       types: typesToAuthorize,
       objects: result.saved_objects.map((obj) => {
         return {
@@ -1498,7 +1465,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     return this.optionallyDecryptAndRedactBulkResult(
       result,
-      redactTypeMap ?? preAuthorizationResult?.typeMap // If the redact type map is valid, use that one; otherwise, fall back to the authorization check
+      redactTypeMap ?? authorizationResult?.typeMap // If the redact type map is valid, use that one; otherwise, fall back to the authorization check
     );
   }
 
@@ -2529,31 +2496,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     }
 
     if (!disableExtensions && this._securityExtension) {
-      // const spaces = new Set(namespaces);
-      // const preAuthorizationResult = await this._securityExtension?.authorize({
-      //   actions: new Set([SecurityAction.OPEN_POINT_IN_TIME]),
-      //   types: new Set(types),
-      //   spaces,
-      // });
-      // if (preAuthorizationResult?.status === 'unauthorized') {
-      //   // If the user is unauthorized to find *anything* they requested, return an empty response
-      //   // This is one of the last remaining calls to addAuditEvent outside of the security extension
-      //   this._securityExtension.addAuditEvent({
-      //     action: AuditAction.OPEN_POINT_IN_TIME,
-      //     error: new Error('User is unauthorized for any requested types/spaces.'),
-      //     // TODO: include object type(s) that were requested?
-      //     // requestedTypes: types,
-      //     // requestedSpaces: namespaces,
-      //   });
-      //   throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('unauthorized'));
-      // }
-      // this._securityExtension.addAuditEvent({
-      //   action: AuditAction.OPEN_POINT_IN_TIME,
-      //   outcome: 'unknown',
-      //   // TODO: include object type(s) that were requested?
-      //   // requestedTypes: types,
-      //   // requestedSpaces: namespaces,
-      // });
       await this._securityExtension.authorizeOpenPointInTime({
         namespaces: new Set(namespaces),
         types: new Set(types),

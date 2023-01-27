@@ -36,8 +36,6 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
   getFindRedactTypeMap: jest.fn(),
   authorizeAndRedactMultiNamespaceReferences: jest.fn(),
   authorizeAndRedactInternalBulkResolve: jest.fn(),
-  authorize: jest.fn(),
-  addAuditEvent: jest.fn(),
   redactNamespaces: jest.fn(),
   authorizeUpdateSpaces: jest.fn(),
 });

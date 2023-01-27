@@ -81,8 +81,13 @@ export interface AuditHelperParams {
    * Whether or not to use success as the non-failure outcome. Default is 'unknown'.
    */
   useSuccessOutcome?: boolean;
-
+  /**
+   * The spaces in which to add the objects. Default is none.
+   */
   addToSpaces?: string[];
+  /**
+   * The spaces from which to remove the objects. Default is none.
+   */
   deleteFromSpaces?: string[];
   /**
    * Error information produced by the action.
@@ -154,23 +159,27 @@ export interface AuditOptions {
   useSuccessOutcome?: boolean;
 }
 
+/**
+ * The UpdateSpacesAuditOptions interface contains optional settings for
+ * auditing the UPDATE_OBJECTS_SPACES action.
+ */
 export interface UpdateSpacesAuditOptions extends AuditOptions {
   /**
-   * An array of spaces which to add the objects (used in Update Object Spaces)
+   * An array of spaces which to add the objects (used in updateObjectsSpaces)
    */
   addToSpaces?: string[];
   /**
-   * An array of spaces from which to remove the objects (used in Update Object Spaces)
+   * An array of spaces from which to remove the objects (used in updateObjectsSpaces)
    */
   deleteFromSpaces?: string[];
 }
 
 /**
- * The AuthorizeParams interface contains settings for checking
- * & enforcing authorization via the ISavedObjectsSecurityExtension.
+ * The InternalAuthorizeParams interface contains settings for checking
+ * & enforcing authorization via the ISavedObjectsSecurityExtension. This
+ * is used only for the private authorize method.
  */
-// ToDo: change to InternalAuthorizeParams
-export interface AuthorizeParams<A extends string> {
+export interface InternalAuthorizeParams<A extends string> {
   /**
    * A set of actions to check.
    */
@@ -189,10 +198,12 @@ export interface AuthorizeParams<A extends string> {
    */
   enforceMap?: Map<string, Set<string>>;
   /**
-   * Options
-   * allowGlobalResource - whether or not to allow global resources, false if options are undefined
+   * Options for authorization
    */
   options?: {
+    /**
+     * allowGlobalResource - whether or not to allow global resources, false if options are undefined
+     */
     allowGlobalResource?: boolean;
   };
   /**
@@ -219,9 +230,12 @@ export interface CheckAuthorizationParams<A extends string> {
    */
   actions: Set<A>;
   /**
-   * Authorization options - whether or not to allow global resources, false if options are undefined
+   * Authorization options
    */
   options?: {
+    /**
+     * allowGlobalResource - whether or not to allow global resources, false if options are undefined
+     */
     allowGlobalResource: boolean;
   };
 }
@@ -269,6 +283,7 @@ export interface CheckAuthorizationResult<A extends string> {
 /**
  * The EnforceAuthorizationParams interface contains settings for
  * enforcing a single action via the ISavedObjectsSecurityExtension.
+ * This is used only for the private enforceAuthorization method.
  */
 export interface EnforceAuthorizationParams<A extends string> {
   /**
@@ -311,7 +326,8 @@ export enum AuditAction {
 
 /**
  * The AddAuditEventParams interface contains settings for adding
- * audit events via the ISavedObjectsSecurityExtension.
+ * audit events via the ISavedObjectsSecurityExtension. This is
+ * used only for the private addAuditEvent method.
  */
 export interface AddAuditEventParams {
   /**
@@ -362,25 +378,79 @@ export interface RedactNamespacesParams<T, A extends string> {
   typeMap: AuthorizationTypeMap<A>;
 }
 
+/**
+ * The AuthorizeObject interface contains information to specify an
+ * object for authorization. This is a base interface which is
+ * extended by other interfaces for specific actions.
+ */
 export interface AuthorizeObject {
+  /**
+   * The type of object
+   */
   type: string;
+  /**
+   * The id of the object
+   */
   id: string;
 }
 
+/**
+ * The AuthorizeObjectWithExistingSpaces extends AuthorizeObject and contains
+ * an array of existing namespaces for the object. Used by the
+ * authorizeDelete, authorizeBulkDelete, authorizeGet,
+ * authorizeCheckConflicts, and getFindRedactTypeMap methods.
+ */
 export interface AuthorizeObjectWithExistingSpaces extends AuthorizeObject {
+  /**
+   * Spaces where the object is known to exist. Usually populated
+   * by document data from the result of an es query.
+   */
   existingNamespaces?: string[];
 }
 
+/**
+ * The AuthorizeCreateObject extends AuthorizeObjectWithExistingSpaces
+ * and contains an array of initial namespaces for the object. Used by
+ * the authorizeCreate and authorizeBulkCreate methods.
+ */
 export interface AuthorizeCreateObject extends AuthorizeObjectWithExistingSpaces {
+  /**
+   * Initial spaces to include the created object. Populated by options
+   * passed to the repository's bulkCreate method.
+   */
   initialNamespaces?: string[];
 }
 
+/**
+ * The AuthorizeUpdateObject extends AuthorizeObjectWithExistingSpaces
+ * and contains a object namespace override. Used by the authorizeUpdate
+ * and authorizeBulkUpdate methods.
+ */
 export interface AuthorizeUpdateObject extends AuthorizeObjectWithExistingSpaces {
+  /**
+   * ToDo: Verify wording
+   * The namespace from which to update this object. Populated by options
+   * passed to the repository's update or bulkUpdate method.
+   */
   objectNamespace?: string;
 }
 
+/**
+ * The AuthorizeBulkGetObject extends AuthorizeObjectWithExistingSpaces
+ * and contains a object namespaces override. Used by the
+ * authorizeBulkGet method.
+ */
 export interface AuthorizeBulkGetObject extends AuthorizeObjectWithExistingSpaces {
+  /**
+   * ToDo: Verify wording
+   * The namespaces to include when retrieving this object. Populated by options
+   * passed to the repository's update or bulkUpdate method.
+   */
   objectNamespaces?: string[];
+  /**
+   * Whether or not an error occured when getting this object. Populated by
+   * the result of a query. Default is false.
+   */
   error?: boolean;
 }
 
@@ -437,7 +507,7 @@ export interface AuthorizeFindParams {
 }
 
 export interface GetFindRedactTypeMapParams {
-  authorizeNamespaces: Set<string>;
+  previouslyCheckedNamespaces: Set<string>;
   types: Set<string>;
   objects: AuthorizeObjectWithExistingSpaces[];
 }
@@ -468,49 +538,49 @@ export interface ISavedObjectsSecurityExtension {
    * @returns CheckAuthorizationResult or undefined - the resulting authorization level and authorization map, undefined
    * if the authorization action does not require an authorization check. (ToDo: remove this possibility for actions that are not applicable?)
    */
-  authorizeCreate: (
+  authorizeCreate: <A extends string>(
     params: AuthorizeCreateParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  authorizeBulkCreate: (
+  authorizeBulkCreate: <A extends string>(
     params: AuthorizeBulkCreateParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  authorizeUpdate: (
+  authorizeUpdate: <A extends string>(
     params: AuthorizeUpdateParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  authorizeBulkUpdate: (
+  authorizeBulkUpdate: <A extends string>(
     params: AuthorizeBulkUpdateParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  authorizeDelete: (
+  authorizeDelete: <A extends string>(
     params: AuthorizeDeleteParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  authorizeBulkDelete: (
+  authorizeBulkDelete: <A extends string>(
     params: AuthorizeBulkDeleteParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  authorizeGet: (
+  authorizeGet: <A extends string>(
     params: AuthorizeGetParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  authorizeBulkGet: (
+  authorizeBulkGet: <A extends string>(
     params: AuthorizeBulkGetParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  authorizeCheckConflicts: (
+  authorizeCheckConflicts: <A extends string>(
     params: AuthorizeCheckConflictsParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  authorizeRemoveReferences: (
+  authorizeRemoveReferences: <A extends string>(
     params: AuthorizeDeleteParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  authorizeOpenPointInTime: (
+  authorizeOpenPointInTime: <A extends string>(
     params: AuthorizeOpenPointInTimeParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
   auditClosePointInTime: () => void;
 
@@ -543,37 +613,17 @@ export interface ISavedObjectsSecurityExtension {
    * @returns CheckAuthorizationResult or undefined - the resulting authorization level and authorization map, undefined
    * if the authorization action does not require an authorization check. (ToDo: remove this possibility for actions that are not applicable?)
    */
-  authorizeUpdateSpaces: (
+  authorizeUpdateSpaces: <A extends string>(
     params: AuthorizeUpdateSpacesParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  authorizeFind: (
+  authorizeFind: <A extends string>(
     params: AuthorizeFindParams
-  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+  ) => Promise<CheckAuthorizationResult<A> | undefined>;
 
-  // ToDo: change name to...
-  // "updateFindTypeMapForRedact" OR
-  // "authorizeFindExistingObjectSpaces" OR
-  // "updateFindAuthorization" OR
-  // "authorizeFindAdditionalSpaces"
-  getFindRedactTypeMap: (
+  getFindRedactTypeMap: <A extends string>(
     params: GetFindRedactTypeMapParams
-  ) => Promise<AuthorizationTypeMap<string> | undefined>;
-
-  /**
-   * Performs authorization (check & enforce) of actions on specified types in specified spaces.
-   * @param params - actions, types & spaces map, audit callback, options (enforce bypassed if enforce map is undefined)
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
-   */
-  authorize: <T extends string>(
-    params: AuthorizeParams<T>
-  ) => Promise<CheckAuthorizationResult<T> | undefined>;
-
-  /**
-   * Adds an audit event for the specified action with relevant information
-   * @param params - the action, outcome, error, and relevant object/space information
-   */
-  addAuditEvent: (params: AddAuditEventParams) => void;
+  ) => Promise<AuthorizationTypeMap<A> | undefined>;
 
   /**
    * Filters a saved object's spaces based on an authorization map (from CheckAuthorizationResult)

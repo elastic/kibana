@@ -662,7 +662,6 @@ describe('#updateObjectsSpaces', () => {
     const spacesToRemove = [EXISTING_SPACE];
 
     afterEach(() => {
-      mockSecurityExt.authorize.mockClear();
       mockSecurityExt.redactNamespaces.mockClear();
     });
 

@@ -11,7 +11,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
-import type { BulkResolveError, SavedObject } from '@kbn/core-saved-objects-common';
+import type { BulkResolveError } from '@kbn/core-saved-objects-common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
 import type {
@@ -26,8 +26,8 @@ import type {
   CheckAuthorizationResult,
   EnforceAuthorizationParams,
   ISavedObjectsSecurityExtension,
-  PerformAuthorizationParams,
   RedactNamespacesParams,
+  SavedObject,
   UpdateSpacesAuditHelperParams,
   UpdateSpacesAuditOptions,
 } from '@kbn/core-saved-objects-server';
@@ -46,6 +46,7 @@ import type {
   AuthorizeUpdateSpacesParams,
   GetFindRedactTypeMapParams,
   InternalAuthorizeOptions,
+  InternalAuthorizeParams,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
@@ -288,7 +289,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
   }
 
-  enforceAuthorization<A extends string>(params: EnforceAuthorizationParams<A>): void {
+  private enforceAuthorization<A extends string>(params: EnforceAuthorizationParams<A>): void {
     const { typesAndSpaces, action, typeMap, auditOptions } = params;
     const {
       objects: auditObjects,
@@ -335,8 +336,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   }
 
   async authorize<A extends string>(
-    params: PerformAuthorizationParams<A>
-  ): Promise<CheckAuthorizationResult<A> | undefined> {
+    params: InternalAuthorizeParams<A>
+  ): Promise<CheckAuthorizationResult<string>> {
     if (params.actions.size === 0) {
       throw new Error('No actions specified for authorization');
     }
@@ -350,42 +351,12 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const { authzActions } = this.translateActions(params.actions);
 
-    // const {
-    //   objects: auditObjects,
-    //   bypassOnSuccess: bypassAuditOnSuccess,
-    //   useSuccessOutcome,
-    // } = params.auditOptions || {};
-
-    // ToDo: get rid of this check and move it to the one authz method that requires this (close PIT)
-    // If there are no actions to authorize then we can just add any audits for the sec actions
-    // Example: SecurityAction.CLOSE_POINT_IN_TIME does not need authz, but we want an audit trail
-    // if (authzActions.size === 0) {
-    //   if (!bypassAuditOnSuccess && auditActions.size > 0) {
-    //     auditActions.forEach((auditAction) => {
-    //       this.auditHelper({ action: auditAction, objects: auditObjects, useSuccessOutcome });
-    //     });
-    //   }
-    //   return;
-    // }
-
-    // console.log(`CHECKING...`);
-    // console.log(`TYPES: ${Array.from(params.types).toString()}`);
-    // console.log(`SPACES: ${Array.from(params.spaces).toString()}`);
-    const checkResult: CheckAuthorizationResult<string> = await this.checkAuthorization({
+    const checkResult: CheckAuthorizationResult<A> = await this.checkAuthorization({
       types: params.types,
       spaces: params.spaces,
       actions: authzActions,
       options: { allowGlobalResource: params.options?.allowGlobalResource === true },
     });
-
-    // AuthorizationTypeMap<A extends string> = Map<string, Record<A, AuthorizationTypeEntry>>;
-    // console.log(`CHECK RESULT TYPEMAP...`);
-    // Array.from(checkResult.typeMap.keys()).forEach((key) => {
-    //   const value = checkResult.typeMap.get(key);
-    //   if (value !== undefined) {
-    //     console.log(`TYPE: ${key}, Auth Entry: ${JSON.stringify(value)}`);
-    //   }
-    // });
 
     const typesAndSpaces = params.enforceMap;
     if (typesAndSpaces !== undefined && checkResult) {
@@ -406,10 +377,21 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return checkResult;
   }
 
-  addAuditEvent(params: AddAuditEventParams): void {
+  private addAuditEvent(params: AddAuditEventParams): void {
     if (this.auditLogger.enabled) {
       const auditEvent = savedObjectEvent(params);
       this.auditLogger.log(auditEvent);
+    }
+  }
+
+  private async checkPrivileges(
+    actions: string | string[],
+    namespaceOrNamespaces?: string | Array<undefined | string>
+  ) {
+    try {
+      return await this.checkPrivilegesFunc(actions, namespaceOrNamespaces);
+    } catch (error) {
+      throw this.errors.decorateGeneralError(error, error.body && error.body.reason);
     }
   }
 
@@ -430,36 +412,25 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return { ...savedObject, namespaces: redactedSpaces };
   }
 
-  private async checkPrivileges(
-    actions: string | string[],
-    namespaceOrNamespaces?: string | Array<undefined | string>
-  ) {
-    try {
-      return await this.checkPrivilegesFunc(actions, namespaceOrNamespaces);
-    } catch (error) {
-      throw this.errors.decorateGeneralError(error, error.body && error.body.reason);
-    }
-  }
-
-  async authorizeCreate(
+  async authorizeCreate<A extends string>(
     params: AuthorizeCreateParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     return this.internalAuthorizeCreate({
       namespace: params.namespace,
       objects: [params.object],
     });
   }
 
-  async authorizeBulkCreate(
+  async authorizeBulkCreate<A extends string>(
     params: AuthorizeBulkCreateParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     return this.internalAuthorizeCreate(params, { forceBulkAction: true });
   }
 
-  private async internalAuthorizeCreate(
+  private async internalAuthorizeCreate<A extends string>(
     params: AuthorizeBulkCreateParams,
     options?: InternalAuthorizeOptions
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
 
@@ -505,25 +476,25 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return authorizationResult;
   }
 
-  async authorizeUpdate(
+  async authorizeUpdate<A extends string>(
     params: AuthorizeUpdateParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     return this.internalAuthorizeUpdate({
       namespace: params.namespace,
       objects: [params.object],
     });
   }
 
-  async authorizeBulkUpdate(
+  async authorizeBulkUpdate<A extends string>(
     params: AuthorizeBulkUpdateParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     return this.internalAuthorizeUpdate(params, { forceBulkAction: true });
   }
 
-  private async internalAuthorizeUpdate(
+  private async internalAuthorizeUpdate<A extends string>(
     params: AuthorizeBulkUpdateParams,
     options?: InternalAuthorizeOptions
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
 
@@ -572,9 +543,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return authorizationResult;
   }
 
-  async authorizeDelete(
+  async authorizeDelete<A extends string>(
     params: AuthorizeDeleteParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     return this.internalAuthorizeDelete({
       namespace: params.namespace,
       // force existing namespaces to be undefined because we do not want to
@@ -583,16 +554,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
   }
 
-  async authorizeBulkDelete(
+  async authorizeBulkDelete<A extends string>(
     params: AuthorizeBulkDeleteParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     return this.internalAuthorizeDelete(params, { forceBulkAction: true });
   }
 
-  private async internalAuthorizeDelete(
+  private async internalAuthorizeDelete<A extends string>(
     params: AuthorizeBulkDeleteParams,
     options?: InternalAuthorizeOptions
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
     const enforceMap = new Map<string, Set<string>>();
@@ -627,9 +598,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
   }
 
-  async authorizeGet(
+  async authorizeGet<A extends string>(
     params: AuthorizeGetParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     const { namespace, object, objectNotFound } = params;
     const spacesToEnforce = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
     const existingNamespaces = object.existingNamespaces ?? [];
@@ -643,9 +614,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
   }
 
-  async authorizeBulkGet(
+  async authorizeBulkGet<A extends string>(
     params: AuthorizeBulkGetParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     const action = SecurityAction.BULK_GET;
     const namespace = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
@@ -689,23 +660,11 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       types: new Set(enforceMap.keys()),
       spaces: spacesToAuthorize,
       enforceMap,
-      // ToDo: need to handle this case!
-      // auditCallback: (error) => {
-      //   for (const { type, id, error: bulkError } of result.saved_objects) {
-      //     if (!error && !!bulkError) continue; // Only log success events for objects that were actually found (and are being returned to the user)
-      //     this._securityExtension!.addAuditEvent({
-      //       action: AuditAction.GET,
-      //       savedObject: { type, id },
-      //       error,
-      //     });
-      //   }
-      // },
       auditOptions: {
         objects,
         useSuccessOutcome: true,
         bypassOnSuccess: true, // We will override the success case below
-      }, // ToDo: why is this array empty in out unit testing? Because we forgot a mock?
-      // Answer: likely because we're stripping objecs with errors above for either success or fail cases
+      },
     });
 
     // if we made it here, enforce was a success, so let's audit...
@@ -721,9 +680,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return authorizationResult;
   }
 
-  async authorizeCheckConflicts(
+  async authorizeCheckConflicts<A extends string>(
     params: AuthorizeCheckConflictsParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     const action = SecurityAction.CHECK_CONFLICTS;
     const { namespace, objects } = params;
     if (objects.length === 0) {
@@ -752,9 +711,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
   }
 
-  async authorizeRemoveReferences(
+  async authorizeRemoveReferences<A extends string>(
     params: AuthorizeDeleteParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     // TODO: Improve authorization and auditing (https://github.com/elastic/kibana/issues/135259)
     const { namespace, object } = params;
     const spaces = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
@@ -767,9 +726,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
   }
 
-  async authorizeOpenPointInTime(
+  async authorizeOpenPointInTime<A extends string>(
     params: AuthorizeOpenPointInTimeParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     const { namespaces, types } = params;
 
     const preAuthorizationResult = await this.authorize({
@@ -781,16 +740,15 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     if (preAuthorizationResult?.status === 'unauthorized') {
       // If the user is unauthorized to find *anything* they requested, return an empty response
-      const error = new Error('User is unauthorized for any requested types/spaces.');
       this.addAuditEvent({
         action: AuditAction.OPEN_POINT_IN_TIME,
-        error,
+        error: new Error('User is unauthorized for any requested types/spaces'),
         // TODO: include object type(s) that were requested?
         // requestedTypes: types,
         // requestedSpaces: namespaces,
       });
       // this.auditHelper({ action: AuditAction.OPEN_POINT_IN_TIME, objects: auditObjects });
-      throw SavedObjectsErrorHelpers.decorateForbiddenError(error);
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('unauthorized'));
     }
     this.addAuditEvent({
       action: AuditAction.OPEN_POINT_IN_TIME,
@@ -1062,9 +1020,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
   }
 
-  async authorizeUpdateSpaces(
+  async authorizeUpdateSpaces<A extends string>(
     params: AuthorizeUpdateSpacesParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     const action = SecurityAction.UPDATE_OBJECTS_SPACES;
     const { objects, spacesToAdd, spacesToRemove } = params;
 
@@ -1115,9 +1073,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
   }
 
-  async authorizeFind(
+  async authorizeFind<A extends string>(
     params: AuthorizeFindParams
-  ): Promise<CheckAuthorizationResult<string> | undefined> {
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
     const { types, namespaces } = params;
 
     const preAuthorizationResult = await this.authorize({
@@ -1130,7 +1088,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       // This is one of the last remaining calls to addAuditEvent outside of the sec ext
       this.addAuditEvent({
         action: AuditAction.FIND,
-        error: new Error(`User is unauthorized for any requested types/spaces.`),
+        error: new Error(`User is unauthorized for any requested types/spaces`),
         // TODO: Improve authorization and auditing (https://github.com/elastic/kibana/issues/135259)
         // include object type(s) that were requested?
         // requestedTypes: types,
@@ -1140,10 +1098,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return preAuthorizationResult;
   }
 
-  async getFindRedactTypeMap(
+  async getFindRedactTypeMap<A extends string>(
     params: GetFindRedactTypeMapParams
-  ): Promise<AuthorizationTypeMap<string> | undefined> {
-    const { authorizeNamespaces, types, objects } = params;
+  ): Promise<AuthorizationTypeMap<A> | undefined> {
+    const { previouslyCheckedNamespaces: authorizeNamespaces, types, objects } = params;
 
     const spacesToAuthorize = new Set<string>(authorizeNamespaces); // only for namespace redaction
     for (const { type, id, existingNamespaces = [] } of objects) {

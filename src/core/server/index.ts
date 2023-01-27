@@ -360,7 +360,6 @@ export type {
   SavedObjectsRequestHandlerContext,
   EncryptedObjectDescriptor,
   ISavedObjectsEncryptionExtension,
-  PerformAuthorizationParams,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
@@ -370,6 +369,7 @@ export type {
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
   SavedObjectsExtensions,
+  InternalAuthorizeParams,
 } from '@kbn/core-saved-objects-server';
 export {
   ENCRYPTION_EXTENSION_ID,
