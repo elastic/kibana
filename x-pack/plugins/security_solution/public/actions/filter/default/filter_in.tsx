@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { createFilter } from '../helpers';
@@ -30,7 +30,7 @@ export const createFilterInAction = ({ order }: { order?: number }) =>
       const services = KibanaServices.get();
       const filterManager = services.data.query.filterManager;
 
-      const makeFilter = (currentVal: string | null | undefined) =>
+      const makeFilter = (currentVal: string | string[] | null | undefined) =>
         currentVal?.length === 0
           ? createFilter(field.name, undefined)
           : createFilter(field.name, currentVal);
