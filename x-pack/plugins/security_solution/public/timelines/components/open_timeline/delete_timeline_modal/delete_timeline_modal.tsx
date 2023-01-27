@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EuiConfirmModal, EuiTitle, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
@@ -36,14 +36,18 @@ export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDel
     const trimmedTitle = title != null ? title.trim() : '';
     const titleResult = !isEmpty(trimmedTitle) ? trimmedTitle : i18n.UNTITLED_TIMELINE;
     return (
-      <FormattedMessage
-        id="xpack.securitySolution.open.timeline.deleteTimelineModalTitle"
-        defaultMessage='Delete "{title}"?'
-        data-test-subj="title"
-        values={{
-          title: titleResult,
-        }}
-      />
+      <EuiTitle size="l">
+        <h1>
+          <FormattedMessage
+            id="xpack.securitySolution.open.timeline.deleteTimelineModalTitle"
+            defaultMessage='Delete "{title}"?'
+            data-test-subj="title"
+            values={{
+              title: titleResult,
+            }}
+          />
+        </h1>
+      </EuiTitle>
     );
   }, [title]);
   return (
