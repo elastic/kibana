@@ -34,7 +34,7 @@ export function NavNameWithBetaBadge({ label, iconType, isTechnicalPreview }: Pr
           />
         ) : (
           <EuiBetaBadge
-            color="subdued"
+            color="hollow"
             size="s"
             label={i18n.translate('xpack.observability.navigation.betaBadge', {
               defaultMessage: 'Beta',
