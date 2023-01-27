@@ -144,7 +144,7 @@ export function SloEditForm({ slo }: Props) {
           <EuiSpacer size="xxl" />
 
           {watch('indicator.type') === 'sli.kql.custom' ? (
-            <SloEditFormDefinitionCustomKql control={control} trigger={trigger} />
+            <SloEditFormDefinitionCustomKql control={control} />
           ) : null}
 
           <EuiSpacer size="m" />

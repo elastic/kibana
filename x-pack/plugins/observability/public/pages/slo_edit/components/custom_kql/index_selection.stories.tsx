@@ -8,20 +8,27 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { FormProvider, useForm } from 'react-hook-form';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
-import { IndiceSelection as Component, Props } from './indice_selection';
+import { IndexSelection as Component, Props } from './index_selection';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
 
 export default {
   component: Component,
-  title: 'app/SLO/EditPage/CustomKQL/IndiceSelection',
+  title: 'app/SLO/EditPage/CustomKQL/IndexSelection',
   decorators: [KibanaReactStorybookDecorator],
 };
 
 const Template: ComponentStory<typeof Component> = (props: Props) => {
-  return <Component {...props} />;
+  const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES });
+  return (
+    <FormProvider {...methods}>
+      <Component {...props} control={methods.control} />
+    </FormProvider>
+  );
 };
 
 const defaultProps = {};
 
-export const IndiceSelection = Template.bind({});
-IndiceSelection.args = defaultProps;
+export const IndexSelection = Template.bind({});
+IndexSelection.args = defaultProps;
