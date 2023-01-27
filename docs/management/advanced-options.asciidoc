@@ -495,4 +495,4 @@ only production-ready visualizations are available to users.
 ==== Usage data
 
 Helps improve the Elastic Stack by providing usage statistics for
-basic features. This data will not be shared outside of Elastic.
+basic features. 
