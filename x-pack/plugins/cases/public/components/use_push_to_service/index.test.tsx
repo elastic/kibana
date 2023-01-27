@@ -76,8 +76,8 @@ describe('usePushToService', () => {
       }
     );
 
-    act(() => {
-      result.current.handlePushToService();
+    await act(async () => {
+      await result.current.handlePushToService();
     });
 
     expect(pushCaseToExternalService).toBeCalledWith({
@@ -212,8 +212,8 @@ describe('usePushToService', () => {
       }
     );
 
-    act(() => {
-      result.current.handlePushToService();
+    await act(async () => {
+      await result.current.handlePushToService();
     });
 
     expect(pushCaseToExternalService).not.toBeCalled();
@@ -227,8 +227,8 @@ describe('usePushToService', () => {
       }
     );
 
-    act(() => {
-      result.current.handlePushToService();
+    await act(async () => {
+      await result.current.handlePushToService();
     });
 
     await waitFor(() => {
@@ -552,7 +552,7 @@ describe('usePushToService', () => {
       expect(result.current.hasPushPermissions).toBe(false);
     });
 
-    it('hasLicenseError=false if enabledInLicense=false', async () => {
+    it('hasLicenseError=true if enabledInLicense=false', async () => {
       useFetchActionLicenseMock.mockImplementation(() => ({
         isLoading: false,
         data: {

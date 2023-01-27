@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
 
-export const PUSH_THIRD = (thirdParty: string) => {
+export const PUSH_INCIDENT = (thirdParty: string) => {
   if (thirdParty === 'none') {
     return i18n.translate('xpack.cases.caseView.pushThirdPartyIncident', {
       defaultMessage: 'Push as external incident',
@@ -22,7 +22,7 @@ export const PUSH_THIRD = (thirdParty: string) => {
   });
 };
 
-export const UPDATE_THIRD = (thirdParty: string) => {
+export const UPDATE_INCIDENT = (thirdParty: string) => {
   if (thirdParty === 'none') {
     return i18n.translate('xpack.cases.caseView.updateThirdPartyIncident', {
       defaultMessage: 'Update external incident',

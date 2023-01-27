@@ -9,10 +9,7 @@ import getPort from 'get-port';
 import http from 'http';
 
 import type SuperTest from 'supertest';
-import {
-  CASES_INTERNAL_URL,
-  CASE_CONFIGURE_CONNECTORS_URL,
-} from '@kbn/cases-plugin/common/constants';
+import { CASE_CONFIGURE_CONNECTORS_URL } from '@kbn/cases-plugin/common/constants';
 import {
   CasesConfigureResponse,
   CaseConnector,
@@ -20,6 +17,7 @@ import {
   CasePostRequest,
   CaseResponse,
   GetCaseConnectorsResponse,
+  getCaseConnectorsUrl,
 } from '@kbn/cases-plugin/common/api';
 import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types';
 import { User } from './authentication/types';
@@ -316,7 +314,7 @@ export const getConnectors = async ({
   auth?: { user: User; space: string | null };
 }): Promise<GetCaseConnectorsResponse> => {
   const { body: connectors } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/_connectors`)
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseConnectorsUrl(caseId)}`)
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 

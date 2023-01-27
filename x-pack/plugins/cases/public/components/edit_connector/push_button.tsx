@@ -37,7 +37,7 @@ const PushButtonComponent: React.FC<PushButtonProps> = ({
       disabled={disabled}
       isLoading={isLoading}
     >
-      {hasBeenPushed ? i18n.UPDATE_THIRD(connectorName) : i18n.PUSH_THIRD(connectorName)}
+      {hasBeenPushed ? i18n.UPDATE_INCIDENT(connectorName) : i18n.PUSH_INCIDENT(connectorName)}
     </EuiButtonEmpty>
   );
 

@@ -55,8 +55,7 @@ export const CaseViewActivity = ({
   );
 
   const { data: userActionsData, isLoading: isLoadingUserActions } = useGetCaseUserActions(
-    caseData.id,
-    caseData.connector.id
+    caseData.id
   );
 
   const assignees = useMemo(
@@ -144,46 +143,52 @@ export const CaseViewActivity = ({
     [onUpdateField]
   );
 
+  const showUserActions =
+    !isLoadingUserActions &&
+    !isLoadingCaseConnectors &&
+    userActionsData &&
+    caseConnectors &&
+    userProfiles;
+
+  const showConnectorSidebar =
+    pushToServiceAuthorized && userActionsData && caseConnectors && allAvailableConnectors;
+
   return (
     <>
       <EuiFlexItem grow={6}>
         {(isLoadingUserActions || isLoadingCaseConnectors) && (
           <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
         )}
-        {!isLoadingUserActions &&
-          !isLoadingCaseConnectors &&
-          userActionsData &&
-          caseConnectors &&
-          userProfiles && (
-            <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
-              <EuiFlexItem>
-                <UserActions
-                  userProfiles={userProfiles}
-                  currentUserProfile={currentUserProfile}
-                  getRuleDetailsHref={ruleDetailsNavigation?.href}
-                  onRuleDetailsClick={ruleDetailsNavigation?.onClick}
-                  caseConnectors={caseConnectors}
-                  caseUserActions={userActionsData.caseUserActions}
-                  data={caseData}
-                  actionsNavigation={actionsNavigation}
-                  isLoadingDescription={isLoading && loadingKey === 'description'}
-                  isLoadingUserActions={isLoadingUserActions}
-                  onShowAlertDetails={onShowAlertDetails}
-                  onUpdateField={onUpdateField}
-                  statusActionButton={
-                    permissions.update ? (
-                      <StatusActionButton
-                        status={caseData.status}
-                        onStatusChanged={changeStatus}
-                        isLoading={isLoading && loadingKey === 'status'}
-                      />
-                    ) : null
-                  }
-                  useFetchAlertData={useFetchAlertData}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+        {showUserActions && (
+          <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
+            <EuiFlexItem>
+              <UserActions
+                userProfiles={userProfiles}
+                currentUserProfile={currentUserProfile}
+                getRuleDetailsHref={ruleDetailsNavigation?.href}
+                onRuleDetailsClick={ruleDetailsNavigation?.onClick}
+                caseConnectors={caseConnectors}
+                caseUserActions={userActionsData.caseUserActions}
+                data={caseData}
+                actionsNavigation={actionsNavigation}
+                isLoadingDescription={isLoading && loadingKey === 'description'}
+                isLoadingUserActions={isLoadingUserActions}
+                onShowAlertDetails={onShowAlertDetails}
+                onUpdateField={onUpdateField}
+                statusActionButton={
+                  permissions.update ? (
+                    <StatusActionButton
+                      status={caseData.status}
+                      onStatusChanged={changeStatus}
+                      isLoading={isLoading && loadingKey === 'status'}
+                    />
+                  ) : null
+                }
+                useFetchAlertData={useFetchAlertData}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
@@ -226,11 +231,7 @@ export const CaseViewActivity = ({
             onSubmit={onSubmitTags}
             isLoading={isLoading && loadingKey === 'tags'}
           />
-          {pushToServiceAuthorized &&
-          userActionsData &&
-          caseConnectors &&
-          caseData &&
-          allAvailableConnectors ? (
+          {showConnectorSidebar ? (
             <EditConnector
               caseData={caseData}
               caseConnectors={caseConnectors}

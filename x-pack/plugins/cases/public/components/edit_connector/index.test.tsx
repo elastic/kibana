@@ -42,6 +42,26 @@ describe('EditConnector ', () => {
     appMockRender = createAppMockRenderer();
   });
 
+  it('Renders the none connector', async () => {
+    render(
+      <TestProviders>
+        <EditConnector {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(
+      await screen.findByText(
+        'To create and update a case in an external system, select a connector.'
+      )
+    ).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('connector-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('dropdown-connector-no-connector').length).toBeGreaterThan(0);
+    });
+  });
+
   it('Renders servicenow connector from case initially', async () => {
     const serviceNowProps = {
       ...defaultProps,
@@ -70,7 +90,6 @@ describe('EditConnector ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('has-data-to-push-button'));
     userEvent.click(screen.getByTestId('connector-edit-button'));
 
     await waitFor(() => {
@@ -202,6 +221,7 @@ describe('EditConnector ', () => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
+    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
     userEvent.click(screen.getByTestId('edit-connectors-cancel'));
 
     await waitFor(() => {
@@ -251,7 +271,7 @@ describe('EditConnector ', () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByTestId('has-data-to-push-button')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('push-to-external-service')).not.toBeInTheDocument();
     });
   });
 
@@ -383,7 +403,7 @@ describe('EditConnector ', () => {
 
     const result = appMockRender.render(<EditConnector {...defaultProps} />);
     await waitFor(() => {
-      expect(result.queryByTestId('has-data-to-push-button')).toBe(null);
+      expect(result.queryByTestId('push-to-external-service')).toBe(null);
     });
   });
 
@@ -392,7 +412,7 @@ describe('EditConnector ', () => {
     const result = appMockRender.render(<EditConnector {...defaultProps} />);
 
     await waitFor(() => {
-      expect(result.queryByTestId('has-data-to-push-button')).toBe(null);
+      expect(result.queryByTestId('push-to-external-service')).toBe(null);
     });
   });
 

@@ -28,7 +28,7 @@ describe('useGetCaseConnectors', () => {
     jest.clearAllMocks();
   });
 
-  it('calls getCases with correct arguments', async () => {
+  it('calls getCaseConnectors with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCaseConnectors');
     const { waitForNextUpdate } = renderHook(() => useGetCaseConnectors(caseId), {
       wrapper: appMockRender.AppWrapper,

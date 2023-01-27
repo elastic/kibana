@@ -271,7 +271,7 @@ describe('CaseViewPage', () => {
 
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-    expect(result.getByTestId('has-data-to-push-button')).toBeInTheDocument();
+    expect(result.getByTestId('push-to-external-service')).toBeInTheDocument();
 
     userEvent.click(result.getByTestId('push-to-external-service'));
 
@@ -409,7 +409,7 @@ describe('CaseViewPage', () => {
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('has-data-to-push-button')).toHaveTextContent(
+      expect(result.getByTestId('push-to-external-service')).toHaveTextContent(
         'My Resilient connector'
       );
     });

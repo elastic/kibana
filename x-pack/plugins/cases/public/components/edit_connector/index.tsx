@@ -93,7 +93,7 @@ export const EditConnector = React.memo(
   }: EditConnectorProps) => {
     const caseFields = caseData.connector.fields;
     const selectedConnector = caseData.connector.id;
-    const actionConnector = allAvailableConnectors.find((c) => c.id === caseData.connector.id);
+    const actionConnector = getConnectorById(caseData.connector.id, allAvailableConnectors);
     const isValidConnector = !!actionConnector;
 
     const { form } = useForm({
@@ -111,20 +111,22 @@ export const EditConnector = React.memo(
       {
         ...initialState,
         fields: caseFields,
-        currentConnector: getConnectorById(caseData.connector.id, allAvailableConnectors),
+        currentConnector: actionConnector,
       }
     );
 
-    // only enable the save button if changes were made to the previous selected
-    // connector or its fields
-    // null and none are equivalent to `no connector`.
-    // This makes sure we don't enable the button when the "no connector" option is selected
-    // by default. e.g. when a case is created without a selector
-    const isNoConnectorDefaultValue =
+    /**
+     *  only enable the save button if changes were made to the previous selected
+     * connector or its fields
+     * null and none are equivalent to `no connector`.
+     * This makes sure we don't enable the button when the "no connector" option is selected
+     * by default. e.g. when a case is created without a connector
+     */
+    const isDefaultNoneConnectorSelected =
       currentConnector === null && selectedConnector === NONE_CONNECTOR_ID;
 
     const enableSave =
-      (!isNoConnectorDefaultValue && currentConnector?.id !== selectedConnector) ||
+      (!isDefaultNoneConnectorSelected && currentConnector?.id !== selectedConnector) ||
       !deepEqual(fields, caseFields);
 
     const onChangeConnector = useCallback(
@@ -161,7 +163,7 @@ export const EditConnector = React.memo(
 
       dispatch({
         type: 'SET_CURRENT_CONNECTOR',
-        payload: getConnectorById(caseData.connector.id, allAvailableConnectors),
+        payload: actionConnector,
       });
 
       dispatch({
@@ -173,13 +175,7 @@ export const EditConnector = React.memo(
         type: 'SET_EDIT_CONNECTOR',
         payload: false,
       });
-    }, [
-      allAvailableConnectors,
-      caseData.connector.id,
-      caseFields,
-      selectedConnector,
-      setFieldValue,
-    ]);
+    }, [actionConnector, caseFields, selectedConnector, setFieldValue]);
 
     const onError = useCallback(() => {
       resetConnector();
@@ -241,6 +237,13 @@ export const EditConnector = React.memo(
       caseStatus: caseData.status,
       isValidConnector,
     });
+
+    const disablePushButton =
+      isLoadingPushToService ||
+      errorsMsg.length > 0 ||
+      !hasPushPermissions ||
+      !isValidConnector ||
+      !needsToBePushed;
 
     return (
       <EuiFlexItem grow={false}>
@@ -348,17 +351,11 @@ export const EditConnector = React.memo(
               !editConnector &&
               hasPushPermissions &&
               actionsReadCapabilities && (
-                <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
+                <EuiFlexItem grow={false}>
                   <span>
                     <PushButton
                       hasBeenPushed={hasBeenPushed}
-                      disabled={
-                        isLoadingPushToService ||
-                        errorsMsg.length > 0 ||
-                        !hasPushPermissions ||
-                        !isValidConnector ||
-                        !needsToBePushed
-                      }
+                      disabled={disablePushButton}
                       isLoading={isLoadingPushToService}
                       pushToService={handlePushToService}
                       errorsMsg={errorsMsg}

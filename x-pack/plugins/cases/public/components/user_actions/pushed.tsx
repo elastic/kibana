@@ -16,33 +16,45 @@ import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 import type { CaseConnectors } from '../../containers/types';
 
-const comparePushDates = (
-  type: 'firstPush' | 'latestPush',
-  pushedAt: string,
+const getPushDates = (
+  userActionPushedAt: string,
   connectorPushedAt: string | undefined
-) => {
+): { userActionDate: Date; connectorDate: Date } | undefined => {
   if (!connectorPushedAt) {
-    return type === 'firstPush' ? true : false;
+    return;
   }
 
-  const pushedDate = new Date(pushedAt);
+  const pushedDate = new Date(userActionPushedAt);
   const connectorDate = new Date(connectorPushedAt);
 
   if (isNaN(pushedDate.getTime()) || isNaN(connectorDate.getTime())) {
-    return type === 'firstPush' ? true : false;
+    return;
   }
 
-  return type === 'firstPush'
-    ? pushedDate.getTime() <= connectorDate.getTime()
-    : pushedDate.getTime() >= connectorDate.getTime();
+  return {
+    userActionDate: pushedDate,
+    connectorDate,
+  };
 };
 
 const isLatestPush = (pushedAt: string, latestPush: string | undefined) => {
-  return comparePushDates('latestPush', pushedAt, latestPush);
+  const dates = getPushDates(pushedAt, latestPush);
+
+  if (!dates) {
+    return false;
+  }
+
+  return dates.userActionDate.getTime() >= dates.connectorDate.getTime();
 };
 
 const isFirstPush = (pushedAt: string, oldestPush: string | undefined) => {
-  return comparePushDates('firstPush', pushedAt, oldestPush);
+  const dates = getPushDates(pushedAt, oldestPush);
+
+  if (!dates) {
+    return true;
+  }
+
+  return dates.userActionDate.getTime() <= dates.connectorDate.getTime();
 };
 
 const getLabelTitle = (action: UserActionResponse<PushedUserAction>, firstPush: boolean) => {
@@ -114,10 +126,10 @@ export const createPushedUserActionBuilder: UserActionBuilder = ({
 }) => ({
   build: () => {
     const pushedUserAction = userAction as UserActionResponse<PushedUserAction>;
-    const connectorId = pushedUserAction.payload.externalService?.connectorId;
+    const connectorId = pushedUserAction.payload.externalService.connectorId;
     const connectorInfo = caseConnectors[connectorId];
 
-    if (!connectorId || !connectorInfo) {
+    if (!connectorInfo) {
       return [];
     }
 

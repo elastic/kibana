@@ -8,7 +8,12 @@
 import http from 'http';
 import expect from '@kbn/expect';
 
-import { ActionTypes, CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import {
+  ActionTypes,
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+} from '@kbn/cases-plugin/common/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -246,7 +251,7 @@ export default ({ getService }: FtrProviderContext): void => {
             connectorId: connector.id,
           });
 
-          const pachedCase = await createComment({
+          const patched = await createComment({
             supertest,
             caseId: postedCase.id,
             params: postCommentUserReq,
@@ -269,8 +274,8 @@ export default ({ getService }: FtrProviderContext): void => {
             params: {
               cases: [
                 {
-                  id: pachedCase.id,
-                  version: pachedCase.version,
+                  id: patched.id,
+                  version: patched.version,
                   connector: {
                     id: serviceNow2.id,
                     name: 'ServiceNow 2 Connector',
@@ -290,7 +295,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await pushCase({
             supertest,
-            caseId: pachedCase.id,
+            caseId: patched.id,
             connectorId: serviceNow2.id,
           });
 
@@ -315,11 +320,14 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(connectors[serviceNow2.id].push.externalService?.connector_name).to.not.eql(
             connector.name
           );
+          expect(connectors[serviceNow2.id].push.externalService?.connector_id).to.not.eql(
+            connector.id
+          );
         });
       });
 
-      describe('latestPushDate', () => {
-        it('does not set latestPushDate or oldestPushDate when the connector has not been used to push', async () => {
+      describe('latestUserActionPushDate', () => {
+        it('does not set latestUserActionPushDate or oldestPushDate when the connector has not been used to push', async () => {
           const { postedCase, connector } = await createCaseWithConnector({
             supertest,
             serviceNowSimulatorURL,
@@ -334,7 +342,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(connectors[connector.id].push.oldestUserActionPushDate).to.be(undefined);
         });
 
-        it('sets latestPushDate to the most recent push date and oldestPushDate to the first push date', async () => {
+        it('sets latestUserActionPushDate to the most recent push date and oldestPushDate to the first push date', async () => {
           const { postedCase, connector } = await createCaseWithConnector({
             supertest,
             serviceNowSimulatorURL,
@@ -494,6 +502,39 @@ export default ({ getService }: FtrProviderContext): void => {
                   id: pushedCase.id,
                   version: pushedCase.version,
                   severity: CaseSeverity.CRITICAL,
+                },
+              ],
+            },
+          });
+
+          const connectors = await getConnectors({ caseId: postedCase.id, supertest });
+
+          expect(Object.keys(connectors).length).to.be(1);
+          expect(connectors[connector.id].id).to.be(connector.id);
+          expect(connectors[connector.id].push.needsToBePushed).to.be(false);
+        });
+
+        it('sets needs to push to false when the status of a case was changed after the last push', async () => {
+          const { postedCase, connector } = await createCaseWithConnector({
+            supertest,
+            serviceNowSimulatorURL,
+            actionsRemover,
+          });
+
+          const pushedCase = await pushCase({
+            supertest,
+            caseId: postedCase.id,
+            connectorId: connector.id,
+          });
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: pushedCase.id,
+                  version: pushedCase.version,
+                  status: CaseStatuses['in-progress'],
                 },
               ],
             },

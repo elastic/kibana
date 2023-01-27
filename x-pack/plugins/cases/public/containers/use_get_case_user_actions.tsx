@@ -43,11 +43,11 @@ export const getProfileUids = (userActions: CaseUserActions[]) => {
   return uids;
 };
 
-export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) => {
+export const useGetCaseUserActions = (caseId: string) => {
   const toasts = useToasts();
   const abortCtrlRef = new AbortController();
   return useQuery(
-    casesQueriesKeys.userActions(caseId, caseConnectorId),
+    casesQueriesKeys.userActions(caseId),
     async () => {
       const response = await getCaseUserActions(caseId, abortCtrlRef.signal);
       const participants = !isEmpty(response)
