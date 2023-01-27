@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { ErrorCallOut } from './error_callout';
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
 import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
 import { NetworkTimingsDonut } from './step_timing_breakdown/network_timings_donut';
@@ -29,7 +30,7 @@ export const StepDetailPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
   useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
 
-  const { data, isFailed, currentStep } = useJourneySteps();
+  const { data, isFailedStep, currentStep } = useJourneySteps();
 
   useStepDetailsBreadcrumbs();
 
@@ -50,6 +51,7 @@ export const StepDetailPage = () => {
 
   return (
     <>
+      <ErrorCallOut step={activeStep} />
       {data?.details?.journey?.config_id && (
         <MonitorDetailsLinkPortal
           configId={data.details.journey.config_id}
@@ -60,7 +62,7 @@ export const StepDetailPage = () => {
         <EuiFlexItem grow={1}>
           <EuiPanel hasShadow={false} hasBorder>
             {data?.details?.journey && currentStep && (
-              <StepImage ping={data?.details?.journey} step={currentStep} isFailed={isFailed} />
+              <StepImage ping={data?.details?.journey} step={currentStep} isFailed={isFailedStep} />
             )}
           </EuiPanel>
         </EuiFlexItem>
