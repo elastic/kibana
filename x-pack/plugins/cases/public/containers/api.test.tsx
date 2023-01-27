@@ -49,11 +49,11 @@ import {
   pushedCase,
   tags,
   findCaseUserActionsResponse,
-  findCaseUserActionsSnake,
   casesStatusSnake,
   basicCaseId,
   caseWithRegisteredAttachmentsSnake,
   caseWithRegisteredAttachments,
+  caseUserActionsWithRegisteredAttachmentsSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -457,6 +457,13 @@ describe('Cases API', () => {
   });
 
   describe('findCaseUserActions', () => {
+    const findCaseUserActionsSnake = {
+      page: 1,
+      perPage: 1000,
+      total: 20,
+      userActions: [...caseUserActionsWithRegisteredAttachmentsSnake],
+    };
+
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(findCaseUserActionsSnake);

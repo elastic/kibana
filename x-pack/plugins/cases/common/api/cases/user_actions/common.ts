@@ -57,10 +57,6 @@ export const CaseUserActionInjectedDeprecatedIdsRt = rt.type({
   comment_id: rt.union([rt.string, rt.null]),
 });
 
-/**
- * This should be used for all user action types going forward it will be renamed to CaseUserActionSavedObjectIdsRt
- * Once the UI is switched to using the new user actions _find API
- */
 export const CaseUserActionInjectedIdsRt = rt.type({
   comment_id: rt.union([rt.string, rt.null]),
 });

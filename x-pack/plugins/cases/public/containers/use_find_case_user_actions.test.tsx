@@ -90,7 +90,9 @@ describe('useFindCaseUserActions', () => {
     it('aggregates the uids from the createdBy field of a user action', async () => {
       jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
         Promise.resolve({
-          ...findCaseUserActionsResponse,
+          page: 1,
+          perPage: 1000,
+          total: 20,
           userActions: [getUserAction('pushed', Actions.add, { createdBy: { profileUid: '456' } })],
         })
       );
@@ -114,7 +116,9 @@ describe('useFindCaseUserActions', () => {
     it('aggregates the uids from a push', async () => {
       jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
         Promise.resolve({
-          ...findCaseUserActionsResponse,
+          page: 1,
+          perPage: 1000,
+          total: 20,
           userActions: [
             getUserAction('pushed', Actions.add, {
               payload: { externalService: { pushedBy: { profileUid: '123' } } },
@@ -142,7 +146,9 @@ describe('useFindCaseUserActions', () => {
     it('aggregates the uids from an assignment add user action', async () => {
       jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
         Promise.resolve({
-          ...findCaseUserActionsResponse,
+          page: 1,
+          perPage: 1000,
+          total: 20,
           userActions: [...caseUserActions, getUserAction('assignees', Actions.add)],
         })
       );
@@ -167,7 +173,9 @@ describe('useFindCaseUserActions', () => {
     it('ignores duplicate uids', async () => {
       jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
         Promise.resolve({
-          ...findCaseUserActionsResponse,
+          page: 1,
+          perPage: 1000,
+          total: 20,
           userActions: [
             ...caseUserActions,
             getUserAction('assignees', Actions.add),
@@ -196,7 +204,9 @@ describe('useFindCaseUserActions', () => {
     it('aggregates the uids from an assignment delete user action', async () => {
       jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
         Promise.resolve({
-          ...findCaseUserActionsResponse,
+          page: 1,
+          perPage: 1000,
+          total: 20,
           userActions: [...caseUserActions, getUserAction('assignees', Actions.delete)],
         })
       );
