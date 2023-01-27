@@ -41,10 +41,10 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
       defaultValue: 'json',
     },
     value: {
-      controle: {
+      control: {
         type: 'text',
       },
-      defaultValue: 'initial code editor value',
+      defaultValue: '',
     },
     'aria-label': {
       control: {

@@ -31,7 +31,9 @@ const mock = new CodeEditorStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
 export const Basic = (params: CodeEditorStorybookParams) => {
-  return <CodeEditor {...params} languageId="plainText" placeholder="myplaceholder" />;
+  return (
+    <CodeEditor {...params} languageId="plainText" onChange={action('on change')} value="Hello!" />
+  );
 };
 
 Basic.argTypes = argTypes;

@@ -432,17 +432,18 @@ export const CodeEditor: React.FC<Props> = ({
     };
   }, [placeholder, value]);
 
-  useEffect(() => {
-    // register theme for dark or light
-    monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
-  }, [useDarkTheme, transparentBackground]);
-
   const { CopyButton } = useCopy({ isCopyable, value });
 
   const controlStyles = useMemo(() => {
     const copyableStyles = [defaultStyles, codeEditorControlsStyles(euiTheme.size, euiTheme.base)];
     return allowFullScreen || isCopyable ? copyableStyles && defaultStyles : defaultStyles;
   }, [allowFullScreen, isCopyable, defaultStyles, euiTheme]);
+
+  const theme = useMemo(() => {
+    // register theme for dark or light
+    monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
+    return options?.theme ?? (transparentBackground ? 'euiColorsTransparent' : 'euiColors');
+  }, [useDarkTheme, transparentBackground, options]);
 
   return (
     <div css={codeEditorStyles()} onKeyDown={onKeyDown}>
@@ -462,9 +463,7 @@ export const CodeEditor: React.FC<Props> = ({
           </div>
         ) : null}
         <MonacoEditor
-          theme={useMemo(() => {
-            return options?.theme ?? (transparentBackground ? 'euiColorsTransparent' : 'euiColors');
-          }, [options?.theme, transparentBackground])}
+          theme={theme}
           language={languageId}
           value={value}
           onChange={onChange}
