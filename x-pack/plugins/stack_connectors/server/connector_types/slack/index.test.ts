@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import axios from 'axios';
 import { Logger } from '@kbn/core/server';
 import { Services } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
@@ -13,9 +14,25 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SlackConnectorType } from '../../../common/slack/types';
+import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
+import type {
+  ExecutorPostMessageParams,
+  PostMessageParams,
+  SlackConnectorType,
+} from '../../../common/slack/types';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
+
+jest.mock('axios');
+jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+  return {
+    ...originalUtils,
+    request: jest.fn(),
+  };
+});
+
+const requestMock = utils.request as jest.Mock;
 
 jest.mock('@slack/webhook');
 const { IncomingWebhook } = jest.requireMock('@slack/webhook');
@@ -191,256 +208,390 @@ describe('validateConnectorTypeSecrets', () => {
 describe('execute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    axios.create = jest.fn().mockImplementation(() => axios);
     connectorType = getConnectorType();
   });
-
-  test('should execute with success', async () => {
-    jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
-      getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
-    }));
-    configurationUtilities = actionsConfigMock.create();
-    IncomingWebhook.mockImplementation(() => ({
-      send: () => ({
-        text: 'ok',
-      }),
-    }));
-    const response = await connectorType.executor({
-      actionId: 'some-id',
-      services,
-      config: {},
-      secrets: { webhookUrl: 'http://example.com' },
-      params: { message: 'this invocation should succeed' },
-      configurationUtilities,
-      logger: mockedLogger,
-    });
-
-    expect(response).toEqual({
-      actionId: 'some-id',
-      data: { text: 'ok' },
-      status: 'ok',
-    });
-  });
-
-  test('should return an error if test in response is not ok', async () => {
-    jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
-      getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
-    }));
-    configurationUtilities = actionsConfigMock.create();
-    IncomingWebhook.mockImplementation(() => ({
-      send: () => ({
-        text: 'not ok',
-      }),
-    }));
-    const response = await connectorType.executor({
-      actionId: 'some-id',
-      services,
-      config: {},
-      secrets: { webhookUrl: 'http://example.com' },
-      params: { message: 'this invocation should succeed' },
-      configurationUtilities,
-      logger: mockedLogger,
-    });
-
-    expect(response).toEqual({
-      actionId: 'some-id',
-      message: 'error posting slack message',
-      serviceMessage: 'not ok',
-      status: 'error',
-    });
-  });
-
-  test('should return a null response from slack', async () => {
-    jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
-      getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
-    }));
-    configurationUtilities = actionsConfigMock.create();
-    IncomingWebhook.mockImplementation(() => ({
-      send: jest.fn(),
-    }));
-    const response = await connectorType.executor({
-      actionId: 'some-id',
-      services,
-      config: {},
-      secrets: { webhookUrl: 'http://example.com' },
-      params: { message: 'this invocation should succeed' },
-      configurationUtilities,
-      logger: mockedLogger,
-    });
-
-    expect(response).toEqual({
-      actionId: 'some-id',
-      message: 'unexpected null response from slack',
-      status: 'error',
-    });
-  });
-
-  test('should return that sending a message fails', async () => {
-    jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
-      getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
-    }));
-    configurationUtilities = actionsConfigMock.create();
-    IncomingWebhook.mockImplementation(() => ({
-      send: () => {
-        throw new Error('sending a message fails');
-      },
-    }));
-
-    expect(
-      await connectorType.executor({
+  describe('Webhook', () => {
+    test('should execute with success', async () => {
+      jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
+        getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
+      }));
+      configurationUtilities = actionsConfigMock.create();
+      IncomingWebhook.mockImplementation(() => ({
+        send: () => ({
+          text: 'ok',
+        }),
+      }));
+      const response = await connectorType.executor({
         actionId: 'some-id',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },
-        params: { message: 'failure: this invocation should fail' },
+        params: { message: 'this invocation should succeed' },
         configurationUtilities,
         logger: mockedLogger,
-      })
-    ).toEqual({
-      actionId: 'some-id',
-      message: 'error posting slack message',
-      serviceMessage: 'sending a message fails',
-      status: 'error',
+      });
+
+      expect(response).toEqual({
+        actionId: 'some-id',
+        data: { text: 'ok' },
+        status: 'ok',
+      });
+    });
+
+    test('should return an error if test in response is not ok', async () => {
+      jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
+        getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
+      }));
+      configurationUtilities = actionsConfigMock.create();
+      IncomingWebhook.mockImplementation(() => ({
+        send: () => ({
+          text: 'not ok',
+        }),
+      }));
+      const response = await connectorType.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { webhookUrl: 'http://example.com' },
+        params: { message: 'this invocation should succeed' },
+        configurationUtilities,
+        logger: mockedLogger,
+      });
+
+      expect(response).toEqual({
+        actionId: 'some-id',
+        message: 'error posting slack message',
+        serviceMessage: 'not ok',
+        status: 'error',
+      });
+    });
+
+    test('should return a null response from slack', async () => {
+      jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
+        getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
+      }));
+      configurationUtilities = actionsConfigMock.create();
+      IncomingWebhook.mockImplementation(() => ({
+        send: jest.fn(),
+      }));
+      const response = await connectorType.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { webhookUrl: 'http://example.com' },
+        params: { message: 'this invocation should succeed' },
+        configurationUtilities,
+        logger: mockedLogger,
+      });
+
+      expect(response).toEqual({
+        actionId: 'some-id',
+        message: 'unexpected null response from slack',
+        status: 'error',
+      });
+    });
+
+    test('should return that sending a message fails', async () => {
+      jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
+        getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
+      }));
+      configurationUtilities = actionsConfigMock.create();
+      IncomingWebhook.mockImplementation(() => ({
+        send: () => {
+          throw new Error('sending a message fails');
+        },
+      }));
+
+      expect(
+        await connectorType.executor({
+          actionId: 'some-id',
+          services,
+          config: {},
+          secrets: { webhookUrl: 'http://example.com' },
+          params: { message: 'failure: this invocation should fail' },
+          configurationUtilities,
+          logger: mockedLogger,
+        })
+      ).toEqual({
+        actionId: 'some-id',
+        message: 'error posting slack message',
+        serviceMessage: 'sending a message fails',
+        status: 'error',
+      });
+    });
+
+    test('calls the mock executor with success proxy', async () => {
+      const configUtils = actionsConfigMock.create();
+      configUtils.getProxySettings.mockReturnValue({
+        proxyUrl: 'https://someproxyhost',
+        proxySSLSettings: {
+          verificationMode: 'none',
+        },
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
+      });
+      const connectorTypeProxy = getConnectorType();
+      await connectorTypeProxy.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { webhookUrl: 'http://example.com' },
+        params: { message: 'this invocation should succeed' },
+        configurationUtilities: configUtils,
+        logger: mockedLogger,
+      });
+      expect(mockedLogger.debug).toHaveBeenCalledWith(
+        'IncomingWebhook was called with proxyUrl https://someproxyhost'
+      );
+    });
+
+    test('ensure proxy bypass will bypass when expected', async () => {
+      mockedLogger.debug.mockReset();
+      const configUtils = actionsConfigMock.create();
+      configUtils.getProxySettings.mockReturnValue({
+        proxyUrl: 'https://someproxyhost',
+        proxySSLSettings: {
+          verificationMode: 'none',
+        },
+        proxyBypassHosts: new Set(['example.com']),
+        proxyOnlyHosts: undefined,
+      });
+      const connectorTypeProxy = getConnectorType();
+      await connectorTypeProxy.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { webhookUrl: 'http://example.com' },
+        params: { message: 'this invocation should succeed' },
+        configurationUtilities: configUtils,
+        logger: mockedLogger,
+      });
+      expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+        'IncomingWebhook was called with proxyUrl https://someproxyhost'
+      );
+    });
+
+    test('ensure proxy bypass will not bypass when expected', async () => {
+      mockedLogger.debug.mockReset();
+      const configUtils = actionsConfigMock.create();
+      configUtils.getProxySettings.mockReturnValue({
+        proxyUrl: 'https://someproxyhost',
+        proxySSLSettings: {
+          verificationMode: 'none',
+        },
+        proxyBypassHosts: new Set(['not-example.com']),
+        proxyOnlyHosts: undefined,
+      });
+      const connectorTypeProxy = getConnectorType();
+      await connectorTypeProxy.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { webhookUrl: 'http://example.com' },
+        params: { message: 'this invocation should succeed' },
+        configurationUtilities: configUtils,
+        logger: mockedLogger,
+      });
+      expect(mockedLogger.debug).toHaveBeenCalledWith(
+        'IncomingWebhook was called with proxyUrl https://someproxyhost'
+      );
+    });
+
+    test('ensure proxy only will proxy when expected', async () => {
+      mockedLogger.debug.mockReset();
+      const configUtils = actionsConfigMock.create();
+      configUtils.getProxySettings.mockReturnValue({
+        proxyUrl: 'https://someproxyhost',
+        proxySSLSettings: {
+          verificationMode: 'none',
+        },
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: new Set(['example.com']),
+      });
+      const connectorTypeProxy = getConnectorType();
+      await connectorTypeProxy.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { webhookUrl: 'http://example.com' },
+        params: { message: 'this invocation should succeed' },
+        configurationUtilities: configUtils,
+        logger: mockedLogger,
+      });
+      expect(mockedLogger.debug).toHaveBeenCalledWith(
+        'IncomingWebhook was called with proxyUrl https://someproxyhost'
+      );
+    });
+
+    test('ensure proxy only will not proxy when expected', async () => {
+      mockedLogger.debug.mockReset();
+      const configUtils = actionsConfigMock.create();
+      configUtils.getProxySettings.mockReturnValue({
+        proxyUrl: 'https://someproxyhost',
+        proxySSLSettings: {
+          verificationMode: 'none',
+        },
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: new Set(['not-example.com']),
+      });
+      const connectorTypeProxy = getConnectorType();
+      await connectorTypeProxy.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { webhookUrl: 'http://example.com' },
+        params: { message: 'this invocation should succeed' },
+        configurationUtilities: configUtils,
+        logger: mockedLogger,
+      });
+      expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+        'IncomingWebhook was called with proxyUrl https://someproxyhost'
+      );
+    });
+
+    test('renders parameter templates as expected', async () => {
+      expect(connectorType.renderParameterTemplates).toBeTruthy();
+      const paramsWithTemplates = {
+        message: '{{rogue}}',
+      };
+      const variables = {
+        rogue: '*bold*',
+      };
+      const params = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+      expect(params.message).toBe('`*bold*`');
     });
   });
 
-  test('calls the mock executor with success proxy', async () => {
-    const configUtils = actionsConfigMock.create();
-    configUtils.getProxySettings.mockReturnValue({
-      proxyUrl: 'https://someproxyhost',
-      proxySSLSettings: {
-        verificationMode: 'none',
-      },
-      proxyBypassHosts: undefined,
-      proxyOnlyHosts: undefined,
+  describe('Web API', () => {
+    test.only('renders parameter templates as expected', async () => {
+      expect(connectorType.renderParameterTemplates).toBeTruthy();
+      const paramsWithTemplates = {
+        subAction: 'postMessage' as const,
+        subActionParams: { text: 'some text', channels: ['general'] },
+      };
+      const variables = { rogue: '*bold*' };
+      const params = connectorType.renderParameterTemplates!(
+        paramsWithTemplates,
+        variables
+      ) as ExecutorPostMessageParams;
+      expect(params.subActionParams.text).toBe('some text');
     });
-    const connectorTypeProxy = getConnectorType();
-    await connectorTypeProxy.executor({
-      actionId: 'some-id',
-      services,
-      config: {},
-      secrets: { webhookUrl: 'http://example.com' },
-      params: { message: 'this invocation should succeed' },
-      configurationUtilities: configUtils,
-      logger: mockedLogger,
-    });
-    expect(mockedLogger.debug).toHaveBeenCalledWith(
-      'IncomingWebhook was called with proxyUrl https://someproxyhost'
-    );
-  });
 
-  test('ensure proxy bypass will bypass when expected', async () => {
-    mockedLogger.debug.mockReset();
-    const configUtils = actionsConfigMock.create();
-    configUtils.getProxySettings.mockReturnValue({
-      proxyUrl: 'https://someproxyhost',
-      proxySSLSettings: {
-        verificationMode: 'none',
-      },
-      proxyBypassHosts: new Set(['example.com']),
-      proxyOnlyHosts: undefined,
-    });
-    const connectorTypeProxy = getConnectorType();
-    await connectorTypeProxy.executor({
-      actionId: 'some-id',
-      services,
-      config: {},
-      secrets: { webhookUrl: 'http://example.com' },
-      params: { message: 'this invocation should succeed' },
-      configurationUtilities: configUtils,
-      logger: mockedLogger,
-    });
-    expect(mockedLogger.debug).not.toHaveBeenCalledWith(
-      'IncomingWebhook was called with proxyUrl https://someproxyhost'
-    );
-  });
+    test('should execute with success for post message', async () => {
+      requestMock.mockImplementation(() => ({
+        data: {
+          ok: true,
+          data: { text: 'some text' },
+          channel: 'general',
+        },
+      }));
+      const response = await connectorType.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { token: 'some token' },
+        params: {
+          subAction: 'postMessage',
+          subActionParams: { channels: ['general'], text: 'some text' },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+      });
 
-  test('ensure proxy bypass will not bypass when expected', async () => {
-    mockedLogger.debug.mockReset();
-    const configUtils = actionsConfigMock.create();
-    configUtils.getProxySettings.mockReturnValue({
-      proxyUrl: 'https://someproxyhost',
-      proxySSLSettings: {
-        verificationMode: 'none',
-      },
-      proxyBypassHosts: new Set(['not-example.com']),
-      proxyOnlyHosts: undefined,
-    });
-    const connectorTypeProxy = getConnectorType();
-    await connectorTypeProxy.executor({
-      actionId: 'some-id',
-      services,
-      config: {},
-      secrets: { webhookUrl: 'http://example.com' },
-      params: { message: 'this invocation should succeed' },
-      configurationUtilities: configUtils,
-      logger: mockedLogger,
-    });
-    expect(mockedLogger.debug).toHaveBeenCalledWith(
-      'IncomingWebhook was called with proxyUrl https://someproxyhost'
-    );
-  });
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        configurationUtilities,
+        logger: mockedLogger,
+        method: 'post',
+        url: 'chat.postMessage',
+        data: { channel: 'general', text: 'some text' },
+      });
 
-  test('ensure proxy only will proxy when expected', async () => {
-    mockedLogger.debug.mockReset();
-    const configUtils = actionsConfigMock.create();
-    configUtils.getProxySettings.mockReturnValue({
-      proxyUrl: 'https://someproxyhost',
-      proxySSLSettings: {
-        verificationMode: 'none',
-      },
-      proxyBypassHosts: undefined,
-      proxyOnlyHosts: new Set(['example.com']),
+      expect(response).toEqual({
+        actionId: 'some-id',
+        data: [
+          {
+            channel: 'general',
+            data: {
+              text: 'some text',
+            },
+            ok: true,
+          },
+        ],
+        status: 'ok',
+      });
     });
-    const connectorTypeProxy = getConnectorType();
-    await connectorTypeProxy.executor({
-      actionId: 'some-id',
-      services,
-      config: {},
-      secrets: { webhookUrl: 'http://example.com' },
-      params: { message: 'this invocation should succeed' },
-      configurationUtilities: configUtils,
-      logger: mockedLogger,
-    });
-    expect(mockedLogger.debug).toHaveBeenCalledWith(
-      'IncomingWebhook was called with proxyUrl https://someproxyhost'
-    );
-  });
 
-  test('ensure proxy only will not proxy when expected', async () => {
-    mockedLogger.debug.mockReset();
-    const configUtils = actionsConfigMock.create();
-    configUtils.getProxySettings.mockReturnValue({
-      proxyUrl: 'https://someproxyhost',
-      proxySSLSettings: {
-        verificationMode: 'none',
-      },
-      proxyBypassHosts: undefined,
-      proxyOnlyHosts: new Set(['not-example.com']),
-    });
-    const connectorTypeProxy = getConnectorType();
-    await connectorTypeProxy.executor({
-      actionId: 'some-id',
-      services,
-      config: {},
-      secrets: { webhookUrl: 'http://example.com' },
-      params: { message: 'this invocation should succeed' },
-      configurationUtilities: configUtils,
-      logger: mockedLogger,
-    });
-    expect(mockedLogger.debug).not.toHaveBeenCalledWith(
-      'IncomingWebhook was called with proxyUrl https://someproxyhost'
-    );
-  });
+    test('should execute with success for get channels', async () => {
+      requestMock.mockImplementation(() => ({
+        data: {
+          ok: true,
+          channels: [
+            {
+              id: 'id',
+              name: 'general',
+              is_channel: true,
+              is_archived: false,
+              is_private: true,
+            },
+          ],
+        },
+      }));
+      const response = await connectorType.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { token: 'some token' },
+        params: {
+          subAction: 'getChannels',
+          subActionParams: {},
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+      });
 
-  test('renders parameter templates as expected', async () => {
-    expect(connectorType.renderParameterTemplates).toBeTruthy();
-    const paramsWithTemplates = {
-      message: '{{rogue}}',
-    };
-    const variables = {
-      rogue: '*bold*',
-    };
-    const params = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
-    expect(params.message).toBe('`*bold*`');
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        configurationUtilities,
+        logger: mockedLogger,
+        method: 'get',
+        url: 'conversations.list?types=public_channel,private_channel',
+      });
+
+      expect(response).toEqual({
+        actionId: 'some-id',
+        data: {
+          channels: [
+            {
+              id: 'id',
+              is_archived: false,
+              is_channel: true,
+              is_private: true,
+              name: 'general',
+            },
+          ],
+          ok: true,
+        },
+        status: 'ok',
+      });
+    });
+
+    test('should fail if subAction is not known', async () => {
+      await expect(
+        connectorType.executor({
+          actionId: 'some-id',
+          services,
+          config: {},
+          secrets: { token: 'some token' },
+          params: {
+            subAction: 'weirdAcrion' as 'postMessage',
+            subActionParams: {} as PostMessageParams,
+          },
+          configurationUtilities,
+          logger: mockedLogger,
+        })
+      ).rejects.toThrowError('[Action][ExternalService] Unsupported subAction type weirdAcrion.');
+    });
   });
 });

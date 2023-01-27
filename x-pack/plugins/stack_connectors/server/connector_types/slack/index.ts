@@ -56,7 +56,7 @@ export function getConnectorType(): SlackConnectorType {
         schema: SlackParamsSchema,
       },
     },
-    // renderParameterTemplates,
+    renderParameterTemplates,
     executor: (execOptions: SlackExecutorOptions) => {
       const res =
         'webhookUrl' in execOptions.secrets
@@ -74,7 +74,14 @@ const renderParameterTemplates = (
   if ('message' in params)
     return { message: renderMustacheString(params.message, variables, 'slack') };
   if (params.subAction === 'postMessage')
-    return { message: renderMustacheString(params.subActionParams.text, variables, 'slack') };
+    return {
+      subAction: params.subAction,
+      subActionParams: {
+        ...params.subActionParams,
+        text: renderMustacheString(params.subActionParams.text, variables, 'slack'),
+      },
+    };
+  return params;
 };
 
 const slackWebhookExecutor = async (
