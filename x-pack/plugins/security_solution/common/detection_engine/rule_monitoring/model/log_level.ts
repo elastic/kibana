@@ -6,7 +6,6 @@
  */
 
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
-import type { RuleLastRunOutcomes } from '@kbn/alerting-plugin/common';
 import { enumFromString } from '../../../utils/enum_from_string';
 import { assertUnreachable } from '../../../utility_types';
 import { RuleExecutionStatus } from './execution_status';
