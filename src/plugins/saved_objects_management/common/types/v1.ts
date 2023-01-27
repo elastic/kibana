@@ -101,14 +101,14 @@ export type BulkGetHTTPBodyV1 = Array<{
   type: string;
 }>;
 
-export type BulkGetHTTPResponseV1 = SavedObjectWithMetadataV1[];
+export type BulkGetResponseHTTPV1 = SavedObjectWithMetadataV1[];
 
-export type BulkDeleteHTTPBodyV1 = Array<{
+export type BulkDeleteBodyHTTPV1 = Array<{
   type: string;
   id: string;
 }>;
 
-export type BulkDeleteHTTPResponseV1 = Array<{
+export type BulkDeleteResponseHTTPV1 = Array<{
   /** The ID of the saved object */
   id: string;
   /** The type of the saved object */

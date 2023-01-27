@@ -7,13 +7,13 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { BulkDeleteHTTPBodyV1, BulkDeleteHTTPResponseV1 } from '../../common';
+import { BulkDeleteBodyHTTPV1, BulkDeleteResponseHTTPV1 } from '../../common';
 
 export function bulkDeleteObjects(
   http: HttpStart,
-  objects: BulkDeleteHTTPBodyV1
-): Promise<BulkDeleteHTTPResponseV1> {
-  return http.post<BulkDeleteHTTPResponseV1>(
+  objects: BulkDeleteBodyHTTPV1
+): Promise<BulkDeleteResponseHTTPV1> {
+  return http.post<BulkDeleteResponseHTTPV1>(
     '/internal/kibana/management/saved_objects/_bulk_delete',
     {
       body: JSON.stringify(objects),
