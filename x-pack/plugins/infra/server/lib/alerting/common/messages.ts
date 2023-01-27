@@ -275,7 +275,8 @@ export const tagsActionVariableDescription = i18n.translate(
 export const originalAlertStateActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.originalAlertStateActionVariableDescription',
   {
-    defaultMessage: 'The original alert state. This is only available in the recovery context',
+    defaultMessage:
+      'The state of the alert before it recovered. This is only available in the recovery context',
   }
 );
 
@@ -283,6 +284,6 @@ export const originalAlertStateWasActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.originalAlertStateWasWARNINGActionVariableDescription',
   {
     defaultMessage:
-      'Boolean value for template conditions. This is only available in the recovery context',
+      'Boolean value of the state of the alert before it recovered. This can be used for template conditions. This is only available in the recovery context',
   }
 );
