@@ -135,6 +135,21 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       }),
     });
   };
+  function resourceFindingsPageTitleTranslation(resourceName: string) {
+    return i18n.translate('xpack.csp.findings.resourceFindings.resourceFindingsPageTitle', {
+      defaultMessage: '{resourceName} - Findings',
+      values: {
+        resourceName,
+      },
+    });
+  }
+
+  const defaultPageTitle = i18n.translate(
+    'xpack.csp.findings.resourceFindings.resourceFindingsDefaultPageTitle',
+    {
+      defaultMessage: 'Findings',
+    }
+  );
 
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
@@ -149,15 +164,13 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         <BackToResourcesButton />
         <PageTitleText
           title={
-            <CloudPosturePageTitle
-              title={i18n.translate(
-                'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
-                {
-                  defaultMessage: '{resourceName} - Findings',
-                  values: { resourceName: resourceFindings.data?.resourceName },
-                }
-              )}
-            />
+            resourceFindings.data?.resourceName ? (
+              <CloudPosturePageTitle
+                title={resourceFindingsPageTitleTranslation(resourceFindings.data.resourceName)}
+              />
+            ) : (
+              <CloudPosturePageTitle title={defaultPageTitle} />
+            )
           }
         />
       </PageTitle>
