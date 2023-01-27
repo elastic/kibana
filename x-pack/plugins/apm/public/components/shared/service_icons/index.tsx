@@ -33,18 +33,22 @@ const cloudIcons: Record<string, string> = {
 };
 
 function getServerlessTitle(serverlessType?: ServerlessType): string {
-  if (serverlessType === ServerlessType.AWS_LAMBDA) {
-    return i18n.translate('xpack.apm.serviceIcons.aws_lambda', {
-      defaultMessage: 'AWS Lambda',
-    });
-  } else if (serverlessType === ServerlessType.AZURE_FUNCTIONS) {
-    return i18n.translate('xpack.apm.serviceIcons.azure_functions', {
-      defaultMessage: 'Azure Functions',
-    });
-  } else {
-    return i18n.translate('xpack.apm.serviceIcons.serverless', {
-      defaultMessage: 'Serverless',
-    });
+  switch (serverlessType) {
+    case ServerlessType.AWS_LAMBDA: {
+      return i18n.translate('xpack.apm.serviceIcons.aws_lambda', {
+        defaultMessage: 'AWS Lambda',
+      });
+    }
+    case ServerlessType.AZURE_FUNCTIONS: {
+      return i18n.translate('xpack.apm.serviceIcons.azure_functions', {
+        defaultMessage: 'Azure Functions',
+      });
+    }
+    default: {
+      return i18n.translate('xpack.apm.serviceIcons.serverless', {
+        defaultMessage: 'Serverless',
+      });
+    }
   }
 }
 
@@ -157,8 +161,7 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
     {
       key: 'serverless',
       icon: {
-        type:
-          getServerlessIcon(icons?.serverlessType, theme.darkMode) || 'node',
+        type: getServerlessIcon(icons?.serverlessType) || 'node',
       },
       isVisible: !!icons?.serverlessType,
       title: getServerlessTitle(icons?.serverlessType),

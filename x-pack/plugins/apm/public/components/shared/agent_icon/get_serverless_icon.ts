@@ -17,20 +17,9 @@ const serverlessIcons: ServerlessIcons = {
   'azure.functions': azureFunctionsIcon,
 };
 
-const darkServerlessIcons: ServerlessIcons = {
-  ...serverlessIcons,
-};
-
-export function getServerlessIcon(
-  serverlessType: ServerlessType | undefined,
-  isDarkMode: boolean
-) {
+export function getServerlessIcon(serverlessType?: ServerlessType) {
   if (!serverlessType) {
     return defaultIcon;
   }
-  return (
-    (isDarkMode
-      ? darkServerlessIcons[serverlessType]
-      : serverlessIcons[serverlessType]) ?? defaultIcon
-  );
+  return serverlessIcons[serverlessType] ?? defaultIcon;
 }
