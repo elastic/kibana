@@ -451,7 +451,7 @@ export class Embeddable
       this.activeVisualization.fromPersistableState?.(
         this.savedVis?.state.visualization,
         this.savedVis?.references
-      ) ?? this.activeVisualization.initialize(() => '', this.savedVis?.state.visualization)
+      ) || this.activeVisualization.initialize(() => '', this.savedVis?.state.visualization)
     );
   }
 
