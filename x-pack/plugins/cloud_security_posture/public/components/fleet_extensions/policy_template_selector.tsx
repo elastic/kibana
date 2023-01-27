@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
