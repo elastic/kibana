@@ -17,13 +17,22 @@ export const convertToMetricExplorerCustomMetric = (
     return { ...omit(metric, 'aggType'), aggregation: metric.aggType };
   });
 
+const isMetricExpressionCustomMetric = (
+  subject: any[]
+): subject is MetricExpressionCustomMetric[] => {
+  return subject.every((m) => m.aggType != null);
+};
+
 export const createCustomMetricsAggregations = (
   id: string,
-  customMetrics: MetricsExplorerCustomMetric[],
+  customMetrics: MetricsExplorerCustomMetric[] | MetricExpressionCustomMetric[],
   equation?: string
 ) => {
+  const metrics = isMetricExpressionCustomMetric(customMetrics)
+    ? convertToMetricExplorerCustomMetric(customMetrics)
+    : customMetrics;
   const bucketsPath: { [id: string]: string } = {};
-  const metricAggregations = customMetrics.reduce((acc, metric) => {
+  const metricAggregations = metrics.reduce((acc, metric) => {
     const key = `${id}_${metric.name}`;
     if (metric.aggregation === 'count') {
       bucketsPath[metric.name] = `${key}>_count`;

@@ -7,10 +7,7 @@
 
 import moment from 'moment';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
-import {
-  convertToMetricExplorerCustomMetric,
-  createCustomMetricsAggregations,
-} from '../../../create_custom_metrics_aggregations';
+import { createCustomMetricsAggregations } from '../../../create_custom_metrics_aggregations';
 import {
   hasAdditionalContext,
   KUBERNETES_POD_UID,
@@ -109,7 +106,7 @@ export const getElasticsearchMetricQuery = (
       : aggType === Aggregators.CUSTOM
       ? createCustomMetricsAggregations(
           'aggregatedValue',
-          convertToMetricExplorerCustomMetric(metricParams.customMetrics),
+          metricParams.customMetrics,
           metricParams.equation
         )
       : {
