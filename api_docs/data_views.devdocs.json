@@ -321,14 +321,6 @@
               },
               {
                 "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
@@ -8533,14 +8525,6 @@
               },
               {
                 "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
@@ -15833,14 +15817,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
                 "plugin": "unifiedFieldList",
@@ -26123,6 +26099,18 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
