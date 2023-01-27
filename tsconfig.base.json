@@ -372,6 +372,8 @@
       "@kbn/core-logging-browser-mocks/*": ["packages/core/logging/core-logging-browser-mocks/*"],
       "@kbn/core-logging-common-internal": ["packages/core/logging/core-logging-common-internal"],
       "@kbn/core-logging-common-internal/*": ["packages/core/logging/core-logging-common-internal/*"],
+      "@kbn/core-logging-integration-tests": ["packages/core/logging/core-logging-integration-tests"],
+      "@kbn/core-logging-integration-tests/*": ["packages/core/logging/core-logging-integration-tests/*"],
       "@kbn/core-logging-server": ["packages/core/logging/core-logging-server"],
       "@kbn/core-logging-server/*": ["packages/core/logging/core-logging-server/*"],
       "@kbn/core-logging-server-internal": ["packages/core/logging/core-logging-server-internal"],
