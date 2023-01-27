@@ -229,7 +229,17 @@ const startFleetServerWithDocker = async ({
       `docker.elastic.co/beats/elastic-agent:${agentVersion}`,
     ];
 
-    // TODO:PT check if container name is already running and kill it
+    await execa('docker', ['kill', containerName])
+      .then(() => {
+        log.verbose(
+          `Killed an existing container with name [${containerName}]. New one will be started.`
+        );
+      })
+      .catch((error) => {
+        log.verbose(`Attempt to kill currently running fleet-server container (if any) with name [${containerName}] was unsuccessful:
+  ${error}
+(This is ok if one was not running already)`);
+      });
 
     log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 
