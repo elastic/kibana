@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { createApiKey } from './create_api_key';
 
 describe('createApiKey lib function', () => {
-  const security = securityMock.createStart();
-  const request = {} as KibanaRequest;
-
-  const indexName = 'my-index';
-  const keyName = '{indexName}-key';
+  const engineName = 'my-index';
+  const keyName = 'Engine read only key';
 
   const createResponse = {
     api_key: 'ui2lp2axTNmsyakw9tvNnw',
@@ -24,26 +20,32 @@ describe('createApiKey lib function', () => {
     name: keyName,
   };
 
-  security.authc.apiKeys.create = jest.fn().mockReturnValue(createResponse);
+  const mockClient = {
+    asCurrentUser: {
+      security: {
+        createApiKey: jest.fn().mockReturnValue(createResponse),
+      },
+    },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should create an api key via the security plugin', async () => {
-    await expect(createApiKey(request, security, indexName, keyName)).resolves.toEqual(
-      createResponse
-    );
+    await expect(
+      createApiKey(mockClient as unknown as IScopedClusterClient, engineName, keyName)
+    ).resolves.toEqual(createResponse);
 
-    expect(security.authc.apiKeys.create).toHaveBeenCalledWith(request, {
-      name: keyName,
+    expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
+      name: 'Engine read only key',
       role_descriptors: {
-        [`${indexName}-key-role`]: {
-          cluster: [],
-          index: [
+        'my-index-key-role': {
+          applications: [
             {
-              names: [indexName],
-              privileges: ['all'],
+              application: 'enterprise-search',
+              privileges: ['engine:read'],
+              resources: ['engine:my-index'],
             },
           ],
         },

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+
 import { createApiKey } from '../../lib/engines/create_api_key';
 
 import { RouteDependencies } from '../../plugin';
