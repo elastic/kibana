@@ -6,6 +6,7 @@
  */
 
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButton,
@@ -131,7 +132,10 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           </EuiText>
         ) : (
           <EuiText color="subdued">
-            <EuiIcon type="alert" color="red" /> &nbsp;
+            <EuiToolTip content={`Diagnostics status: ${currentItem?.status}`}>
+              <EuiIcon type="alert" color="red" />
+            </EuiToolTip>
+            &nbsp;
             {currentItem?.name}
           </EuiText>
         );

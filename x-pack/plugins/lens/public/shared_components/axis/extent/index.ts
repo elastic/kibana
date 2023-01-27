@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { BucketAxisBoundsControl } from './axis_extent_settings';
+export { AxisBoundsControl } from './axis_extent_settings';
 export {
   validateAxisDomain,
   validateZeroInclusivityExtent,
