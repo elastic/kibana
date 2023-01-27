@@ -91,7 +91,7 @@ export const getElasticsearchMetricQuery = (
   if (aggType === Aggregators.COUNT && metric) {
     throw new Error('Cannot aggregate document count with a metric');
   }
-  if (['count', 'custom'].includes(aggType) !== true && !metric) {
+  if (!['count', 'custom'].includes(aggType) && !metric) {
     throw new Error('Can only aggregate without a metric if using the document count aggregator');
   }
 
