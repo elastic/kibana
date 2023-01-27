@@ -24,7 +24,7 @@ export const AlertSummaryWidget = ({
   chartThemes,
 }: AlertSummaryWidgetProps) => {
   const {
-    alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount, recoveredAlerts },
+    alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
     isLoading,
     error,
   } = useLoadAlertSummary({
@@ -41,7 +41,6 @@ export const AlertSummaryWidget = ({
       activeAlertCount={activeAlertCount}
       activeAlerts={activeAlerts}
       recoveredAlertCount={recoveredAlertCount}
-      recoveredAlerts={recoveredAlerts}
       dateFormat={timeRange.dateFormat}
       chartThemes={chartThemes}
     />
@@ -51,7 +50,6 @@ export const AlertSummaryWidget = ({
       activeAlerts={activeAlerts}
       onClick={onClick}
       recoveredAlertCount={recoveredAlertCount}
-      recoveredAlerts={recoveredAlerts}
       timeRangeTitle={timeRange.title}
       chartThemes={chartThemes}
     />
