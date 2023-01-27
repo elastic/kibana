@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elast
 import type { Filter } from '@kbn/es-query';
 import { isArray } from 'lodash/fp';
 import React, { useMemo, useState } from 'react';
+import { defaultUnit } from '../../toolbar/unit';
 import type { BadgeMetric, CustomMetric } from '../accordion_panel';
 import { GroupPanel } from '../accordion_panel';
 import { GroupStats } from '../accordion_panel/group_stats';
@@ -58,7 +59,7 @@ const GroupingContainerComponent = ({
   renderChildComponent,
   selectedGroup,
   takeActionItems,
-  unit,
+  unit = defaultUnit,
 }: GroupingContainerProps) => {
   const [trigger, setTrigger] = useState<
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
@@ -66,18 +67,17 @@ const GroupingContainerComponent = ({
 
   const groupsNumber = data?.groupsNumber?.value ?? 0;
   const unitCountText = useMemo(() => {
-    const countBuckets = data?.alertsCount?.buckets;
-    return `${(countBuckets && countBuckets.length > 0
-      ? countBuckets[0].doc_count ?? 0
-      : 0
-    ).toLocaleString()} ${
-      unit && unit(countBuckets && countBuckets.length > 0 ? countBuckets[0].doc_count ?? 0 : 0)
-    }`;
+    const count =
+      data?.alertsCount?.buckets && data?.alertsCount?.buckets.length > 0
+        ? data?.alertsCount?.buckets[0].doc_count ?? 0
+        : 0;
+    return `${count.toLocaleString()} ${unit && unit(count)}`;
   }, [data?.alertsCount?.buckets, unit]);
 
-  const unitGroupsCountText = useMemo(() => {
-    return `${groupsNumber.toLocaleString()} ${GROUPS_UNIT(groupsNumber)}`;
-  }, [groupsNumber]);
+  const unitGroupsCountText = useMemo(
+    () => `${groupsNumber.toLocaleString()} ${GROUPS_UNIT(groupsNumber)}`,
+    [groupsNumber]
+  );
 
   const groupPanels = useMemo(
     () =>
@@ -140,10 +140,10 @@ const GroupingContainerComponent = ({
           />
         );
         return (
-          <>
+          <span key={groupKey}>
             {panel}
             <EuiSpacer size="s" />
-          </>
+          </span>
         );
       }),
     [
