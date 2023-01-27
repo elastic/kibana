@@ -7,7 +7,7 @@
 
 import type SuperTest from 'supertest';
 import { CASES_INTERNAL_URL } from '@kbn/cases-plugin/common/constants';
-import { BulkGetCommentsResponse } from '@kbn/cases-plugin/common/api';
+import { BulkGetAttachmentsResponse } from '@kbn/cases-plugin/common/api';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { getSpaceUrlPrefix } from './utils';
@@ -24,7 +24,7 @@ export const bulkGetAttachments = async ({
   caseId: string;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<BulkGetCommentsResponse> => {
+}): Promise<BulkGetAttachmentsResponse> => {
   const { body: comments } = await supertest
     .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_get`)
     .send({ ids: attachmentIds })

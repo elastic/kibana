@@ -4,50 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
-import { partition } from 'lodash';
-import { CASE_SAVED_OBJECT, MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import type {
   AlertResponse,
   AllCommentsResponse,
   AttributesTypeAlerts,
-  BulkGetCommentsResponse,
-  CommentAttributes,
   CommentResponse,
   CommentsResponse,
 } from '../../../common/api';
-import {
-  excess,
-  throwErrors,
-  BulkGetCommentsResponseRt,
-  AllCommentsResponseRt,
-  CommentResponseRt,
-  CommentsResponseRt,
-  BulkGetCommentsRequestRt,
-} from '../../../common/api';
+import { AllCommentsResponseRt, CommentResponseRt, CommentsResponseRt } from '../../../common/api';
 import {
   defaultSortField,
   transformComments,
   flattenCommentSavedObject,
   flattenCommentSavedObjects,
   getIDsAndIndicesAsArrays,
-  asArray,
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import type { CasesClientArgs, SOWithErrors } from '../types';
+import type { CasesClientArgs } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';
 import { Operations } from '../../authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import type { CasesClient } from '../client';
-import type { BulkGetArgs, FindArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
-import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/attachments/types';
+import type { FindArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
@@ -260,154 +241,3 @@ export async function getAll(
     });
   }
 }
-
-type AttachmentSavedObjectWithErrors = SOWithErrors<CommentAttributes>;
-
-type AttachmentSavedObject = SavedObject<CommentAttributes>;
-
-/**
- * Retrieves multiple attachments by id.
- */
-export async function bulkGet(
-  { attachmentIDs, caseID }: BulkGetArgs,
-  clientArgs: CasesClientArgs
-): Promise<BulkGetCommentsResponse> {
-  const {
-    services: { attachmentService },
-    logger,
-    authorization,
-  } = clientArgs;
-
-  try {
-    const request = pipe(
-      excess(BulkGetCommentsRequestRt).decode({ ids: attachmentIDs }),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
-
-    const attachmentIdsArray = asArray(request.ids);
-
-    throwErrorIfIdsExceedTheLimit(attachmentIdsArray);
-
-    const attachments = await attachmentService.getter.bulkGet(attachmentIdsArray);
-
-    const { validAttachments, attachmentsWithErrors, invalidAssociationAttachments } =
-      partitionAttachments(caseID, attachments);
-
-    const { authorized: authorizedAttachments, unauthorized: unauthorizedAttachments } =
-      await authorization.getAndEnsureAuthorizedEntities({
-        savedObjects: validAttachments,
-        operation: Operations.bulkGetAttachments,
-      });
-
-    const errors = constructErrors({
-      associationErrors: invalidAssociationAttachments,
-      unauthorizedAttachments,
-      soBulkGetErrors: attachmentsWithErrors,
-      caseId: caseID,
-    });
-
-    return BulkGetCommentsResponseRt.encode({
-      attachments: flattenCommentSavedObjects(authorizedAttachments),
-      errors,
-    });
-  } catch (error) {
-    throw createCaseError({
-      message: `Failed to bulk get attachments for case id: ${caseID}: ${error}`,
-      error,
-      logger,
-    });
-  }
-}
-
-const throwErrorIfIdsExceedTheLimit = (ids: string[]) => {
-  if (ids.length > MAX_BULK_GET_ATTACHMENTS) {
-    throw Boom.badRequest(
-      `Maximum request limit of ${MAX_BULK_GET_ATTACHMENTS} attachments reached`
-    );
-  }
-};
-
-interface PartitionedAttachments {
-  validAttachments: AttachmentSavedObject[];
-  attachmentsWithErrors: AttachmentSavedObjectWithErrors;
-  invalidAssociationAttachments: AttachmentSavedObject[];
-}
-
-const partitionAttachments = (
-  caseId: string,
-  attachments: BulkOptionalAttributes<CommentAttributes>
-): PartitionedAttachments => {
-  const [attachmentsWithoutErrors, errors] = partitionBySOError(attachments.saved_objects);
-  const [caseAttachments, invalidAssociationAttachments] = partitionByCaseAssociation(
-    caseId,
-    attachmentsWithoutErrors
-  );
-
-  return {
-    validAttachments: caseAttachments,
-    attachmentsWithErrors: errors,
-    invalidAssociationAttachments,
-  };
-};
-
-const partitionBySOError = (attachments: Array<OptionalAttributes<CommentAttributes>>) =>
-  partition(
-    attachments,
-    (attachment) => attachment.error == null && attachment.attributes != null
-  ) as [AttachmentSavedObject[], AttachmentSavedObjectWithErrors];
-
-const partitionByCaseAssociation = (caseId: string, attachments: AttachmentSavedObject[]) =>
-  partition(attachments, (attachment) => {
-    const ref = getCaseReference(attachment.references);
-
-    return caseId === ref?.id;
-  });
-
-const getCaseReference = (references: SavedObjectReference[]): SavedObjectReference | undefined => {
-  return references.find(
-    (ref) => ref.name === `associated-${CASE_SAVED_OBJECT}` && ref.type === CASE_SAVED_OBJECT
-  );
-};
-
-const constructErrors = ({
-  caseId,
-  soBulkGetErrors,
-  associationErrors,
-  unauthorizedAttachments,
-}: {
-  caseId: string;
-  soBulkGetErrors: AttachmentSavedObjectWithErrors;
-  associationErrors: AttachmentSavedObject[];
-  unauthorizedAttachments: AttachmentSavedObject[];
-}): BulkGetCommentsResponse['errors'] => {
-  const errors: BulkGetCommentsResponse['errors'] = [];
-
-  for (const soError of soBulkGetErrors) {
-    errors.push({
-      error: soError.error.error,
-      message: soError.error.message,
-      status: soError.error.statusCode,
-      attachmentId: soError.id,
-    });
-  }
-
-  for (const attachment of associationErrors) {
-    errors.push({
-      error: 'Bad Request',
-      message: `Attachment is not attached to case id=${caseId}`,
-      status: 400,
-      attachmentId: attachment.id,
-    });
-  }
-
-  for (const unauthorizedAttachment of unauthorizedAttachments) {
-    errors.push({
-      error: 'Forbidden',
-      message: `Unauthorized to access attachment with owner: "${unauthorizedAttachment.attributes.owner}"`,
-      status: 403,
-      attachmentId: unauthorizedAttachment.id,
-    });
-  }
-
-  return errors;
-};

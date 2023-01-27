@@ -8,7 +8,7 @@
 import type {
   AlertResponse,
   AllCommentsResponse,
-  BulkGetCommentsResponse,
+  BulkGetAttachmentsResponse,
   CaseResponse,
   CommentResponse,
   CommentsResponse,
@@ -32,7 +32,8 @@ import type {
 } from './types';
 import { bulkCreate } from './bulk_create';
 import { deleteAll, deleteComment } from './delete';
-import { bulkGet, find, get, getAll, getAllAlertsAttachToCase } from './get';
+import { find, get, getAll, getAllAlertsAttachToCase } from './get';
+import { bulkGet } from './bulk_get';
 import { update } from './update';
 
 /**
@@ -44,7 +45,7 @@ export interface AttachmentsSubClient {
    */
   add(params: AddArgs): Promise<CaseResponse>;
   bulkCreate(params: BulkCreateArgs): Promise<CaseResponse>;
-  bulkGet(params: BulkGetArgs): Promise<BulkGetCommentsResponse>;
+  bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponse>;
   /**
    * Deletes all attachments associated with a single case.
    */
