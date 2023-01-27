@@ -47,6 +47,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     onPageChange,
     onSortChange,
     sort: sortingFields,
+    getInspectQuery,
   } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
@@ -114,6 +115,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       browserFields,
       controls: props.controls,
       setIsBulkActionsLoading,
+      getInspectQuery,
     });
   }, [
     bulkActionsState,
@@ -128,6 +130,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     browserFields,
     props.controls,
     setIsBulkActionsLoading,
+    getInspectQuery,
   ])();
 
   const leadingControlColumns = useMemo(() => {

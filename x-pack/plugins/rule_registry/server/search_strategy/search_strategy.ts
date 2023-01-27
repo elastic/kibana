@@ -159,7 +159,7 @@ export const ruleRegistrySearchStrategyProvider = (
             });
           }
 
-          response.inspect = { dsl: [JSON.stringify(params, null, 2)] };
+          response.inspect = { dsl: [JSON.stringify(params)] };
 
           return response;
         }),

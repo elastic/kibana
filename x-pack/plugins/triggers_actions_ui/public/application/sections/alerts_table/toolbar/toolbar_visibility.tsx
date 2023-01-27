@@ -13,24 +13,30 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 import React, { lazy, Suspense } from 'react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsCount } from './components/alerts_count/alerts_count';
-import { BulkActionsConfig, RowSelection } from '../../../../types';
+import { BulkActionsConfig, GetInspectQuery, RowSelection } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
+import { InspectButton } from './components/inspect';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 
 const rightControl = ({
   controls,
   updatedAt,
+  getInspectQuery,
 }: {
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   updatedAt: number;
-}) => (
-  <>
-    <LastUpdatedAt updatedAt={updatedAt} />
-    {controls?.right}
-  </>
-);
+  getInspectQuery: GetInspectQuery;
+}) => {
+  return (
+    <>
+      <LastUpdatedAt updatedAt={updatedAt} />
+      {controls?.right}
+      <InspectButton showInspectButton getInspectQuery={getInspectQuery} />
+    </>
+  );
+};
 
 const getDefaultVisibility = ({
   alertsCount,
@@ -40,6 +46,7 @@ const getDefaultVisibility = ({
   onResetColumns,
   browserFields,
   controls,
+  getInspectQuery,
 }: {
   alertsCount: number;
   updatedAt: number;
@@ -48,10 +55,11 @@ const getDefaultVisibility = ({
   onResetColumns: () => void;
   browserFields: BrowserFields;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  getInspectQuery: GetInspectQuery;
 }): EuiDataGridToolBarVisibilityOptions => {
   const hasBrowserFields = Object.keys(browserFields).length > 0;
   const additionalControls = {
-    right: rightControl({ controls, updatedAt }),
+    right: rightControl({ controls, updatedAt, getInspectQuery }),
     left: {
       append: (
         <>
@@ -91,6 +99,7 @@ export const getToolbarVisibility = ({
   browserFields,
   setIsBulkActionsLoading,
   controls,
+  getInspectQuery,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -104,6 +113,7 @@ export const getToolbarVisibility = ({
   browserFields: any;
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  getInspectQuery: GetInspectQuery;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibility = getDefaultVisibility({
@@ -114,6 +124,7 @@ export const getToolbarVisibility = ({
     onResetColumns,
     browserFields,
     controls,
+    getInspectQuery,
   });
   const isBulkActionsActive =
     selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;
@@ -124,7 +135,7 @@ export const getToolbarVisibility = ({
     showColumnSelector: false,
     showSortSelector: false,
     additionalControls: {
-      right: rightControl({ controls, updatedAt }),
+      right: rightControl({ controls, updatedAt, getInspectQuery }),
       left: {
         append: (
           <>

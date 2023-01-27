@@ -449,13 +449,19 @@ export enum AlertsField {
   uuid = 'kibana.alert.rule.uuid',
 }
 
+export interface InspectQuery {
+  request: string[];
+  response: string[];
+}
+export type GetInspectQuery = () => InspectQuery;
+
 export interface FetchAlertData {
   activePage: number;
   alerts: EcsFieldsResponse[];
   alertsCount: number;
   isInitializing: boolean;
   isLoading: boolean;
-  getInspectQuery: () => { request: {}; response: {} };
+  getInspectQuery: GetInspectQuery;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
