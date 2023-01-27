@@ -420,7 +420,7 @@ export const LensTopNavMenu = ({
         const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
           datasourceStates[activeDatasourceId].state
         );
-        const dataView = dataViewId ? await data.dataViews.get(dataViewId) : undefined;
+        const dataView = dataViewId ? await data.dataViews.get(dataViewId, false) : undefined;
         setCurrentIndexPattern(dataView ?? indexPatterns[0]);
       }
     };
@@ -876,7 +876,7 @@ export const LensTopNavMenu = ({
       canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
-              const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
+              const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id, false);
               closeFieldEditor.current = dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: indexPatternInstance,
@@ -983,7 +983,7 @@ export const LensTopNavMenu = ({
     onCreateDefaultAdHocDataView,
     adHocDataViews,
     onChangeDataView: async (newIndexPatternId: string) => {
-      const currentDataView = await data.dataViews.get(newIndexPatternId);
+      const currentDataView = await data.dataViews.get(newIndexPatternId, false);
       setCurrentIndexPattern(currentDataView);
       dispatchChangeIndexPattern(newIndexPatternId);
       if (isOnTextBasedMode) {

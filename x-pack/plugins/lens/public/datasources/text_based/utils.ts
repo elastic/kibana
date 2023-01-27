@@ -84,7 +84,7 @@ export async function getStateFromAggregateQuery(
   let timeFieldName;
   try {
     const dataView = dataViewId
-      ? await dataViews.get(dataViewId)
+      ? await dataViews.get(dataViewId, false)
       : await dataViews.create({
           title: indexPattern,
         });

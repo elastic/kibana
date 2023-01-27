@@ -440,7 +440,7 @@ export async function getNamedArgumentSuggestions({
     query,
     selectionStart: position,
     selectionEnd: position,
-    indexPatterns: [await dataViews.get(indexPattern.id)],
+    indexPatterns: [await dataViews.get(indexPattern.id, false)],
     boolFilter: [],
   });
   return {

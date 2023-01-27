@@ -187,7 +187,7 @@ export async function getIndexPatternsObjects(
   ids: string[],
   dataViews: DataViewsContract
 ): Promise<{ indexPatterns: DataView[]; rejectedIds: string[] }> {
-  const responses = await Promise.allSettled(ids.map((id) => dataViews.get(id)));
+  const responses = await Promise.allSettled(ids.map((id) => dataViews.get(id, false)));
   const fullfilled = responses.filter(
     (response): response is PromiseFulfilledResult<DataView> => response.status === 'fulfilled'
   );

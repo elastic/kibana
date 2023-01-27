@@ -308,7 +308,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     () =>
       editPermission
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            const indexPatternInstance = await dataViews.get(currentIndexPattern?.id);
+            const indexPatternInstance = await dataViews.get(currentIndexPattern?.id, false);
             closeFieldEditor.current = indexPatternFieldEditor.openEditor({
               ctx: {
                 dataView: indexPatternInstance,
