@@ -79,7 +79,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the `get-file` endpoint response action
    */
-  responseActionGetFileEnabled: false,
+  responseActionGetFileEnabled: true,
 
   /**
    * Enables the `execute` endpoint response action
