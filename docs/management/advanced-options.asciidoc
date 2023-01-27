@@ -236,8 +236,7 @@ If disabled, only visualizations that are considered production-ready are availa
 === Usage data settings
 
 Helps improve the Elastic Stack by providing usage statistics for 
-basic features. This data will not be shared outside of Elastic.
-
+basic features.
 
 
 
