@@ -16,7 +16,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import { getOriginalActionGroup } from '../../../utils/get_original_alert_state';
+import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';

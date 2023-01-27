@@ -13,10 +13,3 @@ export const getOriginalActionGroup = (
   const source = alertHits && alertHits.length > 0 ? alertHits[0]._source : undefined;
   return source?.[ALERT_ACTION_GROUP];
 };
-
-export const createGetOriginalAlertState =
-  (translateActionGroupToAlertState: (actionGroup: string | undefined) => string | undefined) =>
-  (alertHits: Array<{ [id: string]: any }> | null | undefined) => {
-    const source = getOriginalActionGroup(alertHits);
-    return translateActionGroupToAlertState(source?.[ALERT_ACTION_GROUP]);
-  };
