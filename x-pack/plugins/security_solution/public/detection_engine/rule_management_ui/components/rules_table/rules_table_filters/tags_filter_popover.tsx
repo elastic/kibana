@@ -93,9 +93,9 @@ const TagsFilterPopoverComponent = ({
       <EuiSelectable
         searchable
         searchProps={{
-          placeholder: 'Search tags',
+          placeholder: i18n.SEARCH_TAGS,
         }}
-        aria-label="Rules tag search"
+        aria-label={i18n.RULES_TAG_SEARCH}
         options={selectableOptions}
         onChange={handleSelectableOptionsChange}
         emptyMessage={i18n.NO_TAGS_AVAILABLE}
