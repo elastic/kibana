@@ -17,17 +17,21 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardGrid } from './dashboard_grid';
+import { DashboardContainer } from '../../embeddable/dashboard_container';
 import { getSampleDashboardInput, mockDashboardReduxEmbeddableTools } from '../../../mocks';
 
 jest.mock('./dashboard_grid_item', () => ({
-  DashboardGridItem: require('react').forwardRef((props, ref) => (
-    <div ref={ref}>mockDashboardGridItem</div>
-  )),
+  DashboardGridItem: require('react').forwardRef((props, ref) => {
+    const className = props.expandedPanelId === undefined
+      ? 'regularPanel'
+      : props.expandedPanelId === props.id ? 'expandedPanel' : 'hiddenPanel';
+    return <div className={className} id={`mockDashboardGridItem_${props.id}`} ref={ref}>mockDashboardGridItem</div>;
+  }),
 }));
 
 const DashboardServicesProvider = pluginServices.getContextProvider();
 
-async function prepare() {
+async function getDashboardContainer() {
   const initialInput = getSampleDashboardInput({
     panels: {
       '1': {
@@ -42,12 +46,9 @@ async function prepare() {
       },
     },
   });
-  const dashboardMock = await mockDashboardReduxEmbeddableTools({ explicitInput: initialInput });
-
-  return {
-    tools: dashboardMock.tools,
-    dashboardContainer: dashboardMock.dashboardContainer,
-  };
+  const dashboardContainer = new DashboardContainer(initialInput);
+  await dashboardContainer.untilInitialized();
+  return dashboardContainer;
 }
 
 beforeAll(() => {
@@ -61,13 +62,14 @@ afterAll(() => {
 });
 
 test('renders DashboardGrid', async () => {
-  const { tools } = await prepare();
+  const dashboardContainer = await getDashboardContainer();
+  const { Wrapper: DashboardReduxWrapper } = dashboardContainer.getReduxEmbeddableTools();
 
   const component = mountWithIntl(
     <DashboardServicesProvider>
-      <tools.Wrapper>
+      <DashboardReduxWrapper>
         <DashboardGrid />
-      </tools.Wrapper>
+      </DashboardReduxWrapper>
     </DashboardServicesProvider>
   );
   const panelElements = component.find('GridItem');
@@ -75,12 +77,14 @@ test('renders DashboardGrid', async () => {
 });
 
 test('renders DashboardGrid with no visualizations', async () => {
-  const { tools, dashboardContainer } = await prepare();
+  const dashboardContainer = await getDashboardContainer();
+  const { Wrapper: DashboardReduxWrapper } = dashboardContainer.getReduxEmbeddableTools();
+
   const component = mountWithIntl(
     <DashboardServicesProvider>
-      <tools.Wrapper>
+      <DashboardReduxWrapper>
         <DashboardGrid />
-      </tools.Wrapper>
+      </DashboardReduxWrapper>
     </DashboardServicesProvider>
   );
 
@@ -90,12 +94,14 @@ test('renders DashboardGrid with no visualizations', async () => {
 });
 
 test('DashboardGrid removes panel when removed from container', async () => {
-  const { tools, dashboardContainer } = await prepare();
+  const dashboardContainer = await getDashboardContainer();
+  const { Wrapper: DashboardReduxWrapper } = dashboardContainer.getReduxEmbeddableTools();
+
   const component = mountWithIntl(
     <DashboardServicesProvider>
-      <tools.Wrapper>
+      <DashboardReduxWrapper>
         <DashboardGrid />
-      </tools.Wrapper>
+      </DashboardReduxWrapper>
     </DashboardServicesProvider>
   );
 
@@ -109,12 +115,14 @@ test('DashboardGrid removes panel when removed from container', async () => {
 });
 
 test('DashboardGrid renders expanded panel', async () => {
-  const { tools, dashboardContainer } = await prepare();
+  const dashboardContainer = await getDashboardContainer();
+  const { Wrapper: DashboardReduxWrapper } = dashboardContainer.getReduxEmbeddableTools();
+
   const component = mountWithIntl(
     <DashboardServicesProvider>
-      <tools.Wrapper>
+      <DashboardReduxWrapper>
         <DashboardGrid />
-      </tools.Wrapper>
+      </DashboardReduxWrapper>
     </DashboardServicesProvider>
   );
 
@@ -124,14 +132,20 @@ test('DashboardGrid renders expanded panel', async () => {
   expect(component.find('GridItem').length).toBe(2);
 
   expect(
-    (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
-  ).toBe('1');
+    (component.find('#mockDashboardGridItem_1').hasClass('expandedPanel'))
+  ).toBe(true);
+  expect(
+    (component.find('#mockDashboardGridItem_2').hasClass('hiddenPanel'))
+  ).toBe(true);
 
   dashboardContainer.setExpandedPanelId();
   component.update();
   expect(component.find('GridItem').length).toBe(2);
 
   expect(
-    (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
-  ).toBeUndefined();
+    (component.find('#mockDashboardGridItem_1').hasClass('regularPanel'))
+  ).toBe(true);
+  expect(
+    (component.find('#mockDashboardGridItem_2').hasClass('regularPanel'))
+  ).toBe(true);
 });
