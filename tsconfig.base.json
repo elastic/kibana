@@ -510,6 +510,8 @@
       "@kbn/core-status-common/*": ["packages/core/status/core-status-common/*"],
       "@kbn/core-status-common-internal": ["packages/core/status/core-status-common-internal"],
       "@kbn/core-status-common-internal/*": ["packages/core/status/core-status-common-internal/*"],
+      "@kbn/core-status-integration-tests": ["packages/core/status/core-status-integration-tests"],
+      "@kbn/core-status-integration-tests/*": ["packages/core/status/core-status-integration-tests/*"],
       "@kbn/core-status-server": ["packages/core/status/core-status-server"],
       "@kbn/core-status-server/*": ["packages/core/status/core-status-server/*"],
       "@kbn/core-status-server-internal": ["packages/core/status/core-status-server-internal"],

@@ -3365,6 +3365,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-node-integration-tests@link:packages/core/node/core-node-integration-tests":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-node-server-internal@link:packages/core/node/core-node-server-internal":
   version "0.0.0"
   uid ""
