@@ -50,7 +50,7 @@ export function SloEditForm({ slo }: Props) {
     notifications: { toasts },
   } = useKibana().services;
 
-  const { control, watch, getFieldState, getValues, formState, trigger } = useForm({
+  const { control, watch, getFieldState, getValues, formState } = useForm({
     defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
     values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',

@@ -96,7 +96,7 @@ export function IndexSelection({ control }: Props) {
                 return field.onChange(selected[0].value);
               }
 
-              field.onChange(undefined);
+              field.onChange('');
             }}
             onSearchChange={onSearchChange}
             options={indexOptions}
@@ -106,7 +106,17 @@ export function IndexSelection({ control }: Props) {
                 defaultMessage: 'Select an index or index pattern',
               }
             )}
-            selectedOptions={field.value ? [{ value: field.value, label: field.value }] : []}
+            selectedOptions={
+              !!field.value
+                ? [
+                    {
+                      value: field.value,
+                      label: field.value,
+                      'data-test-subj': 'indexSelectionSelectedValue',
+                    },
+                  ]
+                : []
+            }
             singleSelection
           />
         )}
