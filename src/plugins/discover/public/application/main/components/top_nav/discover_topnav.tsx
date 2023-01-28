@@ -191,6 +191,7 @@ export const DiscoverTopNav = ({
     } else {
       stateContainer.actions.setDataView(editedDataView);
     }
+    stateContainer.actions.loadDataViewList();
     stateContainer.dataState.fetch();
   };
 
