@@ -70,15 +70,12 @@ export class ApmSynthtraceEsClient {
   }
 
   async clean() {
-    this.logger.info(`Cleaning APM data streams ${DATA_STREAMS.join(', ')}`);
+    this.logger.info(`Cleaning APM data streams ${DATA_STREAMS.join(',')}`);
 
-    for (const name of DATA_STREAMS) {
-      const dataStream = await this.client.indices.getDataStream({ name }, { ignore: [404] });
-      if (dataStream.data_streams && dataStream.data_streams.length > 0) {
-        this.logger.debug(`Deleting datastream: ${name}`);
-        await this.client.indices.deleteDataStream({ name });
-      }
-    }
+    await this.client.indices.deleteDataStream({
+      name: DATA_STREAMS.join(','),
+      expand_wildcards: ['open', 'hidden'],
+    });
   }
 
   async updateComponentTemplate(

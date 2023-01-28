@@ -14,8 +14,8 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'agent.name',
   'service.environment',
   'service.name',
-  'service.node.name',
   'transaction.type',
+  'service.language.name',
 ];
 
 export function createServiceMetricsAggregator(flushInterval: string) {
@@ -38,8 +38,6 @@ export function createServiceMetricsAggregator(flushInterval: string) {
           'processor.name': 'metric',
           'transaction.duration.histogram': createLosslessHistogram(),
           'transaction.duration.summary': {
-            min: 0,
-            max: 0,
             value_count: 0,
             sum: 0,
           },
@@ -65,8 +63,6 @@ export function createServiceMetricsAggregator(flushInterval: string) {
 
       const summary = metric['transaction.duration.summary'];
 
-      summary.min = Math.min(duration, metric['transaction.duration.summary'].min);
-      summary.max = Math.max(duration, metric['transaction.duration.summary'].max);
       summary.sum += duration;
       summary.value_count += 1;
     },

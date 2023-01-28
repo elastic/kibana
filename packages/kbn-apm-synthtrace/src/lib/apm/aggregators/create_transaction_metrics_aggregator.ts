@@ -73,8 +73,6 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
           'transaction.root': !event['parent.id'],
           'transaction.duration.histogram': createLosslessHistogram(),
           'transaction.duration.summary': {
-            min: 0,
-            max: 0,
             value_count: 0,
             sum: 0,
           },
@@ -99,8 +97,6 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
 
       const summary = metric['transaction.duration.summary'];
 
-      summary.min = Math.min(duration, metric['transaction.duration.summary'].min);
-      summary.max = Math.max(duration, metric['transaction.duration.summary'].max);
       summary.sum += duration;
       summary.value_count += 1;
     },
