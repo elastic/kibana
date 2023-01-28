@@ -771,6 +771,7 @@
     "@kbn/core-saved-objects-import-export-server-mocks": "link:packages/core/saved-objects/core-saved-objects-import-export-server-mocks",
     "@kbn/core-saved-objects-migration-server-mocks": "link:packages/core/saved-objects/core-saved-objects-migration-server-mocks",
     "@kbn/core-saved-objects-server-mocks": "link:packages/core/saved-objects/core-saved-objects-server-mocks",
+    "@kbn/core-status-integration-tests": "link:packages/core/status/core-status-integration-tests",
     "@kbn/core-status-server-mocks": "link:packages/core/status/core-status-server-mocks",
     "@kbn/core-test-helpers-kbn-server": "link:packages/core/test-helpers/core-test-helpers-kbn-server",
     "@kbn/core-theme-browser-mocks": "link:packages/core/theme/core-theme-browser-mocks",
