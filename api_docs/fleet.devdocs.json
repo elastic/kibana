@@ -9155,6 +9155,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Agent.metrics",
+            "type": "Object",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              "AgentMetrics",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9235,7 +9250,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"inactive\" | \"active\""
+              "\"active\" | \"inactive\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -13793,7 +13808,7 @@
                 "section": "def-common.RegistryElasticsearch",
                 "text": "RegistryElasticsearch"
               },
-              ", \"index_template.settings\" | \"index_template.mappings\"> | undefined"
+              ", \"index_template.settings\" | \"index_template.mappings\" | \"index_template.data_stream\"> | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,

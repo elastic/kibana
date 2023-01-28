@@ -63,11 +63,12 @@
     "@kbn/logging",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/core-saved-objects-common",
     "@kbn/share-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/slo-schema",
+    "@kbn/guided-onboarding",
     "@kbn/charts-plugin",
+    "@kbn/securitysolution-ecs",
   ],
   "exclude": [
     "target/**/*",

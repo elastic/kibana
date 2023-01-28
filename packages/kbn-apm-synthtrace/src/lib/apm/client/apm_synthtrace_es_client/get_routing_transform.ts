@@ -31,14 +31,12 @@ export function getRoutingTransform() {
 
           if (metricsetName === 'app') {
             index = `metrics-apm.app.${document['service.name']}-default`;
-            // TODO: re-enable this as soon as the updated
-            // package containing the new data streams for continuous rollups are available
-            // } else if (
-            //   metricsetName === 'transaction' ||
-            //   metricsetName === 'service' ||
-            //   metricsetName === 'service_destination'
-            // ) {
-            //   index = `metrics-apm.${metricsetName}.${document['metricset.interval']!}-default`;
+          } else if (
+            metricsetName === 'transaction' ||
+            metricsetName === 'service_transaction' ||
+            metricsetName === 'service_destination'
+          ) {
+            index = `metrics-apm.${metricsetName}.${document['metricset.interval']!}-default`;
           } else {
             index = `metrics-apm.internal-default`;
           }

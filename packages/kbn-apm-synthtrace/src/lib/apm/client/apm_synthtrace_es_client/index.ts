@@ -13,7 +13,7 @@ import {
   SynthtraceESAction,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import { castArray, merge, once } from 'lodash';
+import { castArray } from 'lodash';
 import { PassThrough, pipeline, Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { ValuesType } from 'utility-types';
@@ -70,15 +70,12 @@ export class ApmSynthtraceEsClient {
   }
 
   async clean() {
-    this.logger.info(`Cleaning APM data streams ${DATA_STREAMS.join(', ')}`);
+    this.logger.info(`Cleaning APM data streams ${DATA_STREAMS.join(',')}`);
 
-    for (const name of DATA_STREAMS) {
-      const dataStream = await this.client.indices.getDataStream({ name }, { ignore: [404] });
-      if (dataStream.data_streams && dataStream.data_streams.length > 0) {
-        this.logger.debug(`Deleting datastream: ${name}`);
-        await this.client.indices.deleteDataStream({ name });
-      }
-    }
+    await this.client.indices.deleteDataStream({
+      name: DATA_STREAMS.join(','),
+      expand_wildcards: ['open', 'hidden'],
+    });
   }
 
   async updateComponentTemplate(
@@ -160,51 +157,7 @@ export class ApmSynthtraceEsClient {
     return this.version;
   }
 
-  bootstrap = once(async () => {
-    await this.updateComponentTemplate(ComponentTemplateName.MetricsInternal, (template) => {
-      return merge({}, template, {
-        mappings: {
-          properties: {
-            event: {
-              properties: {
-                success_count: {
-                  type: 'aggregate_metric_double',
-                  metrics: ['sum', 'value_count'],
-                  default_metric: 'sum',
-                },
-              },
-            },
-            transaction: {
-              properties: {
-                duration: {
-                  properties: {
-                    summary: {
-                      type: 'aggregate_metric_double',
-                      metrics: ['min', 'max', 'sum', 'value_count'],
-                      default_metric: 'max',
-                    },
-                  },
-                },
-              },
-            },
-            metricset: {
-              properties: {
-                interval: {
-                  // TODO: change this to a constant keyword as soon as the updated
-                  // package containing the new data streams for continuous rollups are available
-                  type: 'keyword' as const,
-                },
-              },
-            },
-          },
-        },
-      });
-    });
-  });
-
   async index(streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<ApmFields>>) {
-    await this.bootstrap();
-
     this.logger.debug(`Bulk indexing ${castArray(streamOrGenerator).length} stream(s)`);
 
     const allStreams = castArray(streamOrGenerator).map((obj) => {
