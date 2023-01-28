@@ -15,7 +15,7 @@ import {
 import { visit } from './login';
 
 export const installAwsCloudFrontWithPolicy = () => {
-  visit('app/integrations/detail/aws-1.17.0/overview?integration=cloudfront');
+  visit('app/integrations/detail/aws-1.17.0/overview?integration=cloudfront?');
   cy.get(ADD_INTEGRATION_BTN).click();
   cy.get(QUEUE_URL).type('http://www.example.com');
 
