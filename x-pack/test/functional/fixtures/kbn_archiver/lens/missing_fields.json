@@ -1,0 +1,27 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"version\":\"8.7.0\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"7d75b51d-19fc-4dba-8174-b82e2905745d\"},\"panelIndex\":\"7d75b51d-19fc-4dba-8174-b82e2905745d\",\"embeddableConfig\":{\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsMetric\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"logstash-*\",\"name\":\"indexpattern-datasource-layer-78c0d2e4-4bb8-49e7-ae98-cbe5851bb959\"}],\"state\":{\"visualization\":{\"layerId\":\"78c0d2e4-4bb8-49e7-ae98-cbe5851bb959\",\"layerType\":\"data\",\"metricAccessor\":\"8630dc6f-828f-4a7d-8283-821cf6b54e4f\"},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"78c0d2e4-4bb8-49e7-ae98-cbe5851bb959\":{\"columns\":{\"8630dc6f-828f-4a7d-8283-821cf6b54e4f\":{\"label\":\"Median of missing field\",\"dataType\":\"number\",\"operationType\":\"median\",\"sourceField\":\"missing field\",\"isBucketed\":false,\"scale\":\"ratio\",\"params\":{\"emptyAsNull\":true}}},\"columnOrder\":[\"8630dc6f-828f-4a7d-8283-821cf6b54e4f\"],\"incompleteColumns\":{},\"sampling\":1}}},\"textBased\":{\"layers\":{}}},\"internalReferences\":[],\"adHocDataViews\":{}}},\"enhancements\":{}}}]",
+    "timeRestore": false,
+    "title": "Dashboard with missing field Lens",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.7.0",
+  "created_at": "2023-01-28T17:47:28.069Z",
+  "id": "d4cc9840-9f33-11ed-896f-1111cbb8731e",
+  "migrationVersion": { "dashboard": "8.7.0" },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "7d75b51d-19fc-4dba-8174-b82e2905745d:indexpattern-datasource-layer-78c0d2e4-4bb8-49e7-ae98-cbe5851bb959",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2023-01-28T17:47:28.069Z",
+  "version": "WzM0OCwxXQ=="
+}

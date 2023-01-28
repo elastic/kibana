@@ -1603,10 +1603,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Applicable both on the embeddable and in the editor. In both scenarios, a popover containing user messages (errors, warnings) is shown.
      */
-    async assertMessageListContains(assertText: string) {
+    async assertMessageListContains(assertText: string, severity: 'warning' | 'error') {
       await testSubjects.click('lens-message-list-trigger');
-      await testSubjects.existOrFail('lens-message-list-message');
-      const messages = await testSubjects.findAll('lens-message-list-message');
+      const messageSelector = `lens-message-list-${severity}`;
+      await testSubjects.existOrFail(messageSelector);
+      const messages = await testSubjects.findAll(messageSelector);
       let found = false;
       for (const message of messages) {
         const text = await message.getVisibleText();

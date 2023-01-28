@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'visualize',
     'lens',
+    'dashboard',
     'header',
     'timePicker',
     'common',
@@ -19,30 +20,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('Lens error handling', () => {
-    before(async () => {
-      await security.testUser.setRoles(
-        ['global_discover_read', 'global_visualize_read', 'test_logstash_reader'],
-        { skipBrowserRefresh: true }
-      );
-      // loading an object without reference fails, so we load data view + lens object and then unload data view
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/errors'
-      );
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/errors2'
-      );
-    });
-
-    after(async () => {
-      await security.testUser.restoreDefaults();
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/errors'
-      );
-    });
-
     describe('Index Pattern missing', () => {
+      before(async () => {
+        await security.testUser.setRoles(
+          ['global_discover_read', 'global_visualize_read', 'test_logstash_reader'],
+          { skipBrowserRefresh: true }
+        );
+        // loading an object without reference fails, so we load data view + lens object and then unload data view
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/lens/errors'
+        );
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/lens/errors2'
+        );
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/lens/errors'
+        );
+      });
+
       it('the warning is shown and user can fix the state', async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsMetricWithNonExistingDataView');
@@ -75,6 +77,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await PageObjects.lens.waitForMissingDataViewWarning();
       });
+    });
+
+    it('does not block render when missing fields', async () => {
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/missing_fields'
+      );
+
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.loadSavedDashboard('Dashboard with missing field Lens');
+      await PageObjects.lens.assertMessageListContains(
+        'Field missing field was not found',
+        'error'
+      );
+      await PageObjects.lens.waitForVisualization('mtrVis');
+
+      await PageObjects.dashboard.switchToEditMode();
+      await dashboardPanelActions.editPanelByTitle();
+      await PageObjects.lens.assertMessageListContains(
+        'Field missing field was not found',
+        'error'
+      );
+      await PageObjects.lens.waitForVisualization('mtrVis');
+
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/missing_fields'
+      );
     });
   });
 }

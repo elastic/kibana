@@ -106,7 +106,7 @@ export const MessageList = ({
           <li
             key={index}
             className="lnsWorkspaceWarningList__item"
-            data-test-subj="lens-message-list-message"
+            data-test-subj={`lens-message-list-${message.severity}`}
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
