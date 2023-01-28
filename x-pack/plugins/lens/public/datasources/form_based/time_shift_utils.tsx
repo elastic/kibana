@@ -21,7 +21,6 @@ import {
 import type { DateRange } from '../../../common/types';
 import type { FormBasedLayer, FormBasedPrivateState } from './types';
 import type { FramePublicAPI, IndexPattern } from '../../types';
-import type { FieldBasedOperationErrorMessage } from './operations/definitions';
 
 export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {
   if (isAbsoluteTimeShift(timeShiftString.trim())) {
@@ -170,35 +169,6 @@ export function getLayerTimeShiftChecks({
       return Boolean(parsedValue === 'invalid');
     },
   };
-}
-
-export function getDisallowedPreviousShiftMessage(
-  layer: FormBasedLayer,
-  columnId: string
-): FieldBasedOperationErrorMessage[] | undefined {
-  const currentColumn = layer.columns[columnId];
-  const hasPreviousShift =
-    currentColumn.timeShift &&
-    !isAbsoluteTimeShift(currentColumn.timeShift) &&
-    parseTimeShift(currentColumn.timeShift) === 'previous';
-  if (!hasPreviousShift) {
-    return;
-  }
-  const hasDateHistogram = Object.values(layer.columns).some(
-    (column) => column.operationType === 'date_histogram'
-  );
-  if (!hasDateHistogram) {
-    return;
-  }
-  return [
-    i18n.translate('xpack.lens.indexPattern.dateHistogramTimeShift', {
-      defaultMessage:
-        'In a single layer, you are unable to combine previous time range shift with date histograms. Either use an explicit time shift duration in "{column}" or replace the date histogram.',
-      values: {
-        column: currentColumn.label,
-      },
-    }),
-  ];
 }
 
 export function getStateTimeShiftWarningMessages(
