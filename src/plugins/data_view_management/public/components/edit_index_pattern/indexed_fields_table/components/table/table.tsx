@@ -297,12 +297,10 @@ export const getConflictModalContent = ({
   <>
     <EuiModalHeader>
       <EuiModalHeaderTitle>
-        <h1>
-          <FormattedMessage
-            id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
-            defaultMessage="This field has a type conflict"
-          />
-        </h1>
+        <FormattedMessage
+          id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
+          defaultMessage="This field has a type conflict"
+        />
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>

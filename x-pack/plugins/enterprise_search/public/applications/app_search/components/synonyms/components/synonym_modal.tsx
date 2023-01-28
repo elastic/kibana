@@ -48,9 +48,7 @@ export const SynonymModal: React.FC = () => {
   return isModalOpen ? (
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>{modalTitle}</h1>
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <FlashMessages />
       <EuiModalBody>
