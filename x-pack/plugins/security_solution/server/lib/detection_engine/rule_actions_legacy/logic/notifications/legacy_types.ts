@@ -18,7 +18,7 @@ import type {
   AlertInstanceContext,
   RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
-import type { Rule, RuleActionOptionalUuid } from '@kbn/alerting-plugin/common';
+import type { Rule, RuleAction } from '@kbn/alerting-plugin/common';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../../../common/constants';
 
 /**
@@ -57,7 +57,7 @@ export interface LegacyClients {
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export interface LegacyNotificationAlertParams {
-  actions: RuleActionOptionalUuid[];
+  actions: Array<Omit<RuleAction, 'uuid'>>;
   enabled: boolean;
   ruleAlertId: string;
   interval: string;
