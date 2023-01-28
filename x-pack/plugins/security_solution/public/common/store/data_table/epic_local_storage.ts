@@ -22,6 +22,8 @@ import {
   updateColumnWidth,
   updateItemsPerPage,
   updateSort,
+  changeViewMode,
+  updateShowBuildingBlockAlertsFilter,
 } from './actions';
 import type { TimelineEpicDependencies } from '../../../timelines/store/timeline/types';
 
@@ -36,6 +38,8 @@ const tableActionTypes = [
   updateColumnWidth.type,
   updateItemsPerPage.type,
   updateSort.type,
+  changeViewMode.type,
+  updateShowBuildingBlockAlertsFilter.type,
 ];
 
 export const createDataTableLocalStorageEpic =

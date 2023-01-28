@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { VIEW_SELECTION } from '../../../../common/constants';
 import type { ColumnHeaderOptions, TableIdLiteral } from '../../../../common/types';
 import type { DataTablesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -54,6 +55,11 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
         deletedEventIds: timelineModel.deletedEventIds,
         expandedDetail: timelineModel.expandedDetail,
         totalCount: timelineModel.totalCount || 0,
+        viewMode: VIEW_SELECTION.gridView,
+        additionalFilters: {
+          showBuildingBlockAlerts: false,
+          showOnlyThreatIndicatorAlerts: false,
+        },
         ...(Array.isArray(timelineModel.columns)
           ? {
               columns: timelineModel.columns

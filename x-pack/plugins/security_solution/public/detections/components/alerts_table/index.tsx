@@ -130,7 +130,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     dataTable: {
       graphEventId, // If truthy, the graph viewer (Resolver) is showing
       sessionViewConfig,
-      viewMode: tableView,
+      viewMode: tableView = eventsDefaultModel.viewMode,
     } = eventsDefaultModel,
   } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
 
@@ -229,7 +229,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId: configId,
-      id: `detection-engine-alert-table-${configId}`,
+      // stores saperate configuration based on the view of the table
+      id: `detection-engine-alert-table-${configId}-${tableView}`,
       flyoutSize,
       featureIds: ['siem'],
       query: finalBoolQuery,
@@ -250,6 +251,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       finalColumns,
       finalBrowserFields,
       onAlertTableUpdate,
+      tableView,
     ]
   );
 

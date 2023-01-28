@@ -74,27 +74,6 @@ export const transformControlColumns = ({
   setEventsLoading,
   setEventsDeleted,
 }: TransformColumnsProps): EuiDataGridControlColumn[] => {
-  console.warn({
-    columnHeaders,
-    controlColumns,
-    data,
-    fieldBrowserOptions,
-    loadingEventIds,
-    onRowSelected,
-    onRuleChange,
-    selectedEventIds,
-    showCheckboxes,
-    tabType,
-    timelineId,
-    isSelectAllChecked,
-    onSelectPage,
-    browserFields,
-    pageSize,
-    sort,
-    theme,
-    setEventsLoading,
-    setEventsDeleted,
-  });
   return controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
       id: `${columnId}`,

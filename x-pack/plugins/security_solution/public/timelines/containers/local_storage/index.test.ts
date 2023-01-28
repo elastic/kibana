@@ -20,6 +20,7 @@ import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../
 import { useKibana } from '../../../common/lib/kibana';
 import type { DataTableModel } from '../../../common/store/data_table/model';
 import { TableId } from '../../../../common/types';
+import { VIEW_SELECTION } from '../../../../common/constants';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -639,6 +640,11 @@ describe('SiemLocalStorage', () => {
         initialized: true,
         updated: 1665943295913,
         totalCount: 0,
+        viewMode: VIEW_SELECTION.gridView,
+        additionalFilters: {
+          showBuildingBlockAlerts: false,
+          showOnlyThreatIndicatorAlerts: false,
+        },
       };
       const dataTables = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
       expect(dataTables).toStrictEqual({
