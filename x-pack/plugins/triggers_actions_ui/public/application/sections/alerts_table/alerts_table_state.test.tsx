@@ -16,6 +16,7 @@ import {
   AlertsField,
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
+  FetchAlertData,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import { TypeRegistry } from '../../type_registry';
@@ -91,6 +92,62 @@ const alerts = [
   },
 ] as unknown as EcsFieldsResponse[];
 
+const oldAlertsData = [
+  [
+    {
+      field: AlertsField.name,
+      value: ['one'],
+    },
+    {
+      field: AlertsField.reason,
+      value: ['two'],
+    },
+  ],
+  [
+    {
+      field: AlertsField.name,
+      value: ['three'],
+    },
+    {
+      field: AlertsField.reason,
+      value: ['four'],
+    },
+  ],
+] as FetchAlertData['oldAlertsData'];
+
+const ecsAlertsData = [
+  [
+    {
+      '@timestamp': ['2023-01-28T10:48:49.559Z'],
+      _id: 'SomeId',
+      _index: 'SomeIndex',
+      kibana: {
+        alert: {
+          rule: {
+            name: ['one'],
+          },
+          reason: ['two'],
+        },
+      },
+    },
+  ],
+  [
+    {
+      '@timestamp': ['2023-01-27T10:48:49.559Z'],
+      _id: 'SomeId2',
+      _index: 'SomeIndex',
+      kibana: {
+        alert: {
+          rule: {
+            name: ['three'],
+          },
+          reason: ['four'],
+        },
+      },
+    },
+  ],
+] as FetchAlertData['ecsAlertsData'];
+
 const FlyoutBody = ({ alert }: AlertsTableFlyoutBaseProps) => (
   <ul>
     {columns.map((column) => (
@@ -144,6 +201,8 @@ hookUseFetchAlerts.mockImplementation(() => [
     getInspectQuery: jest.fn(),
     refetch: refecthMock,
     totalAlerts: alerts.length,
+    ecsAlertsData,
+    oldAlertsData,
   },
 ]);
 
@@ -304,6 +363,7 @@ describe('AlertsTableState', () => {
         },
         set: jest.fn(),
       }));
+
       const { getByTestId, queryByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
 
       expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).toBe(null);
@@ -313,12 +373,14 @@ describe('AlertsTableState', () => {
       fireEvent.click(getByTestId('close'));
 
       await waitFor(() => {
+        // screen.debug(undefined, 1000000);
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
         expect(
           getByTestId('dataGridHeader')
-            .querySelectorAll('.euiDataGridHeaderCell__content')[1]
+            .querySelectorAll('.euiDataGridHeaderCell__content')[2]
             .getAttribute('title')
         ).toBe('Name');
+        // Failing because browserfield not picking up `displayAsText` from columns
       });
     });
 

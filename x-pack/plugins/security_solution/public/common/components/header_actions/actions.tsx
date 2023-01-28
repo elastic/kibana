@@ -299,7 +299,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
           disabled={isContextMenuDisabled}
           onRuleChange={onRuleChange}
           refetch={refetch}
-          setEventsLoading={setEventsLoading}
         />
         {isDisabled === false ? (
           <div>

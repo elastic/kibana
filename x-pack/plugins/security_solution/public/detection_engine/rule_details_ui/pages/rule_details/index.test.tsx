@@ -64,6 +64,18 @@ jest.mock('../../../../common/containers/sourcerer', () => {
       .mockReturnValue({ indexPattern: ['fakeindex'], loading: false }),
   };
 });
+jest.mock('../../../../detections/pages/detection_engine/use_alert_table_filters', () => {
+  return {
+    ...jest.requireActual('../../../../detections/pages/detection_engine/use_alert_table_filters'),
+    useDataTableFilters: jest.fn().mockReturnValue({
+      showBuildingBlockAlerts: false,
+      showOnlyThreatIndicatorAlerts: false,
+      setShowBuildingBlockAlerts: jest.fn(),
+      setShowOnlyThreatIndicatorAlerts: jest.fn(),
+    }),
+  };
+});
+
 jest.mock('../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiDataGridColumn,
-  EuiDataGridColumnCellAction,
-  EuiDataGridRefProps,
-} from '@elastic/eui';
+import type { EuiDataGridColumn, EuiDataGridRefProps } from '@elastic/eui';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { get } from 'lodash';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -19,16 +15,16 @@ import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
-import type { ColumnHeaderOptions } from '../../../../common/types';
 import { TableId } from '../../../../common/types';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../common/lib/cell_actions/constants';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { dataTableSelectors } from '../../../common/store/data_table';
 
-export const getUseCellActionsHook =
-  (tableId: TableId): AlertsTableConfigurationRegistry['useCellActions'] =>
-  ({
+export const getUseCellActionsHook = (
+  tableId: TableId
+): AlertsTableConfigurationRegistry['useCellActions'] => {
+  const useCellActions = ({
     columns,
     data,
     ecsData,
@@ -52,36 +48,43 @@ export const getUseCellActionsHook =
       ) ?? tableDefaults.viewMode;
 
     if (viewMode === VIEW_SELECTION.eventRenderedView) {
-      return { cellActions: [] };
+      // No cell actions are needed when eventRenderedView
+      return { getCellActions: () => [] };
     }
 
     return {
-      cellActions: defaultCellActions.map((dca) => {
-        return dca({
-          browserFields,
-          data: data as TimelineNonEcsData[][],
-          ecsData: ecsData as Ecs[],
-          header: columns.map((col) => {
-            const splitCol = col.id.split('.');
-            const fields =
-              splitCol.length > 0
-                ? get(browserFields, [
-                    splitCol.length === 1 ? 'base' : splitCol[0],
-                    'fields',
-                    col.id,
-                  ])
-                : {};
-            return {
-              ...col,
-              ...fields,
-            };
-          }) as ColumnHeaderOptions[],
-          scopeId: SourcererScopeName.default,
-          pageSize,
-          closeCellPopover: dataGridRef?.closeCellPopover,
-        });
-      }) as EuiDataGridColumnCellAction[],
+      getCellActions: (columnId: string) =>
+        defaultCellActions.map((dca) => {
+          return dca({
+            browserFields,
+            data: data as TimelineNonEcsData[][],
+            ecsData: ecsData as Ecs[],
+            header: columns
+              .filter((col) => col.id === columnId)
+              .map((col) => {
+                const splitCol = col.id.split('.');
+                const fields =
+                  splitCol.length > 0
+                    ? get(browserFields, [
+                        splitCol.length === 1 ? 'base' : splitCol[0],
+                        'fields',
+                        col.id,
+                      ])
+                    : {};
+                return {
+                  ...col,
+                  ...fields,
+                };
+              })[0],
+            scopeId: SourcererScopeName.default,
+            pageSize,
+            closeCellPopover: dataGridRef?.closeCellPopover,
+          });
+        }),
       visibleCellActions: 5,
       disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
     };
   };
+
+  return useCellActions;
+};

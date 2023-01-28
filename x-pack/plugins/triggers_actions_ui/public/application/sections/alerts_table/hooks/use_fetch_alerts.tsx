@@ -291,7 +291,6 @@ const useFetchAlerts = ({
       pagination,
       query,
       sort,
-      _source: true,
     };
     if (
       newAlertRequest.fields.length > 0 &&

@@ -40,7 +40,7 @@ describe('RowAction', () => {
   const defaultProps = {
     columnHeaders: defaultHeaders,
     controlColumn: getDefaultControlColumn(5)[0],
-    data: [sampleData],
+    data: sampleData,
     disabled: false,
     index: 1,
     isEventViewer: false,

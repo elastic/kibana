@@ -300,7 +300,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     ]
   );
 
-  const { cellActions, visibleCellActions, disabledCellActions } = props.alertsTableConfiguration
+  const { getCellActions, visibleCellActions, disabledCellActions } = props.alertsTableConfiguration
     ?.useCellActions
     ? props.alertsTableConfiguration?.useCellActions({
         columns: props.columns,
@@ -309,22 +309,22 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         dataGridRef: dataGridRef.current,
         pageSize: pagination.pageSize,
       })
-    : { cellActions: null, visibleCellActions: 2, disabledCellActions: [] };
+    : { getCellActions: () => null, visibleCellActions: 2, disabledCellActions: [] };
 
   const columnsWithCellActions = useMemo(() => {
-    if (cellActions) {
+    if (getCellActions) {
       return props.columns.map((col) => ({
         ...col,
         ...(!(disabledCellActions ?? []).includes(col.id)
           ? {
-              cellActions,
+              cellActions: getCellActions(col.id) ?? [],
               visibleCellActions,
             }
           : {}),
       }));
     }
     return props.columns;
-  }, [cellActions, disabledCellActions, props.columns, visibleCellActions]);
+  }, [getCellActions, disabledCellActions, props.columns, visibleCellActions]);
 
   return (
     <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>

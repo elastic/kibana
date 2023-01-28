@@ -52,6 +52,62 @@ describe('AlertsTable', () => {
     },
   ] as unknown as EcsFieldsResponse[];
 
+  const oldAlertsData = [
+    [
+      {
+        field: AlertsField.name,
+        value: ['one'],
+      },
+      {
+        field: AlertsField.reason,
+        value: ['two'],
+      },
+    ],
+    [
+      {
+        field: AlertsField.name,
+        value: ['three'],
+      },
+      {
+        field: AlertsField.reason,
+        value: ['four'],
+      },
+    ],
+  ] as FetchAlertData['oldAlertsData'];
+
+  const ecsAlertsData = [
+    [
+      {
+        '@timestamp': ['2023-01-28T10:48:49.559Z'],
+        _id: 'SomeId',
+        _index: 'SomeIndex',
+        kibana: {
+          alert: {
+            rule: {
+              name: ['one'],
+            },
+            reason: ['two'],
+          },
+        },
+      },
+    ],
+    [
+      {
+        '@timestamp': ['2023-01-27T10:48:49.559Z'],
+        _id: 'SomeId2',
+        _index: 'SomeIndex',
+        kibana: {
+          alert: {
+            rule: {
+              name: ['three'],
+            },
+            reason: ['four'],
+          },
+        },
+      },
+    ],
+  ] as FetchAlertData['ecsAlertsData'];
+
   const fetchAlertsData: FetchAlertData = {
     activePage: 0,
     alerts,
@@ -63,8 +119,8 @@ describe('AlertsTable', () => {
     onSortChange: jest.fn(),
     refresh: jest.fn(),
     sort: [],
-    ecsAlertsData: [],
-    oldAlertsData: [],
+    ecsAlertsData,
+    oldAlertsData,
   };
 
   const useFetchAlertsData = () => {
@@ -317,6 +373,7 @@ describe('AlertsTable', () => {
                       </EuiFlexItem>
                     </>
                   ),
+                  width: 124,
                 };
               },
             },
@@ -325,6 +382,7 @@ describe('AlertsTable', () => {
 
         it('should show the row loader when callback triggered', async () => {
           render(<AlertsTableWithLocale {...customTableProps} />);
+          screen.debug(undefined, 1000000);
           fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
           // the callback given to our clients to run when they want to update the loading state

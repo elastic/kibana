@@ -7,11 +7,11 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import type { ViewSelection } from '../../../../common/types';
 import { TableId } from '../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { InspectButton } from '../inspect';
 import { UpdatedFlexGroup, UpdatedFlexItem } from './styles';
-import type { ViewSelection } from './summary_view_select';
 import { SummaryViewSelector } from './summary_view_select';
 
 const TitleText = styled.span`

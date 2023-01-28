@@ -28,6 +28,7 @@ import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_SIGNALS_INDEX,
+  VIEW_SELECTION,
 } from '../../../common/constants';
 import { networkModel } from '../../explore/network/store';
 import {
@@ -405,6 +406,11 @@ export const mockGlobalState: State = {
         isLoading: false,
         queryFields: [],
         totalCount: 0,
+        viewMode: VIEW_SELECTION.gridView,
+        additionalFilters: {
+          showBuildingBlockAlerts: false,
+          showOnlyThreatIndicatorAlerts: false,
+        },
       },
     },
   },

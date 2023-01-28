@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { of } from 'rxjs';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useFetchAlerts, FetchAlertsArgs } from './use_fetch_alerts';
+import { useFetchAlerts, FetchAlertsArgs, FetchAlertResp } from './use_fetch_alerts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 
@@ -75,6 +75,17 @@ const searchResponse = {
 
 const searchResponse$ = of<IKibanaSearchResponse>(searchResponse);
 
+const expectedResponse: FetchAlertResp = {
+  alerts: [],
+  getInspectQuery: expect.anything(),
+  refetch: expect.anything(),
+  isInitializing: true,
+  totalAlerts: -1,
+  updatedAt: 0,
+  oldAlertsData: [],
+  ecsAlertsData: [],
+};
+
 describe('useFetchAlerts', () => {
   let clock: sinon.SinonFakeTimers;
   const args: FetchAlertsArgs = {
@@ -111,6 +122,7 @@ describe('useFetchAlerts', () => {
     expect(result.current).toEqual([
       false,
       {
+        ...expectedResponse,
         alerts: [
           {
             _index: '.internal.alerts-security.alerts-default-000001',
@@ -146,6 +158,86 @@ describe('useFetchAlerts', () => {
         updatedAt: 1609502400000,
         getInspectQuery: expect.anything(),
         refetch: expect.anything(),
+        ecsAlertsData: [
+          {
+            kibana: {
+              alert: {
+                severity: ['low'],
+                risk_score: [21],
+                rule: { name: ['test'] },
+                reason: [
+                  'registry event with process iexlorer.exe, by 5qcxz8o4j7 on Host-4dbzugdlqd created low alert test.',
+                ],
+              },
+            },
+            process: { name: ['iexlorer.exe'] },
+            '@timestamp': ['2022-03-22T16:48:07.518Z'],
+            user: { name: ['5qcxz8o4j7'] },
+            host: { name: ['Host-4dbzugdlqd'] },
+            _id: '38dd308706a127696cc63b8f142e8e4d66f8f79bc7d491dd79a42ea4ead62dd1',
+            _index: '.internal.alerts-security.alerts-default-000001',
+          },
+          {
+            kibana: {
+              alert: {
+                severity: ['low'],
+                risk_score: [21],
+                rule: { name: ['test'] },
+                reason: [
+                  'network event with process iexlorer.exe, by hdgsmwj08h on Host-4dbzugdlqd created low alert test.',
+                ],
+              },
+            },
+            process: { name: ['iexlorer.exe'] },
+            '@timestamp': ['2022-03-22T16:17:50.769Z'],
+            user: { name: ['hdgsmwj08h'] },
+            host: { name: ['Host-4dbzugdlqd'] },
+            _id: '8361363c0db6f30ca2dfb4aeb4835e7d6ec57bc195b96d9ee5a4ead1bb9f8b86',
+            _index: '.internal.alerts-security.alerts-default-000001',
+          },
+        ],
+        oldAlertsData: [
+          [
+            { field: 'kibana.alert.severity', value: ['low'] },
+            { field: 'process.name', value: ['iexlorer.exe'] },
+            { field: '@timestamp', value: ['2022-03-22T16:48:07.518Z'] },
+            { field: 'kibana.alert.risk_score', value: [21] },
+            { field: 'kibana.alert.rule.name', value: ['test'] },
+            { field: 'user.name', value: ['5qcxz8o4j7'] },
+            {
+              field: 'kibana.alert.reason',
+              value: [
+                'registry event with process iexlorer.exe, by 5qcxz8o4j7 on Host-4dbzugdlqd created low alert test.',
+              ],
+            },
+            { field: 'host.name', value: ['Host-4dbzugdlqd'] },
+            {
+              field: '_id',
+              value: '38dd308706a127696cc63b8f142e8e4d66f8f79bc7d491dd79a42ea4ead62dd1',
+            },
+            { field: '_index', value: '.internal.alerts-security.alerts-default-000001' },
+          ],
+          [
+            { field: 'kibana.alert.severity', value: ['low'] },
+            { field: 'process.name', value: ['iexlorer.exe'] },
+            { field: '@timestamp', value: ['2022-03-22T16:17:50.769Z'] },
+            { field: 'kibana.alert.risk_score', value: [21] },
+            { field: 'kibana.alert.rule.name', value: ['test'] },
+            { field: 'user.name', value: ['hdgsmwj08h'] },
+            {
+              field: 'kibana.alert.reason',
+              value: [
+                'network event with process iexlorer.exe, by hdgsmwj08h on Host-4dbzugdlqd created low alert test.',
+              ],
+            },
+            { field: 'host.name', value: ['Host-4dbzugdlqd'] },
+            {
+              field: '_id',
+              value: '8361363c0db6f30ca2dfb4aeb4835e7d6ec57bc195b96d9ee5a4ead1bb9f8b86',
+            },
+            { field: '_index', value: '.internal.alerts-security.alerts-default-000001' },
+          ],
+        ],
       },
     ]);
   });
@@ -176,6 +268,7 @@ describe('useFetchAlerts', () => {
     expect(result.current).toEqual([
       false,
       {
+        ...expectedResponse,
         alerts: [],
         getInspectQuery: expect.anything(),
         refetch: expect.anything(),
@@ -195,6 +288,7 @@ describe('useFetchAlerts', () => {
     expect(result.current).toEqual([
       false,
       {
+        ...expectedResponse,
         alerts: [],
         getInspectQuery: expect.anything(),
         refetch: expect.anything(),
@@ -215,6 +309,7 @@ describe('useFetchAlerts', () => {
     expect(result.current).toEqual([
       true,
       {
+        ...expectedResponse,
         alerts: [],
         getInspectQuery: expect.anything(),
         refetch: expect.anything(),
@@ -233,6 +328,7 @@ describe('useFetchAlerts', () => {
     expect(result.current).toEqual([
       false,
       {
+        ...expectedResponse,
         alerts: [],
         getInspectQuery: expect.anything(),
         refetch: expect.anything(),
@@ -253,6 +349,7 @@ describe('useFetchAlerts', () => {
     expect(result.current).toEqual([
       false,
       {
+        ...expectedResponse,
         alerts: [],
         getInspectQuery: expect.anything(),
         refetch: expect.anything(),
@@ -364,6 +461,7 @@ describe('useFetchAlerts', () => {
     expect(result.current).toEqual([
       false,
       {
+        ...expectedResponse,
         alerts: [],
         getInspectQuery: expect.anything(),
         refetch: expect.anything(),

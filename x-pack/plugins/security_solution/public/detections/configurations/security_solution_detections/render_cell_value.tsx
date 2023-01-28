@@ -80,7 +80,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
 };
 
 export const getRenderCellValueHook = ({ scopeId }: { scopeId: string }) => {
-  const useRenderCellValue: GetRenderCellValue = ({ setFlyoutAlert }) => {
+  const useRenderCellValue: GetRenderCellValue = () => {
     const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
 
     const result = useCallback(
@@ -101,7 +101,7 @@ export const getRenderCellValueHook = ({ scopeId }: { scopeId: string }) => {
         rowRenderers,
         setCellProps,
         truncate = true,
-      }: CellValueElementProps) => {
+      }) => {
         const splitColumnId = columnId.split('.');
         let myHeader = header ?? { id: columnId };
 

@@ -50,6 +50,7 @@ export const useFetchBrowserFieldCapabilities = ({
 
   useEffect(() => {
     if (isLoading !== undefined || featureIds.includes(INVALID_FEATURE_ID)) {
+      // outside this hook there is not awareness
       setIsLoading(false);
       return;
     }

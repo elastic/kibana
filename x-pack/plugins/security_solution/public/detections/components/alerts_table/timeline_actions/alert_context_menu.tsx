@@ -53,7 +53,7 @@ interface AlertContextMenuProps {
   ecsRowData: Ecs;
   onRuleChange?: () => void;
   scopeId: string;
-  refetch: () => void | undefined;
+  refetch: (() => void) | undefined;
 }
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({

@@ -517,16 +517,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
   );
 
-  const alertsTableDefaultFilters = useMemo(
-    () => [
-      ...buildAlertsFilter(rule?.rule_id ?? ''),
-      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildAlertStatusFilter(filterGroup),
-      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-    ],
-    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
-  );
-
   const alertMergedFilters = useMemo(
     () => [...alertDefaultFilters, ...filters],
     [alertDefaultFilters, filters]
@@ -834,6 +824,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         tableId={TableId.alertsOnRuleDetailsPage}
                         from={from}
                         to={to}
+                        isLoading={showUpdating}
                       />
                     )}
                   </>

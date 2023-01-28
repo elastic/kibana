@@ -83,6 +83,7 @@ interface DetectionEngineAlertTableProps {
   sourcererScope?: SourcererScopeName;
   from: string;
   to: string;
+  isLoading: boolean;
 }
 export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   configId,
@@ -92,6 +93,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   sourcererScope = SourcererScopeName.detections,
   from,
   to,
+  isLoading,
 }) => {
   const { triggersActionsUi, uiSettings } = useKibana().services;
 
@@ -109,7 +111,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   const { browserFields, indexPattern: indexPatterns } = useSourcererDataView(sourcererScope);
 
   const getGlobalInputs = inputsSelectors.globalSelector();
-  const globalInputs = useSelector((state) => getGlobalInputs(state));
+  const globalInputs = useSelector((state: State) => getGlobalInputs(state));
   const { query: globalQuery, filters: globalFilters, queries: globalQueries } = globalInputs;
 
   useEffect(() => {
@@ -203,11 +205,11 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   );
 
   const onAlertTableUpdate: AlertsTableStateProps['onUpdate'] = useCallback(
-    ({ isLoading, totalCount, refresh }) => {
+    ({ isLoading: isAlertTableLoading, totalCount, refresh }) => {
       dispatch(
         updateIsLoading({
           id: tableId,
-          isLoading,
+          isLoading: isAlertTableLoading,
         })
       );
 
@@ -285,6 +287,10 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       <GraphOverlay scopeId={tableId} SessionView={SessionView} Navigation={Navigation} />
     ) : null;
   }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <div>

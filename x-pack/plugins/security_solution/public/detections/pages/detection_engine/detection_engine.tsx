@@ -109,8 +109,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
       isAuthenticated: isUserAuthenticated,
       hasEncryptionKey,
       signalIndexName,
-      hasIndexWrite = false,
-      hasIndexMaintenance = false,
       canUserREAD,
       hasIndexRead,
     },
@@ -234,6 +232,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     () => loading || !Array.isArray(detectionPageFilters),
     [loading, detectionPageFilters]
   );
+
   const isChartPanelLoading = useMemo(
     () => isLoadingIndexPattern || !Array.isArray(detectionPageFilters),
     [isLoadingIndexPattern, detectionPageFilters]
@@ -340,6 +339,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
               tableId={TableId.alertsOnAlertsPage}
               from={from}
               to={to}
+              isLoading={isAlertTableLoading}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>

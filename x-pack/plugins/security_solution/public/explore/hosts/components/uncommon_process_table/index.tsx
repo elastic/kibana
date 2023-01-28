@@ -227,7 +227,7 @@ export const getHostNames = (hosts: HostEcs[]): string[] => {
 export const getUncommonColumnsCurated = (pageType: HostsType): UncommonProcessTableColumns => {
   const columns: UncommonProcessTableColumns = getUncommonColumns();
   if (pageType === HostsType.details) {
-    return [i18n.HOSTS, i18n.NUMBER_OF_HOSTS].reduce((acc, name) => {
+    return [i18n.HOSTS, i18n.NUMBER_OF_HOSTS].reduce<UncommonProcessTableColumns>((acc, name) => {
       acc.splice(
         acc.findIndex((column) => column.name === name),
         1
