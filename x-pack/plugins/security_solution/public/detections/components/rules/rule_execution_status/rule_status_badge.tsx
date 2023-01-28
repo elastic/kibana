@@ -30,7 +30,9 @@ const RuleStatusBadgeComponent = ({ status, message }: RuleStatusBadgeProps) => 
   const statusColor = getStatusColor(status);
   return (
     <HealthTruncateText
-      tooltipContent={statusTooltip}
+      tooltipContent={statusTooltip?.split('\n').map((line) => (
+        <p>{line}</p>
+      ))}
       healthColor={statusColor}
       dataTestSubj="ruleExecutionStatus"
     >
