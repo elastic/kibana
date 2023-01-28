@@ -85,3 +85,38 @@ export const fetchFleetAgents = async (
     })
     .then((response) => response.data);
 };
+
+/**
+ * Will keep querying Fleet list of agents until the given `hostname` shows up as healthy
+ *
+ * @param kbnClient
+ * @param hostname
+ * @param timeoutMs
+ */
+export const waitForHostToEnroll = async (
+  kbnClient: KbnClient,
+  hostname: string,
+  timeoutMs: number = 15000
+): Promise<void> => {
+  const started = new Date();
+  const hasTimedOut = (): boolean => {
+    const elapsedTime = Date.now() - started.getTime();
+    return elapsedTime > timeoutMs;
+  };
+  let found = false;
+
+  while (!found && !hasTimedOut()) {
+    const hostAgent = await fetchFleetAgents(kbnClient, {
+      perPage: 1,
+      kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
+      showInactive: false,
+    }).then((response) => response.items[0]);
+
+    if (hostAgent) {
+      found = true;
+    } else {
+      // sleep and check again
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+};
