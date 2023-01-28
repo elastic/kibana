@@ -2541,6 +2541,28 @@ describe('successful migrations', () => {
 
       expect(migratedAlert870.attributes.params).toEqual({ foo: true });
     });
+
+    test('adds uuid to rule actions', () => {
+      const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0'];
+      const rule = getMockData(
+        {
+          params: { foo: true },
+          alertTypeId: '.not-es-query',
+        },
+        true
+      );
+      const migratedAlert870 = migration870(rule, migrationContext);
+
+      expect(migratedAlert870.attributes.actions).toEqual([
+        {
+          group: 'default',
+          actionRef: '1',
+          actionTypeId: '1',
+          params: { foo: true },
+          uuid: expect.any(String),
+        },
+      ]);
+    });
   });
 
   describe('Metrics Inventory Threshold rule', () => {

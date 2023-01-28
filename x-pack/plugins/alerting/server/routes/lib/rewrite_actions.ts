@@ -5,14 +5,15 @@
  * 2.0.
  */
 import { CamelToSnake, RewriteRequestCase } from './rewrite_request_case';
-import { RuleAction, RuleActionOptionalUuid } from '../../types';
+import { RuleAction } from '../../types';
 
-type ReqRuleAction = Omit<RuleActionOptionalUuid, 'actionTypeId' | 'frequency'> & {
+type ReqRuleAction = Omit<RuleAction, 'actionTypeId' | 'frequency' | 'uuid'> & {
   frequency?: {
     [K in keyof NonNullable<RuleAction['frequency']> as CamelToSnake<K>]: NonNullable<
       RuleAction['frequency']
     >[K];
   };
+  uuid?: string;
 };
 export const rewriteActionsReq: (
   actions?: ReqRuleAction[]

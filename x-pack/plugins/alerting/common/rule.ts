@@ -83,10 +83,6 @@ export interface RuleAction {
   };
 }
 
-export type RuleActionOptionalUuid = Omit<RuleAction, 'uuid'> & {
-  uuid?: string;
-};
-
 export interface RuleAggregations {
   alertExecutionStatus: { [status: string]: number };
   ruleLastRunOutcome: { [status: string]: number };

@@ -113,7 +113,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
       id,
       data: {
         ...data,
-        actions: data.actions.map((action) => ({
+        actions: (data.actions || []).map((action) => ({
           ...action,
           uuid: action.uuid || v4(),
         })),
@@ -222,7 +222,6 @@ async function updateAlert<Params extends RuleTypeParams>(
     updatedBy: username,
     updatedAt: new Date().toISOString(),
   });
-
   const mappedParams = getMappedParams(updatedParams);
 
   if (Object.keys(mappedParams).length) {
