@@ -139,8 +139,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
-  // todo verify if is correct
-  const useLegacy = services.uiSettings.get<boolean>('lens:useFieldExistenceSampling');
 
   const querySubscriberResult = useQuerySubscriber({ data });
 
@@ -189,7 +187,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     const subscription = props.documents$.subscribe((documentState) => {
       console.log('*** documents$ is firing', documentState.recordRawType);
       const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
-      const fieldsFromResults = useLegacy || isPlainRecordType;
 
       // todo - make this parallel to fetch - what triggers new docs?
       switch (documentState?.fetchStatus) {
@@ -202,13 +199,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           });
           break;
         case FetchStatus.LOADING:
-          console.log(
-            '*** fetchStatus.LOADING is firing ',
-            fieldsFromResults,
-            useLegacy,
-            isPlainRecordType
-          );
-          if (fieldsFromResults) {
+          console.log('*** fetchStatus.LOADING is firing ', isPlainRecordType);
+          if (isPlainRecordType) {
             console.log('*** BOO OLDDDD');
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
@@ -222,7 +214,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           }
           break;
         case FetchStatus.COMPLETE:
-          if (fieldsFromResults) {
+          if (isPlainRecordType) {
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
               payload: {
@@ -233,7 +225,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
             });
           }
-          if (fieldsFromResults) {
+          /*
+          if (isPlainRecordType) {
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
               payload: {
@@ -246,6 +239,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
             });
           }
+          */
           break;
         case FetchStatus.ERROR:
           dispatchSidebarStateAction({
@@ -262,7 +256,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, useLegacy, fetchFields]);
+  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, fetchFields]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {
