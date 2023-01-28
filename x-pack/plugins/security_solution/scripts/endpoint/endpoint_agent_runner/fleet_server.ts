@@ -28,7 +28,7 @@ import type {
 import { outputRoutesService } from '@kbn/fleet-plugin/common/services';
 import execa from 'execa';
 import { isLocalhost } from '../common/localhost_services';
-import { fetchFleetAgents } from '../common/fleet_services';
+import { fetchFleetAgents, waitForHostToEnroll } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
 export const runFleetServerIfNeeded = async () => {
@@ -175,6 +175,7 @@ const startFleetServerWithDocker = async ({
     log,
     localhostRealIp,
     elastic: { url: elasticUrl, isLocalhost: isElasticOnLocalhost },
+    kbnClient,
   } = getRuntimeServices();
 
   log.info(`Starting a new fleet server using Docker`);
@@ -245,8 +246,7 @@ const startFleetServerWithDocker = async ({
 
     const containerId = (await execa('docker', dockerArgs)).stdout;
 
-    // TODO:PT Remove delay once we are able to determine if fleet server connected
-    await new Promise((r) => setTimeout(r, 15000));
+    await waitForHostToEnroll(kbnClient, containerName);
 
     log.info(`Done. Fleet Server is running and connected to Fleet.
   Container Name: ${containerName}
