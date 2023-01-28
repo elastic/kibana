@@ -3134,6 +3134,106 @@ describe('IndexPattern Data Source', () => {
         `);
         expect(getErrorMessages).toHaveBeenCalledTimes(2);
       });
+
+      describe('dimension button error behavior', () => {
+        const state: FormBasedPrivateState = {
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {
+                col1: {
+                  operationType: 'terms',
+                  filter: {
+                    query: '::: bad query that will mark column invalid',
+                    language: 'kuery',
+                  },
+
+                  sourceField: 'op',
+                  params: {
+                    size: 5,
+                    orderBy: { type: 'alphabetical' },
+                    orderDirection: 'asc',
+                  },
+                  label: 'My Op',
+                  dataType: 'string',
+                  isBucketed: true,
+                } as TermsIndexPatternColumn,
+              },
+            },
+          },
+          currentIndexPatternId: '1',
+        };
+
+        it('should generate generic error if column invalid', () => {
+          (getErrorMessages as jest.Mock).mockClear();
+          (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
+
+          const messages = FormBasedDatasource.getUserMessages(state, {
+            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            setState: () => {},
+          });
+
+          expect(messages.length).toBe(1);
+
+          expect(messages).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "displayLocations": Array [
+                  Object {
+                    "dimensionId": "col1",
+                    "id": "dimensionButton",
+                  },
+                ],
+                "fixableInEditor": true,
+                "longMessage": <p>
+                  Invalid configuration.
+                  <br />
+                  Click for more details.
+                </p>,
+                "severity": "error",
+                "shortMessage": "",
+              },
+            ]
+          `);
+        });
+
+        it('should override generic error if operation generates something specific', () => {
+          (getErrorMessages as jest.Mock).mockClear();
+          (getErrorMessages as jest.Mock).mockReturnValueOnce([
+            {
+              displayLocations: [{ id: 'dimensionButton', dimensionId: 'col1' }],
+              message: 'specific error',
+            },
+          ] as ReturnType<typeof getErrorMessages>);
+
+          const messages = FormBasedDatasource.getUserMessages(state, {
+            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            setState: () => {},
+          });
+
+          expect(messages.length).toBe(1);
+
+          expect(messages).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "displayLocations": Array [
+                  Object {
+                    "dimensionId": "col1",
+                    "id": "dimensionButton",
+                  },
+                ],
+                "fixableInEditor": true,
+                "longMessage": <React.Fragment>
+                  specific error
+                </React.Fragment>,
+                "severity": "error",
+                "shortMessage": "",
+              },
+            ]
+          `);
+        });
+      });
     });
 
     describe('warning messages', () => {

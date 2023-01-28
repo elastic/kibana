@@ -78,6 +78,8 @@ export function isColumnInvalid(
       operationDefinitionMap
     );
 
+  // it looks like this is just a back-stop since we prevent
+  // invalid filters from being set at the UI level
   const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
 
   return (
