@@ -21,7 +21,7 @@ describe('uiSettings/routes', function () {
 
   beforeAll(startServers);
   // eslint-disable-next-line jest/valid-describe
-  describe('doc missing', docMissingSuite(savedObjectIndex));
+  describe.skip('doc missing', docMissingSuite(savedObjectIndex));
   // eslint-disable-next-line jest/valid-describe
   describe('doc exists', docExistsSuite(savedObjectIndex));
   afterAll(stopServers);

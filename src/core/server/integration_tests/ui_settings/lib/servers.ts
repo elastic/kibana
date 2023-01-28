@@ -18,6 +18,7 @@ import {
   type TestUtils,
   type HttpMethod,
 } from '@kbn/core-test-helpers-kbn-server';
+import { schema } from '@kbn/config-schema';
 import type { SavedObjectsClientContract, IUiSettingsClient } from '../../..';
 
 let servers: TestUtils;
@@ -49,6 +50,19 @@ export async function startServers() {
   });
   esServer = await servers.startES();
   kbn = await servers.startKibana();
+  // register global setting
+  kbn.coreSetup.uiSettings.registerGlobal({
+    foo: {
+      value: 'bar',
+      schema: schema.string(),
+    },
+  });
+  kbn.coreSetup.uiSettings.registerGlobal({
+    defaultIndex: {
+      value: 'something',
+      schema: schema.string(),
+    },
+  });
 }
 
 export function getServices() {
