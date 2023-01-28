@@ -268,7 +268,7 @@ export const previewRulesRoute = async (
 
             const errors = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-              .map((item) => item.message ?? 'Unkown Error');
+              .map((item) => item.message ?? 'Unknown Error');
 
             const warnings = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])

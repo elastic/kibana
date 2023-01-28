@@ -160,9 +160,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
         initialFocus=".canvasCustomElementForm__name"
       >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <h3>{title}</h3>
-          </EuiModalHeaderTitle>
+          <EuiModalHeaderTitle component="h3">{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
