@@ -7,7 +7,7 @@
 
 import type { Client, estypes } from '@elastic/elasticsearch';
 import { AGENT_API_ROUTES, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import type { AgentStatus, GetAgentsResponse } from '@kbn/fleet-plugin/common';
+import type { AgentStatus, GetAgentsResponse, Agent } from '@kbn/fleet-plugin/common';
 import { pick } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { GetAgentsRequest } from '@kbn/fleet-plugin/common/types';
@@ -97,26 +97,30 @@ export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
   hostname: string,
   timeoutMs: number = 15000
-): Promise<void> => {
+): Promise<Agent> => {
   const started = new Date();
   const hasTimedOut = (): boolean => {
     const elapsedTime = Date.now() - started.getTime();
     return elapsedTime > timeoutMs;
   };
-  let found = false;
+  let found: Agent | undefined;
 
   while (!found && !hasTimedOut()) {
-    const hostAgent = await fetchFleetAgents(kbnClient, {
+    found = await fetchFleetAgents(kbnClient, {
       perPage: 1,
       kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
       showInactive: false,
     }).then((response) => response.items[0]);
 
-    if (hostAgent) {
-      found = true;
-    } else {
+    if (!found) {
       // sleep and check again
       await new Promise((r) => setTimeout(r, 2000));
     }
   }
+
+  if (!found) {
+    throw new Error(`Timed out waiting for host [${hostname}] to show up in Fleet`);
+  }
+
+  return found;
 };

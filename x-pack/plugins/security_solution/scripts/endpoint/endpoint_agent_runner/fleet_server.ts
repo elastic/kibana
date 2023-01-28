@@ -246,7 +246,9 @@ const startFleetServerWithDocker = async ({
 
     const containerId = (await execa('docker', dockerArgs)).stdout;
 
-    await waitForHostToEnroll(kbnClient, containerName);
+    const fleetServerAgent = await waitForHostToEnroll(kbnClient, containerName);
+
+    log.verbose(`Fleet server enrolled agent:\n${fleetServerAgent}`);
 
     log.info(`Done. Fleet Server is running and connected to Fleet.
   Container Name: ${containerName}
@@ -337,8 +339,6 @@ const configureFleetIfNeeded = async () => {
         }
       }
     }
-
-    // TODO:PT should we also add an entry to the Fleet server list in settings?
   } catch (error) {
     log.indent(-4);
     throw error;
