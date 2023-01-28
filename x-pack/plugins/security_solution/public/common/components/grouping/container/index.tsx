@@ -92,14 +92,17 @@ const GroupingContainerComponent = ({
         return (
           <span key={groupKey}>
             <GroupPanel
-              selectedGroup={selectedGroup}
-              groupBucket={groupBucket}
-              forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
-              renderChildComponent={
-                trigger[groupKey] && trigger[groupKey].state === 'open'
-                  ? renderChildComponent
-                  : () => null
+              extraAction={
+                <GroupStats
+                  bucket={groupBucket}
+                  takeActionItems={takeActionItems(createGroupFilter(selectedGroup, group))}
+                  badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
+                  customMetricStats={customMetricStats && customMetricStats(groupBucket)}
+                />
               }
+              forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
+              groupBucket={groupBucket}
+              groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
               onToggleGroup={(isOpen) => {
                 setTrigger({
                   // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
@@ -109,15 +112,12 @@ const GroupingContainerComponent = ({
                   },
                 });
               }}
-              extraAction={
-                <GroupStats
-                  bucket={groupBucket}
-                  takeActionItems={takeActionItems(createGroupFilter(selectedGroup, group))}
-                  badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
-                  customMetricStats={customMetricStats && customMetricStats(groupBucket)}
-                />
+              renderChildComponent={
+                trigger[groupKey] && trigger[groupKey].state === 'open'
+                  ? renderChildComponent
+                  : () => null
               }
-              groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
+              selectedGroup={selectedGroup}
             />
             <EuiSpacer size="s" />
           </span>

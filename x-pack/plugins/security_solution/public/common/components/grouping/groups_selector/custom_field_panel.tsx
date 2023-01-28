@@ -47,7 +47,7 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
       .map((f) => ({ label: f.name }));
     const isSubmitDisabled = !this.state.selectedOptions.length;
     return (
-      <div style={{ padding: 16 }}>
+      <div data-test-subj="custom-field-panel" style={{ padding: 16 }}>
         <EuiForm>
           <EuiFormRow
             label={i18n.translate('xpack.securitySolution.groupsSelector.customGroupByFieldLabel', {

@@ -17,20 +17,24 @@ import { CustomFieldPanel } from './custom_field_panel';
 import { GROUP_BY, TECHNICAL_PREVIEW } from '../translations';
 import { StyledContextMenu } from '../styles';
 
+const none = i18n.translate('xpack.securitySolution.groupsSelector.noneGroupByOptionName', {
+  defaultMessage: 'None',
+});
+
 interface GroupSelectorProps {
-  onGroupChange: (groupSelection?: string) => void;
+  fields: FieldSpec[];
   groupSelected?: string;
   onClearSelected: () => void;
-  fields: FieldSpec[];
+  onGroupChange: (groupSelection?: string) => void;
   options: Array<{ key: string; label: string }>;
   title?: string;
 }
 
 const GroupsSelectorComponent = ({
-  groupSelected = 'none',
-  onGroupChange,
-  onClearSelected,
   fields,
+  groupSelected = 'none',
+  onClearSelected,
+  onGroupChange,
   options,
   title = '',
 }: GroupSelectorProps) => {
@@ -41,22 +45,22 @@ const GroupsSelectorComponent = ({
         id: 'firstPanel',
         items: [
           {
-            name: i18n.translate('xpack.securitySolution.groupsSelector.noneGroupByOptionName', {
-              defaultMessage: 'None',
-            }),
+            'data-test-subj': 'panel-none',
+            name: none,
             icon: groupSelected === 'none' || !groupSelected ? 'check' : 'empty',
-            onClick: () => onClearSelected(),
+            onClick: onClearSelected,
           },
-          ...options.map((o) => {
-            const icon = groupSelected === o.key ? 'check' : 'empty';
-            const panel = {
-              name: o.label,
-              onClick: () => onGroupChange(o.key),
-              icon,
-            } as EuiContextMenuPanelItemDescriptor;
-            return panel;
-          }),
+          ...options.map(
+            (o) =>
+              ({
+                'data-test-subj': `panel-${o.key}`,
+                name: o.label,
+                onClick: () => onGroupChange(o.key),
+                icon: groupSelected === o.key ? 'check' : 'empty',
+              } as EuiContextMenuPanelItemDescriptor)
+          ),
           {
+            'data-test-subj': `panel-custom`,
             name: i18n.translate('xpack.securitySolution.groupsSelector.customGroupByOptionName', {
               defaultMessage: 'Custom field',
             }),
@@ -84,8 +88,10 @@ const GroupsSelectorComponent = ({
     ],
     [fields, groupSelected, onClearSelected, onGroupChange, options]
   );
-
-  const selectedOption = options.filter((groupOption) => groupOption.key === groupSelected);
+  const selectedOption = useMemo(
+    () => options.filter((groupOption) => groupOption.key === groupSelected),
+    [groupSelected, options]
+  );
 
   const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -93,17 +99,18 @@ const GroupsSelectorComponent = ({
   const button = useMemo(
     () => (
       <EuiButtonEmpty
-        iconType="arrowDown"
+        data-test-subj="group-selector-dropdown"
+        flush="both"
         iconSide="right"
         iconSize="s"
+        iconType="arrowDown"
         onClick={onButtonClick}
         size="xs"
-        flush="both"
         style={{ fontWeight: 'normal' }}
       >
-        {title ?? GROUP_BY}
-        {': '}
-        {groupSelected && selectedOption.length > 0 ? selectedOption[0].label : 'None'}
+        {`${title ?? GROUP_BY}: ${
+          groupSelected && selectedOption.length > 0 ? selectedOption[0].label : none
+        }`}
       </EuiButtonEmpty>
     ),
     [groupSelected, onButtonClick, selectedOption, title]
@@ -113,15 +120,15 @@ const GroupsSelectorComponent = ({
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem>
         <EuiPopover
-          panelPaddingSize="none"
           button={button}
-          isOpen={isPopoverOpen}
           closePopover={closePopover}
+          isOpen={isPopoverOpen}
+          panelPaddingSize="none"
         >
           <StyledContextMenu
+            data-test-subj="groupByContextMenu"
             initialPanelId="firstPanel"
             panels={panels}
-            data-test-subj="groupByContextMenu"
           />
         </EuiPopover>
       </EuiFlexItem>
