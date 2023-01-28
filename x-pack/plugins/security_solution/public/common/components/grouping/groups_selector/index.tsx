@@ -9,37 +9,13 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBetaBadge,
-  EuiButtonEmpty,
-  EuiPopover,
-  EuiContextMenu,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CustomFieldPanel } from './custom_field_panel';
 import { GROUP_BY, TECHNICAL_PREVIEW } from '../translations';
-
-export type GroupSelection = 'kibana.alert.rule.name' | 'user.name' | 'host.name' | 'source.ip';
-
-const StyledContextMenu = euiStyled(EuiContextMenu)`
-  width: 250px;
-  & .euiContextMenuItem__text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .euiContextMenuItem {
-    border-bottom: 1px solid;
-    border-color: #D4DAE5;
-  }
-  .euiContextMenuItem:last-child {
-    border: none;
-  }
-`;
+import { StyledContextMenu } from '../styles';
 
 interface GroupSelectorProps {
   onGroupChange: (groupSelection?: string) => void;

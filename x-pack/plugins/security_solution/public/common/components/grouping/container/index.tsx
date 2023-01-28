@@ -167,18 +167,24 @@ const GroupingContainerComponent = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <GroupingStyledContainer>
-        {groupsNumber > 0 ? groupPanels : <EmptyGroupingComponent />}
-        <EuiSpacer size="m" />
-        <EuiTablePagination
-          activePage={pagination.pageIndex}
-          data-test-subj="grouping-table-pagination"
-          itemsPerPage={pagination.pageSize}
-          itemsPerPageOptions={tableDefaults.itemsPerPageOptions}
-          onChangeItemsPerPage={pagination.onChangeItemsPerPage}
-          onChangePage={pagination.onChangePage}
-          pageCount={pageCount}
-          showPerPageOptions
-        />
+        {groupsNumber > 0 ? (
+          <>
+            {groupPanels}
+            <EuiSpacer size="m" />
+            <EuiTablePagination
+              activePage={pagination.pageIndex}
+              data-test-subj="grouping-table-pagination"
+              itemsPerPage={pagination.pageSize}
+              itemsPerPageOptions={tableDefaults.itemsPerPageOptions}
+              onChangeItemsPerPage={pagination.onChangeItemsPerPage}
+              onChangePage={pagination.onChangePage}
+              pageCount={pageCount}
+              showPerPageOptions
+            />
+          </>
+        ) : (
+          <EmptyGroupingComponent />
+        )}
       </GroupingStyledContainer>
     </>
   );

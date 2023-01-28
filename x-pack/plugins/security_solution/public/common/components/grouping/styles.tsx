@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EuiContextMenu } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import styled from 'styled-components';
 
 export const GroupsUnitCount = styled.span`
@@ -40,6 +42,8 @@ export const GroupingStyledContainer = styled.div`
     border-bottom: 1px solid #d3dae6;
     border-radius: 5px;
     min-height: 78px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
   .groupingAccordionForm {
     border-top: 1px solid #d3dae6;
@@ -47,5 +51,23 @@ export const GroupingStyledContainer = styled.div`
     border-right: 1px solid #d3dae6;
     border-bottom: none;
     border-radius: 5px;
+  }
+  .groupingAccordionForm__button {
+    text-decoration: none !important;
+  }
+`;
+
+export const StyledContextMenu = euiStyled(EuiContextMenu)`
+  width: 250px;
+  & .euiContextMenuItem__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .euiContextMenuItem {
+    border-bottom: 1px solid;
+    border-color: #D4DAE5;
+  }
+  .euiContextMenuItem:last-child {
+    border: none;
   }
 `;
