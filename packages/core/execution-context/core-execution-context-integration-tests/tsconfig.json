@@ -16,5 +16,6 @@
   "kbn_references": [
     "@kbn/core-execution-context-browser-internal",
     "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-http-request-handler-context-server",
   ]
 }
