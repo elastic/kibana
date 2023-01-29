@@ -143,10 +143,15 @@ export interface ServiceContext {
   auditLogger: AuditLogger;
 }
 
+export interface PushTimeFrameInfo {
+  mostRecent: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  oldest: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+}
+
 export interface CaseConnectorActivity {
   connectorId: string;
   fields: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
-  push?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  push?: PushTimeFrameInfo;
 }
 
 export type CaseConnectorFields = Map<
