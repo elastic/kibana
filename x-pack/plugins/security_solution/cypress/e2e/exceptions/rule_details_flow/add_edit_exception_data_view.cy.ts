@@ -16,7 +16,9 @@ import {
   goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../tasks/alerts';
 import {
-  addExceptionConditions,
+  addExceptionEntryFieldValue,
+  addExceptionEntryFieldValueValue,
+  addExceptionEntryOperatorValue,
   addExceptionFlyoutItemName,
   editException,
   editExceptionFlyoutItemName,
@@ -47,8 +49,8 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_ITEM_CONTAINER,
-  FIELD_INPUT,
   VALUES_INPUT,
+  FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
@@ -94,11 +96,11 @@ describe('Add exception using data views from rule details', () => {
   it('Creates an exception item from alert actions overflow menu', () => {
     cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
-    addExceptionConditions({
-      field: 'agent.name',
-      operator: 'is',
-      values: ['foo'],
-    });
+
+    addExceptionEntryFieldValue('agent.name', 0);
+    addExceptionEntryOperatorValue('is', 0);
+    addExceptionEntryFieldValueValue('foo', 0);
+
     addExceptionFlyoutItemName(ITEM_NAME);
     selectBulkCloseAlerts();
     submitNewExceptionItem();
@@ -212,7 +214,11 @@ describe('Add exception using data views from rule details', () => {
     editExceptionFlyoutItemName(NEW_ITEM_NAME);
 
     // check that the existing item's field is being populated
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(0).should('have.text', ITEM_FIELD);
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(0)
+      .find(FIELD_INPUT_PARENT)
+      .eq(0)
+      .should('have.text', ITEM_FIELD);
     cy.get(VALUES_INPUT).should('have.text', 'foo');
 
     // edit conditions

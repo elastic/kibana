@@ -52,10 +52,10 @@ import {
   CONFIRM_BTN,
   ADD_TO_SHARED_LIST_RADIO_INPUT,
   EXCEPTION_ITEM_CONTAINER,
-  FIELD_INPUT,
   VALUES_MATCH_ANY_INPUT,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
+  FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 import {
   createExceptionList,
@@ -145,7 +145,7 @@ describe('Add/edit exception from rule details', () => {
       // check that the existing item's field is being populated
       cy.get(EXCEPTION_ITEM_CONTAINER)
         .eq(0)
-        .find(FIELD_INPUT)
+        .find(FIELD_INPUT_PARENT)
         .eq(0)
         .should('have.text', ITEM_FIELD);
       cy.get(VALUES_MATCH_ANY_INPUT).should('have.text', 'foo');
