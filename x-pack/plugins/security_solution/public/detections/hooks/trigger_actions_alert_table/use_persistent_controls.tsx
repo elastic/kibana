@@ -66,6 +66,7 @@ export const getPersistentControlsHook = (tableId: TableId) => {
     return {
       right: (
         <RightTopMenu
+          position="relative"
           tableView={tableView}
           loading={false}
           tableId={tableId}
@@ -73,6 +74,7 @@ export const getPersistentControlsHook = (tableId: TableId) => {
           onViewChange={handleChangeTableView}
           hasRightOffset={false}
           additionalFilters={additionalFiltersComponent}
+          showInspect={false}
         />
       ),
     };

@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { CSSProperties } from 'styled-components';
 import styled from 'styled-components';
 import type { ViewSelection } from '../../../../common/types';
 import { TableId } from '../../../../common/types';
@@ -26,6 +27,8 @@ interface Props {
   onViewChange: (viewSelection: ViewSelection) => void;
   additionalFilters?: React.ReactNode;
   hasRightOffset?: boolean;
+  showInspect?: boolean;
+  position?: CSSProperties['position'];
 }
 
 export const RightTopMenu = ({
@@ -36,6 +39,8 @@ export const RightTopMenu = ({
   onViewChange,
   additionalFilters,
   hasRightOffset,
+  showInspect = true,
+  position = 'absolute',
 }: Props) => {
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
@@ -52,10 +57,13 @@ export const RightTopMenu = ({
       justifyContent="flexEnd"
       direction="row"
       $hasRightOffset={hasRightOffset}
+      position={position}
     >
-      <UpdatedFlexItem grow={false} $show={!loading}>
-        <InspectButton title={justTitle} queryId={tableId} />
-      </UpdatedFlexItem>
+      {showInspect ? (
+        <UpdatedFlexItem grow={false} $show={!loading}>
+          <InspectButton title={justTitle} queryId={tableId} />
+        </UpdatedFlexItem>
+      ) : null}
       <UpdatedFlexItem grow={false} $show={!loading}>
         {additionalFilters}
       </UpdatedFlexItem>

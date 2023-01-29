@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import type { CSSProperties } from 'styled-components';
 import styled from 'styled-components';
 export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
 export const EVENTS_TABLE_CLASS_NAME = 'siemEventsTable';
@@ -36,16 +37,27 @@ export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
 
 export const UpdatedFlexGroup = styled(EuiFlexGroup)<{
   $hasRightOffset?: boolean;
+  position: CSSProperties['position'];
 }>`
-  ${({ $hasRightOffset, theme }) =>
-    $hasRightOffset
+  ${({ $hasRightOffset, theme, position }) =>
+    position === 'relative'
+      ? `margin-right: ${theme.eui.euiSizeXS}; margin-left: `
+      : $hasRightOffset && position === 'absolute'
       ? `margin-right: ${theme.eui.euiSizeXL};`
       : `margin-right: ${theme.eui.euiSizeXS};`}
-  position: relative;
+  position: ${({ position }) => {
+    return position === 'relative'
+      ? `display: flex; justify-content:center; align-items:center`
+      : `position: absolute`;
+  }};
   display: inline-flex;
   z-index: ${({ theme }) => theme.eui.euiZLevel1 - 3};
-  ${({ $hasRightOffset, theme }) =>
-    $hasRightOffset ? `right: ${theme.eui.euiSizeXL * 2};` : `right: ${theme.eui.euiSizeXS};`}
+  ${({ $hasRightOffset, theme, position }) =>
+    position === 'relative'
+      ? `right: 0;`
+      : $hasRightOffset && position === 'absolute'
+      ? `right: ${theme.eui.euiSizeXL};`
+      : `right: ${theme.eui.euiSizeL};`}
 `;
 
 export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`
