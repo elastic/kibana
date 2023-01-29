@@ -708,6 +708,7 @@ packages/core/application/core-application-browser-mocks @elastic/kibana-core
 packages/core/application/core-application-common @elastic/kibana-core
 packages/core/apps/core-apps-browser-internal @elastic/kibana-core
 packages/core/apps/core-apps-browser-mocks @elastic/kibana-core
+packages/core/apps/core-apps-integration-tests @elastic/kibana-core
 packages/core/apps/core-apps-server-internal @elastic/kibana-core
 packages/core/base/core-base-browser-internal @elastic/kibana-core
 packages/core/base/core-base-browser-mocks @elastic/kibana-core
@@ -718,12 +719,14 @@ packages/core/base/core-base-server-mocks @elastic/kibana-core
 packages/core/capabilities/core-capabilities-browser-internal @elastic/kibana-core
 packages/core/capabilities/core-capabilities-browser-mocks @elastic/kibana-core
 packages/core/capabilities/core-capabilities-common @elastic/kibana-core
+packages/core/capabilities/core-capabilities-integration-tests @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server-internal @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server-mocks @elastic/kibana-core
 packages/core/chrome/core-chrome-browser @elastic/kibana-core
 packages/core/chrome/core-chrome-browser-internal @elastic/kibana-core
 packages/core/chrome/core-chrome-browser-mocks @elastic/kibana-core
+packages/core/config/core-config-integration-tests @elastic/kibana-core
 packages/core/config/core-config-server-internal @elastic/kibana-core
 packages/core/custom-branding/core-custom-branding-browser @elastic/appex-sharedux
 packages/core/custom-branding/core-custom-branding-browser-internal @elastic/appex-sharedux
@@ -747,6 +750,7 @@ packages/core/doc-links/core-doc-links-server-internal @elastic/kibana-core
 packages/core/doc-links/core-doc-links-server-mocks @elastic/kibana-core
 packages/core/elasticsearch/core-elasticsearch-client-server-internal @elastic/kibana-core
 packages/core/elasticsearch/core-elasticsearch-client-server-mocks @elastic/kibana-core
+packages/core/elasticsearch/core-elasticsearch-integration-tests @elastic/kibana-core
 packages/core/elasticsearch/core-elasticsearch-server @elastic/kibana-core
 packages/core/elasticsearch/core-elasticsearch-server-internal @elastic/kibana-core
 packages/core/elasticsearch/core-elasticsearch-server-mocks @elastic/kibana-core
@@ -756,6 +760,7 @@ packages/core/execution-context/core-execution-context-browser @elastic/kibana-c
 packages/core/execution-context/core-execution-context-browser-internal @elastic/kibana-core
 packages/core/execution-context/core-execution-context-browser-mocks @elastic/kibana-core
 packages/core/execution-context/core-execution-context-common @elastic/kibana-core
+packages/core/execution-context/core-execution-context-integration-tests @elastic/kibana-core
 packages/core/execution-context/core-execution-context-server @elastic/kibana-core
 packages/core/execution-context/core-execution-context-server-internal @elastic/kibana-core
 packages/core/execution-context/core-execution-context-server-mocks @elastic/kibana-core
@@ -768,8 +773,10 @@ packages/core/http/core-http-browser-mocks @elastic/kibana-core
 packages/core/http/core-http-common @elastic/kibana-core
 packages/core/http/core-http-context-server-internal @elastic/kibana-core
 packages/core/http/core-http-context-server-mocks @elastic/kibana-core
+packages/core/http/core-http-integration-tests @elastic/kibana-core
 packages/core/http/core-http-request-handler-context-server @elastic/kibana-core
 packages/core/http/core-http-request-handler-context-server-internal @elastic/kibana-core
+packages/core/http/core-http-resources-integration-tests @elastic/kibana-core
 packages/core/http/core-http-resources-server @elastic/kibana-core
 packages/core/http/core-http-resources-server-internal @elastic/kibana-core
 packages/core/http/core-http-resources-server-mocks @elastic/kibana-core
@@ -798,16 +805,19 @@ packages/core/lifecycle/core-lifecycle-server-mocks @elastic/kibana-core
 packages/core/logging/core-logging-browser-internal @elastic/kibana-core
 packages/core/logging/core-logging-browser-mocks @elastic/kibana-core
 packages/core/logging/core-logging-common-internal @elastic/kibana-core
+packages/core/logging/core-logging-integration-tests @elastic/kibana-core
 packages/core/logging/core-logging-server @elastic/kibana-core
 packages/core/logging/core-logging-server-internal @elastic/kibana-core
 packages/core/logging/core-logging-server-mocks @elastic/kibana-core
 packages/core/metrics/core-metrics-collectors-server-internal @elastic/kibana-core
 packages/core/metrics/core-metrics-collectors-server-mocks @elastic/kibana-core
+packages/core/metrics/core-metrics-integration-tests @elastic/kibana-core
 packages/core/metrics/core-metrics-server @elastic/kibana-core
 packages/core/metrics/core-metrics-server-internal @elastic/kibana-core
 packages/core/metrics/core-metrics-server-mocks @elastic/kibana-core
 packages/core/mount-utils/core-mount-utils-browser @elastic/kibana-core
 packages/core/mount-utils/core-mount-utils-browser-internal @elastic/kibana-core
+packages/core/node/core-node-integration-tests @elastic/kibana-core
 packages/core/node/core-node-server @elastic/kibana-core
 packages/core/node/core-node-server-internal @elastic/kibana-core
 packages/core/node/core-node-server-mocks @elastic/kibana-core
@@ -853,6 +863,7 @@ packages/core/saved-objects/core-saved-objects-server-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-utils-server @elastic/kibana-core
 packages/core/status/core-status-common @elastic/kibana-core
 packages/core/status/core-status-common-internal @elastic/kibana-core
+packages/core/status/core-status-integration-tests @elastic/kibana-core
 packages/core/status/core-status-server @elastic/kibana-core
 packages/core/status/core-status-server-internal @elastic/kibana-core
 packages/core/status/core-status-server-mocks @elastic/kibana-core
