@@ -7,6 +7,7 @@
  */
 
 import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
+import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import {
   createRoot,
   createTestServers,
@@ -14,8 +15,6 @@ import {
   request as kbnServerRequest,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-
-import { RequestHandlerContext } from '../..';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
