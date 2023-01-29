@@ -373,11 +373,10 @@ describe('AlertsTableState', () => {
       fireEvent.click(getByTestId('close'));
 
       await waitFor(() => {
-        // screen.debug(undefined, 1000000);
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
         expect(
           getByTestId('dataGridHeader')
-            .querySelectorAll('.euiDataGridHeaderCell__content')[2]
+            .querySelectorAll('.euiDataGridHeaderCell__content')[1]
             .getAttribute('title')
         ).toBe('Name');
         // Failing because browserfield not picking up `displayAsText` from columns

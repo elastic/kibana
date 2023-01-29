@@ -27,7 +27,7 @@ describe('useFetchBrowserFieldCapabilities', () => {
     const { result } = renderHook(() => useFetchBrowserFieldCapabilities({ featureIds: ['siem'] }));
 
     expect(httpMock).toHaveBeenCalledTimes(0);
-    expect(result.current).toEqual([false, {}]);
+    expect(result.current).toEqual([undefined, {}]);
   });
 
   it('should call the api only once', async () => {

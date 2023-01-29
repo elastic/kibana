@@ -128,14 +128,15 @@ const AlertsTableState = ({
   const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
   const persistentControls = alertsTableConfiguration?.usePersistentControls?.();
 
+  const columnConfigByClient =
+    propColumns && !isEmpty(propColumns) ? propColumns : alertsTableConfiguration?.columns ?? [];
+
   const columnsLocal =
     localAlertsTableConfig &&
     localAlertsTableConfig.columns &&
     !isEmpty(localAlertsTableConfig?.columns)
       ? localAlertsTableConfig?.columns ?? []
-      : propColumns && !isEmpty(propColumns)
-      ? propColumns
-      : alertsTableConfiguration?.columns ?? [];
+      : columnConfigByClient;
 
   const storageAlertsTable = useRef<AlertsTableStorage>({
     columns: columnsLocal,
@@ -152,6 +153,22 @@ const AlertsTableState = ({
         ? localAlertsTableConfig?.visibleColumns ?? []
         : columnsLocal.map((c) => c.id),
   });
+
+  storageAlertsTable.current = {
+    columns: localAlertsTableConfig?.columns ?? columnsLocal,
+    sort:
+      localAlertsTableConfig &&
+      localAlertsTableConfig.sort &&
+      !isEmpty(localAlertsTableConfig?.sort)
+        ? localAlertsTableConfig?.sort ?? []
+        : alertsTableConfiguration?.sort ?? [],
+    visibleColumns:
+      localAlertsTableConfig &&
+      localAlertsTableConfig.visibleColumns &&
+      !isEmpty(localAlertsTableConfig?.visibleColumns)
+        ? localAlertsTableConfig?.visibleColumns ?? []
+        : columnsLocal.map((c) => c.id),
+  };
 
   const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
   const [pagination, setPagination] = useState({
@@ -173,7 +190,7 @@ const AlertsTableState = ({
     storageAlertsTable,
     storage,
     id,
-    defaultColumns: columnsLocal ?? [],
+    defaultColumns: columnConfigByClient,
   });
 
   const finalBrowserFields = useMemo(

@@ -382,7 +382,6 @@ describe('AlertsTable', () => {
 
         it('should show the row loader when callback triggered', async () => {
           render(<AlertsTableWithLocale {...customTableProps} />);
-          screen.debug(undefined, 1000000);
           fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
           // the callback given to our clients to run when they want to update the loading state

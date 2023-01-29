@@ -8,7 +8,7 @@
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEqual } from 'lodash';
 import { AlertsTableStorage } from '../../alerts_table_state';
@@ -149,31 +149,30 @@ export const useColumns = ({
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
   const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
 
-  const defaultColumnsRef = useRef<typeof defaultColumns>();
+  const defaultColumnsRef = useRef<typeof defaultColumns>(defaultColumns);
+
+  const didDefaultColumnChanged = useMemo(
+    () => !isEqual(defaultColumns, defaultColumnsRef.current),
+    [defaultColumns]
+  );
 
   useEffect(() => {
-    // check if default set of columns have changed
-    const defaultColumnsEqual = isEqual(defaultColumns, defaultColumnsRef.current);
-
-    if (!defaultColumnsEqual && isColumnsPopulated) {
-      // if changed, populate the columns again
-      setColumnsPopulated(false);
+    // if defaultColumns have changed, populate again
+    if (didDefaultColumnChanged) {
+      defaultColumnsRef.current = defaultColumns;
+      setColumns(storageAlertsTable.current.columns);
       return;
     }
+  }, [didDefaultColumnChanged, storageAlertsTable, defaultColumns]);
 
-    const isApiNeverCalled = isBrowserFieldDataLoading !== false; // loading, undefined
+  useEffect(() => {
+    if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
 
-    const noOp = isApiNeverCalled || isColumnsPopulated;
+    const populatedColumns = populateColumns(columns, browserFields, defaultColumns);
 
-    if (noOp) return;
-
-    defaultColumnsRef.current = defaultColumns;
-    const columnsToPopulate = defaultColumnsEqual ? columns : defaultColumns;
-
-    const populatedColumns = populateColumns(columnsToPopulate, browserFields, defaultColumns);
     setColumnsPopulated(true);
     setColumns(populatedColumns);
-  }, [browserFields, columns, defaultColumns, isBrowserFieldDataLoading, isColumnsPopulated]);
+  }, [browserFields, defaultColumns, isBrowserFieldDataLoading, isColumnsPopulated, columns]);
 
   const setColumnsAndSave = useCallback(
     (newColumns: EuiDataGridColumn[]) => {
