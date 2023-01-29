@@ -528,7 +528,11 @@ async function getUpdatedAttributesFromOperations(
 ) {
   let attributes = cloneDeep(rule.attributes);
   let ruleActions = {
-    actions: injectReferencesIntoActions(rule.id, rule.attributes.actions, rule.references || []),
+    actions: injectReferencesIntoActions(
+      rule.id,
+      rule.attributes.actions || [],
+      rule.references || []
+    ),
   };
 
   let hasUpdateApiKeyOperation = false;
@@ -642,7 +646,7 @@ async function getUpdatedAttributesFromOperations(
   return {
     attributes,
     ruleActions: {
-      actions: ruleActions.actions.map((action) => {
+      actions: (ruleActions.actions || []).map((action) => {
         return {
           ...action,
           uuid: action.uuid || v4(),
