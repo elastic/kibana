@@ -134,6 +134,41 @@ const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit'> = {
   timeUnit: 'm',
 };
 
+const availableFields = {
+  'host.name': {
+    keyword: {
+      type: 'keyword',
+      metadata_field: false,
+      searchable: true,
+      aggregatable: true,
+    },
+  },
+  'host.disk.read.bytes': {
+    long: {
+      type: 'long',
+      metadata_field: false,
+      searchable: true,
+      aggregatable: true,
+    },
+  },
+  'host.network.egress.bytes': {
+    long: {
+      type: 'long',
+      metadata_field: false,
+      searchable: true,
+      aggregatable: true,
+    },
+  },
+  'host.cpu.usage': {
+    scaled_float: {
+      type: 'scaled_float',
+      metadata_field: false,
+      searchable: true,
+      aggregatable: true,
+    },
+  },
+};
+
 const TIMESTAMP_FIELD = '@timestamp';
 const FILEBEAT_INDEX = 'filebeat-*';
 const EXECUTION_TIMESTAMP = new Date('2022-01-01T00:00:00.000Z').valueOf();
@@ -290,10 +325,8 @@ describe('Log threshold executor', () => {
                   aggregations: {
                     additionalContext: {
                       top_hits: {
-                        _source: {
-                          excludes: ['host.cpu.*', 'host.disk.*', 'host.network.*'],
-                          includes: ['host'],
-                        },
+                        _source: false,
+                        fields: ['host.*'],
                         size: 1,
                       },
                     },
@@ -401,10 +434,8 @@ describe('Log threshold executor', () => {
                       aggregations: {
                         additionalContext: {
                           top_hits: {
-                            _source: {
-                              excludes: ['host.cpu.*', 'host.disk.*', 'host.network.*'],
-                              includes: ['host'],
-                            },
+                            _source: false,
+                            fields: ['host.*'],
                             size: 1,
                           },
                         },
@@ -451,7 +482,13 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+        processUngroupedResults(
+          results,
+          ruleParams,
+          alertFactoryMock,
+          alertLimitMock,
+          availableFields
+        );
 
         // first call, fifth argument
         expect(alertFactoryMock.mock.calls[0][4]).toEqual([
@@ -487,7 +524,13 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+        processUngroupedResults(
+          results,
+          ruleParams,
+          alertFactoryMock,
+          alertLimitMock,
+          availableFields
+        );
 
         expect(alertFactoryMock).toBeCalledTimes(1);
         expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(true);
@@ -512,7 +555,13 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+        processUngroupedResults(
+          results,
+          ruleParams,
+          alertFactoryMock,
+          alertLimitMock,
+          availableFields
+        );
 
         expect(alertFactoryMock).toBeCalledTimes(1);
         expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);
@@ -537,7 +586,13 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+        processUngroupedResults(
+          results,
+          ruleParams,
+          alertFactoryMock,
+          alertLimitMock,
+          availableFields
+        );
 
         expect(alertFactoryMock).not.toHaveBeenCalled();
         expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);
@@ -571,10 +626,8 @@ describe('Log threshold executor', () => {
                 hits: {
                   hits: [
                     {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-1',
-                        },
+                      fields: {
+                        'host.name': ['i-am-a-host-name-1'],
                       },
                     },
                   ],
@@ -594,10 +647,8 @@ describe('Log threshold executor', () => {
                 hits: {
                   hits: [
                     {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-2',
-                        },
+                      fields: {
+                        'host.name': ['i-am-a-host-name-2'],
                       },
                     },
                   ],
@@ -617,10 +668,8 @@ describe('Log threshold executor', () => {
                 hits: {
                   hits: [
                     {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-3',
-                        },
+                      fields: {
+                        'host.name': ['i-am-a-host-name-3'],
                       },
                     },
                   ],
@@ -630,7 +679,13 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        processGroupByResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+        processGroupByResults(
+          results,
+          ruleParams,
+          alertFactoryMock,
+          alertLimitMock,
+          availableFields
+        );
         expect(alertFactoryMock.mock.calls.length).toBe(2);
 
         // First call, fifth argument
@@ -712,10 +767,8 @@ describe('Log threshold executor', () => {
                 hits: {
                   hits: [
                     {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-1',
-                        },
+                      fields: {
+                        'host.name': ['i-am-a-host-name-1'],
                       },
                     },
                   ],
@@ -735,10 +788,8 @@ describe('Log threshold executor', () => {
                 hits: {
                   hits: [
                     {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-2',
-                        },
+                      fields: {
+                        'host.name': ['i-am-a-host-name-2'],
                       },
                     },
                   ],
@@ -758,10 +809,8 @@ describe('Log threshold executor', () => {
                 hits: {
                   hits: [
                     {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-3',
-                        },
+                      fields: {
+                        'host.name': ['i-am-a-host-name-3'],
                       },
                     },
                   ],
@@ -771,7 +820,13 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        processGroupByResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+        processGroupByResults(
+          results,
+          ruleParams,
+          alertFactoryMock,
+          alertLimitMock,
+          availableFields
+        );
 
         expect(alertFactoryMock).toHaveBeenCalledTimes(1);
         expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(true);
@@ -803,10 +858,8 @@ describe('Log threshold executor', () => {
                 hits: {
                   hits: [
                     {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-1',
-                        },
+                      fields: {
+                        'host.name': ['i-am-a-host-name-1'],
                       },
                     },
                   ],
@@ -826,10 +879,8 @@ describe('Log threshold executor', () => {
                 hits: {
                   hits: [
                     {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-2',
-                        },
+                      fields: {
+                        'host.name': ['i-am-a-host-name-2'],
                       },
                     },
                   ],
@@ -849,10 +900,8 @@ describe('Log threshold executor', () => {
                 hits: {
                   hits: [
                     {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-3',
-                        },
+                      fields: {
+                        'host.name': ['i-am-a-host-name-3'],
                       },
                     },
                   ],
@@ -862,7 +911,13 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        processGroupByResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+        processGroupByResults(
+          results,
+          ruleParams,
+          alertFactoryMock,
+          alertLimitMock,
+          availableFields
+        );
 
         expect(alertFactoryMock).toHaveBeenCalledTimes(2);
         expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);

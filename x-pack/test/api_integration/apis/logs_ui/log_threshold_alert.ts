@@ -21,6 +21,41 @@ import {
 import { DATES } from '../metrics_ui/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const availableFields = {
+  'host.name': {
+    keyword: {
+      type: 'keyword',
+      metadata_field: false,
+      searchable: true,
+      aggregatable: true,
+    },
+  },
+  'host.disk.read.bytes': {
+    long: {
+      type: 'long',
+      metadata_field: false,
+      searchable: true,
+      aggregatable: true,
+    },
+  },
+  'host.network.egress.bytes': {
+    long: {
+      type: 'long',
+      metadata_field: false,
+      searchable: true,
+      aggregatable: true,
+    },
+  },
+  'host.cpu.usage': {
+    scaled_float: {
+      type: 'scaled_float',
+      metadata_field: false,
+      searchable: true,
+      aggregatable: true,
+    },
+  },
+};
+
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
@@ -61,7 +96,8 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf()
+            timestamp.valueOf(),
+            availableFields
           );
 
           expect(alertFactory.callCount).to.equal(1);
@@ -121,7 +157,8 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf()
+            timestamp.valueOf(),
+            availableFields
           );
 
           expect(alertFactory.callCount).to.equal(2);
@@ -182,7 +219,8 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf()
+            timestamp.valueOf(),
+            availableFields
           );
 
           expect(alertFactory.callCount).to.equal(1);
@@ -207,9 +245,6 @@ export default function ({ getService }: FtrProviderContext) {
                   reason: '1 log entry in the last 5 mins for host-01. Alert when ≥ 1.',
                   host: {
                     name: 'host-01',
-                    disk: {},
-                    network: {},
-                    cpu: {},
                   },
                 },
               },
@@ -217,9 +252,6 @@ export default function ({ getService }: FtrProviderContext) {
             {
               host: {
                 name: 'host-01',
-                disk: {},
-                network: {},
-                cpu: {},
               },
             },
           ]);
@@ -258,13 +290,14 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf()
+            timestamp.valueOf(),
+            availableFields
           );
 
           expect(alertFactory.callCount).to.equal(1);
-          expect(alertFactory.getCall(0).args[5]?.host.disk).to.be.empty();
-          expect(alertFactory.getCall(0).args[5]?.host.network).to.be.empty();
-          expect(alertFactory.getCall(0).args[5]?.host.cpu).to.be.empty();
+          expect(alertFactory.getCall(0).args[5]?.host).not.have.property('disk');
+          expect(alertFactory.getCall(0).args[5]?.host).not.have.property('network');
+          expect(alertFactory.getCall(0).args[5]?.host).not.have.property('cpu');
         });
 
         it('should limit alerts to the alert limit', async () => {
@@ -299,7 +332,8 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf()
+            timestamp.valueOf(),
+            availableFields
           );
 
           expect(alertFactory.callCount).to.equal(1);
@@ -354,6 +388,7 @@ export default function ({ getService }: FtrProviderContext) {
               [{ field: 'event.dataset', comparator: Comparator.NOT_EQ, value: 'nginx.error' }],
             ] as RatioCriteria,
           };
+
           await executeRatioAlert(
             ruleParams,
             '@timestamp',
@@ -362,7 +397,8 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf()
+            timestamp.valueOf(),
+            availableFields
           );
           expect(alertFactory.callCount).to.equal(1);
           expect(alertFactory.getCall(0).args).to.eql([
@@ -411,6 +447,7 @@ export default function ({ getService }: FtrProviderContext) {
               [{ field: 'event.dataset', comparator: Comparator.NOT_EQ, value: 'nginx.error' }],
             ] as RatioCriteria,
           };
+
           await executeRatioAlert(
             ruleParams,
             '@timestamp',
@@ -419,7 +456,8 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf()
+            timestamp.valueOf(),
+            availableFields
           );
           expect(alertFactory.callCount).to.equal(1);
           expect(alertFactory.getCall(0).args).to.eql([
