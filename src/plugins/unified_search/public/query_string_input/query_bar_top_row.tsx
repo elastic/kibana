@@ -435,7 +435,7 @@ export const QueryBarTopRow = React.memo(
           <EuiSuperUpdateButton
             iconType={props.isDirty ? iconDirty : 'refresh'}
             iconOnly={submitButtonIconOnly}
-            aria-label={props.isLoading ? buttonLabelUpdate : buttonLabelRefresh}
+            aria-label={props.isDirty ? buttonLabelUpdate : buttonLabelRefresh}
             isDisabled={isDateRangeInvalid || props.isDisabled}
             isLoading={props.isLoading}
             onClick={onClickSubmitButton}
@@ -444,11 +444,11 @@ export const QueryBarTopRow = React.memo(
             fill={props.isDirty}
             needsUpdate={props.isDirty}
             data-test-subj="querySubmitButton"
-            // @ts-expect-error Need to fix expecting `children` in EUI
             toolTipProps={{
               content: props.isDirty ? tooltipDirty : buttonLabelRefresh,
               delay: 'long',
               position: 'bottom',
+              children: <></>,
             }}
           />
         </EuiFlexItem>
@@ -603,6 +603,7 @@ export const QueryBarTopRow = React.memo(
           <>
             <EuiFlexGroup
               className="kbnQueryBar"
+              data-test-subj="query-bar"
               direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
               responsive={false}
               gutterSize="s"

@@ -10,7 +10,6 @@ import React, { useEffect, useState } from 'react';
 import { compact, isEqual } from 'lodash';
 import classNames from 'classnames';
 import { EuiIconProps, useEuiTheme } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import { isOfQueryType } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -179,7 +178,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
   );
   const [stateOpenQueryBarMenu, setStateOpenQueryBarMenu] = useState(false);
   // Needed to do lifecycle comparisons... See the useEffect for more info.
-  const [stateProps, setStateProps] = useState(props);
+  const [previousProps, setPreviousProps] = useState(props);
 
   useEffect(() => {
     // This component used to be a class component. It used getDerivedStateFromProps
@@ -188,7 +187,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
     // This useEffect is basically a refactor of that getDerivedStateFromProps.
     // The isEqual comparison of props *is* expensive, but if you remove it
     // lots of FTR tests will break. So optimize at your own peril.
-    if (!isEqual(stateProps, props)) {
+    if (!isEqual(previousProps, props)) {
       if (!query) {
         if (stateQuery) {
           setStateQuery(undefined);
@@ -201,7 +200,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
           if (isOfQueryType(stateQuery)) {
             if (query.query !== stateQuery?.query) {
               const newQueryString =
-                stateProps.query === props.query ? stateQuery.query : query.query;
+                previousProps.query === props.query ? stateQuery.query : query.query;
 
               setStateQuery({ query: newQueryString, language: query.language });
             }
@@ -228,16 +227,16 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
         setStateDateRangeTo(dateRangeTo);
       }
 
-      setStateProps(props);
+      setPreviousProps(props);
     }
   }, [
     dateRangeFrom,
     dateRangeTo,
+    previousProps,
     props,
     query,
     stateDateRangeFrom,
     stateDateRangeTo,
-    stateProps,
     stateQuery,
   ]);
 
@@ -262,15 +261,18 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
   };
 
   const isDirty = () => {
-    if (!stateQuery || !query) {
-      return false;
-    }
-
     if (!isEqual(stateQuery, query)) {
       return true;
     }
 
-    return dateRangeFrom !== stateDateRangeFrom || dateRangeTo !== stateDateRangeTo;
+    if (
+      (dateRangeFrom && dateRangeFrom !== stateDateRangeFrom) ||
+      (dateRangeTo && dateRangeTo !== stateDateRangeTo)
+    ) {
+      return true;
+    }
+
+    return false;
   };
 
   const handleSave = async (
@@ -428,7 +430,6 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
             ) : (
               <FilterBar
                 afterQueryBar
-                data-test-subj="unifiedFilterBar"
                 filters={filters!}
                 hiddenPanelOptions={hiddenFilterPanelOptions}
                 indexPatterns={indexPatterns!}
