@@ -220,13 +220,16 @@ describe('execute Torq action', () => {
 
     expect(actionType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
-      body: '{"x": {{obj}}, "y": "{{scalar}}"}',
+      body: '{"x": {{obj}}, "y": "{{scalar}}", "z": "{{scalar_with_json_chars}}"}',
     };
     const variables = {
       obj: templatedObject,
       scalar: '1970',
+      scalar_with_json_chars: 'noinjection", "here": "',
     };
     const params = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
-    expect(params.body).toBe(`{"x": ${templatedObject}, "y": "${variables.scalar}"}`);
+    expect(params.body).toBe(
+      `{"x": ${templatedObject}, "y": "${variables.scalar}", "z": "${variables.scalar_with_json_chars}"}`
+    );
   });
 });

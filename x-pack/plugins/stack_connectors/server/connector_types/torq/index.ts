@@ -19,7 +19,7 @@ import {
   SecurityConnectorFeatureId,
   ActionTypeExecutorResult,
 } from '@kbn/actions-plugin/common';
-import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
@@ -92,9 +92,7 @@ function renderParameterTemplates(
   variables: Record<string, unknown>
 ): ActionParamsType {
   if (!params.body) return params;
-  return {
-    body: renderMustacheString(params.body, variables, 'none'),
-  };
+  return renderMustacheObject(params, variables);
 }
 
 function validateActionTypeConfig(
