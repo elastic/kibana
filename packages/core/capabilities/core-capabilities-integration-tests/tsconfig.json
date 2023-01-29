@@ -13,5 +13,16 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/repo-info",
+    "@kbn/config",
+    "@kbn/config-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-http-context-server-mocks",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-capabilities-server",
+    "@kbn/core-capabilities-server-internal",
+  ]
 }

@@ -13,5 +13,10 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/test",
+    "@kbn/core-root-server-internal",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-elasticsearch-server-internal",
+  ]
 }

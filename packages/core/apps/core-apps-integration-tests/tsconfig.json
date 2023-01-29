@@ -13,5 +13,15 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-http-context-server-mocks",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-apps-server-internal",
+    "@kbn/core-root-server-internal",
+    "@kbn/core-test-helpers-kbn-server",
+  ]
 }

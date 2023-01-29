@@ -13,5 +13,10 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core-logging-server",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-lifecycle-server-internal",
+    "@kbn/core-logging-server-internal",
+  ]
 }
