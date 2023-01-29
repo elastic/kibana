@@ -28,9 +28,7 @@ const getO11yAlertsTableConfiguration = (
 ): AlertsTableConfigurationRegistry => ({
   id: observabilityFeatureId,
   casesFeatureId,
-  columns: alertO11yColumns.map((col) => {
-    return addDisplayNames(col);
-  }),
+  columns: alertO11yColumns.map(addDisplayNames),
   getRenderCellValue: (({ setFlyoutAlert }: { setFlyoutAlert: (data: TopAlert) => void }) => {
     return getRenderCellValue({ observabilityRuleTypeRegistry, setFlyoutAlert });
   }) as unknown as GetRenderCellValue,
