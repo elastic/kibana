@@ -8,7 +8,7 @@
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { buildContextMenuForActions } from './build_eui_context_menu_panels';
-import { Action, createAction } from '../actions';
+import { Action, ActionInternal } from '../actions';
 import { PresentableGrouping } from '../..';
 
 const createTestAction = ({
@@ -24,7 +24,7 @@ const createTestAction = ({
   grouping?: PresentableGrouping;
   disabled?: boolean;
 }) =>
-  createAction({
+  new ActionInternal({
     id: type as string,
     type,
     getDisplayName: () => dispayName,
