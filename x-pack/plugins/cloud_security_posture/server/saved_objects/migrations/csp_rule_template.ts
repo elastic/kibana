@@ -28,7 +28,7 @@ function migrateCspRuleTemplatesToV840(
       muted,
       metadata: {
         ...metadata,
-        benchmark: { ...benchmark, id: 'cis_k8s' },
+        benchmark: { ...benchmark, id: 'cis_k8s', posture_type: 'kspm' },
         impact: metadata.impact || undefined,
         default_value: metadata.default_value || undefined,
         references: metadata.references || undefined,
