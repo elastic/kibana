@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const healthColorsMap = {
+import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
+
+import { IconColor } from '@elastic/eui';
+
+type HealthStatusStrings = 'red' | 'green' | 'yellow' | 'unavailable';
+export const healthColorsMap: Record<HealthStatusStrings, IconColor> = {
   red: 'danger',
   green: 'success',
   yellow: 'warning',
@@ -19,4 +24,9 @@ export const healthColorsMapSelectable = {
   GREEN: 'success',
   yellow: 'warning',
   YELLOW: 'warning',
+};
+
+export const indexHealthToHealthColor = (health?: HealthStatus | 'unavailable'): IconColor => {
+  if (!health) return '';
+  return healthColorsMap[health.toLowerCase() as HealthStatusStrings] ?? '';
 };
