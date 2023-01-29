@@ -59,6 +59,12 @@ export const axisExtentConfigFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Enforce extent params.',
       }),
     },
+    niceValues: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisExtentConfig.niceValues.help', {
+        defaultMessage: 'Enable axis extents value rounding',
+      }),
+    },
   },
   fn(input, args) {
     if (args.mode === AxisExtentModes.CUSTOM) {
