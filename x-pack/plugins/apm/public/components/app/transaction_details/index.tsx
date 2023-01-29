@@ -35,7 +35,7 @@ export function TransactionDetails() {
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
-  const { transactionType, fallbackToTransactions, runtimeName } =
+  const { transactionType, fallbackToTransactions, serverlessType } =
     useApmServiceContext();
 
   const history = useHistory();
@@ -56,7 +56,7 @@ export function TransactionDetails() {
     [apmRouter, path, query, transactionName]
   );
 
-  const isServerless = isServerlessAgent(runtimeName);
+  const isServerless = isServerlessAgent(serverlessType);
 
   return (
     <>
