@@ -18,7 +18,10 @@ import type { Sort } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
+import {
+  CSP_FINDINGS_DATA_VIEW,
+  CSP_LATEST_FINDINGS_DATA_VIEW,
+} from '../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
@@ -54,7 +57,7 @@ export const showErrorToast = (
 };
 
 export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => ({
-  index: CSP_LATEST_FINDINGS_DATA_VIEW,
+  index: CSP_FINDINGS_DATA_VIEW,
   query,
   sort: getSortField(sort),
   size: MAX_FINDINGS_TO_LOAD,

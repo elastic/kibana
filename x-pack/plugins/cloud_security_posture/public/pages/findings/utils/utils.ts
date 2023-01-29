@@ -118,6 +118,27 @@ export const getFindingsPageSizeInfo = ({
 
 export const getFindingsCountAggQuery = () => ({
   count: { terms: { field: 'result.evaluation' } },
+  '2': {
+    multi_terms: {
+      terms: [{ field: 'resource.id' }, { field: 'rule.id' }],
+      size: 10000,
+    },
+    aggs: {
+      '1': {
+        top_hits: {
+          _source: true,
+          size: 1,
+          sort: [
+            {
+              '@timestamp': {
+                order: 'desc',
+              },
+            },
+          ],
+        },
+      },
+    },
+  },
 });
 
 export const getAggregationCount = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) => {
