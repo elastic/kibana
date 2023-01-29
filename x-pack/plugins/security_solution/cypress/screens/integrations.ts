@@ -7,7 +7,7 @@
 
 export const ADD_INTEGRATION_BTN = '[data-test-subj="addIntegrationPolicyButton"]';
 
-export const SKIP_AGENT_INSTALLATION = '[data-test-subj="skipAgentInstallation"]';
+export const SKIP_AGENT_INSTALLATION_BTN = '[data-test-subj="skipAgentInstallation"]';
 
 export const INTEGRATION_ADDED_POP_UP = '[data-test-subj="postInstallAddAgentModal"]';
 
