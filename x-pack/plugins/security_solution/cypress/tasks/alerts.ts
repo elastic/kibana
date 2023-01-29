@@ -262,12 +262,10 @@ export const markAcknowledgedFirstAlert = () => {
 };
 
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
-  const click = ($el: JQuery<HTMLElement>) => {
-    return $el.trigger('click');
-  };
   waitForAlerts();
   for (let i = 0; i < numberOfAlerts; i++) {
-    cy.get(ALERT_CHECKBOX).eq(i).pipe(click).should('have.attr', 'checked', 'true');
+    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').click({ force: true });
+    cy.get('@checkbox').should('have.attr', 'checked');
   }
 };
 

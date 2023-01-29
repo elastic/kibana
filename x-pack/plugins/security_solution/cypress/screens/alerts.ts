@@ -35,7 +35,7 @@ export const CHART_SELECT = '[data-test-subj="chartSelect"]';
 
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
-export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="close-alert-status"]';
+export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="closed-alert-status"]';
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
