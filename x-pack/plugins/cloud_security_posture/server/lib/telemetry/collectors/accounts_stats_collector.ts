@@ -52,6 +52,7 @@ interface AccountEntity {
   };
 }
 
+// The runtime field help to have unique identifier for CSPM and KSPM
 export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
   asset_identifier: {
     type: 'keyword',

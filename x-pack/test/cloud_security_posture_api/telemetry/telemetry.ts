@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { data } from './data';
+import { data, MockTelemetryFindings } from './data';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
@@ -18,9 +18,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  //   /**
-  //    * required before indexing findings
-  //    */
+  /**
+   * required before indexing findings
+   */
   const waitForPluginInitialized = (): Promise<void> =>
     retry.try(async () => {
       log.debug('Check CSP plugin is initialized');
@@ -39,8 +39,8 @@ export default function ({ getService }: FtrProviderContext) {
         refresh: true,
       }),
 
-    add: async <T>(findingsMock: T[]) => {
-      const operations = findingsMock.flatMap((doc: T) => [
+    add: async (mockTelemetryFindings: MockTelemetryFindings[]) => {
+      const operations = mockTelemetryFindings.flatMap((doc) => [
         { index: { _index: FINDINGS_INDEX } },
         doc,
       ]);
@@ -228,7 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
     });
 
-    it('includes only old version KSPM findings (no posture_type field)', async () => {
+    it('includes only KSPM findings without posture_type', async () => {
       await index.add(data.kspmFindingsNoPostureType);
 
       const {
@@ -280,7 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
     });
 
-    it('includes only old version KSPM findings (no posture_type field) and CSPM', async () => {
+    it('includes KSPM findings without posture_type and CSPM findings as well', async () => {
       await index.add(data.kspmFindingsNoPostureType);
       await index.add(data.cspmFindings);
 

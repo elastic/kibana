@@ -5,7 +5,23 @@
  * 2.0.
  */
 
-export const data = {
+export interface MockTelemetryFindings {
+  rule: {
+    benchmark: { id: string; posture_type?: string | undefined; version: string; name: string };
+  };
+  resource: { type: string; sub_type: string; id: string };
+  agent: { id: string };
+  result: { evaluation: string };
+  host: { name: string };
+  cluster_id?: string;
+  cloud?: { account: { id: string } };
+}
+
+export interface MockTelemetryData {
+  [key: string]: MockTelemetryFindings[];
+}
+
+export const data: MockTelemetryData = {
   cspmFindings: [
     {
       rule: {
@@ -60,7 +76,7 @@ export const data = {
       resource: {
         type: 'k8s_object',
         sub_type: 'ServiceAccount',
-        id: 1111,
+        id: '1111',
       },
       agent: { id: '07bd3686-98ef-4b23-99cb-9ff544b25ae2' },
       result: { evaluation: 'passed' },
@@ -79,7 +95,7 @@ export const data = {
       resource: {
         type: 'process',
         sub_type: 'process',
-        id: 1111,
+        id: '1111',
       },
       agent: { id: '07bd3686-98ef-4b23-99cb-9ff544b25ae3' },
       result: { evaluation: 'passed' },
@@ -99,7 +115,7 @@ export const data = {
       resource: {
         type: 'k8s_object',
         sub_type: 'ServiceAccount',
-        id: 1111,
+        id: '1111',
       },
       agent: { id: '07bd3686-98ef-4b23-99cb-9ff544b25ae2' },
       result: { evaluation: 'passed' },
@@ -117,7 +133,7 @@ export const data = {
       resource: {
         type: 'process',
         sub_type: 'process',
-        id: 1111,
+        id: '1111',
       },
       agent: { id: '07bd3686-98ef-4b23-99cb-9ff544b25ae3' },
       result: { evaluation: 'passed' },
