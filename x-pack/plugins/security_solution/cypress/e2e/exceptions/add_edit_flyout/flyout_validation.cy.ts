@@ -247,20 +247,28 @@ describe('Exceptions flyout', () => {
     cy.get(ENTRY_DELETE_BTN).eq(4).click();
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(1).should('have.text', 'b');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT_PARENT).eq(1).should('have.text', 'b');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(1).should('have.text', 'user');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(2).should('have.text', 'last');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
+      .eq(1)
+      .should('have.text', 'user');
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(1)
+      .find(FIELD_INPUT_PARENT)
+      .eq(2)
+      .should('have.text', 'last');
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(1)
+      .find(FIELD_INPUT_PARENT)
       .eq(3)
       .should('have.text', '@timestamp');
 
@@ -268,18 +276,18 @@ describe('Exceptions flyout', () => {
     cy.get(ENTRY_DELETE_BTN).eq(4).click();
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(1).should('have.text', 'b');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT_PARENT).eq(1).should('have.text', 'b');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(1)
       .should('have.text', '@timestamp');
 
