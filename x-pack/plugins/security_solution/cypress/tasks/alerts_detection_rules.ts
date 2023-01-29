@@ -6,13 +6,13 @@
  */
 
 import { duplicatedRuleName } from '../objects/rule';
-import { RULES_MONITORING_TABLE, RULES_SELECTED_TAG } from '../screens/alerts_detection_rules';
 import {
   BULK_ACTIONS_BTN,
   COLLAPSED_ACTION_BTN,
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
   DELETE_RULE_BULK_BTN,
+  RULES_SELECTED_TAG,
   LOAD_PREBUILT_RULES_BTN,
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULES_TABLE_INITIAL_LOADING_INDICATOR,
@@ -59,6 +59,7 @@ import {
   RULES_MANAGEMENT_TAB,
   RULES_MONITORING_TAB,
 } from '../screens/alerts_detection_rules';
+import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
