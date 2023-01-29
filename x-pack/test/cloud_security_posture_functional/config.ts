@@ -38,7 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          *   2. merge the updated version number change to kibana
          */
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
-        `--xpack.fleet.packages.0.version=1.0.8`,
+        `--xpack.fleet.packages.0.version=1.2.8`,
         // `--xpack.fleet.registryUrl=https://localhost:8080`,
       ],
     },
