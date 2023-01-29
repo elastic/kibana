@@ -200,7 +200,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           break;
         case FetchStatus.LOADING:
           console.log('*** fetchStatus.LOADING is firing ', isPlainRecordType);
-          if (isPlainRecordType) {
+          if (isPlainRecordType || !props.useNewFieldsApi) {
             console.log('*** BOO OLDDDD');
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
@@ -214,7 +214,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           }
           break;
         case FetchStatus.COMPLETE:
-          if (isPlainRecordType) {
+          if (isPlainRecordType || !props.useNewFieldsApi) {
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
               payload: {
@@ -256,7 +256,13 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, fetchFields]);
+  }, [
+    props.documents$,
+    dispatchSidebarStateAction,
+    selectedDataViewRef,
+    fetchFields,
+    props.useNewFieldsApi,
+  ]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {
