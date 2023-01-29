@@ -6,7 +6,7 @@
  */
 
 import { duplicatedRuleName } from '../objects/rule';
-import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
+import { RULES_MONITORING_TABLE, RULES_SELECTED_TAG } from '../screens/alerts_detection_rules';
 import {
   BULK_ACTIONS_BTN,
   COLLAPSED_ACTION_BTN,
@@ -364,23 +364,21 @@ export const expectTags = (tags: string[]) => {
   cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
 
   cy.get(RULES_TAGS_FILTER_POPOVER)
-    .find('.euiSelectableListItem[data-test-selected="true"]')
+    .find(RULES_SELECTED_TAG)
     .should('have.length', tags.length)
     .each(($el, index) => {
       cy.wrap($el).contains(tags[index]);
     });
 
   for (const tag of tags) {
-    cy.get(RULES_TAGS_FILTER_POPOVER).contains('[data-test-selected="true"]', tag);
+    cy.get(RULES_TAGS_FILTER_POPOVER).contains(RULES_SELECTED_TAG, tag);
   }
 };
 
 export const expectNoTags = () => {
   cy.get(RULES_TAGS_FILTER_BTN).contains('Tags').click();
 
-  cy.get(RULES_TAGS_FILTER_POPOVER)
-    .find('.euiSelectableListItem[data-test-selected="true"]')
-    .should('not.exist');
+  cy.get(RULES_TAGS_FILTER_POPOVER).find(RULES_SELECTED_TAG).should('not.exist');
 };
 
 export const expectCustomRules = () => {

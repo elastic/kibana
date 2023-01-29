@@ -133,6 +133,8 @@ export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-butto
 
 export const RULES_TAGS_FILTER_POPOVER = '[data-test-subj="tags-filter-popover"]';
 
+export const RULES_SELECTED_TAG = '.euiSelectableListItem[data-test-selected="true"]';
+
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
 
 export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
