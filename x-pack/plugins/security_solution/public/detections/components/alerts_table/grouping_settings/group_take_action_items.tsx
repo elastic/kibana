@@ -27,10 +27,6 @@ import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import * as i18n from '../translations';
 
-export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
-  return { bool: { filter: { terms: { _id: eventIds } } } };
-};
-
 export interface TakeActionsProps {
   currentStatus?: AlertWorkflowStatus;
   indexName: string;

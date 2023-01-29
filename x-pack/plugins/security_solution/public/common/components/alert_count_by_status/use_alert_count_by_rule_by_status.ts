@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { isArray } from 'lodash/fp';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import type { GenericBuckets } from '../../../../common/search_strategy';
@@ -202,7 +203,7 @@ const parseAlertCountByRuleItems = (
   return buckets.map<AlertCountByRuleByStatusItem>((bucket) => {
     const uuid = bucket.ruleUuid.hits?.hits[0]?._source['kibana.alert.rule.uuid'] || '';
     return {
-      ruleName: bucket.key,
+      ruleName: isArray(bucket.key) ? bucket.key[0] : bucket.key,
       count: bucket.doc_count,
       uuid,
     };

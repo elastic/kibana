@@ -13,6 +13,7 @@ import type {
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
+import { isArray } from 'lodash/fp';
 
 import type { RawBucket } from '../types';
 
@@ -28,7 +29,10 @@ export const getMaxRiskSubAggregations = (
   buckets: RawBucket[]
 ): Record<string, number | undefined> =>
   buckets.reduce<Record<string, number | undefined>>(
-    (acc, x) => ({ ...acc, [x.key]: x.maxRiskSubAggregation?.value ?? undefined }),
+    (acc, x) => ({
+      ...acc,
+      [isArray(x.key) ? x.key[0] : x.key]: x.maxRiskSubAggregation?.value ?? undefined,
+    }),
     {}
   );
 

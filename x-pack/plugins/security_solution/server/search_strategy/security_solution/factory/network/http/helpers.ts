@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, getOr } from 'lodash/fp';
+import { get, getOr, isArray } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
@@ -17,19 +17,22 @@ export const getHttpEdges = (response: IEsSearchResponse<unknown>): NetworkHttpE
   formatHttpEdges(getOr([], `aggregations.url.buckets`, response.rawResponse));
 
 const formatHttpEdges = (buckets: NetworkHttpBuckets[]): NetworkHttpEdges[] =>
-  buckets.map((bucket: NetworkHttpBuckets) => ({
-    node: {
-      _id: bucket.key,
-      domains: bucket.domains.buckets.map(({ key }) => key),
-      methods: bucket.methods.buckets.map(({ key }) => key),
-      statuses: bucket.status.buckets.map(({ key }) => `${key}`),
-      lastHost: get('source.hits.hits[0].fields["host.name"]', bucket),
-      lastSourceIp: get('source.hits.hits[0].fields["source.ip"]', bucket),
-      path: bucket.key,
-      requestCount: bucket.doc_count,
-    },
-    cursor: {
-      value: bucket.key,
-      tiebreaker: null,
-    },
-  }));
+  buckets.map((bucket: NetworkHttpBuckets) => {
+    const bucketKey = isArray(bucket.key) ? bucket.key[0] : bucket.key;
+    return {
+      node: {
+        _id: bucketKey,
+        domains: bucket.domains.buckets.map(({ key }) => (isArray(key) ? key[0] : key)),
+        methods: bucket.methods.buckets.map(({ key }) => (isArray(key) ? key[0] : key)),
+        statuses: bucket.status.buckets.map(({ key }) => `${isArray(key) ? key[0] : key}`),
+        lastHost: get('source.hits.hits[0].fields["host.name"]', bucket),
+        lastSourceIp: get('source.hits.hits[0].fields["source.ip"]', bucket),
+        path: bucketKey,
+        requestCount: bucket.doc_count,
+      },
+      cursor: {
+        value: bucketKey,
+        tiebreaker: null,
+      },
+    };
+  });

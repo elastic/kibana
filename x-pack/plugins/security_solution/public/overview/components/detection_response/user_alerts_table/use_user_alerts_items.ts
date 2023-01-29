@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { isArray } from 'lodash/fp';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import type { GenericBuckets } from '../../../../../common/search_strategy';
@@ -246,7 +247,7 @@ function parseUsersData(rawAggregation: AlertCountersBySeverityAggregation): Use
 
   return buckets.reduce<UserAlertsItem[]>((accumalatedAlertsByUser, currentUser) => {
     accumalatedAlertsByUser.push({
-      userName: currentUser.key || '—',
+      userName: (isArray(currentUser.key) ? currentUser.key[0] : currentUser.key) || '—',
       totalAlerts: currentUser.doc_count,
       low: currentUser.low.doc_count,
       medium: currentUser.medium.doc_count,

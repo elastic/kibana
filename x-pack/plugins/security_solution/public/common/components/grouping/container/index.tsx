@@ -35,7 +35,7 @@ interface GroupingContainerProps {
           | undefined;
       }
     >;
-  groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element;
+  groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
   groupsSelector?: JSX.Element;
   inspectButton?: JSX.Element;
   pagination: {

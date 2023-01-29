@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isArray } from 'lodash/fp';
 import type { LegendItem } from '../../../charts/draggable_legend_item';
 import { getLegendMap, getLegendItemFromFlattenedBucket } from '.';
 import type { FlattenedBucket, RawBucket } from '../../types';
@@ -38,8 +39,8 @@ export const getFlattenedLegendItems = ({
   >(
     (acc, flattenedBucket) => ({
       ...acc,
-      [flattenedBucket.key]: [
-        ...(acc[flattenedBucket.key] ?? []),
+      [isArray(flattenedBucket.key) ? flattenedBucket.key[0] : flattenedBucket.key]: [
+        ...(acc[isArray(flattenedBucket.key) ? flattenedBucket.key[0] : flattenedBucket.key] ?? []),
         getLegendItemFromFlattenedBucket({
           colorPalette,
           flattenedBucket,
@@ -54,7 +55,10 @@ export const getFlattenedLegendItems = ({
 
   // reduce all the legend items to a single array in the same order as the raw buckets:
   return buckets.reduce<LegendItem[]>(
-    (acc, bucket) => [...acc, ...combinedLegendItems[bucket.key]],
+    (acc, bucket) => [
+      ...acc,
+      ...combinedLegendItems[isArray(bucket.key) ? bucket.key[0] : bucket.key],
+    ],
     []
   );
 };

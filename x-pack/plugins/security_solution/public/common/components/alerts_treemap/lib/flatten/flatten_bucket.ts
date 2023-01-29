@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isArray } from 'lodash/fp';
 import type { RawBucket, FlattenedBucket } from '../../types';
 
 export const flattenBucket = ({
@@ -18,6 +19,6 @@ export const flattenBucket = ({
     doc_count: bucket.doc_count,
     key: bucket.key_as_string ?? bucket.key, // prefer key_as_string when available, because it contains a formatted date
     maxRiskSubAggregation: bucket.maxRiskSubAggregation,
-    stackByField1Key: x.key_as_string ?? x.key,
+    stackByField1Key: x.key_as_string ?? (isArray(x.key) ? x.key[0] : x.key),
     stackByField1DocCount: x.doc_count,
   })) ?? [];

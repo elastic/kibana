@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { FunctionComponent } from 'react';
+import { isArray } from 'lodash/fp';
 import React from 'react';
 import type { GenericBuckets } from '../../../../../common/search_strategy';
 import type { RawBucket } from '../../../../common/components/grouping';
@@ -26,19 +26,20 @@ import { COLUMN_TAGS } from '../../../pages/detection_engine/rules/translations'
 export const getSelectedGroupButtonContent = (selectedGroup: string, bucket: RawBucket) => {
   switch (selectedGroup) {
     case 'kibana.alert.rule.name':
-      return (
+      return isArray(bucket.key) ? (
         <RuleNameGroupContent
           ruleName={bucket.key[0]}
           ruleDescription={bucket.key[1]}
           tags={bucket.ruleTags?.buckets}
         />
-      );
+      ) : undefined;
     case 'host.name':
       return <HostNameGroupContent hostName={bucket.key} />;
     case 'user.name':
       return <UserNameGroupContent userName={bucket.key} />;
+    case 'source.ip':
+      return <SourceIpGroupContent sourceIp={bucket.key} />;
   }
-  return <DefaultGroupContent fieldValue={bucket.key} />;
 };
 
 const RuleNameGroupContent = React.memo<{
@@ -53,16 +54,21 @@ const RuleNameGroupContent = React.memo<{
   );
   return (
     <div>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexGroup
+        data-test-subj="rule-name-group-renderer"
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
+      >
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs" className="euiAccordionForm__title">
+          <EuiTitle size="xs">
             <h4>{ruleName.trim()}</h4>
           </EuiTitle>
         </EuiFlexItem>
         {tags && tags.length > 0 ? (
           <EuiFlexItem onClick={(e) => e.stopPropagation()} grow={false}>
             <PopoverItems
-              items={tags.map((tag) => tag.key)}
+              items={tags.map((tag) => tag.key.toString())}
               popoverTitle={COLUMN_TAGS}
               popoverButtonTitle={tags.length.toString()}
               popoverButtonIcon="tag"
@@ -83,15 +89,20 @@ const RuleNameGroupContent = React.memo<{
 });
 RuleNameGroupContent.displayName = 'RuleNameGroup';
 
-const HostNameGroupContent = React.memo<{ hostName: string }>(({ hostName }) => (
+const HostNameGroupContent = React.memo<{ hostName: string | string[] }>(({ hostName }) => (
   <div>
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      data-test-subj="host-name-group-renderer"
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+    >
       <EuiFlexItem grow={false}>
         <EuiIcon color="primary" type="database" size="l" />
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiTitle size="xs" className="euiAccordionForm__title">
+        <EuiTitle size="xs">
           <h4>{hostName}</h4>
         </EuiTitle>
       </EuiFlexItem>
@@ -100,16 +111,22 @@ const HostNameGroupContent = React.memo<{ hostName: string }>(({ hostName }) => 
 ));
 HostNameGroupContent.displayName = 'HostNameGroupContent';
 
-const UserNameGroupContent = React.memo<{ userName: string }>(({ userName }) => {
+const UserNameGroupContent = React.memo<{ userName: string | string[] }>(({ userName }) => {
+  const userNameValue = isArray(userName) ? userName[0] : userName;
   return (
     <div>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexGroup
+        data-test-subj="user-name-group-renderer"
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
+      >
         <EuiFlexItem grow={false}>
-          <EuiAvatar name={userName.toString()} color={euiThemeVars.euiColorVis0} />
+          <EuiAvatar name={userNameValue} color={euiThemeVars.euiColorVis0} />
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiTitle size="xs" className="euiAccordionForm__title">
+          <EuiTitle size="xs">
             <h4>{userName}</h4>
           </EuiTitle>
         </EuiFlexItem>
@@ -119,14 +136,23 @@ const UserNameGroupContent = React.memo<{ userName: string }>(({ userName }) => 
 });
 UserNameGroupContent.displayName = 'UserNameGroupContent';
 
-const DefaultGroupContent: FunctionComponent<{ fieldValue: string }> = ({ fieldValue }) => (
+const SourceIpGroupContent = React.memo<{ sourceIp: string | string[] }>(({ sourceIp }) => (
   <div>
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      data-test-subj="source-ip-group-renderer"
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiIcon color="primary" type="ip" size="l" />
+      </EuiFlexItem>
       <EuiFlexItem>
-        <EuiTitle size="xs" className="euiAccordionForm__title">
-          <h4>{fieldValue}</h4>
+        <EuiTitle size="xs">
+          <h4>{sourceIp}</h4>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
   </div>
-);
+));
+SourceIpGroupContent.displayName = 'SourceIpGroupContent';
