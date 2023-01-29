@@ -50,7 +50,7 @@ export async function startServers() {
   });
   esServer = await servers.startES();
   kbn = await servers.startKibana();
-  // register global setting
+  // register global settings
   kbn.coreSetup.uiSettings.registerGlobal({
     foo: {
       value: 'bar',
@@ -78,7 +78,6 @@ export function getServices() {
 
   const uiSettings = kbn.coreStart.uiSettings.asScopedToClient(savedObjectsClient);
   const uiSettingsGlobal = kbn.coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
-
   services = {
     supertest: (method: HttpMethod, path: string) => getSupertest(kbn.root, method, path),
     esClient,
