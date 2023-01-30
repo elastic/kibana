@@ -33,6 +33,16 @@ exports[`FieldIcon renders known field types _source is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types binary is rendered 1`] = `
+<EuiToken
+  aria-label="binary"
+  className="kbnFieldIcon"
+  iconType="tokenBinary"
+  size="s"
+  title="binary"
+/>
+`;
+
 exports[`FieldIcon renders known field types boolean is rendered 1`] = `
 <EuiToken
   aria-label="boolean"
@@ -82,6 +92,26 @@ exports[`FieldIcon renders known field types date_range is rendered 1`] = `
   iconType="tokenDate"
   size="s"
   title="date_range"
+/>
+`;
+
+exports[`FieldIcon renders known field types dense_vector is rendered 1`] = `
+<EuiToken
+  aria-label="dense_vector"
+  className="kbnFieldIcon"
+  iconType="tokenDenseVector"
+  size="s"
+  title="dense_vector"
+/>
+`;
+
+exports[`FieldIcon renders known field types flattened is rendered 1`] = `
+<EuiToken
+  aria-label="flattened"
+  className="kbnFieldIcon"
+  iconType="tokenFlattened"
+  size="s"
+  title="flattened"
 />
 `;
 
@@ -202,6 +232,46 @@ exports[`FieldIcon renders known field types number_range is rendered 1`] = `
   iconType="tokenNumber"
   size="s"
   title="number_range"
+/>
+`;
+
+exports[`FieldIcon renders known field types point is rendered 1`] = `
+<EuiToken
+  aria-label="point"
+  className="kbnFieldIcon"
+  iconType="tokenShape"
+  size="s"
+  title="point"
+/>
+`;
+
+exports[`FieldIcon renders known field types rank_feature is rendered 1`] = `
+<EuiToken
+  aria-label="rank_feature"
+  className="kbnFieldIcon"
+  iconType="tokenRankFeature"
+  size="s"
+  title="rank_feature"
+/>
+`;
+
+exports[`FieldIcon renders known field types rank_features is rendered 1`] = `
+<EuiToken
+  aria-label="rank_features"
+  className="kbnFieldIcon"
+  iconType="tokenRankFeatures"
+  size="s"
+  title="rank_features"
+/>
+`;
+
+exports[`FieldIcon renders known field types shape is rendered 1`] = `
+<EuiToken
+  aria-label="shape"
+  className="kbnFieldIcon"
+  iconType="tokenShape"
+  size="s"
+  title="shape"
 />
 `;
 
