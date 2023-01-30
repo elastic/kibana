@@ -23,7 +23,7 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
@@ -38,6 +38,9 @@ import type {
   IndexPatternRef,
   DatasourceLayerSettingsProps,
   DataSourceInfo,
+  UserMessage,
+  FrameDatasourceAPI,
+  StateSetter,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -50,12 +53,7 @@ import {
   triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
-import {
-  FormBasedDimensionTrigger,
-  FormBasedDimensionEditor,
-  getDropProps,
-  onDrop,
-} from './dimension_panel';
+import { FormBasedDimensionEditor, getDropProps, onDrop } from './dimension_panel';
 import { FormBasedDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
@@ -101,8 +99,16 @@ import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer } from '../..';
+import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
+
+function wrapOnDot(str?: string) {
+  // u200B is a non-width white-space character, which allows
+  // the browser to efficiently word-wrap right after the dot
+  // without us having to draw a lot of extra DOM elements, etc
+  return str ? str.replace(/\./g, '.\u200B') : '';
+}
 
 export function columnToOperation(
   column: GenericIndexPatternColumn,
@@ -526,6 +532,8 @@ export function getFormBasedDatasource({
       props: DatasourceDimensionTriggerProps<FormBasedPrivateState>
     ) => {
       const columnLabelMap = formBasedDatasource.uniqueLabels(props.state);
+      const uniqueLabel = columnLabelMap[props.columnId];
+      const formattedLabel = wrapOnDot(uniqueLabel);
 
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -542,7 +550,13 @@ export function getFormBasedDatasource({
                 unifiedSearch,
               }}
             >
-              <FormBasedDimensionTrigger uniqueLabel={columnLabelMap[props.columnId]} {...props} />
+              <DimensionTrigger
+                id={props.columnId}
+                label={formattedLabel}
+                isInvalid={props.invalid}
+                hideTooltip={props.hideTooltip}
+                invalidMessage={props.invalidMessage}
+              />
             </KibanaContextProvider>
           </I18nProvider>
         </KibanaThemeProvider>,
@@ -815,119 +829,57 @@ export function getFormBasedDatasource({
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
 
-    getErrorMessages(state, indexPatterns) {
+    getUserMessages(state, { frame: frameDatasourceAPI, setState }) {
       if (!state) {
-        return;
+        return [];
       }
 
-      // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.entries(state.layers)
-        .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
-        .map(([layerId, layer]) =>
-          (
-            getErrorMessages(
-              layer,
-              indexPatterns[layer.indexPatternId],
-              state,
-              layerId,
-              core,
-              data
-            ) ?? []
-          ).map((message) => ({
-            shortMessage: '', // Not displayed currently
-            longMessage: typeof message === 'string' ? message : message.message,
-            fixAction: typeof message === 'object' ? message.fixAction : undefined,
-          }))
-        );
+      const layerErrorMessages = getLayerErrorMessages(
+        state,
+        frameDatasourceAPI,
+        setState,
+        core,
+        data
+      );
 
-      // Single layer case, no need to explain more
-      if (layerErrors.length <= 1) {
-        return layerErrors[0]?.length ? layerErrors[0] : undefined;
-      }
+      const dimensionErrorMessages = getDimensionErrorMessages(state, (layerId, columnId) =>
+        this.isValidColumn(state, frameDatasourceAPI.dataViews.indexPatterns, layerId, columnId)
+      );
 
-      // For multiple layers we will prepend each error with the layer number
-      const messages = layerErrors.flatMap((errors, index) => {
-        return errors.map((error) => {
-          const { shortMessage, longMessage } = error;
-          return {
-            shortMessage: shortMessage
-              ? i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
-                  defaultMessage: 'Layer {position} error: {wrappedMessage}',
-                  values: {
-                    position: index + 1,
-                    wrappedMessage: shortMessage,
-                  },
-                })
-              : '',
-            longMessage: longMessage
-              ? i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
-                  defaultMessage: 'Layer {position} error: {wrappedMessage}',
-                  values: {
-                    position: index + 1,
-                    wrappedMessage: longMessage,
-                  },
-                })
-              : '',
+      const warningMessages = [
+        ...[
+          ...(getStateTimeShiftWarningMessages(
+            data.datatableUtilities,
+            state,
+            frameDatasourceAPI
+          ) || []),
+          ...getPrecisionErrorWarningMessages(
+            data.datatableUtilities,
+            state,
+            frameDatasourceAPI,
+            core.docLinks,
+            setState
+          ),
+        ].map((longMessage) => {
+          const message: UserMessage = {
+            severity: 'warning',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
+            shortMessage: '',
+            longMessage,
           };
-        });
-      });
-      return messages.length ? messages : undefined;
-    },
-    getWarningMessages: (state, frame, adapters, setState) => {
-      return [
-        ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
-        ...getPrecisionErrorWarningMessages(
-          data.datatableUtilities,
-          state,
-          frame,
-          core.docLinks,
-          setState
-        ),
+
+          return message;
+        }),
       ];
+
+      return [...layerErrorMessages, ...dimensionErrorMessages, ...warningMessages];
     },
+
     getSearchWarningMessages: (state, warning, request, response) => {
       return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
     },
-    getDeprecationMessages: () => {
-      const deprecatedMessages: React.ReactNode[] = [];
-      const useFieldExistenceSamplingKey = 'lens:useFieldExistenceSampling';
-      const isUsingSampling = core.uiSettings.get(useFieldExistenceSamplingKey);
 
-      if (isUsingSampling) {
-        deprecatedMessages.push(
-          <EuiCallOut
-            color="warning"
-            iconType="alert"
-            size="s"
-            title={
-              <FormattedMessage
-                id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
-                defaultMessage="Field existence sampling has been deprecated and will be removed in Kibana {version}. You may disable this feature in {link}."
-                values={{
-                  version: '8.6.0',
-                  link: (
-                    <EuiLink
-                      onClick={() => {
-                        core.application.navigateToApp('management', {
-                          path: `/kibana/settings?query=${useFieldExistenceSamplingKey}`,
-                        });
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.lens.indexPattern.useFieldExistenceSampling.advancedSettings"
-                        defaultMessage="Advanced Settings"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            }
-          />
-        );
-      }
-
-      return deprecatedMessages;
-    },
     checkIntegrity: (state, indexPatterns) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !indexPatterns[id]);
@@ -1023,4 +975,126 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
     columnOrder: [],
     sampling: 1,
   };
+}
+
+function getLayerErrorMessages(
+  state: FormBasedPrivateState,
+  frameDatasourceAPI: FrameDatasourceAPI,
+  setState: StateSetter<FormBasedPrivateState, unknown>,
+  core: CoreStart,
+  data: DataPublicPluginStart
+) {
+  const indexPatterns = frameDatasourceAPI.dataViews.indexPatterns;
+
+  const layerErrors: UserMessage[][] = Object.entries(state.layers)
+    .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
+    .map(([layerId, layer]) =>
+      (
+        getErrorMessages(layer, indexPatterns[layer.indexPatternId], state, layerId, core, data) ??
+        []
+      ).map((error) => {
+        const message: UserMessage = {
+          severity: 'error',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'visualization' }],
+          shortMessage: '',
+          longMessage:
+            typeof error === 'string' ? (
+              error
+            ) : (
+              <>
+                {error.message}
+                {error.fixAction && (
+                  <EuiButton
+                    data-test-subj="errorFixAction"
+                    onClick={async () => {
+                      const newState = await error.fixAction?.newState(frameDatasourceAPI);
+                      if (newState) {
+                        setState(newState);
+                      }
+                    }}
+                  >
+                    {error.fixAction?.label}
+                  </EuiButton>
+                )}
+              </>
+            ),
+        };
+
+        return message;
+      })
+    );
+
+  let errorMessages: UserMessage[];
+  if (layerErrors.length <= 1) {
+    // Single layer case, no need to explain more
+    errorMessages = layerErrors[0]?.length ? layerErrors[0] : [];
+  } else {
+    // For multiple layers we will prepend each error with the layer number
+    errorMessages = layerErrors.flatMap((errors, index) => {
+      return errors.map((error) => {
+        const message: UserMessage = {
+          ...error,
+          shortMessage: i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
+            defaultMessage: 'Layer {position} error: {wrappedMessage}',
+            values: {
+              position: index + 1,
+              wrappedMessage: error.shortMessage,
+            },
+          }),
+          longMessage: (
+            <FormattedMessage
+              id="xpack.lens.indexPattern.layerErrorWrapper"
+              defaultMessage="Layer {position} error: {wrappedMessage}"
+              values={{
+                position: index + 1,
+                wrappedMessage: <>{error.longMessage}</>,
+              }}
+            />
+          ),
+        };
+
+        return message;
+      });
+    });
+  }
+
+  return errorMessages;
+}
+
+function getDimensionErrorMessages(
+  state: FormBasedPrivateState,
+  isValidColumn: (layerId: string, columnId: string) => boolean
+) {
+  // generate messages for invalid columns
+  const columnErrorMessages: UserMessage[] = Object.keys(state.layers)
+    .map((layerId) => {
+      const messages: UserMessage[] = [];
+      for (const columnId of Object.keys(state.layers[layerId].columns)) {
+        if (!isValidColumn(layerId, columnId)) {
+          messages.push({
+            severity: 'error',
+            displayLocations: [{ id: 'dimensionTrigger', dimensionId: columnId }],
+            fixableInEditor: true,
+            shortMessage: '',
+            longMessage: (
+              <p>
+                {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+                  defaultMessage: 'Invalid configuration.',
+                })}
+                <br />
+                {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+                  defaultMessage: 'Click for more details.',
+                })}
+              </p>
+            ),
+          });
+        }
+      }
+
+      return messages;
+    })
+    .flat();
+
+  return columnErrorMessages;
 }

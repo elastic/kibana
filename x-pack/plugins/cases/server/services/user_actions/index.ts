@@ -14,52 +14,45 @@ import type {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
-import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
-import {
-  isConnectorUserAction,
-  isPushedUserAction,
-  isCreateCaseUserAction,
-  isCommentUserAction,
-} from '../../../common/utils/user_actions';
 import type {
-  CaseUserActionAttributes,
   CaseUserActionAttributesWithoutConnectorId,
-  CaseUserActionResponse,
+  CaseUserActionDeprecatedResponse,
+  CaseUserActionInjectedAttributes,
 } from '../../../common/api';
-import { Actions, ActionTypes, NONE_CONNECTOR_ID } from '../../../common/api';
+import { ActionTypes } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
-  CASE_COMMENT_SAVED_OBJECT,
 } from '../../../common/constants';
-import {
-  CASE_REF_NAME,
-  COMMENT_REF_NAME,
-  CONNECTOR_ID_REFERENCE_NAME,
-  EXTERNAL_REFERENCE_REF_NAME,
-  PUSH_CONNECTOR_ID_REFERENCE_NAME,
-} from '../../common/constants';
-import { findConnectorIdReference } from '../transform';
 import { buildFilter, combineFilters } from '../../client/utils';
-import type { CaseConnectorActivity, CaseConnectorFields, PushInfo, ServiceContext } from './types';
-import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
+import type {
+  CaseConnectorActivity,
+  CaseConnectorFields,
+  PushInfo,
+  PushTimeFrameInfo,
+  ServiceContext,
+} from './types';
+import { defaultSortField } from '../../common/utils';
 import { UserActionPersister } from './operations/create';
+import { UserActionFinder } from './operations/find';
+import { transformToExternalModel, legacyTransformFindResponseToExternalModel } from './transform';
 
 export interface UserActionItem {
   attributes: CaseUserActionAttributesWithoutConnectorId;
   references: SavedObjectReference[];
 }
 
-interface MostRecentResults {
-  mostRecent: {
-    hits: {
-      total: number;
-      hits: SavedObjectsRawDoc[];
-    };
+interface TopHits {
+  hits: {
+    total: number;
+    hits: SavedObjectsRawDoc[];
   };
+}
+
+interface TimeFrameInfo {
+  mostRecent: TopHits;
+  oldest: TopHits;
 }
 
 interface ConnectorActivityAggsResult {
@@ -71,9 +64,9 @@ interface ConnectorActivityAggsResult {
           reverse: {
             connectorActivity: {
               buckets: {
-                changeConnector: MostRecentResults;
-                createCase: MostRecentResults;
-                pushInfo: MostRecentResults;
+                changeConnector: TimeFrameInfo;
+                createCase: TimeFrameInfo;
+                pushInfo: TimeFrameInfo;
               };
             };
           };
@@ -88,7 +81,7 @@ interface ConnectorFieldsBeforePushAggsResult {
     connectors: {
       reverse: {
         ids: {
-          buckets: Record<string, MostRecentResults>;
+          buckets: Record<string, TimeFrameInfo>;
         };
       };
     };
@@ -97,13 +90,19 @@ interface ConnectorFieldsBeforePushAggsResult {
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;
+  private readonly _finder: UserActionFinder;
 
   constructor(private readonly context: ServiceContext) {
     this._creator = new UserActionPersister(context);
+    this._finder = new UserActionFinder(context);
   }
 
   public get creator() {
     return this._creator;
+  }
+
+  public get finder() {
+    return this._finder;
   }
 
   public async getConnectorFieldsBeforeLatestPush(
@@ -271,7 +270,7 @@ export class CaseUserActionService {
 
   public async getMostRecentUserAction(
     caseId: string
-  ): Promise<SavedObject<CaseUserActionResponse> | undefined> {
+  ): Promise<SavedObject<CaseUserActionInjectedAttributes> | undefined> {
     try {
       this.context.log.debug(
         `Attempting to retrieve the most recent user action for case id: ${caseId}`
@@ -378,7 +377,7 @@ export class CaseUserActionService {
         rawFieldsDoc = createCase.mostRecent.hits.hits[0];
       }
 
-      let fieldsDoc: SavedObject<CaseUserActionResponse> | undefined;
+      let fieldsDoc: SavedObject<CaseUserActionInjectedAttributes> | undefined;
       if (rawFieldsDoc != null) {
         const doc =
           this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
@@ -391,28 +390,13 @@ export class CaseUserActionService {
         );
       }
 
-      const pushInfo = connectorInfo.reverse.connectorActivity.buckets.pushInfo;
-      let pushDoc: SavedObject<CaseUserActionResponse> | undefined;
-
-      if (pushInfo.mostRecent.hits.hits.length > 0) {
-        const rawPushDoc = pushInfo.mostRecent.hits.hits[0];
-
-        const doc =
-          this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
-            rawPushDoc
-          );
-
-        pushDoc = transformToExternalModel(
-          doc,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
-      }
+      const pushDocs = this.getPushDocs(connectorInfo.reverse.connectorActivity.buckets.pushInfo);
 
       if (fieldsDoc != null) {
         caseConnectorInfo.push({
           connectorId: connectorInfo.key,
           fields: fieldsDoc,
-          push: pushDoc,
+          push: pushDocs,
         });
       } else {
         this.context.log.warn(`Unable to find fields for connector id: ${connectorInfo.key}`);
@@ -420,6 +404,33 @@ export class CaseUserActionService {
     }
 
     return caseConnectorInfo;
+  }
+
+  private getPushDocs(pushTimeFrameInfo: TimeFrameInfo): PushTimeFrameInfo | undefined {
+    const mostRecentPushDoc = this.getTopHitsDoc(pushTimeFrameInfo.mostRecent);
+    const oldestPushDoc = this.getTopHitsDoc(pushTimeFrameInfo.oldest);
+
+    if (mostRecentPushDoc && oldestPushDoc) {
+      return {
+        mostRecent: mostRecentPushDoc,
+        oldest: oldestPushDoc,
+      };
+    }
+  }
+
+  private getTopHitsDoc(
+    topHits: TopHits
+  ): SavedObject<CaseUserActionInjectedAttributes> | undefined {
+    if (topHits.hits.hits.length > 0) {
+      const rawPushDoc = topHits.hits.hits[0];
+
+      const doc =
+        this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
+          rawPushDoc
+        );
+
+      return transformToExternalModel(doc, this.context.persistableStateAttachmentTypeRegistry);
+    }
   }
 
   private static buildConnectorInfoAggs(): Record<
@@ -490,6 +501,18 @@ export class CaseUserActionService {
                               size: 1,
                             },
                           },
+                          oldest: {
+                            top_hits: {
+                              sort: [
+                                {
+                                  [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
+                                    order: 'asc',
+                                  },
+                                },
+                              ],
+                              size: 1,
+                            },
+                          },
                         },
                       },
                     },
@@ -503,7 +526,9 @@ export class CaseUserActionService {
     };
   }
 
-  public async getAll(caseId: string): Promise<SavedObjectsFindResponse<CaseUserActionResponse>> {
+  public async getAll(
+    caseId: string
+  ): Promise<SavedObjectsFindResponse<CaseUserActionDeprecatedResponse>> {
     try {
       const id = caseId;
       const type = CASE_SAVED_OBJECT;
@@ -520,7 +545,7 @@ export class CaseUserActionService {
           }
         );
 
-      return transformFindResponseToExternalModel(
+      return legacyTransformFindResponseToExternalModel(
         userActions,
         this.context.persistableStateAttachmentTypeRegistry
       );
@@ -558,60 +583,6 @@ export class CaseUserActionService {
       return ids;
     } catch (error) {
       this.context.log.error(`Error retrieving user action ids for cases: [${caseIds}]: ${error}`);
-      throw error;
-    }
-  }
-
-  public async findStatusChanges({
-    caseId,
-    filter,
-  }: {
-    caseId: string;
-    filter?: KueryNode;
-  }): Promise<Array<SavedObject<CaseUserActionResponse>>> {
-    try {
-      this.context.log.debug('Attempting to find status changes');
-
-      const updateActionFilter = buildFilter({
-        filters: Actions.update,
-        field: 'action',
-        operator: 'or',
-        type: CASE_USER_ACTION_SAVED_OBJECT,
-      });
-
-      const statusChangeFilter = buildFilter({
-        filters: ActionTypes.status,
-        field: 'type',
-        operator: 'or',
-        type: CASE_USER_ACTION_SAVED_OBJECT,
-      });
-
-      const combinedFilters = combineFilters([updateActionFilter, statusChangeFilter, filter]);
-
-      const finder =
-        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<CaseUserActionAttributesWithoutConnectorId>(
-          {
-            type: CASE_USER_ACTION_SAVED_OBJECT,
-            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-            sortField: defaultSortField,
-            sortOrder: 'asc',
-            filter: combinedFilters,
-            perPage: MAX_DOCS_PER_PAGE,
-          }
-        );
-
-      let userActions: Array<SavedObject<CaseUserActionResponse>> = [];
-      for await (const findResults of finder.find()) {
-        userActions = userActions.concat(
-          findResults.saved_objects.map((so) =>
-            transformToExternalModel(so, this.context.persistableStateAttachmentTypeRegistry)
-          )
-        );
-      }
-
-      return userActions;
-    } catch (error) {
-      this.context.log.error(`Error finding status changes: ${error}`);
       throw error;
     }
   }
@@ -690,127 +661,4 @@ export class CaseUserActionService {
       },
     };
   }
-}
-
-export function transformFindResponseToExternalModel(
-  userActions: SavedObjectsFindResponse<CaseUserActionAttributesWithoutConnectorId>,
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObjectsFindResponse<CaseUserActionResponse> {
-  return {
-    ...userActions,
-    saved_objects: userActions.saved_objects.map((so) => ({
-      ...so,
-      ...transformToExternalModel(so, persistableStateAttachmentTypeRegistry),
-    })),
-  };
-}
-
-function transformToExternalModel(
-  userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>,
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObject<CaseUserActionResponse> {
-  const { references } = userAction;
-
-  const caseId = findReferenceId(CASE_REF_NAME, CASE_SAVED_OBJECT, references) ?? '';
-  const commentId =
-    findReferenceId(COMMENT_REF_NAME, CASE_COMMENT_SAVED_OBJECT, references) ?? null;
-  const payload = addReferenceIdToPayload(userAction, persistableStateAttachmentTypeRegistry);
-
-  return {
-    ...userAction,
-    attributes: {
-      ...userAction.attributes,
-      action_id: userAction.id,
-      case_id: caseId,
-      comment_id: commentId,
-      payload,
-    } as CaseUserActionResponse,
-  };
-}
-
-const addReferenceIdToPayload = (
-  userAction: SavedObject<CaseUserActionAttributes>,
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): CaseUserActionAttributes['payload'] => {
-  const connectorId = getConnectorIdFromReferences(userAction);
-  const userActionAttributes = userAction.attributes;
-
-  if (isConnectorUserAction(userActionAttributes) || isCreateCaseUserAction(userActionAttributes)) {
-    return {
-      ...userActionAttributes.payload,
-      connector: {
-        ...userActionAttributes.payload.connector,
-        id: connectorId ?? NONE_CONNECTOR_ID,
-      },
-    };
-  } else if (isPushedUserAction(userActionAttributes)) {
-    return {
-      ...userAction.attributes.payload,
-      externalService: {
-        ...userActionAttributes.payload.externalService,
-        connector_id: connectorId ?? NONE_CONNECTOR_ID,
-      },
-    };
-  } else if (isCommentUserAction(userActionAttributes)) {
-    if (isCommentRequestTypeExternalReferenceSO(userActionAttributes.payload.comment)) {
-      const externalReferenceId = findReferenceId(
-        EXTERNAL_REFERENCE_REF_NAME,
-        userActionAttributes.payload.comment.externalReferenceStorage.soType,
-        userAction.references
-      );
-
-      return {
-        ...userAction.attributes.payload,
-        comment: {
-          ...userActionAttributes.payload.comment,
-          externalReferenceId: externalReferenceId ?? '',
-        },
-      };
-    }
-
-    if (isCommentRequestTypePersistableState(userActionAttributes.payload.comment)) {
-      const injectedAttributes = injectPersistableReferencesToSO(
-        userActionAttributes.payload.comment,
-        userAction.references,
-        {
-          persistableStateAttachmentTypeRegistry,
-        }
-      );
-
-      return {
-        ...userAction.attributes.payload,
-        comment: {
-          ...userActionAttributes.payload.comment,
-          ...injectedAttributes,
-        },
-      };
-    }
-  }
-
-  return userAction.attributes.payload;
-};
-
-function getConnectorIdFromReferences(
-  userAction: SavedObject<CaseUserActionAttributes>
-): string | null {
-  const { references } = userAction;
-
-  if (
-    isConnectorUserAction(userAction.attributes) ||
-    isCreateCaseUserAction(userAction.attributes)
-  ) {
-    return findConnectorIdReference(CONNECTOR_ID_REFERENCE_NAME, references)?.id ?? null;
-  } else if (isPushedUserAction(userAction.attributes)) {
-    return findConnectorIdReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, references)?.id ?? null;
-  }
-
-  return null;
-}
-
-function findReferenceId(
-  name: string,
-  type: string,
-  references: SavedObjectReference[]
-): string | undefined {
-  return references.find((ref) => ref.name === name && ref.type === type)?.id;
 }

@@ -24,7 +24,6 @@ import {
   getMapsCapabilities,
   getIsAllowByValueEmbeddables,
   getInspector,
-  getCoreI18n,
   getSavedObjectsClient,
   getCoreOverlays,
   getSavedObjectsTagging,
@@ -249,7 +248,7 @@ export function getTopNavConfig({
           );
         }
 
-        showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);
+        showSaveModal(saveModal, PresentationUtilContext);
       },
     });
 

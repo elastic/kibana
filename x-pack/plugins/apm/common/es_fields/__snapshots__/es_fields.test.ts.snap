@@ -172,6 +172,8 @@ exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Error METRICSET_INTERVAL 1`] = `undefined`;
+
 exports[`Error METRICSET_NAME 1`] = `undefined`;
 
 exports[`Error NETWORK_CONNECTION_TYPE 1`] = `undefined`;
@@ -448,6 +450,8 @@ exports[`Span METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Span METRICSET_INTERVAL 1`] = `undefined`;
 
 exports[`Span METRICSET_NAME 1`] = `undefined`;
 
@@ -735,6 +739,8 @@ exports[`Transaction METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Transaction METRICSET_INTERVAL 1`] = `undefined`;
 
 exports[`Transaction METRICSET_NAME 1`] = `undefined`;
 
