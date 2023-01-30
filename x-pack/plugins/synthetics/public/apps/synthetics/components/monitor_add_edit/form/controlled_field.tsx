@@ -15,11 +15,11 @@ import {
 } from 'react-hook-form';
 import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { selectServiceLocationsState } from '../../../state';
-import { FieldMeta } from '../types';
+import { FieldMeta, FormConfig } from '../types';
 
 type Props = FieldMeta & {
   component: React.ComponentType<any>;
-  field: ControllerRenderProps;
+  field: ControllerRenderProps<FormConfig>;
   fieldState: ControllerFieldState;
   formRowProps: Partial<EuiFormRowProps>;
   error: React.ReactNode;
@@ -62,7 +62,7 @@ export const ControlledField = ({
         field,
         setValue,
         reset,
-        locations,
+        locations: locations.map((location) => ({ ...location, key: location.id })),
         dependencies: dependenciesValues,
         dependenciesFieldMeta,
         space: space?.id,

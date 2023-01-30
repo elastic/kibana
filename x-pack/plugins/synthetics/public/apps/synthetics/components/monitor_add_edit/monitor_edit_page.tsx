@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
-import { ConfigKey } from '../../../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
 import { getServiceLocations } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 import { MonitorSteps } from './steps';
@@ -35,9 +35,15 @@ const MonitorEditPage: React.FC = () => {
     return getMonitorAPI({ id: monitorId });
   }, []);
 
+  const isReadOnly = data?.attributes[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+
   return data && !loading && !error ? (
     <MonitorForm defaultValues={data?.attributes}>
-      <MonitorSteps stepMap={EDIT_MONITOR_STEPS} isEditFlow={true} />
+      <MonitorSteps
+        stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
+        isEditFlow={true}
+        readOnly={isReadOnly}
+      />
       <MonitorDetailsLinkPortal
         configId={data?.attributes[ConfigKey.CONFIG_ID]}
         name={data?.attributes.name}

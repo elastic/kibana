@@ -29,7 +29,7 @@ const MONITOR_TYPE_STEP: Step = {
     />
   ),
 };
-const MONITOR_DETAILS_STEP: Step = {
+const MONITOR_DETAILS_STEP = (readOnly: boolean = false): Step => ({
   title: i18n.translate('xpack.synthetics.monitorConfig.monitorDetailsStep.title', {
     defaultMessage: 'Monitor details',
   }),
@@ -43,9 +43,10 @@ const MONITOR_DETAILS_STEP: Step = {
         </p>
       }
       stepKey="step2"
+      readOnly={readOnly}
     />
   ),
-};
+});
 
 const SCRIPT_RECORDER_BTNS = (
   <EuiFlexGroup justifyContent="flexStart">
@@ -104,7 +105,7 @@ const MONITOR_SCRIPT_STEP: Step = {
   ),
 };
 
-const MONITOR_SCRIPT_STEP_EDIT: Step = {
+const MONITOR_SCRIPT_STEP_EDIT = (readOnly: boolean = false): Step => ({
   title: i18n.translate('xpack.synthetics.monitorConfig.monitorScriptEditStep.title', {
     defaultMessage: 'Monitor script',
   }),
@@ -113,41 +114,50 @@ const MONITOR_SCRIPT_STEP_EDIT: Step = {
       description={
         <>
           <p>
-            <FormattedMessage
-              id="xpack.synthetics.monitorConfig.monitorScriptEditStep.description"
-              defaultMessage="Use Elastic Synthetics Recorder to generate and upload a script. Alternatively, you can edit the existing {playwright} script (or paste a new one) in the script editor."
-              values={{
-                playwright: (
-                  <EuiLink href="https://playwright.dev/" target="_blank" external>
-                    <FormattedMessage
-                      id="xpack.synthetics.monitorConfig.monitorScriptEditStep.playwrightLink"
-                      defaultMessage="Playwright"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
+            {readOnly ? (
+              <FormattedMessage
+                id="xpack.synthetics.monitorConfig.monitorScriptEditStepReadOnly.description"
+                defaultMessage="The script for Project Monitors cannot be edited here. To see or update the script, go to where the Project was pushed from."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.synthetics.monitorConfig.monitorScriptEditStep.description"
+                defaultMessage="Use Elastic Synthetics Recorder to generate and upload a script. Alternatively, you can edit the existing {playwright} script (or paste a new one) in the script editor."
+                values={{
+                  playwright: (
+                    <EuiLink href="https://playwright.dev/" target="_blank" external>
+                      <FormattedMessage
+                        id="xpack.synthetics.monitorConfig.monitorScriptEditStep.playwrightLink"
+                        defaultMessage="Playwright"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            )}
           </p>
-          {SCRIPT_RECORDER_BTNS}
+          {readOnly ? null : SCRIPT_RECORDER_BTNS}
         </>
       }
       stepKey="scriptEdit"
+      readOnly={readOnly}
+      descriptionOnly={readOnly}
     />
   ),
-};
+});
 
 export const ADD_MONITOR_STEPS: StepMap = {
-  [FormMonitorType.MULTISTEP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP, MONITOR_SCRIPT_STEP],
-  [FormMonitorType.SINGLE]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP],
-  [FormMonitorType.HTTP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP],
-  [FormMonitorType.ICMP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP],
-  [FormMonitorType.TCP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP],
+  [FormMonitorType.MULTISTEP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP(), MONITOR_SCRIPT_STEP],
+  [FormMonitorType.SINGLE]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP()],
+  [FormMonitorType.HTTP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP()],
+  [FormMonitorType.ICMP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP()],
+  [FormMonitorType.TCP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP()],
 };
 
-export const EDIT_MONITOR_STEPS: StepMap = {
-  [FormMonitorType.MULTISTEP]: [MONITOR_SCRIPT_STEP_EDIT, MONITOR_DETAILS_STEP],
-  [FormMonitorType.SINGLE]: [MONITOR_DETAILS_STEP],
-  [FormMonitorType.HTTP]: [MONITOR_DETAILS_STEP],
-  [FormMonitorType.ICMP]: [MONITOR_DETAILS_STEP],
-  [FormMonitorType.TCP]: [MONITOR_DETAILS_STEP],
-};
+export const EDIT_MONITOR_STEPS = (readOnly: boolean): StepMap => ({
+  [FormMonitorType.MULTISTEP]: [MONITOR_SCRIPT_STEP_EDIT(readOnly), MONITOR_DETAILS_STEP(readOnly)],
+  [FormMonitorType.SINGLE]: [MONITOR_DETAILS_STEP(readOnly)],
+  [FormMonitorType.HTTP]: [MONITOR_DETAILS_STEP(readOnly)],
+  [FormMonitorType.ICMP]: [MONITOR_DETAILS_STEP(readOnly)],
+  [FormMonitorType.TCP]: [MONITOR_DETAILS_STEP(readOnly)],
+});

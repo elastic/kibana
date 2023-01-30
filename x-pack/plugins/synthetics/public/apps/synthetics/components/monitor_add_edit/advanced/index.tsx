@@ -14,14 +14,14 @@ import { FORM_CONFIG } from '../form/form_config';
 import { Field } from '../form/field';
 import { ConfigKey, FormMonitorType } from '../types';
 
-export const AdvancedConfig = () => {
+export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
   const {
     watch,
     formState: { errors },
   } = useFormContext();
   const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
 
-  return FORM_CONFIG[type]?.advanced ? (
+  return FORM_CONFIG(readOnly)[type]?.advanced ? (
     <EuiPanel hasBorder>
       <EuiAccordion
         id="syntheticsAdvancedPanel"
@@ -30,7 +30,7 @@ export const AdvancedConfig = () => {
         })}
       >
         <EuiSpacer />
-        {FORM_CONFIG[type].advanced?.map((configGroup) => {
+        {FORM_CONFIG(readOnly)[type].advanced?.map((configGroup) => {
           return (
             <DescripedFormGroup
               description={configGroup.description}

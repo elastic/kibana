@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { ConfigKey, FormMonitorType, FieldMeta } from '../types';
-
+import { AlertConfigKey } from '../constants';
 import { FIELD } from './field_config';
 
-const DEFAULT_DATA_OPTIONS = {
+const DEFAULT_DATA_OPTIONS = (readOnly: boolean) => ({
   title: i18n.translate('xpack.synthetics.monitorConfig.section.dataOptions.title', {
     defaultMessage: 'Data options',
   }),
@@ -18,13 +18,13 @@ const DEFAULT_DATA_OPTIONS = {
     defaultMessage: 'Configure data options to add context to the data coming from your monitors.',
   }),
   components: [
-    FIELD[ConfigKey.TAGS],
-    FIELD[ConfigKey.APM_SERVICE_NAME],
-    FIELD[ConfigKey.NAMESPACE],
+    FIELD(readOnly)[ConfigKey.TAGS],
+    FIELD(readOnly)[ConfigKey.APM_SERVICE_NAME],
+    FIELD(readOnly)[ConfigKey.NAMESPACE],
   ],
-};
+});
 
-const HTTP_ADVANCED = {
+const HTTP_ADVANCED = (readOnly: boolean) => ({
   requestConfig: {
     title: i18n.translate('xpack.synthetics.monitorConfig.section.requestConfiguration.title', {
       defaultMessage: 'Request configuration',
@@ -37,12 +37,12 @@ const HTTP_ADVANCED = {
       }
     ),
     components: [
-      FIELD[ConfigKey.USERNAME],
-      FIELD[ConfigKey.PASSWORD],
-      FIELD[ConfigKey.PROXY_URL],
-      FIELD[ConfigKey.REQUEST_METHOD_CHECK],
-      FIELD[ConfigKey.REQUEST_HEADERS_CHECK],
-      FIELD[ConfigKey.REQUEST_BODY_CHECK],
+      FIELD(readOnly)[ConfigKey.USERNAME],
+      FIELD(readOnly)[ConfigKey.PASSWORD],
+      FIELD(readOnly)[ConfigKey.PROXY_URL],
+      FIELD(readOnly)[ConfigKey.REQUEST_METHOD_CHECK],
+      FIELD(readOnly)[ConfigKey.REQUEST_HEADERS_CHECK],
+      FIELD(readOnly)[ConfigKey.REQUEST_BODY_CHECK],
     ],
   },
   responseConfig: {
@@ -55,7 +55,10 @@ const HTTP_ADVANCED = {
         defaultMessage: 'Control the indexing of the HTTP response contents.',
       }
     ),
-    components: [FIELD[ConfigKey.RESPONSE_HEADERS_INDEX], FIELD[ConfigKey.RESPONSE_BODY_INDEX]],
+    components: [
+      FIELD(readOnly)[ConfigKey.RESPONSE_HEADERS_INDEX],
+      FIELD(readOnly)[ConfigKey.RESPONSE_BODY_INDEX],
+    ],
   },
   responseChecks: {
     title: i18n.translate('xpack.synthetics.monitorConfig.section.responseChecks.title', {
@@ -68,15 +71,15 @@ const HTTP_ADVANCED = {
       }
     ),
     components: [
-      FIELD[ConfigKey.RESPONSE_STATUS_CHECK],
-      FIELD[ConfigKey.RESPONSE_HEADERS_CHECK],
-      FIELD[ConfigKey.RESPONSE_BODY_CHECK_POSITIVE],
-      FIELD[ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE],
+      FIELD(readOnly)[ConfigKey.RESPONSE_STATUS_CHECK],
+      FIELD(readOnly)[ConfigKey.RESPONSE_HEADERS_CHECK],
+      FIELD(readOnly)[ConfigKey.RESPONSE_BODY_CHECK_POSITIVE],
+      FIELD(readOnly)[ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE],
     ],
   },
-};
+});
 
-export const TCP_ADVANCED = {
+export const TCP_ADVANCED = (readOnly: boolean) => ({
   requestConfig: {
     title: i18n.translate('xpack.synthetics.monitorConfig.section.requestConfigTCP.title', {
       defaultMessage: 'Request configuration',
@@ -87,7 +90,10 @@ export const TCP_ADVANCED = {
         defaultMessage: 'Configure the payload sent to the remote host.',
       }
     ),
-    components: [FIELD[`${ConfigKey.PROXY_URL}__tcp`], FIELD[ConfigKey.REQUEST_SEND_CHECK]],
+    components: [
+      FIELD(readOnly)[`${ConfigKey.PROXY_URL}__tcp`],
+      FIELD(readOnly)[ConfigKey.REQUEST_SEND_CHECK],
+    ],
   },
   responseChecks: {
     title: i18n.translate('xpack.synthetics.monitorConfig.section.responseChecksTCP.title', {
@@ -99,11 +105,11 @@ export const TCP_ADVANCED = {
         defaultMessage: 'Configure the expected response from the remote host.',
       }
     ),
-    components: [FIELD[ConfigKey.RESPONSE_RECEIVE_CHECK]],
+    components: [FIELD(readOnly)[ConfigKey.RESPONSE_RECEIVE_CHECK]],
   },
-};
+});
 
-export const BROWSER_ADVANCED = [
+export const BROWSER_ADVANCED = (readOnly: boolean) => [
   {
     title: i18n.translate('xpack.synthetics.monitorConfig.section.syntAgentOptions.title', {
       defaultMessage: 'Synthetics agent options',
@@ -115,9 +121,9 @@ export const BROWSER_ADVANCED = [
       }
     ),
     components: [
-      FIELD[ConfigKey.IGNORE_HTTPS_ERRORS],
-      FIELD[ConfigKey.SYNTHETICS_ARGS],
-      FIELD[ConfigKey.PLAYWRIGHT_OPTIONS],
+      FIELD(readOnly)[ConfigKey.IGNORE_HTTPS_ERRORS],
+      FIELD(readOnly)[ConfigKey.SYNTHETICS_ARGS],
+      FIELD(readOnly)[ConfigKey.PLAYWRIGHT_OPTIONS],
     ],
   },
 ];
@@ -125,21 +131,21 @@ export const BROWSER_ADVANCED = [
 interface AdvancedFieldGroup {
   title: string;
   description: string;
-  components: FieldMeta[];
+  components: Array<FieldMeta<any>>;
 }
 
 type FieldConfig = Record<
   FormMonitorType,
   {
-    step1: FieldMeta[];
-    step2: FieldMeta[];
-    step3?: FieldMeta[];
-    scriptEdit?: FieldMeta[];
+    step1: Array<FieldMeta<any>>;
+    step2: Array<FieldMeta<any>>;
+    step3?: Array<FieldMeta<any>>;
+    scriptEdit?: Array<FieldMeta<any>>;
     advanced?: AdvancedFieldGroup[];
   }
 >;
 
-const TLS_OPTIONS = {
+const TLS_OPTIONS = (readOnly: boolean): AdvancedFieldGroup => ({
   title: i18n.translate('xpack.synthetics.monitorConfig.section.tlsOptions.title', {
     defaultMessage: 'TLS options',
   }),
@@ -148,116 +154,116 @@ const TLS_OPTIONS = {
       'Configure TLS options, including verification mode, certificate authorities, and client certificates.',
   }),
   components: [
-    FIELD.isTLSEnabled,
-    FIELD[ConfigKey.TLS_VERIFICATION_MODE],
-    FIELD[ConfigKey.TLS_VERSION],
-    FIELD[ConfigKey.TLS_CERTIFICATE_AUTHORITIES],
-    FIELD[ConfigKey.TLS_CERTIFICATE],
-    FIELD[ConfigKey.TLS_KEY],
-    FIELD[ConfigKey.TLS_KEY_PASSPHRASE],
+    FIELD(readOnly).isTLSEnabled,
+    FIELD(readOnly)[ConfigKey.TLS_VERIFICATION_MODE],
+    FIELD(readOnly)[ConfigKey.TLS_VERSION],
+    FIELD(readOnly)[ConfigKey.TLS_CERTIFICATE_AUTHORITIES],
+    FIELD(readOnly)[ConfigKey.TLS_CERTIFICATE],
+    FIELD(readOnly)[ConfigKey.TLS_KEY],
+    FIELD(readOnly)[ConfigKey.TLS_KEY_PASSPHRASE],
   ],
-};
+});
 
-export const FORM_CONFIG: FieldConfig = {
+export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
   [FormMonitorType.HTTP]: {
-    step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
+    step1: [FIELD(readOnly)[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [
-      FIELD[`${ConfigKey.URLS}__http`],
-      FIELD[ConfigKey.NAME],
-      FIELD[ConfigKey.LOCATIONS],
-      FIELD[ConfigKey.SCHEDULE],
-      FIELD[ConfigKey.MAX_REDIRECTS],
-      FIELD[ConfigKey.TIMEOUT],
-      FIELD[ConfigKey.ENABLED],
-      FIELD[ConfigKey.ALERT_CONFIG],
+      FIELD(readOnly)[`${ConfigKey.URLS}__http`],
+      FIELD(readOnly)[ConfigKey.NAME],
+      FIELD(readOnly)[ConfigKey.LOCATIONS],
+      FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
+      FIELD(readOnly)[ConfigKey.MAX_REDIRECTS],
+      FIELD(readOnly)[ConfigKey.TIMEOUT],
+      FIELD(readOnly)[ConfigKey.ENABLED],
+      FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
     advanced: [
-      DEFAULT_DATA_OPTIONS,
-      HTTP_ADVANCED.requestConfig,
-      HTTP_ADVANCED.responseConfig,
-      HTTP_ADVANCED.responseChecks,
-      TLS_OPTIONS,
+      DEFAULT_DATA_OPTIONS(readOnly),
+      HTTP_ADVANCED(readOnly).requestConfig,
+      HTTP_ADVANCED(readOnly).responseConfig,
+      HTTP_ADVANCED(readOnly).responseChecks,
+      TLS_OPTIONS(readOnly),
     ],
   },
   [FormMonitorType.TCP]: {
-    step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
+    step1: [FIELD(readOnly)[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [
-      FIELD[`${ConfigKey.HOSTS}__tcp`],
-      FIELD[ConfigKey.NAME],
-      FIELD[ConfigKey.LOCATIONS],
-      FIELD[ConfigKey.SCHEDULE],
-      FIELD[ConfigKey.TIMEOUT],
-      FIELD[ConfigKey.ENABLED],
-      FIELD[ConfigKey.ALERT_CONFIG],
+      FIELD(readOnly)[`${ConfigKey.HOSTS}__tcp`],
+      FIELD(readOnly)[ConfigKey.NAME],
+      FIELD(readOnly)[ConfigKey.LOCATIONS],
+      FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
+      FIELD(readOnly)[ConfigKey.TIMEOUT],
+      FIELD(readOnly)[ConfigKey.ENABLED],
+      FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
     advanced: [
-      DEFAULT_DATA_OPTIONS,
-      TCP_ADVANCED.requestConfig,
-      TCP_ADVANCED.responseChecks,
-      TLS_OPTIONS,
+      DEFAULT_DATA_OPTIONS(readOnly),
+      TCP_ADVANCED(readOnly).requestConfig,
+      TCP_ADVANCED(readOnly).responseChecks,
+      TLS_OPTIONS(readOnly),
     ],
   },
   [FormMonitorType.MULTISTEP]: {
-    step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
+    step1: [FIELD(readOnly)[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [
-      FIELD[ConfigKey.NAME],
-      FIELD[ConfigKey.LOCATIONS],
-      FIELD[ConfigKey.SCHEDULE],
-      FIELD[ConfigKey.THROTTLING_CONFIG],
-      FIELD[ConfigKey.ENABLED],
-      FIELD[ConfigKey.ALERT_CONFIG],
+      FIELD(readOnly)[ConfigKey.NAME],
+      FIELD(readOnly)[ConfigKey.LOCATIONS],
+      FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
+      FIELD(readOnly)[ConfigKey.THROTTLING_CONFIG],
+      FIELD(readOnly)[ConfigKey.ENABLED],
+      FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
-    step3: [FIELD[ConfigKey.SOURCE_INLINE], FIELD[ConfigKey.PARAMS]],
-    scriptEdit: [FIELD[ConfigKey.SOURCE_INLINE]],
+    step3: [FIELD(readOnly)['source.inline'], FIELD(readOnly)[ConfigKey.PARAMS]],
+    scriptEdit: [FIELD(readOnly)['source.inline']],
     advanced: [
       {
-        ...DEFAULT_DATA_OPTIONS,
+        ...DEFAULT_DATA_OPTIONS(readOnly),
         components: [
-          FIELD[ConfigKey.TAGS],
-          FIELD[ConfigKey.APM_SERVICE_NAME],
-          FIELD[ConfigKey.SCREENSHOTS],
-          FIELD[ConfigKey.NAMESPACE],
+          FIELD(readOnly)[ConfigKey.TAGS],
+          FIELD(readOnly)[ConfigKey.APM_SERVICE_NAME],
+          FIELD(readOnly)[ConfigKey.SCREENSHOTS],
+          FIELD(readOnly)[ConfigKey.NAMESPACE],
         ],
       },
-      ...BROWSER_ADVANCED,
+      ...BROWSER_ADVANCED(readOnly),
     ],
   },
   [FormMonitorType.SINGLE]: {
-    step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
+    step1: [FIELD(readOnly)[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [
-      FIELD[`${ConfigKey.URLS}__single`],
-      FIELD[ConfigKey.NAME],
-      FIELD[ConfigKey.TEXT_ASSERTION],
-      FIELD[ConfigKey.LOCATIONS],
-      FIELD[ConfigKey.SCHEDULE],
-      FIELD[ConfigKey.THROTTLING_CONFIG],
-      FIELD[ConfigKey.ENABLED],
-      FIELD[ConfigKey.ALERT_CONFIG],
+      FIELD(readOnly)[`${ConfigKey.URLS}__single`],
+      FIELD(readOnly)[ConfigKey.NAME],
+      FIELD(readOnly)[ConfigKey.TEXT_ASSERTION],
+      FIELD(readOnly)[ConfigKey.LOCATIONS],
+      FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
+      FIELD(readOnly)[ConfigKey.THROTTLING_CONFIG],
+      FIELD(readOnly)[ConfigKey.ENABLED],
+      FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
     advanced: [
       {
-        ...DEFAULT_DATA_OPTIONS,
+        ...DEFAULT_DATA_OPTIONS(readOnly),
         components: [
-          FIELD[ConfigKey.TAGS],
-          FIELD[ConfigKey.APM_SERVICE_NAME],
-          FIELD[ConfigKey.SCREENSHOTS],
-          FIELD[ConfigKey.NAMESPACE],
+          FIELD(readOnly)[ConfigKey.TAGS],
+          FIELD(readOnly)[ConfigKey.APM_SERVICE_NAME],
+          FIELD(readOnly)[ConfigKey.SCREENSHOTS],
+          FIELD(readOnly)[ConfigKey.NAMESPACE],
         ],
       },
-      ...BROWSER_ADVANCED,
+      ...BROWSER_ADVANCED(readOnly),
     ],
   },
   [FormMonitorType.ICMP]: {
-    step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
+    step1: [FIELD(readOnly)[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [
-      FIELD[`${ConfigKey.HOSTS}__icmp`],
-      FIELD[ConfigKey.NAME],
-      FIELD[ConfigKey.LOCATIONS],
-      FIELD[ConfigKey.SCHEDULE],
-      FIELD[ConfigKey.WAIT],
-      FIELD[ConfigKey.TIMEOUT],
-      FIELD[ConfigKey.ENABLED],
+      FIELD(readOnly)[`${ConfigKey.HOSTS}__icmp`],
+      FIELD(readOnly)[ConfigKey.NAME],
+      FIELD(readOnly)[ConfigKey.LOCATIONS],
+      FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
+      FIELD(readOnly)[ConfigKey.WAIT],
+      FIELD(readOnly)[ConfigKey.TIMEOUT],
+      FIELD(readOnly)[ConfigKey.ENABLED],
     ],
-    advanced: [DEFAULT_DATA_OPTIONS],
+    advanced: [DEFAULT_DATA_OPTIONS(readOnly)],
   },
-};
+});
