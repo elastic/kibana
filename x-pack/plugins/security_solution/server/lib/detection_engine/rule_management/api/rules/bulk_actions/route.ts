@@ -329,7 +329,6 @@ export const performBulkActionRoute = (
         ]);
 
         const rulesClient = ctx.alerting.getRulesClient();
-        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
         const exceptionsClient = ctx.lists?.getExceptionListClient();
         const savedObjectsClient = ctx.core.savedObjects.client;
 
@@ -481,7 +480,6 @@ export const performBulkActionRoute = (
                 await deleteRules({
                   ruleId: migratedRule.id,
                   rulesClient,
-                  ruleExecutionLog,
                 });
 
                 return null;

@@ -5955,9 +5955,9 @@
             "signature": [
               "<T = unknown>() => Promise<Record<string, (",
               {
-                "pluginId": "@kbn/core-ui-settings-common",
+                "pluginId": "@kbn/core-ui-settings-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.PublicUiSettingsParams",
                 "text": "PublicUiSettingsParams"
               },
