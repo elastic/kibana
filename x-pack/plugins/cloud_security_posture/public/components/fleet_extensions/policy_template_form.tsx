@@ -33,7 +33,7 @@ interface Props extends PackagePolicyCreateExtensionComponentProps {
 
 const EditScreenStepTitle = () => (
   <>
-    <EuiTitle size="xs">
+    <EuiTitle size="s">
       <h4>
         <FormattedMessage
           id="xpack.csp.fleetIntegration.integrationSettingsTitle"

@@ -24,7 +24,7 @@ import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 const AWSSetupInfoContent = () => (
   <>
     <EuiSpacer size="l" />
-    <EuiTitle size="xs">
+    <EuiTitle size="s">
       <h2>
         <FormattedMessage
           id="xpack.csp.awsIntegration.setupInfoContentTitle"
@@ -32,7 +32,7 @@ const AWSSetupInfoContent = () => (
         />
       </h2>
     </EuiTitle>
-    <EuiSpacer size="s" />
+    <EuiSpacer size="l" />
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
         id="xpack.csp.awsIntegration.setupInfoContent"

@@ -106,9 +106,9 @@ export function useOnSubmit({
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
 
-  // Used to render extension components only when package policy is initialized
+  // Used to render extension components only after package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  // Used to initialize the package policy only once
+  // Used to initialize the package policy once
   const isInitializedRef = useRef(false);
 
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
@@ -203,7 +203,6 @@ export function useOnSubmit({
       });
       const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
-      // Used to avoid initializing a package policy twice
       isInitializedRef.current = true;
       updatePackagePolicy(
         packageToPackagePolicy(
