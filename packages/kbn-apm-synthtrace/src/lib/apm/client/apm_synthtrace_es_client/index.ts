@@ -20,6 +20,7 @@ import { ValuesType } from 'utility-types';
 import { Logger } from '../../../utils/create_logger';
 import { fork, sequential } from '../../../utils/stream_utils';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
+import { createServiceMetricsAggregator } from '../../aggregators/create_service_metrics_aggregator';
 import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
 import { createTransactionMetricsAggregator } from '../../aggregators/create_transaction_metrics_aggregator';
 import { getApmServerMetadataTransform } from './get_apm_server_metadata_transform';
@@ -69,15 +70,12 @@ export class ApmSynthtraceEsClient {
   }
 
   async clean() {
-    this.logger.info(`Cleaning APM data streams ${DATA_STREAMS.join(', ')}`);
+    this.logger.info(`Cleaning APM data streams ${DATA_STREAMS.join(',')}`);
 
-    for (const name of DATA_STREAMS) {
-      const dataStream = await this.client.indices.getDataStream({ name }, { ignore: [404] });
-      if (dataStream.data_streams && dataStream.data_streams.length > 0) {
-        this.logger.debug(`Deleting datastream: ${name}`);
-        await this.client.indices.deleteDataStream({ name });
-      }
-    }
+    await this.client.indices.deleteDataStream({
+      name: DATA_STREAMS.join(','),
+      expand_wildcards: ['open', 'hidden'],
+    });
   }
 
   async updateComponentTemplate(
@@ -92,14 +90,16 @@ export class ApmSynthtraceEsClient {
       name,
     });
 
-    const template = response.component_templates[0];
-
-    await this.client.cluster.putComponentTemplate({
-      name,
-      template: {
-        ...modify(template.component_template.template),
-      },
-    });
+    await Promise.all(
+      response.component_templates.map((template) => {
+        return this.client.cluster.putComponentTemplate({
+          name: template.name,
+          template: {
+            ...modify(template.component_template.template),
+          },
+        });
+      })
+    );
 
     this.logger.info(`Updated component template: ${name}`);
   }
@@ -118,7 +118,14 @@ export class ApmSynthtraceEsClient {
     return (base: Readable) => {
       const aggregators = [
         createTransactionMetricsAggregator('1m'),
+        createTransactionMetricsAggregator('10m'),
+        createTransactionMetricsAggregator('60m'),
+        createServiceMetricsAggregator('1m'),
+        createServiceMetricsAggregator('10m'),
+        createServiceMetricsAggregator('60m'),
         createSpanMetricsAggregator('1m'),
+        createSpanMetricsAggregator('10m'),
+        createSpanMetricsAggregator('60m'),
       ];
 
       const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
