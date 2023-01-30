@@ -11,6 +11,15 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { Alert } from '@kbn/alerting-plugin/server';
 import { RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
+import {
+  IndicesGetMappingIndexMappingRecord,
+  MsearchRequestItem,
+} from '@elastic/elasticsearch/lib/api/types';
+import * as t from 'io-ts';
+import {
+  MsearchMultisearchHeader,
+  MsearchMultisearchBody,
+} from '@elastic/elasticsearch/lib/api/types';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -31,6 +40,123 @@ import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 
+// TODO move all this to separate files
+export const AllowedValues = t.array(
+  t.partial({
+    description: t.string,
+    name: t.string,
+  })
+);
+
+export type AllowedValuesInputs = t.TypeOf<typeof AllowedValues>;
+
+export const GetUnallowedFieldValuesBody = t.array(
+  t.type({
+    indexName: t.string,
+    indexFieldName: t.string,
+    allowedValues: AllowedValues,
+    from: t.string,
+    to: t.string,
+  })
+);
+
+export type GetUnallowedFieldValuesInputs = t.TypeOf<typeof GetUnallowedFieldValuesBody>;
+
+export const getMSearchRequestHeader = (indexName: string): MsearchMultisearchHeader => ({
+  expand_wildcards: ['open'],
+  index: indexName,
+});
+
+export const getMSearchRequestBody = ({
+  indexFieldName,
+  allowedValues,
+  from,
+  to,
+}: {
+  indexFieldName: string;
+  allowedValues: AllowedValuesInputs;
+  from: string;
+  to: string;
+}): MsearchMultisearchBody => ({
+  aggregations: {
+    unallowedValues: {
+      terms: {
+        field: indexFieldName,
+        order: {
+          _count: 'desc',
+        },
+      },
+    },
+  },
+  query: {
+    bool: {
+      filter: [
+        {
+          bool: {
+            must: [],
+            filter: [],
+            should: [],
+            must_not:
+              allowedValues.length > 0
+                ? [
+                    {
+                      bool: {
+                        should: allowedValues.map(({ name: allowedValue }) => ({
+                          match_phrase: {
+                            [indexFieldName]: allowedValue,
+                          },
+                        })),
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ]
+                : [],
+          },
+        },
+        {
+          range: {
+            '@timestamp': {
+              gte: from,
+              lte: to,
+            },
+          },
+        },
+      ],
+    },
+  },
+  runtime_mappings: {},
+  size: 0,
+});
+
+export const getUnallowedFieldValues = (
+  esClient: ElasticsearchClient,
+  items: GetUnallowedFieldValuesInputs
+) => {
+  const searches: MsearchRequestItem[] = items.reduce<MsearchRequestItem[]>(
+    (acc, { indexName, indexFieldName, allowedValues, from, to }) =>
+      acc.concat([
+        getMSearchRequestHeader(indexName),
+        getMSearchRequestBody({ indexFieldName, allowedValues, from, to }),
+      ]),
+    []
+  );
+
+  return esClient.msearch({
+    searches,
+  });
+};
+
+export const fetchMappings = async (
+  client: ElasticsearchClient,
+  indexName: string
+): Promise<Record<string, IndicesGetMappingIndexMappingRecord>> =>
+  await client.indices.getMapping({
+    expand_wildcards: ['open'],
+    index: indexName,
+  });
+
+// END files TODO
+
 async function fetchKibanaNodeDataQuality(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
@@ -39,7 +165,13 @@ async function fetchKibanaNodeDataQuality(
   maxBucketSize: number,
   filterQuery: string | undefined
 ): Promise<AlertDataQualityStats[]> {
+  const { indices = {} } = await esClient.indices.stats();
+  console.log('indices found', Object.keys(indices));
+
+  // TODO fetch allowed values
   // TODO use Andrew's APIs here for each index
+
+  // 1. find the relevant code
   throw new Error('Function not implemented.');
 }
 
@@ -109,6 +241,7 @@ export class DataQualityRule extends BaseRule {
     };
   }
 
+  // TODO update texts here
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
     const stat = item.meta as AlertDataQualityStats;
     return {
@@ -151,6 +284,7 @@ export class DataQualityRule extends BaseRule {
     };
   }
 
+  // TODO update texts here
   protected executeActions(
     instance: Alert,
     { alertStates }: AlertInstanceState,
