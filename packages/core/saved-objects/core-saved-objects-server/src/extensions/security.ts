@@ -12,7 +12,7 @@ import {
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { BulkResolveError, LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
-import { EcsEventOutcome } from '@kbn/ecs';
+import { EcsEvent } from '@kbn/ecs';
 import { SavedObject } from '../..';
 
 /**
@@ -372,7 +372,7 @@ export interface AddAuditEventParams {
    * The outcome of the operation
    * 'failure' | 'success' | 'unknown'
    */
-  outcome?: EcsEventOutcome;
+  outcome?: EcsEvent['outcome'];
   /**
    * Relevant saved object information
    * object containing type & id strings

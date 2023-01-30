@@ -168,7 +168,7 @@ describe('Lens createAddToTimelineAction', () => {
               and: [],
               enabled: true,
               excluded: false,
-              id: 'event-details-value-default-draggable-timeline-1-event_1-user_name-0-the value',
+              id: 'event-field-default-timeline-1-event_1-user_name-0-the value',
               kqlQuery: '',
               name: 'user.name',
               queryMatch: {
@@ -190,19 +190,47 @@ describe('Lens createAddToTimelineAction', () => {
       expect(mockWarningToast).not.toHaveBeenCalled();
     });
 
+    it('should add exclusive provider for empty values', async () => {
+      await addToTimelineAction.execute({
+        ...context,
+        data: [{ columnMeta }],
+      });
+      expect(mockDispatch).toHaveBeenCalledTimes(2);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: addProvider.type,
+        payload: {
+          id: TimelineId.active,
+          providers: [
+            {
+              and: [],
+              enabled: true,
+              excluded: true,
+              id: 'empty-value-timeline-1-user_name-0',
+              kqlQuery: '',
+              name: 'user.name',
+              queryMatch: {
+                field: 'user.name',
+                operator: ':*',
+                value: '',
+              },
+            },
+          ],
+        },
+      });
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: showTimeline.type,
+        payload: {
+          id: TimelineId.active,
+          show: true,
+        },
+      });
+      expect(mockWarningToast).not.toHaveBeenCalled();
+    });
+
     it('should show warning if no provider added', async () => {
       await addToTimelineAction.execute({
         ...context,
         data: [],
-      });
-      expect(mockDispatch).not.toHaveBeenCalled();
-      expect(mockWarningToast).toHaveBeenCalled();
-    });
-
-    it('should show warning if no value in the data', async () => {
-      await addToTimelineAction.execute({
-        ...context,
-        data: [{ columnMeta }],
       });
       expect(mockDispatch).not.toHaveBeenCalled();
       expect(mockWarningToast).toHaveBeenCalled();

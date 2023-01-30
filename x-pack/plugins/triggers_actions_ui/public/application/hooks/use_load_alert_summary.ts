@@ -27,7 +27,6 @@ interface AlertSummary {
   activeAlertCount: number;
   activeAlerts: Alert[];
   recoveredAlertCount: number;
-  recoveredAlerts: Alert[];
 }
 
 interface LoadAlertSummaryResponse {
@@ -44,7 +43,6 @@ export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAl
       activeAlertCount: 0,
       activeAlerts: [],
       recoveredAlertCount: 0,
-      recoveredAlerts: [],
     },
   });
   const isCancelledRef = useRef(false);
@@ -56,14 +54,13 @@ export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAl
     abortCtrlRef.current = new AbortController();
 
     try {
-      const { activeAlertCount, activeAlerts, recoveredAlertCount, recoveredAlerts } =
-        await fetchAlertSummary({
-          featureIds,
-          filter,
-          http,
-          signal: abortCtrlRef.current.signal,
-          timeRange,
-        });
+      const { activeAlertCount, activeAlerts, recoveredAlertCount } = await fetchAlertSummary({
+        featureIds,
+        filter,
+        http,
+        signal: abortCtrlRef.current.signal,
+        timeRange,
+      });
 
       if (!isCancelledRef.current) {
         setAlertSummary(() => ({
@@ -71,7 +68,6 @@ export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAl
             activeAlertCount,
             activeAlerts,
             recoveredAlertCount,
-            recoveredAlerts,
           },
           isLoading: false,
         }));
@@ -123,12 +119,10 @@ async function fetchAlertSummary({
   const activeAlertCount = res?.activeAlertCount ?? 0;
   const activeAlerts = res?.activeAlerts ?? [];
   const recoveredAlertCount = res?.recoveredAlertCount ?? 0;
-  const recoveredAlerts = res?.recoveredAlerts ?? [];
 
   return {
     activeAlertCount,
     activeAlerts,
     recoveredAlertCount,
-    recoveredAlerts,
   };
 }

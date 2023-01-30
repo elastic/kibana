@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { Status } from '../../../../../common/types/api';
 
-import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
+import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
@@ -57,7 +57,7 @@ describe('EnginesList', () => {
     setMockActions(mockActions);
 
     const wrapper = shallow(<EnginesList />);
-    const pageTemplate = wrapper.find(EnterpriseSearchContentPageTemplate);
+    const pageTemplate = wrapper.find(EnterpriseSearchEnginesPageTemplate);
 
     expect(pageTemplate.prop('isLoading')).toEqual(true);
   });

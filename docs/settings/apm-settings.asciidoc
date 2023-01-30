@@ -68,9 +68,6 @@ Maximum number of traces per request for generating the global service map. Defa
 `xpack.apm.ui.enabled` {ess-icon}::
 Set to `false` to hide the APM app from the main menu. Defaults to `true`.
 
-`xpack.apm.ui.transactionGroupBucketSize` {ess-icon}::
-Number of top transaction groups displayed in the APM app. Defaults to `1000`.
-
 `xpack.apm.ui.maxTraceItems` {ess-icon}::
 Maximum number of child items displayed when viewing trace details. Defaults to `1000`.
 

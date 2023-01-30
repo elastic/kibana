@@ -18,9 +18,9 @@ import {
 import Boom from '@hapi/boom';
 import type { RequestHandlerWrapper } from '@kbn/core-http-server';
 import type {
+  SavedObject,
   ISavedObjectTypeRegistry,
   SavedObjectsExportResultDetails,
-  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 

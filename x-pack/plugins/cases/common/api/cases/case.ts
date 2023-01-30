@@ -11,7 +11,7 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
-import { CaseConnectorRt } from '../connectors';
+import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
 
 export const AttachmentTotalsRt = rt.type({
@@ -213,6 +213,10 @@ export const CasesFindRequestRt = rt.partial({
    * The fields to perform the simple_query_string parsed query against
    */
   searchFields: rt.union([rt.array(rt.string), rt.string]),
+  /**
+   * The root fields to perform the simple_query_string parsed query against
+   */
+  rootSearchFields: rt.array(rt.string),
   /**
    * The field to use for sorting the found objects.
    *

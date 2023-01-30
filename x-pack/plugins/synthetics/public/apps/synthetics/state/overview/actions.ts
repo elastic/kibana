@@ -20,6 +20,7 @@ export const setOverviewPageStateAction = createAction<Partial<MonitorOverviewPa
 );
 
 export const setFlyoutConfig = createAction<MonitorOverviewFlyoutConfig>('setFlyoutConfig');
+export const toggleErrorPopoverOpen = createAction<string | null>('setErrorPopoverOpen');
 
 export const quietFetchOverviewAction = createAsyncAction<
   MonitorOverviewPageState,

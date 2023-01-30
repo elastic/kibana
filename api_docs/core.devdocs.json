@@ -10463,9 +10463,9 @@
             "signature": [
               "() => Readonly<Record<string, ",
               {
-                "pluginId": "@kbn/core-ui-settings-common",
+                "pluginId": "@kbn/core-ui-settings-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.PublicUiSettingsParams",
                 "text": "PublicUiSettingsParams"
               },
@@ -19329,9 +19329,9 @@
             "signature": [
               "[key: string]:  ",
               {
-                "pluginId": "@kbn/core-ui-settings-common",
+                "pluginId": "@kbn/core-ui-settings-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.PublicUiSettingsParams",
                 "text": "PublicUiSettingsParams"
               },
@@ -20337,9 +20337,7 @@
         "type": "Type",
         "tags": [],
         "label": "PublicUiSettingsParams",
-        "description": [
-          "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
-        ],
+        "description": [],
         "signature": [
           "{ name?: string | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; options?: string[] | number[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; type?: ",
           {
@@ -20367,7 +20365,7 @@
           },
           " | undefined; }"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -20906,14 +20904,6 @@
           },
           {
             "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
           },
           {
@@ -20923,210 +20913,6 @@
           {
             "plugin": "@kbn/core-saved-objects-server",
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/collect_multi_namespace_references.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/collect_multi_namespace_references.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/collect_multi_namespace_references.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/update_objects_spaces.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/update_objects_spaces.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
@@ -21138,70 +20924,6 @@
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_objects_filter.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_objects_filter.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/extract_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/extract_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/extract_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/regenerate_ids.ts"
           },
           {
@@ -21210,138 +20932,6 @@
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/split_overwrites.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/split_overwrites.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/split_overwrites.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/split_overwrites.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/validate_references.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/validate_references.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
           },
           {
@@ -21379,102 +20969,6 @@
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts"
           },
           {
             "plugin": "apm",
@@ -21669,70 +21163,6 @@
             "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/server/saved_objects/saved_objects_security_extension.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/server/saved_objects/saved_objects_security_extension.ts"
-          },
-          {
-            "plugin": "encryptedSavedObjects",
-            "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/saved_objects_encryption_extension.ts"
-          },
-          {
-            "plugin": "encryptedSavedObjects",
-            "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/saved_objects_encryption_extension.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/embeddable/make_lens_embeddable_factory.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/embeddable/make_lens_embeddable_factory.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/authorization.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/authorization.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/authorization.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/authorization.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/common/types.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/common/types.ts"
-          },
-          {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
           },
@@ -21781,42 +21211,6 @@
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/server/routes/monitor_cruds/bulk_cruds/delete_monitor_bulk.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/server/routes/monitor_cruds/bulk_cruds/delete_monitor_bulk.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/test_helpers.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/test_helpers.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/test_helpers.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/bulk_disable.test.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/bulk_disable.test.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/bulk_disable.test.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/bulk_disable.test.ts"
-          },
-          {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
@@ -21859,30 +21253,6 @@
           {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/server/services/agents/action.mock.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/server/services/agents/action.mock.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/server/services/agents/action.mock.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/server/services/agents/action.mock.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/server/services/slo/fixtures/slo.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/server/services/slo/fixtures/slo.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -21915,158 +21285,6 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.security_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.security_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.security_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.spaces_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.spaces_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.spaces_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/import_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/import_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.test.ts"
           },
           {
             "plugin": "@kbn/core-ui-settings-server-internal",
@@ -22079,126 +21297,6 @@
           {
             "plugin": "@kbn/core-ui-settings-server-internal",
             "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/saved_objects/transforms.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/extract_errors.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/extract_errors.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/regenerate_ids.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/regenerate_ids.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -22265,30 +21363,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.13/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.13/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
           }
         ],
         "initialIsOpen": false
@@ -22659,36 +21733,12 @@
             "path": "x-pack/plugins/ml/common/types/modules.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/save_dashboard_state_to_saved_object.ts"
           },
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/save_dashboard_state_to_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -23118,22 +22168,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/decorator/inject_tag_references.test.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts"
-          },
-          {
             "plugin": "kibanaUtils",
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts"
           },
@@ -23674,38 +22708,6 @@
             "path": "src/plugins/data/common/search/search_source/inject_references.test.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/common/locator/locator.ts"
           },
@@ -23726,64 +22728,76 @@
             "path": "x-pack/plugins/lens/public/app_plugin/share_action.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/types.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/types.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/cpu.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/cpu.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/load.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/load.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/rx.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/rx.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/tx.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/tx.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_read.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_read.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_write.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_write.ts"
           },
           {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.test.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           }
         ],
         "initialIsOpen": false
@@ -23997,7 +23011,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\" | \"css\"> & { title?: string | ",
+          ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"placeholder\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\" | \"css\"> & { title?: string | ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "common",
@@ -24056,7 +23070,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\" | \"css\"> & { title?: string | ",
+          ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"placeholder\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\" | \"css\"> & { title?: string | ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "common",
@@ -28809,21 +27823,14 @@
           {
             "parentPluginId": "core",
             "id": "def-server.AddAuditEventParams.outcome",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "outcome",
             "description": [
               "\nThe outcome of the operation\n'failure' | 'success' | 'unknown'"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/ecs",
-                "scope": "common",
-                "docId": "kibKbnEcsPluginApi",
-                "section": "def-common.EcsEventOutcome",
-                "text": "EcsEventOutcome"
-              },
-              " | undefined"
+              "string | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
@@ -34241,6 +33248,438 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.EcsEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "EcsEvent",
+        "description": [
+          "\nThe event fields are used for context information about the log or metric event itself.\nA log is defined as an event containing details of something that happened. Log events must include the time at which the thing happened. Examples of log events include a process starting on a host, a network packet being sent from a source to a destination, or a network connection between a client and a server being initiated or closed. A metric is defined as an event containing one or more numerical measurements and the time at which the measurement was taken. Examples of metric events include memory pressure measured on a host and device temperature. See the `event.kind` definition in this section for additional details about metric and state events."
+        ],
+        "path": "packages/kbn-ecs/generated/event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [
+              "\nThe action captured by the event.\nThis describes the information in the event. It is more specific than `event.category`. Examples are `group-add`, `process-started`, `file-created`. The value is normally defined by the implementer."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.agent_id_status",
+            "type": "string",
+            "tags": [],
+            "label": "agent_id_status",
+            "description": [
+              "\nAgents are normally responsible for populating the `agent.id` field value. If the system receiving events is capable of validating the value based on authentication information for the client then this field can be used to reflect the outcome of that validation.\nFor example if the agent's connection is authenticated with mTLS and the client cert contains the ID of the agent to which the cert was issued then the `agent.id` value in events can be checked against the certificate. If the values match then `event.agent_id_status: verified` is added to the event, otherwise one of the other allowed values should be used.\nIf no validation is performed then the field should be omitted.\nThe allowed values are:\n`verified` - The `agent.id` field value matches expected value obtained from auth metadata.\n`mismatch` - The `agent.id` field value does not match the expected value obtained from auth metadata.\n`missing` - There was no `agent.id` field in the event to validate.\n`auth_metadata_missing` - There was no auth metadata or it was missing information about the agent ID."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.category",
+            "type": "Array",
+            "tags": [],
+            "label": "category",
+            "description": [
+              "\nThis is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy.\n`event.category` represents the \"big buckets\" of ECS categories. For example, filtering on `event.category:process` yields all events relating to process activity. This field is closely related to `event.type`, which is used as a subcategory.\nThis field is an array. This will allow proper categorization of some events that fall in multiple categories."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [
+              "\nIdentification code for this event, if one exists.\nSome event sources use event codes to identify messages unambiguously, regardless of message language or wording adjustments over time. An example of this is the Windows Event ID."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.created",
+            "type": "string",
+            "tags": [],
+            "label": "created",
+            "description": [
+              "\nevent.created contains the date/time when the event was first read by an agent, or by your pipeline.\nThis field is distinct from @timestamp in that @timestamp typically contain the time extracted from the original event.\nIn most situations, these two timestamps will be slightly different. The difference can be used to calculate the delay between your source generating an event, and the time when your agent first processed it. This can be used to monitor your agent's or pipeline's ability to keep up with your event source.\nIn case the two timestamps are identical, @timestamp should be used."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.dataset",
+            "type": "string",
+            "tags": [],
+            "label": "dataset",
+            "description": [
+              "\nName of the dataset.\nIf an event source publishes more than one type of log or events (e.g. access log, error log), the dataset is used to specify which one the event comes from.\nIt's recommended but not required to start the dataset name with the module name, followed by a dot, then the dataset name."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [
+              "\nDuration of the event in nanoseconds.\nIf event.start and event.end are known this value should be the difference between the end and start time."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.end",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [
+              "\nevent.end contains the date when the event ended or when the activity was last observed."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.hash",
+            "type": "string",
+            "tags": [],
+            "label": "hash",
+            "description": [
+              "\nHash (perhaps logstash fingerprint) of raw field to be able to demonstrate log integrity."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique ID to describe the event."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.ingested",
+            "type": "string",
+            "tags": [],
+            "label": "ingested",
+            "description": [
+              "\nTimestamp when an event arrived in the central data store.\nThis is different from `@timestamp`, which is when the event originally occurred.  It's also different from `event.created`, which is meant to capture the first time an agent saw the event.\nIn normal conditions, assuming no tampering, the timestamps should chronologically look like this: `@timestamp` < `event.created` < `event.ingested`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.kind",
+            "type": "string",
+            "tags": [],
+            "label": "kind",
+            "description": [
+              "\nThis is one of four ECS Categorization Fields, and indicates the highest level in the ECS category hierarchy.\n`event.kind` gives high-level information about what type of information the event contains, without being specific to the contents of the event. For example, values of this field distinguish alert events from metric events.\nThe value of this field can be used to inform how these kinds of events should be handled. They may warrant different retention, different access control, it may also help understand whether the data coming in at a regular interval or not."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.module",
+            "type": "string",
+            "tags": [],
+            "label": "module",
+            "description": [
+              "\nName of the module this data is coming from.\nIf your monitoring agent supports the concept of modules or plugins to process events of a given source (e.g. Apache logs), `event.module` should contain the name of this module."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.original",
+            "type": "string",
+            "tags": [],
+            "label": "original",
+            "description": [
+              "\nRaw text message of entire event. Used to demonstrate log integrity or where the full log message (before splitting it up in multiple parts) may be required, e.g. for reindex.\nThis field is not indexed and doc_values are disabled. It cannot be searched, but it can be retrieved from `_source`. If users wish to override this and index this field, please see `Field data types` in the `Elasticsearch Reference`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.outcome",
+            "type": "string",
+            "tags": [],
+            "label": "outcome",
+            "description": [
+              "\nThis is one of four ECS Categorization Fields, and indicates the lowest level in the ECS category hierarchy.\n`event.outcome` simply denotes whether the event represents a success or a failure from the perspective of the entity that produced the event.\nNote that when a single transaction is described in multiple events, each event may populate different values of `event.outcome`, according to their perspective.\nAlso note that in the case of a compound event (a single event that contains multiple logical events), this field should be populated with the value that best captures the overall success or failure from the perspective of the event producer.\nFurther note that not all events will have an associated outcome. For example, this field is generally not populated for metric events, events with `event.type:info`, or any events for which an outcome does not make logical sense."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.provider",
+            "type": "string",
+            "tags": [],
+            "label": "provider",
+            "description": [
+              "\nSource of the event.\nEvent transports such as Syslog or the Windows Event Log typically mention the source of an event. It can be the name of the software that generated the event (e.g. Sysmon, httpd), or of a subsystem of the operating system (kernel, Microsoft-Windows-Security-Auditing)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [
+              "\nReason why this event happened, according to the source.\nThis describes the why of a particular action or outcome captured in the event. Where `event.action` captures the action from the event, `event.reason` describes why that action was taken. For example, a web proxy with an `event.action` which denied the request may also populate `event.reason` with the reason why (e.g. `blocked site`)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.reference",
+            "type": "string",
+            "tags": [],
+            "label": "reference",
+            "description": [
+              "\nReference URL linking to additional information about this event.\nThis URL links to a static definition of this event. Alert events, indicated by `event.kind:alert`, are a common use case for this field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.risk_score",
+            "type": "number",
+            "tags": [],
+            "label": "risk_score",
+            "description": [
+              "\nRisk score or priority of the event (e.g. security solutions). Use your system's original value here."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.risk_score_norm",
+            "type": "number",
+            "tags": [],
+            "label": "risk_score_norm",
+            "description": [
+              "\nNormalized risk score or priority of the event, on a scale of 0 to 100.\nThis is mainly useful if you use more than one system that assigns risk scores, and you want to see a normalized value across all systems."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.sequence",
+            "type": "number",
+            "tags": [],
+            "label": "sequence",
+            "description": [
+              "\nSequence number of the event.\nThe sequence number is a value published by some event sources, to make the exact ordering of events unambiguous, regardless of the timestamp precision."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.severity",
+            "type": "number",
+            "tags": [],
+            "label": "severity",
+            "description": [
+              "\nThe numeric severity of the event according to your event source.\nWhat the different severity values mean can be different between sources and use cases. It's up to the implementer to make sure severities are consistent across events from the same source.\nThe Syslog severity belongs in `log.syslog.severity.code`. `event.severity` is meant to represent the severity according to the event source (e.g. firewall, IDS). If the event source does not publish its own severity, you may optionally copy the `log.syslog.severity.code` to `event.severity`."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.start",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [
+              "\nevent.start contains the date when the event started or when the activity was first observed."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.timezone",
+            "type": "string",
+            "tags": [],
+            "label": "timezone",
+            "description": [
+              "\nThis field should be populated when the event's timestamp does not include timezone information already (e.g. default Syslog timestamps). It's optional otherwise.\nAcceptable timezone formats are: a canonical ID (e.g. \"Europe/Amsterdam\"), abbreviated (e.g. \"EST\") or an HH:mm differential (e.g. \"-05:00\")."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.type",
+            "type": "Array",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThis is one of four ECS Categorization Fields, and indicates the third level in the ECS category hierarchy.\n`event.type` represents a categorization \"sub-bucket\" that, when used along with the `event.category` field values, enables filtering events down to a level appropriate for single visualization.\nThis field is an array. This will allow proper categorization of some events that fall in multiple event types."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EcsEvent.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "\nURL linking to an external system to continue investigation of this event.\nThis URL links to another system where in-depth investigation of the specific occurrence of this event can take place. Alert events, indicated by `event.kind:alert`, are a common use case for this field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ecs/generated/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.ElasticsearchClientConfig",
         "type": "Interface",
         "tags": [],
@@ -39189,29 +38628,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params?: ",
+              "; fieldCaps: { (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -46168,29 +45607,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params?: ",
+              "; fieldCaps: { (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -47370,29 +46809,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params?: ",
+              "; fieldCaps: { (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -48362,15 +47801,15 @@
               "\nReturns registered uiSettings values {@link UiSettingsParams}"
             ],
             "signature": [
-              "() => Readonly<Record<string, ",
+              "() => Readonly<Record<string, Omit<",
               {
                 "pluginId": "@kbn/core-ui-settings-common",
                 "scope": "common",
                 "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.PublicUiSettingsParams",
-                "text": "PublicUiSettingsParams"
+                "section": "def-common.UiSettingsParams",
+                "text": "UiSettingsParams"
               },
-              ">>"
+              "<unknown>, \"schema\">>>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
@@ -52441,29 +51880,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params?: ",
+              "; fieldCaps: { (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -54679,6 +54118,30 @@
           {
             "plugin": "savedSearch",
             "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
           }
         ],
         "children": [
@@ -58936,7 +58399,8 @@
               "\nUse the sort values from the previous page to retrieve the next page of results."
             ],
             "signature": [
-              "string[] | undefined"
+              "SortResults",
+              " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
@@ -59394,7 +58858,8 @@
               "\nThe Elasticsearch `sort` value of this result.\n"
             ],
             "signature": [
-              "string[] | undefined"
+              "SortResults",
+              " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
@@ -63063,10 +62528,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/pinned_events.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/logic/rule_execution_log/execution_saved_object/saved_objects_type.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -66874,146 +66335,322 @@
         "type": "Type",
         "tags": [],
         "label": "Ecs",
-        "description": [
-          "\nRepresents the full ECS schema.\n"
-        ],
+        "description": [],
         "signature": [
-          "EcsBase",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsBase",
+            "text": "EcsBase"
+          },
           " & ",
-          "EcsTracing",
-          " & { ecs: EcsField; agent?: ",
-          "EcsAgent",
-          " | undefined; as?: ",
-          "EcsAutonomousSystem",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsTracing",
+            "text": "EcsTracing"
+          },
+          " & { agent?: ",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsAgent",
+            "text": "EcsAgent"
+          },
           " | undefined; client?: ",
-          "EcsClient",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsClient",
+            "text": "EcsClient"
+          },
           " | undefined; cloud?: ",
-          "EcsCloud",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsCloud",
+            "text": "EcsCloud"
+          },
           " | undefined; container?: ",
-          "EcsContainer",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsContainer",
+            "text": "EcsContainer"
+          },
           " | undefined; data_stream?: ",
-          "EcsDataStream",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsDataStream",
+            "text": "EcsDataStream"
+          },
           " | undefined; destination?: ",
-          "EcsDestination",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsDestination",
+            "text": "EcsDestination"
+          },
+          " | undefined; device?: ",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsDevice",
+            "text": "EcsDevice"
+          },
+          " | undefined; dll?: ",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsDll",
+            "text": "EcsDll"
+          },
           " | undefined; dns?: ",
-          "EcsDns",
-          " | undefined; email?: ",
-          "EcsEmail",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsDns",
+            "text": "EcsDns"
+          },
+          " | undefined; ecs: ",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsEcs",
+            "text": "EcsEcs"
+          },
+          "; email?: ",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsEmail",
+            "text": "EcsEmail"
+          },
           " | undefined; error?: ",
-          "EcsError",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsError",
+            "text": "EcsError"
+          },
           " | undefined; event?: ",
-          "EcsEvent",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsEvent",
+            "text": "EcsEvent"
+          },
           " | undefined; faas?: ",
-          "EcsFaas",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsFaas",
+            "text": "EcsFaas"
+          },
           " | undefined; file?: ",
-          "EcsFile",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsFile",
+            "text": "EcsFile"
+          },
           " | undefined; group?: ",
-          "EcsGroup",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsGroup",
+            "text": "EcsGroup"
+          },
           " | undefined; host?: ",
-          "EcsHost",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsHost",
+            "text": "EcsHost"
+          },
           " | undefined; http?: ",
-          "EcsHttp",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsHttp",
+            "text": "EcsHttp"
+          },
           " | undefined; log?: ",
-          "EcsLog",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsLog",
+            "text": "EcsLog"
+          },
           " | undefined; network?: ",
-          "EcsNetwork",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsNetwork",
+            "text": "EcsNetwork"
+          },
           " | undefined; observer?: ",
-          "EcsObserver",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsObserver",
+            "text": "EcsObserver"
+          },
           " | undefined; orchestrator?: ",
-          "EcsOrchestrator",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsOrchestrator",
+            "text": "EcsOrchestrator"
+          },
           " | undefined; organization?: ",
-          "EcsOrganization",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsOrganization",
+            "text": "EcsOrganization"
+          },
           " | undefined; package?: ",
-          "EcsPackage",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsPackage",
+            "text": "EcsPackage"
+          },
           " | undefined; process?: ",
-          "EcsProcess",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsProcess",
+            "text": "EcsProcess"
+          },
           " | undefined; registry?: ",
-          "EcsRegistry",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsRegistry",
+            "text": "EcsRegistry"
+          },
           " | undefined; related?: ",
-          "EcsRelated",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsRelated",
+            "text": "EcsRelated"
+          },
           " | undefined; rule?: ",
-          "EcsRule",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsRule",
+            "text": "EcsRule"
+          },
           " | undefined; server?: ",
-          "EcsServer",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsServer",
+            "text": "EcsServer"
+          },
           " | undefined; service?: ",
-          "EcsService",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsService",
+            "text": "EcsService"
+          },
           " | undefined; source?: ",
-          "EcsSource",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsSource",
+            "text": "EcsSource"
+          },
           " | undefined; threat?: ",
-          "EcsThreat",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsThreat",
+            "text": "EcsThreat"
+          },
           " | undefined; tls?: ",
-          "EcsTls",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsTls",
+            "text": "EcsTls"
+          },
           " | undefined; url?: ",
-          "EcsUrl",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsUrl",
+            "text": "EcsUrl"
+          },
           " | undefined; user?: ",
-          "EcsUser",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsUser",
+            "text": "EcsUser"
+          },
           " | undefined; user_agent?: ",
-          "EcsUserAgent",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsUserAgent",
+            "text": "EcsUserAgent"
+          },
           " | undefined; vulnerability?: ",
-          "EcsVulnerability",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsVulnerability",
+            "text": "EcsVulnerability"
+          },
           " | undefined; }"
         ],
-        "path": "packages/kbn-ecs/src/ecs/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.EcsEventCategory",
-        "type": "Type",
-        "tags": [],
-        "label": "EcsEventCategory",
-        "description": [],
-        "signature": [
-          "\"host\" | \"database\" | \"email\" | \"package\" | \"network\" | \"web\" | \"file\" | \"session\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
-        ],
-        "path": "packages/kbn-ecs/src/ecs/event.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.EcsEventKind",
-        "type": "Type",
-        "tags": [],
-        "label": "EcsEventKind",
-        "description": [],
-        "signature": [
-          "\"metric\" | \"alert\" | \"signal\" | \"state\" | \"event\" | \"pipeline_error\""
-        ],
-        "path": "packages/kbn-ecs/src/ecs/event.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.EcsEventOutcome",
-        "type": "Type",
-        "tags": [],
-        "label": "EcsEventOutcome",
-        "description": [],
-        "signature": [
-          "\"success\" | \"unknown\" | \"failure\""
-        ],
-        "path": "packages/kbn-ecs/src/ecs/event.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.EcsEventType",
-        "type": "Type",
-        "tags": [],
-        "label": "EcsEventType",
-        "description": [],
-        "signature": [
-          "\"start\" | \"error\" | \"connection\" | \"user\" | \"info\" | \"group\" | \"end\" | \"admin\" | \"protocol\" | \"access\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
-        ],
-        "path": "packages/kbn-ecs/src/ecs/event.ts",
+        "path": "packages/kbn-ecs/generated/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -67468,29 +67105,29 @@
           "ExplainResponse",
           "<TDocument>>; }; features: ",
           "default",
-          "; fieldCaps: { (this: That, params?: ",
+          "; fieldCaps: { (this: That, params: ",
           "FieldCapsRequest",
           " | ",
           "FieldCapsRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
           "FieldCapsResponse",
-          ">; (this: That, params?: ",
+          ">; (this: That, params: ",
           "FieldCapsRequest",
           " | ",
           "FieldCapsRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptionsWithMeta",
           " | undefined): Promise<",
           "TransportResult",
           "<",
           "FieldCapsResponse",
-          ", unknown>>; (this: That, params?: ",
+          ", unknown>>; (this: That, params: ",
           "FieldCapsRequest",
           " | ",
           "FieldCapsRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
           "FieldCapsResponse",
@@ -69053,71 +68690,269 @@
         ],
         "signature": [
           "Omit<",
-          "EcsBase",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsBase",
+            "text": "EcsBase"
+          },
           ", \"message\" | \"@timestamp\"> & ",
-          "EcsTracing",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsTracing",
+            "text": "EcsTracing"
+          },
           " & { agent?: ",
-          "EcsAgent",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsAgent",
+            "text": "EcsAgent"
+          },
           " | undefined; as?: ",
-          "EcsAutonomousSystem",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsAs",
+            "text": "EcsAs"
+          },
           " | undefined; client?: ",
-          "EcsClient",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsClient",
+            "text": "EcsClient"
+          },
           " | undefined; cloud?: ",
-          "EcsCloud",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsCloud",
+            "text": "EcsCloud"
+          },
           " | undefined; container?: ",
-          "EcsContainer",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsContainer",
+            "text": "EcsContainer"
+          },
           " | undefined; destination?: ",
-          "EcsDestination",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsDestination",
+            "text": "EcsDestination"
+          },
           " | undefined; dns?: ",
-          "EcsDns",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsDns",
+            "text": "EcsDns"
+          },
           " | undefined; error?: ",
-          "EcsError",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsError",
+            "text": "EcsError"
+          },
           " | undefined; event?: ",
-          "EcsEvent",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsEvent",
+            "text": "EcsEvent"
+          },
           " | undefined; file?: ",
-          "EcsFile",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsFile",
+            "text": "EcsFile"
+          },
           " | undefined; group?: ",
-          "EcsGroup",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsGroup",
+            "text": "EcsGroup"
+          },
           " | undefined; host?: ",
-          "EcsHost",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsHost",
+            "text": "EcsHost"
+          },
           " | undefined; http?: ",
-          "EcsHttp",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsHttp",
+            "text": "EcsHttp"
+          },
           " | undefined; log?: Omit<",
-          "EcsLog",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsLog",
+            "text": "EcsLog"
+          },
           ", \"logger\" | \"level\"> | undefined; network?: ",
-          "EcsNetwork",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsNetwork",
+            "text": "EcsNetwork"
+          },
           " | undefined; observer?: ",
-          "EcsObserver",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsObserver",
+            "text": "EcsObserver"
+          },
           " | undefined; organization?: ",
-          "EcsOrganization",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsOrganization",
+            "text": "EcsOrganization"
+          },
           " | undefined; package?: ",
-          "EcsPackage",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsPackage",
+            "text": "EcsPackage"
+          },
           " | undefined; process?: ",
-          "EcsProcess",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsProcess",
+            "text": "EcsProcess"
+          },
           " | undefined; registry?: ",
-          "EcsRegistry",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsRegistry",
+            "text": "EcsRegistry"
+          },
           " | undefined; related?: ",
-          "EcsRelated",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsRelated",
+            "text": "EcsRelated"
+          },
           " | undefined; rule?: ",
-          "EcsRule",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsRule",
+            "text": "EcsRule"
+          },
           " | undefined; server?: ",
-          "EcsServer",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsServer",
+            "text": "EcsServer"
+          },
           " | undefined; service?: ",
-          "EcsService",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsService",
+            "text": "EcsService"
+          },
           " | undefined; source?: ",
-          "EcsSource",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsSource",
+            "text": "EcsSource"
+          },
           " | undefined; threat?: ",
-          "EcsThreat",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsThreat",
+            "text": "EcsThreat"
+          },
           " | undefined; tls?: ",
-          "EcsTls",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsTls",
+            "text": "EcsTls"
+          },
           " | undefined; url?: ",
-          "EcsUrl",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsUrl",
+            "text": "EcsUrl"
+          },
           " | undefined; user?: ",
-          "EcsUser",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsUser",
+            "text": "EcsUser"
+          },
           " | undefined; user_agent?: ",
-          "EcsUserAgent",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsUserAgent",
+            "text": "EcsUserAgent"
+          },
           " | undefined; vulnerability?: ",
-          "EcsVulnerability",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsVulnerability",
+            "text": "EcsVulnerability"
+          },
           " | undefined; }"
         ],
         "path": "packages/kbn-logging/src/log_meta.ts",
@@ -70012,47 +69847,6 @@
           "<ContextType>"
         ],
         "path": "src/core/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.PublicUiSettingsParams",
-        "type": "Type",
-        "tags": [],
-        "label": "PublicUiSettingsParams",
-        "description": [
-          "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
-        ],
-        "signature": [
-          "{ name?: string | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; options?: string[] | number[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; type?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
-          " | undefined; deprecation?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.DeprecationSettings",
-            "text": "DeprecationSettings"
-          },
-          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; scope?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsScope",
-            "text": "UiSettingsScope"
-          },
-          " | undefined; }"
-        ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -16,8 +16,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   CaseUserActionAttributesWithoutConnectorId,
-  CaseUserActionInjectedAttributesWithoutActionId,
-  CaseUserActionResponse,
+  CaseUserActionDeprecatedResponse,
+  CaseUserActionInjectedAttributes,
 } from '../../../common/api';
 import { ActionTypes } from '../../../common/api';
 import {
@@ -26,7 +26,13 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import { buildFilter, combineFilters } from '../../client/utils';
-import type { CaseConnectorActivity, CaseConnectorFields, PushInfo, ServiceContext } from './types';
+import type {
+  CaseConnectorActivity,
+  CaseConnectorFields,
+  PushInfo,
+  PushTimeFrameInfo,
+  ServiceContext,
+} from './types';
 import { defaultSortField } from '../../common/utils';
 import { UserActionPersister } from './operations/create';
 import { UserActionFinder } from './operations/find';
@@ -37,13 +43,16 @@ export interface UserActionItem {
   references: SavedObjectReference[];
 }
 
-interface MostRecentResults {
-  mostRecent: {
-    hits: {
-      total: number;
-      hits: SavedObjectsRawDoc[];
-    };
+interface TopHits {
+  hits: {
+    total: number;
+    hits: SavedObjectsRawDoc[];
   };
+}
+
+interface TimeFrameInfo {
+  mostRecent: TopHits;
+  oldest: TopHits;
 }
 
 interface ConnectorActivityAggsResult {
@@ -55,9 +64,9 @@ interface ConnectorActivityAggsResult {
           reverse: {
             connectorActivity: {
               buckets: {
-                changeConnector: MostRecentResults;
-                createCase: MostRecentResults;
-                pushInfo: MostRecentResults;
+                changeConnector: TimeFrameInfo;
+                createCase: TimeFrameInfo;
+                pushInfo: TimeFrameInfo;
               };
             };
           };
@@ -72,7 +81,7 @@ interface ConnectorFieldsBeforePushAggsResult {
     connectors: {
       reverse: {
         ids: {
-          buckets: Record<string, MostRecentResults>;
+          buckets: Record<string, TimeFrameInfo>;
         };
       };
     };
@@ -261,7 +270,7 @@ export class CaseUserActionService {
 
   public async getMostRecentUserAction(
     caseId: string
-  ): Promise<SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined> {
+  ): Promise<SavedObject<CaseUserActionInjectedAttributes> | undefined> {
     try {
       this.context.log.debug(
         `Attempting to retrieve the most recent user action for case id: ${caseId}`
@@ -368,7 +377,7 @@ export class CaseUserActionService {
         rawFieldsDoc = createCase.mostRecent.hits.hits[0];
       }
 
-      let fieldsDoc: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined;
+      let fieldsDoc: SavedObject<CaseUserActionInjectedAttributes> | undefined;
       if (rawFieldsDoc != null) {
         const doc =
           this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
@@ -381,28 +390,13 @@ export class CaseUserActionService {
         );
       }
 
-      const pushInfo = connectorInfo.reverse.connectorActivity.buckets.pushInfo;
-      let pushDoc: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined;
-
-      if (pushInfo.mostRecent.hits.hits.length > 0) {
-        const rawPushDoc = pushInfo.mostRecent.hits.hits[0];
-
-        const doc =
-          this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
-            rawPushDoc
-          );
-
-        pushDoc = transformToExternalModel(
-          doc,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
-      }
+      const pushDocs = this.getPushDocs(connectorInfo.reverse.connectorActivity.buckets.pushInfo);
 
       if (fieldsDoc != null) {
         caseConnectorInfo.push({
           connectorId: connectorInfo.key,
           fields: fieldsDoc,
-          push: pushDoc,
+          push: pushDocs,
         });
       } else {
         this.context.log.warn(`Unable to find fields for connector id: ${connectorInfo.key}`);
@@ -410,6 +404,33 @@ export class CaseUserActionService {
     }
 
     return caseConnectorInfo;
+  }
+
+  private getPushDocs(pushTimeFrameInfo: TimeFrameInfo): PushTimeFrameInfo | undefined {
+    const mostRecentPushDoc = this.getTopHitsDoc(pushTimeFrameInfo.mostRecent);
+    const oldestPushDoc = this.getTopHitsDoc(pushTimeFrameInfo.oldest);
+
+    if (mostRecentPushDoc && oldestPushDoc) {
+      return {
+        mostRecent: mostRecentPushDoc,
+        oldest: oldestPushDoc,
+      };
+    }
+  }
+
+  private getTopHitsDoc(
+    topHits: TopHits
+  ): SavedObject<CaseUserActionInjectedAttributes> | undefined {
+    if (topHits.hits.hits.length > 0) {
+      const rawPushDoc = topHits.hits.hits[0];
+
+      const doc =
+        this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
+          rawPushDoc
+        );
+
+      return transformToExternalModel(doc, this.context.persistableStateAttachmentTypeRegistry);
+    }
   }
 
   private static buildConnectorInfoAggs(): Record<
@@ -480,6 +501,18 @@ export class CaseUserActionService {
                               size: 1,
                             },
                           },
+                          oldest: {
+                            top_hits: {
+                              sort: [
+                                {
+                                  [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
+                                    order: 'asc',
+                                  },
+                                },
+                              ],
+                              size: 1,
+                            },
+                          },
                         },
                       },
                     },
@@ -493,7 +526,9 @@ export class CaseUserActionService {
     };
   }
 
-  public async getAll(caseId: string): Promise<SavedObjectsFindResponse<CaseUserActionResponse>> {
+  public async getAll(
+    caseId: string
+  ): Promise<SavedObjectsFindResponse<CaseUserActionDeprecatedResponse>> {
     try {
       const id = caseId;
       const type = CASE_SAVED_OBJECT;

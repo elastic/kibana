@@ -7,7 +7,7 @@
 
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
-import type { EcsEventOutcome, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { EcsEvent, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { GetAllSpacesPurpose, Space } from '@kbn/spaces-plugin/server';
@@ -134,7 +134,7 @@ const expectNoAuthorizationCheck = (
 const expectAuditEvent = (
   auditLogger: AuditLogger,
   action: string,
-  outcome: EcsEventOutcome,
+  outcome: EcsEvent['outcome'],
   savedObject?: Required<AuditEvent>['kibana']['saved_object']
 ) => {
   expect(auditLogger.log).toHaveBeenCalledWith(
