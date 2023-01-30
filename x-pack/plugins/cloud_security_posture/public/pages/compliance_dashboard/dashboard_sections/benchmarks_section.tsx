@@ -10,7 +10,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { EuiIconProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CSSObject } from '@emotion/react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type {
@@ -24,14 +24,12 @@ import { KSPM_POLICY_TEMPLATE, RULE_FAILED } from '../../../../common/constants'
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { ClusterDetailsBox } from './cluster_details_box';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
+import {
+  DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
+  DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
+} from '../../findings/test_subjects';
 
-export const TABLE_HEADER_TEST_ID = 'csp:dashboard-sections-table-header';
-export const TABLE_HEADER_SCORE_TEST_ID = 'csp:dashboard-sections-table-header-score';
-export const TABLE_COLUMN_SCORE_TEST_ID = 'csp:dashboard-sections-table-column-score';
-
-type SortOrder = 'asc' | 'desc';
-
-const CLUSTER_DEFAULT_SORT_ORDER: SortOrder = 'desc';
+const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
 const CLUSTER_SORT_BUTTON_CLASS = 'cspDashboard__sortButton';
 
 export const BenchmarksSection = ({
@@ -44,7 +42,7 @@ export const BenchmarksSection = ({
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
-  const [clusterSorting, setClusterSorting] = useLocalStorage<SortOrder>(
+  const [clusterSorting, setClusterSorting] = useLocalStorage<'asc' | 'desc'>(
     LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY,
     CLUSTER_DEFAULT_SORT_ORDER
   );
@@ -88,40 +86,29 @@ export const BenchmarksSection = ({
   }, [isClusterSortingAsc, setClusterSorting]);
 
   const clusters = useMemo(() => {
-    return complianceData.clusters.sort((clusterA, clusterB) =>
+    return [...complianceData.clusters].sort((clusterA, clusterB) =>
       isClusterSortingAsc
         ? clusterA.stats.postureScore - clusterB.stats.postureScore
         : clusterB.stats.postureScore - clusterA.stats.postureScore
     );
   }, [complianceData.clusters, isClusterSortingAsc]);
 
-  const flexTableHeaderStyle: CSSObject = useMemo(
-    () => ({
-      borderBottom: euiTheme.border.thick,
-      borderBottomColor: euiTheme.colors.text,
-      paddingBottom: euiTheme.size.s,
-      [`.${CLUSTER_SORT_BUTTON_CLASS}`]: {
-        fontWeight: euiTheme.font.weight.semiBold,
-      },
-      button: {
-        textAlign: 'left',
-      },
-    }),
-    [euiTheme.border.thick, euiTheme.colors.text, euiTheme.font.weight.semiBold, euiTheme.size]
-  );
-
-  const flexTableRowStyle: CSSObject = useMemo(
-    () => ({
-      borderBottom: euiTheme.border.thin,
-      padding: `${euiTheme.size.base} 0 ${euiTheme.size.l}`,
-    }),
-    [euiTheme.border.thin, euiTheme.size]
-  );
-
   return (
     <>
-      <EuiFlexGroup css={flexTableHeaderStyle}>
-        <EuiFlexItem data-test-subj={TABLE_HEADER_TEST_ID} grow={dashboardColumnsGrow.first}>
+      <EuiFlexGroup
+        css={css`
+        border-bottom: ${euiTheme.border.thick};
+        border-bottom-color: ${euiTheme.colors.text};
+        padding-bottom: ${euiTheme.size.s};
+        ${CLUSTER_SORT_BUTTON_CLASS}: {
+          font-weight: ${euiTheme.font.weight.semiBold};
+        };
+        button: {
+          text-align: left;
+        },
+      `}
+      >
+        <EuiFlexItem grow={dashboardColumnsGrow.first}>
           <EuiTitle size="xxs">
             <div>
               {dashboardType === KSPM_POLICY_TEMPLATE ? (
@@ -138,9 +125,9 @@ export const BenchmarksSection = ({
             </div>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem data-test-subj={TABLE_HEADER_TEST_ID} grow={dashboardColumnsGrow.second}>
+        <EuiFlexItem grow={dashboardColumnsGrow.second}>
           <button
-            data-test-subj={TABLE_HEADER_SCORE_TEST_ID}
+            data-test-subj={DASHBOARD_TABLE_HEADER_SCORE_TEST_ID}
             className={CLUSTER_SORT_BUTTON_CLASS}
             onClick={clusterSortingToggle}
           >
@@ -155,7 +142,7 @@ export const BenchmarksSection = ({
             </EuiTitle>
           </button>
         </EuiFlexItem>
-        <EuiFlexItem data-test-subj={TABLE_HEADER_TEST_ID} grow={dashboardColumnsGrow.third}>
+        <EuiFlexItem grow={dashboardColumnsGrow.third}>
           <EuiTitle size="xxs">
             <div>
               <FormattedMessage
@@ -167,13 +154,19 @@ export const BenchmarksSection = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       {clusters.map((cluster) => (
-        <EuiFlexGroup key={cluster.meta.clusterId} css={flexTableRowStyle}>
+        <EuiFlexGroup
+          key={cluster.meta.clusterId}
+          css={css`
+            border-bottom: ${euiTheme.border.thin};
+            padding: ${euiTheme.size.base} 0 ${euiTheme.size.l};
+          `}
+        >
           <EuiFlexItem grow={dashboardColumnsGrow.first}>
             <ClusterDetailsBox cluster={cluster} />
           </EuiFlexItem>
           <EuiFlexItem
             grow={dashboardColumnsGrow.second}
-            data-test-subj={TABLE_COLUMN_SCORE_TEST_ID}
+            data-test-subj={DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID}
           >
             <CloudPostureScoreChart
               compact
