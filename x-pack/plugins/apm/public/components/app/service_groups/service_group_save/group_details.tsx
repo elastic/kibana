@@ -75,17 +75,15 @@ export function GroupDetails({
     <>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>
-            {isEdit
-              ? i18n.translate(
-                  'xpack.apm.serviceGroups.groupDetailsForm.edit.title',
-                  { defaultMessage: 'Edit group' }
-                )
-              : i18n.translate(
-                  'xpack.apm.serviceGroups.groupDetailsForm.create.title',
-                  { defaultMessage: 'Create group' }
-                )}
-          </h1>
+          {isEdit
+            ? i18n.translate(
+                'xpack.apm.serviceGroups.groupDetailsForm.edit.title',
+                { defaultMessage: 'Edit group' }
+              )
+            : i18n.translate(
+                'xpack.apm.serviceGroups.groupDetailsForm.create.title',
+                { defaultMessage: 'Create group' }
+              )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
