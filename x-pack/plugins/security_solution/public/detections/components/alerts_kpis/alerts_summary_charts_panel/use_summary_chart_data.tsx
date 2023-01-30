@@ -5,31 +5,50 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState, useMemo } from 'react';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { buildEsQuery } from '@kbn/es-query';
-import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
-import type { AlertsBySeverityAgg, EntityFilter, ParsedSeverityData } from '../types';
-import type { ESBoolQuery } from '../../../../../../common/typed_json';
-import { useGlobalTime } from '../../../../../common/containers/use_global_time';
-import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
-import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
-import { useInspectButton } from '../../common/hooks';
-import { parseSeverityAlerts } from '../helpers';
+import type { SummaryChartsAgg, SummaryChartsData } from './types';
+import type { EntityFilter } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
+import { useInspectButton } from '../common/hooks';
+import { parseData } from './helpers';
 
-export const getAlertsBySeverityQuery = ({
+export type UseAlerts = (props: UseAlertsQueryProps) => {
+  items: SummaryChartsData[];
+  isLoading: boolean;
+  updatedAt: number;
+};
+
+export interface UseAlertsQueryProps {
+  aggregations: {};
+  uniqueQueryId: string;
+  signalIndexName: string | null;
+  skip?: boolean;
+  entityFilter?: EntityFilter;
+  query?: Query;
+  filters?: Filter[];
+  runtimeMappings?: MappingRuntimeFields;
+}
+
+export const getAlertsQuery = ({
   additionalFilters = [],
   from,
   to,
   entityFilter,
   runtimeMappings,
+  aggregations,
 }: {
   from: string;
   to: string;
   entityFilter?: EntityFilter;
   additionalFilters?: ESBoolQuery[];
   runtimeMappings?: MappingRuntimeFields;
+  aggregations: {};
 }) => ({
   size: 0,
   query: {
@@ -49,33 +68,12 @@ export const getAlertsBySeverityQuery = ({
       ],
     },
   },
-  aggs: {
-    statusBySeverity: {
-      terms: {
-        field: ALERT_SEVERITY,
-      },
-    },
-  },
+  aggs: aggregations,
   runtime_mappings: runtimeMappings,
 });
 
-export interface UseSeverityChartProps {
-  uniqueQueryId: string;
-  signalIndexName: string | null;
-  skip?: boolean;
-  entityFilter?: EntityFilter;
-  query?: Query;
-  filters?: Filter[];
-  runtimeMappings?: MappingRuntimeFields;
-}
-
-export type UseAlertsBySeverity = (props: UseSeverityChartProps) => {
-  items: ParsedSeverityData;
-  isLoading: boolean;
-  updatedAt: number;
-};
-
-export const useSeverityChartData: UseAlertsBySeverity = ({
+export const useSummaryChartData: UseAlerts = ({
+  aggregations,
   uniqueQueryId,
   entityFilter,
   query,
@@ -84,9 +82,9 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
   signalIndexName,
   skip = false,
 }) => {
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
-  const [items, setItems] = useState<null | ParsedSeverityData>(null);
+  const [items, setItems] = useState<SummaryChartsData[]>([]);
 
   const additionalFilters = useMemo(() => {
     try {
@@ -109,13 +107,14 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
     request,
     response,
     setQuery: setAlertsQuery,
-  } = useQueryAlerts<{}, AlertsBySeverityAgg>({
-    query: getAlertsBySeverityQuery({
+  } = useQueryAlerts<{}, SummaryChartsAgg>({
+    query: getAlertsQuery({
       from,
       to,
       entityFilter,
       additionalFilters,
       runtimeMappings,
+      aggregations,
     }),
     indexName: signalIndexName,
     skip,
@@ -124,21 +123,22 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
 
   useEffect(() => {
     setAlertsQuery(
-      getAlertsBySeverityQuery({
+      getAlertsQuery({
         from,
         to,
         entityFilter,
         additionalFilters,
         runtimeMappings,
+        aggregations,
       })
     );
-  }, [setAlertsQuery, from, to, entityFilter, additionalFilters, runtimeMappings]);
+  }, [setAlertsQuery, from, to, entityFilter, additionalFilters, runtimeMappings, aggregations]);
 
   useEffect(() => {
     if (data == null) {
-      setItems(null);
+      setItems([]);
     } else {
-      setItems(parseSeverityAlerts(data));
+      setItems(parseData(data));
     }
     setUpdatedAt(Date.now());
   }, [data]);

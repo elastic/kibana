@@ -6,22 +6,18 @@
  */
 import React from 'react';
 import { EuiHealth, EuiText } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { capitalize } from 'lodash';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
 import * as i18n from './translations';
 
-interface SeverityTableItem {
-  key: Severity;
-  value: number;
-  label: string;
-}
-
-export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityTableItem>> => [
+export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityData>> => [
   {
     field: 'key',
     name: i18n.SEVERITY_LEVEL_COLUMN_TITLE,
@@ -42,10 +38,11 @@ export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityTab
   },
   {
     field: 'value',
-    name: i18n.SEVERITY_COUNT_COULMN_TITLE,
+    name: COUNT_TABLE_TITLE,
     sortable: true,
     dataType: 'number',
     'data-test-subj': 'severityTable-alertCount',
+    width: '45%',
     render: (alertCount: number) => (
       <EuiText grow={false} size="xs">
         <FormattedCount count={alertCount} />
