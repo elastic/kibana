@@ -52,7 +52,6 @@
     "@kbn/ml-query-utils",
     "@kbn/charts-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/core-ui-settings-browser"
   ],
   "exclude": [
     "target/**/*",
