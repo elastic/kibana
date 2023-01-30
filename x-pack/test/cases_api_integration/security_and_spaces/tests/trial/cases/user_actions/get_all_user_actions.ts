@@ -7,7 +7,11 @@
 
 import http from 'http';
 import expect from '@kbn/expect';
-import { UserActionWithResponse, PushedUserAction, User } from '@kbn/cases-plugin/common/api';
+import {
+  PushedUserAction,
+  User,
+  UserActionWithDeprecatedResponse,
+} from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
@@ -72,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const pushUserAction = userActions[1] as UserActionWithResponse<PushedUserAction>;
+      const pushUserAction = userActions[1] as UserActionWithDeprecatedResponse<PushedUserAction>;
 
       expect(userActions.length).to.eql(2);
       expect(pushUserAction.type).to.eql('pushed');
@@ -181,7 +185,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
-        const pushUserAction = userActions[1] as UserActionWithResponse<PushedUserAction>;
+        const pushUserAction = userActions[1] as UserActionWithDeprecatedResponse<PushedUserAction>;
 
         expect(pushUserAction.payload.externalService.pushed_by).to.eql(superUserWithProfile);
       });
@@ -200,7 +204,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
-        const pushUserAction = userActions[1] as UserActionWithResponse<PushedUserAction>;
+        const pushUserAction = userActions[1] as UserActionWithDeprecatedResponse<PushedUserAction>;
 
         expect(pushUserAction.payload.externalService.pushed_by).to.eql(superUserInfo);
       });

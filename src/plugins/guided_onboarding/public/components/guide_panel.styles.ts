@@ -9,6 +9,7 @@
 import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import panelBgTop from '../../assets/panel_bg_top.svg';
+import panelBgTopDark from '../../assets/panel_bg_top_dark.svg';
 import panelBgBottom from '../../assets/panel_bg_bottom.svg';
 import panelBgBottomDark from '../../assets/panel_bg_bottom_dark.svg';
 
@@ -31,7 +32,7 @@ export const getGuidePanelStyles = ({
   `,
   flyoutOverrides: {
     flyoutHeader: css`
-      background: url(${panelBgTop}) top right no-repeat;
+      background: url(${isDarkTheme ? panelBgTopDark : panelBgTop}) top right no-repeat;
     `,
     flyoutContainer: css`
       top: 55px !important;
