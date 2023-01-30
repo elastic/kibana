@@ -13,7 +13,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 import { showConfirmPanel } from './show_confirm_panel';
-import { persistSavedSearch } from '../application/main/utils/persist_saved_search';
 import { DiscoverStateContainer } from '../application/main/services/discover_state';
 import { updateFiltersReferences } from '../application/main/utils/update_filter_references';
 
@@ -99,17 +98,14 @@ export const useConfirmPersistencePrompt = (stateContainer: DiscoverStateContain
   );
 
   const updateSavedSearch = useCallback(
-    ({ savedSearch, dataView, state }) => {
-      return persistSavedSearch(savedSearch, {
-        dataView,
+    ({ savedSearch }) => {
+      return stateContainer.savedSearchState.persist(savedSearch, {
         onSuccess: () => onUpdateSuccess(savedSearch),
         onError: (error) => onUpdateError(error, savedSearch),
-        state,
         saveOptions: {},
-        services,
       });
     },
-    [onUpdateError, onUpdateSuccess, services]
+    [onUpdateError, onUpdateSuccess, stateContainer.savedSearchState]
   );
 
   return { openConfirmSavePrompt, updateSavedSearch };

@@ -14,6 +14,7 @@ export {
   getSavedSearchUrlConflictMessage,
   throwErrorOnSavedSearchUrlConflict,
   saveSavedSearch,
+  getEmptySavedSearch,
 } from './services/saved_searches';
 export type {
   DiscoverGridSettings,

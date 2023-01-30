@@ -9,9 +9,71 @@
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
 import { getSortForSearchSource } from '../../../utils/sorting';
+
+/**
+ * Helper function to update the given searchSource before fetching/sharing/persisting
+ */
+export function updateVolatileSearchSource(
+  searchSource: ISearchSource,
+  {
+    dataView,
+    services,
+    sort,
+  }: {
+    dataView: DataView;
+    services: DiscoverServices;
+    sort?: SortOrder[];
+  }
+) {
+  const { uiSettings, data } = services;
+  const usedSort = getSortForSearchSource(
+    sort,
+    dataView,
+    uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+  );
+  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  searchSource.setField('trackTotalHits', true).setField('sort', usedSort);
+
+  if (dataView.type !== DataViewType.ROLLUP) {
+    // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
+    searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
+  }
+
+  if (useNewFieldsApi) {
+    searchSource.removeField('fieldsFromSource');
+    const fields: Record<string, string> = { field: '*' };
+
+    fields.include_unmapped = 'true';
+
+    searchSource.setField('fields', [fields]);
+  } else {
+    searchSource.removeField('fields');
+  }
+}
+
+/**
+ * Helper function to update the persisted part (index, query, filter) of searchSource before fetching/sharing/persisting
+ */
+export function updatePersistedSearchSource(
+  searchSource: ISearchSource,
+  {
+    dataView,
+    services,
+  }: {
+    dataView: DataView;
+    services: DiscoverServices;
+  }
+) {
+  const { data } = services;
+
+  searchSource
+    .setField('index', dataView)
+    .setField('query', data.query.queryString.getQuery() || null)
+    .setField('filter', data.query.filterManager.getFilters());
+}
 
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting
@@ -23,44 +85,17 @@ export function updateSearchSource(
     dataView,
     services,
     sort,
-    useNewFieldsApi,
   }: {
     dataView: DataView;
     services: DiscoverServices;
     sort: SortOrder[];
-    useNewFieldsApi: boolean;
   }
 ) {
-  const { uiSettings, data } = services;
   const parentSearchSource = persist ? searchSource : searchSource.getParent()!;
 
-  parentSearchSource
-    .setField('index', dataView)
-    .setField('query', data.query.queryString.getQuery() || null)
-    .setField('filter', data.query.filterManager.getFilters());
+  updatePersistedSearchSource(parentSearchSource, { dataView, services });
 
   if (!persist) {
-    const usedSort = getSortForSearchSource(
-      sort,
-      dataView,
-      uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-    );
-    searchSource.setField('trackTotalHits', true).setField('sort', usedSort);
-
-    if (dataView.type !== DataViewType.ROLLUP) {
-      // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
-      searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
-    }
-
-    if (useNewFieldsApi) {
-      searchSource.removeField('fieldsFromSource');
-      const fields: Record<string, string> = { field: '*' };
-
-      fields.include_unmapped = 'true';
-
-      searchSource.setField('fields', [fields]);
-    } else {
-      searchSource.removeField('fields');
-    }
+    updateVolatileSearchSource(searchSource, { dataView, services, sort });
   }
 }

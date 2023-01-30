@@ -52,14 +52,7 @@ export function fetchAll(
   reset = false,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const {
-    initialFetchStatus,
-    appStateContainer,
-    services,
-    useNewFieldsApi,
-    data,
-    inspectorAdapters,
-  } = fetchDeps;
+  const { initialFetchStatus, appStateContainer, services, data, inspectorAdapters } = fetchDeps;
 
   try {
     const dataView = searchSource.getField('index')!;
@@ -76,7 +69,6 @@ export function fetchAll(
         dataView,
         services,
         sort: sort as SortOrder[],
-        useNewFieldsApi,
       });
     }
 

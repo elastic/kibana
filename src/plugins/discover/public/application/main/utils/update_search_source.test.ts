@@ -11,17 +11,24 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { dataViewMock } from '../../../__mocks__/data_view';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+
+const getUiSettingsMock = (value: boolean) => {
+  return {
+    get: jest.fn(() => value),
+  } as unknown as IUiSettingsClient;
+};
 
 describe('updateSearchSource', () => {
   test('updates a given search source', async () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
+    discoverServiceMock.uiSettings = getUiSettingsMock(true);
     updateSearchSource(volatileSearchSourceMock, false, {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
-      useNewFieldsApi: false,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toBe(undefined);
@@ -31,11 +38,11 @@ describe('updateSearchSource', () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
+    discoverServiceMock.uiSettings = getUiSettingsMock(false);
     updateSearchSource(volatileSearchSourceMock, false, {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
-      useNewFieldsApi: true,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
@@ -48,11 +55,11 @@ describe('updateSearchSource', () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
+    discoverServiceMock.uiSettings = getUiSettingsMock(false);
     updateSearchSource(volatileSearchSourceMock, false, {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
-      useNewFieldsApi: true,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
@@ -65,11 +72,11 @@ describe('updateSearchSource', () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
+    discoverServiceMock.uiSettings = getUiSettingsMock(true);
     updateSearchSource(volatileSearchSourceMock, false, {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
-      useNewFieldsApi: false,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toEqual(undefined);

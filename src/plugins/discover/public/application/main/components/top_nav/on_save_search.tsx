@@ -11,16 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
-import { persistSavedSearch } from '../../utils/persist_saved_search';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 async function saveDataSource({
-  dataView,
   navigateTo,
   savedSearch,
   saveOptions,
@@ -28,7 +25,6 @@ async function saveDataSource({
   state,
   navigateOrReloadSavedSearch,
 }: {
-  dataView: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
@@ -79,32 +75,25 @@ async function saveDataSource({
       text: error.message,
     });
   }
-  return persistSavedSearch(savedSearch, {
-    dataView,
+  return state.savedSearchState.persist(savedSearch, {
     onError,
     onSuccess,
     saveOptions,
-    services,
-    state: state.appState.getState(),
   });
 }
 
 export async function onSaveSearch({
-  dataView,
   navigateTo,
   savedSearch,
   services,
   state,
   onClose,
   onSaveCb,
-  updateAdHocDataViewId,
 }: {
-  dataView: DataView;
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: DiscoverStateContainer;
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   onClose?: () => void;
   onSaveCb?: () => void;
 }) {
@@ -146,21 +135,21 @@ export async function onSaveSearch({
       isTitleDuplicateConfirmed,
     };
 
-    const updatedDataView =
-      !dataView.isPersisted() && newCopyOnSave ? await updateAdHocDataViewId(dataView) : dataView;
-
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
-    const response = await saveDataSource({
-      dataView: updatedDataView,
-      saveOptions,
-      services,
-      navigateTo,
-      savedSearch,
-      state,
-      navigateOrReloadSavedSearch,
-    });
-    // If the save wasn't successful, put the original values back.
-    if (!response.id || response.error) {
+    try {
+      const response = await saveDataSource({
+        saveOptions,
+        services,
+        navigateTo,
+        savedSearch,
+        state,
+        navigateOrReloadSavedSearch,
+      });
+      onSaveCb?.();
+      return response;
+    } catch (e) {
+      // If the save wasn't successful, put the original values back.
+
       savedSearch.title = currentTitle;
       savedSearch.timeRestore = currentTimeRestore;
       savedSearch.rowsPerPage = currentRowsPerPage;
@@ -168,11 +157,7 @@ export async function onSaveSearch({
       if (savedObjectsTagging) {
         savedSearch.tags = currentTags;
       }
-    } else {
-      state.resetInitialAppState();
     }
-    onSaveCb?.();
-    return response;
   };
 
   const saveModal = (

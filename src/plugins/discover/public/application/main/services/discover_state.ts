@@ -24,7 +24,7 @@ import {
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
@@ -39,6 +39,7 @@ import {
   InternalStateContainer,
 } from './discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
+import { getSavedSearchContainer, SavedSearchContainer } from './discover_saved_search_container';
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
   /**
@@ -75,6 +76,10 @@ export interface DiscoverStateContainer {
    * Internal state that's used at several places in the UI
    */
   internalState: InternalStateContainer;
+  /**
+   * State of saved search, the saved object of Discover
+   */
+  savedSearchState: SavedSearchContainer;
   /**
    * Service for handling search sessions
    */
@@ -185,6 +190,7 @@ export function getDiscoverStateContainer({
   savedSearch,
   services,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
+  const initialSavedSearch = savedSearch ?? getEmptySavedSearch(services.data);
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
   const stateStorage = createKbnUrlStateStorage({
@@ -204,6 +210,12 @@ export function getDiscoverStateContainer({
    * App State Container, synced with URL
    */
   const appStateContainer = getDiscoverAppStateContainer(stateStorage, savedSearch, services);
+
+  const savedSearchContainer = getSavedSearchContainer({
+    savedSearch: initialSavedSearch,
+    appStateContainer,
+    services,
+  });
 
   const replaceUrlAppState = async (newPartial: AppState = {}) => {
     await appStateContainer.replaceUrlState(newPartial);
@@ -265,6 +277,7 @@ export function getDiscoverStateContainer({
     appState: appStateContainer,
     internalState: internalStateContainer,
     dataState: dataStateContainer,
+    savedSearchState: savedSearchContainer,
     searchSessionManager,
     startSync: () => {
       const { start, stop } = appStateContainer.syncState();

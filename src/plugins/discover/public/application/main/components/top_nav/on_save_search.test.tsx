@@ -107,7 +107,7 @@ describe('onSaveSearch', () => {
       .spyOn(persistSavedSearchUtils, 'persistSavedSearch')
       .mockImplementationOnce((newSavedSearch, _) => {
         savedSearch = newSavedSearch;
-        return Promise.resolve({ id: newSavedSearch.id });
+        return Promise.resolve(newSavedSearch.id);
       });
     saveModal?.props.onSave({
       newTitle: savedSearch.title,
@@ -154,7 +154,7 @@ describe('onSaveSearch', () => {
       .spyOn(persistSavedSearchUtils, 'persistSavedSearch')
       .mockImplementationOnce((newSavedSearch, _) => {
         savedSearch = newSavedSearch;
-        return Promise.resolve({ id: newSavedSearch.id });
+        return Promise.resolve(newSavedSearch.id);
       });
     saveModal?.props.onSave({
       newTitle: savedSearch.title,

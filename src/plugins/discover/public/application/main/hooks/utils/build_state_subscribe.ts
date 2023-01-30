@@ -40,6 +40,7 @@ export const buildStateSubscribe =
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const docTableSortChanged = !isEqual(nextState.sort, sort);
     const dataViewChanged = !isEqual(nextState.index, index);
+    let savedSearchDataView;
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.index && dataViewChanged) {
       const { dataView: nextDataView, fallback } =
@@ -54,7 +55,10 @@ export const buildStateSubscribe =
       savedSearch.searchSource.setField('index', nextDataView);
       stateContainer.dataState.reset();
       stateContainer.actions.setDataView(nextDataView);
+      savedSearchDataView = nextDataView;
     }
+
+    stateContainer.savedSearchState.update(savedSearchDataView, nextState);
 
     if (
       dataViewChanged &&

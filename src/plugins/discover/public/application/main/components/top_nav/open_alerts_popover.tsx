@@ -64,7 +64,6 @@ export function AlertsPopover({
       dataView: searchSource.getField('index')!,
       services,
       sort: [],
-      useNewFieldsApi: true,
     });
 
     return {
