@@ -85,18 +85,13 @@ export const EditTransformIngestPipeline: FC = () => {
           </EuiFormRow>
         ) : (
           <EditTransformFlyoutFormTextInput
-            dataTestSubj="transformEditFlyoutDestinationIngestPipelineInput"
-            errorMessages={errorMessages}
+            field="destinationIngestPipeline"
             label={i18n.translate(
               'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
               {
                 defaultMessage: 'Ingest Pipeline',
               }
             )}
-            onChange={(valueUpdate) =>
-              formField({ field: 'destinationIngestPipeline', value: valueUpdate })
-            }
-            value={value}
           />
         )
       }

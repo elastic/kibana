@@ -11,23 +11,19 @@ import { EuiAccordion, EuiForm, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { EditTransformFlyoutFormTextInputHelper } from './edit_transform_flyout_form_text_input';
+import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import { EditTransformRetentionPolicy } from './edit_transform_retention_policy';
-import { EditTransformDestinationIndex } from './edit_transform_destination_index';
 import { EditTransformIngestPipeline } from './edit_transform_ingest_pipeline';
-import { EditTransformDocsPerSecond } from './edit_transform_docs_per_second';
-import { EditTransformMaxPageSearchSize } from './edit_transform_max_page_search_size';
-import { EditTransformNumFailureRetries } from './edit_transform_num_failure_retries';
 
 export const EditTransformFlyoutForm: FC = () => (
   <EuiForm>
-    <EditTransformFlyoutFormTextInputHelper
+    <EditTransformFlyoutFormTextInput
       field="description"
       label={i18n.translate(`xpack.transform.transformList.editFlyoutFormDescriptionLabel`, {
         defaultMessage: 'Description',
       })}
     />
-    <EditTransformFlyoutFormTextInputHelper
+    <EditTransformFlyoutFormTextInput
       field="frequency"
       label={i18n.translate(`xpack.transform.transformList.editFlyoutFormFrequencyLabel`, {
         defaultMessage: 'Frequency',
@@ -56,7 +52,15 @@ export const EditTransformFlyoutForm: FC = () => (
       paddingSize="s"
     >
       <div data-test-subj="transformEditAccordionDestinationContent">
-        <EditTransformDestinationIndex />
+        <EditTransformFlyoutFormTextInput
+          field="destinationIndex"
+          label={i18n.translate(
+            'xpack.transform.transformList.editFlyoutFormDestinationIndexLabel',
+            {
+              defaultMessage: 'Destination index',
+            }
+          )}
+        />
 
         <EuiSpacer size="m" />
 
@@ -80,9 +84,48 @@ export const EditTransformFlyoutForm: FC = () => (
       paddingSize="s"
     >
       <div data-test-subj="transformEditAccordionAdvancedSettingsContent">
-        <EditTransformDocsPerSecond />
-        <EditTransformMaxPageSearchSize />
-        <EditTransformNumFailureRetries />
+        <EditTransformFlyoutFormTextInput
+          field="docsPerSecond"
+          helpText={i18n.translate(
+            'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelpText',
+            {
+              defaultMessage: 'To enable throttling, set a limit of documents to input per second.',
+            }
+          )}
+          label={i18n.translate('xpack.transform.transformList.editFlyoutFormDocsPerSecondLabel', {
+            defaultMessage: 'Documents per second',
+          })}
+        />
+        <EditTransformFlyoutFormTextInput
+          field="maxPageSearchSize"
+          helpText={i18n.translate(
+            'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelpText',
+            {
+              defaultMessage:
+                'The initial page size to use for the composite aggregation for each checkpoint.',
+            }
+          )}
+          label={i18n.translate(
+            'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeLabel',
+            {
+              defaultMessage: 'Maximum page search size',
+            }
+          )}
+          placeHolder={true}
+        />
+        <EditTransformFlyoutFormTextInput
+          field="numFailureRetries"
+          helpText={i18n.translate(
+            'xpack.transform.transformList.editFlyoutFormNumFailureRetriesHelpText',
+            {
+              defaultMessage:
+                'The number of retries on a recoverable failure before the transform task is marked as failed. Set it to -1 for infinite retries.',
+            }
+          )}
+          label={i18n.translate('xpack.transform.transformList.numFailureRetriesLabel', {
+            defaultMessage: 'Number of failure retries',
+          })}
+        />
       </div>
     </EuiAccordion>
   </EuiForm>

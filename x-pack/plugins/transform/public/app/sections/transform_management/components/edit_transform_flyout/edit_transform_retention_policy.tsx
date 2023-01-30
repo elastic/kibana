@@ -15,7 +15,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import { useAppDependencies } from '../../../../app_dependencies';
 
-import { EditTransformFlyoutFormTextInputHelper } from './edit_transform_flyout_form_text_input';
+import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import { useEditTransformFlyout, TRANSFORM_HOOK } from './use_edit_transform_flyout';
 
 export const EditTransformRetentionPolicy: FC = () => {
@@ -124,7 +124,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                 />
               </EuiFormRow>
             ) : (
-              <EditTransformFlyoutFormTextInputHelper
+              <EditTransformFlyoutFormTextInput
                 field="retentionPolicyField"
                 label={i18n.translate(
                   `xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel`,
@@ -135,7 +135,7 @@ export const EditTransformRetentionPolicy: FC = () => {
               />
             )
           }
-          <EditTransformFlyoutFormTextInputHelper
+          <EditTransformFlyoutFormTextInput
             field="retentionPolicyMaxAge"
             label={i18n.translate(
               `xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeLabel`,

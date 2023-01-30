@@ -18,24 +18,33 @@ function capitalizeFirstLetter(str: string) {
 }
 
 interface EditTransformFlyoutFormTextInputProps {
-  dataTestSubj: string;
-  errorMessages: string[];
-  helpText?: string;
+  field: Extract<
+    keyof typeof TRANSFORM_HOOK,
+    | 'description'
+    | 'destinationIndex'
+    | 'destinationIngestPipeline'
+    | 'docsPerSecond'
+    | 'frequency'
+    | 'maxPageSearchSize'
+    | 'numFailureRetries'
+    | 'retentionPolicyField'
+    | 'retentionPolicyMaxAge'
+  >;
   label: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  value: string;
+  helpText?: string;
+  placeHolder?: boolean;
 }
 
 export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInputProps> = ({
-  dataTestSubj,
-  errorMessages,
-  helpText,
+  field,
   label,
-  onChange,
-  placeholder,
-  value,
+  helpText,
+  placeHolder = false,
 }) => {
+  const { defaultValue, errorMessages, value } = useEditTransformFlyout(TRANSFORM_HOOK[field]);
+  const { formField } = useEditTransformFlyout(TRANSFORM_HOOK.actions);
+  const upperCaseField = capitalizeFirstLetter(field);
+
   return (
     <EuiFormRow
       label={label}
@@ -44,50 +53,20 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
       error={errorMessages}
     >
       <EuiFieldText
-        data-test-subj={dataTestSubj}
-        placeholder={placeholder}
+        data-test-subj={`transformEditFlyout${upperCaseField}Input`}
+        placeholder={
+          placeHolder
+            ? i18n.translate(`xpack.transform.transformList.editFlyoutFormPlaceholderText`, {
+                defaultMessage: 'Default: {defaultValue}',
+                values: { defaultValue },
+              })
+            : undefined
+        }
         isInvalid={errorMessages.length > 0}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => formField({ field, value: e.target.value })}
         aria-label={label}
       />
     </EuiFormRow>
-  );
-};
-
-interface EditTransformFlyoutFormTextInputHelperProps {
-  field: Extract<
-    keyof typeof TRANSFORM_HOOK,
-    'description' | 'frequency' | 'retentionPolicyField' | 'retentionPolicyMaxAge'
-  >;
-  label: string;
-  helpText?: string;
-  placeHolder?: boolean;
-}
-
-export const EditTransformFlyoutFormTextInputHelper: FC<
-  EditTransformFlyoutFormTextInputHelperProps
-> = ({ field, label, helpText, placeHolder = false }) => {
-  const { defaultValue, errorMessages, value } = useEditTransformFlyout(TRANSFORM_HOOK[field]);
-  const { formField } = useEditTransformFlyout(TRANSFORM_HOOK.actions);
-  const upperCaseField = capitalizeFirstLetter(field);
-
-  return (
-    <EditTransformFlyoutFormTextInput
-      dataTestSubj={`transformEditFlyout${upperCaseField}Input`}
-      errorMessages={errorMessages}
-      helpText={helpText}
-      label={label}
-      onChange={(valueUpdate) => formField({ field, value: valueUpdate })}
-      value={value}
-      placeholder={
-        placeHolder
-          ? i18n.translate(`xpack.transform.transformList.editFlyoutFormPlaceholderText`, {
-              defaultMessage: 'Default: {defaultValue}',
-              values: { defaultValue },
-            })
-          : undefined
-      }
-    />
   );
 };
