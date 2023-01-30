@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export const overflowCss = { overflow: 'hidden' };
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Enterprisesearch', () => {
+    loadTestFile(require.resolve('./overview'));
+  });
+}
