@@ -163,6 +163,7 @@ Object {
       ],
       "legend": Object {
         "isVisible": true,
+        "legendSize": "xlarge",
         "position": "left",
       },
       "preferredSeriesType": "bar_stacked",
@@ -321,6 +322,7 @@ Object {
       ],
       "legend": Object {
         "isVisible": true,
+        "legendSize": "xlarge",
         "position": "left",
       },
       "preferredSeriesType": "bar_stacked",
