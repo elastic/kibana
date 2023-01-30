@@ -160,6 +160,7 @@ export class APMEventClient {
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
       ignore_unavailable: true,
       preference: 'any',
+      expand_wildcards: ['open' as const, 'hidden' as const],
       ...(forceSyntheticSourceForThisRequest
         ? { force_synthetic_source: true }
         : {}),
