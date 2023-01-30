@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isServerless } from '../../../common/util/serverless';
 import { NodesList } from './nodes_overview';
 import { MlPageHeader } from '../components/page_header';
-import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { JobMemoryTreeMap } from './memory_tree_map';
 
 enum TAB {
@@ -35,9 +34,6 @@ export const MemoryUsagePage: FC = () => {
               id="xpack.ml.memoryUsage.memoryUsageHeader"
               defaultMessage="Memory Usage"
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TechnicalPreviewBadge />
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
