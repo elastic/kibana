@@ -141,7 +141,7 @@ journey(`TestNowMode`, async ({ page, params }) => {
 
     await page.waitForSelector('text=1 step completed');
     await page.waitForSelector('text=Go to https://www.google.com');
-    await page.waitForSelector('text=1.4 s');
+    await page.waitForSelector('text=1.42 s');
     await page.waitForSelector('text=Complete');
   });
 
