@@ -22,7 +22,7 @@ import { useDashboardContainerContext } from '../../dashboard_container_renderer
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
-interface Props extends DivProps {
+export interface Props extends DivProps {
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
