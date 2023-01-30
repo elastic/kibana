@@ -19,7 +19,7 @@ import { basicCaseClosed, connectorsMock } from '../../containers/mock';
 import type { UseGetCase } from '../../containers/use_get_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import { useGetTags } from '../../containers/use_get_tags';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
@@ -32,7 +32,7 @@ import {
   defaultGetCase,
   defaultGetCaseMetrics,
   defaultUpdateCaseState,
-  defaultUseGetCaseUserActions,
+  defaultUseFindCaseUserActions,
 } from './mocks';
 import type { CaseViewPageProps } from './types';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
@@ -43,7 +43,7 @@ import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_metrics');
-jest.mock('../../containers/use_get_case_user_actions');
+jest.mock('../../containers/use_find_case_user_actions');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
@@ -61,7 +61,7 @@ const useFetchCaseMock = useGetCase as jest.Mock;
 const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
-const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
+const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
@@ -105,7 +105,7 @@ describe('CaseViewPage', () => {
     jest.clearAllMocks();
     useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
-    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useGetCaseConnectorsMock.mockReturnValue({
       isLoading: false,
@@ -349,7 +349,7 @@ describe('CaseViewPage', () => {
 
   it('should show loading content when loading user actions', async () => {
     const useFetchAlertData = jest.fn().mockReturnValue([true]);
-    useGetCaseUserActionsMock.mockReturnValue({
+    useFindCaseUserActionsMock.mockReturnValue({
       data: undefined,
       isError: false,
       isLoading: true,

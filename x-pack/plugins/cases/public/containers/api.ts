@@ -13,6 +13,7 @@ import type {
   CaseUpdateRequest,
   FetchCasesProps,
   ResolvedCase,
+  FindCaseUserActions,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
 import type {
@@ -22,7 +23,7 @@ import type {
   CaseResponse,
   CaseResolveResponse,
   CasesResponse,
-  CaseUserActionsResponse,
+  UserActionFindResponse,
   CommentRequest,
   User,
   SingleCaseMetricsResponse,
@@ -35,7 +36,7 @@ import {
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
-  getCaseUserActionUrl,
+  getCaseFindUserActionsUrl,
   getCaseCommentDeleteUrl,
   getCaseConnectorsUrl,
 } from '../../common/api';
@@ -44,6 +45,7 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  MAX_DOCS_PER_PAGE,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -147,21 +149,27 @@ export const getSingleCaseMetrics = async (
   );
 };
 
-export const getCaseUserActions = async (
+export const findCaseUserActions = async (
   caseId: string,
   signal: AbortSignal
-): Promise<CaseUserActions[]> => {
-  const response = await KibanaServices.get().http.fetch<CaseUserActionsResponse>(
-    getCaseUserActionUrl(caseId),
+): Promise<FindCaseUserActions> => {
+  const response = await KibanaServices.get().http.fetch<UserActionFindResponse>(
+    getCaseFindUserActionsUrl(caseId),
     {
       method: 'GET',
       signal,
+      query: {
+        perPage: MAX_DOCS_PER_PAGE,
+      },
     }
   );
 
-  return convertUserActionsToCamelCase(
-    decodeCaseUserActionsResponse(response)
-  ) as CaseUserActions[];
+  return {
+    ...response,
+    userActions: convertUserActionsToCamelCase(
+      decodeCaseUserActionsResponse(response.userActions)
+    ) as CaseUserActions[],
+  };
 };
 
 export const getCases = async ({

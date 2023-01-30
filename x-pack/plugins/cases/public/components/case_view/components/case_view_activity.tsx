@@ -29,7 +29,7 @@ import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
-import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
+import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
 import { AssignUsers } from './assign_users';
 import type { Assignee } from '../../user_profiles/types';
 
@@ -54,7 +54,7 @@ export const CaseViewActivity = ({
     caseData.id
   );
 
-  const { data: userActionsData, isLoading: isLoadingUserActions } = useGetCaseUserActions(
+  const { data: userActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
     caseData.id
   );
 

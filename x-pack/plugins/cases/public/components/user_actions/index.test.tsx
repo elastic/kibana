@@ -168,7 +168,7 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="comment-update-action-${ourActions[1].actionId}"] [data-test-subj="move-to-link-${props.data.comments[0].id}"]`
+        `[data-test-subj="comment-update-action-${ourActions[1].id}"] [data-test-subj="move-to-link-${props.data.comments[0].id}"]`
       )
       .first()
       .simulate('click');
