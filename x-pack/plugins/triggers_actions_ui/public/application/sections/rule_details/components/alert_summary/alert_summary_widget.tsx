@@ -38,7 +38,7 @@ export const AlertSummaryWidget = ({
 
   return fullSize ? (
     // Only show full size version if there is data
-    !activeAlertCount && !recoveredAlertCount ? (
+    activeAlertCount || recoveredAlertCount ? (
       <AlertsSummaryWidgetFullSize
         activeAlertCount={activeAlertCount}
         activeAlerts={activeAlerts}

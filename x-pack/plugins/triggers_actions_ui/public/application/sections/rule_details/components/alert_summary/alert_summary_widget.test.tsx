@@ -88,7 +88,7 @@ describe('AlertSummaryWidget', () => {
     expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
   });
 
-  it('should not render AlertSummaryWidget when there is no active and recovered alerts', async () => {
+  it('should render AlertSummaryWidget compact version even when there is no active and recovered alerts', async () => {
     useLoadAlertSummaryMock.mockImplementation(() => ({
       alertSummary: {
         activeAlertCount: 0,
@@ -99,7 +99,21 @@ describe('AlertSummaryWidget', () => {
     }));
     const alertSummaryWidget = renderComponent();
 
-    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeFalsy();
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
+  });
+
+  it('should not render AlertSummaryWidget full-size version when there is no active and recovered alerts', async () => {
+    useLoadAlertSummaryMock.mockImplementation(() => ({
+      alertSummary: {
+        activeAlertCount: 0,
+        activeAlerts: [],
+        recoveredAlertCount: 0,
+      },
+      isLoading: false,
+    }));
+    const alertSummaryWidget = renderComponent({ fullSize: true });
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSzie')).toBeFalsy();
   });
 
   it('should render AlertSummaryWidgetError when API call fails', async () => {
