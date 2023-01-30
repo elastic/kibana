@@ -8,15 +8,9 @@
 import moment from 'moment';
 import React from 'react';
 import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
-import {
-  ACTIVE_ALERT_LABEL,
-  ACTIVE_COLOR,
-  ALL_ALERT_LABEL,
-  RECOVERED_ALERT_LABEL,
-  RECOVERED_COLOR,
-  TOOLTIP_DATE_FORMAT,
-} from './constants';
+import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { AlertCounts } from './alert_counts';
+import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
 import { Alert, ChartThemes } from '../types';
 
 export interface AlertsSummaryWidgetFullSizeProps {
@@ -24,7 +18,6 @@ export interface AlertsSummaryWidgetFullSizeProps {
   activeAlerts: Alert[];
   chartThemes: ChartThemes;
   recoveredAlertCount: number;
-  recoveredAlerts: Alert[];
   dateFormat?: string;
 }
 
@@ -34,9 +27,7 @@ export const AlertsSummaryWidgetFullSize = ({
   chartThemes: { theme, baseTheme },
   dateFormat,
   recoveredAlertCount,
-  recoveredAlerts,
 }: AlertsSummaryWidgetFullSizeProps) => {
-  const { euiTheme } = useEuiTheme();
   const chartTheme = [
     theme,
     {
@@ -53,48 +44,15 @@ export const AlertsSummaryWidgetFullSize = ({
       hasShadow={false}
       paddingSize="none"
     >
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="xl" alignItems="flexStart" responsive={false}>
-                <EuiFlexItem>
-                  <EuiText color={euiTheme.colors.text}>
-                    <h3 data-test-subj="totalAlertsCount">
-                      {activeAlertCount + recoveredAlertCount}
-                    </h3>
-                  </EuiText>
-                  <EuiText size="xs" color="subdued">
-                    {ALL_ALERT_LABEL}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText color={euiTheme.colors.dangerText}>
-                    <h3 data-test-subj="activeAlertsCount">{activeAlertCount}</h3>
-                  </EuiText>
-                  <EuiText size="xs" color="subdued">
-                    {ACTIVE_ALERT_LABEL}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText color={euiTheme.colors.successText}>
-                      <h3 data-test-subj="recoveredAlertsCount">{recoveredAlertCount}</h3>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiText size="xs" color="subdued">
-                    {RECOVERED_ALERT_LABEL}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFlexItem>
+        <AlertCounts
+          activeAlertCount={activeAlertCount}
+          recoveredAlertCount={recoveredAlertCount}
+        />
+      </EuiFlexItem>
       <EuiSpacer size="l" />
       <Chart size={['100%', 170]}>
         <Settings
-          showLegend
           legendPosition={Position.Right}
           theme={chartTheme}
           baseTheme={baseTheme}
@@ -121,33 +79,15 @@ export const AlertsSummaryWidgetFullSize = ({
           yScaleType={ScaleType.Linear}
           xAccessor="key"
           yAccessors={['doc_count']}
+          color={[ALL_ALERT_COLOR]}
           data={activeAlerts}
-          color={[ACTIVE_COLOR]}
           lineSeriesStyle={{
             line: {
               strokeWidth: 2,
             },
-            point: { visible: true, radius: 3, strokeWidth: 2 },
+            point: { visible: false },
           }}
           curve={CurveType.CURVE_MONOTONE_X}
-          timeZone="UTC"
-        />
-        <LineSeries
-          id="Recovered"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="key"
-          yAccessors={['doc_count']}
-          data={recoveredAlerts}
-          color={[RECOVERED_COLOR]}
-          lineSeriesStyle={{
-            line: {
-              strokeWidth: 2,
-            },
-            point: { visible: true, radius: 3, strokeWidth: 2 },
-          }}
-          curve={CurveType.CURVE_MONOTONE_X}
-          timeZone="UTC"
         />
       </Chart>
     </EuiPanel>
