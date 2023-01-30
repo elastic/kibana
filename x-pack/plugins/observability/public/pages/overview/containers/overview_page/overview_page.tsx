@@ -10,12 +10,10 @@ import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useMemo, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 
-import { calculateBucketSize } from './helpers';
-import { buildEsQuery } from '../../../../utils/build_es_query';
-import { getNewsFeed } from '../../../../services/get_news_feed';
-
+import { observabilityFeatureId } from '../../../../../common';
+import type { ObservabilityAppServices } from '../../../../application/types';
 import {
   DataSections,
   LoadingObservability,
@@ -28,29 +26,34 @@ import { Resources } from '../../../../components/app/resources';
 import { NewsFeed } from '../../../../components/app/news_feed';
 import { SectionContainer } from '../../../../components/app/section';
 import { ObservabilityStatusProgress } from '../../../../components/app/observability_status/observability_status_progress';
-
+import { observabilityAlertFeatureIds, paths } from '../../../../config';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { useGuidedSetupProgress } from '../../../../hooks/use_guided_setup_progress';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { useOverviewMetrics } from './helpers/use_metrics';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
+import { getNewsFeed } from '../../../../services/get_news_feed';
+import { buildEsQuery } from '../../../../utils/build_es_query';
+import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
 
-import { observabilityFeatureId } from '../../../../../common';
-import { observabilityAlertFeatureIds, paths } from '../../../../config';
 import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
-
-import type { ObservabilityAppServices } from '../../../../application/types';
+import { calculateBucketSize, useOverviewMetrics } from './helpers';
 
 export function OverviewPage() {
   const {
     cases: {
       ui: { getCasesContext },
     },
+    charts,
     http,
-    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
+    triggersActionsUi: {
+      alertsTableConfigurationRegistry,
+      getAlertsStateTable: AlertsStateTable,
+      getAlertSummaryWidget: AlertSummaryWidget,
+    },
   } = useKibana<ObservabilityAppServices>().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -65,7 +68,6 @@ export function OverviewPage() {
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
   const { hasAnyData, isAllRequestsComplete } = useHasData();
-  const refetch = useRef<() => void>();
 
   const { trackMetric } = useOverviewMetrics({ hasAnyData });
 
@@ -85,6 +87,19 @@ export function OverviewPage() {
       to: relativeEnd,
     })
   );
+  const timeBuckets = useTimeBuckets();
+  const alertSummaryTimeRange = getAlertSummaryTimeRange(
+    {
+      from: relativeStart,
+      to: relativeEnd,
+    },
+    timeBuckets
+  );
+
+  const chartThemes = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
 
   const bucketSize = useMemo(
     () =>
@@ -95,6 +110,15 @@ export function OverviewPage() {
     [absoluteStart, absoluteEnd]
   );
 
+  useEffect(() => {
+    setEsQuery(
+      buildEsQuery({
+        from: relativeStart,
+        to: relativeEnd,
+      })
+    );
+  }, [relativeEnd, relativeStart]);
+
   const handleTimeRangeRefresh = useCallback(() => {
     setEsQuery(
       buildEsQuery({
@@ -102,7 +126,6 @@ export function OverviewPage() {
         to: relativeEnd,
       })
     );
-    return refetch.current && refetch.current();
   }, [relativeEnd, relativeStart]);
 
   const handleCloseGuidedSetupTour = () => {
@@ -170,6 +193,13 @@ export function OverviewPage() {
               permissions={userCasesPermissions}
               features={{ alerts: { sync: false } }}
             >
+              <AlertSummaryWidget
+                featureIds={observabilityAlertFeatureIds}
+                filter={esQuery}
+                fullSize
+                timeRange={alertSummaryTimeRange}
+                chartThemes={chartThemes}
+              />
               <AlertsStateTable
                 alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                 configurationId={AlertConsumers.OBSERVABILITY}

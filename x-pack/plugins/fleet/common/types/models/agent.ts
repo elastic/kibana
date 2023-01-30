@@ -161,8 +161,9 @@ export interface AgentDiagnostics {
   name: string;
   createTime: string;
   filePath: string;
-  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS';
+  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS' | 'FAILED';
   actionId: string;
+  error?: string;
 }
 
 // Generated from FleetServer schema.json

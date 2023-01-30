@@ -6,6 +6,7 @@
  */
 
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButton,
@@ -36,6 +37,10 @@ const FlexStartEuiFlexItem = styled(EuiFlexItem)`
   align-self: flex-start;
 `;
 
+const MarginedIcon = styled(EuiIcon)`
+  margin-right: 7px;
+`;
+
 export interface AgentDiagnosticsProps {
   agent: Agent;
 }
@@ -47,6 +52,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
   const [isLoading, setIsLoading] = useState(true);
   const [diagnosticsEntries, setDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
   const [prevDiagnosticsEntries, setPrevDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
+  const [loadInterval, setLoadInterval] = useState(10000);
 
   const loadData = useCallback(async () => {
     try {
@@ -58,8 +64,20 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       if (!uploadsResponse.data) {
         throw new Error('No data');
       }
-      setDiagnosticEntries(uploadsResponse.data.items);
+      const entries = uploadsResponse.data.items;
+      setDiagnosticEntries(entries);
       setIsLoading(false);
+
+      // query faster if an action is in progress, for quicker feedback
+      if (
+        entries.some(
+          (entry) => entry.status === 'IN_PROGRESS' || entry.status === 'AWAITING_UPLOAD'
+        )
+      ) {
+        setLoadInterval(3000);
+      } else {
+        setLoadInterval(10000);
+      }
     } catch (err) {
       notifications.toasts.addError(err, {
         title: i18n.translate(
@@ -70,13 +88,13 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         ),
       });
     }
-  }, [agent.id, notifications.toasts]);
+  }, [agent.id, notifications.toasts, setLoadInterval]);
 
   useEffect(() => {
     loadData();
     const interval: ReturnType<typeof setInterval> | null = setInterval(async () => {
       loadData();
-    }, 10000);
+    }, loadInterval);
 
     const cleanup = () => {
       if (interval) {
@@ -85,7 +103,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     };
 
     return cleanup;
-  }, [loadData]);
+  }, [loadData, loadInterval]);
 
   useEffect(() => {
     setPrevDiagnosticEntries(diagnosticsEntries);
@@ -111,6 +129,9 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     }
   }, [prevDiagnosticsEntries, diagnosticsEntries, notifications.toasts]);
 
+  const errorIcon = <MarginedIcon type="alert" color="red" />;
+  const getErrorMessage = (error?: string) => (error ? `Error: ${error}` : '');
+
   const columns: Array<EuiTableFieldDataColumnType<AgentDiagnostics>> = [
     {
       field: 'id',
@@ -122,18 +143,32 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
             <EuiIcon type="download" /> &nbsp; {currentItem?.name}
           </EuiLink>
         ) : currentItem?.status === 'IN_PROGRESS' || currentItem?.status === 'AWAITING_UPLOAD' ? (
-          <EuiText color="subdued">
+          <EuiLink color="subdued" disabled>
             <EuiLoadingSpinner /> &nbsp;
             <FormattedMessage
               id="xpack.fleet.requestDiagnostics.generatingText"
               defaultMessage="Generating diagnostics file..."
             />
-          </EuiText>
+          </EuiLink>
         ) : (
-          <EuiText color="subdued">
-            <EuiIcon type="alert" color="red" /> &nbsp;
+          <EuiLink color="subdued" disabled>
+            {currentItem?.status ? (
+              <EuiToolTip
+                content={
+                  <>
+                    <p>Diagnostics status: {currentItem?.status}</p>
+                    <p>{getErrorMessage(currentItem?.error)}</p>
+                  </>
+                }
+              >
+                {errorIcon}
+              </EuiToolTip>
+            ) : (
+              errorIcon
+            )}
+            &nbsp;
             {currentItem?.name}
-          </EuiText>
+          </EuiLink>
         );
       },
     },
@@ -145,7 +180,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         const currentItem = diagnosticsEntries.find((item) => item.id === id);
         return (
           <EuiText color={currentItem?.status === 'READY' ? 'default' : 'subdued'}>
-            {formatDate(currentItem?.createTime, 'll')}
+            {formatDate(currentItem?.createTime, 'lll')}
           </EuiText>
         );
       },
@@ -167,6 +202,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         }
       );
       notifications.toasts.addSuccess(successMessage);
+      loadData();
     } catch (error) {
       setIsSubmitting(false);
       notifications.toasts.addError(error, {
