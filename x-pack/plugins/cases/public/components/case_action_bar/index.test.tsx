@@ -19,14 +19,14 @@ import {
   noUpdateCasesPermissions,
   TestProviders,
 } from '../../common/mock';
-import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
+import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
 jest.mock('../../containers/use_get_case_connectors');
 jest.mock('../case_view/use_on_refresh_case_view_page');
 
-const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
+const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 
 describe('CaseActionBar', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
@@ -40,7 +40,7 @@ describe('CaseActionBar', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useFindCaseUserActionsMock.mockReturnValue({
+    useGetCaseConnectorsMock.mockReturnValue({
       isLoading: false,
       data: caseConnectors,
     });

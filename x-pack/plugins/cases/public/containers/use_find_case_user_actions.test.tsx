@@ -8,7 +8,13 @@
 import { renderHook } from '@testing-library/react-hooks';
 import type { UseFindCaseUserActions } from './use_find_case_user_actions';
 import { useFindCaseUserActions } from './use_find_case_user_actions';
-import { basicCase, caseUserActions, elasticUser, getUserAction } from './mock';
+import {
+  basicCase,
+  caseUserActions,
+  elasticUser,
+  findCaseUserActionsResponse,
+  getUserAction,
+} from './mock';
 import { Actions } from '../../common/api';
 import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -35,7 +41,7 @@ describe('UseFindCaseUserActions', () => {
     jest.restoreAllMocks();
   });
 
-  it('returns proper state on getCaseUserActions', async () => {
+  it('returns proper state on findCaseUserActions', async () => {
     const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
       () => useFindCaseUserActions(basicCase.id),
       { wrapper }
@@ -47,7 +53,7 @@ describe('UseFindCaseUserActions', () => {
       expect.objectContaining({
         ...initialData,
         data: {
-          caseUserActions,
+          caseUserActions: [...findCaseUserActionsResponse.userActions],
           participants: [elasticUser],
           profileUids: new Set(),
         },
