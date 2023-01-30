@@ -60,9 +60,6 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
         size: 0,
         runtime_mappings: {
           ...runTimeMappings,
-          'synthetics.payload.is_navigation_request': {
-            type: 'boolean',
-          },
           'synthetics.payload.transfer_size': {
             type: 'long',
           },
@@ -73,11 +70,6 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
               {
                 term: {
                   'synthetics.type': 'journey/network_info',
-                },
-              },
-              {
-                term: {
-                  'synthetics.payload.is_navigation_request': true,
                 },
               },
               ...useStepFilters(checkGroupId, stepIndex),
