@@ -7,7 +7,7 @@
 
 import { ComplianceDashboardData } from '../../../common/types';
 
-export const clusterMockData = {
+export const getClusterMockData = () => ({
   meta: {
     clusterId: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
     benchmarkName: 'CIS Kubernetes V1.20',
@@ -87,7 +87,11 @@ export const clusterMockData = {
       postureScore: 90.1,
     },
   ],
-};
+});
+
+export const getMockDashboardData = () => ({
+  ...mockDashboardData,
+});
 
 export const mockDashboardData: ComplianceDashboardData = {
   stats: {
@@ -148,7 +152,7 @@ export const mockDashboardData: ComplianceDashboardData = {
       postureScore: 50.0,
     },
   ],
-  clusters: [clusterMockData],
+  clusters: [getClusterMockData()],
   trend: [
     {
       timestamp: '2022-05-22T11:03:00.000Z',
