@@ -141,7 +141,7 @@ image::images/lens_lineChartMetricOverTimeBottomAxis_8.3.png[Bottom axis menu]
 
 Since you removed the axis labels, add a panel title:
 
-. Open the panel menu, then select *Edit panel title*.
+. Open the panel menu, then select *Edit panel settings*.
 
 . In the *Panel title* field, enter `Median of bytes`, then click *Save*.
 +
@@ -245,7 +245,7 @@ image::images/lens_pieChartCompareSubsetOfDocs_7.16.png[Pie chart that compares 
 
 Add a panel title:
 
-. Open the panel menu, then select *Edit panel title*.
+. Open the panel menu, then select *Edit panel settings*.
 
 . In the *Panel title* field, enter `Sum of bytes from large requests`, then click *Save*.
 
@@ -278,7 +278,7 @@ image::images/lens_barChartDistributionOfNumberField_7.16.png[Bar chart that dis
 
 Add a panel title:
 
-. Open the panel menu, then select *Edit panel title*.
+. Open the panel menu, then select *Edit panel settings*.
 
 . In the *Panel title* field, enter `Website traffic`, then click *Save*.
 
@@ -342,7 +342,7 @@ image::images/lens_treemapMultiLevelChart_7.16.png[Treemap visualization]
 
 Add a panel title:
 
-. Open the panel menu, then select *Edit panel title*.
+. Open the panel menu, then select *Edit panel settings*.
 
 . In the *Panel title* field, enter `Page views by location and referrer`, then click *Save*.
 

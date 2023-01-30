@@ -293,7 +293,7 @@ To make changes to the panel, use the panel menu options.
 +
 To make changes without changing the original version, open the panel menu, then click *More > Unlink from library*.
 
-* *Edit panel title* &mdash; Opens the *Customize panel* window to change the *Panel title*.
+* *Edit panel settings* &mdash; Opens the *Edit panel settings* window to change the *Panel title*, *Panel description*, and *Panel time range*.
 
 * *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
 
@@ -341,9 +341,11 @@ For more information about {kib} and {es} filters, refer to <<kibana-concepts-an
 
 To apply a panel-level time filter:
 
-. Open the panel menu, then select *More > Customize time range*.
+. Open the panel menu, then select *More > Edit panel settings*.
 
-. Enter the time range you want to view, then click *Add to panel*.
+. Toggle the switch labelled *Apply a custom time range*.
+
+. Enter the time range you want to view, then click *Save*.
 
 [float]
 [[apply-design-options]]
