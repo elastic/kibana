@@ -78,8 +78,7 @@ function createConnectorUserAction(attributes: Partial<ConnectorUserAction> = {}
     createdBy: { username: 'user', fullName: null, email: null },
     createdAt: '2021-12-08T11:28:32.623Z',
     type: 'connector',
-    actionId: '',
-    caseId: '',
+    id: '',
     commentId: '',
     payload: {
       connector: { id: 'a', name: 'test', fields: defaultJiraFields, type: ConnectorTypes.jira },
