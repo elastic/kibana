@@ -26,7 +26,8 @@
     "mapsEms",
     "savedObjects",
     "share",
-    "presentationUtil"
+    "presentationUtil",
+    "contentManagement"
   ],
   "optionalPlugins": [
     "cloud",

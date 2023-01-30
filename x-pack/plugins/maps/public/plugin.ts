@@ -42,6 +42,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LensPublicSetup } from '@kbn/lens-plugin/public';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
   createRegionMapFn,
   regionMapRenderer,
@@ -115,6 +116,7 @@ export interface MapsPluginStartDependencies {
   mapsEms: MapsEmsPluginPublicStart;
   screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
+  contentManagement: ContentManagementPublicStart;
 }
 
 /**

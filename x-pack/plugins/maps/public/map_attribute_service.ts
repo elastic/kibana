@@ -9,10 +9,16 @@ import { SavedObjectReference } from '@kbn/core/types';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
 import { checkForDuplicateTitle, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-browser';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
-import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
+import {
+  getCoreOverlays,
+  getEmbeddableService,
+  getSavedObjectsClient,
+  getContentManagement,
+} from './kibana_services';
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
@@ -69,11 +75,17 @@ export function getMapAttributeService(): MapAttributeService {
             updatedAttributes,
             { references }
           )
-        : getSavedObjectsClient().create<MapSavedObjectAttributes>(
-            MAP_SAVED_OBJECT_TYPE,
-            updatedAttributes,
-            { references }
-          ));
+        : getContentManagement().rpc.create<
+            MapSavedObjectAttributes,
+            any, // We probably want to type the response
+            SavedObjectsCreateOptions
+          >({
+            type: 'map',
+            data: updatedAttributes,
+            options: {
+              references,
+            },
+          }));
       return { id: savedObject.id };
     },
     unwrapMethod: async (

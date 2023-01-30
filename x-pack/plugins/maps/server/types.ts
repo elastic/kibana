@@ -16,6 +16,7 @@ import {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import type { ContentManagementSetup } from '@kbn/content-management-plugin/server';
 
 export interface SetupDeps {
   data: DataPluginSetup;
@@ -26,6 +27,7 @@ export interface SetupDeps {
   mapsEms: MapsEmsPluginServerSetup;
   embeddable: EmbeddableSetup;
   customIntegrations: CustomIntegrationsPluginSetup;
+  contentManagement: ContentManagementSetup;
 }
 
 export interface StartDeps {

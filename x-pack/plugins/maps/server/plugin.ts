@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
@@ -17,6 +16,7 @@ import {
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects';
@@ -30,6 +30,7 @@ import { setupEmbeddable } from './embeddable';
 import { setupSavedObjects } from './saved_objects';
 import { registerIntegrations } from './register_integrations';
 import { StartDeps, SetupDeps } from './types';
+import { MapsStorage, savedObjectToKibanaContent } from './poc_content_management';
 
 export class MapsPlugin implements Plugin {
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
@@ -200,6 +201,22 @@ export class MapsPlugin implements Plugin {
     registerMapsUsageCollector(usageCollection);
 
     setupEmbeddable(plugins.embeddable, getFilterMigrations, getDataViewMigrations);
+
+    plugins.contentManagement.register('map', {
+      storage: new MapsStorage(),
+      toSearchContentSerializer: savedObjectToKibanaContent,
+      schemas: {
+        rpc: {
+          get: {
+            out: schema.any(), // This will have to be a proper Maps Saved object schema
+          },
+          create: {
+            in: schema.any(), // This will be a proper schema to create a map
+            out: schema.any(), // This will be a proper schema of a map created
+          },
+        },
+      },
+    });
 
     return {
       config: config$,

@@ -68,6 +68,7 @@ export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getApplication = () => coreStart.application;
 export const getUsageCollection = () => pluginsStart.usageCollection;
+export const getContentManagement = () => pluginsStart.contentManagement;
 export const isScreenshotMode = () => {
   return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
 };

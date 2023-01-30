@@ -64,6 +64,8 @@
     "@kbn/config-schema",
     "@kbn/field-types",
     "@kbn/controls-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/core-http-request-handler-context-server",
   ],
   "exclude": [
     "target/**/*",
