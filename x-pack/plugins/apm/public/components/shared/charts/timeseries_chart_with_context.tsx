@@ -79,6 +79,7 @@ export function TimeseriesChartWithContext({
 
   const getAnnotations = () => (
     <LineAnnotation
+      key="annotations"
       id="annotations"
       domainType={AnnotationDomainType.XDomain}
       dataValues={annotations.map((annotation) => ({
