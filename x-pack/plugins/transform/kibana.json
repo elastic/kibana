@@ -21,7 +21,7 @@
     "security",
     "usageCollection",
     "spaces",
-    "alerting",
+    "alerting"
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [

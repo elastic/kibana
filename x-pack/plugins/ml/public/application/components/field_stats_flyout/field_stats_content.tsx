@@ -11,7 +11,6 @@ import moment from 'moment';
 import { isDefined } from '@kbn/ml-is-defined';
 import { type DataView } from '@kbn/data-plugin/common';
 import { getDefaultDatafeedQuery } from '../../jobs/new_job/utils/new_job_utils';
-import { useMlKibana } from '../../contexts/kibana';
 import { JobCreatorContext } from '../../jobs/new_job/pages/components/job_creator_context';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 
@@ -21,24 +20,6 @@ export const FieldStatsContent: FC<{
   dataView: DataView;
   fieldStatsServices: FieldStatsServices;
 }> = ({ dataView: currentDataView, fieldStatsServices }) => {
-  console.log('useMlKibana()', useMlKibana());
-  // const {
-  //   services: { uiSettings, data, fieldFormats, charts },
-  // } = useMlKibana();
-  // const fieldStatsServices: FieldStatsServices = {
-  //   uiSettings,
-  //   dataViews: data.dataViews,
-  //   data,
-  //   fieldFormats,
-  //   charts,
-  // };
-  // currentDataView = dataView;
-
-  // const mlContext = useMlContext();
-  // const { currentSavedSearch, currentDataView, kibanaConfig } = mlContext;
-
-  // console.log('currentDataView', currentDataView);
-
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { fieldName } = useFieldStatsFlyoutContext();
 
@@ -67,9 +48,7 @@ export const FieldStatsContent: FC<{
     [fieldName, currentDataView]
   );
 
-  console.log('fieldForStats', fieldForStats);
-  // const showFieldStats = timeRange && isDefined(currentDataView) && fieldForStats;
-  const showFieldStats = isDefined(currentDataView) && fieldForStats;
+  const showFieldStats = timeRange && isDefined(currentDataView) && fieldForStats;
 
   return showFieldStats ? (
     <FieldStats

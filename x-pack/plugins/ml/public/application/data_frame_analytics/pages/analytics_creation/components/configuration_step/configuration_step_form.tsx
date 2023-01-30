@@ -156,7 +156,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     useEstimatedMml,
   } = form;
 
-  console.log('dependentVariableOptions', dependentVariableOptions);
   const isJobTypeWithDepVar =
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
   const dependentVariableEmpty = isJobTypeWithDepVar && dependentVariable === '';
