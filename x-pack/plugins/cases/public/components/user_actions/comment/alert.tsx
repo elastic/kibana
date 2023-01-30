@@ -66,7 +66,7 @@ const getSingleAlertUserAction = ({
       className: 'comment-alert',
       event: (
         <SingleAlertCommentEvent
-          actionId={userAction.actionId}
+          actionId={userAction.id}
           getRuleDetailsHref={getRuleDetailsHref}
           loadingAlertData={loadingAlertData}
           onRuleDetailsClick={onRuleDetailsClick}
@@ -74,14 +74,14 @@ const getSingleAlertUserAction = ({
           ruleName={ruleName}
         />
       ),
-      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.id}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (
         <UserActionContentToolbar id={comment.id}>
           <EuiFlexItem grow={false}>
             <UserActionShowAlert
-              id={userAction.actionId}
+              id={userAction.id}
               alertId={alertId}
               index={alertIndex}
               onShowAlertDetails={onShowAlertDetails}
@@ -124,7 +124,7 @@ const getMultipleAlertsUserAction = ({
       className: 'comment-alert',
       event: (
         <MultipleAlertsCommentEvent
-          actionId={userAction.actionId}
+          actionId={userAction.id}
           loadingAlertData={loadingAlertData}
           totalAlerts={totalAlerts}
           ruleId={ruleId}
@@ -133,7 +133,7 @@ const getMultipleAlertsUserAction = ({
           onRuleDetailsClick={onRuleDetailsClick}
         />
       ),
-      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.id}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (
