@@ -52,6 +52,7 @@ export interface TelemetryEvent {
   };
   cluster_name?: string;
   cluster_uuid?: string;
+  package_version?: string;
   file?: {
     [key: string]: SearchTypes;
     Ext?: {

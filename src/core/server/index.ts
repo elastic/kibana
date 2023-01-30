@@ -389,7 +389,6 @@ export type {
 
 export type {
   UiSettingsParams,
-  PublicUiSettingsParams,
   UiSettingsType,
   UserProvidedValues,
   DeprecationSettings,
