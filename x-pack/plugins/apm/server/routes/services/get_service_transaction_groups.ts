@@ -10,7 +10,7 @@ import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
-  TRANSACTION_OVERFLOW,
+  TRANSACTION_OVERFLOW_COUNT,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
@@ -98,9 +98,9 @@ export async function getServiceTransactionGroups({
         },
         aggs: {
           total_duration: { sum: { field } },
-          overflow_count: {
+          transaction_overflow_count: {
             sum: {
-              field: TRANSACTION_OVERFLOW,
+              field: TRANSACTION_OVERFLOW_COUNT,
             },
           },
           transaction_groups: {
@@ -161,6 +161,7 @@ export async function getServiceTransactionGroups({
     })),
     maxTransactionGroupsExceeded:
       (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
-    overflowCount: response.aggregations?.overflow_count.value ?? 0,
+    transactionOverflowCount:
+      response.aggregations?.transaction_overflow_count.value ?? 0,
   };
 }

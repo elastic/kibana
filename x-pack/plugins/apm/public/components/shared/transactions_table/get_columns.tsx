@@ -50,7 +50,7 @@ export function getColumns({
   comparisonEnabled,
   shouldShowSparkPlots = true,
   offset,
-  overflowCount,
+  transactionOverflowCount,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
@@ -59,7 +59,7 @@ export function getColumns({
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
   offset?: string;
-  overflowCount: number;
+  transactionOverflowCount: number;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
@@ -79,7 +79,7 @@ export function getColumns({
             latencyAggregationType={latencyAggregationType}
             comparisonEnabled={comparisonEnabled}
             offset={offset}
-            overflowCount={overflowCount}
+            overflowCount={transactionOverflowCount}
           >
             {name}
           </TransactionDetailLink>

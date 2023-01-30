@@ -270,7 +270,7 @@ exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
 
-exports[`Error TRANSACTION_OVERFLOW 1`] = `undefined`;
+exports[`Error TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_PAGE_URL 1`] = `undefined`;
 
@@ -545,7 +545,7 @@ exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
 
-exports[`Span TRANSACTION_OVERFLOW 1`] = `undefined`;
+exports[`Span TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_PAGE_URL 1`] = `undefined`;
 
@@ -838,7 +838,7 @@ exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
 
-exports[`Transaction TRANSACTION_OVERFLOW 1`] = `undefined`;
+exports[`Transaction TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_PAGE_URL 1`] = `undefined`;
 

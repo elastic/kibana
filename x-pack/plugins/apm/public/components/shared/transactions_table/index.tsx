@@ -50,7 +50,7 @@ const INITIAL_STATE: InitialState = {
   mainStatisticsData: {
     transactionGroups: [],
     maxTransactionGroupsExceeded: true,
-    overflowCount: 0,
+    transactionOverflowCount: 0,
     transactionGroupsTotalItems: 0,
   },
 };
@@ -197,7 +197,7 @@ export function TransactionsTable({
     mainStatisticsData: {
       transactionGroups,
       maxTransactionGroupsExceeded,
-      overflowCount,
+      transactionOverflowCount,
       transactionGroupsTotalItems,
     },
   } = data;
@@ -257,7 +257,7 @@ export function TransactionsTable({
     comparisonEnabled,
     shouldShowSparkPlots,
     offset,
-    overflowCount,
+    transactionOverflowCount,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;

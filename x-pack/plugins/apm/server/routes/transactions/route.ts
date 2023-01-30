@@ -53,7 +53,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       errorRate: number;
       impact: number;
     }>;
-    overflowCount: number;
+    transactionOverflowCount: number;
     maxTransactionGroupsExceeded: boolean;
   }> => {
     const { params, config } = resources;
