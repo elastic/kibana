@@ -207,10 +207,13 @@ export class PieChartService extends FtrService {
   }
 
   async getSliceCountForAllPies() {
+    this.log.debug('PieChart.getSliceCountForAllPies');
     let pieSlices = 0;
     const charts =
       (await this.visChart.getAllESChartsDebugDataByTestSubj(partitionVisChartSelector)) ?? [];
+    this.log.debug(`Found ${charts.length} charts`);
     for (const chart of charts) {
+      await chart.moveMouseTo();
       const visContainer = await chart.findByCssSelector('.echChartStatus');
       const debugDataString: string | undefined = await visContainer.getAttribute(
         'data-ech-debug-state'
