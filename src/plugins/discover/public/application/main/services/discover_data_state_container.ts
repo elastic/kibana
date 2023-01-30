@@ -7,6 +7,7 @@
  */
 import { BehaviorSubject, filter, map, Observable, share, Subject, tap } from 'rxjs';
 import { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
@@ -68,6 +69,7 @@ export interface DataMainMsg extends DataMsg {
 
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
+  textBasedQueryColumns?: DatatableColumn[]; // columns from text-based request
 }
 
 export interface DataTotalHitsMsg extends DataMsg {

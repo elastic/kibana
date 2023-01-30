@@ -10,19 +10,18 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-plugin/public';
 
+import { useAbsoluteDate } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import * as labels from '../labels';
 
-interface Props {
-  from?: string;
-  to?: string;
-}
-export const MonitorTestRunsSparkline = ({ from = 'now-30d', to = 'now' }: Props) => {
+export const MonitorTestRunsSparkline = () => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
 
   const theme = useTheme();
+
+  const { from, to } = useAbsoluteDate({ from: 'now-30d', to: 'now' });
 
   return (
     <ExploratoryViewEmbeddable

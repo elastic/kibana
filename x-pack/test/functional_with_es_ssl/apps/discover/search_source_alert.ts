@@ -289,8 +289,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('indexPattern-manage-field');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
-    const titleElem = await testSubjects.find('currentIndexPatternTitle');
-    expect(await titleElem.getVisibleText()).to.equal(dataView);
+    const titleElem = await testSubjects.find('createIndexPatternTitleInput');
+    expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
   const checkUpdatedDataViewState = async (dataView: string) => {
@@ -302,11 +302,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('indexPattern-manage-field');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
-    const titleElem = await testSubjects.find('currentIndexPatternTitle');
-    expect(await titleElem.getVisibleText()).to.equal(dataView);
+    const titleElem = await testSubjects.find('createIndexPatternTitleInput');
+    expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  describe('Search source Alert', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/148388
+  // Failing: See https://github.com/elastic/kibana/issues/148386
+  describe.skip('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
 

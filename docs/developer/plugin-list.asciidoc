@@ -40,6 +40,10 @@ as uiSettings within the code.
 |Console provides the user with tools for storing and executing requests against Elasticsearch.
 
 
+|{kib-repo}blob/{branch}/src/plugins/content_management/README.md[contentManagement]
+|The content management plugin provides functionality to manage content in Kibana.
+
+
 |{kib-repo}blob/{branch}/src/plugins/controls/README.mdx[controls]
 |The Controls plugin contains Embeddables which can be used to add user-friendly interactivity to apps.
 
@@ -182,6 +186,10 @@ for use in their own application.
 
 |{kib-repo}blob/{branch}/src/plugins/files_management/README.md[filesManagement]
 |Minimal interface for admins to manage files in Kibana.
+
+
+|{kib-repo}blob/{branch}/src/plugins/ftr_apis/README.md[ftrApis]
+|This plugin exposes a set of APIs used internally during functional tests by the FTR.
 
 
 |{kib-repo}blob/{branch}/src/plugins/guided_onboarding/README.md[guidedOnboarding]
