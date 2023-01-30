@@ -9,7 +9,7 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesW
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -30,11 +30,14 @@ import {
 import { AlertsCountPanel } from '../../../components/alerts_kpis/alerts_count_panel';
 import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translations';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const TABLE_PANEL_HEIGHT = 330; // px
 const TRENT_CHART_HEIGHT = 127; // px
 const TREND_CHART_PANEL_HEIGHT = 256; // px
 const ALERTS_CHARTS_PANEL_HEIGHT = 375; // px
+
+const DETECTIONS_ALERTS_CHARTS_PANEL_ID = 'detection-alerts-charts-panel';
 
 const FullHeightFlexItem = styled(EuiFlexItem)`
   height: 100%;
@@ -63,6 +66,12 @@ const ChartPanelsComponent: React.FC<Props> = ({
   signalIndexName,
   updateDateRangeCallback,
 }: Props) => {
+  const { toggleStatus: isExpanded, setToggleStatus: setIsExpanded } = useQueryToggle(
+    DETECTIONS_ALERTS_CHARTS_PANEL_ID
+  );
+  const [stackByValue, _] = useState('host.name');
+  const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
+
   const {
     alertViewSelection,
     countTableStackBy0,
@@ -157,18 +166,35 @@ const ChartPanelsComponent: React.FC<Props> = ({
     [onReset, updateCommonStackBy0, updateCommonStackBy1]
   );
 
-  const title = useMemo(
-    () => (
-      <ChartSelectContainer>
-        <ChartSelect
-          alertViewSelection={alertViewSelection}
-          setAlertViewSelection={setAlertViewSelection}
-        />
-      </ChartSelectContainer>
-    ),
-    [alertViewSelection, setAlertViewSelection]
-  );
-  const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
+  const title = useMemo(() => {
+    if (isAlertsPageChartsEnabled) {
+      return isExpanded ? (
+        <ChartSelectContainer>
+          <ChartSelect
+            alertViewSelection={alertViewSelection}
+            setAlertViewSelection={setAlertViewSelection}
+          />
+        </ChartSelectContainer>
+      ) : (
+        <h1>{stackByValue}</h1> // collapsed
+      );
+    } else {
+      return (
+        <ChartSelectContainer>
+          <ChartSelect
+            alertViewSelection={alertViewSelection}
+            setAlertViewSelection={setAlertViewSelection}
+          />
+        </ChartSelectContainer>
+      );
+    }
+  }, [
+    alertViewSelection,
+    setAlertViewSelection,
+    isAlertsPageChartsEnabled,
+    isExpanded,
+    stackByValue,
+  ]);
 
   return (
     <div data-test-subj="chartPanels">
@@ -199,6 +225,8 @@ const ChartPanelsComponent: React.FC<Props> = ({
               title={title}
               titleSize={'s'}
               updateDateRange={updateDateRangeCallback}
+              isExpanded={isExpanded}
+              setIsExpanded={setIsExpanded}
             />
           )}
         </FullHeightFlexItem>
@@ -228,6 +256,8 @@ const ChartPanelsComponent: React.FC<Props> = ({
               stackByField1={countTableStackBy1}
               stackByField1ComboboxRef={stackByField1ComboboxRef}
               title={title}
+              isExpanded={isExpanded}
+              setIsExpanded={setIsExpanded}
             />
           )}
         </FullHeightFlexItem>
@@ -244,11 +274,12 @@ const ChartPanelsComponent: React.FC<Props> = ({
               chartOptionsContextMenu={chartOptionsContextMenu}
               filters={alertsHistogramDefaultFilters}
               inspectTitle={i18n.TREEMAP}
-              isPanelExpanded={isTreemapPanelExpanded}
+              isPanelExpanded={isAlertsPageChartsEnabled ? isExpanded : isTreemapPanelExpanded}
               query={query}
               riskSubAggregationField="kibana.alert.risk_score"
-              runtimeMappings={runtimeMappings}
-              setIsPanelExpanded={setIsTreemapPanelExpanded}
+              setIsPanelExpanded={
+                isAlertsPageChartsEnabled ? setIsExpanded : setIsTreemapPanelExpanded
+              }
               setStackByField0={updateCommonStackBy0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={updateCommonStackBy1}
@@ -278,6 +309,8 @@ const ChartPanelsComponent: React.FC<Props> = ({
               signalIndexName={signalIndexName}
               title={title}
               runtimeMappings={runtimeMappings}
+              isExpanded={isExpanded}
+              setIsExpanded={setIsExpanded}
             />
           )}
         </FullHeightFlexItem>

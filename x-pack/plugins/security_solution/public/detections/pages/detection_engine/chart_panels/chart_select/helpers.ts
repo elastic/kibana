@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor, EuiButtonGroupOptionProps } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -92,3 +92,26 @@ export const getContextMenuPanels = ({
     ],
   },
 ];
+
+export const getOptionProperties = (
+  alertViewSelection: AlertViewSelection
+): EuiButtonGroupOptionProps => {
+  const charts = { id: CHARTS_ID, 'data-test-subj': alertViewSelection, label: i18n.CHARTS_TITLE };
+
+  switch (alertViewSelection) {
+    case TABLE_ID:
+      return { id: TABLE_ID, 'data-test-subj': alertViewSelection, label: i18n.TABLE_TITLE };
+    case TREND_ID:
+      return {
+        id: TREND_ID,
+        'data-test-subj': alertViewSelection,
+        label: i18n.TREND_TITLE,
+      };
+    case TREEMAP_ID:
+      return { id: TREEMAP_ID, 'data-test-subj': alertViewSelection, label: i18n.TREEMAP_TITLE };
+    case CHARTS_ID:
+      return charts;
+    default:
+      return charts;
+  }
+};
