@@ -64,6 +64,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    * run platform-generic build tasks
    */
   if (options.createGenericFolders) {
+    // Build before copying source files
     if (options.buildCanvasShareableRuntime) {
       await run(Tasks.BuildCanvasShareableRuntime);
     }
