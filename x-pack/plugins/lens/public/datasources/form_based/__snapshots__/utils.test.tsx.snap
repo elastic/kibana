@@ -67,7 +67,7 @@ Object {
   "fixableInEditor": true,
   "longMessage": "",
   "severity": "warning",
-  "shortMessage": "This may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records.",
+  "shortMessage": "This may be approximate depending on how the data is indexed. For more precise results, sort by rarity.",
 }
 `;
 
@@ -85,7 +85,7 @@ Object {
   "fixableInEditor": true,
   "longMessage": "",
   "severity": "warning",
-  "shortMessage": "This might be an approximation. For more precise results, try increasing the number of top values or using filters instead.",
+  "shortMessage": "might be an approximation. For more precise results, use Filters or increase the number of Top Values.",
 }
 `;
 
@@ -103,6 +103,6 @@ Object {
   "fixableInEditor": true,
   "longMessage": "",
   "severity": "warning",
-  "shortMessage": "This might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster.",
+  "shortMessage": "This might be an approximation. For more precise results, you can enable accuracy mode, but it increases the load on the Elasticsearch cluster.",
 }
 `;
