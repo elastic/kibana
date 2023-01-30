@@ -62,7 +62,8 @@ export const getColorSpec = (
         selection: USER_SELECTION,
         field: `${forCustomVisLink ? `${CUSTOM_VIS_FIELDS_PATH}.` : ''}${getEscapedVegaFieldName(
           color ?? '00FF00'
-        )}`,
+          // When creating the custom link - this field is returned in an array so we need to access it
+        )}${forCustomVisLink ? '[0]' : ''}`,
         type: legendType,
         scale: {
           range:

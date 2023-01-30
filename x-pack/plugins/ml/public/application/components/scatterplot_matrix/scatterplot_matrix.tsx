@@ -217,7 +217,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
         index,
         body: {
           fields: fieldsToFetch,
-          size: 1000,
+          size: fetchSize,
           _source: false,
         },
       },
@@ -529,14 +529,15 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                     const customVisLink = getCustomVisualizationLink();
                     await application.navigateToApp('visualize#', {
                       path: customVisLink.path,
-                      openInNewTab: true,
+                      openInNewTab: false,
                     });
                   }}
                   data-test-subj="mlSplomoExploreInCustomVisualizationLink"
                 >
                   <EuiIconTip
                     content={i18n.translate('xpack.ml.splom.exploreInCustomVisualizationLabel', {
-                      defaultMessage: 'Explore scatterplot charts in custom visualization',
+                      defaultMessage:
+                        'Explore scatterplot charts in Vega based custom visualization',
                     })}
                     type="visVega"
                     size="l"
