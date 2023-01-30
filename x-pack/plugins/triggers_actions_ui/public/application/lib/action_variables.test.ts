@@ -55,13 +55,13 @@ const expectedTransformResult = [
     name: 'alert.actionGroup',
   },
   {
+    description: 'The action subgroup of the alert that scheduled actions for the rule.',
+    name: 'alert.actionSubgroup',
+  },
+  {
     description:
       'The human readable name of the action group of the alert that scheduled actions for the rule.',
     name: 'alert.actionGroupName',
-  },
-  {
-    description: 'The action subgroup of the alert that scheduled actions for the rule.',
-    name: 'alert.actionSubgroup',
   },
   {
     description:
@@ -104,13 +104,13 @@ const expectedTransformResult = [
   },
   {
     deprecated: true,
-    description: 'This has been deprecated in favor of rule.tags.',
-    name: 'tags',
+    description: 'This has been deprecated in favor of rule.spaceId.',
+    name: 'spaceId',
   },
   {
     deprecated: true,
-    description: 'This has been deprecated in favor of rule.spaceId.',
-    name: 'spaceId',
+    description: 'This has been deprecated in favor of rule.tags.',
+    name: 'tags',
   },
 ];
 
