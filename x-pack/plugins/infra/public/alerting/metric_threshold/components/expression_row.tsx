@@ -96,7 +96,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       setRuleParams(expressionId, {
         ...expression,
         aggType: at as MetricExpression['aggType'],
-        metric: at === 'count' ? undefined : expression.metric,
+        metric: ['custom', 'count'].includes(at) ? undefined : expression.metric,
       });
     },
     [expressionId, expression, setRuleParams]
