@@ -49,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should load 5 metrics trend tiles', async () => {
-        const hosts = await pageObjects.infraHostsView.getMetricsTrendTilesCount();
+        const hosts = await pageObjects.infraHostsView.getAllMetricsTrendTiles();
         expect(hosts.length).to.equal(5);
       });
 
@@ -63,6 +63,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it(`${metric} tile should show ${value}`, async () => {
           const tileValue = await pageObjects.infraHostsView.getMetricsTrendTileValue(metric);
           expect(tileValue).to.eql(value);
+        });
+      });
+
+      describe('Lens charts', () => {
+        it('should load 7 lens metric charts', async () => {
+          const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
+          expect(metricCharts.length).to.equal(7);
+        });
+
+        it('should have an option to open the chart in lens', async () => {
+          await pageObjects.infraHostsView.getOpenInLensOption();
         });
       });
     });

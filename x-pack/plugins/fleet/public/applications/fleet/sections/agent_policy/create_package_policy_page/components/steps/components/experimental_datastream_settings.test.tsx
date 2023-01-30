@@ -92,6 +92,8 @@ describe('ExperimentDatastreamSettings', () => {
               features: {
                 synthetic_source: false,
                 tsdb: false,
+                doc_value_only_numeric: false,
+                doc_value_only_other: false,
               },
             },
           ]}
@@ -141,6 +143,8 @@ describe('ExperimentDatastreamSettings', () => {
           features: {
             synthetic_source: true,
             tsdb: false,
+            doc_value_only_numeric: false,
+            doc_value_only_other: false,
           },
         },
       ];
@@ -169,6 +173,8 @@ describe('ExperimentDatastreamSettings', () => {
           features: {
             synthetic_source: false,
             tsdb: false,
+            doc_value_only_numeric: false,
+            doc_value_only_other: false,
           },
         },
       ]);
@@ -178,6 +184,8 @@ describe('ExperimentDatastreamSettings', () => {
           features: {
             synthetic_source: true,
             tsdb: false,
+            doc_value_only_numeric: false,
+            doc_value_only_other: false,
           },
         },
       ]);

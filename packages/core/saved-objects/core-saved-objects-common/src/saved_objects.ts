@@ -51,30 +51,30 @@ export interface SavedObjectError {
 
 /**
  * @public
- * @deprecated See https://github.com/elastic/kibana/issues/149098
+ * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
  */
 export type SavedObjectAttributeSingle = serverTypes.SavedObjectAttributeSingle;
 
 /**
  * @public
- * @deprecated See https://github.com/elastic/kibana/issues/149098
+ * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
  */
 export type SavedObjectAttribute = serverTypes.SavedObjectAttribute;
 
 /**
  * @public
- * @deprecated See https://github.com/elastic/kibana/issues/149098
+ * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
  */
 export type SavedObjectAttributes = serverTypes.SavedObjectAttributes;
 
 /**
  * @public
- * @deprecated See https://github.com/elastic/kibana/issues/149098
+ * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
  */
 export type SavedObjectReference = serverTypes.SavedObjectReference;
 
 /**
  * @public
- * @deprecated See https://github.com/elastic/kibana/issues/149098
+ * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
  */
 export type SavedObject<T = unknown> = serverTypes.SavedObject<T>;

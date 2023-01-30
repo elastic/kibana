@@ -240,8 +240,8 @@ export class SavedSearchEmbeddable
           loading: false,
         });
 
-        this.searchProps!.rows = result;
-        this.searchProps!.totalHitCount = result.length;
+        this.searchProps!.rows = result.records;
+        this.searchProps!.totalHitCount = result.records.length;
         this.searchProps!.isLoading = false;
         this.searchProps!.isPlainRecord = true;
         this.searchProps!.showTimeCol = false;

@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import { v1 as uuidv1 } from 'uuid';
-import { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import { sloSchema, CreateSLOParams } from '@kbn/slo-schema';
 
 import { SO_SLO_TYPE } from '../../../saved_objects';

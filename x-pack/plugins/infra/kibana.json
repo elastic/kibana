@@ -12,15 +12,24 @@
     "dataViews",
     "visTypeTimeseries",
     "alerting",
+    "lens",
     "triggersActionsUi",
     "observability",
     "ruleRegistry",
     "unifiedSearch"
   ],
-  "optionalPlugins": ["ml", "home", "embeddable", "osquery"],
+  "optionalPlugins": [
+    "ml",
+    "home",
+    "embeddable",
+    "osquery"
+  ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "infra"],
+  "configPath": [
+    "xpack",
+    "infra"
+  ],
   "requiredBundles": [
     "unifiedSearch",
     "observability",
@@ -29,7 +38,7 @@
     "kibanaReact",
     "ml",
     "embeddable",
-    "controls"  
+    "controls"
   ],
   "owner": {
     "name": "Logs and Metrics UI",

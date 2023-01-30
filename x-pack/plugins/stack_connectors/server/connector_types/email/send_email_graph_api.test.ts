@@ -90,7 +90,6 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
-              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -181,7 +180,6 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
-              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -271,7 +269,6 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
-              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },

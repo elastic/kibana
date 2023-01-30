@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Switch, Route } from 'react-router-dom';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
@@ -112,9 +112,11 @@ export const mapToCard = ({
 };
 
 export const EPMHomePage: React.FC = () => {
+  const [prereleaseEnabled, setPrereleaseEnabled] = useState<boolean>(false);
+
   // loading packages to find installed ones
   const { data: allPackages, isLoading } = useGetPackages({
-    prerelease: true,
+    prerelease: prereleaseEnabled,
   });
 
   const installedPackages = useMemo(
@@ -141,7 +143,7 @@ export const EPMHomePage: React.FC = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
         <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
-          <AvailablePackages />
+          <AvailablePackages setPrereleaseEnabled={setPrereleaseEnabled} />
         </DefaultLayout>
       </Route>
     </Switch>

@@ -22,8 +22,8 @@ export function getFieldIconType<T extends FieldListItem = DataViewField>(
 ): string {
   const type = getCustomFieldType ? getCustomFieldType(field) : getFieldType<T>(field);
   const esType = field.esTypes?.[0] || null;
-  if (esType && ['_id', '_index'].includes(esType)) {
-    return type;
+  if (esType && ['_id', '_index'].includes(esType) && type === 'string') {
+    return 'keyword';
   }
   return type === 'string' && esType ? esType : type;
 }

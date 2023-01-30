@@ -51,6 +51,66 @@ describe('engines routes', () => {
     });
   });
 
+  describe('POST /internal/enterprise_search/engines', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/enterprise_search/engines',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/engines',
+      });
+    });
+
+    it('validates correctly with engine_name', () => {
+      const request = {
+        body: {
+          indices: ['search-unit-test'],
+          name: 'some-engine',
+        },
+      };
+
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without body', () => {
+      const request = { params: {} };
+
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without name', () => {
+      const request = {
+        body: {
+          indices: ['search-unit-test'],
+        },
+      };
+
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without indices', () => {
+      const request = {
+        body: {
+          name: 'some-engine',
+        },
+      };
+
+      mockRouter.shouldThrow(request);
+    });
+  });
+
   describe('GET /internal/enterprise_search/engines/{engine_name}', () => {
     let mockRouter: MockRouter;
 

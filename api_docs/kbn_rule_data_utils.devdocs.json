@@ -104,7 +104,7 @@
         "signature": [
           "(sortIds: ",
           "SortResults",
-          " | null | undefined) => any[] | null | undefined"
+          " | null | undefined) => (string | number)[] | null | undefined"
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1416,7 +1416,7 @@
         "label": "STATUS_VALUES",
         "description": [],
         "signature": [
-          "\"open\" | \"in-progress\" | \"closed\" | \"acknowledged\""
+          "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,

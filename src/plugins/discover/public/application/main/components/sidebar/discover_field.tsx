@@ -20,19 +20,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
-import { FieldButton, FieldIcon } from '@kbn/react-field';
+import { FieldButton } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
+  FieldIcon,
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
+  getFieldIconProps,
   wrapFieldNameOnDot,
 } from '@kbn/unified-field-list-plugin/public';
 import { DiscoverFieldStats } from './discover_field_stats';
-import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
-import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
@@ -59,10 +59,7 @@ const FieldInfoIcon: React.FC = memo(() => (
 ));
 
 const DiscoverFieldTypeIcon: React.FC<{ field: DataViewField }> = memo(({ field }) => {
-  const typeForIcon = getTypeForFieldIcon(field);
-  return (
-    <FieldIcon type={typeForIcon} label={getFieldTypeName(typeForIcon)} scripted={field.scripted} />
-  );
+  return <FieldIcon {...getFieldIconProps(field)} />;
 });
 
 const FieldName: React.FC<{ field: DataViewField; highlight?: string }> = memo(

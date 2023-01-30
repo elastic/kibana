@@ -8,12 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
 
+const internalReferenceIdMapping: Record<string, string> = { host: uuidv4(), user: uuidv4() };
+
 export const getRiskScoreDonutAttributes: GetLensAttributes = (
-  stackByField,
+  stackByField = 'host',
   extraOptions = { spaceId: 'default' }
 ) => {
   const layerId = uuidv4();
-  const internalReferenceId = uuidv4();
+  const internalReferenceId = internalReferenceIdMapping[stackByField];
   return {
     title: `${stackByField} risk donut`,
     description: '',

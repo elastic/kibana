@@ -70,6 +70,7 @@
     "@kbn/actions-plugin",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-saved-objects-server",
   ],
   "exclude": [
     "target/**/*",
