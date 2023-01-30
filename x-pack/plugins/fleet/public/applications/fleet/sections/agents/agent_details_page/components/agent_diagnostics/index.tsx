@@ -171,6 +171,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         }
       );
       notifications.toasts.addSuccess(successMessage);
+      loadData();
     } catch (error) {
       setIsSubmitting(false);
       notifications.toasts.addError(error, {
