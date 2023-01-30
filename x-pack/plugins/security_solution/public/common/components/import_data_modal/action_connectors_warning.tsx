@@ -22,7 +22,7 @@ const ActionConnectorWarningsComponent: FC<ActionConnectorWarningsComponentProps
 }) => {
   const { http } = useKibana().services;
 
-  if (!importedActionConnectorsCount) return null;
+  if (!importedActionConnectorsCount || !actionConnectorsWarnings.length) return null;
   const { actionPath } = actionConnectorsWarnings[0];
 
   return (

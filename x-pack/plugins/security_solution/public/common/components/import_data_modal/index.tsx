@@ -133,7 +133,7 @@ export const ImportDataModalComponent = ({
           addError,
           addSuccess,
         });
-        onImportComplete(!connectorsCount);
+        onImportComplete(!warnings?.length);
       } catch (error) {
         cleanupAndCloseModal();
         addError(error, { title: errorMessage(1) });

@@ -38,22 +38,23 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
   };
+  skipActionConnectorsValidations?: boolean;
 }
 
 export async function update<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { id, data }: UpdateOptions<Params>
+  { id, data, skipActionConnectorsValidations }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   return await retryIfConflicts(
     context.logger,
     `rulesClient.update('${id}')`,
-    async () => await updateWithOCC<Params>(context, { id, data })
+    async () => await updateWithOCC<Params>(context, { id, data, skipActionConnectorsValidations })
   );
 }
 
 async function updateWithOCC<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data }: UpdateOptions<Params>
+  { id, data, skipActionConnectorsValidations }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   let alertSavedObject: SavedObject<RawRule>;
 
@@ -99,7 +100,11 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
-  const updateResult = await updateAlert<Params>(context, { id, data }, alertSavedObject);
+  const updateResult = await updateAlert<Params>(
+    context,
+    { id, data, skipActionConnectorsValidations },
+    alertSavedObject
+  );
 
   await Promise.all([
     alertSavedObject.attributes.apiKey
@@ -138,7 +143,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data }: UpdateOptions<Params>,
+  { id, data, skipActionConnectorsValidations }: UpdateOptions<Params>,
   { attributes, version }: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
@@ -156,7 +161,7 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   // Validate
   const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
-  await validateActions(context, ruleType, data);
+  if (!skipActionConnectorsValidations) await validateActions(context, ruleType, data);
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);

@@ -141,6 +141,7 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_warnings: [],
         });
       });
+
       it('should not import rules with actions when user has "read" actions privileges', async () => {
         // create a new action
         const { body: hookAction } = await supertest
@@ -153,7 +154,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [
             {
               group: 'default',
-              id: hookAction.id,
+              id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
               action_type_id: hookAction.actionTypeId,
               params: {},
             },
@@ -232,14 +233,14 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [
             {
               group: 'default',
-              id: hookAction.id,
+              id: 'cabc78e0-9031-11ed-b076-53cc4d57axy1',
               action_type_id: hookAction.actionTypeId,
               params: {},
             },
           ],
         };
         const ruleWithConnector = {
-          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57axy1',
           type: 'action',
           updated_at: '2023-01-25T14:35:52.852Z',
           created_at: '2023-01-25T14:35:52.852Z',
@@ -810,8 +811,68 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         });
       });
+      it('should give single connector warning back if we have a single connector missing secret', async () => {
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf9',
+              action_type_id: '.webhook',
+              params: {},
+            },
+          ],
+        };
+        const ruleWithConnector = {
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf9',
+          type: 'action',
+          updated_at: '2023-01-25T14:35:52.852Z',
+          created_at: '2023-01-25T14:35:52.852Z',
+          version: 'WzUxNTksMV0=',
+          attributes: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            isMissingSecrets: true,
+            config: {},
+            secrets: {},
+          },
+          references: [],
+          migrationVersion: { action: '8.3.0' },
+          coreMigrationVersion: '8.7.0',
+        };
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach(
+            'file',
+            Buffer.from(toNdJsonString([simpleRule, ruleWithConnector])),
+            'rules.ndjson'
+          )
+          .expect(200);
 
-      it('should be able to import a rule with an action connector that exists and return warning if there are missing secrets', async () => {
+        expect(body).to.eql({
+          success: true,
+          success_count: 1,
+          rules_count: 1,
+          errors: [],
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 1,
+          action_connectors_warnings: [
+            {
+              actionPath: '/app/management/insightsAndAlerting/triggersActionsConnectors',
+              buttonLabel: 'Go to connectors',
+              message: '1 connector has sensitive information that require updates.',
+              type: 'action_required',
+            },
+          ],
+          action_connectors_errors: [],
+        });
+      });
+
+      it('should be able to import a rule with an action connector that exists', async () => {
         // create a new action
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
@@ -829,32 +890,11 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         };
-        const ruleWithConnector = {
-          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
-          type: 'action',
-          updated_at: '2023-01-25T14:35:52.852Z',
-          created_at: '2023-01-25T14:35:52.852Z',
-          version: 'WzUxNTksMV0=',
-          attributes: {
-            actionTypeId: '.webhook',
-            name: 'webhook',
-            isMissingSecrets: true,
-            config: {},
-            secrets: {},
-          },
-          references: [],
-          migrationVersion: { action: '8.3.0' },
-          coreMigrationVersion: '8.7.0',
-        };
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach(
-            'file',
-            Buffer.from(toNdJsonString([simpleRule, ruleWithConnector])),
-            'rules.ndjson'
-          )
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
           .expect(200);
         expect(body).to.eql({
           success: true,
@@ -865,20 +905,13 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_success: true,
           exceptions_success_count: 0,
           action_connectors_success: true,
-          action_connectors_success_count: 1,
+          action_connectors_success_count: 0,
           action_connectors_errors: [],
-          action_connectors_warnings: [
-            {
-              actionPath: '/app/management/insightsAndAlerting/triggersActionsConnectors',
-              buttonLabel: 'Go to connectors',
-              message: '1 connector has sensitive information that require updates.',
-              type: 'action_required',
-            },
-          ],
+          action_connectors_warnings: [],
         });
       });
 
-      it('should be able to import 2 rules with action connectors that exist', async () => {
+      it('should be able to import 2 rules with action connectors', async () => {
         // create a new action
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
@@ -891,7 +924,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [
             {
               group: 'default',
-              id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+              id: 'cabc78e0-9031-11ed-b076-53cc4d57abc6',
               action_type_id: hookAction.actionTypeId,
               params: {},
             },
@@ -911,7 +944,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const connector1 = {
-          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57abc6',
           type: 'action',
           updated_at: '2023-01-25T14:35:52.852Z',
           created_at: '2023-01-25T14:35:52.852Z',
@@ -960,7 +993,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body).to.eql({
           success: true,
-          success_count: 4,
+          success_count: 2,
           rules_count: 2,
           errors: [],
           exceptions_errors: [],
@@ -986,7 +1019,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [
             {
               group: 'default',
-              id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+              id: 'cabc78e0-9031-11ed-b076-53cc4d57aayo',
               action_type_id: hookAction.actionTypeId,
               params: {},
             },
@@ -999,14 +1032,14 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               group: 'default',
               id: 'cabc78e0-9031-11ed-b076-53cc4d57aa22', // <-- This does not exist
-              action_type_id: 'invalid type',
+              action_type_id: '.index',
               params: {},
             },
           ],
         };
 
         const connector = {
-          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aayo',
           type: 'action',
           updated_at: '2023-01-25T14:35:52.852Z',
           created_at: '2023-01-25T14:35:52.852Z',
@@ -1022,6 +1055,7 @@ export default ({ getService }: FtrProviderContext): void => {
           migrationVersion: { action: '8.3.0' },
           coreMigrationVersion: '8.7.0',
         };
+
         const rule1String = JSON.stringify(rule1);
         const rule2String = JSON.stringify(rule2);
         const connector2String = JSON.stringify(connector);
@@ -1043,7 +1077,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_id: 'rule-2',
               error: {
                 status_code: 404,
-                message: '1 connector is missing. Connector id missing is: 123',
+                message:
+                  '1 connector is missing. Connector id missing is: cabc78e0-9031-11ed-b076-53cc4d57aa22',
               },
             },
           ],
@@ -1056,7 +1091,8 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               error: {
                 status_code: 404,
-                message: '1 connector is missing. Connector id missing is: 123',
+                message:
+                  '1 connector is missing. Connector id missing is: cabc78e0-9031-11ed-b076-53cc4d57aa22',
               },
               rule_id: 'rule-2',
             },

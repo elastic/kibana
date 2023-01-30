@@ -140,6 +140,7 @@ export const importRules = async ({
                       ...parsedRule,
                       exceptions_list: [...exceptions],
                     },
+                    skipActionConnectorsValidations,
                   });
                   resolve({
                     rule_id: parsedRule.rule_id,
