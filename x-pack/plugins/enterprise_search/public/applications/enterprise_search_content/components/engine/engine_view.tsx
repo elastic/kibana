@@ -18,6 +18,7 @@ import { ENGINE_PATH, EngineViewTabs } from '../../routes';
 import { DeleteEngineModal } from '../engines/delete_engine_modal';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
+import { EngineAPI } from './engine_api/engine_api';
 import { EngineError } from './engine_error';
 import { EngineIndices } from './engine_indices';
 import { EngineViewHeaderActions } from './engine_view_header_actions';
@@ -66,6 +67,7 @@ export const EngineView: React.FC = () => {
       ) : null}
       <Switch>
         <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.INDICES}`} component={EngineIndices} />
+        <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.API}`} component={EngineAPI} />
         <Route // TODO: remove this route when all engine view routes are implemented, replace with a 404 route
           render={() => (
             <EnterpriseSearchEnginesPageTemplate
