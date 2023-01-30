@@ -30,7 +30,7 @@ export function OverviewErrors() {
   const { from, to } = useAbsoluteDate({ from: 'now-6h', to: 'now' });
 
   return (
-    <EuiPanel style={{ width: 500 }} hasShadow={false} hasBorder>
+    <EuiPanel hasShadow={false} hasBorder>
       <EuiTitle size="xs">
         <h3>{headingText}</h3>
       </EuiTitle>

@@ -10,8 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
@@ -22,7 +23,7 @@ export const nodesListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/trained_models/nodes',
+  path: createPath(ML_PAGES.TRAINED_MODELS_NODES),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   title: i18n.translate('xpack.ml.modelManagement.nodesOverview.docTitle', {
     defaultMessage: 'Nodes',
