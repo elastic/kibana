@@ -10,7 +10,7 @@ import { ActionDefinition, Trigger, openContextMenu } from '@kbn/ui-actions-brow
 import { uiActionsPluginMock } from '../mocks';
 import { waitFor } from '@testing-library/dom';
 
-jest.mock('../context_menu');
+jest.mock('@kbn/ui-actions-browser/src/context_menu');
 
 const executeFn = jest.fn();
 const openContextMenuSpy = openContextMenu as unknown as jest.SpyInstance;
