@@ -31,9 +31,9 @@ const rightControl = ({
 }) => {
   return (
     <>
+      <InspectButton showInspectButton getInspectQuery={getInspectQuery} />
       <LastUpdatedAt updatedAt={updatedAt} />
       {controls?.right}
-      <InspectButton showInspectButton getInspectQuery={getInspectQuery} />
     </>
   );
 };

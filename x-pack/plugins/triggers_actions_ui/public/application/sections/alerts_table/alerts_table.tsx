@@ -26,6 +26,7 @@ import {
 
 import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
+import { InspectButtonContainer } from './toolbar/components/inspect';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 
@@ -265,43 +266,45 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   );
 
   return (
-    <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
-      <Suspense fallback={null}>
-        {flyoutAlertIndex > -1 && (
-          <AlertsFlyout
-            alert={alerts[flyoutAlertIndex]}
-            alertsCount={alertsCount}
-            onClose={handleFlyoutClose}
-            alertsTableConfiguration={props.alertsTableConfiguration}
-            flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
-            onPaginate={onPaginateFlyout}
-            isLoading={isLoading}
-            id={props.id}
+    <InspectButtonContainer>
+      <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
+        <Suspense fallback={null}>
+          {flyoutAlertIndex > -1 && (
+            <AlertsFlyout
+              alert={alerts[flyoutAlertIndex]}
+              alertsCount={alertsCount}
+              onClose={handleFlyoutClose}
+              alertsTableConfiguration={props.alertsTableConfiguration}
+              flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
+              onPaginate={onPaginateFlyout}
+              isLoading={isLoading}
+              id={props.id}
+            />
+          )}
+        </Suspense>
+        {alertsCount > 0 && (
+          <EuiDataGrid
+            aria-label="Alerts table"
+            data-test-subj="alertsTable"
+            columns={props.columns}
+            columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
+            trailingControlColumns={props.trailingControlColumns}
+            leadingControlColumns={leadingControlColumns}
+            rowCount={alertsCount}
+            renderCellValue={handleRenderCellValue}
+            gridStyle={{ ...GridStyles, rowClasses }}
+            sorting={{ columns: sortingColumns, onSort }}
+            toolbarVisibility={toolbarVisibility}
+            pagination={{
+              ...pagination,
+              pageSizeOptions: props.pageSizeOptions,
+              onChangeItemsPerPage: onChangePageSize,
+              onChangePage: onChangePageIndex,
+            }}
           />
         )}
-      </Suspense>
-      {alertsCount > 0 && (
-        <EuiDataGrid
-          aria-label="Alerts table"
-          data-test-subj="alertsTable"
-          columns={props.columns}
-          columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
-          trailingControlColumns={props.trailingControlColumns}
-          leadingControlColumns={leadingControlColumns}
-          rowCount={alertsCount}
-          renderCellValue={handleRenderCellValue}
-          gridStyle={{ ...GridStyles, rowClasses }}
-          sorting={{ columns: sortingColumns, onSort }}
-          toolbarVisibility={toolbarVisibility}
-          pagination={{
-            ...pagination,
-            pageSizeOptions: props.pageSizeOptions,
-            onChangeItemsPerPage: onChangePageSize,
-            onChangePage: onChangePageIndex,
-          }}
-        />
-      )}
-    </section>
+      </section>
+    </InspectButtonContainer>
   );
 };
 

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 
 interface StyledDivProps {
@@ -23,8 +22,8 @@ const StyledDiv = euiStyled.div<StyledDivProps>`
     max-width: 100%;
   }
 
-  ${({ targetClassNames, theme }) =>
-    css`
+  ${({ targetClassNames, theme }) => {
+    return `
       ${targetClassNames.map((cn) => `.${cn}`).join(', ')} {
         pointer-events: none;
         opacity: 0;
@@ -35,7 +34,8 @@ const StyledDiv = euiStyled.div<StyledDivProps>`
         pointer-events: auto;
         opacity: 1;
       }
-    `}
+    `;
+  }}
 `;
 
 interface HoverVisibilityContainerProps {
