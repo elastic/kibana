@@ -223,6 +223,27 @@ describe('useLensAttributes', () => {
     expect(result?.current).toBeNull();
   });
 
+  it('should return null if extraOptions.breakDownField is an empty string', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: 'security-solution-default',
+      indicesExist: false,
+      selectedPatterns: ['auditbeat-*'],
+    });
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'kibana.alert.rule.name',
+          extraOptions: {
+            breakdownField: '',
+          },
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current).toBeNull();
+  });
+
   it('should return Lens attributes if adHocDataViews exist', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',

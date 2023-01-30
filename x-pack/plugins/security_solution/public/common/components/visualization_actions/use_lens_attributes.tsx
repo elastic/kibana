@@ -91,7 +91,10 @@ export const useLensAttributes = ({
   const lensAttrsWithInjectedData = useMemo(() => {
     if (
       lensAttributes == null &&
-      (getLensAttributes == null || stackByField == null || stackByField?.length === 0)
+      (getLensAttributes == null ||
+        stackByField == null ||
+        stackByField?.length === 0 ||
+        (extraOptions?.breakdownField != null && extraOptions?.breakdownField.length === 0))
     ) {
       return null;
     }
@@ -120,6 +123,7 @@ export const useLensAttributes = ({
     applyGlobalQueriesAndFilters,
     attrs,
     dataViewId,
+    extraOptions?.breakdownField,
     filters,
     getLensAttributes,
     hasAdHocDataViews,
