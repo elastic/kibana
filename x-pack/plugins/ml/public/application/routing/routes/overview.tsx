@@ -12,13 +12,14 @@ import { Redirect } from 'react-router-dom';
 
 import { useTimefilter } from '@kbn/ml-date-picker';
 
+import { ML_PAGES } from '../../../locator';
 import type { NavigateToPath } from '../../contexts/kibana';
 import { checkFullLicense } from '../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 
-import { MlRoute, PageLoader, PageProps } from '../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 
@@ -29,7 +30,7 @@ export const overviewRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'overview',
-  path: '/overview',
+  path: createPath(ML_PAGES.OVERVIEW),
   title: i18n.translate('xpack.ml.overview.overviewLabel', {
     defaultMessage: 'Overview',
   }),
@@ -75,5 +76,5 @@ export const appRootRouteFactory = (navigateToPath: NavigateToPath, basePath: st
 });
 
 const Page: FC = () => {
-  return <Redirect to="/overview" />;
+  return <Redirect to={createPath(ML_PAGES.OVERVIEW)} />;
 };

@@ -11,9 +11,14 @@ import React, { useState } from 'react';
 interface PopoverTooltipProps {
   ariaLabel?: string;
   children: React.ReactNode;
+  iconType?: string;
 }
 
-export function PopoverTooltip({ ariaLabel, children }: PopoverTooltipProps) {
+export function PopoverTooltip({
+  ariaLabel,
+  iconType,
+  children,
+}: PopoverTooltipProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
@@ -30,7 +35,7 @@ export function PopoverTooltip({ ariaLabel, children }: PopoverTooltipProps) {
           }}
           size="xs"
           color="primary"
-          iconType="questionInCircle"
+          iconType={iconType ?? 'questionInCircle'}
           style={{ height: 'auto' }}
         />
       }
