@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning basic license - permissions group 2', function () {
+  describe('machine learning basic license - permissions - group 2', function () {
     this.tags(['skipFirefox', 'ml']);
 
     before(async () => {

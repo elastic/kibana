@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('transform', function () {
+  describe('transform - permissions', function () {
     this.tags('transform');
 
     before(async () => {
