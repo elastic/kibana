@@ -17,7 +17,15 @@ export interface ConnectorScheduling {
   interval: string;
 }
 
-export type ConnectorCustomScheduling = Record<string, KeyValuePair | null>;
+export interface CustomScheduling {
+  configuration_overrides: Record<string, unknown>;
+  enabled: boolean;
+  interval: string;
+  last_synced: string | null;
+  name: string;
+}
+
+export type ConnectorCustomScheduling = Record<string, CustomScheduling | null>;
 
 export enum ConnectorStatus {
   CREATED = 'created',
