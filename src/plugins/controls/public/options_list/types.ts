@@ -24,13 +24,14 @@ interface SearchString {
 
 // Component state is only used by public components.
 export interface OptionsListComponentState {
+  availableOptions?: OptionsListSuggestions;
+  allowExpensiveQueries: boolean;
+  invalidSelections?: string[];
+  searchString: SearchString;
+  validSelections?: string[];
+  totalCardinality?: number;
   popoverOpen: boolean;
   field?: FieldSpec;
-  totalCardinality?: number;
-  availableOptions?: OptionsListSuggestions;
-  invalidSelections?: string[];
-  validSelections?: string[];
-  searchString: SearchString;
 }
 
 // public only - redux embeddable state type

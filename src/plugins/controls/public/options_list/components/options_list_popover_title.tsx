@@ -15,11 +15,7 @@ import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public'
 import { OptionsListReduxState } from '../types';
 import { optionsListReducers } from '../options_list_reducers';
 
-export const OptionsListPopoverTitle = ({
-  allowExpensiveQueries,
-}: {
-  allowExpensiveQueries: boolean;
-}) => {
+export const OptionsListPopoverTitle = () => {
   // Redux embeddable container Context
   const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
     OptionsListReduxState,
@@ -27,6 +23,7 @@ export const OptionsListPopoverTitle = ({
   >();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
+  const allowExpensiveQueries = select((state) => state.componentState.allowExpensiveQueries);
   const title = select((state) => state.explicitInput.title);
 
   return (

@@ -20,6 +20,7 @@ import {
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
   popoverOpen: false,
+  allowExpensiveQueries: true,
   searchString: { value: '', valid: true },
 });
 
@@ -41,6 +42,12 @@ export const optionsListReducers = {
     ) {
       state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
     }
+  },
+  setAllowExpensiveQueries: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<boolean>
+  ) => {
+    state.componentState.allowExpensiveQueries = action.payload;
   },
   setPopoverOpen: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.componentState.popoverOpen = action.payload;

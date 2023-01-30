@@ -25,14 +25,12 @@ import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
-  allowExpensiveQueries: boolean;
   updateSearchString: (newSearchString: string) => void;
 }
 
 export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   updateSearchString,
-  allowExpensiveQueries,
 }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
@@ -41,6 +39,7 @@ export const OptionsListPopoverActionBar = ({
   >();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
+  const allowExpensiveQueries = select((state) => state.componentState.allowExpensiveQueries);
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
   const searchString = select((state) => state.componentState.searchString);

@@ -18,7 +18,6 @@ import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popo
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
 import { mockOptionsListReduxEmbeddableTools } from '../../../common/mocks';
 import { ControlOutput, OptionsListEmbeddableInput } from '../..';
-import { pluginServices } from '../../services';
 
 describe('Options list popover', () => {
   const defaultProps = {
@@ -332,12 +331,11 @@ describe('Options list popover', () => {
   });
 
   test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
-    pluginServices.getServices().optionsList.getAllowExpensiveQueries = jest
-      .fn()
-      .mockReturnValue(false);
-
     const popover = await mountComponent({
-      componentState: { field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec },
+      componentState: {
+        field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec,
+        allowExpensiveQueries: false,
+      },
     });
     const warning = findTestSubject(popover, 'optionsList-allow-expensive-queries-warning');
     expect(warning.getDOMNode()).toBeInstanceOf(HTMLDivElement);

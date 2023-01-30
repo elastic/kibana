@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
@@ -36,7 +36,7 @@ export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start() {
     return {};
   }
 

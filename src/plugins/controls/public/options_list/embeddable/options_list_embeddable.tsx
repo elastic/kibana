@@ -74,9 +74,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private dataViewsService: ControlsDataViewsService;
   private optionsListService: ControlsOptionsListService;
 
-  // TODO: MAKE THIS OPTIONAL SINCE UNDEFINED SHOULD BE THE SAME AS TRUE
-  private allowExpensiveQueries: boolean = false; // default to false, since wrongly assuming true will break stuff
-
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
   private loadMoreSubject: Subject<number> = new Subject<number>();
@@ -120,7 +117,13 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
     if (!initialSelectedOptions) this.setInitializationFinished();
-    this.allowExpensiveQueries = await this.optionsListService.getAllowExpensiveQueries();
+
+    const {
+      actions: { setAllowExpensiveQueries },
+      dispatch,
+    } = this.reduxEmbeddableTools;
+    dispatch(setAllowExpensiveQueries(await this.optionsListService.getAllowExpensiveQueries()));
+
     this.runOptionsListQuery().then(async () => {
       if (initialSelectedOptions) {
         await this.buildFilter();
@@ -284,7 +287,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     const {
-      componentState: { searchString },
+      componentState: { searchString, allowExpensiveQueries },
       explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
     } = getState();
     dispatch(setLoading(true));
@@ -319,8 +322,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           timeRange,
           runPastTimeout,
           selectedOptions,
+          allowExpensiveQueries,
           searchString: searchString.value,
-          allowExpensiveQueries: this.allowExpensiveQueries,
         },
         this.abortController.signal
       );

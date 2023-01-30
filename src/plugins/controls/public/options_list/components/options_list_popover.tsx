@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { isEmpty } from 'lodash';
 
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { pluginServices } from '../../services';
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
@@ -31,8 +30,8 @@ export interface OptionsListPopoverProps {
 export const OptionsListPopover = ({
   width,
   isLoading,
-  loadMoreSuggestions,
   updateSearchString,
+  loadMoreSuggestions,
 }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
@@ -40,12 +39,8 @@ export const OptionsListPopover = ({
     typeof optionsListReducers
   >();
 
-  // Controls Services Context
-  const {
-    optionsList: { getAllowExpensiveQueries },
-  } = pluginServices.getServices();
-
   // Select current state from Redux using multiple selectors to avoid rerenders.
+  const allowExpensiveQueries = select((state) => state.componentState.allowExpensiveQueries);
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const availableOptions = select((state) => state.componentState.availableOptions);
   const field = select((state) => state.componentState.field);
@@ -56,15 +51,6 @@ export const OptionsListPopover = ({
   const id = select((state) => state.explicitInput.id);
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
-  const [allowExpensiveQueries, setAllowExpensiveQueries] = useState(false);
-
-  useEffect(() => {
-    const waitForAllowExpensiveQueries = async () => {
-      const allow = await getAllowExpensiveQueries();
-      setAllowExpensiveQueries(allow);
-    };
-    waitForAllowExpensiveQueries();
-  }, [getAllowExpensiveQueries]);
 
   return (
     <>
@@ -74,13 +60,12 @@ export const OptionsListPopover = ({
         data-test-subj={`optionsList-control-popover`}
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
-        <OptionsListPopoverTitle allowExpensiveQueries={allowExpensiveQueries} />
+        <OptionsListPopoverTitle />
 
         {field?.type !== 'boolean' && !hideActionBar && (
           <OptionsListPopoverActionBar
             showOnlySelected={showOnlySelected}
             updateSearchString={updateSearchString}
-            allowExpensiveQueries={allowExpensiveQueries}
           />
         )}
         <div
