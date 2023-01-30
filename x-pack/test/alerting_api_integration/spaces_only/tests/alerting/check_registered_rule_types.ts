@@ -22,9 +22,7 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         .expect(200)
         .then((response) => response.body);
 
-      expect(
-        registeredRuleTypes.filter((ruleType: string) => !ruleType.startsWith('test.'))
-      ).to.eql([
+      const ruleTypes = [
         'example.always-firing',
         'transform_health',
         '.index-threshold',
@@ -32,6 +30,7 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         '.es-query',
         'xpack.ml.anomaly_detection_alert',
         'xpack.ml.anomaly_detection_jobs_health',
+        'xpack.synthetics.alerts.monitorStatus',
         'xpack.uptime.alerts.monitorStatus',
         'xpack.uptime.alerts.tlsCertificate',
         'xpack.uptime.alerts.durationAnomaly',
@@ -66,7 +65,11 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         'apm.anomaly',
         'apm.error_rate',
         'apm.transaction_error_rate',
-      ]);
+      ];
+
+      expect(
+        registeredRuleTypes.sort().filter((ruleType: string) => !ruleType.startsWith('test.'))
+      ).to.eql(ruleTypes.sort());
     });
   });
 }

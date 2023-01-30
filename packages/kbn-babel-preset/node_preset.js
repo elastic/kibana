@@ -31,7 +31,7 @@ module.exports = (_, options = {}) => {
           // Because of that we should use for that value the same version we install
           // in the package.json in order to have the same polyfills between the environment
           // and the tests
-          corejs: '3.26.0',
+          corejs: '3.27.2',
           bugfixes: true,
 
           ...(options['@babel/preset-env'] || {}),

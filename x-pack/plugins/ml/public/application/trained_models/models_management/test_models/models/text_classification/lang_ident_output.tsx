@@ -8,23 +8,41 @@
 import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import type { LangIdentInference } from './lang_ident_inference';
 import { getLanguage } from './lang_codes';
-import { getTextClassificationOutputComponent } from './text_classification_output';
+import { PredictionProbabilityList } from './text_classification_output';
+import { FormattedTextClassificationResponse } from './common';
 
 export const getLangIdentOutputComponent = (inferrer: LangIdentInference) => (
   <LangIdentOutput inferrer={inferrer} />
 );
 
 const LangIdentOutput: FC<{ inferrer: LangIdentInference }> = ({ inferrer }) => {
-  const result = useObservable(inferrer.inferenceResult$);
-  if (!result || result.response.length === 0) {
+  const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
+  if (!result) {
     return null;
   }
 
-  const lang = getLanguage(result.response[0].value);
+  return (
+    <>
+      {result.map(({ response, inputText }) => (
+        <>
+          <LanguageIdent response={response} inputText={inputText} />
+          <EuiHorizontalRule />
+        </>
+      ))}
+    </>
+  );
+};
+
+const LanguageIdent: FC<{
+  response: FormattedTextClassificationResponse;
+  inputText: string;
+}> = ({ response, inputText }) => {
+  const langCode = response[0].value;
+  const lang = getLanguage(langCode);
 
   const title =
     lang !== 'unknown'
@@ -33,18 +51,22 @@ const LangIdentOutput: FC<{ inferrer: LangIdentInference }> = ({ inferrer }) => 
           values: { lang },
         })
       : i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.output.titleUnknown', {
-          defaultMessage: 'Language code unknown: {code}',
-          values: { code: result.response[0].value },
+          defaultMessage: 'Language code unknown: {langCode}',
+          values: { langCode },
         });
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h4>{title}</h4>
+      <EuiText size="s" data-test-subj={'mlTestModelLangIdentInputText'}>
+        {inputText}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiTitle size="xxs">
+        <h4 data-test-subj={'mlTestModelLangIdentTitle'}>{title}</h4>
       </EuiTitle>
 
       <EuiSpacer />
-      {getTextClassificationOutputComponent(inferrer)}
+      <PredictionProbabilityList response={response} />
     </>
   );
 };

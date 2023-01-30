@@ -7,12 +7,12 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { defaultRowRenderers } from '../../../../../../timelines/components/timeline/body/renderers';
 import { getRowRenderer } from '../../../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { TimelineId } from '../../../../../../../common/types';
 import { SummaryPanel } from '../wrappers';
 import { ALERT_REASON_PANEL_TITLE } from '../translation';
-import type { Ecs } from '../../../../../../../common/ecs';
 
 export interface AlertRendererPanelProps {
   dataAsNestedObject: Ecs | null;
@@ -20,6 +20,7 @@ export interface AlertRendererPanelProps {
 
 const RendererContainer = styled.div`
   overflow-x: auto;
+  margin-left: -24px;
 
   & .euiFlexGroup {
     justify-content: flex-start;

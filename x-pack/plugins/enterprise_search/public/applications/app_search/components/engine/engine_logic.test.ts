@@ -57,6 +57,7 @@ describe('EngineLogic', () => {
     apiTokens: [],
     apiKey: 'some-key',
     adaptive_relevance_suggestions_active: true,
+    incompleteFields: [],
   };
 
   const DEFAULT_VALUES = {
@@ -74,6 +75,7 @@ describe('EngineLogic', () => {
     engineNotFound: false,
     searchKey: '',
     intervalId: null,
+    hasIncompleteFields: false,
   };
 
   const DEFAULT_VALUES_WITH_ENGINE = {
@@ -255,7 +257,7 @@ describe('EngineLogic', () => {
     });
 
     describe('pollEmptyEngine', () => {
-      beforeEach(() => jest.useFakeTimers('legacy'));
+      beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
       afterEach(() => jest.clearAllTimers());
       afterAll(() => jest.useRealTimers());
 

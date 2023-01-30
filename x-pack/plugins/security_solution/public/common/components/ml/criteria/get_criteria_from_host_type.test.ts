@@ -6,7 +6,7 @@
  */
 
 import { getCriteriaFromHostType } from './get_criteria_from_host_type';
-import { HostsType } from '../../../../hosts/store/model';
+import { HostsType } from '../../../../explore/hosts/store/model';
 
 describe('get_criteria_from_host_type', () => {
   test('returns host names from criteria if the host type is details', () => {

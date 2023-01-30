@@ -80,7 +80,7 @@ describe('AlertingEventLogger', () => {
   let alertingEventLogger: AlertingEventLogger;
 
   beforeAll(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(mockNow));
   });
 

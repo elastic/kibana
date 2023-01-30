@@ -58,6 +58,7 @@ export const LogCategorizationPage: FC = () => {
             'uiSettings',
             'unifiedSearch',
             'theme',
+            'lens',
           ])}
         />
       )}

@@ -20,14 +20,21 @@ export const setOverviewPageStateAction = createAction<Partial<MonitorOverviewPa
 );
 
 export const setFlyoutConfig = createAction<MonitorOverviewFlyoutConfig>('setFlyoutConfig');
+export const toggleErrorPopoverOpen = createAction<string | null>('setErrorPopoverOpen');
 
 export const quietFetchOverviewAction = createAsyncAction<
   MonitorOverviewPageState,
   MonitorOverviewResult
 >('quietFetchOverviewAction');
 
-export const fetchOverviewStatusAction = createAsyncAction<undefined, OverviewStatus>(
-  'fetchOverviewStatusAction'
-);
+export const fetchOverviewStatusAction = createAsyncAction<
+  MonitorOverviewPageState,
+  OverviewStatus
+>('fetchOverviewStatusAction');
+
+export const quietFetchOverviewStatusAction = createAsyncAction<
+  MonitorOverviewPageState,
+  OverviewStatus
+>('quietFetchOverviewStatusAction');
 
 export const clearOverviewStatusErrorAction = createAction<void>('clearOverviewStatusErrorAction');

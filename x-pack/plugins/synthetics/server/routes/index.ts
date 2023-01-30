@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { createJourneyRoute } from './pings/journeys';
+import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
+import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
+import { editSyntheticsParamsRoute } from './settings/edit_param';
+import { getSyntheticsParamsRoute } from './settings/params';
+import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
@@ -35,6 +41,9 @@ import {
   SyntheticsStreamingRouteFactory,
 } from '../legacy_uptime/routes';
 import { getHasZipUrlMonitorRoute } from './fleet/get_has_zip_url_monitors';
+import { addSyntheticsParamsRoute } from './settings/add_param';
+import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
+import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
@@ -59,6 +68,15 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   syntheticsGetPingStatusesRoute,
   getHasZipUrlMonitorRoute,
   createGetCurrentStatusRoute,
+  getIndexSizesRoute,
+  getSyntheticsParamsRoute,
+  editSyntheticsParamsRoute,
+  addSyntheticsParamsRoute,
+  syncParamsSyntheticsParamsRoute,
+  enableDefaultAlertingRoute,
+  getDefaultAlertingRoute,
+  updateDefaultAlertingRoute,
+  createJourneyRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [

@@ -170,12 +170,15 @@ export function MachineLearningCustomUrlsProvider({
 
     async assertDiscoverCustomUrlAction(expectedHitCountFormatted: string) {
       await PageObjects.discover.waitForDiscoverAppOnScreen();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
       // Make sure all existing popovers are closed
       await browser.pressKeys(browser.keys.ESCAPE);
 
       // During cloud tests, the small browser width might cause hit count to be invisible
       // so temporarily collapsing the sidebar ensures the count shows
       await PageObjects.discover.closeSidebar();
+
       await retry.tryForTime(10 * 1000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         expect(hitCount).to.eql(

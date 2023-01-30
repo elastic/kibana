@@ -6,13 +6,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { TASK_METRICS_CHANNEL } from '../constants';
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryConfiguration } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import { artifactService } from '../artifact';
 import { telemetryConfiguration } from '../configuration';
-import { tlog } from '../helpers';
+import { createTaskMetric, tlog } from '../helpers';
 
 export function createTelemetryConfigurationTaskConfig() {
   return {
@@ -28,11 +29,14 @@ export function createTelemetryConfigurationTaskConfig() {
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      const startTime = Date.now();
+      const taskName = 'Security Solution Telemetry Configuration Task';
       try {
         const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
         const configArtifact = (await artifactService.getArtifact(
           artifactName
         )) as unknown as TelemetryConfiguration;
+        tlog(logger, `New telemetry configuration artifact: ${JSON.stringify(configArtifact)}`);
         telemetryConfiguration.max_detection_alerts_batch =
           configArtifact.max_detection_alerts_batch;
         telemetryConfiguration.telemetry_max_buffer_size = configArtifact.telemetry_max_buffer_size;
@@ -42,10 +46,16 @@ export function createTelemetryConfigurationTaskConfig() {
           configArtifact.max_endpoint_telemetry_batch;
         telemetryConfiguration.max_security_list_telemetry_batch =
           configArtifact.max_security_list_telemetry_batch;
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime),
+        ]);
         return 0;
       } catch (err) {
         tlog(logger, `Failed to set telemetry configuration due to ${err.message}`);
         telemetryConfiguration.resetAllToDefault();
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, false, startTime, err.message),
+        ]);
         return 0;
       }
     },

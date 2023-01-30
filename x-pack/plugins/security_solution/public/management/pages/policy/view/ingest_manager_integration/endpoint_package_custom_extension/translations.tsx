@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 export const TRUSTED_APPS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
     i18n.translate(
-      'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummarySummary.error',
+      'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummary.error',
       {
         defaultMessage: 'There was an error trying to fetch trusted applications stats: "{error}"',
         values: { error },
@@ -29,7 +29,7 @@ export const TRUSTED_APPS_LABELS = {
 export const EVENT_FILTERS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
     i18n.translate(
-      'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummarySummary.error',
+      'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummary.error',
       {
         defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
         values: { error },
@@ -46,7 +46,7 @@ export const EVENT_FILTERS_LABELS = {
 export const HOST_ISOLATION_EXCEPTIONS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
     i18n.translate(
-      'xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsSummarySummary.error',
+      'xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsSummary.error',
       {
         defaultMessage:
           'There was an error trying to fetch host isolation exceptions stats: "{error}"',
@@ -63,13 +63,10 @@ export const HOST_ISOLATION_EXCEPTIONS_LABELS = {
 
 export const BLOCKLISTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
-    i18n.translate(
-      'xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsSummarySummary.error',
-      {
-        defaultMessage: 'There was an error trying to fetch blocklist stats: "{error}"',
-        values: { error },
-      }
-    ),
+    i18n.translate('xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsSummary.error', {
+      defaultMessage: 'There was an error trying to fetch blocklist stats: "{error}"',
+      values: { error },
+    }),
   cardTitle: (
     <FormattedMessage
       id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"

@@ -19,6 +19,8 @@ export interface StackAlertsPublicSetupDeps {
 }
 
 export class StackAlertsPublicPlugin implements Plugin<Setup, Start, StackAlertsPublicSetupDeps> {
+  constructor() {}
+
   public setup(core: CoreSetup, { triggersActionsUi, alerting }: StackAlertsPublicSetupDeps) {
     registerRuleTypes({
       ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,

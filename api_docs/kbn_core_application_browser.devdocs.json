@@ -1200,12 +1200,10 @@
             "parentPluginId": "@kbn/core-application-browser",
             "id": "def-common.AppMountParameters.onAppLeave",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "onAppLeave",
             "description": [
-              "\nA function that can be used to register a handler that will be called\nwhen the user is leaving the current application, allowing to\nprompt a confirmation message before actually changing the page.\n\nThis will be called either when the user goes to another application, or when\ntrying to close the tab or manually changing the url.\n"
+              "\nA function that can be used to register a handler that will be called\nwhen the user is leaving the current application, allowing to\nprompt a confirmation message before actually changing the page.\n\nThis will be called either when the user goes to another application, or when\ntrying to close the tab or manually changing the url.\n\n"
             ],
             "signature": [
               "(handler: ",
@@ -1219,87 +1217,8 @@
               ") => void"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
+            "deprecated": false,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core-application-browser-internal",
-                "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
-              },
-              {
-                "plugin": "@kbn/core-application-browser-mocks",
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/components/visualize_top_nav.tsx"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/components/visualize_editor_common.tsx"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/app.tsx"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/types.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/plugin.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/render_app.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/routes/map_page/map_page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/app.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/app/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/plugin.tsx"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
-              },
-              {
-                "plugin": "core",
-                "path": "src/core/public/mocks.ts"
-              }
-            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -1924,9 +1843,7 @@
         "parentPluginId": "@kbn/core-application-browser",
         "id": "def-common.AppLeaveHandler",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": [],
         "label": "AppLeaveHandler",
         "description": [
           "\nA handler that will be executed before leaving the application, either when\ngoing to another application or when closing the browser tab or manually changing\nthe url.\nShould return `confirm` to prompt a message to the user before leaving the page, or `default`\nto keep the default behavior (doing nothing).\n\nSee {@link AppMountParameters} for detailed usage examples.\n"
@@ -1950,95 +1867,8 @@
           }
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-        "deprecated": true,
-        "removeBy": "8.8.0",
+        "deprecated": false,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/ui/app_router.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/ui/app_router.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/application_leave.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/application_leave.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/application_service.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/application_service.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/application_service.tsx"
-          },
-          {
-            "plugin": "core",
-            "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/routes.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/routes.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/hooks/timeline/use_timeline_save_prompt.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/hooks/timeline/use_timeline_save_prompt.ts"
-          }
-        ],
         "returnComment": [],
         "children": [
           {
@@ -2184,7 +2014,7 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; tooltip?: string | undefined; searchable?: boolean | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2200,7 +2030,7 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
+          " | undefined; defaultPath?: string | undefined; }"
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,

@@ -50,7 +50,7 @@ const sessionId = 'abcd';
 
 describe('Filtering and showing warnings', () => {
   const notifications = notificationServiceMock.createStartContract();
-  jest.useFakeTimers('modern');
+  jest.useFakeTimers();
 
   describe('handleWarnings', () => {
     const request = { body: {} };

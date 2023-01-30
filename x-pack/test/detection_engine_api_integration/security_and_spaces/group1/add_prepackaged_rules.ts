@@ -21,6 +21,8 @@ import {
   installPrePackagedRules,
   waitFor,
 } from '../../utils';
+import { createPrebuiltRuleAssetSavedObjects } from '../../utils/create_prebuilt_rule_saved_objects';
+import { deleteAllPrebuiltRules } from '../../utils/delete_all_prebuilt_rules';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -32,12 +34,14 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('creating prepackaged rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
+        await createPrebuiltRuleAssetSavedObjects(es);
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
         await deleteAllAlerts(supertest, log);
         await deleteAllTimelines(es);
+        await deleteAllPrebuiltRules(es);
       });
 
       it('should create the prepackaged rules and return a count greater than zero, rules_updated to be zero, and contain the correct keys', async () => {
@@ -69,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should be possible to call the API twice and the second time the number of rules installed should be zero as well as timeline', async () => {
-        await installPrePackagedRules(supertest, log);
+        await installPrePackagedRules(supertest, es, log);
 
         // NOTE: I call the GET call until eventually it becomes consistent and that the number of rules to install are zero.
         // This is to reduce flakiness where it can for a short period of time try to install the same rule twice.

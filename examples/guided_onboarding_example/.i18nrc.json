@@ -3,5 +3,5 @@
   "paths": {
     "guidedOnboardingExample": "."
   },
-  "translations": ["translations/ja-JP.json"]
+  "translations": []
 }

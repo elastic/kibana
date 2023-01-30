@@ -26,9 +26,13 @@ import {
   INDICATORS_TABLE,
   INDICATORS_TABLE_FEED_NAME_COLUMN_HEADER,
   INDICATORS_TABLE_FIRST_SEEN_COLUMN_HEADER,
+  INDICATORS_TABLE_INDICATOR_NAME_CELL,
   INDICATORS_TABLE_INDICATOR_NAME_COLUMN_HEADER,
+  INDICATORS_TABLE_INDICATOR_TYPE_CELL,
   INDICATORS_TABLE_INDICATOR_TYPE_COLUMN_HEADER,
+  INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON,
   INDICATORS_TABLE_LAST_SEEN_COLUMN_HEADER,
+  INDICATORS_TABLE_ROW_CELL,
   INSPECTOR_BUTTON,
   INSPECTOR_PANEL,
   LEADING_BREADCRUMB,
@@ -36,26 +40,111 @@ import {
   TABLE_CONTROLS,
   TIME_RANGE_PICKER,
   TOGGLE_FLYOUT_BUTTON,
+  REFRESH_BUTTON,
 } from '../screens/indicators';
 import { login } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { selectRange } from '../tasks/select_range';
-
-before(() => {
-  login();
-});
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
 const URL_WITH_CONTRADICTORY_FILTERS =
   '/app/security/threat_intelligence/indicators?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:file),type:phrase),query:(match_phrase:(threat.indicator.type:file))),(%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:url),type:phrase),query:(match_phrase:(threat.indicator.type:url)))),timeRange:(from:now/d,to:now/d))';
 
+describe('Invalid Indicators', () => {
+  before(() => {
+    login();
+  });
+
+  describe('verify the grid loads even with missing fields', () => {
+    before(() => {
+      esArchiverLoad('threat_intelligence/invalid_indicators_data');
+    });
+
+    beforeEach(() => {
+      cy.visit(THREAT_INTELLIGENCE);
+      selectRange();
+    });
+
+    after(() => {
+      esArchiverUnload('threat_intelligence/invalid_indicators_data');
+    });
+
+    it('should display data grid despite the missing fields', () => {
+      cy.get(INDICATORS_TABLE).should('exist');
+
+      // there are 19 documents in the x-pack/test/threat_intelligence_cypress/es_archives/threat_intelligence/invalid_indicators_data/data.json
+      const documentsNumber = 22;
+      cy.get(INDICATORS_TABLE_ROW_CELL).should('have.length.gte', documentsNumber);
+
+      // the last 3 documents have no hash so the investigate in timeline button isn't rendered
+      cy.get(INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON).should(
+        'have.length',
+        documentsNumber - 4
+      );
+
+      // we should have 21 documents plus the header
+      cy.get(INDICATORS_TABLE_INDICATOR_NAME_CELL).should('have.length', documentsNumber + 1);
+
+      // this entry has no hash to we show - in the Indicator Name column
+      cy.get(INDICATORS_TABLE_INDICATOR_NAME_CELL)
+        .eq(documentsNumber - 3)
+        .should('contain.text', '-');
+
+      // this entry is missing the file key entirely
+      cy.get(INDICATORS_TABLE_INDICATOR_NAME_CELL)
+        .eq(documentsNumber - 2)
+        .should('contain.text', '-');
+
+      // this entry is missing the type field
+      cy.get(INDICATORS_TABLE_INDICATOR_NAME_CELL)
+        .eq(documentsNumber - 1)
+        .should('contain.text', '-');
+      cy.get(INDICATORS_TABLE_INDICATOR_TYPE_CELL)
+        .eq(documentsNumber - 1)
+        .should('contain.text', '-');
+
+      // this entry is missing the type field
+      cy.get(INDICATORS_TABLE_INDICATOR_NAME_CELL).last().should('contain.text', '-');
+      cy.get(INDICATORS_TABLE_INDICATOR_TYPE_CELL).last().should('contain.text', '-');
+    });
+  });
+
+  describe('verify the grid loads even with missing mappings and missing fields', () => {
+    before(() => {
+      esArchiverLoad('threat_intelligence/missing_mappings_indicators_data');
+    });
+
+    beforeEach(() => {
+      cy.visit(THREAT_INTELLIGENCE);
+      selectRange();
+    });
+
+    after(() => {
+      esArchiverUnload('threat_intelligence/missing_mappings_indicators_data');
+    });
+
+    it('should display data grid despite the missing mappings and missing fields', () => {
+      cy.get(INDICATORS_TABLE).should('exist');
+
+      // there are 2 documents in the x-pack/test/threat_intelligence_cypress/es_archives/threat_intelligence/missing_mappings_indicators_data/data.json
+      const documentsNumber = 2;
+      cy.get(INDICATORS_TABLE_ROW_CELL).should('have.length.gte', documentsNumber);
+
+      // we should have 2 documents plus the header
+      cy.get(INDICATORS_TABLE_INDICATOR_NAME_CELL).should('have.length', documentsNumber + 1);
+    });
+  });
+});
+
 describe('Indicators', () => {
   before(() => {
-    esArchiverLoad('threat_intelligence');
+    esArchiverLoad('threat_intelligence/indicators_data');
+    login();
   });
+
   after(() => {
-    esArchiverUnload('threat_intelligence');
+    esArchiverUnload('threat_intelligence/indicators_data');
   });
 
   describe('Indicators page loading', () => {
@@ -68,7 +157,7 @@ describe('Indicators', () => {
   });
 
   describe('Indicators page basics', () => {
-    before(() => {
+    beforeEach(() => {
       cy.visit(THREAT_INTELLIGENCE);
 
       selectRange();
@@ -119,7 +208,7 @@ describe('Indicators', () => {
   });
 
   describe('Indicator page search', () => {
-    before(() => {
+    beforeEach(() => {
       cy.visit(THREAT_INTELLIGENCE);
 
       selectRange();
@@ -150,6 +239,18 @@ describe('Indicators', () => {
       cy.get(QUERY_INPUT).should('exist').focus().clear().type('{enter}');
 
       cy.get(TABLE_CONTROLS).should('contain.text', 'Showing 1-25 of');
+    });
+
+    it('should reload the data when refresh button is pressed', () => {
+      cy.intercept(/bsearch/).as('search');
+
+      cy.get(REFRESH_BUTTON).should('exist').click();
+
+      cy.wait('@search');
+
+      cy.get(REFRESH_BUTTON).should('exist').click();
+
+      cy.wait('@search');
     });
 
     describe('No items match search criteria', () => {

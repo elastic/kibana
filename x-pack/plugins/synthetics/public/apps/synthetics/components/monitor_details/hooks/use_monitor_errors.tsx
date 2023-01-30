@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useEsSearch, useTimeZone } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
-import { Ping } from '../../../../../../common/runtime_types';
+import { PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -23,6 +23,8 @@ export function useMonitorErrors(monitorIdArg?: string) {
   const { monitorId } = useParams<{ monitorId: string }>();
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+
+  const timeZone = useTimeZone();
 
   const { data, loading } = useEsSearch(
     {
@@ -39,6 +41,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
                   '@timestamp': {
                     gte: dateRangeStart,
                     lte: dateRangeEnd,
+                    time_zone: timeZone,
                   },
                 },
               },
@@ -55,18 +58,18 @@ export function useMonitorErrors(monitorIdArg?: string) {
             ],
           },
         },
-        sort: [{ '@timestamp': 'desc' }],
+        sort: [{ 'state.started_at': 'desc' }],
         aggs: {
           errorStates: {
             terms: {
               field: 'state.id',
-              size: 1000,
+              size: 10000,
             },
             aggs: {
               summary: {
                 top_hits: {
                   size: 1,
-                  _source: ['error', 'state', 'monitor'],
+                  _source: ['error', 'state', 'monitor', '@timestamp'],
                   sort: [{ '@timestamp': 'desc' }],
                 },
               },
@@ -81,12 +84,13 @@ export function useMonitorErrors(monitorIdArg?: string) {
 
   return useMemo(() => {
     const errorStates = (data?.aggregations?.errorStates.buckets ?? []).map((loc) => {
-      return loc.summary.hits.hits?.[0]._source as Ping;
+      return loc.summary.hits.hits?.[0]._source as PingState;
     });
 
     return {
       errorStates,
       loading,
+      data,
     };
   }, [data, loading]);
 }

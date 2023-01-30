@@ -6,11 +6,13 @@
  */
 import {
   EuiAvatar,
+  EuiBadge,
   EuiCard,
   EuiCardProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -18,30 +20,35 @@ import {
   ServiceGroup,
   SERVICE_GROUP_COLOR_DEFAULT,
 } from '../../../../../common/service_groups';
+import { useObservabilityActiveAlertsHref } from '../../../shared/links/kibana';
+import { ServiceStat } from './service_stat';
 
 interface Props {
   serviceGroup: ServiceGroup;
-  hideServiceCount?: boolean;
-  onClick?: () => void;
   href?: string;
-  servicesCount?: number;
+  serviceGroupCounts?: { services: number; alerts: number };
+  isLoading: boolean;
 }
 
 export function ServiceGroupsCard({
   serviceGroup,
-  hideServiceCount = false,
-  onClick,
   href,
-  servicesCount,
+  serviceGroupCounts,
+  isLoading,
 }: Props) {
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+
+  const activeAlertsHref = useObservabilityActiveAlertsHref(serviceGroup.kuery);
   const cardProps: EuiCardProps = {
-    style: { width: 286 },
+    style: { width: isMobile ? '100%' : 286 },
     icon: (
-      <EuiAvatar
-        name={serviceGroup.groupName}
-        color={serviceGroup.color || SERVICE_GROUP_COLOR_DEFAULT}
-        size="l"
-      />
+      <>
+        <EuiAvatar
+          name={serviceGroup.groupName}
+          color={serviceGroup.color || SERVICE_GROUP_COLOR_DEFAULT}
+          size="l"
+        />
+      </>
     ),
     title: serviceGroup.groupName,
     description: (
@@ -55,33 +62,58 @@ export function ServiceGroupsCard({
               )}
           </EuiText>
         </EuiFlexItem>
-        {!hideServiceCount && (
-          <EuiFlexItem>
-            <EuiText size="s">
-              {servicesCount === undefined ? (
-                <>&nbsp;</>
-              ) : (
-                i18n.translate(
-                  'xpack.apm.serviceGroups.cardsList.serviceCount',
+        <EuiFlexGroup>
+          <ServiceStat loading={isLoading}>
+            <EuiFlexItem>
+              <EuiText size="s" textAlign="left">
+                {serviceGroupCounts !== undefined &&
+                  i18n.translate(
+                    'xpack.apm.serviceGroups.cardsList.serviceCount',
+                    {
+                      defaultMessage:
+                        '{servicesCount} {servicesCount, plural, one {service} other {services}}',
+                      values: { servicesCount: serviceGroupCounts.services },
+                    }
+                  )}
+              </EuiText>
+            </EuiFlexItem>
+          </ServiceStat>
+          <ServiceStat loading={isLoading} grow={isLoading}>
+            {serviceGroupCounts && serviceGroupCounts.alerts > 0 && (
+              <EuiBadge
+                iconType="alert"
+                color="danger"
+                href={activeAlertsHref}
+                {...({
+                  onClick(e: React.SyntheticEvent) {
+                    e.stopPropagation(); // prevents extra click thru to EuiCard's href destination
+                  },
+                } as object)} // workaround for type check that prevents href + onclick
+              >
+                {i18n.translate(
+                  'xpack.apm.serviceGroups.cardsList.alertCount',
                   {
                     defaultMessage:
-                      '{servicesCount} {servicesCount, plural, one {service} other {services}}',
-                    values: { servicesCount },
+                      '{alertsCount} {alertsCount, plural, one {alert} other {alerts}}',
+                    values: { alertsCount: serviceGroupCounts.alerts },
                   }
-                )
-              )}
-            </EuiText>
-          </EuiFlexItem>
-        )}
+                )}
+              </EuiBadge>
+            )}
+          </ServiceStat>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     ),
-    onClick,
     href,
   };
 
   return (
-    <EuiFlexItem key={serviceGroup.groupName}>
-      <EuiCard layout="vertical" {...cardProps} />
+    <EuiFlexItem key={serviceGroup.groupName} grow={false}>
+      <EuiCard
+        layout="vertical"
+        {...cardProps}
+        data-test-subj="serviceGroupCard"
+      />
     </EuiFlexItem>
   );
 }

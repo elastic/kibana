@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export * from './data_assistant_flyout';
 export * from './data_sections';
-export * from './loading_observability';
 export * from './empty_section';
+export * from './header_actions';
+export * from './loading_observability';

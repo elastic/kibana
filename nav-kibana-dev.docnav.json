@@ -117,7 +117,7 @@
       "label": "Tutorials",
       "items": [
         {
-          "id": "kibDevTutorialAddingPerformanceMetrics"
+          "id": "kibDevTutorialAddingCustomPerformanceMetrics"
         },
         {
           "id": "kibDevTutorialSetupWindowsDevWSL"
@@ -175,6 +175,12 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibNovember2022ContributorNewsletter"
+        },
+        {
+          "id": "kibOctober2022ContributorNewsletter"
+        },
         {
           "id": "kibSeptember2022ContributorNewsletter"
         },
@@ -323,6 +329,9 @@
         },
         {
           "id": "kibFileUploadPluginApi"
+        },
+        {
+          "id": "kibFilesPluginApi"
         },
         {
           "id": "kibFleetPluginApi"

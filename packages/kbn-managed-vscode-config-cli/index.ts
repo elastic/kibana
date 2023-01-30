@@ -9,7 +9,7 @@
 import Path from 'path';
 import Fsp from 'fs/promises';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import dedent from 'dedent';
 
 import { run } from '@kbn/dev-cli-runner';

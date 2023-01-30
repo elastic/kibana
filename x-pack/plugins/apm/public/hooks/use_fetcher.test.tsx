@@ -10,7 +10,12 @@ import React, { ReactNode } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { delay } from '../utils/test_helpers';
-import { FetcherResult, useFetcher } from './use_fetcher';
+import {
+  FetcherResult,
+  useFetcher,
+  isPending,
+  FETCH_STATUS,
+} from './use_fetcher';
 
 // Wrap the hook with a provider so it can useKibana
 const KibanaReactContext = createKibanaReactContext({
@@ -36,7 +41,7 @@ describe('useFetcher', () => {
     >;
 
     beforeEach(() => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
       async function fn() {
         await delay(500);
         return 'response from hook';
@@ -86,7 +91,7 @@ describe('useFetcher', () => {
     >;
 
     beforeEach(() => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
       async function fn(): Promise<string> {
         await delay(500);
         throw new Error('Something went wrong');
@@ -129,7 +134,7 @@ describe('useFetcher', () => {
 
   describe('when a hook already has data', () => {
     it('should show "first response" while loading "second response"', async () => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
 
       const hook = renderHook(
         /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -221,6 +226,20 @@ describe('useFetcher', () => {
 
       // assert: rerender with different data returns a new object
       expect(secondResult === thirdResult).toEqual(false);
+    });
+  });
+
+  describe('isPending', () => {
+    [FETCH_STATUS.NOT_INITIATED, FETCH_STATUS.LOADING].forEach((status) => {
+      it(`returns true when ${status}`, () => {
+        expect(isPending(status)).toBeTruthy();
+      });
+    });
+
+    [FETCH_STATUS.FAILURE, FETCH_STATUS.SUCCESS].forEach((status) => {
+      it(`returns false when ${status}`, () => {
+        expect(isPending(status)).toBeFalsy();
+      });
     });
   });
 });

@@ -12,6 +12,7 @@ import {
   deleteAllCaseItems,
   createComment,
   updateCase,
+  getCase,
 } from '../../../cases_api_integration/common/lib/utils';
 import {
   loginUsers,
@@ -21,6 +22,8 @@ import { User } from '../../../cases_api_integration/common/lib/authentication/t
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
+
+type OmitSupertest<T> = Omit<T, 'supertest'>;
 
 export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');
@@ -93,6 +96,10 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
 
     async suggestUserProfiles(options: Parameters<typeof suggestUserProfiles>[0]['req']) {
       return suggestUserProfiles({ supertest: kbnSupertest, req: options });
+    },
+
+    async getCase({ caseId }: OmitSupertest<Parameters<typeof getCase>[0]>): Promise<CaseResponse> {
+      return getCase({ supertest: kbnSupertest, caseId });
     },
   };
 }

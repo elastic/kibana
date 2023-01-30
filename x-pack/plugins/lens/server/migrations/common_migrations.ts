@@ -541,3 +541,32 @@ export const commonMigratePartitionChartGroups = (
     layers: Array<{ primaryGroups?: string[]; secondaryGroups?: string[] }>;
   }>;
 };
+
+export const commonMigratePartitionMetrics = (attributes: LensDocShape860<unknown>) => {
+  if (attributes.visualizationType !== 'lnsPie') {
+    return attributes as LensDocShape860<unknown>;
+  }
+
+  const partitionAttributes = attributes as LensDocShape860<{
+    shape: string;
+    layers: Array<{ metric: string }>;
+  }>;
+
+  return {
+    ...attributes,
+    state: {
+      ...attributes.state,
+      visualization: {
+        ...partitionAttributes.state.visualization,
+        layers: partitionAttributes.state.visualization.layers.map((layer) => ({
+          ...layer,
+          metrics: [layer.metric],
+          metric: undefined,
+        })),
+      },
+    },
+  } as LensDocShape860<{
+    shape: string;
+    layers: Array<{ metrics: string[] }>;
+  }>;
+};

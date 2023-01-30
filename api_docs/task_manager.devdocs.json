@@ -28,9 +28,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -79,9 +79,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-server.PluginInitializerContext",
+                    "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<unknown>"
@@ -105,9 +105,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, plugins: { usageCollection?: ",
@@ -141,9 +141,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -198,12 +198,12 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ savedObjects, elasticsearch, executionContext, }: ",
+              "({ savedObjects, elasticsearch, executionContext, docLinks, }: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ") => ",
@@ -224,14 +224,14 @@
                 "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n  }",
+                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n    docLinks,\n  }",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -473,15 +473,15 @@
               "\nlist of failed tasks and errors caused failure"
             ],
             "signature": [
-              "{ task: ",
+              "{ type: string; id: string; error: ",
               {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.ConcreteTaskInstance",
-                "text": "ConcreteTaskInstance"
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
               },
-              "; error: Error; }[]"
+              "; }[]"
             ],
             "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
             "deprecated": false,
@@ -1232,7 +1232,7 @@
           "\nA task instance that has an id and is ready for storage."
         ],
         "signature": [
-          "{ params: Record<string, any>; enabled?: boolean | undefined; state: Record<string, any>; scope?: string[] | undefined; taskType: string; }"
+          "{ scope?: string[] | undefined; params: Record<string, any>; enabled?: boolean | undefined; state: Record<string, any>; taskType: string; }"
         ],
         "path": "x-pack/plugins/task_manager/server/task.ts",
         "deprecated": false,
@@ -1537,9 +1537,9 @@
         ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { bulkRemoveIfExist: (ids: string[]) => Promise<",
         {
           "pluginId": "@kbn/core-saved-objects-api-server",
-          "scope": "server",
+          "scope": "common",
           "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-          "section": "def-server.SavedObjectsBulkDeleteResponse",
+          "section": "def-common.SavedObjectsBulkDeleteResponse",
           "text": "SavedObjectsBulkDeleteResponse"
         },
         " | undefined>; } & { supportsEphemeralTasks: () => boolean; getRegisteredTypes: () => string[]; }"

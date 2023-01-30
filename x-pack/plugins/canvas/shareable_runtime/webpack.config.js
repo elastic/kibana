@@ -112,7 +112,7 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               postcssOptions: {
-                config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                config: require.resolve('@kbn/optimizer/postcss.config'),
               },
             },
           },
@@ -186,6 +186,10 @@ module.exports = {
           require.resolve('highlight.js'),
         ],
         use: require.resolve('null-loader'),
+      },
+      {
+        test: /\.peggy$/,
+        use: require.resolve('@kbn/peggy-loader'),
       },
     ],
   },

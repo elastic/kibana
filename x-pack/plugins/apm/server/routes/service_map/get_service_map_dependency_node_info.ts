@@ -12,7 +12,7 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -22,6 +22,7 @@ import { getFailedTransactionRateTimeSeries } from '../../lib/helpers/transactio
 import { NodeStats } from '../../../common/service_map';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 
 interface Options {
   apmEventClient: APMEventClient;
@@ -77,6 +78,7 @@ export function getServiceMapDependencyNodeInfo({
           query: {
             bool: {
               filter: [
+                ...getDocumentTypeFilterForServiceDestinationStatistics(true),
                 {
                   term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName },
                 },

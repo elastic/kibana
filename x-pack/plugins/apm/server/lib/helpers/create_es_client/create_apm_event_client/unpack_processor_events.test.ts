@@ -27,7 +27,6 @@ describe('unpackProcessorEvents', () => {
       error: 'my-apm-*-error-*',
       span: 'my-apm-*-span-*',
       onboarding: 'my-apm-*-onboarding-*',
-      sourcemap: 'my-apm-*-sourcemap-*',
     } as ApmIndicesConfig;
 
     res = unpackProcessorEvents(request, indices);

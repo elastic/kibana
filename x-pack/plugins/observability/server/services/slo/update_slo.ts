@@ -6,17 +6,14 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import merge from 'lodash/merge';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 
 import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
-import {
-  UpdateSLOParams,
-  UpdateSLOResponse,
-  updateSLOResponseSchema,
-} from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { SLO } from '../../types/models';
+import { SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
 
 export class UpdateSLO {
@@ -45,10 +42,27 @@ export class UpdateSLO {
 
   private updateSLO(originalSlo: SLO, params: UpdateSLOParams) {
     let hasBreakingChange = false;
-    const updatedSlo: SLO = Object.assign({}, originalSlo, params, { updated_at: new Date() });
+    const updatedSlo: SLO = merge({}, originalSlo, params, { updatedAt: new Date() });
     validateSLO(updatedSlo);
 
     if (!deepEqual(originalSlo.indicator, updatedSlo.indicator)) {
+      hasBreakingChange = true;
+    }
+
+    if (originalSlo.budgetingMethod !== updatedSlo.budgetingMethod) {
+      hasBreakingChange = true;
+    }
+
+    if (
+      originalSlo.budgetingMethod === 'timeslices' &&
+      updatedSlo.budgetingMethod === 'timeslices' &&
+      (originalSlo.objective.timesliceTarget !== updatedSlo.objective.timesliceTarget ||
+        !deepEqual(originalSlo.objective.timesliceWindow, updatedSlo.objective.timesliceWindow))
+    ) {
+      hasBreakingChange = true;
+    }
+
+    if (!deepEqual(originalSlo.settings, updatedSlo.settings)) {
       hasBreakingChange = true;
     }
 
@@ -84,11 +98,13 @@ export class UpdateSLO {
       name: slo.name,
       description: slo.description,
       indicator: slo.indicator,
-      budgeting_method: slo.budgeting_method,
-      time_window: slo.time_window,
+      budgetingMethod: slo.budgetingMethod,
+      timeWindow: slo.timeWindow,
       objective: slo.objective,
-      created_at: slo.created_at,
-      updated_at: slo.updated_at,
+      settings: slo.settings,
+      revision: slo.revision,
+      createdAt: slo.createdAt,
+      updatedAt: slo.updatedAt,
     });
   }
 }

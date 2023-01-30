@@ -13,6 +13,7 @@ import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, GLOBAL_SETTINGS_ID } from '../../com
 import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common/types';
 
 import { appContextService } from './app_context';
+import { listFleetServerHosts } from './fleet_server_host';
 
 export async function getSettings(soClient: SavedObjectsClientContract): Promise<Settings> {
   const res = await soClient.find<SettingsSOAttributes>({
@@ -23,10 +24,12 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
     throw Boom.notFound('Global settings not found');
   }
   const settingsSo = res.saved_objects[0];
+  const fleetServerHosts = await listFleetServerHosts(soClient);
+
   return {
     id: settingsSo.id,
     ...settingsSo.attributes,
-    fleet_server_hosts: settingsSo.attributes.fleet_server_hosts || [],
+    fleet_server_hosts: fleetServerHosts.items.flatMap((item) => item.host_urls),
     preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
   };
 }

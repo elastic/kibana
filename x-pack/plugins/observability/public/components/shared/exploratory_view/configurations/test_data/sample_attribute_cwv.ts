@@ -145,7 +145,7 @@ export const sampleAttributeCoreWebVital = {
         showSingleSeries: true,
         position: 'right',
         shouldTruncate: false,
-        legendSize: 'large',
+        legendSize: 'auto',
       },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: {

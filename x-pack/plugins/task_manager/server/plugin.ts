@@ -135,6 +135,7 @@ export class TaskManagerPlugin
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       shouldRunTasks: this.shouldRunBackgroundTasks,
+      docLinks: core.docLinks,
     });
     const monitoredUtilization$ = backgroundTaskUtilizationRoute({
       router,
@@ -200,6 +201,7 @@ export class TaskManagerPlugin
     savedObjects,
     elasticsearch,
     executionContext,
+    docLinks,
   }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
@@ -264,7 +266,6 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
-      definitions: this.definitions,
       taskManagerId: taskStore.taskManagerId,
     });
 

@@ -6,9 +6,7 @@
  */
 
 import { includes } from 'lodash';
-// @ts-ignore
 import { createQuery } from '../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 import { ML_SUPPORTED_LICENSES } from '../../../common/constants';
 import { ElasticsearchResponse } from '../../../common/types/es';

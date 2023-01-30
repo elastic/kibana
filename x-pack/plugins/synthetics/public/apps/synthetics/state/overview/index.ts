@@ -6,12 +6,9 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
+import { isStatusEnabled } from '../../../../../common/runtime_types/monitor_management/alert_config';
+import { MonitorOverviewState } from './models';
 
-import { MonitorOverviewResult, OverviewStatus } from '../../../../../common/runtime_types';
-
-import { IHttpSerializedFetchError } from '../utils/http_error';
-
-import { MonitorOverviewPageState, MonitorOverviewFlyoutConfig } from './models';
 import {
   clearOverviewStatusErrorAction,
   fetchMonitorOverviewAction,
@@ -19,18 +16,10 @@ import {
   quietFetchOverviewAction,
   setFlyoutConfig,
   setOverviewPageStateAction,
+  toggleErrorPopoverOpen,
 } from './actions';
-
-export interface MonitorOverviewState {
-  data: MonitorOverviewResult;
-  pageState: MonitorOverviewPageState;
-  flyoutConfig: MonitorOverviewFlyoutConfig;
-  loading: boolean;
-  loaded: boolean;
-  error: IHttpSerializedFetchError | null;
-  status: OverviewStatus | null;
-  statusError: IHttpSerializedFetchError | null;
-}
+import { enableMonitorAlertAction } from '../monitor_list/actions';
+import { ConfigKey } from '../../components/monitor_add_edit/types';
 
 const initialState: MonitorOverviewState = {
   data: {
@@ -49,12 +38,12 @@ const initialState: MonitorOverviewState = {
   error: null,
   status: null,
   statusError: null,
+  isErrorPopoverOpen: null,
 };
 
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(fetchMonitorOverviewAction.get, (state, action) => {
-      state.pageState = action.payload;
       state.loading = true;
       state.loaded = false;
     })
@@ -80,14 +69,41 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       };
       state.loaded = false;
     })
+    .addCase(fetchOverviewStatusAction.get, (state) => {
+      state.status = null;
+    })
     .addCase(setFlyoutConfig, (state, action) => {
       state.flyoutConfig = action.payload;
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
-      state.status = action.payload;
+      state.status = {
+        ...action.payload,
+        allConfigs: { ...action.payload.upConfigs, ...action.payload.downConfigs },
+      };
+    })
+    .addCase(enableMonitorAlertAction.success, (state, action) => {
+      const attrs = action.payload.attributes;
+      if (!('errors' in attrs)) {
+        const isStatusAlertEnabled = isStatusEnabled(attrs[ConfigKey.ALERT_CONFIG]);
+        state.data.monitors = state.data.monitors.map((monitor) => {
+          if (
+            monitor.id === action.payload.id ||
+            attrs[ConfigKey.MONITOR_QUERY_ID] === monitor.id
+          ) {
+            return {
+              ...monitor,
+              isStatusAlertEnabled,
+            };
+          }
+          return monitor;
+        });
+      }
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.statusError = action.payload;
+    })
+    .addCase(toggleErrorPopoverOpen, (state, action) => {
+      state.isErrorPopoverOpen = action.payload;
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.statusError = null;

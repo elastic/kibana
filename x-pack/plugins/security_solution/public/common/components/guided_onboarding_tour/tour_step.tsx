@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import type { EuiTourStepProps } from '@elastic/eui';
-import { EuiButton, EuiImage, EuiSpacer, EuiText, EuiTourStep } from '@elastic/eui';
+import { EuiButtonEmpty, EuiImage, EuiSpacer, EuiText, EuiTourStep } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
@@ -21,25 +21,27 @@ import { AlertsCasesTourSteps, SecurityStepId, securityTourConfig } from './tour
 
 interface SecurityTourStep {
   children?: React.ReactElement;
+  onClick?: () => void;
   step: number;
-  stepId: SecurityStepId;
+  tourId: SecurityStepId;
 }
 
-const isStepExternallyMounted = (stepId: SecurityStepId, step: number) =>
-  step === AlertsCasesTourSteps.createCase && stepId === SecurityStepId.alertsCases;
+const isStepExternallyMounted = (tourId: SecurityStepId, step: number) =>
+  (step === AlertsCasesTourSteps.createCase || step === AlertsCasesTourSteps.submitCase) &&
+  tourId === SecurityStepId.alertsCases;
 
-const StyledTourStep = styled(EuiTourStep)<EuiTourStepProps & { stepId: SecurityStepId }>`
+const StyledTourStep = styled(EuiTourStep)<EuiTourStepProps & { tourId: SecurityStepId }>`
   &.euiPopover__panel[data-popover-open] {
-    z-index: ${({ step, stepId }) =>
-      isStepExternallyMounted(stepId, step) ? '9000 !important' : '1000 !important'};
+    z-index: ${({ step, tourId }) =>
+      isStepExternallyMounted(tourId, step) ? '9000 !important' : '1000 !important'};
   }
 `;
 
-export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) => {
+export const SecurityTourStep = ({ children, onClick, step, tourId }: SecurityTourStep) => {
   const { activeStep, incrementStep, isTourShown } = useTourContext();
   const tourStep = useMemo(
-    () => securityTourConfig[stepId].find((config) => config.step === step),
-    [step, stepId]
+    () => securityTourConfig[tourId].find((config) => config.step === step),
+    [step, tourId]
   );
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -47,28 +49,39 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
     (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
   );
 
-  const onClick = useCallback(() => incrementStep(stepId), [incrementStep, stepId]);
+  const onClickNext = useCallback(
+    // onClick should call incrementStep itself
+    () => (onClick ? onClick() : incrementStep(tourId)),
+    [incrementStep, onClick, tourId]
+  );
 
-  // step === AlertsCasesTourSteps.createCase && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
+  // EUI bug, will remove once bug resolve. will link issue here as soon as i have it
+  const onKeyDown = useCallback((e) => {
+    if (e.key === 'Enter') {
+      e.stopPropagation();
+    }
+  }, []);
+
+  // steps in Cases app are out of context.
   // If we mount this step, we know we need to render it
   // we are also managing the context on the siem end in the background
-  const overrideContext = isStepExternallyMounted(stepId, step);
+  const overrideContext = isStepExternallyMounted(tourId, step);
 
   if (
     tourStep == null ||
-    ((step !== activeStep || !isTourShown(stepId)) && !overrideContext) ||
+    ((step !== activeStep || !isTourShown(tourId)) && !overrideContext) ||
     showTimeline
   ) {
     return children ? children : null;
   }
-
   const { anchor, content, imageConfig, dataTestSubj, hideNextButton = false, ...rest } = tourStep;
-
   const footerAction: EuiTourStepProps['footerAction'] = !hideNextButton ? (
-    <EuiButton
-      size="s"
-      onClick={onClick}
-      color="success"
+    <EuiButtonEmpty
+      onClick={onClickNext}
+      onKeyDown={onKeyDown}
+      size="xs"
+      color="text"
+      flush="right"
       data-test-subj="onboarding--securityTourNextStepButton"
       tour-step="nextButton"
     >
@@ -76,7 +89,7 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
         id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
         defaultMessage="Next"
       />
-    </EuiButton>
+    </EuiButtonEmpty>
   ) : (
     <>
       {/* Passing empty element instead of undefined. If undefined "Skip tour" button is shown, we do not want that*/}
@@ -87,7 +100,7 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
     ...rest,
     content: (
       <>
-        <EuiText size="xs">
+        <EuiText size="s">
           <p>{content}</p>
         </EuiText>
         {imageConfig && (
@@ -103,25 +116,21 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
     isStepOpen: true,
     // guided onboarding does not allow skipping tour through the steps
     onFinish: () => null,
-    stepsTotal: securityTourConfig[stepId].length,
-    // TODO: re-add panelProps
-    // EUI has a bug https://github.com/elastic/eui/issues/6297
-    // where any panelProps overwrite their panelProps,
-    // so we lose cool things like the EuiBeacon
-    // panelProps: {
-    //   'data-test-subj': dataTestSubj,
-    // }
+    stepsTotal: securityTourConfig[tourId].length,
+    panelProps: {
+      'data-test-subj': dataTestSubj,
+    },
   };
 
   // tour step either needs children or an anchor element
   //  see type EuiTourStepAnchorProps
   return anchor != null ? (
     <>
-      <StyledTourStep stepId={stepId} {...commonProps} anchor={anchor} />
+      <StyledTourStep tourId={tourId} {...commonProps} anchor={anchor} />
       <>{children}</>
     </>
   ) : children != null ? (
-    <StyledTourStep stepId={stepId} {...commonProps}>
+    <StyledTourStep tourId={tourId} {...commonProps}>
       {children}
     </StyledTourStep>
   ) : null;

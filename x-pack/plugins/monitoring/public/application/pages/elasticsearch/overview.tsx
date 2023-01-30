@@ -10,7 +10,6 @@ import { find } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-// @ts-ignore
 import { ElasticsearchOverview } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';

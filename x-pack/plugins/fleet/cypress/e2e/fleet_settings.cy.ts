@@ -69,6 +69,7 @@ describe('Edit settings', () => {
 
   it('should allow to create new Fleet server hosts', () => {
     cy.getBySel(SETTINGS_FLEET_SERVER_HOSTS.ADD_BUTTON).click();
+    cy.getBySel(FLEET_SERVER_SETUP.SELECT_HOSTS).click();
     cy.getBySel(FLEET_SERVER_SETUP.ADD_HOST_BTN).click();
 
     cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('New Host');

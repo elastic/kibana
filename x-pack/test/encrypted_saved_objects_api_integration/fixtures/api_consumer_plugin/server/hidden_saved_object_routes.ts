@@ -68,6 +68,8 @@ export function registerHiddenSORoutes(
         savedObjects = [...savedObjects, ...result.saved_objects];
       }
 
+      await finder.close();
+
       try {
         return response.ok({
           body: { saved_objects: savedObjects },

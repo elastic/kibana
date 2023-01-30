@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormBasedLayer } from '../types';
 import { hasField } from '../pure_utils';
 import { GenericIndexPatternColumn } from '../operations';
@@ -62,26 +62,28 @@ export function BucketNestingEditor({
   if (aggColumns.length === 1) {
     const [target] = aggColumns;
     const useAsTopLevelAggCopy = i18n.translate('xpack.lens.indexPattern.useAsTopLevelAgg', {
-      defaultMessage: 'Group by this field first',
+      defaultMessage: 'Aggregate by this dimension first',
     });
     return (
-      <EuiFormRow label={useAsTopLevelAggCopy} display="columnCompressedSwitch" fullWidth>
-        <EuiSwitch
-          compressed
-          label={useAsTopLevelAggCopy}
-          showLabel={false}
-          data-test-subj="indexPattern-nesting-switch"
-          name="nestingSwitch"
-          checked={!prevColumn}
-          onChange={() => {
-            if (prevColumn) {
-              setColumns(nestColumn(layer.columnOrder, columnId, target.value));
-            } else {
-              setColumns(nestColumn(layer.columnOrder, target.value, columnId));
-            }
-          }}
-        />
-      </EuiFormRow>
+      <>
+        <EuiSpacer size="s" />
+        <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+          <EuiSwitch
+            label={<EuiText size="xs">{useAsTopLevelAggCopy}</EuiText>}
+            data-test-subj="indexPattern-nesting-switch"
+            name="nestingSwitch"
+            checked={!prevColumn}
+            onChange={() => {
+              if (prevColumn) {
+                setColumns(nestColumn(layer.columnOrder, columnId, target.value));
+              } else {
+                setColumns(nestColumn(layer.columnOrder, target.value, columnId));
+              }
+            }}
+            compressed
+          />
+        </EuiFormRow>
+      </>
     );
   }
 

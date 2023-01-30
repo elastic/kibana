@@ -34,20 +34,22 @@ import {
   updateCase,
   deleteAllCaseItems,
   superUserSpace1Auth,
-  createCaseWithConnector,
-  createConnector,
-  getServiceNowConnector,
   getConnectorMappingsFromES,
   getCase,
-  getServiceNowSimulationServer,
   createConfiguration,
   getSignalsWithES,
   delay,
   calculateDuration,
-  getRecordingServiceNowSimulatorServer,
   getComment,
   bulkCreateAttachments,
 } from '../../../../common/lib/utils';
+import {
+  getServiceNowConnector,
+  createCaseWithConnector,
+  getRecordingServiceNowSimulatorServer,
+  getServiceNowSimulationServer,
+  createConnector,
+} from '../../../../common/lib/connectors';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -57,7 +59,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { RecordingServiceNowSimulator } from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/servicenow_simulation';
+import { RecordingServiceNowSimulator } from '../../../../../alerting_api_integration/common/plugins/actions_simulators/server/servicenow_simulation';
 import { loginUsers, setupSuperUserProfile } from '../../../../common/lib/user_profiles';
 
 // eslint-disable-next-line import/no-default-export
@@ -151,6 +153,36 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should map the fields and add the backlink with spaceId to Kibana correctly', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await pushCase({
+          supertest,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        expect(serviceNowServer.incident).eql({
+          short_description: postedCase.title,
+          description: `${postedCase.description}\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://localhost:5601/s/space1/app/management/insightsAndAlerting/cases/${postedCase.id}`,
+          severity: '2',
+          urgency: '2',
+          impact: '2',
+          category: 'software',
+          subcategory: 'os',
+          correlation_id: postedCase.id,
+          correlation_display: 'Elastic Case',
+          caller_id: 'admin',
+          opened_by: 'admin',
+        });
+      });
+
       it('should format the comments correctly', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           supertest,
@@ -210,6 +242,42 @@ export default ({ getService }: FtrProviderContext): void => {
         // Total alerts
         expect(allCommentRequests[3].work_notes).eql(
           `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`
+        );
+      });
+
+      it('should format the totalAlerts with spaceId correctly', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        const patchedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertReq, postCommentAlertMultipleIdsReq],
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await pushCase({
+          supertest,
+          caseId: patchedCase.id,
+          connectorId: connector.id,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        /**
+         * If the request contains the work_notes property then
+         * it is a create comment request
+         */
+        const allCommentRequests = serviceNowServer.allRequestData.filter((request) =>
+          Boolean(request.work_notes)
+        );
+
+        expect(allCommentRequests.length).be(1);
+        expect(allCommentRequests[0].work_notes).eql(
+          `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/s/space1/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`
         );
       });
     });

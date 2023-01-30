@@ -1229,9 +1229,9 @@
           " extends ",
           {
             "pluginId": "@kbn/logging",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.LogMeta",
+            "section": "def-common.LogMeta",
             "text": "LogMeta"
           }
         ],
@@ -1245,7 +1245,9 @@
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": [],
+            "description": [
+              "\nLog message"
+            ],
             "path": "x-pack/plugins/security/server/audit/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1256,9 +1258,257 @@
             "type": "Object",
             "tags": [],
             "label": "kibana",
-            "description": [],
+            "description": [
+              "\nKibana specific fields"
+            ],
             "signature": [
-              "{ space_id?: string | undefined; session_id?: string | undefined; saved_object?: { type: string; id: string; } | undefined; authentication_provider?: string | undefined; authentication_type?: string | undefined; authentication_realm?: string | undefined; lookup_realm?: string | undefined; add_to_spaces?: readonly string[] | undefined; delete_from_spaces?: readonly string[] | undefined; } | undefined"
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.AuditKibana",
+                "text": "AuditKibana"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditEvent.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [
+              "\nFields describing an HTTP request"
+            ],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.AuditHttp",
+                "text": "AuditHttp"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.AuditHttp",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuditHttp",
+        "description": [
+          "\nAudit http schema using ECS format"
+        ],
+        "signature": [
+          {
+            "pluginId": "security",
+            "scope": "server",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-server.AuditHttp",
+            "text": "AuditHttp"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/ecs",
+            "scope": "common",
+            "docId": "kibKbnEcsPluginApi",
+            "section": "def-common.EcsHttp",
+            "text": "EcsHttp"
+          }
+        ],
+        "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditHttp.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nHTTP request details"
+            ],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.AuditRequest",
+                "text": "AuditRequest"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.AuditKibana",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuditKibana",
+        "description": [
+          "\nAudit kibana schema using ECS format"
+        ],
+        "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.space_id",
+            "type": "string",
+            "tags": [],
+            "label": "space_id",
+            "description": [
+              "\nThe ID of the space associated with this event."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.session_id",
+            "type": "string",
+            "tags": [],
+            "label": "session_id",
+            "description": [
+              "\nThe ID of the user session associated with this event. Each login attempt\nresults in a unique session id."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.saved_object",
+            "type": "Object",
+            "tags": [],
+            "label": "saved_object",
+            "description": [
+              "\nSaved object that was created, changed, deleted or accessed as part of this event."
+            ],
+            "signature": [
+              "{ type: string; id: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.authentication_provider",
+            "type": "string",
+            "tags": [],
+            "label": "authentication_provider",
+            "description": [
+              "\nName of authentication provider associated with a login event."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.authentication_type",
+            "type": "string",
+            "tags": [],
+            "label": "authentication_type",
+            "description": [
+              "\nType of authentication provider associated with a login event."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.authentication_realm",
+            "type": "string",
+            "tags": [],
+            "label": "authentication_realm",
+            "description": [
+              "\nName of Elasticsearch realm that has authenticated the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.lookup_realm",
+            "type": "string",
+            "tags": [],
+            "label": "lookup_realm",
+            "description": [
+              "\nName of Elasticsearch realm where the user details were retrieved from."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.add_to_spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "add_to_spaces",
+            "description": [
+              "\nSet of space IDs that a saved object was shared to."
+            ],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.delete_from_spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "delete_from_spaces",
+            "description": [
+              "\nSet of space IDs that a saved object was removed from."
+            ],
+            "signature": [
+              "readonly string[] | undefined"
             ],
             "path": "x-pack/plugins/security/server/audit/audit_events.ts",
             "deprecated": false,
@@ -1345,6 +1595,48 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-server.AuditRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuditRequest",
+        "description": [
+          "\nAudit request schema using ECS format"
+        ],
+        "signature": [
+          {
+            "pluginId": "security",
+            "scope": "server",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-server.AuditRequest",
+            "text": "AuditRequest"
+          },
+          " extends { body?: { bytes?: number | undefined; content?: string | undefined; } | undefined; bytes?: number | undefined; id?: string | undefined; method?: string | undefined; mime_type?: string | undefined; referrer?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditRequest.headers",
+            "type": "Object",
+            "tags": [],
+            "label": "headers",
+            "description": [
+              "\nHTTP request headers"
+            ],
+            "signature": [
+              "{ 'x-forwarded-for'?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-server.AuditServiceSetup",
         "type": "Interface",
         "tags": [],
@@ -1367,9 +1659,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -1395,9 +1687,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -1597,12 +1889,20 @@
             "label": "apiKeys",
             "description": [],
             "signature": [
-              "{ create: (request: ",
+              "{ validate: (apiKeyPrams: ",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.ValidateAPIKeyParams",
+                "text": "ValidateAPIKeyParams"
+              },
+              ") => Promise<boolean>; create: (request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, createParams: ",
@@ -1624,9 +1924,9 @@
               " | null>; areAPIKeysEnabled: () => Promise<boolean>; invalidate: (request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, params: ",
@@ -1648,9 +1948,9 @@
               " | null>; grantAsInternalUser: (request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, createParams: ",
@@ -1702,9 +2002,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -1731,9 +2031,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -2101,9 +2401,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -2500,6 +2800,48 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.ValidateAPIKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidateAPIKeyParams",
+        "description": [
+          "\nRepresents the parameters for validating API Key credentials."
+        ],
+        "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.ValidateAPIKeyParams.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique id for this API key"
+            ],
+            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.ValidateAPIKeyParams.api_key",
+            "type": "string",
+            "tags": [],
+            "label": "api_key",
+            "description": [
+              "\nGenerated API Key (secret)"
+            ],
+            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -2593,9 +2935,9 @@
             "{ getCurrentUser: (request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
+              "section": "def-common.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => ",
@@ -2635,10 +2977,6 @@
             {
               "plugin": "logstash",
               "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
             },
             {
               "plugin": "securitySolution",
@@ -3045,6 +3383,20 @@
             "path": "x-pack/plugins/security/common/model/api_key.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "role_descriptors",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3415,9 +3767,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.GetDeprecationsContext",
+                "section": "def-common.GetDeprecationsContext",
                 "text": "GetDeprecationsContext"
               }
             ],

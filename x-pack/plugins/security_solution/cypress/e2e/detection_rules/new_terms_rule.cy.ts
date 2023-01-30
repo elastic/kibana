@@ -7,15 +7,13 @@
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import type { Mitre } from '../../objects/rule';
-import { getNewTermsRule, getIndexPatterns } from '../../objects/rule';
+import { getNewTermsRule } from '../../objects/rule';
 
 import { ALERT_DATA_GRID } from '../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
-  RULES_ROW,
-  RULES_TABLE,
   RULE_SWITCH,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
@@ -46,7 +44,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
@@ -100,9 +98,7 @@ describe('New Terms rules', () => {
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-      cy.get(RULES_TABLE).then(($table) => {
-        cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-      });
+      expectNumberOfRules(expectedNumberOfRules);
 
       cy.get(RULE_NAME).should('have.text', this.rule.name);
       cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
@@ -128,7 +124,7 @@ describe('New Terms rules', () => {
       cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
+        getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
         getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'New Terms');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');

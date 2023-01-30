@@ -24,10 +24,9 @@ import {
 } from '../../../api/crawler/types';
 
 import {
-  FetchIndexApiLogic,
-  FetchIndexApiParams,
-  FetchIndexApiResponse,
-} from '../../../api/index/fetch_index_api_logic';
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicActions,
+} from '../../../api/index/cached_fetch_index_api_logic';
 
 import { isCrawlerIndex } from '../../../utils/indices';
 import { IndexNameLogic } from '../index_name_logic';
@@ -41,18 +40,17 @@ export interface CrawlRequestOverrides {
 }
 
 export interface CrawlerValues {
+  connectorId: string | null;
   data: CrawlerData | null;
   dataLoading: boolean;
   domains: CrawlerDomain[];
   events: CrawlEvent[];
+  indexData?: ElasticsearchIndexWithIngestion;
   mostRecentCrawlRequest: CrawlRequest | null;
   mostRecentCrawlRequestStatus: CrawlerStatus | null;
   timeoutId: NodeJS.Timeout | null;
-  connectorId: string | null;
-  indexData?: ElasticsearchIndexWithIngestion;
 }
 
-type FetchIndexApiValues = Actions<FetchIndexApiParams, FetchIndexApiResponse>;
 type StartSyncApiValues = Actions<StartSyncArgs, {}>;
 
 export type CrawlerActions = Pick<
@@ -61,12 +59,12 @@ export type CrawlerActions = Pick<
 > & {
   createNewTimeoutForCrawlerData(duration: number): { duration: number };
   fetchCrawlerData(): void;
+  makeFetchIndexRequest: CachedFetchIndexApiLogicActions['makeRequest'];
+  makeStartSyncRequest: StartSyncApiValues['makeRequest'];
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   reApplyCrawlRules(domain?: CrawlerDomain): { domain?: CrawlerDomain };
   startCrawl(overrides?: CrawlRequestOverrides): { overrides?: CrawlRequestOverrides };
   stopCrawl(): void;
-  makeStartSyncRequest: StartSyncApiValues['makeRequest'];
-  makeFetchIndexRequest: FetchIndexApiValues['makeRequest'];
 };
 
 export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
@@ -82,15 +80,12 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       ['apiError', 'apiSuccess'],
       StartSyncApiLogic,
       ['makeRequest as makeStartSyncRequest'],
-      FetchIndexApiLogic,
+      CachedFetchIndexApiLogic,
       ['makeRequest as makeFetchIndexRequest'],
     ],
-    values: [GetCrawlerApiLogic, ['status', 'data'], FetchIndexApiLogic, ['data as indexData']],
+    values: [GetCrawlerApiLogic, ['status', 'data'], CachedFetchIndexApiLogic, ['indexData']],
   },
   listeners: ({ actions, values }) => ({
-    apiError: (error) => {
-      flashAPIErrors(error);
-    },
     fetchCrawlerData: () => {
       const { indexName } = IndexNameLogic.values;
 

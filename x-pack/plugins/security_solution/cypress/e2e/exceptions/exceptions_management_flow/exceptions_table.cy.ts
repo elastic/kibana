@@ -20,10 +20,9 @@ import {
   searchForExceptionList,
   waitForExceptionsTableToBeLoaded,
   clearSearchSelection,
-  expandExceptionActions,
 } from '../../../tasks/exceptions_table';
 import {
-  EXCEPTIONS_TABLE_DELETE_BTN,
+  EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
   EXCEPTIONS_TABLE_LIST_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../screens/exceptions';
@@ -66,7 +65,9 @@ describe('Exceptions Table', () => {
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
       'exceptionListResponse'
     );
+  });
 
+  beforeEach(() => {
     visitWithoutDateRange(EXCEPTIONS_URL);
   });
 
@@ -182,8 +183,7 @@ describe('Exceptions Table - read only', () => {
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
   });
 
-  it('Delete icon is not shown', () => {
-    expandExceptionActions();
-    cy.get(EXCEPTIONS_TABLE_DELETE_BTN).should('be.disabled');
+  it('Card menu actions should be disabled', () => {
+    cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().should('be.disabled');
   });
 });

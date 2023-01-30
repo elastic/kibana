@@ -75,7 +75,7 @@ export class WMSSource extends AbstractSource implements IRasterSource {
     return this._descriptor.serviceUrl;
   }
 
-  getUrlTemplate() {
+  async getUrlTemplate() {
     const client = new WmsClient({ serviceUrl: this._descriptor.serviceUrl });
     return client.getUrlTemplate(this._descriptor.layers, this._descriptor.styles || '');
   }

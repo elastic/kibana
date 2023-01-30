@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiTabs, EuiTab } from '@elastic/eui';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -14,6 +15,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { EmptyPrompt } from './empty_prompt';
 import { FailurePrompt } from './failure_prompt';
 import { useTabs } from './use_tabs';
+import { push } from '../../../shared/links/url_helpers';
 
 const INITIAL_STATE = {
   containerIds: [],
@@ -23,8 +25,9 @@ const INITIAL_STATE = {
 
 export function InfraTabs() {
   const { serviceName } = useApmServiceContext();
+  const history = useHistory();
   const {
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: { environment, kuery, rangeFrom, rangeTo, detailTab },
   } = useApmParams('/services/{serviceName}/infrastructure');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -89,13 +92,30 @@ export function InfraTabs() {
     );
   }
 
+  const currentTab = tabs.find(({ id }) => id === detailTab) ?? tabs[0];
+
   return (
     <>
-      <EuiTabbedContent
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-        autoFocus="selected"
-      />
+      <EuiTabs>
+        {tabs.map(({ id, name }) => {
+          return (
+            <EuiTab
+              onClick={() => {
+                push(history, {
+                  query: {
+                    detailTab: id,
+                  },
+                });
+              }}
+              isSelected={currentTab.id === id}
+              id={id}
+            >
+              {name}
+            </EuiTab>
+          );
+        })}
+      </EuiTabs>
+      {currentTab.content}
     </>
   );
 }

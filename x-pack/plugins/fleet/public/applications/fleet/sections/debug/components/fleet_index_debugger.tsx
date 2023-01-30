@@ -43,6 +43,8 @@ export const FleetIndexDebugger = () => {
   const indices = [
     { label: '.fleet-agents', value: '.fleet-agents' },
     { label: '.fleet-actions', value: '.fleet-actions' },
+    { label: '.fleet-servers', value: '.fleet-servers' },
+    { label: '.fleet-enrollment-api-keys', value: '.fleet-enrollment-api-keys' },
   ];
   const [index, setIndex] = useState<string | undefined>();
 

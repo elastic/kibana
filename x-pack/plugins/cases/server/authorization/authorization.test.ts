@@ -61,7 +61,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -81,7 +81,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -140,7 +140,7 @@ describe('authorization', () => {
         request,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -266,7 +266,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -295,7 +295,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -322,7 +322,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -980,6 +980,340 @@ describe('authorization', () => {
             ],
           ]
         `);
+      });
+    });
+  });
+
+  describe('getAndEnsureAuthorizedEntities', () => {
+    const feature = { id: '1', cases: ['a', 'b'] };
+
+    let securityStart: ReturnType<typeof securityMock.createStart>;
+    let featuresStart: jest.Mocked<FeaturesPluginStart>;
+    let spacesStart: jest.Mocked<SpacesPluginStart>;
+    let auth: Authorization;
+
+    beforeEach(async () => {
+      securityStart = securityMock.createStart();
+      securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
+      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+        jest.fn(async () => ({
+          hasAllRequested: true,
+          username: 'super',
+          privileges: { kibana: [] },
+        }))
+      );
+
+      featuresStart = featuresPluginMock.createStart();
+      featuresStart.getKibanaFeatures.mockReturnValue([feature] as unknown as KibanaFeature[]);
+
+      spacesStart = createSpacesDisabledFeaturesMock();
+
+      auth = await Authorization.create({
+        request,
+        securityAuth: securityStart.authz,
+        spaces: spacesStart,
+        features: featuresStart,
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
+        logger: loggingSystemMock.createLogger(),
+      });
+    });
+
+    it('throws and logs an error when there are no registered owners from plugins and security is enabled', async () => {
+      expect.assertions(2);
+
+      featuresStart.getKibanaFeatures.mockReturnValue([]);
+
+      auth = await Authorization.create({
+        request,
+        securityAuth: securityStart.authz,
+        spaces: spacesStart,
+        features: featuresStart,
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
+        logger: loggingSystemMock.createLogger(),
+      });
+
+      try {
+        await auth.getAndEnsureAuthorizedEntities({
+          savedObjects: [
+            { id: '1', attributes: { owner: 'b' }, type: 'test', references: [] },
+            { id: '2', attributes: { owner: 'c' }, type: 'test', references: [] },
+          ],
+        });
+      } catch (error) {
+        expect(error.message).toBe('Unauthorized to access cases of any owner');
+      }
+
+      expect(mockLogger.log.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "error": Object {
+                "code": "Error",
+                "message": "Unauthorized to access cases of any owner",
+              },
+              "event": Object {
+                "action": "case_bulk_get",
+                "category": Array [
+                  "database",
+                ],
+                "outcome": "failure",
+                "type": Array [
+                  "access",
+                ],
+              },
+              "kibana": Object {
+                "saved_object": Object {
+                  "id": "1",
+                  "type": "cases",
+                },
+              },
+              "message": "Failed attempt to access cases [id=1] as owner \\"b\\"",
+            },
+          ],
+          Array [
+            Object {
+              "error": Object {
+                "code": "Error",
+                "message": "Unauthorized to access cases of any owner",
+              },
+              "event": Object {
+                "action": "case_bulk_get",
+                "category": Array [
+                  "database",
+                ],
+                "outcome": "failure",
+                "type": Array [
+                  "access",
+                ],
+              },
+              "kibana": Object {
+                "saved_object": Object {
+                  "id": "2",
+                  "type": "cases",
+                },
+              },
+              "message": "Failed attempt to access cases [id=2] as owner \\"c\\"",
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('does not throw an error when a feature owner exists and security is disabled but logs', async () => {
+      expect.assertions(2);
+
+      auth = await Authorization.create({
+        request,
+        spaces: spacesStart,
+        features: featuresStart,
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
+        logger: loggingSystemMock.createLogger(),
+      });
+
+      const helpersPromise = auth.getAndEnsureAuthorizedEntities({
+        savedObjects: [
+          { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },
+          { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
+        ],
+      });
+
+      await expect(helpersPromise).resolves.not.toThrow();
+
+      expect(mockLogger.log.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "event": Object {
+                "action": "case_bulk_get",
+                "category": Array [
+                  "database",
+                ],
+                "outcome": "success",
+                "type": Array [
+                  "access",
+                ],
+              },
+              "kibana": Object {
+                "saved_object": Object {
+                  "id": "1",
+                  "type": "cases",
+                },
+              },
+              "message": "User has accessed cases [id=1] as owner \\"a\\"",
+            },
+          ],
+          Array [
+            Object {
+              "event": Object {
+                "action": "case_bulk_get",
+                "category": Array [
+                  "database",
+                ],
+                "outcome": "success",
+                "type": Array [
+                  "access",
+                ],
+              },
+              "kibana": Object {
+                "saved_object": Object {
+                  "id": "2",
+                  "type": "cases",
+                },
+              },
+              "message": "User has accessed cases [id=2] as owner \\"b\\"",
+            },
+          ],
+        ]
+      `);
+    });
+
+    describe('hasAllRequested: true', () => {
+      it('categorizes the registered owners a and b as authorized and the unregistered owner c as unauthorized', async () => {
+        auth = await Authorization.create({
+          request,
+          spaces: spacesStart,
+          features: featuresStart,
+          auditLogger: new AuthorizationAuditLogger(mockLogger),
+          logger: loggingSystemMock.createLogger(),
+        });
+
+        const res = await auth.getAndEnsureAuthorizedEntities({
+          savedObjects: [
+            { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },
+            { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
+            { id: '3', attributes: { owner: 'c' }, type: 'test', references: [] },
+          ],
+        });
+
+        expect(res).toEqual({
+          authorized: [
+            { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },
+            { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
+          ],
+          unauthorized: [{ id: '3', attributes: { owner: 'c' }, type: 'test', references: [] }],
+        });
+
+        expect(mockLogger.log.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_bulk_get",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "access",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": "User has accessed cases [id=1] as owner \\"a\\"",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_bulk_get",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "access",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "2",
+                    "type": "cases",
+                  },
+                },
+                "message": "User has accessed cases [id=2] as owner \\"b\\"",
+              },
+            ],
+          ]
+        `);
+      });
+    });
+
+    describe('hasAllRequested: false', () => {
+      const checkPrivilegesResponse = {
+        hasAllRequested: false,
+        username: 'super',
+        privileges: {
+          kibana: [
+            {
+              authorized: true,
+              privilege: 'a:getCase',
+            },
+            {
+              authorized: true,
+              privilege: 'b:getCase',
+            },
+            {
+              authorized: false,
+              privilege: 'c:getCase',
+            },
+          ],
+        },
+      };
+
+      beforeEach(async () => {
+        securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValueOnce(
+          jest.fn(async () => checkPrivilegesResponse)
+        );
+
+        securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValueOnce(
+          jest.fn(async () => ({
+            ...checkPrivilegesResponse,
+            hasAllRequested: true,
+          }))
+        );
+
+        (
+          securityStart.authz.actions.cases.get as jest.MockedFunction<
+            typeof securityStart.authz.actions.cases.get
+          >
+        ).mockImplementation((owner, opName) => {
+          return `${owner}:${opName}`;
+        });
+
+        featuresStart.getKibanaFeatures.mockReturnValue([
+          { id: 'a', cases: ['a', 'b', 'c'] },
+        ] as unknown as KibanaFeature[]);
+
+        auth = await Authorization.create({
+          request,
+          securityAuth: securityStart.authz,
+          spaces: spacesStart,
+          features: featuresStart,
+          auditLogger: new AuthorizationAuditLogger(mockLogger),
+          logger: loggingSystemMock.createLogger(),
+        });
+      });
+
+      it('categorizes the registered owners a and b as authorized and the unregistered owner c as unauthorized', async () => {
+        const res = await auth.getAndEnsureAuthorizedEntities({
+          savedObjects: [
+            { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },
+            { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
+            { id: '3', attributes: { owner: 'c' }, type: 'test', references: [] },
+          ],
+        });
+
+        expect(res).toEqual({
+          authorized: [
+            { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },
+            { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
+          ],
+          unauthorized: [{ id: '3', attributes: { owner: 'c' }, type: 'test', references: [] }],
+        });
       });
     });
   });

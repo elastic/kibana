@@ -37,6 +37,7 @@ export const sampleAttributeKpi = {
                 operationType: 'date_histogram',
                 params: {
                   interval: 'auto',
+                  includeEmptyRows: true,
                 },
                 scale: 'interval',
                 sourceField: '@timestamp',
@@ -98,7 +99,7 @@ export const sampleAttributeKpi = {
         isVisible: true,
         showSingleSeries: true,
         position: 'right',
-        legendSize: 'large',
+        legendSize: 'auto',
         shouldTruncate: false,
       },
       preferredSeriesType: 'line',

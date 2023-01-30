@@ -33,9 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     return colorMapping;
   }
-
-  // FLAKY: https://github.com/elastic/kibana/issues/97403
-  describe.skip('sync colors', function () {
+  describe('sync colors', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
@@ -48,6 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should sync colors on dashboard by default', async function () {
@@ -87,12 +86,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'geo.src',
       });
 
-      await filterBar.addFilter('geo.src', 'is not', 'CN');
+      await filterBar.addFilter({ field: 'geo.src', operation: 'is not', value: 'CN' });
 
       await PageObjects.lens.save('vis2', false, true);
+      await PageObjects.dashboard.useColorSync(true);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+
       const colorMapping1 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(0));
       const colorMapping2 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(1));
+
       expect(Object.keys(colorMapping1)).to.have.length(6);
       expect(Object.keys(colorMapping1)).to.have.length(6);
       const panel1Keys = ['CN'];

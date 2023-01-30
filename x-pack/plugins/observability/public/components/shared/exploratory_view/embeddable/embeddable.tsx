@@ -8,7 +8,6 @@
 import { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import styled from 'styled-components';
 import {
   FormulaPublicApi,
   LensEmbeddableInput,
@@ -16,6 +15,8 @@ import {
   XYState,
 } from '@kbn/lens-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
+import styled from 'styled-components';
+import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
 import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
 import { AllSeries, ReportTypes, useTheme } from '../../../..';
@@ -35,6 +36,7 @@ export interface ExploratoryEmbeddableProps {
   appendTitle?: JSX.Element;
   attributes?: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
+  gridlinesVisibilitySettings?: XYState['gridlinesVisibilitySettings'];
   customHeight?: string;
   customLensAttrs?: any; // Takes LensAttributes
   customTimeRange?: { from: string; to: string }; // required if rendered with LensAttributes
@@ -50,6 +52,12 @@ export interface ExploratoryEmbeddableProps {
   showCalculationMethod?: boolean;
   title?: string | JSX.Element;
   withActions?: boolean | ActionTypes[];
+  align?: 'left' | 'right' | 'center';
+  sparklineMode?: boolean;
+  noLabel?: boolean;
+  fontSize?: number;
+  lineHeight?: number;
+  dataTestSubj?: string;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -64,6 +72,7 @@ export default function Embeddable({
   appendTitle,
   attributes = [],
   axisTitlesVisibility,
+  gridlinesVisibilitySettings,
   customHeight,
   customLensAttrs,
   customTimeRange,
@@ -80,12 +89,18 @@ export default function Embeddable({
   withActions = true,
   lensFormulaHelper,
   hideTicks,
+  align,
+  noLabel,
+  fontSize = 27,
+  lineHeight = 32,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
   const [isAddToCaseOpen, setAddToCaseOpen] = useState(false);
+
+  const spaceId = useKibanaSpace();
 
   const series = Object.entries(attributes)[0]?.[1];
 
@@ -97,7 +112,8 @@ export default function Embeddable({
     reportType,
     theme,
     dataViewState,
-    { ...reportConfigMap, ...obsvReportConfigMap }
+    { ...reportConfigMap, ...obsvReportConfigMap },
+    spaceId.space?.id
   );
 
   let lensAttributes;
@@ -144,6 +160,11 @@ export default function Embeddable({
       axisTitlesVisibility;
   }
 
+  if (typeof gridlinesVisibilitySettings !== 'undefined') {
+    (attributesJSON.state.visualization as XYState).gridlinesVisibilitySettings =
+      gridlinesVisibilitySettings;
+  }
+
   if (typeof legendIsVisible !== 'undefined') {
     (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
   }
@@ -168,7 +189,13 @@ export default function Embeddable({
   }
 
   return (
-    <Wrapper $customHeight={customHeight}>
+    <Wrapper
+      $customHeight={customHeight}
+      align={align}
+      noLabel={noLabel}
+      fontSize={fontSize}
+      lineHeight={lineHeight}
+    >
       {(title || showCalculationMethod || appendTitle) && (
         <EuiFlexGroup alignItems="center" gutterSize="none">
           {title && (
@@ -226,6 +253,10 @@ export default function Embeddable({
 
 const Wrapper = styled.div<{
   $customHeight?: string | number;
+  align?: 'left' | 'right' | 'center';
+  noLabel?: boolean;
+  fontSize?: number;
+  lineHeight?: number;
 }>`
   height: ${(props) => (props.$customHeight ? `${props.$customHeight};` : `100%;`)};
   position: relative;
@@ -239,13 +270,27 @@ const Wrapper = styled.div<{
     }
 
     .legacyMtrVis {
+      > :first-child {
+        justify-content: ${(props) =>
+          props.align === 'left'
+            ? `flex-start;`
+            : props.align === 'right'
+            ? `flex-end;`
+            : 'center;'};
+      }
       justify-content: flex-end;
       .legacyMtrVis__container {
         padding: 0;
+        > :nth-child(2) {
+          ${({ noLabel }) =>
+            noLabel &&
+            ` display: none;
+        `}
+        }
       }
       .legacyMtrVis__value {
-        line-height: 32px !important;
-        font-size: 27px !important;
+        line-height: ${({ lineHeight }) => lineHeight}px !important;
+        font-size: ${({ fontSize }) => fontSize}px !important;
       }
       > :first-child {
         transform: none !important;

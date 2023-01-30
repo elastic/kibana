@@ -10,7 +10,6 @@ import { EuiSpacer } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { TopValues } from '../../../top_values';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
@@ -45,32 +44,13 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
   const theme = useDataVizChartTheme();
   if (!formattedPercentages) return null;
 
-  const { trueCount, falseCount, count } = formattedPercentages;
-  const stats = {
-    ...config.stats,
-    topValues: [
-      {
-        key: i18n.translate(
-          'xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.trueCountLabel',
-          { defaultMessage: 'true' }
-        ),
-        doc_count: trueCount ?? 0,
-      },
-      {
-        key: i18n.translate(
-          'xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.falseCountLabel',
-          { defaultMessage: 'false' }
-        ),
-        doc_count: falseCount ?? 0,
-      },
-    ],
-  };
+  const { count } = formattedPercentages;
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerBooleanContent'}>
       <DocumentStatsTable config={config} />
 
       <TopValues
-        stats={stats}
+        stats={config.stats}
         fieldFormat={fieldFormat}
         barColor="success"
         onAddFilter={onAddFilter}

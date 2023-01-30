@@ -20,16 +20,16 @@ const configSchema = schema.object({
   autoCreateApmDataView: schema.boolean({ defaultValue: true }),
   serviceMapEnabled: schema.boolean({ defaultValue: true }),
   serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
-  serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
   serviceMapFingerprintGlobalBucketSize: schema.number({
     defaultValue: 1000,
   }),
+  serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
-    maxTraceItems: schema.number({ defaultValue: 1000 }),
+    maxTraceItems: schema.number({ defaultValue: 5000 }),
   }),
   searchAggregatedTransactions: schema.oneOf(
     [
@@ -51,7 +51,6 @@ const configSchema = schema.object({
     span: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
     error: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
     metric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
-    sourcemap: schema.string({ defaultValue: 'apm-*' }),
     onboarding: schema.string({ defaultValue: 'apm-*' }),
   }),
   forceSyntheticSource: schema.boolean({ defaultValue: false }),
@@ -61,10 +60,12 @@ const configSchema = schema.object({
 export const config: PluginConfigDescriptor<APMConfig> = {
   deprecations: ({
     rename,
+    unused,
     renameFromRoot,
     deprecateFromRoot,
     unusedFromRoot,
   }) => [
+    unused('indices.sourcemap', { level: 'warning' }),
     rename('autocreateApmIndexPattern', 'autoCreateApmDataView', {
       level: 'warning',
     }),

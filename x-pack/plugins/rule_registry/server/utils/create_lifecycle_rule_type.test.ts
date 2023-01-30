@@ -20,6 +20,8 @@ import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -51,6 +53,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         services.alertWithLifecycle(alert);
       });
       nextAlerts = [];
+      return { state: {} };
     },
     id: 'ruleTypeId',
     isExportable: true,
@@ -94,11 +97,11 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
       scheduleActions.mockClear();
 
-      state = ((await type.executor({
+      ({ state } = ((await type.executor({
         executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
         logger: loggerMock.create(),
         namespace: 'namespace',
-        params: {},
+        params: { threshold: 1, operator: '>' },
         previousStartedAt,
         rule: {
           id: 'alertId',
@@ -129,11 +132,13 @@ function createRule(shouldWriteAlerts: boolean = true) {
           shouldStopExecution: () => false,
           shouldWriteAlerts: () => shouldWriteAlerts,
           uiSettingsClient: {} as any,
+          share: {} as SharePluginStart,
+          dataViews: dataViewPluginMocks.createStartContract(),
         },
         spaceId: 'spaceId',
         startedAt,
         state,
-      })) ?? {}) as Record<string, any>;
+      })) ?? {}) as Record<string, any>);
 
       previousStartedAt = startedAt;
     },
@@ -235,11 +240,16 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.action": "open",
               "event.kind": "signal",
               "kibana.alert.duration.us": 0,
+              "kibana.alert.flapping": false,
               "kibana.alert.instance.id": "opbeans-java",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
+              "kibana.alert.rule.parameters": Object {
+                "operator": ">",
+                "threshold": 1,
+              },
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
@@ -266,11 +276,16 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.action": "open",
               "event.kind": "signal",
               "kibana.alert.duration.us": 0,
+              "kibana.alert.flapping": false,
               "kibana.alert.instance.id": "opbeans-node",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
+              "kibana.alert.rule.parameters": Object {
+                "operator": ">",
+                "threshold": 1,
+              },
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [

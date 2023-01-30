@@ -19,7 +19,7 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { getAlertDetailsTabUrl } from '../../../common/components/link_to';
 import { AlertDetailRouteType } from './types';
-import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { getAlertDetailsNavTabs } from './utils/navigation';
 import { SecurityPageName } from '../../../../common/constants';
 import { eventID } from '../../../../common/endpoint/models/event';
@@ -73,13 +73,14 @@ export const AlertDetailsPage = memo(() => {
       {hasData && (
         <>
           <AlertDetailsHeader loading={loading} ruleName={ruleName} timestamp={timestamp} />
-          <SecuritySolutionTabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
+          <TabNavigationWithBreadcrumbs navTabs={getAlertDetailsNavTabs(eventId)} />
           <EuiSpacer size="l" />
           <Switch>
             <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}>
               <DetailsSummaryTab
                 eventId={eventId}
                 dataAsNestedObject={dataAsNestedObject}
+                searchHit={searchHit}
                 detailsData={detailsData}
                 sourcererDataView={sourcererDataView}
               />

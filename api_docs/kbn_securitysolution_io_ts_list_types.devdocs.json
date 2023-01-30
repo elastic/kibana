@@ -472,6 +472,27 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+            "id": "def-common.ApiCallFetchExceptionListsProps.sort",
+            "type": "Object",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-io-ts-list-types",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+                "section": "def-common.Sort",
+                "text": "Sort"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
             "id": "def-common.ApiCallFetchExceptionListsProps.filters",
             "type": "string",
             "tags": [],
@@ -1242,13 +1263,20 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
-            "id": "def-common.ExceptionListFilter.type",
+            "id": "def-common.ExceptionListFilter.types",
             "type": "CompoundType",
             "tags": [],
-            "label": "type",
+            "label": "types",
             "description": [],
             "signature": [
-              "string | null | undefined"
+              {
+                "pluginId": "@kbn/securitysolution-io-ts-list-types",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+                "section": "def-common.ExceptionListTypeEnum",
+                "text": "ExceptionListTypeEnum"
+              },
+              "[] | null | undefined"
             ],
             "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
             "deprecated": false,
@@ -1752,6 +1780,42 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.Sort",
+        "type": "Interface",
+        "tags": [],
+        "label": "Sort",
+        "description": [],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+            "id": "def-common.Sort.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+            "id": "def-common.Sort.order",
+            "type": "string",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
         "id": "def-common.UpdateExceptionListItemProps",
         "type": "Interface",
         "tags": [],
@@ -2108,6 +2172,27 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+            "id": "def-common.UseExceptionListProps.sort",
+            "type": "Object",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-io-ts-list-types",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+                "section": "def-common.Sort",
+                "text": "Sort"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2227,6 +2312,27 @@
             "description": [],
             "signature": [
               "readonly string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+            "id": "def-common.UseExceptionListsProps.initialSort",
+            "type": "Object",
+            "tags": [],
+            "label": "initialSort",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-io-ts-list-types",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+                "section": "def-common.Sort",
+                "text": "Sort"
+              },
+              " | undefined"
             ],
             "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
             "deprecated": false,
@@ -3831,7 +3937,7 @@
         "label": "InternalCreateExceptionListSchema",
         "description": [],
         "signature": [
-          "{ type: \"endpoint\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: \"endpoint_trusted_apps\" | \"endpoint_event_filters\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\" | undefined; } & { description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
+          "{ type: \"endpoint\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; } & { description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/internal/create_exception_list_schema/index.ts",
         "deprecated": false,
@@ -8934,7 +9040,7 @@
           "PartialC",
           "<{ list_id: ",
           "KeyofC",
-          "<{ endpoint_trusted_apps: null; endpoint_event_filters: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; }>>, ",
+          "<Record<string, null>>; }>>, ",
           "IntersectionC",
           "<[",
           "ExactC",

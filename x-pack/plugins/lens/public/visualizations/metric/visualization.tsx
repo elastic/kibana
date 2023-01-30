@@ -98,16 +98,16 @@ const getMetricLayerConfiguration = (
     const hasDynamicColoring = !!props.state.palette;
     return hasDynamicColoring
       ? {
-          triggerIcon: 'colorBy',
+          triggerIconType: 'colorBy',
           palette: stops.map(({ color }) => color),
         }
       : hasStaticColoring
       ? {
-          triggerIcon: 'color',
+          triggerIconType: 'color',
           color: props.state.color,
         }
       : {
-          triggerIcon: 'color',
+          triggerIconType: 'color',
           color: getDefaultColor(props.state),
         };
   };
@@ -209,7 +209,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.breakdownByAccessor,
-                triggerIcon: props.state.collapseFn ? ('aggregate' as const) : undefined,
+                triggerIconType: props.state.collapseFn ? ('aggregate' as const) : undefined,
               },
             ]
           : [],
@@ -634,14 +634,9 @@ export const getMetricVisualization = ({
     );
   },
 
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
-  },
-
   getDisplayOptions() {
     return {
-      noPanelTitle: true,
+      noPanelTitle: false,
       noPadding: true,
     };
   },
@@ -668,5 +663,58 @@ export const getMetricVisualization = ({
       },
     };
     return suggestion;
+  },
+
+  getVisualizationInfo(state: MetricVisualizationState) {
+    const dimensions = [];
+    if (state.metricAccessor) {
+      dimensions.push({
+        id: state.metricAccessor,
+        name: i18n.translate('xpack.lens.primaryMetric.label', {
+          defaultMessage: 'Primary metric',
+        }),
+        dimensionType: 'primary_metric',
+      });
+    }
+
+    if (state.secondaryMetricAccessor) {
+      dimensions.push({
+        id: state.secondaryMetricAccessor,
+        name: i18n.translate('xpack.lens.metric.secondaryMetric', {
+          defaultMessage: 'Secondary metric',
+        }),
+        dimensionType: 'secondary_metric',
+      });
+    }
+
+    if (state.maxAccessor) {
+      dimensions.push({
+        id: state.maxAccessor,
+        name: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
+        dimensionType: 'max',
+      });
+    }
+
+    if (state.breakdownByAccessor) {
+      dimensions.push({
+        id: state.breakdownByAccessor,
+        name: i18n.translate('xpack.lens.metric.breakdownBy', {
+          defaultMessage: 'Break down by',
+        }),
+        dimensionType: 'breakdown',
+      });
+    }
+
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: 'metric',
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
   },
 });

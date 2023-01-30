@@ -30,14 +30,7 @@
         ],
         "signature": [
           "() => typeof ",
-          {
-            "pluginId": "@kbn/handlebars",
-            "scope": "common",
-            "docId": "kibKbnHandlebarsPluginApi",
-            "section": "def-common.ExtendedHandlebars",
-            "text": "ExtendedHandlebars"
-          },
-          " & typeof Handlebars"
+          "node_modules/handlebars/types/index.d.ts"
         ],
         "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
@@ -49,9 +42,137 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.DecoratorOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "DecoratorOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/handlebars",
+            "scope": "common",
+            "docId": "kibKbnHandlebarsPluginApi",
+            "section": "def-common.DecoratorOptions",
+            "text": "DecoratorOptions"
+          },
+          " extends Omit<",
+          "HelperOptions",
+          ", \"lookupProperties\">"
+        ],
+        "path": "packages/kbn-handlebars/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/handlebars",
+            "id": "def-common.DecoratorOptions.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "any[] | undefined"
+            ],
+            "path": "packages/kbn-handlebars/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.DecoratorsHash",
+        "type": "Interface",
+        "tags": [],
+        "label": "DecoratorsHash",
+        "description": [],
+        "path": "packages/kbn-handlebars/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/handlebars",
+            "id": "def-common.DecoratorsHash.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[name: string]: DecoratorFunction",
+            "description": [],
+            "signature": [
+              "[name: string]:  ",
+              {
+                "pluginId": "@kbn/handlebars",
+                "scope": "common",
+                "docId": "kibKbnHandlebarsPluginApi",
+                "section": "def-common.DecoratorFunction",
+                "text": "DecoratorFunction"
+              }
+            ],
+            "path": "packages/kbn-handlebars/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.HelpersHash",
+        "type": "Interface",
+        "tags": [],
+        "label": "HelpersHash",
+        "description": [],
+        "path": "packages/kbn-handlebars/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/handlebars",
+            "id": "def-common.HelpersHash.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[name: string]: HelperDelegate",
+            "description": [],
+            "signature": [
+              "[name: string]:  ",
+              "HelperDelegate"
+            ],
+            "path": "packages/kbn-handlebars/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.AmbiguousHelperOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "AmbiguousHelperOptions",
+        "description": [],
+        "signature": [
+          "HelperOptions",
+          " | ",
+          {
+            "pluginId": "@kbn/handlebars",
+            "scope": "common",
+            "docId": "kibKbnHandlebarsPluginApi",
+            "section": "def-common.NonBlockHelperOptions",
+            "text": "NonBlockHelperOptions"
+          }
+        ],
+        "path": "packages/kbn-handlebars/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/handlebars",
         "id": "def-common.compileFnName",
@@ -71,6 +192,85 @@
       },
       {
         "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.DecoratorFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "DecoratorFunction",
+        "description": [
+          "\nAccording to the [decorator docs]{@link https://github.com/handlebars-lang/handlebars.js/blob/4.x/docs/decorators-api.md},\na decorator will be called with a different set of arugments than what's actually happening in the upstream code.\nSo here I assume that the docs are wrong and that the upstream code is correct. In reality, `context` is the last 4\ndocumented arguments rolled into one object."
+        ],
+        "signature": [
+          "(prog: ",
+          "TemplateDelegate",
+          "<any>, props: Record<string, any>, container: Container, options: any) => any"
+        ],
+        "path": "packages/kbn-handlebars/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/handlebars",
+            "id": "def-common.DecoratorFunction.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "prog",
+            "description": [],
+            "signature": [
+              "TemplateDelegate",
+              "<any>"
+            ],
+            "path": "packages/kbn-handlebars/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/handlebars",
+            "id": "def-common.DecoratorFunction.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "packages/kbn-handlebars/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/handlebars",
+            "id": "def-common.DecoratorFunction.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [],
+            "signature": [
+              "Container"
+            ],
+            "path": "packages/kbn-handlebars/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/handlebars",
+            "id": "def-common.DecoratorFunction.$4",
+            "type": "Any",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-handlebars/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/handlebars",
         "id": "def-common.ExtendedCompileOptions",
         "type": "Type",
         "tags": [],
@@ -79,7 +279,7 @@
           "\nSupported Handlebars compile options.\n\nThis is a subset of all the compile options supported by the upstream\nHandlebars module."
         ],
         "signature": [
-          "{ data?: boolean | undefined; strict?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; assumeObjects?: boolean | undefined; noEscape?: boolean | undefined; }"
+          "{ data?: boolean | undefined; strict?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; noEscape?: boolean | undefined; assumeObjects?: boolean | undefined; }"
         ],
         "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
@@ -96,7 +296,7 @@
           "\nSupported Handlebars runtime options\n\nThis is a subset of all the runtime options supported by the upstream\nHandlebars module."
         ],
         "signature": [
-          "{ data?: any; helpers?: { [name: string]: Function; } | undefined; blockParams?: any[] | undefined; }"
+          "{ data?: any; helpers?: { [name: string]: Function; } | undefined; decorators?: { [name: string]: Function; } | undefined; blockParams?: any[] | undefined; }"
         ],
         "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
@@ -105,23 +305,13 @@
       },
       {
         "parentPluginId": "@kbn/handlebars",
-        "id": "def-common.Handlebars",
-        "type": "CompoundType",
+        "id": "def-common.NonBlockHelperOptions",
+        "type": "Type",
         "tags": [],
-        "label": "Handlebars",
-        "description": [
-          "\nA custom version of the Handlesbars module with an extra `compileAST` function."
-        ],
+        "label": "NonBlockHelperOptions",
+        "description": [],
         "signature": [
-          "typeof ",
-          {
-            "pluginId": "@kbn/handlebars",
-            "scope": "common",
-            "docId": "kibKbnHandlebarsPluginApi",
-            "section": "def-common.ExtendedHandlebars",
-            "text": "ExtendedHandlebars"
-          },
-          " & typeof Handlebars"
+          "{ name: string; data?: any; hash: any; loc: { start: hbs.AST.Position; end: hbs.AST.Position; }; lookupProperty: LookupProperty; }"
         ],
         "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
@@ -132,24 +322,34 @@
     "objects": [
       {
         "parentPluginId": "@kbn/handlebars",
-        "id": "def-common.ExtendedHandlebars",
+        "id": "def-common.handlebars",
         "type": "Object",
         "tags": [],
-        "label": "ExtendedHandlebars",
+        "label": "'handlebars'",
         "description": [
-          "\nNormally this namespace isn't used directly. It's required to be present by\nTypeScript when calling the `Handlebars.create()` function."
+          "\nA custom version of the Handlesbars module with an extra `compileAST` function and fixed typings."
         ],
         "signature": [
           "typeof ",
-          {
-            "pluginId": "@kbn/handlebars",
-            "scope": "common",
-            "docId": "kibKbnHandlebarsPluginApi",
-            "section": "def-common.ExtendedHandlebars",
-            "text": "ExtendedHandlebars"
-          }
+          "node_modules/handlebars/types/index.d.ts"
         ],
         "path": "packages/kbn-handlebars/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.Handlebars",
+        "type": "Object",
+        "tags": [],
+        "label": "Handlebars",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "node_modules/handlebars/types/index.d.ts"
+        ],
+        "path": "node_modules/handlebars/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

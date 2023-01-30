@@ -5,32 +5,38 @@
  * 2.0.
  */
 
-import { toDateRange } from '../../domain/services';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
-import { createSLIClientMock, createSLORepositoryMock } from './mocks';
-import { SLIClient } from './sli_client';
+import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
 import { SLORepository } from './slo_repository';
+import { SummaryClient } from './summary_client';
 
 describe('GetSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
-  let mockSLIClient: jest.Mocked<SLIClient>;
+  let mockSummaryClient: jest.Mocked<SummaryClient>;
   let getSLO: GetSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
-    mockSLIClient = createSLIClientMock();
-    getSLO = new GetSLO(mockRepository, mockSLIClient);
+    mockSummaryClient = createSummaryClientMock();
+    getSLO = new GetSLO(mockRepository, mockSummaryClient);
   });
 
   describe('happy path', () => {
     it('retrieves the SLO from the repository', async () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce({
-        good: 9999,
-        total: 10000,
-        date_range: toDateRange(slo.time_window),
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce({
+        [slo.id]: {
+          status: 'HEALTHY',
+          sliValue: 0.9999,
+          errorBudget: {
+            initial: 0.001,
+            consumed: 0.1,
+            remaining: 0.9,
+            isEstimated: false,
+          },
+        },
       });
 
       const result = await getSLO.execute(slo.id);
@@ -40,35 +46,41 @@ describe('GetSLO', () => {
         id: slo.id,
         name: 'irrelevant',
         description: 'irrelevant',
-        budgeting_method: 'occurrences',
+        budgetingMethod: 'occurrences',
         indicator: {
           params: {
             environment: 'irrelevant',
-            good_status_codes: ['2xx', '3xx', '4xx'],
             service: 'irrelevant',
-            transaction_name: 'irrelevant',
-            transaction_type: 'irrelevant',
+            transactionName: 'irrelevant',
+            transactionType: 'irrelevant',
+            goodStatusCodes: ['2xx', '3xx', '4xx'],
           },
-          type: 'slo.apm.transaction_error_rate',
+          type: 'sli.apm.transactionErrorRate',
         },
         objective: {
           target: 0.999,
         },
-        time_window: {
+        timeWindow: {
           duration: '7d',
-          is_rolling: true,
+          isRolling: true,
         },
-
+        settings: {
+          timestampField: '@timestamp',
+          syncDelay: '1m',
+          frequency: '1m',
+        },
         summary: {
-          sli_value: 0.9999,
-          error_budget: {
+          status: 'HEALTHY',
+          sliValue: 0.9999,
+          errorBudget: {
             initial: 0.001,
             consumed: 0.1,
             remaining: 0.9,
+            isEstimated: false,
           },
         },
-        created_at: slo.created_at.toISOString(),
-        updated_at: slo.updated_at.toISOString(),
+        createdAt: slo.createdAt.toISOString(),
+        updatedAt: slo.updatedAt.toISOString(),
         revision: slo.revision,
       });
     });

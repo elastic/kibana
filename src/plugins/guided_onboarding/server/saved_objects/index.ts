@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { guidedSetupSavedObjects, guidedSetupSavedObjectsType } from './guided_setup';
+export {
+  guideStateSavedObjects,
+  guideStateSavedObjectsType,
+  pluginStateSavedObjects,
+  pluginStateSavedObjectsId,
+  pluginStateSavedObjectsType,
+} from './guided_setup';
+export type { PluginStateSO } from './guided_setup';

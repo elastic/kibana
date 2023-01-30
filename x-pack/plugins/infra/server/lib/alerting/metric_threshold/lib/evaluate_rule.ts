@@ -15,6 +15,7 @@ import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
 import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
+import { AdditionalContext } from '../../common/utils';
 
 export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];
@@ -31,6 +32,7 @@ export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
   shouldWarn: boolean;
   isNoData: boolean;
   bucketKey: Record<string, string>;
+  context?: AdditionalContext;
 };
 
 export const evaluateRule = async <Params extends EvaluatedRuleParams = EvaluatedRuleParams>(
@@ -106,6 +108,14 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
             shouldWarn: result.warn,
             isNoData: result.value === null,
             bucketKey: result.bucketKey,
+            context: {
+              cloud: result.cloud,
+              host: result.host,
+              container: result.container,
+              orchestrator: result.orchestrator,
+              labels: result.labels,
+              tags: result.tags,
+            },
           };
         }
       }

@@ -64,7 +64,9 @@ node scripts/generate_indicators.js
 
 see the file in order to adjust the amount of indicators generated. The default is one million.
 
-## Data for E2E tests
+## E2E
+
+### Data fixtures and loading process
 
 Use es_archives to export data for e2e testing purposes, like so:
 
@@ -75,6 +77,20 @@ TEST_ES_PORT=9200 node scripts/es_archiver save x-pack/test/threat_intelligence_
 These can be loaded at will with `x-pack/plugins/threat_intelligence/cypress/tasks/es_archiver.ts` task.
 
 You can use this approach to load separate data dumps for every test case, to cover all critical scenarios.
+
+### Running locally
+
+`cd` into plugin root and execute `yarn cypress:open-as-ci`
+
+### CI Execution
+
+The entry point for PR testing is `.buildkite/pipelines/pull_request/threat_intelligence.yml` file, see that for details on
+how the test suite is executed & extra options regarding parallelism, retrying etc.
+
+E2E tests for this plugin will only be executed if any of the files changed within the PR matches dependency list here:
+`.buildkite/scripts/pipelines/pull_request/pipeline.ts`
+
+It is also possible to run all tests by attaching a PR flag: `ci:all-cypress-suites`.
 
 ## FAQ
 

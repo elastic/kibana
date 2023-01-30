@@ -1756,11 +1756,11 @@
           },
           ", indexPatterns: ",
           {
-            "pluginId": "dataViews",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
           },
           "[]) => string"
         ],
@@ -1798,11 +1798,11 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "dataViews",
+                "pluginId": "@kbn/es-query",
                 "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
               },
               "[]"
             ],
@@ -1839,6 +1839,14 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
+          "[] | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
           "[]) => string"
         ],
         "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
@@ -1869,7 +1877,7 @@
           {
             "parentPluginId": "data",
             "id": "def-public.getFieldDisplayValueFromFilter.$2",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "indexPatterns",
             "description": [],
@@ -1880,6 +1888,14 @@
                 "docId": "kibDataViewsPluginApi",
                 "section": "def-common.DataView",
                 "text": "DataView"
+              },
+              "[] | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
               },
               "[]"
             ],
@@ -1908,23 +1924,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          ", indexPatterns: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "[]) => ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          " | undefined"
+          ", indexPatterns: T[]) => T | undefined"
         ],
         "path": "src/plugins/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts",
         "deprecated": false,
@@ -1959,14 +1959,7 @@
             "label": "indexPatterns",
             "description": [],
             "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[]"
+              "T[]"
             ],
             "path": "src/plugins/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts",
             "deprecated": false,
@@ -2178,14 +2171,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/url_state/global_sync.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/url_state/global_sync.ts"
           },
           {
             "plugin": "monitoring",
@@ -4565,7 +4550,7 @@
           "\nConverts QueryState to expression AST"
         ],
         "signature": [
-          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataViewsService,\n}: Args) => Promise<",
+          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n}: Args) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -4584,7 +4569,7 @@
             "id": "def-common.textBasedQueryStateToAstWithValidation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataViewsService,\n}",
+            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n}",
             "description": [],
             "signature": [
               "Args"

@@ -11,8 +11,11 @@ export type DatasourceMock = jest.Mocked<Datasource> & {
   publicAPIMock: jest.Mocked<DatasourcePublicAPI>;
 };
 
-export function createMockDatasource(id: string): DatasourceMock {
-  const publicAPIMock: jest.Mocked<DatasourcePublicAPI> = {
+export function createMockDatasource(
+  id: string,
+  customPublicApi: Partial<DatasourcePublicAPI> = {}
+): DatasourceMock {
+  const publicAPIMock = {
     datasourceId: id,
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
@@ -22,7 +25,8 @@ export function createMockDatasource(id: string): DatasourceMock {
     getMaxPossibleNumValues: jest.fn(),
     isTextBasedLanguage: jest.fn(() => false),
     hasDefaultTimeField: jest.fn(() => true),
-  };
+    ...customPublicApi,
+  } as jest.Mocked<DatasourcePublicAPI>;
 
   return {
     id: 'testDatasource',
@@ -42,7 +46,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     initialize: jest.fn((_state?) => {}),
     renderDataPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
-    toExpression: jest.fn((_frame, _state, _indexPatterns) => null),
+    toExpression: jest.fn((_frame, _state, _indexPatterns, dateRange) => null),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
     removeLayer: jest.fn((state, layerId) => ({ newState: state, removedLayerIds: [layerId] })),
     cloneLayer: jest.fn((_state, _layerId, _newLayerId, getNewId) => {}),
@@ -59,7 +63,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
     publicAPIMock,
-    getErrorMessages: jest.fn((_state, _indexPatterns) => undefined),
+    getUserMessages: jest.fn((_state, _deps) => []),
     checkIntegrity: jest.fn((_state, _indexPatterns) => []),
     isTimeBased: jest.fn(),
     isValidColumn: jest.fn(),
@@ -67,6 +71,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getUsedDataView: jest.fn((state, layer) => 'mockip'),
     getUsedDataViews: jest.fn(),
     onRefreshIndexPattern: jest.fn(),
+    getDatasourceInfo: jest.fn(),
   };
 }
 

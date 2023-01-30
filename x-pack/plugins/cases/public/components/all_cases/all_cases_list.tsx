@@ -11,12 +11,7 @@ import { EuiProgress } from '@elastic/eui';
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
-import type {
-  Case,
-  CaseStatusWithAllStatus,
-  FilterOptions,
-  QueryParams,
-} from '../../../common/ui/types';
+import type { Case, CaseStatusWithAllStatus, FilterOptions } from '../../../common/ui/types';
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/api';
 
@@ -29,16 +24,12 @@ import { CasesTable } from './table';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CasesMetrics } from './cases_metrics';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
-import {
-  DEFAULT_FILTER_OPTIONS,
-  DEFAULT_QUERY_PARAMS,
-  initialData,
-  useGetCases,
-} from '../../containers/use_get_cases';
+import { initialData, useGetCases } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
 import { useIsLoadingCases } from './use_is_loading_cases';
+import { useAllCasesState } from './use_all_cases_state';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -54,7 +45,8 @@ const ProgressLoader = styled(EuiProgress)`
 `;
 
 const getSortField = (field: string): SortFieldCase =>
-  field === SortFieldCase.closedAt ? SortFieldCase.closedAt : SortFieldCase.createdAt;
+  // @ts-ignore
+  SortFieldCase[field] ?? SortFieldCase.title;
 
 export interface AllCasesListProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
@@ -69,18 +61,16 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const isLoading = useIsLoadingCases();
 
     const hasOwner = !!owner.length;
-
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
       ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: firstAvailableStatus }),
       owner: hasOwner ? owner : availableSolutions,
     };
 
-    const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-      ...DEFAULT_FILTER_OPTIONS,
-      ...initialFilterOptions,
-    });
-    const [queryParams, setQueryParams] = useState<QueryParams>(DEFAULT_QUERY_PARAMS);
+    const { queryParams, setQueryParams, filterOptions, setFilterOptions } = useAllCasesState(
+      isSelectorView,
+      initialFilterOptions
+    );
     const [selectedCases, setSelectedCases] = useState<Case[]>([]);
 
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
@@ -112,7 +102,10 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const sorting = useMemo(
       () => ({
-        sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
+        sort: {
+          field: queryParams.sortField,
+          direction: queryParams.sortOrder,
+        },
       }),
       [queryParams.sortField, queryParams.sortOrder]
     );
@@ -149,29 +142,23 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
-        if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.closed) {
-          setQueryParams((prevQueryParams) => ({
-            ...prevQueryParams,
-            sortField: SortFieldCase.closedAt,
-          }));
-        } else if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.open) {
-          setQueryParams((prevQueryParams) => ({
-            ...prevQueryParams,
-            sortField: SortFieldCase.createdAt,
-          }));
+        if (
+          newFilterOptions?.status === CaseStatuses.closed &&
+          queryParams.sortField === SortFieldCase.createdAt
+        ) {
+          setQueryParams({ sortField: SortFieldCase.closedAt });
         } else if (
           newFilterOptions.status &&
-          newFilterOptions.status === CaseStatuses['in-progress']
+          [CaseStatuses.open, CaseStatuses['in-progress'], StatusAll].includes(
+            newFilterOptions.status
+          ) &&
+          queryParams.sortField === SortFieldCase.closedAt
         ) {
-          setQueryParams((prevQueryParams) => ({
-            ...prevQueryParams,
-            sortField: SortFieldCase.createdAt,
-          }));
+          setQueryParams({ sortField: SortFieldCase.createdAt });
         }
 
         deselectCases();
-        setFilterOptions((prevFilterOptions) => ({
-          ...prevFilterOptions,
+        setFilterOptions({
           ...newFilterOptions,
           /**
            * If the user selects and deselects all solutions
@@ -191,15 +178,22 @@ export const AllCasesList = React.memo<AllCasesListProps>(
                 owner: newFilterOptions.owner.length === 0 ? owner : newFilterOptions.owner,
               }
             : {}),
-        }));
+        });
       },
-      [deselectCases, hasOwner, availableSolutions, owner]
+      [
+        queryParams.sortField,
+        deselectCases,
+        setFilterOptions,
+        hasOwner,
+        availableSolutions,
+        owner,
+        setQueryParams,
+      ]
     );
 
     const { columns } = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,
       userProfiles: userProfiles ?? new Map(),
-      currentUserProfile,
       isSelectorView,
       connectors,
       onRowClick,
@@ -209,10 +203,10 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const pagination = useMemo(
       () => ({
-        pageIndex: (queryParams?.page ?? DEFAULT_QUERY_PARAMS.page) - 1,
-        pageSize: queryParams?.perPage ?? DEFAULT_QUERY_PARAMS.perPage,
+        pageIndex: queryParams.page - 1,
+        pageSize: queryParams.perPage,
         totalItemCount: data.total ?? 0,
-        pageSizeOptions: [5, 10, 15, 20, 25],
+        pageSizeOptions: [10, 25, 50, 100],
       }),
       [data, queryParams]
     );

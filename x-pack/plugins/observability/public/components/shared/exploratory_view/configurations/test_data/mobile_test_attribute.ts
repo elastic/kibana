@@ -38,7 +38,7 @@ export const testMobileKPIAttr = {
                 isBucketed: true,
                 label: '@timestamp',
                 operationType: 'date_histogram',
-                params: { interval: 'auto' },
+                params: { interval: 'auto', includeEmptyRows: true },
                 scale: 'interval',
               },
               'y-axis-column-layer0-0': {
@@ -66,7 +66,7 @@ export const testMobileKPIAttr = {
         isVisible: true,
         showSingleSeries: true,
         position: 'right',
-        legendSize: 'large',
+        legendSize: 'auto',
         shouldTruncate: false,
       },
       valueLabels: 'hide',

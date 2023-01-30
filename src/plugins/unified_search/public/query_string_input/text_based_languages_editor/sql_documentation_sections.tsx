@@ -14,28 +14,20 @@ export const initialSection = (
     markdown={i18n.translate(
       'unifiedSearch.query.textBasedLanguagesEditor.documentation.markdown',
       {
-        defaultMessage: `## How it works
+        defaultMessage: `## About Elasticsearch SQL
 
-With Elasticsearch SQL, you can access that full text search, 
-blazing speed, and effortless scalability with a familiar query syntax.
-You can use SQL to search and aggregate data natively inside Elasticsearch. 
-One can think of Elasticsearch SQL as a translator, 
-one that understands both SQL and Elasticsearch and makes it easy
-to read and process data in real-time.
-                    
-An example SQL query can be:
+Use Elasticsearch SQL to search and aggregate data inside Elasticsearch. This query language provides full text search with a familiar syntax. Here is an example query:
                     
 \`\`\`
 SELECT * FROM library 
 ORDER BY page_count DESC LIMIT 5
 \`\`\`
                     
-As a general rule, Elasticsearch SQL as the name indicates provides a SQL interface to Elasticsearch.
-As such, it follows the SQL terminology and conventions first, whenever possible.
-                    
-Elasticsearch SQL currently accepts only one command at a time. A command is a sequence of tokens terminated by the end of input stream.
-                    
-Elasticsearch SQL provides a comprehensive set of built-in operators and functions.
+Elasticsearch SQL:
+
+- Provides a comprehensive set of built-in operators and functions.
+- Follows SQL terminology and conventions.
+- Accepts one command per line. A command is a sequence of tokens terminated by the end of input stream
                     
                                       `,
       }

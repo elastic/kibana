@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useCallback, useRef } from 'react';
+import React, { memo, PropsWithChildren, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { EsQueryRuleParams, SearchType } from '../types';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
 import { QueryFormTypeChooser } from './query_form_type_chooser';
 import { isSearchSourceRule } from '../util';
-import { EXPRESSION_ERROR_KEYS } from '../constants';
+import { ALL_EXPRESSION_ERROR_KEYS } from '../constants';
 
 function areSearchSourceExpressionPropsEqual(
   prevProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>,
@@ -33,11 +33,12 @@ const SearchSourceExpressionMemoized = memo<SearchSourceExpressionProps>(
 );
 
 export const EsQueryRuleTypeExpression: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<EsQueryRuleParams>
+  RuleTypeParamsExpressionProps<EsQueryRuleParams, EsQueryRuleMetaData>
 > = (props) => {
   const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceRule(ruleParams);
-  const isManagementPage = useRef(!Object.keys(ruleParams).length).current;
+  // metadata provided only when open alert from Discover page
+  const isManagementPage = props.metadata?.isManagementPage ?? true;
 
   const formTypeSelected = useCallback(
     (searchType: SearchType | null) => {
@@ -58,7 +59,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
     }
   );
 
-  const errorParam = EXPRESSION_ERROR_KEYS.find((errorKey) => {
+  const errorParam = ALL_EXPRESSION_ERROR_KEYS.find((errorKey) => {
     return errors[errorKey]?.length >= 1 && ruleParams[errorKey] !== undefined;
   });
 
@@ -67,8 +68,9 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
       <EuiCallOut
         color="danger"
         size="s"
+        data-test-subj="esQueryAlertExpressionError"
         title={
-          ['index', 'searchType'].includes(errorParam)
+          ['index', 'searchType', 'timeField'].includes(errorParam)
             ? errors[errorParam]
             : expressionGenericErrorMessage
         }

@@ -288,7 +288,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           !('selectionStyle' in operationDefinition) ||
           operationDefinition.selectionStyle !== 'hidden'
       )
-      .filter(({ type }) => fieldByOperation[type]?.size || operationWithoutField.has(type))
+      .filter(({ type }) => fieldByOperation.get(type)?.size || operationWithoutField.has(type))
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
@@ -328,6 +328,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         field: currentField || undefined,
         filterOperations: props.filterOperations,
         visualizationGroups: dimensionGroups,
+        dateRange,
       }),
       disabledStatus:
         definition.getDisabledStatus &&
@@ -396,7 +397,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         );
       } else if (!compatibleWithCurrentField) {
         label = (
-          <EuiFlexGroup gutterSize="none" alignItems="center">
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
               {label}
             </EuiFlexItem>
@@ -499,7 +500,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             setStateWrapper(newLayer);
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
-            const possibleFields = fieldByOperation[operationType] || new Set();
+            const possibleFields = fieldByOperation.get(operationType) ?? new Set<string>();
 
             let newLayer: FormBasedLayer;
             if (possibleFields.size === 1) {
@@ -606,6 +607,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     setIsCloseable,
     paramEditorCustomProps,
     ReferenceEditor,
+    dataSectionExtra: props.dataSectionExtra,
     ...services,
   };
 
@@ -650,7 +652,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     <>
       <EuiFormRow
         label={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
                 defaultMessage: 'Functions',
@@ -663,10 +665,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 isOpen={isHelpOpen}
                 display="inlineBlock"
                 panelPaddingSize="none"
-                className="dscFieldTypesHelp__popover"
-                panelClassName="dscFieldTypesHelp__panel"
                 closePopover={closeHelp}
-                initialFocus="#dscFieldTypesHelpBasicTableId"
+                initialFocus="#functionsHelpBasicTableId"
               >
                 <EuiPopoverTitle paddingSize="s">
                   {i18n.translate('xpack.lens.indexPattern.quickFunctions.popoverTitle', {
@@ -680,7 +680,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   paddingSize="s"
                 >
                   <EuiBasicTable
-                    id="dscFieldTypesHelpBasicTableId"
+                    id="functionsHelpBasicTableId"
                     style={{ width: 350 }}
                     tableCaption={i18n.translate(
                       'xpack.lens.indexPattern.quickFunctions.tableTitle',
@@ -834,8 +834,22 @@ export function DimensionEditor(props: DimensionEditorProps) {
           operationDefinitionMap={operationDefinitionMap}
         />
       ) : null}
+      {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
+        <BucketNestingEditor
+          layer={state.layers[props.layerId]}
+          columnId={props.columnId}
+          setColumns={(columnOrder) => updateLayer({ columnOrder })}
+          getFieldByName={currentIndexPattern.getFieldByName}
+        />
+      )}
 
       {shouldDisplayExtraOptions && <ParamEditor {...paramEditorProps} />}
+      {!selectedOperationDefinition?.handleDataSectionExtra && (
+        <>
+          <EuiSpacer size="m" />
+          {props.dataSectionExtra}
+        </>
+      )}
     </>
   );
 
@@ -1142,15 +1156,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     },
                   });
                 }}
-              />
-            )}
-
-            {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
-              <BucketNestingEditor
-                layer={state.layers[props.layerId]}
-                columnId={props.columnId}
-                setColumns={(columnOrder) => updateLayer({ columnOrder })}
-                getFieldByName={currentIndexPattern.getFieldByName}
               />
             )}
 

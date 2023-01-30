@@ -11,9 +11,16 @@ import { ProfilingPlugin } from './plugin';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  elasticsearch: schema.maybe(
+    schema.object({
+      hosts: schema.string(),
+      username: schema.string(),
+      password: schema.string(),
+    })
+  ),
 });
 
-type ProfilingConfig = TypeOf<typeof configSchema>;
+export type ProfilingConfig = TypeOf<typeof configSchema>;
 
 // plugin config
 export const config: PluginConfigDescriptor<ProfilingConfig> = {

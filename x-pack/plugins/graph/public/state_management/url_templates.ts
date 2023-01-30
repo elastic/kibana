@@ -9,7 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { i18n } from '@kbn/i18n';
 import { modifyUrl } from '@kbn/std';
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import { takeEvery } from 'redux-saga/effects';
 import { format, parse } from 'url';
 import { GraphState, GraphStoreDependencies } from './store';

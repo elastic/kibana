@@ -5,41 +5,54 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
-import { fetchJourneySteps } from '../../../state';
+import {
+  fetchJourneyAction,
+  selectBrowserJourney,
+  selectBrowserJourneyLoading,
+} from '../../../state';
 
-export const useJourneySteps = (checkGroup: string | undefined) => {
-  const { stepIndex } = useParams<{ stepIndex: string }>();
+export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
+  const { stepIndex, checkGroupId: urlCheckGroup } = useParams<{
+    stepIndex: string;
+    checkGroupId: string;
+  }>();
+  const checkGroupId = checkGroup ?? urlCheckGroup;
 
-  const { data, loading } = useFetcher(() => {
-    if (!checkGroup) {
-      return Promise.resolve(null);
+  const journeyData = useSelector(selectBrowserJourney(checkGroupId));
+  const loading = useSelector(selectBrowserJourneyLoading(checkGroupId));
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (checkGroupId) {
+      dispatch(fetchJourneyAction.get({ checkGroup: checkGroupId }));
     }
+  }, [checkGroupId, dispatch, lastRefresh]);
 
-    return fetchJourneySteps({ checkGroup });
-  }, [checkGroup]);
-
-  const isFailed =
-    data?.steps.some(
-      (step) =>
-        step.synthetics?.step?.status === 'failed' || step.synthetics?.step?.status === 'skipped'
-    ) ?? false;
-
-  const stepEnds: JourneyStep[] = (data?.steps ?? []).filter(isStepEnd);
-
+  const stepEnds: JourneyStep[] = (journeyData?.steps ?? []).filter(isStepEnd);
+  const failedStep = journeyData?.steps.find((step) => step.synthetics?.step?.status === 'failed');
   const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
 
+  const currentStep = stepIndex
+    ? stepEnds.find((step) => step.synthetics?.step?.index === Number(stepIndex))
+    : undefined;
+
+  const isFailedStep =
+    failedStep?.synthetics?.step && failedStep.synthetics.step.index === Number(stepIndex);
+
   return {
-    data: data as SyntheticsJourneyApiResponse,
+    data: journeyData as SyntheticsJourneyApiResponse,
     loading: loading ?? false,
-    isFailed,
     stepEnds,
     stepLabels,
-    currentStep: stepIndex
-      ? data?.steps.find((step) => step.synthetics?.step?.index === Number(stepIndex))
-      : undefined,
+    currentStep,
+    failedStep,
+    isFailedStep,
+    isFailed: false,
   };
 };

@@ -7,7 +7,7 @@
 
 export interface KeyValuePair {
   label: string;
-  value: string;
+  value: string | null;
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
@@ -98,11 +98,36 @@ export interface FilteringConfig {
   draft: FilteringRules;
 }
 
+export enum TriggerMethod {
+  ON_DEMAND = 'on_demand',
+  SCHEDULED = 'scheduled',
+}
+
+export enum FeatureName {
+  FILTERING_ADVANCED_CONFIG = 'filtering_advanced_config',
+  FILTERING_RULES = 'filtering_rules',
+  SYNC_RULES = 'sync_rules',
+}
+
+export type ConnectorFeatures = Partial<{
+  [FeatureName.FILTERING_ADVANCED_CONFIG]: boolean;
+  [FeatureName.FILTERING_RULES]: boolean;
+  [FeatureName.SYNC_RULES]: {
+    advanced?: {
+      enabled: boolean;
+    };
+    basic?: {
+      enabled: boolean;
+    };
+  };
+}> | null;
+
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
   description: string | null;
   error: string | null;
+  features: ConnectorFeatures;
   filtering: FilteringConfig[];
   id: string;
   index_name: string;
@@ -126,14 +151,37 @@ export interface Connector {
 export type ConnectorDocument = Omit<Connector, 'id'>;
 
 export interface ConnectorSyncJob {
+  cancelation_requested_at: string | null;
+  canceled_at: string | null;
   completed_at: string | null;
-  connector?: ConnectorDocument;
-  connector_id: string;
+  connector: {
+    configuration: ConnectorConfiguration;
+    filtering: FilteringRules[] | null;
+    id: string;
+    index_name: string;
+    language: string;
+    pipeline: IngestPipelineParams | null;
+    service_type: string;
+  };
   created_at: string;
   deleted_document_count: number;
   error: string | null;
-  index_name: string;
+  id: string;
   indexed_document_count: number;
+  indexed_document_volume: number;
+  last_seen: string;
+  metadata: Record<string, unknown>;
+  started_at: string;
   status: SyncStatus;
+  trigger_method: TriggerMethod;
   worker_hostname: string;
+}
+
+export type ConnectorSyncJobDocument = Omit<ConnectorSyncJob, 'id'>;
+
+export interface NativeConnector {
+  configuration: ConnectorConfiguration;
+  features: Connector['features'];
+  name: string;
+  serviceType: string;
 }

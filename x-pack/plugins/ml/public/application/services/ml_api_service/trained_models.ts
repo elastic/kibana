@@ -126,7 +126,11 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     startModelAllocation(
       modelId: string,
-      queryParams?: { number_of_allocations: number; threads_per_allocation: number }
+      queryParams?: {
+        number_of_allocations: number;
+        threads_per_allocation: number;
+        priority: 'low' | 'normal';
+      }
     ) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}/deployment/_start`,
@@ -145,13 +149,40 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    inferTrainedModel(modelId: string, payload: any, timeout?: string) {
+    updateModelDeployment(modelId: string, params: { number_of_allocations: number }) {
+      return httpService.http<{ acknowledge: boolean }>({
+        path: `${apiBasePath}/trained_models/${modelId}/deployment/_update`,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+    },
+
+    inferTrainedModel(
+      modelId: string,
+      payload: estypes.MlInferTrainedModelRequest['body'],
+      timeout?: string
+    ) {
       const body = JSON.stringify(payload);
       return httpService.http<estypes.MlInferTrainedModelResponse>({
         path: `${apiBasePath}/trained_models/infer/${modelId}`,
         method: 'POST',
         body,
         ...(timeout ? { query: { timeout } as HttpFetchQuery } : {}),
+      });
+    },
+
+    trainedModelPipelineSimulate(
+      pipeline: estypes.IngestPipeline,
+      docs: estypes.IngestSimulateDocument[]
+    ) {
+      const body = JSON.stringify({
+        pipeline,
+        docs,
+      });
+      return httpService.http<estypes.IngestSimulateResponse>({
+        path: `${apiBasePath}/trained_models/pipeline_simulate`,
+        method: 'POST',
+        body,
       });
     },
   };

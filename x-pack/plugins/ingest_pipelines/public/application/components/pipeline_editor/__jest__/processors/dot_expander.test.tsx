@@ -16,7 +16,7 @@ describe('Processor: Dot Expander', () => {
   const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -129,6 +129,7 @@ describe('Processor: Dot Expander', () => {
 
     // Set optional parameters
     form.setInputValue('pathField.input', 'somepath');
+    form.toggleEuiSwitch('overrideField.input');
 
     // Save the field with new changes
     await saveNewProcessor();
@@ -137,6 +138,7 @@ describe('Processor: Dot Expander', () => {
     expect(processors[0][DOT_EXPANDER_TYPE]).toEqual({
       field: 'field.notation',
       path: 'somepath',
+      override: true,
     });
   });
 });

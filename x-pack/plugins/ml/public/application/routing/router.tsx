@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, FC } from 'react';
-import { useHistory, useLocation, Router, RouteProps } from 'react-router-dom';
-import { Location } from 'history';
+import React, { FC } from 'react';
+import { Router, type RouteProps } from 'react-router-dom';
+import { type Location } from 'history';
 
 import type {
   AppMountParameters,
@@ -18,11 +18,12 @@ import type {
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { EuiLoadingContent } from '@elastic/eui';
+import { UrlStateProvider } from '@kbn/ml-url-state';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 import { MlContext, MlContextValue } from '../contexts/ml';
-import { UrlStateProvider } from '../util/url_state';
 
 import { MlPage } from '../components/ml_page';
+import { MlPages } from '../../locator';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -75,26 +76,6 @@ export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children 
 };
 
 /**
- * This component provides compatibility with the previous hash based
- * URL format used by HashRouter. Even if we migrate all internal URLs
- * to one without hashes, we should keep this redirect in place to
- * support legacy bookmarks and as a fallback for unmigrated URLs
- * from other plugins.
- */
-const LegacyHashUrlRedirect: FC = ({ children }) => {
-  const history = useHistory();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (location.hash.startsWith('#/')) {
-      history.push(location.hash.replace('#', ''));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.hash]);
-
-  return <>{children}</>;
-};
-/**
  * `MlRouter` is based on `BrowserRouter` and takes in `ScopedHistory` provided
  * by Kibana. `LegacyHashUrlRedirect` provides compatibility with legacy hash based URLs.
  * `UrlStateProvider` manages state stored in `_g/_a` URL parameters which can be
@@ -104,12 +85,14 @@ export const MlRouter: FC<{
   pageDeps: PageDependencies;
 }> = ({ pageDeps }) => (
   <Router history={pageDeps.history}>
-    <LegacyHashUrlRedirect>
-      <UrlStateProvider>
-        <MlNotificationsContextProvider>
-          <MlPage pageDeps={pageDeps} />
-        </MlNotificationsContextProvider>
-      </UrlStateProvider>
-    </LegacyHashUrlRedirect>
+    <UrlStateProvider>
+      <MlNotificationsContextProvider>
+        <MlPage pageDeps={pageDeps} />
+      </MlNotificationsContextProvider>
+    </UrlStateProvider>
   </Router>
 );
+
+export function createPath(page: MlPages, additionalPrefix?: string) {
+  return `/${page}${additionalPrefix ? `${additionalPrefix}` : ''}`;
+}

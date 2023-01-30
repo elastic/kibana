@@ -32,7 +32,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { isPending } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { asInteger } from '../../../../../common/utils/formatters/formatters';
@@ -131,10 +131,7 @@ export function StorageDetailsPerService({
     [indexLifecyclePhase, start, end, environment, kuery, serviceName]
   );
 
-  if (
-    status === FETCH_STATUS.LOADING ||
-    status === FETCH_STATUS.NOT_INITIATED
-  ) {
+  if (isPending(status)) {
     return (
       <div style={{ width: '50%' }}>
         <EuiLoadingContent data-test-subj="loadingSpinner" />

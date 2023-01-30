@@ -19,7 +19,7 @@ export interface ErrorFromPayload {
 }
 
 // interface of the API result
-interface Payload {
+export interface Payload {
   statusCode: number;
   content: string | Stream | ErrorFromPayload;
   contentType: string | null;

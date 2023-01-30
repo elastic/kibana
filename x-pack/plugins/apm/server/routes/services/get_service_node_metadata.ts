@@ -7,15 +7,9 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  HOST_NAME,
-  CONTAINER_ID,
-} from '../../../common/elasticsearch_fieldnames';
+import { HOST_NAME, CONTAINER_ID } from '../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import {
-  SERVICE_NAME,
-  SERVICE_NODE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import {
   environmentQuery,
   serviceNodeNameQuery,

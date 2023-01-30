@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -16,10 +13,27 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../timelines/tsconfig.json" },
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../../../src/plugins/unified_search/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" }
+    "@kbn/cases-plugin",
+    "@kbn/timelines-plugin",
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/i18n-react",
+    "@kbn/data-views-plugin",
+    "@kbn/es-query",
+    "@kbn/rule-registry-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/shared-ux-page-kibana-template-types",
+    "@kbn/doc-links",
+    "@kbn/i18n",
+    "@kbn/kibana-react-plugin",
+    "@kbn/utility-types",
+    "@kbn/ui-theme",
+    "@kbn/securitysolution-io-ts-list-types"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

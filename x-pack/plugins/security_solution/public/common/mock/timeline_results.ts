@@ -21,7 +21,7 @@ import { Direction } from '../../../common/search_strategy';
 import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import type { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import type { TGridModel } from '../store/data_table/model';
+import type { DataTableModel } from '../store/data_table/model';
 
 export const mockOpenTimelineQueryResults = {
   totalCount: 11,
@@ -1993,6 +1993,7 @@ export const mockTimelineModel: TimelineModel = {
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'ef579e40-jibber-jabber',
+  selectAll: false,
   indexNames: [],
   isFavorite: false,
   isLive: false,
@@ -2030,7 +2031,7 @@ export const mockTimelineModel: TimelineModel = {
   version: '1',
 };
 
-export const mockTGridModel: TGridModel = {
+export const mockDataTableModel: DataTableModel = {
   columns: mockTimelineModelColumns,
   defaultColumns: mockTimelineModelColumns,
   dataViewId: null,
@@ -2073,6 +2074,7 @@ export const mockTGridModel: TGridModel = {
   title: 'Test rule',
   showCheckboxes: false,
   selectAll: false,
+  totalCount: 0,
 };
 
 export const mockGetOneTimelineResult: TimelineResult = {
@@ -2183,6 +2185,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     pinnedEventsSaveObject: {},
     queryFields: [],
     savedObjectId: null,
+    selectAll: false,
     selectedEventIds: {},
     sessionViewConfig: null,
     show: false,
@@ -2204,6 +2207,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
   to: '2018-11-05T19:03:25.937Z',
   notes: null,
   ruleNote: '# this is some markdown documentation',
+  ruleAuthor: ['elastic'],
 };
 
 export const mockTimelineDetails: TimelineEventsDetailsItem[] = [

@@ -27,48 +27,46 @@ export interface EndpointInputs<
   body?: B;
 }
 
-export interface CreateRouteDefinition<Inputs extends EndpointInputs, R> {
-  inputs: {
-    params: TypeOf<NonNullable<Inputs['params']>>;
-    query: TypeOf<NonNullable<Inputs['query']>>;
-    body: TypeOf<NonNullable<Inputs['body']>>;
-  };
-  output: R;
-}
-
-export type AnyEndpoint = CreateRouteDefinition<EndpointInputs, unknown>;
+type Extends<X, Y> = X extends Y ? Y : unknown;
 
 /**
- * Abstract type definition for API route inputs and outputs.
+ * Use this when creating file service endpoints to ensure that the client methods
+ * are receiving the types they expect as well as providing the expected inputs.
  *
- * These definitions should be shared between the public and server
- * as the single source of truth.
+ * For example, consider create route:
+ *
+ * const rt = configSchema.object({...});
+ *
+ * export type Endpoint<M = unknown> = CreateRouteDefinition<
+ *   typeof rt,              // We pass in our runtime types
+ *   { file: FileJSON<M> },  // We pass in return type
+ *   FilesClient['create']   // We pass in client method
+ * >;
+ *
+ * This will return `unknown` for param, query or body if client-server types
+ * are out-of-sync.
+ *
+ * The very best would be if the client was auto-generated from the server
+ * endpoint declarations.
  */
-export interface HttpApiInterfaceEntryDefinition<
-  P = unknown,
-  Q = unknown,
-  B = unknown,
-  R = unknown
+export interface CreateRouteDefinition<
+  Inputs extends EndpointInputs,
+  R,
+  ClientMethod extends (arg: any) => Promise<any> = () => Promise<unknown>
 > {
   inputs: {
-    params: P;
-    query: Q;
-    body: B;
+    params: Extends<Parameters<ClientMethod>[0], TypeOf<NonNullable<Inputs['params']>>>;
+    query: Extends<Parameters<ClientMethod>[0], TypeOf<NonNullable<Inputs['query']>>>;
+    body: Extends<Parameters<ClientMethod>[0], TypeOf<NonNullable<Inputs['body']>>>;
   };
-  output: R;
+  output: Extends<R, Awaited<ReturnType<ClientMethod>>>;
 }
 
-export type { Endpoint as CreateFileKindHttpEndpoint } from '../server/routes/file_kind/create';
-export type { Endpoint as DeleteFileKindHttpEndpoint } from '../server/routes/file_kind/delete';
-export type { Endpoint as DownloadFileKindHttpEndpoint } from '../server/routes/file_kind/download';
-export type { Endpoint as GetByIdFileKindHttpEndpoint } from '../server/routes/file_kind/get_by_id';
-export type { Endpoint as ListFileKindHttpEndpoint } from '../server/routes/file_kind/list';
-export type { Endpoint as UpdateFileKindHttpEndpoint } from '../server/routes/file_kind/update';
-export type { Endpoint as UploadFileKindHttpEndpoint } from '../server/routes/file_kind/upload';
-export type { Endpoint as FindFilesHttpEndpoint } from '../server/routes/find';
-export type { Endpoint as FilesMetricsHttpEndpoint } from '../server/routes/metrics';
-export type { Endpoint as FileShareHttpEndpoint } from '../server/routes/file_kind/share/share';
-export type { Endpoint as FileUnshareHttpEndpoint } from '../server/routes/file_kind/share/unshare';
-export type { Endpoint as FileGetShareHttpEndpoint } from '../server/routes/file_kind/share/get';
-export type { Endpoint as FileListSharesHttpEndpoint } from '../server/routes/file_kind/share/list';
-export type { Endpoint as FilePublicDownloadHttpEndpoint } from '../server/routes/public_facing/download';
+export interface AnyEndpoint {
+  inputs: {
+    params: any;
+    query: any;
+    body: any;
+  };
+  output: any;
+}

@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import {
+  MlAnomalyDetectors,
+  MlMlSystem,
+  MlModules,
+} from '@kbn/ml-plugin/server';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMRouteHandlerResources } from '../../routes/typings';
 
 export interface MlClient {
-  mlSystem: any;
-  anomalyDetectors: any;
-  modules: any;
+  mlSystem: MlMlSystem;
+  anomalyDetectors: MlAnomalyDetectors;
+  modules: MlModules;
 }
 
 export async function getMlClient({

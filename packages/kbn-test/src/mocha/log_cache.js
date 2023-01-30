@@ -12,7 +12,7 @@ const cachesRunnableLogs = new WeakMap();
 /**
  * Add a chunk of log output to the cached
  * output for a suite
- * @param {Mocha.Suite} suite
+ * @param {import('../functional_test_runner/fake_mocha_types').Suite} suite
  * @param {string} chunk
  */
 export function recordLog(suite, chunk) {
@@ -23,7 +23,7 @@ export function recordLog(suite, chunk) {
 /**
  * Recursively walk up from a runnable to collect
  * the cached log for its suite and all its parents
- * @param {Mocha.Suite} suite
+ * @param {import('../functional_test_runner/fake_mocha_types').Suite} suite
  */
 function getCurrentCachedSuiteLogs(suite) {
   const history = suite.parent ? getCurrentCachedSuiteLogs(suite.parent) : '';
@@ -35,6 +35,7 @@ function getCurrentCachedSuiteLogs(suite) {
  * Snapshot the logs from this runnable's suite at this point,
  * as the suite logs will get updated to include output from
  * subsequent runnables
+ * @param {import('../functional_test_runner/fake_mocha_types').Runnable} runnable
  * @param {Mocha.Runnable} runnable
  */
 export function snapshotLogsForRunnable(runnable) {
@@ -44,7 +45,7 @@ export function snapshotLogsForRunnable(runnable) {
 /**
  * Get the suite logs as they were when the logs for this runnable
  * were snapshotted
- * @param {Mocha.Runnable} runnable
+ * @param {import('../functional_test_runner/fake_mocha_types').Runnable} runnable
  */
 export function getSnapshotOfRunnableLogs(runnable) {
   return cachesRunnableLogs.get(runnable);

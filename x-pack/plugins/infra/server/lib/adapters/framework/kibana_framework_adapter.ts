@@ -16,7 +16,6 @@ import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   CallWithRequestParams,
-  InfraDatabaseFieldCapsResponse,
   InfraDatabaseGetIndicesAliasResponse,
   InfraDatabaseGetIndicesResponse,
   InfraDatabaseMultiResponse,
@@ -90,11 +89,6 @@ export class KibanaFramework {
   ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
   callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
-    endpoint: 'fieldCaps',
-    options?: CallWithRequestParams
-  ): Promise<InfraDatabaseFieldCapsResponse>;
-  callWithRequest(
-    requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'indices.existsAlias',
     options?: CallWithRequestParams
   ): Promise<boolean>;
@@ -118,7 +112,6 @@ export class KibanaFramework {
     endpoint: string,
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse>;
-
   public async callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
@@ -161,12 +154,6 @@ export class KibanaFramework {
           ...params,
           ...frozenIndicesParams,
         } as estypes.MsearchRequest);
-        break;
-      case 'fieldCaps':
-        // @ts-expect-error FieldCapsRequest.fields is not optional, CallWithRequestParams.fields is
-        apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
-          ...params,
-        });
         break;
       case 'indices.existsAlias':
         apiResult = elasticsearch.client.asCurrentUser.indices.existsAlias({

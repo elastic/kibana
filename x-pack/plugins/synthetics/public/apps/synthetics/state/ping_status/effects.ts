@@ -18,6 +18,6 @@ export function* fetchPingStatusesEffect() {
       fetchMonitorPingStatuses,
       getMonitorPingStatusesAction.success,
       getMonitorPingStatusesAction.fail
-    )
+    ) as ReturnType<typeof fetchEffectFactory>
   );
 }

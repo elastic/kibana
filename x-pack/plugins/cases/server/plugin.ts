@@ -31,8 +31,9 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { APP_ID } from '../common/constants';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 
+import { APP_ID } from '../common/constants';
 import {
   createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
@@ -72,6 +73,7 @@ export interface PluginsStart {
   taskManager?: TaskManagerStartContract;
   security: SecurityPluginStart;
   spaces: SpacesPluginStart;
+  notifications: NotificationsPluginStart;
 }
 
 export class CasePlugin {
@@ -199,6 +201,7 @@ export class CasePlugin {
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
+      notifications: plugins.notifications,
     });
 
     const client = core.elasticsearch.client;

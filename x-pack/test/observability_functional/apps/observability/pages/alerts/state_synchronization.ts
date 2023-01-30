@@ -17,7 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const find = getService('find');
     const testSubjects = getService('testSubjects');
     const observability = getService('observability');
-    const pageObjects = getPageObjects(['common']);
+    const pageObjects = getPageObjects(['common', 'observability', 'timePicker']);
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -45,9 +45,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should not sync URL state to shared time range on page load ', async () => {
-      await (await find.byLinkText('Stream')).click();
+      await pageObjects.observability.clickSolutionNavigationEntry(
+        'observability-overview',
+        'overview'
+      );
 
-      await assertLogsStreamPageTimeRange('Last 1 day');
+      const observabilityPageDateRange = await pageObjects.observability.getDatePickerRangeText();
+
+      expect(observabilityPageDateRange).to.be('Last 15 minutes');
     });
 
     it('should apply defaults if URL state is missing', async () => {
@@ -61,18 +66,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should use shared time range if set', async () => {
-      await (await find.byLinkText('Stream')).click();
+      await pageObjects.observability.clickSolutionNavigationEntry(
+        'observability-overview',
+        'overview'
+      );
       await setTimeRangeToXDaysAgo(10);
-      await (await find.byLinkText('Alerts')).click();
+      await pageObjects.observability.clickSolutionNavigationEntry(
+        'observability-overview',
+        'alerts'
+      );
 
       expect(await observability.alerts.common.getTimeRange()).to.be('Last 10 days');
     });
 
     it('should set the shared time range', async () => {
       await setTimeRangeToXDaysAgo(100);
-      await (await find.byLinkText('Stream')).click();
+      await pageObjects.observability.clickSolutionNavigationEntry(
+        'observability-overview',
+        'overview'
+      );
 
-      await assertLogsStreamPageTimeRange('Last 100 days');
+      const observabilityPageDateRange = await pageObjects.observability.getDatePickerRangeText();
+
+      expect(observabilityPageDateRange).to.be('Last 100 days');
     });
 
     async function assertAlertsPageState(expected: {
@@ -90,18 +106,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(timeRange).to.be(expected.timeRange);
     }
 
-    async function assertLogsStreamPageTimeRange(expected: string) {
-      // Only handles relative time ranges
-      const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
-      const timerange = await datePickerButton.getVisibleText();
-      expect(timerange).to.be(expected);
-    }
-
     async function setTimeRangeToXDaysAgo(numberOfDays: number) {
       await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
-      const numerOfDaysField = await find.byCssSelector('[aria-label="Time value"]');
-      await numerOfDaysField.clearValueWithKeyboard();
-      await numerOfDaysField.type(numberOfDays.toString());
+      const numberField = await find.byCssSelector('[aria-label="Time value"]');
+      await numberField.clearValueWithKeyboard();
+      await numberField.type(numberOfDays.toString());
+      const unitField = await find.byCssSelector('[aria-label="Time unit"]');
+      await unitField.type('Days');
       await find.clickByButtonText('Apply');
     }
   });

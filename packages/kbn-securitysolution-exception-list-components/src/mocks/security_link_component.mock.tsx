@@ -26,7 +26,7 @@ export const getSecurityLinkAction = (dataTestSubj: string) =>
     linkedRules: [
       ...rules,
       {
-        exception_list: [],
+        exceptions_list: [],
         id: '2a2b3c',
         name: 'Simple Rule Query 2',
         rule_id: 'rule-2',

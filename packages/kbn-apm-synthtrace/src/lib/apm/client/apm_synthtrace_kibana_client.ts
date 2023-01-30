@@ -10,94 +10,58 @@ import fetch from 'node-fetch';
 import { Logger } from '../../utils/create_logger';
 
 export class ApmSynthtraceKibanaClient {
-  constructor(private readonly logger: Logger) {}
+  private readonly logger: Logger;
+  private target: string;
 
-  async migrateCloudToManagedApm(cloudId: string, username: string, password: string) {
-    await this.logger.perf('migrate_apm_on_cloud', async () => {
-      this.logger.info('attempting to migrate cloud instance over to managed APM');
-      const cloudUrls = Buffer.from(cloudId.split(':')[1], 'base64').toString().split('$');
-      const kibanaCloudUrl = `https://${cloudUrls[2]}.${cloudUrls[0]}`;
-      const response = await fetch(
-        kibanaCloudUrl + '/internal/apm/fleet/cloud_apm_package_policy',
-        {
-          method: 'POST', // *GET, POST, PUT, DELETE, etc.
-          headers: {
-            Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'kbn-xsrf': 'kibana',
-          },
-        }
-      );
-      const responseJson = await response.json();
-      if (responseJson.message) {
-        this.logger.info(`Cloud Instance already migrated to managed APM: ${responseJson.message}`);
-      }
-      if (responseJson.cloudApmPackagePolicy) {
-        this.logger.info(
-          `Cloud Instance migrated to managed APM: ${responseJson.cloudApmPackagePolicy.package.version}`
-        );
-      }
-    });
+  constructor(options: { logger: Logger; target: string }) {
+    this.logger = options.logger;
+    this.target = options.target;
   }
 
-  async discoverLocalKibana() {
-    return await fetch('http://localhost:5601', {
-      method: 'HEAD',
-      follow: 1,
-      redirect: 'manual',
-    }).then((res) => {
-      const kibanaUrl = res.headers.get('location');
-      this.logger.info(`Discovered local kibana running at: ${kibanaUrl}`);
-      return kibanaUrl;
-    });
-  }
-
-  async fetchLatestApmPackageVersion(
-    kibanaUrl: string,
-    version: string,
-    username: string,
-    password: string
-  ) {
-    const url = `${kibanaUrl}/api/fleet/epm/packages/apm`;
-    const response = await fetch(url, {
+  async fetchLatestApmPackageVersion() {
+    this.logger.debug(`Fetching latest APM package version`);
+    const fleetPackageApiUrl = `${this.target}/api/fleet/epm/packages/apm?prerelease=true`;
+    const response = await fetch(fleetPackageApiUrl, {
       method: 'GET',
-      headers: kibanaHeaders(username, password),
+      headers: kibanaHeaders(),
     });
-    const json = (await response.json()) as { item: { latestVersion: string } };
-    const { latestVersion } = json.item;
-    return latestVersion;
+
+    const responseJson = await response.json();
+
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch latest APM package version, received HTTP ${response.status} and message: ${responseJson.message}`
+      );
+    }
+
+    const { latestVersion } = responseJson.item;
+
+    return latestVersion as string;
   }
 
-  async installApmPackage(kibanaUrl: string, version: string, username: string, password: string) {
-    const packageVersion = await this.fetchLatestApmPackageVersion(
-      kibanaUrl,
-      version,
-      username,
-      password
-    );
-    const response = await fetch(`${kibanaUrl}/api/fleet/epm/packages/apm/${packageVersion}`, {
+  async installApmPackage(packageVersion: string) {
+    this.logger.debug(`Installing APM package ${packageVersion}`);
+
+    const response = await fetch(`${this.target}/api/fleet/epm/packages/apm/${packageVersion}`, {
       method: 'POST',
-      headers: kibanaHeaders(username, password),
+      headers: kibanaHeaders(),
       body: '{"force":true}',
     });
 
     const responseJson = await response.json();
 
-    if (responseJson.statusCode) {
-      throw Error(
-        `unable to install apm package ${packageVersion}. Received status code: ${responseJson.statusCode} and message: ${responseJson.message}`
+    if (!responseJson.items) {
+      throw new Error(
+        `Failed to install APM package version ${packageVersion}, received HTTP ${response.status} and message: ${responseJson.message}`
       );
     }
-    if (responseJson.items) {
-      this.logger.info(`Installed apm package ${packageVersion}`);
-    } else this.logger.error(responseJson);
+
+    this.logger.info(`Installed APM package ${packageVersion}`);
   }
 }
 
-function kibanaHeaders(username: string, password: string) {
+function kibanaHeaders() {
   return {
-    Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
     Accept: 'application/json',
     'Content-Type': 'application/json',
     'kbn-xsrf': 'kibana',

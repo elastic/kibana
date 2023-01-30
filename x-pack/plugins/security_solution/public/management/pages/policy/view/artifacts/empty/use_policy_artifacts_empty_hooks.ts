@@ -10,16 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { APP_UI_ID } from '../../../../../../../common/constants';
-import type { EventFiltersPageLocation } from '../../../../event_filters/types';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 export const useGetLinkTo = (
   policyId: string,
   policyName: string,
   getPolicyArtifactsPath: (policyId: string) => string,
-  getArtifactPath: (
-    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
-  ) => string,
+  getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string,
   location?: Partial<{ show: 'create' }>
 ) => {
   const { getAppUrl } = useAppUrl();

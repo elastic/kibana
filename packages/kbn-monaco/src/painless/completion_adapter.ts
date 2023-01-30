@@ -8,8 +8,8 @@
 
 import { monaco } from '../monaco_imports';
 import { EditorStateService } from './lib';
-import { PainlessCompletionResult, PainlessCompletionKind } from './types';
-import { PainlessWorker } from './worker';
+import type { PainlessCompletionResult, PainlessCompletionKind } from './types';
+import type { PainlessWorker } from './worker';
 
 const getCompletionKind = (kind: PainlessCompletionKind): monaco.languages.CompletionItemKind => {
   const monacoItemKind = monaco.languages.CompletionItemKind;

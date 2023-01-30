@@ -13,8 +13,15 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType, EuiFlyoutSize, RecursivePartial } from '@elastic/eui';
+import type {
+  IconType,
+  EuiFlyoutSize,
+  RecursivePartial,
+  EuiDataGridToolBarAdditionalControlsOptions,
+} from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
+import { HttpSetup } from '@kbn/core/public';
+import { KueryNode } from '@kbn/es-query';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
@@ -40,6 +47,7 @@ import {
   RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
+  RuleLastRun,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -60,6 +68,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
+import { AlertSummaryTimeRange } from './application/sections/rule_details/components/alert_summary/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
@@ -106,6 +115,7 @@ export type {
   RuleStatusDropdownProps,
   RuleTagFilterProps,
   RuleStatusFilterProps,
+  RuleLastRun,
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,
@@ -120,6 +130,7 @@ export type {
   GetFieldTableColumns,
   BrowserFieldItem,
   RulesListVisibleColumns,
+  AlertSummaryTimeRange,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -167,6 +178,28 @@ export enum ActionConnectorMode {
   ActionForm = 'actionForm',
 }
 
+export interface BulkOperationResponse {
+  rules: Rule[];
+  errors: BulkOperationError[];
+  total: number;
+}
+
+interface BulkOperationAttributesByIds {
+  ids: string[];
+  filter?: never;
+}
+interface BulkOperationAttributesByFilter {
+  ids?: never;
+  filter: KueryNode | null;
+}
+export type BulkOperationAttributesWithoutHttp =
+  | BulkOperationAttributesByIds
+  | BulkOperationAttributesByFilter;
+
+export type BulkOperationAttributes = BulkOperationAttributesWithoutHttp & {
+  http: HttpSetup;
+};
+
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
@@ -179,6 +212,7 @@ export interface ActionParamsProps<TParams> {
   isDisabled?: boolean;
   showEmailSubjectAndMessage?: boolean;
   executionMode?: ActionConnectorMode;
+  onBlur?: (field?: string) => void;
 }
 
 export interface Pagination {
@@ -292,11 +326,12 @@ export interface RuleType<
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
+  hasGetSummarizedAlerts?: boolean;
 }
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
-export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus'>;
+export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
 
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
@@ -322,6 +357,7 @@ export interface RuleTypeParamsExpressionProps<
     key: Prop,
     value: SanitizedRule<Params>[Prop] | null
   ) => void;
+  onChangeMetaData: (metadata: MetaData) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
@@ -344,6 +380,9 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   requiresAppContext: boolean;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
+  alertDetailsAppSection?:
+    | React.FunctionComponent<any>
+    | React.LazyExoticComponent<ComponentType<any>>;
 }
 
 export interface IErrorObject {
@@ -359,10 +398,10 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
   initialRule: Rule;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: RuleFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
-  onSave?: () => Promise<void>;
+  onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleType?: RuleType<string, string>;
 }
@@ -371,13 +410,13 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: RuleFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   ruleTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Rule>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
-  onSave?: () => Promise<void>;
+  onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
   filteredRuleTypes?: string[];
@@ -446,6 +485,7 @@ export interface AlertsTableProps {
   onResetColumns: () => void;
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
+  controls?: EuiDataGridToolBarAdditionalControlsOptions;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -472,8 +512,24 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (selectedIds: TimelineItem[], isAllSelected: boolean) => void;
+  onClick: (
+    selectedIds: TimelineItem[],
+    isAllSelected: boolean,
+    setIsBulkActionsLoading: (isLoading: boolean) => void
+  ) => void;
 }
+
+export interface RenderCustomActionsRowArgs {
+  alert: EcsFieldsResponse;
+  setFlyoutAlert: (data: unknown) => void;
+  id?: string;
+  setIsActionLoading?: (isLoading: boolean) => void;
+}
+
+export type UseActionsColumnRegistry = () => {
+  renderCustomActionsRow: (args: RenderCustomActionsRowArgs) => JSX.Element;
+  width?: number;
+};
 
 export type UseBulkActionsRegistry = () => BulkActionsConfig[];
 
@@ -488,15 +544,11 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
-  useActionsColumn?: () => {
-    renderCustomActionsRow: (
-      alert: EcsFieldsResponse,
-      setFlyoutAlert: (data: unknown) => void,
-      id?: string
-    ) => JSX.Element;
-    width?: number;
-  };
+  useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
+  usePersistentControls?: () => {
+    right?: ReactNode;
+  };
 }
 
 export enum BulkActionsVerbs {
@@ -506,19 +558,28 @@ export enum BulkActionsVerbs {
   selectCurrentPage = 'selectCurrentPage',
   selectAll = 'selectAll',
   rowCountUpdate = 'rowCountUpdate',
+  updateRowLoadingState = 'updateRowLoadingState',
+  updateAllLoadingState = 'updateAllLoadingState',
 }
 
 export interface BulkActionsReducerAction {
   action: BulkActionsVerbs;
   rowIndex?: number;
   rowCount?: number;
+  isLoading?: boolean;
 }
 
 export interface BulkActionsState {
-  rowSelection: Set<number>;
+  rowSelection: Map<number, RowSelectionState>;
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
+}
+
+export type RowSelection = Map<number, RowSelectionState>;
+
+export interface RowSelectionState {
+  isLoading: boolean;
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
@@ -551,4 +612,47 @@ export interface SnoozeSchedule {
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
+}
+
+export interface RulesListFilters {
+  searchText: string;
+  types: string[];
+  actionTypes: string[];
+  ruleExecutionStatuses: string[];
+  ruleLastRunOutcomes: string[];
+  ruleStatuses: RuleStatus[];
+  tags: string[];
+}
+
+export type UpdateFiltersProps =
+  | {
+      filter: 'searchText';
+      value: string;
+    }
+  | {
+      filter: 'ruleStatuses';
+      value: RuleStatus[];
+    }
+  | {
+      filter: 'types' | 'actionTypes' | 'ruleExecutionStatuses' | 'ruleLastRunOutcomes' | 'tags';
+      value: string[];
+    };
+
+export interface RulesPageContainerState {
+  lastResponse: string[];
+  status: RuleStatus[];
+}
+
+export type BulkEditActions =
+  | 'snooze'
+  | 'unsnooze'
+  | 'schedule'
+  | 'unschedule'
+  | 'updateApiKey'
+  | 'delete';
+
+export interface UpdateRulesToBulkEditProps {
+  action: BulkEditActions;
+  rules?: RuleTableItem[];
+  filter?: KueryNode | null;
 }

@@ -66,6 +66,9 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     expect(renderResult.getByTestId('test-passcodeMessage')).toHaveTextContent(
       '(ZIP file passcode: elastic)'
     );
+    expect(renderResult.getByTestId('test-fileDeleteMessage')).toHaveTextContent(
+      'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+    );
   });
 
   it('should display custom button label', async () => {
@@ -93,7 +96,7 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
-        path: '/api/endpoint/action/123/agent-a/file',
+        path: '/api/endpoint/action/123/file/123.agent-a',
       });
     });
 

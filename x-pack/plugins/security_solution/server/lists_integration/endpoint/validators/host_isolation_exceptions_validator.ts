@@ -61,18 +61,21 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {
-    return super.validateHasPrivilege('canWriteHostIsolationExceptions');
+    return this.validateHasPrivilege('canWriteHostIsolationExceptions');
+  }
+
+  protected async validateHasDeletePrivilege(): Promise<void> {
+    return this.validateHasPrivilege('canDeleteHostIsolationExceptions');
   }
 
   protected async validateHasReadPrivilege(): Promise<void> {
-    return super.validateHasPrivilege('canReadHostIsolationExceptions');
+    return this.validateHasPrivilege('canReadHostIsolationExceptions');
   }
 
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
     await this.validateHasWritePrivilege();
-    await this.validateCanIsolateHosts();
     await this.validateHostIsolationData(item);
     await this.validateByPolicyItem(item);
 
@@ -85,7 +88,6 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
     await this.validateHasWritePrivilege();
-    await this.validateCanIsolateHosts();
     await this.validateHostIsolationData(updatedItem);
     await this.validateByPolicyItem(updatedItem);
 
@@ -101,7 +103,7 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
   }
 
   async validatePreDeleteItem(): Promise<void> {
-    await this.validateHasWritePrivilege();
+    await this.validateHasDeletePrivilege();
   }
 
   async validatePreExport(): Promise<void> {

@@ -10,8 +10,9 @@ import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   MonitorOverviewResult,
   MonitorOverviewResultCodec,
+  FetchMonitorOverviewQueryArgs,
   OverviewStatus,
-  OverviewStatusType,
+  OverviewStatusCodec,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 import { MonitorOverviewPageState } from './models';
@@ -24,15 +25,34 @@ export const fetchSyntheticsMonitor = async (
   return apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`);
 };
 
+function toMonitorOverviewQueryArgs(
+  pageState: MonitorOverviewPageState
+): FetchMonitorOverviewQueryArgs {
+  return {
+    query: pageState.query,
+    tags: pageState.tags,
+    locations: pageState.locations,
+    monitorType: pageState.monitorType,
+    sortField: pageState.sortField,
+    sortOrder: pageState.sortOrder,
+    searchFields: [],
+  };
+}
+
 export const fetchMonitorOverview = async (
   pageState: MonitorOverviewPageState
 ): Promise<MonitorOverviewResult> => {
-  return await apiService.get(
+  const params = toMonitorOverviewQueryArgs(pageState);
+  return apiService.get(
     SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
-    { perPage: pageState.perPage, sortOrder: pageState.sortOrder, sortField: pageState.sortField },
+    params,
     MonitorOverviewResultCodec
   );
 };
 
-export const fetchOverviewStatus = async (): Promise<OverviewStatus> =>
-  apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, {}, OverviewStatusType);
+export const fetchOverviewStatus = async (
+  pageState: MonitorOverviewPageState
+): Promise<OverviewStatus> => {
+  const params = toMonitorOverviewQueryArgs(pageState);
+  return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, params, OverviewStatusCodec);
+};

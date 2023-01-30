@@ -11,8 +11,9 @@ import { uniq } from 'lodash';
 import { safeLoad } from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
-import uuidv5 from 'uuid/v5';
+import { v5 as uuidv5 } from 'uuid';
 import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type {
@@ -27,7 +28,11 @@ import { appContextService } from '../../app_context';
 
 import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from '.';
 import type { ArchiveEntry } from '.';
-import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './parse';
+import {
+  parseAndVerifyPolicyTemplates,
+  parseAndVerifyStreams,
+  parseTopLevelElasticsearchEntry,
+} from './parse';
 
 const ONE_BYTE = 1024 * 1024;
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
@@ -101,10 +106,9 @@ export async function removeArchiveEntries(opts: {
 }) {
   const { savedObjectsClient, refs } = opts;
   if (!refs) return;
-  const results = await Promise.all(
-    refs.map((ref) => savedObjectsClient.delete(ASSETS_SAVED_OBJECT_TYPE, ref.id))
+  return savedObjectsClient.bulkDelete(
+    refs.map((ref) => ({ id: ref.id, type: ASSETS_SAVED_OBJECT_TYPE }))
   );
-  return results;
 }
 
 export async function saveArchiveEntries(opts: {
@@ -157,16 +161,24 @@ export async function getAsset(opts: {
   path: string;
 }) {
   const { savedObjectsClient, path } = opts;
-  const assetSavedObject = await savedObjectsClient.get<PackageAsset>(
-    ASSETS_SAVED_OBJECT_TYPE,
-    assetPathToObjectId(path)
-  );
-  const storedAsset = assetSavedObject?.attributes;
-  if (!storedAsset) {
-    return;
-  }
+  try {
+    const assetSavedObject = await savedObjectsClient.get<PackageAsset>(
+      ASSETS_SAVED_OBJECT_TYPE,
+      assetPathToObjectId(path)
+    );
+    const storedAsset = assetSavedObject?.attributes;
+    if (!storedAsset) {
+      return;
+    }
 
-  return storedAsset;
+    return storedAsset;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      appContextService.getLogger().warn(error.message);
+      return;
+    }
+    throw error;
+  }
 }
 
 export const getEsPackage = async (
@@ -222,7 +234,9 @@ export const getEsPackage = async (
     assetPathToObjectId(manifestPath)
   );
   const packageInfo = safeLoad(soResManifest.attributes.data_utf8);
-
+  if (packageInfo.elasticsearch) {
+    packageInfo.elasticsearch = parseTopLevelElasticsearchEntry(packageInfo.elasticsearch);
+  }
   try {
     const readmePath = `docs/README.md`;
     await savedObjectsClient.get<PackageAsset>(

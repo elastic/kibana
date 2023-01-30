@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
@@ -102,6 +103,7 @@ export function loadInitial(
     datasourceMap,
     embeddableEditorIncomingState,
     initialContext,
+    initialStateFromLocator,
     visualizationMap,
   } = storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
@@ -120,11 +122,96 @@ export function loadInitial(
     activeDatasourceId = 'textBased';
   }
 
+  if (initialStateFromLocator) {
+    const locatorReferences =
+      'references' in initialStateFromLocator ? initialStateFromLocator.references : undefined;
+
+    const newFilters = initialStateFromLocator.filters
+      ? cloneDeep(initialStateFromLocator.filters)
+      : undefined;
+
+    if (newFilters) {
+      data.query.filterManager.setAppFilters(newFilters);
+    }
+
+    if (initialStateFromLocator.resolvedDateRange) {
+      const newTimeRange = {
+        from: initialStateFromLocator.resolvedDateRange.fromDate,
+        to: initialStateFromLocator.resolvedDateRange.toDate,
+      };
+      data.query.timefilter.timefilter.setTime(newTimeRange);
+    }
+
+    return initializeSources(
+      {
+        datasourceMap,
+        visualizationMap,
+        visualizationState: emptyState.visualization,
+        datasourceStates: emptyState.datasourceStates,
+        initialContext,
+        adHocDataViews:
+          lens.persistedDoc?.state.adHocDataViews || initialStateFromLocator.dataViewSpecs,
+        references: locatorReferences,
+        ...loaderSharedArgs,
+      },
+      {
+        isFullEditor: true,
+      }
+    )
+      .then(({ datasourceStates, visualizationState, indexPatterns, indexPatternRefs }) => {
+        const currentSessionId =
+          initialStateFromLocator?.searchSessionId || data.search.session.getSessionId();
+        store.dispatch(
+          setState({
+            isSaveable: true,
+            filters: initialStateFromLocator.filters || data.query.filterManager.getFilters(),
+            query: initialStateFromLocator.query || emptyState.query,
+            searchSessionId: currentSessionId,
+            activeDatasourceId: emptyState.activeDatasourceId,
+            visualization: {
+              activeId: emptyState.visualization.activeId,
+              state: visualizationState,
+            },
+            dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+            datasourceStates: Object.entries(datasourceStates).reduce(
+              (state, [datasourceId, datasourceState]) => ({
+                ...state,
+                [datasourceId]: {
+                  ...datasourceState,
+                  isLoading: false,
+                },
+              }),
+              {}
+            ),
+            isLoading: false,
+          })
+        );
+
+        if (autoApplyDisabled) {
+          store.dispatch(disableAutoApply());
+        }
+      })
+      .catch((e: { message: string }) => {
+        notifications.toasts.addDanger({
+          title: e.message,
+        });
+      });
+  }
+
   if (
     !initialInput ||
     (attributeService.inputIsRefType(initialInput) &&
       initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
   ) {
+    const newFilters =
+      initialContext && 'searchFilters' in initialContext && initialContext.searchFilters
+        ? cloneDeep(initialContext.searchFilters)
+        : undefined;
+
+    if (newFilters) {
+      data.query.filterManager.setAppFilters(newFilters);
+    }
+
     return initializeSources(
       {
         datasourceMap,

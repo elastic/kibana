@@ -25,6 +25,8 @@ import type {
 } from '../../../../../../common/endpoint/types';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
+jest.mock('../../../../../common/experimental_features_service');
+
 describe('When using the suspend-process action from response actions console', () => {
   let render: (
     capabilities?: EndpointCapabilities[]

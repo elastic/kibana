@@ -202,21 +202,41 @@ describe('math completion', () => {
   });
 
   describe('autocomplete', () => {
-    it('should list all valid functions at the top level (fake test)', async () => {
-      // This test forces an invalid scenario, since the autocomplete actually requires
-      // some typing
-      const results = await suggest({
-        expression: '',
-        zeroIndexedOffset: 1,
+    const dateRange = { fromDate: '2022-11-01T00:00:00.000Z', toDate: '2022-11-03T00:00:00.000Z' };
+
+    function getSuggestionArgs({
+      expression,
+      zeroIndexedOffset,
+      triggerCharacter,
+    }: {
+      expression: string;
+      zeroIndexedOffset: number;
+      triggerCharacter: string;
+    }) {
+      return {
+        expression,
+        zeroIndexedOffset,
         context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
-          triggerCharacter: '',
+          triggerCharacter,
         },
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
         dataViews: dataViewPluginMocks.createStartContract(),
-      });
+        dateRange,
+      };
+    }
+    it('should list all valid functions at the top level (fake test)', async () => {
+      // This test forces an invalid scenario, since the autocomplete actually requires
+      // some typing
+      const results = await suggest(
+        getSuggestionArgs({
+          expression: '',
+          zeroIndexedOffset: 1,
+          triggerCharacter: '',
+        })
+      );
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'operation' }]));
@@ -227,18 +247,13 @@ describe('math completion', () => {
     });
 
     it('should list all valid sub-functions for a fullReference', async () => {
-      const results = await suggest({
-        expression: 'moving_average()',
-        zeroIndexedOffset: 15,
-        context: {
-          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+      const results = await suggest(
+        getSuggestionArgs({
+          expression: 'moving_average()',
+          zeroIndexedOffset: 15,
           triggerCharacter: '(',
-        },
-        indexPattern: createMockedIndexPattern(),
-        operationDefinitionMap,
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
-      });
+        })
+      );
       expect(results.list).toHaveLength(2);
       ['sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'operation' }]));
@@ -246,50 +261,35 @@ describe('math completion', () => {
     });
 
     it('should list all valid named arguments for a fullReference', async () => {
-      const results = await suggest({
-        expression: 'moving_average(count(),)',
-        zeroIndexedOffset: 23,
-        context: {
-          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+      const results = await suggest(
+        getSuggestionArgs({
+          expression: 'moving_average(count(),)',
+          zeroIndexedOffset: 23,
           triggerCharacter: ',',
-        },
-        indexPattern: createMockedIndexPattern(),
-        operationDefinitionMap,
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
-      });
+        })
+      );
       expect(results.list).toEqual(['window']);
     });
 
     it('should not list named arguments when they are already in use', async () => {
-      const results = await suggest({
-        expression: 'moving_average(count(), window=5, )',
-        zeroIndexedOffset: 34,
-        context: {
-          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+      const results = await suggest(
+        getSuggestionArgs({
+          expression: 'moving_average(count(), window=5, )',
+          zeroIndexedOffset: 34,
           triggerCharacter: ',',
-        },
-        indexPattern: createMockedIndexPattern(),
-        operationDefinitionMap,
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
-      });
+        })
+      );
       expect(results.list).toEqual([]);
     });
 
     it('should list all valid positional arguments for a tinymath function used by name', async () => {
-      const results = await suggest({
-        expression: 'divide(count(), )',
-        zeroIndexedOffset: 16,
-        context: {
-          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+      const results = await suggest(
+        getSuggestionArgs({
+          expression: 'divide(count(), )',
+          zeroIndexedOffset: 16,
           triggerCharacter: ',',
-        },
-        indexPattern: createMockedIndexPattern(),
-        operationDefinitionMap,
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
-      });
+        })
+      );
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'math' }]));
@@ -300,18 +300,13 @@ describe('math completion', () => {
     });
 
     it('should list all valid positional arguments for a tinymath function used with alias', async () => {
-      const results = await suggest({
-        expression: 'count() / ',
-        zeroIndexedOffset: 10,
-        context: {
-          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+      const results = await suggest(
+        getSuggestionArgs({
+          expression: 'count() / ',
+          zeroIndexedOffset: 10,
           triggerCharacter: ',',
-        },
-        indexPattern: createMockedIndexPattern(),
-        operationDefinitionMap,
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
-      });
+        })
+      );
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'math' }]));
@@ -322,51 +317,92 @@ describe('math completion', () => {
     });
 
     it('should not autocomplete any fields for the count function', async () => {
-      const results = await suggest({
-        expression: 'count()',
-        zeroIndexedOffset: 6,
-        context: {
-          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+      const results = await suggest(
+        getSuggestionArgs({
+          expression: 'count()',
+          zeroIndexedOffset: 6,
           triggerCharacter: '(',
-        },
-        indexPattern: createMockedIndexPattern(),
-        operationDefinitionMap,
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
-      });
+        })
+      );
       expect(results.list).toHaveLength(0);
     });
 
     it('should autocomplete and validate the right type of field', async () => {
-      const results = await suggest({
-        expression: 'sum()',
-        zeroIndexedOffset: 4,
-        context: {
-          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+      const results = await suggest(
+        getSuggestionArgs({
+          expression: 'sum()',
+          zeroIndexedOffset: 4,
           triggerCharacter: '(',
-        },
-        indexPattern: createMockedIndexPattern(),
-        operationDefinitionMap,
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
-      });
-      expect(results.list).toEqual(['bytes', 'memory']);
+        })
+      );
+      expect(results.list).toEqual(['bytes', 'memory', 'runtime-number']);
     });
 
     it('should autocomplete only operations that provide numeric or date output', async () => {
-      const results = await suggest({
-        expression: 'last_value()',
-        zeroIndexedOffset: 11,
-        context: {
-          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+      const results = await suggest(
+        getSuggestionArgs({
+          expression: 'last_value()',
+          zeroIndexedOffset: 11,
           triggerCharacter: '(',
-        },
-        indexPattern: createMockedIndexPattern(),
-        operationDefinitionMap,
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
-      });
-      expect(results.list).toEqual(['bytes', 'memory', 'timestamp', 'start_date']);
+        })
+      );
+      expect(results.list).toEqual([
+        'bytes',
+        'memory',
+        'runtime-number',
+        'timestamp',
+        'start_date',
+      ]);
+    });
+
+    it('should autocomplete shift parameter with relative suggestions and a couple of abs ones', async () => {
+      const results = await suggest(
+        getSuggestionArgs({
+          expression: `count(shift='')`,
+          zeroIndexedOffset: 13,
+          triggerCharacter: '=',
+        })
+      );
+      expect(results.list).toEqual([
+        '',
+        '1h',
+        '3h',
+        '6h',
+        '12h',
+        '1d',
+        '1w',
+        '1M',
+        '3M',
+        '6M',
+        '1y',
+        'previous',
+        'startAt(2022-11-01T00:00:00.000Z)',
+        'endAt(2022-11-03T00:00:00.000Z)',
+      ]);
+    });
+
+    it('should autocomplete shift parameter with absolute suggestions once detected', async () => {
+      const results = await suggest(
+        getSuggestionArgs({
+          expression: `count(shift='endAt(')`,
+          zeroIndexedOffset: 19,
+          triggerCharacter: '=',
+        })
+      );
+      expect(results.list).toEqual([
+        '2022-11-03T00:00:00.000Z)',
+        '2022-11-02T23:00:00.000Z)',
+        '2022-11-02T21:00:00.000Z)',
+        '2022-11-02T18:00:00.000Z)',
+        '2022-11-02T12:00:00.000Z)',
+        '2022-11-02T00:00:00.000Z)',
+        '2022-10-27T00:00:00.000Z)',
+        '2022-10-03T00:00:00.000Z)',
+        '2022-08-03T00:00:00.000Z)',
+        '2022-05-03T00:00:00.000Z)',
+        '2021-11-03T00:00:00.000Z)',
+        '2022-11-03T00:00:00.000Z)',
+      ]);
     });
   });
 

@@ -8,10 +8,10 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
   onClose={[Function]}
 >
   <EuiModalHeader>
-    <EuiModalHeaderTitle>
-      <h3>
-        Edit custom icon
-      </h3>
+    <EuiModalHeaderTitle
+      component="h3"
+    >
+      Edit custom icon
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
@@ -29,7 +29,6 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
           describedByIds={Array []}
           display="rowCompressed"
           error=""
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText="SVGs without sharp corners and intricate details work best. Modifying the settings under Advanced options may improve rendering."
@@ -51,7 +50,6 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
         <EuiFormRow
           describedByIds={Array []}
           display="rowCompressed"
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label="Name"
@@ -94,7 +92,6 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
               className="mapsCustomIconForm__cutoff"
               describedByIds={Array []}
               display="rowCompressed"
-              fullWidth={false}
               hasChildLabel={true}
               hasEmptyLabelSpace={false}
               label={
@@ -132,7 +129,6 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
               className="mapsCustomIconForm__radius"
               describedByIds={Array []}
               display="rowCompressed"
-              fullWidth={false}
               hasChildLabel={true}
               hasEmptyLabelSpace={false}
               label={
@@ -234,10 +230,10 @@ exports[`should render an empty custom icon modal 1`] = `
   onClose={[Function]}
 >
   <EuiModalHeader>
-    <EuiModalHeaderTitle>
-      <h3>
-        Custom Icon
-      </h3>
+    <EuiModalHeaderTitle
+      component="h3"
+    >
+      Custom Icon
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
@@ -255,7 +251,6 @@ exports[`should render an empty custom icon modal 1`] = `
           describedByIds={Array []}
           display="rowCompressed"
           error=""
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText="SVGs without sharp corners and intricate details work best. Modifying the settings under Advanced options may improve rendering."

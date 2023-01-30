@@ -1,0 +1,55 @@
+{
+  "id": "@kbn/shared-ux-file-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-mocks",
+        "id": "def-common.createMockFilesClient",
+        "type": "Function",
+        "tags": [],
+        "label": "createMockFilesClient",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/utility-types-jest",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesJestPluginApi",
+            "section": "def-common.DeeplyMockedKeys",
+            "text": "DeeplyMockedKeys"
+          },
+          "<",
+          "BaseFilesClient",
+          "<unknown>>"
+        ],
+        "path": "packages/shared-ux/file/mocks/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

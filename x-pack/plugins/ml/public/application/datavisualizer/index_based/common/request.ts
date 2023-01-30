@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MlJobFieldType } from '../../../../../common/types/field_types';
 
 export interface FieldRequestConfig {

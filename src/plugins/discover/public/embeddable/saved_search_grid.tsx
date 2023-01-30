@@ -11,6 +11,7 @@ import { DataTableRecord } from '../types';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 import './saved_search_grid.scss';
+import { DiscoverGridFlyout } from '../components/discover_grid/discover_grid_flyout';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;
@@ -39,6 +40,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
           {...props}
           setExpandedDoc={!props.isPlainRecord ? setExpandedDoc : undefined}
           expandedDoc={expandedDoc}
+          DocumentView={DiscoverGridFlyout}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

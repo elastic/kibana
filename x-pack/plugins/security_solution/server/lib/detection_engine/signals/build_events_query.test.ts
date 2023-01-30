@@ -51,9 +51,6 @@ describe('create_signals', () => {
                   },
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -141,9 +138,6 @@ describe('create_signals', () => {
                   minimum_should_match: 1,
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -210,9 +204,6 @@ describe('create_signals', () => {
                   },
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -269,9 +260,6 @@ describe('create_signals', () => {
                     format: 'strict_date_optional_time',
                   },
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
@@ -330,9 +318,6 @@ describe('create_signals', () => {
                   },
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -388,9 +373,6 @@ describe('create_signals', () => {
                     format: 'strict_date_optional_time',
                   },
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
@@ -454,9 +436,6 @@ describe('create_signals', () => {
                     format: 'strict_date_optional_time',
                   },
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
@@ -551,6 +530,61 @@ describe('create_signals', () => {
       '@timestamp': {
         order: 'desc',
         unmapped_type: 'date',
+      },
+    });
+  });
+
+  test('it respects overriderBody params', () => {
+    const query = buildEventsSearchQuery({
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortIds: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
+      runtimeMappings: undefined,
+      overrideBody: {
+        _source: false,
+        fields: ['@timestamp'],
+      },
+    });
+    expect(query).toEqual({
+      allow_no_indices: true,
+      index: ['auditbeat-*'],
+      size: 100,
+      runtime_mappings: undefined,
+      track_total_hits: undefined,
+      ignore_unavailable: true,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {},
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m',
+                    lte: 'today',
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        _source: false,
+        fields: ['@timestamp'],
+        runtime_mappings: undefined,
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+        ],
       },
     });
   });

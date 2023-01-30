@@ -7,11 +7,16 @@
 
 import React, { VFC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { useFilterInOut } from '../../hooks';
 import { FilterOut } from '../../utils';
 import { Indicator } from '../../../../../common/types/indicator';
-import { useStyles } from './styles';
 
 const ICON_TYPE = 'minusInCircle';
 const TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterOut', {
@@ -148,8 +153,6 @@ export const FilterOutCellAction: VFC<FilterOutCellActionProps> = ({
   Component,
   'data-test-subj': dataTestSub,
 }) => {
-  const styles = useStyles();
-
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterOut });
   if (!filterFn) {
     return <></>;
@@ -157,11 +160,11 @@ export const FilterOutCellAction: VFC<FilterOutCellActionProps> = ({
 
   return (
     <EuiToolTip content={TITLE}>
-      <div data-test-subj={dataTestSub} css={styles.button}>
+      <EuiFlexItem data-test-subj={dataTestSub}>
         <Component aria-label={TITLE} iconType={ICON_TYPE} onClick={filterFn}>
           {TITLE}
         </Component>
-      </div>
+      </EuiFlexItem>
     </EuiToolTip>
   );
 };

@@ -14,16 +14,31 @@ import type {
   ConnectorMappingsService,
   AttachmentService,
 } from '.';
+import type { LicensingService } from './licensing';
+import type { EmailNotificationService } from './notifications/email_notification_service';
+import type { UserActionPersister } from './user_actions/operations/create';
+import type { UserActionFinder } from './user_actions/operations/find';
+
+interface UserActionServiceOperations {
+  creator: CaseUserActionPersisterServiceMock;
+  finder: CaseUserActionFinderServiceMock;
+}
 
 export type CaseServiceMock = jest.Mocked<CasesService>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureService>;
 export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsService>;
-export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionService>;
+export type CaseUserActionServiceMock = jest.Mocked<
+  CaseUserActionService & UserActionServiceOperations
+>;
+export type CaseUserActionPersisterServiceMock = jest.Mocked<UserActionPersister>;
+export type CaseUserActionFinderServiceMock = jest.Mocked<UserActionFinder>;
 export type AlertServiceMock = jest.Mocked<AlertService>;
 export type AttachmentServiceMock = jest.Mocked<AttachmentService>;
+export type LicensingServiceMock = jest.Mocked<LicensingService>;
+export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
-  const service: PublicMethodsOf<CasesService> = {
+  const service = {
     deleteCase: jest.fn(),
     findCases: jest.fn(),
     getAllCaseComments: jest.fn(),
@@ -69,18 +84,39 @@ export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => 
   return service as unknown as ConnectorMappingsServiceMock;
 };
 
-export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
-  const service: PublicMethodsOf<CaseUserActionService> = {
-    bulkCreateCaseDeletion: jest.fn(),
+const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceMock => {
+  const service: PublicMethodsOf<UserActionPersister> = {
+    bulkAuditLogCaseDeletion: jest.fn(),
     bulkCreateUpdateCase: jest.fn(),
     bulkCreateAttachmentDeletion: jest.fn(),
     bulkCreateAttachmentCreation: jest.fn(),
     createUserAction: jest.fn(),
-    create: jest.fn(),
-    getAll: jest.fn(),
-    bulkCreate: jest.fn(),
+  };
+
+  return service as unknown as CaseUserActionPersisterServiceMock;
+};
+
+const createUserActionFinderServiceMock = (): CaseUserActionFinderServiceMock => {
+  const service: PublicMethodsOf<UserActionFinder> = {
+    find: jest.fn(),
     findStatusChanges: jest.fn(),
+  };
+
+  return service as unknown as CaseUserActionFinderServiceMock;
+};
+
+type FakeUserActionService = PublicMethodsOf<CaseUserActionService> & UserActionServiceOperations;
+
+export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
+  const service: FakeUserActionService = {
+    creator: createUserActionPersisterServiceMock(),
+    finder: createUserActionFinderServiceMock(),
+    getConnectorFieldsBeforeLatestPush: jest.fn(),
+    getMostRecentUserAction: jest.fn(),
+    getCaseConnectorInformation: jest.fn(),
+    getAll: jest.fn(),
     getUniqueConnectors: jest.fn(),
+    getUserActionIdsForCases: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
@@ -113,8 +149,33 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     getCaseCommentStats: jest.fn(),
     valueCountAlertsAttachedToCase: jest.fn(),
     executeCaseAggregations: jest.fn(),
+    getAttachmentIdsForCases: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as AttachmentServiceMock;
+};
+
+export const createLicensingServiceMock = (): LicensingServiceMock => {
+  const service: PublicMethodsOf<LicensingService> = {
+    notifyUsage: jest.fn(),
+    getLicenseInformation: jest.fn(),
+    isAtLeast: jest.fn(),
+    isAtLeastPlatinum: jest.fn().mockReturnValue(true),
+    isAtLeastGold: jest.fn(),
+    isAtLeastEnterprise: jest.fn(),
+  };
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as LicensingServiceMock;
+};
+
+export const createNotificationServiceMock = (): NotificationServiceMock => {
+  const service: PublicMethodsOf<EmailNotificationService> = {
+    notifyAssignees: jest.fn(),
+    bulkNotifyAssignees: jest.fn(),
+  };
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as NotificationServiceMock;
 };

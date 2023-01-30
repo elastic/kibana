@@ -10,6 +10,7 @@ import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-
 import { keyBy } from 'lodash';
 import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
 import { documentField } from '../datasources/form_based/document_field';
+import { sortDataViewRefs } from '../utils';
 
 type ErrorHandler = (err: Error) => void;
 type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
@@ -46,7 +47,7 @@ export function convertDataViewIntoLensIndexPattern(
         customLabel: field.customLabel,
         runtimeField: field.runtimeField,
         runtime: Boolean(field.runtimeField),
-        timeSeriesMetricType: field.timeSeriesMetric,
+        timeSeriesMetric: field.timeSeriesMetric,
         timeSeriesRollup: field.isRolledUpField,
         partiallyApplicableFunctions: field.isRolledUpField
           ? {
@@ -111,34 +112,10 @@ export function convertDataViewIntoLensIndexPattern(
 }
 
 export async function loadIndexPatternRefs(
-  dataViews: MinimalDataViewsContract,
-  adHocDataViews?: Record<string, DataViewSpec>,
-  contextDataViewSpec?: DataViewSpec
+  dataViews: MinimalDataViewsContract
 ): Promise<IndexPatternRef[]> {
-  const indexPatterns = await dataViews.getIdsWithTitle();
-  const missedIndexPatterns = Object.values(adHocDataViews || {});
-
-  // add data view from context
-  if (contextDataViewSpec) {
-    const existingDataView = indexPatterns.find(
-      (indexPattern) => indexPattern.id === contextDataViewSpec.id
-    );
-    if (!existingDataView) {
-      missedIndexPatterns.push(contextDataViewSpec);
-    }
-  }
-
-  return indexPatterns
-    .concat(
-      missedIndexPatterns.map((dataViewSpec) => ({
-        id: dataViewSpec.id!,
-        name: dataViewSpec.name,
-        title: dataViewSpec.title!,
-      }))
-    )
-    .sort((a, b) => {
-      return a.title.localeCompare(b.title);
-    });
+  const indexPatternsRefs = await dataViews.getIdsWithTitle();
+  return sortDataViewRefs(indexPatternsRefs);
 }
 
 /**

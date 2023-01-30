@@ -47,9 +47,9 @@ export interface EditTagsProps {
 const MyFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`
     width: 100%;
-    margin-top: ${theme.eui.euiSizeM};
     p {
       font-size: ${theme.eui.euiSizeM};
+      margin-block-end: unset;
     }
   `}
 `;
@@ -103,104 +103,107 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
     [tagOptions]
   );
   return (
-    <EuiText data-test-subj="case-view-tag-list">
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="xs"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <h4>{i18n.TAGS}</h4>
-        </EuiFlexItem>
-        {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
-        {!isLoading && permissions.update && (
-          <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
-            <EuiButtonIcon
-              data-test-subj="tag-list-edit-button"
-              aria-label={i18n.EDIT_TAGS_ARIA}
-              iconType={'pencil'}
-              onClick={setIsEditTags.bind(null, true)}
-            />
+    <EuiFlexItem grow={false}>
+      <EuiText data-test-subj="case-view-tag-list">
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="none"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <h4>{i18n.TAGS}</h4>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
-      <MyFlexGroup gutterSize="none" data-test-subj="case-tags">
-        {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
-        {!isEditTags && (
-          <EuiFlexItem>
-            <Tags tags={tags} color="hollow" />
-          </EuiFlexItem>
-        )}
-        {isEditTags && (
-          <ColumnFlexGroup data-test-subj="edit-tags" direction="column">
+          {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
+          {!isLoading && permissions.update && (
+            <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
+              <EuiButtonIcon
+                data-test-subj="tag-list-edit-button"
+                aria-label={i18n.EDIT_TAGS_ARIA}
+                iconType={'pencil'}
+                onClick={setIsEditTags.bind(null, true)}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="xs" />
+        <MyFlexGroup gutterSize="none" data-test-subj="case-tags">
+          {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
+          {!isEditTags && (
             <EuiFlexItem>
-              <Form form={form}>
-                <CommonUseField
-                  path="tags"
-                  componentProps={{
-                    idAria: 'caseTags',
-                    'data-test-subj': 'caseTags',
-                    euiFieldProps: {
-                      fullWidth: true,
-                      placeholder: '',
-                      options,
-                      noSuggestions: false,
-                    },
-                  }}
-                />
-                <FormDataProvider pathsToWatch="tags">
-                  {({ tags: anotherTags }) => {
-                    const current: string[] = options.map((opt) => opt.label);
-                    const newOptions = anotherTags.reduce((acc: string[], item: string) => {
-                      if (!acc.includes(item)) {
-                        return [...acc, item];
+              <Tags tags={tags} color="hollow" />
+            </EuiFlexItem>
+          )}
+          {isEditTags && (
+            <ColumnFlexGroup data-test-subj="edit-tags" direction="column">
+              <EuiFlexItem>
+                <Form form={form}>
+                  <CommonUseField
+                    path="tags"
+                    componentProps={{
+                      idAria: 'caseTags',
+                      'data-test-subj': 'caseTags',
+                      euiFieldProps: {
+                        fullWidth: true,
+                        placeholder: '',
+                        options,
+                        noSuggestions: false,
+                        customOptionText: i18n.ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX,
+                      },
+                    }}
+                  />
+                  <FormDataProvider pathsToWatch="tags">
+                    {({ tags: anotherTags }) => {
+                      const current: string[] = options.map((opt) => opt.label);
+                      const newOptions = anotherTags.reduce((acc: string[], item: string) => {
+                        if (!acc.includes(item)) {
+                          return [...acc, item];
+                        }
+                        return acc;
+                      }, current);
+                      if (!isEqual(current, newOptions)) {
+                        setOptions(
+                          newOptions.map((label: string) => ({
+                            label,
+                          }))
+                        );
                       }
-                      return acc;
-                    }, current);
-                    if (!isEqual(current, newOptions)) {
-                      setOptions(
-                        newOptions.map((label: string) => ({
-                          label,
-                        }))
-                      );
-                    }
-                    return null;
-                  }}
-                </FormDataProvider>
-              </Form>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="success"
-                    data-test-subj="edit-tags-submit"
-                    fill
-                    iconType="save"
-                    onClick={onSubmitTags}
-                    size="s"
-                  >
-                    {i18n.SAVE}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="edit-tags-cancel"
-                    iconType="cross"
-                    onClick={setIsEditTags.bind(null, false)}
-                    size="s"
-                  >
-                    {i18n.CANCEL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </ColumnFlexGroup>
-        )}
-      </MyFlexGroup>
-    </EuiText>
+                      return null;
+                    }}
+                  </FormDataProvider>
+                </Form>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="success"
+                      data-test-subj="edit-tags-submit"
+                      fill
+                      iconType="save"
+                      onClick={onSubmitTags}
+                      size="s"
+                    >
+                      {i18n.SAVE}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj="edit-tags-cancel"
+                      iconType="cross"
+                      onClick={setIsEditTags.bind(null, false)}
+                      size="s"
+                    >
+                      {i18n.CANCEL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </ColumnFlexGroup>
+          )}
+        </MyFlexGroup>
+      </EuiText>
+    </EuiFlexItem>
   );
 });
 

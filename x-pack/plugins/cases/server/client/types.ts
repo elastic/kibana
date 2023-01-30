@@ -11,6 +11,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { IBasePath } from '@kbn/core-http-browser';
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 import type { CasesFindRequest, User } from '../../common/api';
 import type { Authorization } from '../authorization/authorization';
@@ -25,6 +26,7 @@ import type {
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { LicensingService } from '../services/licensing';
+import type { NotificationService } from '../services/notifications/types';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -34,6 +36,7 @@ export interface CasesServices {
   userActionService: CaseUserActionService;
   attachmentService: AttachmentService;
   licensingService: LicensingService;
+  notificationService: NotificationService;
 }
 
 /**
@@ -50,6 +53,8 @@ export interface CasesClientArgs {
   readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   readonly securityStartPlugin: SecurityPluginStart;
+  readonly spaceId: string;
+  readonly savedObjectsSerializer: ISavedObjectsSerializer;
   readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
 

@@ -366,6 +366,15 @@ export function registerIndexRoutes({
         }),
         body: schema.object({
           destination_field: schema.maybe(schema.nullable(schema.string())),
+          inference_config: schema.maybe(
+            schema.object({
+              zero_shot_classification: schema.maybe(
+                schema.object({
+                  labels: schema.arrayOf(schema.string()),
+                })
+              ),
+            })
+          ),
           model_id: schema.string(),
           pipeline_name: schema.string(),
           source_field: schema.string(),
@@ -381,6 +390,7 @@ export function registerIndexRoutes({
         pipeline_name: pipelineName,
         source_field: sourceField,
         destination_field: destinationField,
+        inference_config: inferenceConfig,
       } = request.body;
 
       let createPipelineResult: CreateMlInferencePipelineResponse | undefined;
@@ -392,6 +402,7 @@ export function registerIndexRoutes({
           modelId,
           sourceField,
           destinationField,
+          inferenceConfig,
           client.asCurrentUser
         );
       } catch (error) {
@@ -577,12 +588,102 @@ export function registerIndexRoutes({
         pipeline: { description: defaultDescription, ...pipeline },
       };
 
-      const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
+      try {
+        const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
 
-      return response.ok({
-        body: simulateResult,
-        headers: { 'content-type': 'application/json' },
-      });
+        return response.ok({
+          body: simulateResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        return createError({
+          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+          message: e.message,
+          response,
+          statusCode: 400,
+        });
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate/{pipelineName}',
+      validate: {
+        body: schema.object({
+          docs: schema.arrayOf(schema.any()),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { docs } = request.body;
+      const indexName = decodeURIComponent(request.params.indexName);
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+
+      const [indexExists, pipelinesResponse] = await Promise.all([
+        indexOrAliasExists(client, indexName),
+        client.asCurrentUser.ingest.getPipeline({
+          id: pipelineName,
+        }),
+      ]);
+      if (!indexExists) {
+        return createError({
+          errorCode: ErrorCode.INDEX_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.indices.pipelines.indexMissingError',
+            {
+              defaultMessage: 'The index {indexName} does not exist',
+              values: {
+                indexName,
+              },
+            }
+          ),
+          response,
+          statusCode: 404,
+        });
+      }
+      if (!(pipelineName in pipelinesResponse)) {
+        return createError({
+          errorCode: ErrorCode.PIPELINE_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.indices.pipelines.pipelineMissingError',
+            {
+              defaultMessage: 'The pipeline {pipelineName} does not exist',
+              values: {
+                pipelineName,
+              },
+            }
+          ),
+          response,
+          statusCode: 404,
+        });
+      }
+
+      const simulateRequest: IngestSimulateRequest = {
+        docs,
+        pipeline: pipelinesResponse[pipelineName],
+      };
+
+      try {
+        const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
+
+        return response.ok({
+          body: simulateResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        return createError({
+          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+          message: e.message,
+          response,
+          statusCode: 400,
+        });
+      }
     })
   );
 

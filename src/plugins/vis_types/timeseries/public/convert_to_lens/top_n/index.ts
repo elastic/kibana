@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds, Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
-import { getDataSourceInfo } from '../lib/datasource';
+import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForTopN as getConfiguration, getLayers } from '../lib/configurations/xy';
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
@@ -28,77 +28,84 @@ const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<st
   return newLayers;
 };
 
+const invalidModelError = () => new Error('Invalid model');
+
 export const convertToLens: ConvertTsvbToLensVisualization = async (
   { params: model },
   timeRange
 ) => {
   const dataViews = getDataViewsStart();
-  const extendedLayers: Record<number, ExtendedLayer> = {};
-  const seriesNum = model.series.filter((series) => !series.hidden).length;
+  try {
+    const extendedLayers: Record<number, ExtendedLayer> = {};
+    const seriesNum = model.series.filter((series) => !series.hidden).length;
 
-  // handle multiple layers/series
-  for (const [layerIdx, series] of model.series.entries()) {
-    if (series.hidden) {
-      continue;
+    // handle multiple layers/series
+    for (const [layerIdx, series] of model.series.entries()) {
+      if (series.hidden) {
+        continue;
+      }
+
+      // not valid time shift
+      if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
+        throw invalidModelError();
+      }
+
+      if (!isValidMetrics(series.metrics, PANEL_TYPES.TOP_N, series.time_range_mode)) {
+        throw invalidModelError();
+      }
+
+      const datasourceInfo = await extractOrGenerateDatasourceInfo(
+        model.index_pattern,
+        model.time_field,
+        Boolean(series.override_index_pattern),
+        series.series_index_pattern,
+        series.series_time_field,
+        dataViews
+      );
+
+      if (!datasourceInfo) {
+        throw invalidModelError();
+      }
+
+      const { indexPatternId, indexPattern } = datasourceInfo;
+      const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
+
+      // handle multiple metrics
+      const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, {
+        reducedTimeRange,
+      });
+      if (!metricsColumns) {
+        throw invalidModelError();
+      }
+
+      const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, false);
+      if (bucketsColumns === null) {
+        throw invalidModelError();
+      }
+
+      const layerId = uuidv4();
+      extendedLayers[layerIdx] = {
+        indexPatternId,
+        layerId,
+        columns: [...metricsColumns, ...bucketsColumns],
+        columnOrder: [],
+      };
     }
 
-    // not valid time shift
-    if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
-      return null;
+    const configLayers = await getLayers(extendedLayers, model, dataViews, true);
+    if (configLayers === null) {
+      throw invalidModelError();
     }
 
-    if (!isValidMetrics(series.metrics, PANEL_TYPES.TOP_N, series.time_range_mode)) {
-      return null;
-    }
+    const layers = Object.values(excludeMetaFromLayers(extendedLayers));
 
-    const datasourceInfo = await getDataSourceInfo(
-      model.index_pattern,
-      model.time_field,
-      Boolean(series.override_index_pattern),
-      series.series_index_pattern,
-      series.series_time_field,
-      dataViews
-    );
-
-    if (!datasourceInfo) {
-      return null;
-    }
-
-    const { indexPatternId, indexPattern } = datasourceInfo;
-    const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
-
-    // handle multiple metrics
-    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, {
-      reducedTimeRange,
-    });
-    if (!metricsColumns) {
-      return null;
-    }
-
-    const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, false);
-    if (bucketsColumns === null) {
-      return null;
-    }
-
-    const layerId = uuid();
-    extendedLayers[layerIdx] = {
-      indexPatternId,
-      layerId,
-      columns: [...metricsColumns, ...bucketsColumns],
-      columnOrder: [],
+    return {
+      type: 'lnsXY',
+      layers,
+      configuration: getConfiguration(model, configLayers),
+      indexPatternIds: getIndexPatternIds(layers),
     };
-  }
-
-  const configLayers = await getLayers(extendedLayers, model, dataViews, true);
-  if (configLayers === null) {
+  } catch (e) {
     return null;
   }
-
-  const layers = Object.values(excludeMetaFromLayers(extendedLayers));
-  return {
-    type: 'lnsXY',
-    layers,
-    configuration: getConfiguration(model, configLayers),
-    indexPatternIds: getIndexPatternIds(layers),
-  };
 };

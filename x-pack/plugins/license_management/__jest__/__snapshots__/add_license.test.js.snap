@@ -2,90 +2,98 @@
 
 exports[`AddLicense component when license is active should display correct verbiage 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
 >
   <div
-    class="euiCard__content emotion-euiCard__content-vertical"
+    class="euiCard__main emotion-euiCard__main-vertical"
   >
-    <p
-      class="euiTitle euiCard__title emotion-euiTitle-s"
-      id="generated-idTitle"
-    >
-      <span
-        class="emotion-euiCard__text-center"
-      >
-        Update your license
-      </span>
-    </p>
     <div
-      class="euiText emotion-euiText-s-euiCard__description"
-      id="generated-idDescription"
+      class="euiCard__content emotion-euiCard__content-vertical"
     >
-      <p>
-        If you already have a new license, upload it now.
-      </p>
-    </div>
-  </div>
-  <div
-    class="emotion-euiCard__footer"
-  >
-    <a
-      class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
-      data-test-subj="updateLicenseButton"
-      href="/upload_license"
-      rel="noreferrer"
-    >
-      <span
-        class="emotion-euiButtonDisplayContent"
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
       >
-        Update license
-      </span>
-    </a>
+        <span
+          class="emotion-euiCard__text-center"
+        >
+          Update your license
+        </span>
+      </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          If you already have a new license, upload it now.
+        </p>
+      </div>
+    </div>
+    <div
+      class="emotion-euiCard__footer"
+    >
+      <a
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+        data-test-subj="updateLicenseButton"
+        href="/upload_license"
+        rel="noreferrer"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          Update license
+        </span>
+      </a>
+    </div>
   </div>
 </div>
 `;
 
 exports[`AddLicense component when license is expired should display with correct verbiage 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
 >
   <div
-    class="euiCard__content emotion-euiCard__content-vertical"
+    class="euiCard__main emotion-euiCard__main-vertical"
   >
-    <p
-      class="euiTitle euiCard__title emotion-euiTitle-s"
-      id="generated-idTitle"
-    >
-      <span
-        class="emotion-euiCard__text-center"
-      >
-        Update your license
-      </span>
-    </p>
     <div
-      class="euiText emotion-euiText-s-euiCard__description"
-      id="generated-idDescription"
+      class="euiCard__content emotion-euiCard__content-vertical"
     >
-      <p>
-        If you already have a new license, upload it now.
-      </p>
-    </div>
-  </div>
-  <div
-    class="emotion-euiCard__footer"
-  >
-    <a
-      class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
-      data-test-subj="updateLicenseButton"
-      href="/upload_license"
-      rel="noreferrer"
-    >
-      <span
-        class="emotion-euiButtonDisplayContent"
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
       >
-        Update license
-      </span>
-    </a>
+        <span
+          class="emotion-euiCard__text-center"
+        >
+          Update your license
+        </span>
+      </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          If you already have a new license, upload it now.
+        </p>
+      </div>
+    </div>
+    <div
+      class="emotion-euiCard__footer"
+    >
+      <a
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+        data-test-subj="updateLicenseButton"
+        href="/upload_license"
+        rel="noreferrer"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          Update license
+        </span>
+      </a>
+    </div>
   </div>
 </div>
 `;

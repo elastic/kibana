@@ -62,19 +62,20 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           scatterplotMatrixColorsWizard: [
             // markers
-            { color: '#52B398', percentage: 15 },
+            { color: '#5078AA', percentage: 15 },
             // grey boilerplate
-            { color: '#6A717D', percentage: 13 },
+            { color: '#69707D', percentage: 12 },
           ],
           scatterplotMatrixColorStatsResults: [
-            // red markers
-            { color: '#D98071', percentage: 1 },
-            // tick/grid/axis, grey markers
-            { color: '#6A717D', percentage: 12 },
-            { color: '#D3DAE6', percentage: 8 },
-            { color: '#98A1B3', percentage: 12 },
+            // outlier markers
+            { color: '#BE6E96', percentage: 1 },
+            // regular markers
+            { color: '#6496BE', percentage: 15 },
+            // tick/grid/axis
+            { color: '#69707D', percentage: 12 },
+            { color: '#D2DCE6', percentage: 10 },
             // anti-aliasing
-            { color: '#F5F7FA', percentage: 30 },
+            { color: '#F5F7FA', percentage: 35 },
           ],
           runtimeFieldsEditorContent: [
             '{',

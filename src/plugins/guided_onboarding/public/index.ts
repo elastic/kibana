@@ -16,5 +16,3 @@ export type {
   GuidedOnboardingPluginStart,
   GuidedOnboardingApi,
 } from './types';
-
-export { guidesConfig } from './constants/guides_config';

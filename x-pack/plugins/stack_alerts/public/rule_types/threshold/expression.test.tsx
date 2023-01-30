@@ -101,6 +101,7 @@ describe('IndexThresholdRuleTypeExpression', () => {
         defaultActionGroupId=""
         actionGroups={[]}
         charts={chartsStartMock}
+        onChangeMetaData={() => {}}
       />
     );
 

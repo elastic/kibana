@@ -6,21 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { FieldSpec, DataView, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
-import { FieldSpec, DataView } from '@kbn/data-views-plugin/common';
 
+import { OptionsListSortingType } from './suggestions_sorting';
 import { DataControlInput } from '../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
+  sort?: OptionsListSortingType;
   selectedOptions?: string[];
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  hideSort?: boolean;
+  hideActionBar?: boolean;
   exclude?: boolean;
+  placeholder?: string;
 }
 
 export type OptionsListField = FieldSpec & {
@@ -29,11 +34,16 @@ export type OptionsListField = FieldSpec & {
   childFieldName?: string;
 };
 
+export interface OptionsListSuggestions {
+  [key: string]: { doc_count: number };
+}
+
 /**
  * The Options list response is returned from the serverside Options List route.
  */
 export interface OptionsListResponse {
-  suggestions: string[];
+  rejected: boolean;
+  suggestions: OptionsListSuggestions;
   totalCardinality: number;
   invalidSelections?: string[];
 }
@@ -57,9 +67,12 @@ export type OptionsListRequest = Omit<
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
  */
 export interface OptionsListRequestBody {
+  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
+  sort?: OptionsListSortingType;
   filters?: Array<{ bool: BoolQuery }>;
   selectedOptions?: string[];
   runPastTimeout?: boolean;
+  parentFieldName?: string;
   textFieldName?: string;
   searchString?: string;
   fieldSpec?: FieldSpec;

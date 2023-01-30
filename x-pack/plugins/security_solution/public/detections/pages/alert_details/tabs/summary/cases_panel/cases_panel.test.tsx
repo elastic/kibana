@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { CasesPanel } from '.';
+import type { RelatedCaseInfo } from '@kbn/cases-plugin/common/api';
+import { CaseStatuses } from '@kbn/cases-plugin/common/api';
+import { CasesPanel, CASES_PANEL_CASES_COUNT_MAX } from '.';
 import { TestProviders } from '../../../../../../common/mock';
 import {
   mockAlertDetailsTimelineResponse,
@@ -134,10 +136,17 @@ describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
       });
     });
   });
-  describe('has related cases', () => {
-    const mockRelatedCase = {
+  describe('has a single related cases', () => {
+    const mockRelatedCase: RelatedCaseInfo = {
+      createdAt: '2022-11-04T17:22:13.267Z',
       title: 'test case',
+      description: 'Test case description',
+      status: CaseStatuses.open,
       id: 'test-case-id',
+      totals: {
+        alerts: 2,
+        userComments: 4,
+      },
     };
 
     beforeEach(() => {
@@ -159,6 +168,56 @@ describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
       );
 
       expect(getByTestId('case-panel')).toHaveTextContent(mockRelatedCase.title);
+      expect(getByTestId('case-panel')).toHaveTextContent(mockRelatedCase.description);
+      expect(getByTestId('case-panel')).toHaveTextContent(`${mockRelatedCase.totals.alerts}`);
+      expect(getByTestId('case-panel')).toHaveTextContent(`${mockRelatedCase.totals.userComments}`);
+    });
+  });
+  describe(`has more than ${CASES_PANEL_CASES_COUNT_MAX} related cases`, () => {
+    const mockRelatedCase: RelatedCaseInfo = {
+      createdAt: '2022-11-04T17:22:13.267Z',
+      title: 'test case',
+      description: 'Test case description',
+      status: CaseStatuses.open,
+      id: 'test-case-id',
+      totals: {
+        alerts: 2,
+        userComments: 4,
+      },
+    };
+
+    const mockRelatedCaseList = Array.from(Array(CASES_PANEL_CASES_COUNT_MAX + 3).keys()).map(
+      (position) => ({
+        ...mockRelatedCase,
+        title: `test case ${position + 1}`,
+        id: `test-case-id-${position + 1}`,
+      })
+    );
+
+    beforeEach(() => {
+      (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
+        create: true,
+        update: true,
+      });
+      (useGetRelatedCasesByEvent as jest.Mock).mockReturnValue({
+        loading: false,
+        relatedCases: mockRelatedCaseList,
+      });
+    });
+
+    it('should show the related case', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <CasesPanel {...defaultPanelProps} />
+        </TestProviders>
+      );
+
+      expect(getByTestId('case-panel')).toHaveTextContent(
+        `test case ${CASES_PANEL_CASES_COUNT_MAX}`
+      );
+      expect(getByTestId('case-panel')).not.toHaveTextContent(
+        `test case ${CASES_PANEL_CASES_COUNT_MAX + 1}`
+      );
     });
   });
 });

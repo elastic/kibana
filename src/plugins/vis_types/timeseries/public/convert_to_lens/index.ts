@@ -45,10 +45,6 @@ const getConvertFnByType = (type: PANEL_TYPES) => {
  * In case of null, the menu item is disabled and the user can't navigate to Lens.
  */
 export const convertTSVBtoLensConfiguration = async (vis: Vis<Panel>, timeRange?: TimeRange) => {
-  // Disables the option for not supported charts, for the string mode and for series with annotations
-  if (!vis.params.use_kibana_indexes) {
-    return null;
-  }
   // Disables if model is invalid
   if (vis.params.isModelInvalid) {
     return null;

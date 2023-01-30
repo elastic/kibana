@@ -5,7 +5,7 @@
  * 2.0.
  */
 import fetch, { BodyInit, HeadersInit, Response } from 'node-fetch';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { format as formatUrl } from 'url';
 import {
@@ -19,10 +19,8 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import {
-  comparePolicies,
-  getTestProjectSyntheticsPolicy,
-} from '../uptime/rest/sample_data/test_policy';
+import { comparePolicies } from './sample_data/test_policy';
+import { getTestProjectSyntheticsPolicy } from './sample_data/test_project_monitor_policy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddProjectLegacyMonitors', function () {
@@ -47,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     const setUniqueIds = (request: LegacyProjectMonitorsRequest) => {
       return {
         ...request,
-        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuid.v4() })),
+        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
       };
     };
 
@@ -84,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.10.3')
+        .post('/api/fleet/epm/packages/synthetics/0.11.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -140,6 +138,11 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             'filter_journeys.match': 'check if title is present',
             'filter_journeys.tags': [],
             form_monitor_type: 'multistep',
@@ -152,11 +155,8 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
             ],
             name: 'check if title is present',
@@ -228,8 +228,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(messages[2].failedMonitors).eql([
           {
             id: httpProjectMonitors.monitors[0].id,
-            details: `Multiple urls are not supported for http project monitors in ${kibanaVersion}. Please set only 1 url per monitor. You monitor was not created or updated.`,
-            reason: 'Unsupported Heartbeat option',
+            details: `\`http\` project monitors must have exactly one value for field \`urls\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+            reason: 'Invalid Heartbeat configuration',
           },
           {
             id: httpProjectMonitors.monitors[0].id,
@@ -240,6 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const monitor of successfulMonitors) {
           const journeyId = monitor.id;
+          const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
           const createdMonitorsResponse = await supertest
             .get(API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
@@ -253,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_tls_enabled: false,
+              is_tls_enabled: isTLSEnabled,
             },
             'check.request.method': 'POST',
             'check.response.status': ['200'],
@@ -270,6 +271,11 @@ export default function ({ getService }: FtrProviderContext) {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
             enabled: false,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'http',
             journey_id: journeyId,
             locations: [
@@ -279,11 +285,8 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
             ],
             max_redirects: '0',
@@ -306,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-            'ssl.verification_mode': 'full',
+            'ssl.verification_mode': isTLSEnabled ? 'strict' : 'full',
             'ssl.key': '',
             'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
@@ -343,8 +346,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(messages[2].failedMonitors).eql([
           {
             id: tcpProjectMonitors.monitors[2].id,
-            details: `Multiple hosts are not supported for tcp project monitors in ${kibanaVersion}. Please set only 1 host per monitor. You monitor was not created or updated.`,
-            reason: 'Unsupported Heartbeat option',
+            details: `\`tcp\` project monitors must have exactly one value for field \`hosts\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+            reason: 'Invalid Heartbeat configuration',
           },
           {
             id: tcpProjectMonitors.monitors[2].id,
@@ -355,6 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const monitor of successfulMonitors) {
           const journeyId = monitor.id;
+          const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
           const createdMonitorsResponse = await supertest
             .get(API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
@@ -368,13 +372,18 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_tls_enabled: false,
+              is_tls_enabled: isTLSEnabled,
             },
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             'check.receive': '',
             'check.send': '',
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'tcp',
             journey_id: journeyId,
             locations: [
@@ -384,11 +393,8 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
             ],
             name: monitor.name,
@@ -407,7 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-            'ssl.verification_mode': 'full',
+            'ssl.verification_mode': isTLSEnabled ? 'strict' : 'full',
             'ssl.key': '',
             'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
@@ -445,8 +451,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(messages[2].failedMonitors).eql([
           {
             id: icmpProjectMonitors.monitors[2].id,
-            details: `Multiple hosts are not supported for icmp project monitors in ${kibanaVersion}. Please set only 1 host per monitor. You monitor was not created or updated.`,
-            reason: 'Unsupported Heartbeat option',
+            details: `\`icmp\` project monitors must have exactly one value for field \`hosts\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+            reason: 'Invalid Heartbeat configuration',
           },
           {
             id: icmpProjectMonitors.monitors[2].id,
@@ -472,6 +478,11 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'icmp',
             journey_id: journeyId,
             locations: [
@@ -481,21 +492,15 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
               {
-                agentPolicyId: testPolicyId,
-                concurrentMonitors: 1,
                 geo: {
                   lat: '',
                   lon: '',
                 },
                 id: testPolicyId,
-                isInvalid: false,
                 isServiceManaged: false,
                 label: 'Test private location 0',
               },
@@ -552,6 +557,19 @@ export default function ({ getService }: FtrProviderContext) {
           }),
         ]);
       }
+    });
+
+    it('project monitors - returns error if the space does not exist', async () => {
+      const messages = await parseStreamApiResponse(
+        kibanaServerUrl + '/s/i_dont_exist' + API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY,
+        JSON.stringify(projectMonitors)
+      );
+
+      expect(messages).to.have.length(2);
+      expect(messages[0]).to.equal(
+        "Unable to create monitors. Kibana space 'i_dont_exist' does not exist."
+      );
+      expect(messages[1].failedMonitors).to.eql(projectMonitors.monitors.map((m) => m.id));
     });
 
     it('project monitors - returns a list of successfully updated monitors', async () => {
@@ -821,8 +839,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {
@@ -958,8 +976,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {
@@ -1012,8 +1030,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {
@@ -1474,6 +1492,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'check if title is present-Test private location 0',
             id,
             configId,
+            locationName: 'Test private location 0',
           })
         );
       } finally {
@@ -1591,6 +1610,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'check if title is present-Test private location 0',
             id,
             configId,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1670,6 +1690,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'check if title is present-Test private location 0',
             id,
             configId,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1767,10 +1788,17 @@ export default function ({ getService }: FtrProviderContext) {
           streams: [
             {
               enabled: true,
-              data_stream: { type: 'synthetics', dataset: 'http' },
-              release: 'experimental',
+              data_stream: {
+                elasticsearch: {
+                  privileges: {
+                    indices: ['auto_configure', 'create_doc', 'read'],
+                  },
+                },
+                type: 'synthetics',
+                dataset: 'http',
+              },
               vars: {
-                __ui: { value: '{"is_tls_enabled":false}', type: 'yaml' },
+                __ui: { value: '{"is_tls_enabled":true}', type: 'yaml' },
                 enabled: { value: false, type: 'bool' },
                 type: { value: 'http', type: 'text' },
                 name: { value: 'My Monitor 3', type: 'text' },
@@ -1799,7 +1827,7 @@ export default function ({ getService }: FtrProviderContext) {
                 'ssl.certificate': { value: null, type: 'yaml' },
                 'ssl.key': { value: null, type: 'yaml' },
                 'ssl.key_passphrase': { value: null, type: 'text' },
-                'ssl.verification_mode': { value: 'full', type: 'text' },
+                'ssl.verification_mode': { value: 'strict', type: 'text' },
                 'ssl.supported_protocols': {
                   value: '["TLSv1.1","TLSv1.2","TLSv1.3"]',
                   type: 'yaml',
@@ -1823,7 +1851,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               id: `synthetics/http-http-${id}-${testPolicyId}`,
               compiled_stream: {
-                __ui: { is_tls_enabled: false },
+                __ui: { is_tls_enabled: true },
                 type: 'http',
                 name: 'My Monitor 3',
                 id,
@@ -1840,10 +1868,11 @@ export default function ({ getService }: FtrProviderContext) {
                 'check.request.headers': { 'Content-Type': 'application/x-www-form-urlencoded' },
                 'check.response.status': ['200'],
                 'check.response.body.positive': ['Saved', 'saved'],
-                'ssl.verification_mode': 'full',
+                'ssl.verification_mode': 'strict',
                 'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+                'run_from.geo.name': 'Test private location 0',
+                'run_from.id': 'Test private location 0',
                 processors: [
-                  { add_observer_metadata: { geo: { name: 'Test private location 0' } } },
                   {
                     add_fields: {
                       target: '',
@@ -1936,6 +1965,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'check if title is present-Test private location 0',
             id,
             configId,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1972,6 +2002,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'check if title is present-Test private location 0',
             id: id2,
             configId: configId2,
+            locationName: 'Test private location 0',
           })
         );
       } finally {
@@ -2012,22 +2043,16 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'localhost',
               label: 'Local Synthetics Service',
               geo: { lat: 0, lon: 0 },
-              url: 'mockDevUrl',
               isServiceManaged: true,
-              status: 'experimental',
-              isInvalid: false,
             },
             {
               label: 'Test private location 0',
               isServiceManaged: false,
-              isInvalid: false,
-              agentPolicyId: testPolicyId,
               id: testPolicyId,
               geo: {
                 lat: '',
                 lon: '',
               },
-              concurrentMonitors: 1,
             },
           ]);
         });

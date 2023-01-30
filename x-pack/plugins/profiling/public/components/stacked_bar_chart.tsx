@@ -26,10 +26,15 @@ import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { SubChart } from './subchart';
 
-function SubchartTooltip({
+const SubchartTooltip = ({
   highlightedSubchart,
+  highlightedSample,
   showFrames,
-}: TooltipInfo & { highlightedSubchart: TopNSubchart; showFrames: boolean }) {
+}: TooltipInfo & {
+  highlightedSubchart: TopNSubchart;
+  highlightedSample: TopNSample | null;
+  showFrames: boolean;
+}) => {
   // max tooltip width - 2 * padding (16px)
   const width = 224;
   return (
@@ -39,8 +44,9 @@ function SubchartTooltip({
         color={highlightedSubchart.Color}
         category={highlightedSubchart.Category}
         label={highlightedSubchart.Label}
-        percentage={highlightedSubchart.Percentage}
         data={highlightedSubchart.Series}
+        percentage={highlightedSubchart.Percentage}
+        sample={highlightedSample}
         showFrames={showFrames}
         /* we don't show metadata in tooltips */
         metadata={[]}
@@ -52,15 +58,16 @@ function SubchartTooltip({
       />
     </EuiPanel>
   );
-}
+};
 
 export interface StackedBarChartProps {
   height: number;
   asPercentages: boolean;
   onBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
-  onSampleClick: (sample: TopNSample) => void;
+  onSampleOver: (sample: TopNSample) => void;
   onSampleOut: () => void;
-  highlightedSubchart?: TopNSubchart;
+  highlightedSample: TopNSample | null;
+  highlightedSubchart: TopNSubchart | null;
   charts: TopNSubchart[];
   showFrames: boolean;
 }
@@ -69,8 +76,9 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
   height,
   asPercentages,
   onBrushEnd,
-  onSampleClick,
   onSampleOut,
+  onSampleOver,
+  highlightedSample,
   highlightedSubchart,
   charts,
   showFrames,
@@ -78,6 +86,17 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
   const timeZone = useKibanaTimeZoneSetting();
 
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
+
+  const customTooltip = highlightedSubchart
+    ? (props: TooltipInfo) => (
+        <SubchartTooltip
+          {...props}
+          highlightedSubchart={highlightedSubchart!}
+          highlightedSample={highlightedSample}
+          showFrames={showFrames}
+        />
+      )
+    : () => <></>;
 
   return (
     <Chart size={{ height }}>
@@ -92,30 +111,15 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
         }}
         baseTheme={chartsBaseTheme}
         theme={chartsTheme}
-        onElementClick={(events) => {
+        onElementOver={(events) => {
           const [value] = events[0] as XYChartElementEvent;
-          onSampleClick(value.datum as TopNSample);
-        }}
-        onElementOver={() => {
-          onSampleOut();
+          onSampleOver(value.datum as TopNSample);
         }}
         onElementOut={() => {
           onSampleOut();
         }}
       />
-      <Tooltip
-        customTooltip={
-          highlightedSubchart
-            ? (props) => (
-                <SubchartTooltip
-                  {...props}
-                  showFrames={showFrames}
-                  highlightedSubchart={highlightedSubchart}
-                />
-              )
-            : () => <></>
-        }
-      />
+      <Tooltip customTooltip={customTooltip} />
       {charts.map((chart) => (
         <HistogramBarSeries
           key={chart.Category}

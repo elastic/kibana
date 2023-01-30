@@ -7,6 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { of } from 'rxjs';
+import { siemGuideId } from '../../../../common/guided_onboarding/siem_guide_config';
 import { TourContextProvider, useTourContext } from './tour';
 import { SecurityStepId, securityTourConfig } from './tour_config';
 import { useKibana } from '../../lib/kibana';
@@ -41,8 +42,8 @@ describe('useTourContext', () => {
     jest.clearAllMocks();
   });
   // @ts-ignore
-  const stepIds = Object.values(SecurityStepId);
-  describe.each(stepIds)('%s', (stepId) => {
+  const tourIds = [SecurityStepId.alertsCases];
+  describe.each(tourIds)('%s', (tourId: SecurityStepId) => {
     it('if guidedOnboardingApi?.isGuideStepActive$ is false, isTourShown should be false', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -56,22 +57,22 @@ describe('useTourContext', () => {
       const { result } = renderHook(() => useTourContext(), {
         wrapper: TourContextProvider,
       });
-      expect(result.current.isTourShown(stepId)).toBe(false);
+      expect(result.current.isTourShown(tourId)).toBe(false);
     });
     it('if guidedOnboardingApi?.isGuideStepActive$ is true, isTourShown should be true', () => {
       const { result } = renderHook(() => useTourContext(), {
         wrapper: TourContextProvider,
       });
-      expect(result.current.isTourShown(stepId)).toBe(true);
+      expect(result.current.isTourShown(tourId)).toBe(true);
     });
-    it('endTourStep calls completeGuideStep with correct stepId', async () => {
+    it('endTourStep calls completeGuideStep with correct tourId', async () => {
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
           wrapper: TourContextProvider,
         });
         await waitForNextUpdate();
-        result.current.endTourStep(stepId);
-        expect(mockCompleteGuideStep).toHaveBeenCalledWith('security', stepId);
+        result.current.endTourStep(tourId);
+        expect(mockCompleteGuideStep).toHaveBeenCalledWith(siemGuideId, tourId);
       });
     });
     it('activeStep is initially 1', () => {
@@ -80,19 +81,41 @@ describe('useTourContext', () => {
       });
       expect(result.current.activeStep).toBe(1);
     });
-    it('increment step properly increments for each stepId, and if attempted to increment beyond length of tour config steps resets activeStep to 1', async () => {
+    it('incrementStep properly increments for each tourId, and if attempted to increment beyond length of tour config steps resets activeStep to 1', async () => {
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
           wrapper: TourContextProvider,
         });
         await waitForNextUpdate();
-        const stepCount = securityTourConfig[stepId].length;
+        const stepCount = securityTourConfig[tourId].length;
         for (let i = 0; i < stepCount - 1; i++) {
-          result.current.incrementStep(stepId);
+          result.current.incrementStep(tourId);
         }
         const lastStep = stepCount ? stepCount : 1;
         expect(result.current.activeStep).toBe(lastStep);
-        result.current.incrementStep(stepId);
+        result.current.incrementStep(tourId);
+        expect(result.current.activeStep).toBe(1);
+      });
+    });
+
+    it('setStep sets activeStep to step number argument', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
+          wrapper: TourContextProvider,
+        });
+        await waitForNextUpdate();
+        result.current.setStep(tourId, 7);
+        expect(result.current.activeStep).toBe(7);
+      });
+    });
+
+    it('does not setStep sets activeStep to non-existing step number', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
+          wrapper: TourContextProvider,
+        });
+        await waitForNextUpdate();
+        result.current.setStep(tourId, 88);
         expect(result.current.activeStep).toBe(1);
       });
     });

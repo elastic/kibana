@@ -8,21 +8,28 @@
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingContent,
   EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiSpacer,
   EuiTabbedContent,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { SearchHit } from '../../../../common/search_strategy';
+import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
-import { getTourAnchor, SecurityStepId } from '../guided_onboarding_tour/tour_config';
+import {
+  AlertsCasesTourSteps,
+  getTourAnchor,
+  SecurityStepId,
+} from '../guided_onboarding_tour/tour_config';
 import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
@@ -31,7 +38,6 @@ import { ThreatSummaryView } from './cti_details/threat_summary_view';
 import { ThreatDetailsView } from './cti_details/threat_details_view';
 import * as i18n from './translations';
 import { AlertSummaryView } from './alert_summary_view';
-import type { Ecs } from '../../../../common/ecs';
 import type { BrowserFields } from '../../containers/source';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
@@ -125,6 +131,17 @@ const RendererContainer = styled.div`
   }
 `;
 
+const ThreatTacticContainer = styled(EuiFlexGroup)`
+  flex-wrap: nowrap;
+  & .euiFlexGroup {
+    flex-wrap: nowrap;
+  }
+`;
+
+const ThreatTacticDescription = styled.div`
+  padding-left: ${(props) => props.theme.eui.euiSizeL};
+`;
+
 const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
   data,
@@ -163,6 +180,10 @@ const EventDetailsComponent: React.FC<Props> = ({
     range,
   } = useInvestigationTimeEnrichment(eventFields);
 
+  const threatDetails = useMemo(
+    () => getMitreComponentParts(rawEventData as SearchHit),
+    [rawEventData]
+  );
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
       return existingEnrichments;
@@ -211,9 +232,25 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
                 <EuiSpacer size="l" />
-
+                <ThreatTacticContainer direction="column" wrap={false} gutterSize="none">
+                  {threatDetails && threatDetails[0] && (
+                    <>
+                      <EuiTitle size="xxs">
+                        <h5>{threatDetails[0].title}</h5>
+                      </EuiTitle>
+                      <ThreatTacticDescription>
+                        {threatDetails[0].description}
+                      </ThreatTacticDescription>
+                    </>
+                  )}
+                </ThreatTacticContainer>
+                <EuiSpacer size="l" />
                 {renderer != null && detailsEcsData != null && (
                   <div>
+                    <EuiTitle size="xs">
+                      <h5>{i18n.ALERT_REASON}</h5>
+                    </EuiTitle>
+                    <EuiSpacer size="s" />
                     <RendererContainer data-test-subj="renderer">
                       {renderer.renderRow({
                         contextId: EVENT_DETAILS_CONTEXT_ID,
@@ -224,7 +261,6 @@ const EventDetailsComponent: React.FC<Props> = ({
                     </RendererContainer>
                   </div>
                 )}
-
                 <EuiHorizontalRule />
                 <AlertSummaryView
                   {...{
@@ -238,8 +274,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   }}
                   goToTable={goToTableTab}
                 />
-
-                <EuiSpacer size="l" />
+                <EuiSpacer size="xl" />
                 <Insights
                   browserFields={browserFields}
                   eventId={id}
@@ -274,23 +309,24 @@ const EventDetailsComponent: React.FC<Props> = ({
           }
         : undefined,
     [
-      allEnrichments,
+      isAlert,
       browserFields,
+      scopeId,
       data,
-      detailsEcsData,
-      goToTableTab,
-      handleOnEventClosed,
-      hostRisk,
       id,
       indexName,
-      isAlert,
-      isDraggable,
-      scopeId,
-      isEnrichmentsLoading,
-      showThreatSummary,
+      handleOnEventClosed,
       isReadOnly,
       renderer,
+      detailsEcsData,
+      isDraggable,
+      goToTableTab,
+      threatDetails,
+      showThreatSummary,
+      hostRisk,
       userRisk,
+      allEnrichments,
+      isEnrichmentsLoading,
     ]
   );
 
@@ -300,26 +336,17 @@ const EventDetailsComponent: React.FC<Props> = ({
         ? {
             id: EventsViewType.threatIntelView,
             'data-test-subj': 'threatIntelTab',
-            name: (
-              <EuiFlexGroup
-                direction="row"
-                alignItems={'center'}
-                justifyContent={'spaceAround'}
-                gutterSize="xs"
-              >
-                <EuiFlexItem>
-                  <span>{i18n.THREAT_INTEL}</span>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {isEnrichmentsLoading ? (
-                    <EuiLoadingSpinner />
-                  ) : (
-                    <EuiNotificationBadge data-test-subj="enrichment-count-notification">
-                      {enrichmentCount}
-                    </EuiNotificationBadge>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
+            name: i18n.THREAT_INTEL,
+            append: (
+              <>
+                {isEnrichmentsLoading ? (
+                  <EuiLoadingSpinner />
+                ) : (
+                  <EuiNotificationBadge data-test-subj="enrichment-count-notification">
+                    {enrichmentCount}
+                  </EuiNotificationBadge>
+                )}
+              </>
             ),
             content: (
               <ThreatDetailsView
@@ -415,17 +442,20 @@ const EventDetailsComponent: React.FC<Props> = ({
   return (
     <GuidedOnboardingTourStep
       isTourAnchor={isTourAnchor}
-      step={3}
-      stepId={SecurityStepId.alertsCases}
+      step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
+      tourId={SecurityStepId.alertsCases}
     >
-      <StyledEuiTabbedContent
-        {...tourAnchor}
-        data-test-subj="eventDetails"
-        tabs={tabs}
-        selectedTab={selectedTab}
-        onTabClick={handleTabClick}
-        key="event-summary-tabs"
-      />
+      <>
+        <EuiSpacer size="s" />
+        <StyledEuiTabbedContent
+          {...tourAnchor}
+          data-test-subj="eventDetails"
+          tabs={tabs}
+          selectedTab={selectedTab}
+          onTabClick={handleTabClick}
+          key="event-summary-tabs"
+        />
+      </>
     </GuidedOnboardingTourStep>
   );
 };

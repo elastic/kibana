@@ -15,8 +15,8 @@ import {
   findDashboardSavedObjects,
   findDashboardSavedObjectsByIds,
 } from './lib/find_dashboard_saved_objects';
-import { loadDashboardStateFromSavedObject } from './lib/load_dashboard_state_from_saved_object';
 import { saveDashboardStateToSavedObject } from './lib/save_dashboard_state_to_saved_object';
+import { loadDashboardStateFromSavedObject } from './lib/load_dashboard_state_from_saved_object';
 import type { DashboardSavedObjectRequiredServices, DashboardSavedObjectService } from './types';
 
 export type DashboardSavedObjectServiceFactory = KibanaPluginServiceFactory<
@@ -34,24 +34,29 @@ export const dashboardSavedObjectServiceFactory: DashboardSavedObjectServiceFact
   } = coreStart;
 
   return {
-    loadDashboardStateFromSavedObject: ({ id, getScopedHistory }) =>
+    loadDashboardStateFromSavedObject: ({ id }) =>
       loadDashboardStateFromSavedObject({
         id,
-        getScopedHistory,
         savedObjectsClient,
         ...requiredServices,
       }),
-    saveDashboardStateToSavedObject: ({ currentState, redirectTo, saveOptions }) =>
+    saveDashboardStateToSavedObject: ({ currentState, saveOptions, lastSavedId }) =>
       saveDashboardStateToSavedObject({
-        redirectTo,
         saveOptions,
+        lastSavedId,
         currentState,
         savedObjectsClient,
         ...requiredServices,
       }),
     findDashboards: {
-      findSavedObjects: ({ hasReference, search, size }) =>
-        findDashboardSavedObjects({ hasReference, search, size, savedObjectsClient }),
+      findSavedObjects: ({ hasReference, hasNoReference, search, size }) =>
+        findDashboardSavedObjects({
+          hasReference,
+          hasNoReference,
+          search,
+          size,
+          savedObjectsClient,
+        }),
       findByIds: (ids) => findDashboardSavedObjectsByIds(savedObjectsClient, ids),
       findByTitle: (title) => findDashboardIdByTitle(title, savedObjectsClient),
     },

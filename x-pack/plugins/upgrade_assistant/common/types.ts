@@ -277,3 +277,9 @@ export interface SystemIndicesMigrationStarted {
   features: SystemIndicesMigrationFeature[];
   accepted: boolean;
 }
+
+export interface FeatureSet {
+  migrateSystemIndices: boolean;
+  mlSnapshots: boolean;
+  reindexCorrectiveActions: boolean;
+}

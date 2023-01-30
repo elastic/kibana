@@ -13,6 +13,7 @@ import {
   InjectedMetadataExternalUrlPolicy,
   InjectedMetadataPlugin,
 } from '@kbn/core-injected-metadata-common-internal';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 /** @internal */
 export interface InjectedMetadataParams {
@@ -52,11 +53,16 @@ export interface InternalInjectedMetadataSetup {
       defaults: Record<string, any>;
       user?: Record<string, any> | undefined;
     };
+    globalUiSettings: {
+      defaults: Record<string, any>;
+      user?: Record<string, any> | undefined;
+    };
   };
   getInjectedVar: (name: string, defaultValue?: any) => unknown;
   getInjectedVars: () => {
     [key: string]: unknown;
   };
+  getCustomBranding: () => CustomBranding;
 }
 
 /** @internal */

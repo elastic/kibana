@@ -8,6 +8,7 @@
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
+import { useStyles } from './styles';
 import { useKibana } from '../../../../../hooks';
 import { Indicator } from '../../../../../../common/types/indicator';
 import { IndicatorFieldValue } from '../../field_value';
@@ -16,6 +17,8 @@ import { ActionsRowCell } from '.';
 
 export const cellRendererFactory = (from: number) => {
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
+    const styles = useStyles();
+
     const indicatorsTableContext = useContext(IndicatorsTableContext);
 
     if (!indicatorsTableContext) {
@@ -48,10 +51,13 @@ export const cellRendererFactory = (from: number) => {
       return null;
     }
 
-    if (columnId === 'Actions') {
-      return <ActionsRowCell indicator={indicator} />;
-    }
+    const renderContent =
+      columnId === 'Actions' ? (
+        <ActionsRowCell indicator={indicator} />
+      ) : (
+        <IndicatorFieldValue indicator={indicator} field={columnId} />
+      );
 
-    return <IndicatorFieldValue indicator={indicator} field={columnId} />;
+    return <div css={styles.tableCell}>{renderContent}</div>;
   };
 };

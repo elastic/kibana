@@ -45,6 +45,7 @@ export const connectorIndex: ConnectorViewIndex = {
     configuration: { foo: { label: 'bar', value: 'barbar' } },
     description: null,
     error: null,
+    features: null,
     filtering: [
       {
         active: {
@@ -116,7 +117,7 @@ export const connectorIndex: ConnectorViewIndex = {
   count: 1,
   hidden: false,
   ingestionMethod: IngestionMethod.CONNECTOR,
-  ingestionStatus: IngestionStatus.INCOMPLETE,
+  ingestionStatus: IngestionStatus.CONFIGURED,
   lastUpdated: 'never',
   name: 'connector',
   total: {
@@ -127,31 +128,14 @@ export const connectorIndex: ConnectorViewIndex = {
     store: { size_in_bytes: '8024' },
   },
 };
+
 export const crawlerIndex: CrawlerViewIndex = {
-  count: 1,
-  crawler: {
-    id: '3',
-    index_name: 'crawler',
-  },
-  hidden: false,
-  ingestionMethod: IngestionMethod.CRAWLER,
-  ingestionStatus: IngestionStatus.INCOMPLETE,
-  lastUpdated: null,
-  name: 'crawler',
-  total: {
-    docs: {
-      count: 1,
-      deleted: 0,
-    },
-    store: { size_in_bytes: '8024' },
-  },
-};
-export const connectorCrawlerIndex: CrawlerViewIndex = {
   connector: {
     api_key_id: null,
     configuration: { foo: { label: 'bar', value: 'barbar' } },
     description: null,
     error: null,
+    features: null,
     filtering: [
       {
         active: {
@@ -204,14 +188,14 @@ export const connectorCrawlerIndex: CrawlerViewIndex = {
       },
     ],
     id: '4',
-    index_name: 'connector-crawler',
+    index_name: 'crawler',
     is_native: true,
     language: 'en',
     last_seen: null,
     last_sync_error: null,
     last_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
-    name: 'connector-crawler',
+    name: 'crawler',
     scheduling: {
       enabled: false,
       interval: '',
@@ -223,13 +207,13 @@ export const connectorCrawlerIndex: CrawlerViewIndex = {
   count: 1,
   crawler: {
     id: '5',
-    index_name: 'crawler',
+    index_name: 'connector-crawler',
   },
   hidden: false,
   ingestionMethod: IngestionMethod.CRAWLER,
-  ingestionStatus: IngestionStatus.INCOMPLETE,
+  ingestionStatus: IngestionStatus.CONFIGURED,
   lastUpdated: null,
-  name: 'connector-crawler',
+  name: 'crawler',
   total: {
     docs: {
       count: 1,
@@ -239,9 +223,4 @@ export const connectorCrawlerIndex: CrawlerViewIndex = {
   },
 };
 
-export const elasticsearchViewIndices = [
-  apiIndex,
-  connectorIndex,
-  crawlerIndex,
-  connectorCrawlerIndex,
-];
+export const elasticsearchViewIndices = [apiIndex, connectorIndex, crawlerIndex];

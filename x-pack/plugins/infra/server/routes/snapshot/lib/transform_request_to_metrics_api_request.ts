@@ -7,7 +7,7 @@
 
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { findInventoryFields, findInventoryModel } from '../../../../common/inventory_models';
-import { MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
+import { MetricsAPIMetric, MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { InfraSource } from '../../../lib/sources';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
@@ -38,9 +38,7 @@ export const transformRequestToMetricsAPIRequest = async ({
   const metricsApiRequest: MetricsAPIRequest = {
     indexPattern: sourceOverrides?.indexPattern ?? source.configuration.metricAlias,
     timerange: {
-      from: timeRangeWithIntervalApplied.from,
-      to: timeRangeWithIntervalApplied.to,
-      interval: timeRangeWithIntervalApplied.interval,
+      ...timeRangeWithIntervalApplied,
     },
     metrics: transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest),
     limit: snapshotRequest.overrideCompositeSize
@@ -48,6 +46,7 @@ export const transformRequestToMetricsAPIRequest = async ({
       : compositeSize,
     alignDataToEnd: true,
     dropPartialBuckets: true,
+    includeTimeseries: snapshotRequest.includeTimeseries,
   };
 
   const filters = [];
@@ -75,13 +74,24 @@ export const transformRequestToMetricsAPIRequest = async ({
     metricsApiRequest.groupBy = [...groupBy, inventoryFields.id];
   }
 
-  const metaAggregation = {
+  const topMetricMetrics = [{ field: inventoryFields.name }];
+  if (inventoryFields.ip) {
+    topMetricMetrics.push({ field: inventoryFields.ip });
+  }
+  if (inventoryFields.os) {
+    topMetricMetrics.push({ field: inventoryFields.os });
+  }
+  if (inventoryFields.cloudProvider) {
+    topMetricMetrics.push({ field: inventoryFields.cloudProvider });
+  }
+
+  const metaAggregation: MetricsAPIMetric = {
     id: META_KEY,
     aggregations: {
       [META_KEY]: {
         top_metrics: {
           size: 1,
-          metrics: [{ field: inventoryFields.name }],
+          metrics: topMetricMetrics,
           sort: {
             [TIMESTAMP_FIELD]: 'desc',
           },
@@ -89,14 +99,6 @@ export const transformRequestToMetricsAPIRequest = async ({
       },
     },
   };
-
-  if (inventoryFields.ip) {
-    metaAggregation.aggregations[META_KEY].top_metrics.metrics.push({ field: inventoryFields.ip });
-  }
-
-  if (inventoryFields.os) {
-    metaAggregation.aggregations[META_KEY].top_metrics.metrics.push({ field: inventoryFields.os });
-  }
 
   metricsApiRequest.metrics.push(metaAggregation);
 

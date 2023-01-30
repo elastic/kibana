@@ -451,7 +451,7 @@ export const termsOperation: OperationDefinition<
         // in single field mode, allow the automatic switch of the function to
         // the most appropriate one
         if (fields.length === 1) {
-          const possibleOperations = operationSupportMatrix.operationByField[sourcefield];
+          const possibleOperations = operationSupportMatrix.operationByField.get(sourcefield);
           const termsSupported = possibleOperations?.has('terms');
           if (!termsSupported) {
             const newFieldOp = possibleOperations?.values().next().value;
@@ -560,6 +560,7 @@ export const termsOperation: OperationDefinition<
 The top values of a specified field ranked by the chosen metric.
       `,
   }),
+  handleDataSectionExtra: true,
   paramEditor: function ParamEditor({
     layer,
     paramEditorUpdater,
@@ -570,6 +571,7 @@ The top values of a specified field ranked by the chosen metric.
     ReferenceEditor,
     paramEditorCustomProps,
     activeData,
+    dataSectionExtra,
     ...rest
   }) {
     const [incompleteColumn, setIncompleteColumn] = useState<IncompleteColumn | undefined>(
@@ -929,6 +931,12 @@ The top values of a specified field ranked by the chosen metric.
             }}
           />
         </EuiFormRow>
+        {dataSectionExtra && (
+          <>
+            <EuiSpacer size="m" />
+            {dataSectionExtra}
+          </>
+        )}
         {!hasRestrictions && (
           <>
             <EuiSpacer size="m" />

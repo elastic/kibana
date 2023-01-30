@@ -10,6 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import * as cborx from 'cbor-x';
 import { basename } from 'path';
+import { generateFileMetadataDocumentMock } from '../../../../server/endpoint/services/actions/mocks';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import { checkInFleetAgent } from '../../common/fleet_services';
 import { sendEndpointMetadataUpdate } from '../../common/endpoint_metadata_services';
@@ -29,6 +30,7 @@ import type {
   GetProcessesActionOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  FileUploadMetadata,
 } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -193,40 +195,40 @@ export const sendEndpointActionResponse = async (
     )?.parameters?.path!;
 
     const fileName = basename(filePath.replace(/\\/g, '/'));
+    const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
+      action_id: action.id,
+      agent_id: action.agents[0],
+      contents: [
+        {
+          sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
+          file_name: fileName ?? 'bad_file.txt',
+          path: filePath,
+          size: 4,
+          type: 'file',
+        },
+      ],
+      file: {
+        attributes: ['archive', 'compressed'],
+        ChunkSize: 4194304,
+        compression: 'deflate',
+        hash: {
+          sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
+        },
+        mime_type: 'application/zip',
+        name: 'upload.zip',
+        extension: 'zip',
+        size: 125,
+        Status: 'READY',
+        type: 'file',
+      },
+      src: 'endpoint',
+    });
 
     // Index the file's metadata
     const fileMeta = await esClient.index({
       index: FILE_STORAGE_METADATA_INDEX,
       id: getFileDownloadId(action, action.agents[0]),
-      body: {
-        action_id: action.id,
-        agent_id: action.agents[0],
-        contents: [
-          {
-            hash: {
-              sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
-            },
-            name: fileName ?? 'bad_file.txt',
-            path: filePath,
-            size: 4,
-            type: 'file',
-          },
-        ],
-        file: {
-          attributes: ['archive', 'compressed'],
-          ChunkSize: 4194304,
-          Compression: 'deflate',
-          hash: {
-            sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
-          },
-          mime_type: 'application/zip',
-          name: 'upload.zip',
-          size: 125,
-          Status: 'READY',
-          type: 'file',
-        },
-        source: 'endpoint',
-      },
+      body: fileMetaDoc,
       refresh: 'wait_for',
     });
 
@@ -281,15 +283,22 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
         output: {
           type: 'json',
           content: {
-            code: 'ra_get-file-success',
-            path: (
-              action as ActionDetails<
-                ResponseActionGetFileOutputContent,
-                ResponseActionGetFileParameters
-              >
-            ).parameters?.path,
-            size: 1234,
+            code: 'ra_get-file_success_done',
             zip_size: 123,
+            contents: [
+              {
+                type: 'file',
+                path: (
+                  action as ActionDetails<
+                    ResponseActionGetFileOutputContent,
+                    ResponseActionGetFileParameters
+                  >
+                ).parameters?.path,
+                size: 1234,
+                file_name: 'bad_file.txt',
+                sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
+              },
+            ],
           },
         },
       } as ResponseOutput<ResponseActionGetFileOutputContent>;

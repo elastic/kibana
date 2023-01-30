@@ -15,11 +15,11 @@ interface Props {
 
 export const Step = ({ description, children }: Props) => {
   return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem>
+    <EuiFlexGroup gutterSize="s" wrap>
+      <EuiFlexItem style={{ minWidth: 200 }}>
         <EuiText>{description}</EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>{children}</EuiFlexItem>
+      <EuiFlexItem style={{ minWidth: 500 }}>{children}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

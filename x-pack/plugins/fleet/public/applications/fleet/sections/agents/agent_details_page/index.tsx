@@ -25,12 +25,14 @@ import {
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
+import { ExperimentalFeaturesService } from '../../../services';
+
 import { AgentRefreshContext } from './hooks';
 import {
   AgentLogs,
   AgentDetailsActionMenu,
   AgentDetailsContent,
-  AgentDashboardLink,
+  AgentDiagnosticsTab,
 } from './components';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
@@ -38,6 +40,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
+  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
   const {
     isLoading,
     isInitialRequest,
@@ -46,6 +49,9 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     resendRequest: sendAgentRequest,
   } = useGetOneAgent(agentId, {
     pollIntervalMs: 5000,
+    query: {
+      withMetrics: displayAgentMetrics,
+    },
   });
   const {
     isLoading: isAgentPolicyLoading,
@@ -65,6 +71,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       navigateToApp(routeState.onDoneNavigateTo[0], routeState.onDoneNavigateTo[1]);
     }
   }, [routeState, navigateToApp]);
+  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
 
   const host = agentData?.item?.local_metadata?.host;
 
@@ -123,9 +130,6 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <AgentDashboardLink agent={agentData?.item} agentPolicy={agentPolicyData?.item} />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </>
       ) : undefined,
@@ -134,7 +138,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   );
 
   const headerTabs = useMemo(() => {
-    return [
+    const tabs = [
       {
         id: 'details',
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
@@ -152,7 +156,18 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         isSelected: tabId === 'logs',
       },
     ];
-  }, [getHref, agentId, tabId]);
+    if (diagnosticFileUploadEnabled) {
+      tabs.push({
+        id: 'diagnostics',
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.diagnosticsTab', {
+          defaultMessage: 'Diagnostics',
+        }),
+        href: getHref('agent_details_diagnostics', { agentId, tabId: 'diagnostics' }),
+        isSelected: tabId === 'diagnostics',
+      });
+    }
+    return tabs;
+  }, [getHref, agentId, tabId, diagnosticFileUploadEnabled]);
 
   return (
     <AgentRefreshContext.Provider
@@ -220,6 +235,12 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         path={FLEET_ROUTING_PATHS.agent_details_logs}
         render={() => {
           return <AgentLogs agent={agent} agentPolicy={agentPolicy} />;
+        }}
+      />
+      <Route
+        path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
+        render={() => {
+          return <AgentDiagnosticsTab agent={agent} />;
         }}
       />
       <Route

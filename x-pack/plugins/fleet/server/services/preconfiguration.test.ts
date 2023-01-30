@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -108,7 +108,7 @@ function getPutPreconfiguredPackagesMock() {
     const { id } = options!;
     mockConfiguredPolicies.set(id, attributes);
     return {
-      id: id || uuid.v4(),
+      id: id || uuidv4(),
       attributes,
       type,
       references: [],
@@ -908,6 +908,7 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
     name: 'Test policy',
     description: 'This is a test policy',
     unenroll_timeout: 60,
+    inactivity_timeout: 60,
     is_preconfigured: true,
     status: 'active',
     is_managed: true,

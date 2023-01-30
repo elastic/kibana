@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 
 import type { RequestHandler, Logger } from '@kbn/core/server';
@@ -160,18 +160,21 @@ export function registerResponseActionRoutes(
     )
   );
 
-  router.post(
-    {
-      path: GET_FILE_ROUTE,
-      validate: EndpointActionGetFileSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      logger,
-      responseActionRequestHandler(endpointContext, 'get-file')
-    )
-  );
+  // `get-file` currently behind FF
+  if (endpointContext.experimentalFeatures.responseActionGetFileEnabled) {
+    router.post(
+      {
+        path: GET_FILE_ROUTE,
+        validate: EndpointActionGetFileSchema,
+        options: { authRequired: true, tags: ['access:securitySolution'] },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'get-file')
+      )
+    );
+  }
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([
@@ -226,7 +229,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     caseIDs = [...new Set(caseIDs)];
 
     // create an Action ID and dispatch it to ES & Fleet Server
-    const actionID = uuid.v4();
+    const actionID = uuidv4();
 
     let fleetActionIndexResult;
     let logsEndpointActionsResult;

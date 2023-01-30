@@ -18,7 +18,6 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { MAJOR_VERSION } from '../../../common/constants';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
@@ -79,7 +78,7 @@ describe('reindexService', () => {
       licensingPluginSetup
     );
 
-    versionService.setup(MAJOR_VERSION);
+    versionService.setup('8.0.0');
   });
 
   describe('hasRequiredPrivileges', () => {

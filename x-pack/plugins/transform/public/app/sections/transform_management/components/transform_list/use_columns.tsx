@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -133,7 +133,7 @@ export const useColumns = (
                   values: { transformId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowDown' : 'arrowRight'}
           data-test-subj="transformListRowDetailsToggle"
         />
       ),
@@ -266,7 +266,7 @@ export const useColumns = (
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             {isBatchTransform && (
-              <Fragment>
+              <>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
                   <EuiProgress
                     value={progress}
@@ -281,10 +281,10 @@ export const useColumns = (
                 <EuiFlexItem style={{ width: '35px' }} grow={false}>
                   <EuiText size="xs">{`${progress}%`}</EuiText>
                 </EuiFlexItem>
-              </Fragment>
+              </>
             )}
             {!isBatchTransform && (
-              <Fragment>
+              <>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
                   {/* If not stopped, failed or waiting show the animated progress bar */}
                   {item.stats.state !== TRANSFORM_STATE.STOPPED &&
@@ -302,7 +302,7 @@ export const useColumns = (
                 <EuiFlexItem style={{ width: '35px' }} grow={false}>
                   &nbsp;
                 </EuiFlexItem>
-              </Fragment>
+              </>
             )}
           </EuiFlexGroup>
         );

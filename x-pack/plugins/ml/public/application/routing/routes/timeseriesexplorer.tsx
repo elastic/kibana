@@ -12,6 +12,9 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
+import { useUrlState } from '@kbn/ml-url-state';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_PAGES } from '../../../locator';
 import { getViewableDetectors } from '../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
 import { NavigateToPath, useNotifications } from '../../contexts/kibana';
 import { useMlContext } from '../../contexts/ml';
@@ -31,15 +34,13 @@ import {
 } from '../../timeseriesexplorer/timeseriesexplorer_utils';
 import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
 import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
-import { useUrlState } from '../../util/url_state';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 
-import { MlRoute, PageLoader, PageProps } from '../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { useTimefilter } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
@@ -55,7 +56,7 @@ export const timeSeriesExplorerRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'timeseriesexplorer',
-  path: '/timeseriesexplorer',
+  path: createPath(ML_PAGES.SINGLE_METRIC_VIEWER),
   title: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
     defaultMessage: 'Single Metric Viewer',
   }),

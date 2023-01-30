@@ -595,7 +595,7 @@
         "label": "fetchExceptionListsWithValidation",
         "description": [],
         "signature": [
-          "({ filters, http, namespaceTypes, pagination, signal, }: ",
+          "({ filters, http, namespaceTypes, pagination, signal, sort, }: ",
           {
             "pluginId": "@kbn/securitysolution-io-ts-list-types",
             "scope": "common",
@@ -614,7 +614,7 @@
             "id": "def-common.fetchExceptionListsWithValidation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filters,\n  http,\n  namespaceTypes,\n  pagination,\n  signal,\n}",
+            "label": "{\n  filters,\n  http,\n  namespaceTypes,\n  pagination,\n  signal,\n  sort,\n}",
             "description": [],
             "signature": [
               {

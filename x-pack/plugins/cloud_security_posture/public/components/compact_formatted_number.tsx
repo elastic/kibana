@@ -5,13 +5,28 @@
  * 2.0.
  */
 import React from 'react';
-import { FormattedNumber } from '@kbn/i18n-react';
+import { EuiToolTip } from '@elastic/eui';
 
-export const CompactFormattedNumber = ({ number }: { number: number }) => (
-  <FormattedNumber
-    value={number}
-    maximumFractionDigits={1}
-    notation="compact"
-    compactDisplay="short"
-  />
-);
+export const CompactFormattedNumber = ({
+  number = 0,
+  abbreviateAbove = 999999,
+}: {
+  number: number;
+  /** numbers higher than the value of this field will be abbreviated using compact notation and have a tooltip displaying the full value */
+  abbreviateAbove?: number;
+}) => {
+  if (number <= abbreviateAbove) {
+    return <span>{number.toLocaleString()}</span>;
+  }
+
+  return (
+    <EuiToolTip content={number.toLocaleString()}>
+      <span>
+        {number.toLocaleString(undefined, {
+          notation: 'compact',
+          maximumFractionDigits: 1,
+        })}
+      </span>
+    </EuiToolTip>
+  );
+};

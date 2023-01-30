@@ -117,14 +117,14 @@ export const ENTER_NUMBER_OF_DOWN_COUNTS = i18n.translate(
 export const MATCHING_MONITORS_DOWN = i18n.translate(
   'xpack.synthetics.alerts.monitorStatus.numTimesExpression.matchingMonitors.description',
   {
-    defaultMessage: 'matching monitors are down >',
+    defaultMessage: 'matching monitors are down >=',
   }
 );
 
 export const ANY_MONITOR_DOWN = i18n.translate(
   'xpack.synthetics.alerts.monitorStatus.numTimesExpression.anyMonitors.description',
   {
-    defaultMessage: 'any monitor is down >',
+    defaultMessage: 'any monitor is down >=',
   }
 );
 

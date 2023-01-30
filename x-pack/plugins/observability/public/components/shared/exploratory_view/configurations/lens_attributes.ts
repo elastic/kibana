@@ -50,6 +50,7 @@ import {
   RECORDS_FIELD,
   RECORDS_PERCENTAGE_FIELD,
   REPORT_METRIC_FIELD,
+  REPORT_METRIC_TIMESTAMP,
   ReportTypes,
   TERMS_COLUMN,
   USE_BREAK_DOWN_COLUMN,
@@ -123,7 +124,7 @@ export const parseCustomFieldName = (
 
       return {
         ...(currField ?? {}),
-        fieldName: selectedMetricField,
+        fieldName: currField?.field ?? selectedMetricField,
         columnLabel: currField?.label,
         columnField: currField?.field,
       };
@@ -230,15 +231,20 @@ export class LensAttributes {
     alphabeticOrder?: boolean;
     size?: number;
   }): TermsIndexPatternColumn {
-    const { dataView, seriesConfig } = layerConfig;
+    const { dataView, seriesConfig, selectedMetricField } = layerConfig;
 
     const fieldMeta = dataView.getFieldByName(sourceField);
-
+    const { metricOptions } = seriesConfig;
     const { sourceField: yAxisSourceField } = seriesConfig.yAxisColumns[0];
 
     const labels = seriesConfig.labels ?? {};
 
-    const isFormulaColumn = yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
+    const isFormulaColumn =
+      Boolean(
+        metricOptions &&
+          (metricOptions.find((option) => option.id === selectedMetricField) as MetricOption)
+            ?.formula
+      ) || yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
 
     let orderBy: TermColumnParamsOrderBy = {
       type: 'column',
@@ -326,7 +332,6 @@ export class LensAttributes {
     columnType,
     columnFilter,
     operationType,
-    shortLabel,
   }: {
     sourceField: string;
     columnType?: string;
@@ -334,7 +339,6 @@ export class LensAttributes {
     operationType?: SupportedOperations | 'last_value';
     label?: string;
     seriesConfig: SeriesConfig;
-    shortLabel?: boolean;
   }) {
     if (columnType === 'operation' || operationType) {
       if (
@@ -347,7 +351,6 @@ export class LensAttributes {
           label,
           seriesConfig,
           columnFilter,
-          shortLabel,
         });
       }
       if (operationType === 'last_value') {
@@ -360,7 +363,7 @@ export class LensAttributes {
         });
       }
       if (operationType?.includes('th')) {
-        return this.getPercentileNumberColumn(sourceField, operationType, seriesConfig!);
+        return this.getPercentileNumberColumn(sourceField, operationType, seriesConfig!, label);
       }
     }
     return this.getNumberRangeColumn(sourceField, seriesConfig!, label);
@@ -397,14 +400,12 @@ export class LensAttributes {
     seriesConfig,
     operationType,
     columnFilter,
-    shortLabel,
   }: {
     sourceField: string;
     operationType: SupportedOperations;
     label?: string;
     seriesConfig: SeriesConfig;
     columnFilter?: ColumnFilter;
-    shortLabel?: boolean;
   }):
     | MinIndexPatternColumn
     | MaxIndexPatternColumn
@@ -464,14 +465,17 @@ export class LensAttributes {
   getPercentileNumberColumn(
     sourceField: string,
     percentileValue: string,
-    seriesConfig: SeriesConfig
+    seriesConfig: SeriesConfig,
+    label?: string
   ): PercentileIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
-      label: i18n.translate('xpack.observability.expView.columns.label', {
-        defaultMessage: '{percentileValue} percentile of {sourceField}',
-        values: { sourceField: seriesConfig.labels[sourceField]?.toLowerCase(), percentileValue },
-      }),
+      label:
+        label ??
+        i18n.translate('xpack.observability.expView.columns.label', {
+          defaultMessage: '{percentileValue} percentile of {sourceField}',
+          values: { sourceField: seriesConfig.labels[sourceField]?.toLowerCase(), percentileValue },
+        }),
       operationType: 'percentile',
       params: getPercentileParam(percentileValue),
       customLabel: true,
@@ -485,7 +489,7 @@ export class LensAttributes {
       isBucketed: true,
       label: '@timestamp',
       operationType: 'date_histogram',
-      params: { interval: 'auto' },
+      params: { interval: 'auto', includeEmptyRows: true },
       scale: 'interval',
     };
   }
@@ -512,11 +516,13 @@ export class LensAttributes {
   getXAxis(layerConfig: LayerConfig, layerId: string) {
     const { xAxisColumn } = layerConfig.seriesConfig;
 
-    if (!xAxisColumn.sourceField) {
+    let xSourceFiled = xAxisColumn?.sourceField;
+
+    if (!xSourceFiled) {
       return [xAxisColumn as LastValueIndexPatternColumn];
     }
 
-    if (xAxisColumn?.sourceField === USE_BREAK_DOWN_COLUMN) {
+    if (xSourceFiled === USE_BREAK_DOWN_COLUMN) {
       return this.getBreakdownColumn({
         layerId,
         layerConfig,
@@ -524,10 +530,22 @@ export class LensAttributes {
       });
     }
 
-    if (xAxisColumn.sourceField === REPORT_METRIC_FIELD) {
-      const { paramFilters } = this.getFieldMeta(xAxisColumn.sourceField, layerConfig);
+    if (xSourceFiled === REPORT_METRIC_FIELD) {
+      const { paramFilters } = this.getFieldMeta(xSourceFiled, layerConfig);
       if (paramFilters) {
         return this.getFiltersColumn({ paramFilters });
+      }
+    }
+
+    if (xSourceFiled === REPORT_METRIC_TIMESTAMP) {
+      const metricOption = parseCustomFieldName(
+        layerConfig.seriesConfig,
+        layerConfig.selectedMetricField
+      );
+
+      if (!Array.isArray(metricOption)) {
+        const { timestampField = '@timestamp' } = metricOption;
+        xSourceFiled = timestampField;
       }
     }
 
@@ -535,7 +553,7 @@ export class LensAttributes {
       layerConfig,
       layerId,
       label: xAxisColumn.label,
-      sourceField: xAxisColumn.sourceField,
+      sourceField: xSourceFiled,
     });
   }
 
@@ -547,7 +565,6 @@ export class LensAttributes {
     colIndex,
     layerId,
     metricOption,
-    shortLabel,
   }: {
     sourceField: string;
     metricOption?: MetricOption;
@@ -556,12 +573,12 @@ export class LensAttributes {
     layerId: string;
     layerConfig: LayerConfig;
     colIndex?: number;
-    shortLabel?: boolean;
   }) {
     const { breakdown, seriesConfig } = layerConfig;
     const fieldMetaInfo = this.getFieldMeta(sourceField, layerConfig, metricOption);
 
     const {
+      format,
       formula,
       fieldMeta,
       columnType,
@@ -576,6 +593,7 @@ export class LensAttributes {
       return getDistributionInPercentageColumn({
         layerId,
         formula,
+        format,
         label: columnLabel ?? label,
         dataView: layerConfig.dataView,
         lensFormulaHelper: this.lensFormulaHelper!,
@@ -609,7 +627,8 @@ export class LensAttributes {
         ...this.getPercentileNumberColumn(
           fieldName,
           operationType || PERCENTILE_RANKS[0],
-          seriesConfig!
+          seriesConfig!,
+          label || columnLabel
         ),
         filter: colIndex !== undefined ? columnFilters?.[colIndex] : undefined,
       };
@@ -623,7 +642,6 @@ export class LensAttributes {
         operationType,
         label: label || columnLabel,
         seriesConfig: layerConfig.seriesConfig,
-        shortLabel,
       });
     }
     if (operationType === 'unique_count' || fieldType === 'string') {
@@ -678,9 +696,11 @@ export class LensAttributes {
         paramFilters,
         showPercentileAnnotations,
         formula,
+        format,
       } = metricOption;
       const fieldMeta = layerConfig.dataView.getFieldByName(fieldName!);
       return {
+        format,
         formula,
         palette,
         fieldMeta,
@@ -733,6 +753,10 @@ export class LensAttributes {
 
     const fieldMetaInfo = this.getFieldMeta(sourceField, layerConfig);
 
+    if (!fieldMetaInfo.fieldMeta && fieldMetaInfo.fieldName === RECORDS_FIELD) {
+      return [this.getRecordsColumn(label, fieldMetaInfo.columnFilters?.[0], timeScale)];
+    }
+
     if ('items' in fieldMetaInfo) {
       const { items } = fieldMetaInfo;
 
@@ -740,7 +764,6 @@ export class LensAttributes {
         return this.getColumnBasedOnType({
           layerConfig,
           layerId,
-          shortLabel: true,
           label: item.label,
           sourceField: REPORT_METRIC_FIELD,
           metricOption: item,
@@ -1055,7 +1078,7 @@ export class LensAttributes {
         isVisible: true,
         showSingleSeries: true,
         position: 'right',
-        legendSize: LegendSize.LARGE,
+        legendSize: LegendSize.AUTO,
         shouldTruncate: false,
       },
       valueLabels: 'hide',

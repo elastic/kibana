@@ -7,7 +7,7 @@
 
 import { CommentType, SECURITY_SOLUTION_OWNER } from '../../common';
 import {
-  getPersistableStateAttachmentTypeRegistry,
+  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
   persistableStateAttachmentAttributes,
 } from './mocks';
@@ -19,7 +19,7 @@ import {
 } from './so_references';
 
 describe('Persistable state SO references', () => {
-  const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   const references = [
     {
       id: 'testRef',

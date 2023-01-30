@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../routes/security');
+jest.mock('../security');
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 

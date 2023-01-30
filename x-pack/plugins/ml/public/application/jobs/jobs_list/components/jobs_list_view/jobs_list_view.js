@@ -75,7 +75,7 @@ export class JobsListView extends Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.refreshJobSummaryList(true);
+    this.refreshJobSummaryList();
     this.openAutoStartDatafeedModal();
   }
 
@@ -290,72 +290,74 @@ export class JobsListView extends Component {
 
   onRefreshClick = () => {
     this.setState({ isRefreshing: true });
-    this.refreshJobSummaryList(true);
+    this.refreshJobSummaryList();
   };
 
   isDoneRefreshing = () => {
     this.setState({ isRefreshing: false });
   };
 
-  async refreshJobSummaryList(forceRefresh = false) {
-    if (this._isMounted && (forceRefresh === true || this.props.blockRefresh !== true)) {
-      // Set loading to true for jobs_list table for initial job loading
-      if (this.state.loading === null) {
-        this.setState({ loading: true });
-      }
+  async refreshJobSummaryList() {
+    if (this._isMounted === false) {
+      return;
+    }
 
-      const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
-      try {
-        let jobsAwaitingNodeCount = 0;
-        const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
-        const fullJobsList = {};
-        const jobsSummaryList = jobs.map((job) => {
-          if (job.fullJob !== undefined) {
-            fullJobsList[job.id] = job.fullJob;
-            delete job.fullJob;
-          }
-          job.latestTimestampSortValue = job.latestTimestampMs || 0;
+    // Set loading to true for jobs_list table for initial job loading
+    if (this.state.loading === null) {
+      this.setState({ loading: true });
+    }
 
-          if (job.awaitingNodeAssignment === true) {
-            jobsAwaitingNodeCount++;
-          }
-          return job;
-        });
-        const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
-        this.setState(
-          {
-            jobsSummaryList,
-            filteredJobsSummaryList,
-            fullJobsList,
-            loading: false,
-            jobsAwaitingNodeCount,
-          },
-          () => {
-            this.refreshSelectedJobs();
-          }
-        );
-
-        Object.keys(this.updateFunctions).forEach((j) => {
-          this.updateFunctions[j](fullJobsList[j]);
-        });
-
-        jobs.forEach((job) => {
-          if (job.blocked !== undefined && this.state.itemIdToExpandedRowMap[job.id]) {
-            this.toggleRow(job.id);
-          }
-        });
-
-        this.isDoneRefreshing();
-        if (jobsSummaryList.some((j) => j.blocked !== undefined)) {
-          // if there are some jobs in a deleting state, start polling for
-          // deleting jobs so we can update the jobs list once the
-          // deleting tasks are over
-          this.checkBlockingJobTasks(forceRefresh);
+    const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
+    try {
+      let jobsAwaitingNodeCount = 0;
+      const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
+      const fullJobsList = {};
+      const jobsSummaryList = jobs.map((job) => {
+        if (job.fullJob !== undefined) {
+          fullJobsList[job.id] = job.fullJob;
+          delete job.fullJob;
         }
-      } catch (error) {
-        console.error(error);
-        this.setState({ loading: false });
+        job.latestTimestampSortValue = job.latestTimestampMs || 0;
+
+        if (job.awaitingNodeAssignment === true) {
+          jobsAwaitingNodeCount++;
+        }
+        return job;
+      });
+      const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
+      this.setState(
+        {
+          jobsSummaryList,
+          filteredJobsSummaryList,
+          fullJobsList,
+          loading: false,
+          jobsAwaitingNodeCount,
+        },
+        () => {
+          this.refreshSelectedJobs();
+        }
+      );
+
+      Object.keys(this.updateFunctions).forEach((j) => {
+        this.updateFunctions[j](fullJobsList[j]);
+      });
+
+      jobs.forEach((job) => {
+        if (job.blocked !== undefined && this.state.itemIdToExpandedRowMap[job.id]) {
+          this.toggleRow(job.id);
+        }
+      });
+
+      this.isDoneRefreshing();
+      if (jobsSummaryList.some((j) => j.blocked !== undefined)) {
+        // if there are some jobs in a deleting state, start polling for
+        // deleting jobs so we can update the jobs list once the
+        // deleting tasks are over
+        this.checkBlockingJobTasks(true);
       }
+    } catch (error) {
+      console.error(error);
+      this.setState({ loading: false });
     }
   }
 
@@ -432,7 +434,7 @@ export class JobsListView extends Component {
                     showResetJobModal={this.showResetJobModal}
                     showCreateAlertFlyout={this.showCreateAlertFlyout}
                     showStopDatafeedsConfirmModal={this.showStopDatafeedsConfirmModal}
-                    refreshJobs={() => this.refreshJobSummaryList(true)}
+                    refreshJobs={() => this.refreshJobSummaryList()}
                   />
                   <JobFilterBar
                     setFilters={this.setFilters}
@@ -452,7 +454,7 @@ export class JobsListView extends Component {
                   showCloseJobsConfirmModal={this.showCloseJobsConfirmModal}
                   showStartDatafeedModal={this.showStartDatafeedModal}
                   showStopDatafeedsConfirmModal={this.showStopDatafeedsConfirmModal}
-                  refreshJobs={() => this.refreshJobSummaryList(true)}
+                  refreshJobs={() => this.refreshJobSummaryList()}
                   jobsViewState={this.props.jobsViewState}
                   onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
                   selectedJobsCount={this.state.selectedJobs.length}
@@ -466,40 +468,40 @@ export class JobsListView extends Component {
           <EditJobFlyout
             setShowFunction={this.setShowEditJobFlyoutFunction}
             unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
-            refreshJobs={() => this.refreshJobSummaryList(true)}
+            refreshJobs={() => this.refreshJobSummaryList()}
             allJobIds={jobIds}
           />
           <JobListDatafeedChartFlyout
             setShowFunction={this.setShowDatafeedChartFlyoutFunction}
             unsetShowFunction={this.unsetShowDatafeedChartFlyoutFunction}
-            refreshJobs={() => this.refreshJobSummaryList(true)}
+            refreshJobs={() => this.refreshJobSummaryList()}
           />
           <StopDatafeedsConfirmModal
             setShowFunction={this.setShowStopDatafeedsConfirmModalFunction}
             unsetShowFunction={this.unsetShowStopDatafeedsConfirmModalFunction}
-            refreshJobs={() => this.refreshJobSummaryList(true)}
+            refreshJobs={() => this.refreshJobSummaryList()}
             allJobIds={jobIds}
           />
           <CloseJobsConfirmModal
             setShowFunction={this.setShowCloseJobsConfirmModalFunction}
             unsetShowFunction={this.unsetShowCloseJobsConfirmModalFunction}
-            refreshJobs={() => this.refreshJobSummaryList(true)}
+            refreshJobs={() => this.refreshJobSummaryList()}
           />
           <DeleteJobModal
             setShowFunction={this.setShowDeleteJobModalFunction}
             unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-            refreshJobs={() => this.refreshJobSummaryList(true)}
+            refreshJobs={() => this.refreshJobSummaryList()}
           />
           <ResetJobModal
             setShowFunction={this.setShowResetJobModalFunction}
             unsetShowFunction={this.unsetShowResetJobModalFunction}
-            refreshJobs={() => this.refreshJobSummaryList(true)}
+            refreshJobs={() => this.refreshJobSummaryList()}
           />
           <StartDatafeedModal
             setShowFunction={this.setShowStartDatafeedModalFunction}
             unsetShowFunction={this.unsetShowDeleteJobModalFunction}
             getShowCreateAlertFlyoutFunction={this.getShowCreateAlertFlyoutFunction}
-            refreshJobs={() => this.refreshJobSummaryList(true)}
+            refreshJobs={() => this.refreshJobSummaryList()}
           />
           <JobListMlAnomalyAlertFlyout
             setShowFunction={this.setShowCreateAlertFlyoutFunction}

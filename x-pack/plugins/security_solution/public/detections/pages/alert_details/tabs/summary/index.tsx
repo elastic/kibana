@@ -8,12 +8,13 @@
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { SearchHit } from '../../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../../common/types';
 import { useDetailPanel } from '../../../../../timelines/components/side_panel/hooks/use_detail_panel';
 import { useGetUserCasesPermissions } from '../../../../../common/lib/kibana';
 import type { SelectedDataView } from '../../../../../common/store/sourcerer/model';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import type { Ecs } from '../../../../../../common/ecs';
 import { AlertRendererPanel } from './alert_renderer_panel';
 import { RulePanel } from './rule_panel';
 import { CasesPanel, CasesPanelNoReadPermissions } from './cases_panel';
@@ -25,11 +26,18 @@ export interface DetailsSummaryTabProps {
   eventId: string;
   dataAsNestedObject: Ecs | null;
   detailsData: TimelineEventsDetailsItem[];
+  searchHit?: SearchHit;
   sourcererDataView: SelectedDataView;
 }
 
 export const DetailsSummaryTab = React.memo(
-  ({ dataAsNestedObject, detailsData, eventId, sourcererDataView }: DetailsSummaryTabProps) => {
+  ({
+    dataAsNestedObject,
+    detailsData,
+    searchHit,
+    eventId,
+    sourcererDataView,
+  }: DetailsSummaryTabProps) => {
     const userCasesPermissions = useGetUserCasesPermissions();
 
     const { DetailsPanel, openHostDetailsPanel, openUserDetailsPanel } = useDetailPanel({
@@ -46,6 +54,7 @@ export const DetailsSummaryTab = React.memo(
             <RulePanel
               id={eventId}
               data={detailsData}
+              searchHit={searchHit}
               browserFields={sourcererDataView.browserFields}
             />
             <SummaryRow>

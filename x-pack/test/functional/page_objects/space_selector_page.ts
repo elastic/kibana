@@ -205,6 +205,7 @@ export class SpaceSelectorPageObject extends FtrService {
       this.log.info(`SpaceSelectorPage:goToSpecificSpace(${spaceId})`);
       await this.testSubjects.click(`${spaceId}-selectableSpaceItem`);
       await this.common.sleep(1000);
+      expect(await this.find.existsByCssSelector('#headerSpacesMenuContent')).to.be(false);
     });
   }
 

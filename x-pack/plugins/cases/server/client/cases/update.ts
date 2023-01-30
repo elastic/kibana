@@ -12,19 +12,23 @@ import { identity } from 'fp-ts/lib/function';
 
 import type {
   SavedObject,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 
 import { nodeBuilder } from '@kbn/es-query';
 
 import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 import type {
+  CaseAssignees,
+  CaseAttributes,
   CasePatchRequest,
+  CaseResponse,
   CasesPatchRequest,
   CasesResponse,
   CommentAttributes,
-  CaseAttributes,
   User,
 } from '../../../common/api';
 import {
@@ -42,7 +46,7 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
-import { getCaseToUpdate } from '../utils';
+import { arraysDifference, getCaseToUpdate } from '../utils';
 
 import type { AlertService, CasesService } from '../../services';
 import { createCaseError } from '../../common/error';
@@ -58,6 +62,7 @@ import { Operations } from '../../authorization';
 import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
+import type { CaseSavedObject } from '../../common/types';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -252,7 +257,7 @@ async function updateAlerts({
 }
 
 function partitionPatchRequest(
-  casesMap: Map<string, SavedObject<CaseAttributes>>,
+  casesMap: Map<string, CaseSavedObject>,
   patchReqCases: CasePatchRequest[]
 ): {
   nonExistingCases: CasePatchRequest[];
@@ -287,7 +292,7 @@ function partitionPatchRequest(
 
 interface UpdateRequestWithOriginalCase {
   updateReq: CasePatchRequest;
-  originalCase: SavedObject<CaseAttributes>;
+  originalCase: CaseSavedObject;
 }
 
 /**
@@ -300,12 +305,18 @@ export const update = async (
   clientArgs: CasesClientArgs
 ): Promise<CasesResponse> => {
   const {
-    unsecuredSavedObjectsClient,
-    services: { caseService, userActionService, alertsService, licensingService },
+    services: {
+      caseService,
+      userActionService,
+      alertsService,
+      licensingService,
+      notificationService,
+    },
     user,
     logger,
     authorization,
   } = clientArgs;
+
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)
@@ -316,10 +327,15 @@ export const update = async (
       caseIds: query.cases.map((q) => q.id),
     });
 
+    /**
+     * Warning: The code below assumes that the
+     * casesMap is immutable. It should be used
+     * only for read.
+     */
     const casesMap = myCases.saved_objects.reduce((acc, so) => {
       acc.set(so.id, so);
       return acc;
-    }, new Map<string, SavedObject<CaseAttributes>>());
+    }, new Map<string, CaseSavedObject>());
 
     const { nonExistingCases, conflictedCases, casesToAuthorize } = partitionPatchRequest(
       casesMap,
@@ -347,7 +363,7 @@ export const update = async (
       );
     }
 
-    const updateCases: UpdateRequestWithOriginalCase[] = query.cases.reduce(
+    const casesToUpdate: UpdateRequestWithOriginalCase[] = query.cases.reduce(
       (acc: UpdateRequestWithOriginalCase[], updateCase) => {
         const originalCase = casesMap.get(updateCase.id);
 
@@ -368,24 +384,24 @@ export const update = async (
       []
     );
 
-    if (updateCases.length <= 0) {
+    if (casesToUpdate.length <= 0) {
       throw Boom.notAcceptable('All update fields are identical to current version.');
     }
 
     const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
 
-    throwIfUpdateOwner(updateCases);
-    throwIfTitleIsInvalid(updateCases);
-    throwIfUpdateAssigneesWithoutValidLicense(updateCases, hasPlatinumLicense);
-    throwIfTotalAssigneesAreInvalid(updateCases);
+    throwIfUpdateOwner(casesToUpdate);
+    throwIfTitleIsInvalid(casesToUpdate);
+    throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
+    throwIfTotalAssigneesAreInvalid(casesToUpdate);
 
-    notifyPlatinumUsage(licensingService, updateCases);
+    notifyPlatinumUsage(licensingService, casesToUpdate);
 
-    const updatedCases = await patchCases({ caseService, user, casesToUpdate: updateCases });
+    const updatedCases = await patchCases({ caseService, user, casesToUpdate });
 
     // If a status update occurred and the case is synced then we need to update all alerts' status
     // attached to the case to the new status.
-    const casesWithStatusChangedAndSynced = updateCases.filter(({ updateReq, originalCase }) => {
+    const casesWithStatusChangedAndSynced = casesToUpdate.filter(({ updateReq, originalCase }) => {
       return (
         originalCase != null &&
         updateReq.status != null &&
@@ -396,7 +412,7 @@ export const update = async (
 
     // If syncAlerts setting turned on we need to update all alerts' status
     // attached to the case to the current status.
-    const casesWithSyncSettingChangedToOn = updateCases.filter(({ updateReq, originalCase }) => {
+    const casesWithSyncSettingChangedToOn = casesToUpdate.filter(({ updateReq, originalCase }) => {
       return (
         originalCase != null &&
         updateReq.settings?.syncAlerts != null &&
@@ -413,29 +429,34 @@ export const update = async (
       alertsService,
     });
 
-    const returnUpdatedCase = myCases.saved_objects
-      .filter((myCase) =>
-        updatedCases.saved_objects.some((updatedCase) => updatedCase.id === myCase.id)
-      )
-      .map((myCase) => {
-        const updatedCase = updatedCases.saved_objects.find((c) => c.id === myCase.id);
-        return flattenCaseSavedObject({
-          savedObject: {
-            ...myCase,
-            ...updatedCase,
-            attributes: { ...myCase.attributes, ...updatedCase?.attributes },
-            references: myCase.references,
-            version: updatedCase?.version ?? myCase.version,
-          },
-        });
-      });
+    const returnUpdatedCase = updatedCases.saved_objects.reduce((flattenCases, updatedCase) => {
+      const originalCase = casesMap.get(updatedCase.id);
 
-    await userActionService.bulkCreateUpdateCase({
-      unsecuredSavedObjectsClient,
+      if (!originalCase) {
+        return flattenCases;
+      }
+
+      return [
+        ...flattenCases,
+        flattenCaseSavedObject({
+          savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
+        }),
+      ];
+    }, [] as CaseResponse[]);
+
+    await userActionService.creator.bulkCreateUpdateCase({
       originalCases: myCases.saved_objects,
       updatedCases: updatedCases.saved_objects,
       user,
     });
+
+    const casesAndAssigneesToNotifyForAssignment = getCasesAndAssigneesToNotifyForAssignment(
+      updatedCases,
+      casesMap,
+      user
+    );
+
+    await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
     return CasesResponseRt.encode(returnUpdatedCase);
   } catch (error) {
@@ -496,4 +517,51 @@ const patchCases = async ({
   });
 
   return updatedCases;
+};
+
+const getCasesAndAssigneesToNotifyForAssignment = (
+  updatedCases: SavedObjectsBulkUpdateResponse<CaseAttributes>,
+  casesMap: Map<string, CaseSavedObject>,
+  user: CasesClientArgs['user']
+) => {
+  return updatedCases.saved_objects.reduce<
+    Array<{ assignees: CaseAssignees; theCase: CaseSavedObject }>
+  >((acc, updatedCase) => {
+    const originalCaseSO = casesMap.get(updatedCase.id);
+
+    if (!originalCaseSO) {
+      return acc;
+    }
+
+    const alreadyAssignedToCase = originalCaseSO.attributes.assignees;
+    const comparedAssignees = arraysDifference(
+      alreadyAssignedToCase,
+      updatedCase.attributes.assignees ?? []
+    );
+
+    if (comparedAssignees && comparedAssignees.addedItems.length > 0) {
+      const theCase = mergeOriginalSOWithUpdatedSO(originalCaseSO, updatedCase);
+
+      const assigneesWithoutCurrentUser = comparedAssignees.addedItems.filter(
+        (assignee) => assignee.uid !== user.profile_uid
+      );
+
+      acc.push({ theCase, assignees: assigneesWithoutCurrentUser });
+    }
+
+    return acc;
+  }, []);
+};
+
+const mergeOriginalSOWithUpdatedSO = (
+  originalSO: CaseSavedObject,
+  updatedSO: SavedObjectsUpdateResponse<CaseAttributes>
+): CaseSavedObject => {
+  return {
+    ...originalSO,
+    ...updatedSO,
+    attributes: { ...originalSO.attributes, ...updatedSO?.attributes },
+    references: updatedSO.references ?? originalSO.references,
+    version: updatedSO?.version ?? updatedSO.version,
+  };
 };

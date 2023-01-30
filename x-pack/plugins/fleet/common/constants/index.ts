@@ -18,6 +18,7 @@ export * from './preconfiguration';
 export * from './download_source';
 export * from './fleet_server_policy_config';
 export * from './authz';
+export * from './file_storage';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates
 // the maximum amount of results allowed to be returned from a search. It's possible

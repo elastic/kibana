@@ -11,29 +11,33 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { DocLinksStart, HttpSetup } from '@kbn/core/public';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import {
+  FieldOption,
+  buildAggregation,
+  parseAggregationResults,
+  isGroupAggregation,
+  isCountAggregation,
+  BUCKET_SELECTOR_FIELD,
+} from '@kbn/triggers-actions-ui-plugin/public/common';
+import { Comparator } from '../../../../common/comparator_types';
+import { getComparatorScript } from '../../../../common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { EsQueryRuleParams, SearchType } from '../types';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { totalHitsToNumber } from '../test_query_row';
+import { useTriggerUiActionServices } from '../util';
 
 const { useXJsonMode } = XJson;
 
-interface KibanaDeps {
-  http: HttpSetup;
-  docLinks: DocLinksStart;
-}
-
 export const EsQueryExpression: React.FC<
-  RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>>
+  RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
   const {
     index,
@@ -44,6 +48,11 @@ export const EsQueryExpression: React.FC<
     threshold,
     timeWindowSize,
     timeWindowUnit,
+    aggType,
+    aggField,
+    groupBy,
+    termSize,
+    termField,
     excludeHitsFromPreviousRun,
   } = ruleParams;
 
@@ -56,6 +65,9 @@ export const EsQueryExpression: React.FC<
       thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
       size: size ?? DEFAULT_VALUES.SIZE,
       esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
+      aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
+      groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
+      termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
       searchType: SearchType.esQuery,
       excludeHitsFromPreviousRun:
         excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
@@ -73,17 +85,10 @@ export const EsQueryExpression: React.FC<
     [setRuleParams]
   );
 
-  const { http, docLinks } = useKibana<KibanaDeps>().services;
+  const services = useTriggerUiActionServices();
+  const { http, docLinks } = services;
 
-  const [esFields, setEsFields] = useState<
-    Array<{
-      name: string;
-      type: string;
-      normalizedType: string;
-      searchable: boolean;
-      aggregatable: boolean;
-    }>
-  >([]);
+  const [esFields, setEsFields] = useState<FieldOption[]>([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
 
   const setDefaultExpressionValues = async () => {
@@ -91,7 +96,7 @@ export const EsQueryExpression: React.FC<
     setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
 
     if (index && index.length > 0) {
-      await refreshEsFields();
+      await refreshEsFields(index);
     }
   };
 
@@ -100,21 +105,21 @@ export const EsQueryExpression: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const refreshEsFields = async () => {
-    if (index) {
-      const currentEsFields = await getFields(http, index);
-      setEsFields(currentEsFields);
-    }
+  const refreshEsFields = async (indices: string[]) => {
+    const currentEsFields = await getFields(http, indices);
+    setEsFields(currentEsFields);
   };
 
-  const hasValidationErrors = useCallback(() => {
-    return hasExpressionValidationErrors(currentRuleParams);
-  }, [currentRuleParams]);
-
   const onTestQuery = useCallback(async () => {
+    const isGroupAgg = isGroupAggregation(termField);
+    const isCountAgg = isCountAggregation(aggType);
     const window = `${timeWindowSize}${timeWindowUnit}`;
-    if (hasValidationErrors()) {
-      return { nrOfDocs: 0, timeWindow: window };
+    if (hasExpressionValidationErrors(currentRuleParams)) {
+      return {
+        testResults: { results: [], truncated: false },
+        isGrouped: isGroupAgg,
+        timeWindow: window,
+      };
     }
     const timeWindow = parseDuration(window);
     const parsedQuery = JSON.parse(esQuery);
@@ -130,13 +135,43 @@ export const EsQueryExpression: React.FC<
           searchAfterSortId: undefined,
           timeField: timeField ? timeField : '',
           track_total_hits: true,
+          aggs: buildAggregation({
+            aggType,
+            aggField,
+            termField,
+            termSize,
+            condition: {
+              conditionScript: getComparatorScript(
+                (thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR) as Comparator,
+                threshold,
+                BUCKET_SELECTOR_FIELD
+              ),
+            },
+          }),
         }),
       })
     );
 
-    const hits = rawResponse.hits;
-    return { nrOfDocs: totalHitsToNumber(hits.total), timeWindow: window };
-  }, [data.search, esQuery, index, timeField, timeWindowSize, timeWindowUnit, hasValidationErrors]);
+    return {
+      testResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: rawResponse }),
+      isGrouped: isGroupAgg,
+      timeWindow: window,
+    };
+  }, [
+    timeWindowSize,
+    timeWindowUnit,
+    currentRuleParams,
+    esQuery,
+    data.search,
+    index,
+    timeField,
+    aggType,
+    aggField,
+    termField,
+    termSize,
+    threshold,
+    thresholdComparator,
+  ]);
 
   return (
     <Fragment>
@@ -163,7 +198,7 @@ export const EsQueryExpression: React.FC<
           // reset expression fields if indices are deleted
           if (indices.length === 0) {
             setRuleProperty('params', {
-              ...ruleParams,
+              timeField: ruleParams.timeField,
               index: indices,
               esQuery: DEFAULT_VALUES.QUERY,
               size: DEFAULT_VALUES.SIZE,
@@ -171,10 +206,14 @@ export const EsQueryExpression: React.FC<
               timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
               timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
               threshold: DEFAULT_VALUES.THRESHOLD,
-              timeField: '',
+              aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+              groupBy: DEFAULT_VALUES.GROUP_BY,
+              termSize: DEFAULT_VALUES.TERM_SIZE,
+              searchType: SearchType.esQuery,
+              excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
             });
           } else {
-            await refreshEsFields();
+            await refreshEsFields(indices);
           }
         }}
         onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
@@ -237,26 +276,62 @@ export const EsQueryExpression: React.FC<
         timeWindowSize={timeWindowSize}
         timeWindowUnit={timeWindowUnit}
         size={size}
-        onChangeThreshold={(selectedThresholds) => setParam('threshold', selectedThresholds)}
-        onChangeThresholdComparator={(selectedThresholdComparator) =>
-          setParam('thresholdComparator', selectedThresholdComparator)
-        }
-        onChangeWindowSize={(selectedWindowSize: number | undefined) =>
-          setParam('timeWindowSize', selectedWindowSize)
-        }
-        onChangeWindowUnit={(selectedWindowUnit: string) =>
-          setParam('timeWindowUnit', selectedWindowUnit)
-        }
-        onChangeSizeValue={(updatedValue) => {
-          setParam('size', updatedValue);
-        }}
+        esFields={esFields}
+        aggType={aggType}
+        aggField={aggField}
+        groupBy={groupBy}
+        termSize={termSize}
+        termField={termField}
+        onChangeSelectedAggField={useCallback(
+          (selectedAggField?: string) => setParam('aggField', selectedAggField),
+          [setParam]
+        )}
+        onChangeSelectedAggType={useCallback(
+          (selectedAggType: string) => setParam('aggType', selectedAggType),
+          [setParam]
+        )}
+        onChangeSelectedGroupBy={useCallback(
+          (selectedGroupBy) => setParam('groupBy', selectedGroupBy),
+          [setParam]
+        )}
+        onChangeSelectedTermField={useCallback(
+          (selectedTermField) => setParam('termField', selectedTermField),
+          [setParam]
+        )}
+        onChangeSelectedTermSize={useCallback(
+          (selectedTermSize?: number) => setParam('termSize', selectedTermSize),
+          [setParam]
+        )}
+        onChangeThreshold={useCallback(
+          (selectedThresholds) => setParam('threshold', selectedThresholds),
+          [setParam]
+        )}
+        onChangeThresholdComparator={useCallback(
+          (selectedThresholdComparator) =>
+            setParam('thresholdComparator', selectedThresholdComparator),
+          [setParam]
+        )}
+        onChangeWindowSize={useCallback(
+          (selectedWindowSize: number | undefined) =>
+            setParam('timeWindowSize', selectedWindowSize),
+          [setParam]
+        )}
+        onChangeWindowUnit={useCallback(
+          (selectedWindowUnit: string) => setParam('timeWindowUnit', selectedWindowUnit),
+          [setParam]
+        )}
+        onChangeSizeValue={useCallback(
+          (updatedValue) => setParam('size', updatedValue),
+          [setParam]
+        )}
         errors={errors}
-        hasValidationErrors={hasValidationErrors()}
+        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams)}
         onTestFetch={onTestQuery}
         excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
-        onChangeExcludeHitsFromPreviousRun={(exclude) => {
-          setParam('excludeHitsFromPreviousRun', exclude);
-        }}
+        onChangeExcludeHitsFromPreviousRun={useCallback(
+          (exclude) => setParam('excludeHitsFromPreviousRun', exclude),
+          [setParam]
+        )}
       />
 
       <EuiSpacer />

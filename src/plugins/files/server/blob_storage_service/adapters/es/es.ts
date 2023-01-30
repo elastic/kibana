@@ -63,45 +63,52 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
   }
 
   /**
-   * @note
+   * This function acts as a singleton i.t.o. execution: it can only be called once.
+   * Subsequent calls should not re-execute it.
+   *
    * There is a known issue where calling this function simultaneously can result
    * in a race condition where one of the calls will fail because the index is already
-   * being created.
-   *
-   * This is only an issue for the very first time the index is being created.
+   * being created. This is only an issue for the very first time the index is being
+   * created.
    */
-  private createIndexIfNotExists = once(async (): Promise<void> => {
-    try {
-      const index = this.index;
-      if (await this.esClient.indices.exists({ index })) {
-        this.logger.debug(`${index} already exists.`);
-        return;
-      }
+  private static createIndexIfNotExists = once(
+    async (index: string, esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+      try {
+        if (await esClient.indices.exists({ index })) {
+          logger.debug(`${index} already exists.`);
+          return;
+        }
 
-      this.logger.info(`Creating ${index} for Elasticsearch blob store.`);
+        logger.info(`Creating ${index} for Elasticsearch blob store.`);
 
-      await this.esClient.indices.create({
-        index,
-        body: {
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
+        await esClient.indices.create({
+          index,
+          wait_for_active_shards: 'all',
+          body: {
+            settings: {
+              number_of_shards: 1,
+              auto_expand_replicas: '0-1',
+            },
+            mappings,
           },
-          mappings,
-        },
-      });
-    } catch (e) {
-      if (e instanceof errors.ResponseError && e.statusCode === 400) {
-        this.logger.warn('Unable to create blob storage index, it may have been created already.');
+        });
+      } catch (e) {
+        if (e instanceof errors.ResponseError && e.statusCode === 400) {
+          logger.warn('Unable to create blob storage index, it may have been created already.');
+        }
+        // best effort
       }
-      // best effort
     }
-  });
+  );
 
   public async upload(src: Readable, options: UploadOptions = {}) {
     const { transforms, id } = options;
 
-    await this.createIndexIfNotExists();
+    await ElasticsearchBlobStorageClient.createIndexIfNotExists(
+      this.index,
+      this.esClient,
+      this.logger
+    );
 
     const processUpload = async () => {
       try {

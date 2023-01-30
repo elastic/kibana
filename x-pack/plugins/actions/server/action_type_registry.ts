@@ -25,8 +25,6 @@ import {
   ActionTypeParams,
 } from './types';
 
-export const MAX_ATTEMPTS: number = 3;
-
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
@@ -149,20 +147,25 @@ export class ActionTypeRegistry {
       );
     }
 
+    const maxAttempts = this.actionsConfigUtils.getMaxAttempts({
+      actionTypeId: actionType.id,
+      actionTypeMaxAttempts: actionType.maxAttempts,
+    });
+
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
-        maxAttempts: actionType.maxAttempts || MAX_ATTEMPTS,
+        maxAttempts,
         getRetry(attempts: number, error: unknown) {
           if (error instanceof ExecutorError) {
             return error.retry == null ? false : error.retry;
           }
           // Only retry other kinds of errors based on attempts
-          return attempts < (actionType.maxAttempts ?? 0);
+          return attempts < maxAttempts;
         },
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(context, actionType.maxAttempts),
+          this.taskRunnerFactory.create(context, maxAttempts),
       },
     });
     // No need to notify usage on basic action types
@@ -220,5 +223,9 @@ export class ActionTypeRegistry {
    */
   public getUtils(): ActionsConfigurationUtilities {
     return this.actionsConfigUtils;
+  }
+
+  public getAllTypes(): string[] {
+    return [...this.list().map(({ id }) => id)];
   }
 }

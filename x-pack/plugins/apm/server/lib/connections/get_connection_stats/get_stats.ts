@@ -24,12 +24,13 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_SUBTYPE,
   SPAN_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { NodeType } from '../../../../common/connections';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
+import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../helpers/spans/get_is_using_service_destination_metrics';
 
 export const getStats = async ({
   apmEventClient,
@@ -63,11 +64,7 @@ export const getStats = async ({
         bool: {
           filter: [
             ...filter,
-            {
-              exists: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-              },
-            },
+            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
             ...rangeQuery(startWithOffset, endWithOffset),
             ...excludeRumExitSpansQuery(),
           ],

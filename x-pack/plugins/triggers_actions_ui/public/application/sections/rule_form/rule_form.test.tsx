@@ -211,6 +211,7 @@ describe('rule_form', () => {
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          onChangeMetaData={jest.fn()}
         />
       );
 
@@ -232,7 +233,12 @@ describe('rule_form', () => {
   describe('rule_form create rule', () => {
     let wrapper: ReactWrapper<any>;
 
-    async function setup(enforceMinimum = false, schedule = '1m', featureId = 'alerting') {
+    async function setup(
+      showRulesList = false,
+      enforceMinimum = false,
+      schedule = '1m',
+      featureId = 'alerting'
+    ) {
       const mocks = coreMock.createSetup();
       const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
       const ruleTypes: RuleType[] = [
@@ -319,6 +325,7 @@ describe('rule_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
+        ...(!showRulesList ? { ruleTypeId: ruleType.id } : {}),
       } as unknown as Rule;
 
       wrapper = mountWithIntl(
@@ -334,6 +341,7 @@ describe('rule_form', () => {
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
           connectorFeatureId={featureId}
+          onChangeMetaData={jest.fn()}
         />
       );
 
@@ -351,20 +359,20 @@ describe('rule_form', () => {
     });
 
     it('renders registered selected rule type', async () => {
-      await setup();
+      await setup(true);
       const ruleTypeSelectOptions = wrapper.find('[data-test-subj="my-rule-type-SelectOption"]');
       expect(ruleTypeSelectOptions.exists()).toBeTruthy();
     });
 
     it('renders minimum schedule interval helper text when enforce = true', async () => {
-      await setup(true);
+      await setup(false, true);
       expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
         `Interval must be at least 1 minute.`
       );
     });
 
     it('renders minimum schedule interval helper suggestion when enforce = false and schedule is less than configuration', async () => {
-      await setup(false, '10s');
+      await setup(false, false, '10s');
       expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
         `Intervals less than 1 minute are not recommended due to performance considerations.`
       );
@@ -432,7 +440,7 @@ describe('rule_form', () => {
     });
 
     it('renders uses feature id to load action types', async () => {
-      await setup(false, '1m', 'anotherFeature');
+      await setup(false, false, '1m', 'anotherFeature');
       const ruleTypeSelectOptions = wrapper.find(
         '[data-test-subj=".server-log-anotherFeature-ActionTypeSelectOption"]'
       );
@@ -440,7 +448,7 @@ describe('rule_form', () => {
     });
 
     it('renders rule type description', async () => {
-      await setup();
+      await setup(true);
       wrapper.find('button[data-test-subj="my-rule-type-SelectOption"]').first().simulate('click');
       const ruleDescription = wrapper.find('[data-test-subj="ruleDescription"]');
       expect(ruleDescription.exists()).toBeTruthy();
@@ -448,7 +456,7 @@ describe('rule_form', () => {
     });
 
     it('renders rule type documentation link', async () => {
-      await setup();
+      await setup(true);
       wrapper.find('button[data-test-subj="my-rule-type-SelectOption"]').first().simulate('click');
       const ruleDocumentationLink = wrapper.find('[data-test-subj="ruleDocumentationLink"]');
       expect(ruleDocumentationLink.exists()).toBeTruthy();
@@ -456,7 +464,7 @@ describe('rule_form', () => {
     });
 
     it('renders rule types disabled by license', async () => {
-      await setup();
+      await setup(true);
       const actionOption = wrapper.find(`[data-test-subj="disabled-by-license-SelectOption"]`);
       expect(actionOption.exists()).toBeTruthy();
       expect(
@@ -578,6 +586,7 @@ describe('rule_form', () => {
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          onChangeMetaData={jest.fn()}
         />
       );
 
@@ -644,6 +653,7 @@ describe('rule_form', () => {
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          onChangeMetaData={jest.fn()}
         />
       );
 

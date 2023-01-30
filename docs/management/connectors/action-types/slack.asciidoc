@@ -13,14 +13,14 @@ The Slack connector uses https://api.slack.com/incoming-webhooks[Slack Incoming 
 
 Slack connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+Name::      The name of the connector.
 Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messaging/webhooks#getting_started[Slack Incoming Webhooks] for instructions on generating this URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 
 [float]
 [[slack-connector-networking-configuration]]
 ==== Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the <<action-settings,Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[Preconfigured-slack-configuration]]
@@ -41,7 +41,7 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[define-slack-ui]]
-==== Define connector in Stack Management
+==== Define connector in {stack-manage-app}
 
 Define Slack connector properties.
 

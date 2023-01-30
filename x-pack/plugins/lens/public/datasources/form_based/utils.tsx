@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiTextColor, EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq } from 'lodash';
@@ -25,7 +25,8 @@ import {
 } from '@kbn/data-plugin/public';
 
 import { estypes } from '@elastic/elasticsearch';
-import type { FramePublicAPI, IndexPattern, StateSetter } from '../../types';
+import type { DateRange } from '../../../common/types';
+import type { FramePublicAPI, IndexPattern, StateSetter, UserMessage } from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
@@ -54,7 +55,8 @@ import { isQueryValid } from '../../shared_components';
 export function isColumnInvalid(
   layer: FormBasedLayer,
   columnId: string,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  dateRange: DateRange | undefined
 ) {
   const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
   if (!column || !indexPattern) return;
@@ -64,11 +66,17 @@ export function isColumnInvalid(
   const referencesHaveErrors =
     true &&
     'references' in column &&
-    Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
+    Boolean(getReferencesErrors(layer, column, indexPattern, dateRange).filter(Boolean).length);
 
   const operationErrorMessages =
     operationDefinition &&
-    operationDefinition.getErrorMessage?.(layer, columnId, indexPattern, operationDefinitionMap);
+    operationDefinition.getErrorMessage?.(
+      layer,
+      columnId,
+      indexPattern,
+      dateRange,
+      operationDefinitionMap
+    );
 
   const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
 
@@ -82,7 +90,8 @@ export function isColumnInvalid(
 function getReferencesErrors(
   layer: FormBasedLayer,
   column: ReferenceBasedIndexPatternColumn,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  dateRange: DateRange | undefined
 ) {
   return column.references?.map((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
@@ -91,6 +100,7 @@ function getReferencesErrors(
       layer,
       referenceId,
       indexPattern,
+      dateRange,
       operationDefinitionMap
     );
   });
@@ -116,7 +126,7 @@ const accuracyModeDisabledWarning = (
       id="xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled"
       defaultMessage="{name} might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster. {learnMoreLink}"
       values={{
-        name: <EuiTextColor color="accent">{columnName}</EuiTextColor>,
+        name: <strong>{columnName}</strong>,
         learnMoreLink: (
           <EuiLink href={docLink} color="text" target="_blank" external={true}>
             <FormattedMessage
@@ -128,11 +138,11 @@ const accuracyModeDisabledWarning = (
       }}
     />
     <EuiSpacer size="s" />
-    <EuiButton data-test-subj="lnsPrecisionWarningEnableAccuracy" onClick={enableAccuracyMode}>
+    <EuiLink data-test-subj="lnsPrecisionWarningEnableAccuracy" onClick={enableAccuracyMode}>
       {i18n.translate('xpack.lens.indexPattern.enableAccuracyMode', {
         defaultMessage: 'Enable accuracy mode',
       })}
-    </EuiButton>
+    </EuiLink>
   </>
 );
 
@@ -141,22 +151,22 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
     id="xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled"
     defaultMessage="{name} might be an approximation. For more precise results, try increasing the number of {topValues} or using {filters} instead. {learnMoreLink}"
     values={{
-      name: <EuiTextColor color="accent">{columnName}</EuiTextColor>,
+      name: <strong>{columnName}</strong>,
       topValues: (
-        <EuiTextColor color="subdued">
+        <strong>
           <FormattedMessage
             id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
             defaultMessage="top values"
           />
-        </EuiTextColor>
+        </strong>
       ),
       filters: (
-        <EuiTextColor color="subdued">
+        <strong>
           <FormattedMessage
             id="xpack.lens.indexPattern.precisionErrorWarning.filters"
             defaultMessage="filters"
           />
-        </EuiTextColor>
+        </strong>
       ),
       learnMoreLink: (
         <EuiLink href={docLink} color="text" target="_blank" external={true}>
@@ -176,7 +186,7 @@ export function getShardFailuresWarningMessages(
   request: SearchRequest,
   response: estypes.SearchResponse,
   theme: ThemeServiceStart
-): Array<string | React.ReactNode> {
+): UserMessage[] {
   if (state) {
     if (warning.type === 'shard_failure') {
       switch (warning.reason.type) {
@@ -195,38 +205,55 @@ export function getShardFailuresWarningMessages(
                   ].includes(col.operationType)
                 )
                 .map((col) => col.label)
-            ).map((label) =>
-              i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
-                defaultMessage:
-                  '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-                values: {
-                  label,
-                },
-              })
+            ).map(
+              (label) =>
+                ({
+                  uniqueId: `unsupported_aggregation_on_downsampled_index--${label}`,
+                  severity: 'warning',
+                  fixableInEditor: true,
+                  displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+                  shortMessage: '',
+                  longMessage: i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+                    defaultMessage:
+                      '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+                    values: {
+                      label,
+                    },
+                  }),
+                } as UserMessage)
             )
           );
         default:
           return [
-            <>
-              <EuiText size="s">
-                <strong>{warning.message}</strong>
-                <p>{warning.text}</p>
-              </EuiText>
-              <EuiSpacer size="s" />
-              {warning.text ? (
-                <ShardFailureOpenModalButton
-                  theme={theme}
-                  title={warning.message}
-                  size="m"
-                  getRequestMeta={() => ({
-                    request: request as ShardFailureRequest,
-                    response,
-                  })}
-                  color="primary"
-                  isButtonEmpty={true}
-                />
-              ) : null}
-            </>,
+            {
+              uniqueId: `shard_failure`,
+              severity: 'warning',
+              fixableInEditor: true,
+              displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+              shortMessage: '',
+              longMessage: (
+                <>
+                  <EuiText size="s">
+                    <strong>{warning.message}</strong>
+                    <p>{warning.text}</p>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  {warning.text ? (
+                    <ShardFailureOpenModalButton
+                      theme={theme}
+                      title={warning.message}
+                      size="m"
+                      getRequestMeta={() => ({
+                        request: request as ShardFailureRequest,
+                        response,
+                      })}
+                      color="primary"
+                      isButtonEmpty={true}
+                    />
+                  ) : null}
+                </>
+              ),
+            } as UserMessage,
           ];
       }
     }
@@ -313,7 +340,7 @@ export function getPrecisionErrorWarningMessages(
                   id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning"
                   defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records. To learn more about this limit, {link}."
                   values={{
-                    name: <EuiTextColor color="accent">{column.name}</EuiTextColor>,
+                    name: <strong>{column.name}</strong>,
                     link: (
                       <EuiLink
                         href={docLinks.links.aggs.rare_terms}
@@ -330,7 +357,7 @@ export function getPrecisionErrorWarningMessages(
                   }}
                 />
                 <EuiSpacer size="s" />
-                <EuiButton
+                <EuiLink
                   onClick={() => {
                     setState((prevState) =>
                       mergeLayer({
@@ -355,7 +382,7 @@ export function getPrecisionErrorWarningMessages(
                   {i18n.translate('xpack.lens.indexPattern.switchToRare', {
                     defaultMessage: 'Rank by rarity',
                   })}
-                </EuiButton>
+                </EuiLink>
               </>
             );
           }

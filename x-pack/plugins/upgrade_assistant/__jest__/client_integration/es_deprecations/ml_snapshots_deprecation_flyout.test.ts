@@ -42,7 +42,7 @@ describe('Machine learning deprecation flyout', () => {
     });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup);
     });
 
     const { actions, component } = testBed;
@@ -153,7 +153,7 @@ describe('Machine learning deprecation flyout', () => {
       });
 
       await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup);
       });
 
       const { actions, exists, component } = testBed;

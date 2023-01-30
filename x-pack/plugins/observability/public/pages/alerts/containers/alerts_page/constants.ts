@@ -6,5 +6,7 @@
  */
 
 export const ALERTS_PAGE_ID = 'alerts-o11y';
+export const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 export const ALERTS_PER_PAGE = 50;
 export const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
+export const URL_STORAGE_KEY = '_a';

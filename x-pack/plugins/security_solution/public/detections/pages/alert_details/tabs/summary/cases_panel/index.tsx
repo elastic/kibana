@@ -16,13 +16,14 @@ import {
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import styled from 'styled-components';
 import type { TimelineEventsDetailsItem } from '../../../../../../../common/search_strategy';
 import { useGetUserCasesPermissions, useKibana } from '../../../../../../common/lib/kibana';
-import { CaseDetailsLink } from '../../../../../../common/components/links';
 import { useGetRelatedCasesByEvent } from '../../../../../../common/containers/cases/use_get_related_cases_by_event';
 import {
   ADD_TO_EXISTING_CASE_BUTTON,
   ADD_TO_NEW_CASE_BUTTON,
+  CASES_PANEL_SUBTITLE,
   CASES_PANEL_TITLE,
   CASE_NO_READ_PERMISSIONS,
   ERROR_LOADING_CASES,
@@ -31,12 +32,24 @@ import {
 } from '../translation';
 import { SummaryPanel } from '../wrappers';
 import { CasesPanelActions, CASES_PANEL_ACTIONS_CLASS } from './cases_panel_actions';
+import { RelatedCasesList } from './related_case';
 
 export interface CasesPanelProps {
   eventId: string;
   dataAsNestedObject: Ecs | null;
   detailsData: TimelineEventsDetailsItem[];
 }
+
+const StyledCasesFlexGroup = styled(EuiFlexGroup)`
+  max-height: 300px;
+  overflow-y: auto;
+`;
+
+/**
+ * There is currently no api limit for the number of cases that can be returned
+ * To prevent the UI from growing too large, we limit to 25 most recent cases
+ */
+export const CASES_PANEL_CASES_COUNT_MAX = 25;
 
 const CasesPanelLoading = () => (
   <EuiEmptyPrompt
@@ -114,28 +127,32 @@ export const CasesPanel = React.memo<CasesPanelProps>(
       ]
     );
 
+    // Sort by most recently created being first
+    const relatedCasesCount = relatedCases ? relatedCases.length : 0;
+    const visibleCaseCount = useMemo(
+      () => Math.min(relatedCasesCount, CASES_PANEL_CASES_COUNT_MAX),
+      [relatedCasesCount]
+    );
+    const hasRelatedCases = relatedCasesCount > 0;
+
     if (loading) return <CasesPanelLoading />;
 
     if (error || relatedCases === undefined) return <CasesPanelError />;
-
-    const hasRelatedCases = relatedCases && relatedCases.length > 0;
 
     return (
       <SummaryPanel
         actionsClassName={CASES_PANEL_ACTIONS_CLASS}
         title={CASES_PANEL_TITLE}
+        description={hasRelatedCases ? CASES_PANEL_SUBTITLE(visibleCaseCount) : undefined}
         renderActionsPopover={hasRelatedCases ? renderCasesActions : undefined}
       >
         {hasRelatedCases ? (
-          <EuiFlexGroup direction="column" data-test-subj="case-panel">
-            {relatedCases?.map(({ id, title }) => (
-              <EuiFlexItem key={id}>
-                <CaseDetailsLink detailName={id} title={title}>
-                  {title}
-                </CaseDetailsLink>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <StyledCasesFlexGroup direction="column" data-test-subj="case-panel">
+            <RelatedCasesList
+              maximumVisible={CASES_PANEL_CASES_COUNT_MAX}
+              relatedCases={relatedCases}
+            />
+          </StyledCasesFlexGroup>
         ) : (
           <EuiEmptyPrompt
             iconColor="default"

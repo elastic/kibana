@@ -9,6 +9,7 @@ import {
   loadMlServerInfo,
   getCloudDeploymentId,
   isCloud,
+  isCloudTrial,
   getNewJobDefaults,
   getNewJobLimits,
   extractDeploymentId,
@@ -34,8 +35,9 @@ describe('ml_server_info', () => {
   });
 
   describe('cloud information', () => {
-    it('should get could deployment id', () => {
+    it('should get could deployment id and trial info', () => {
       expect(isCloud()).toBe(true);
+      expect(isCloudTrial()).toBe(true);
       expect(getCloudDeploymentId()).toBe('85d666f3350c469e8c3242d76a7f459c');
     });
   });

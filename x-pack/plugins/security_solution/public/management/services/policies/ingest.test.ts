@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import {
-  INGEST_API_EPM_PACKAGES,
-  sendGetPackagePolicy,
-  sendGetEndpointSecurityPackage,
-} from './ingest';
+import { sendGetPackagePolicy, sendGetEndpointSecurityPackage } from './ingest';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { EPM_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_API_ROOT, epmRouteService } from '@kbn/fleet-plugin/common';
 import { policyListApiPathHandlers } from '../../pages/policy/store/test_mock_utils';
 
 describe('ingest service', () => {
@@ -37,14 +33,11 @@ describe('ingest service', () => {
   });
 
   describe('sendGetEndpointSecurityPackage()', () => {
-    it('should query EPM with category=security', async () => {
-      http.get.mockReturnValue(
-        Promise.resolve(policyListApiPathHandlers()[INGEST_API_EPM_PACKAGES]())
-      );
+    it('should query for endpoint package', async () => {
+      const path = epmRouteService.getInfoPath('endpoint');
+      http.get.mockReturnValue(Promise.resolve(policyListApiPathHandlers()[path]()));
       await sendGetEndpointSecurityPackage(http);
-      expect(http.get).toHaveBeenCalledWith(`${EPM_API_ROUTES.LIST_PATTERN}`, {
-        query: { category: 'security' },
-      });
+      expect(http.get).toHaveBeenCalledWith(path);
     });
 
     it('should throw if package is not found', async () => {

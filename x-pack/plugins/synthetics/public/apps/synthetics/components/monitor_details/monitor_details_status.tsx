@@ -5,58 +5,33 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiBadge, EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-plugin/public';
 
+import { EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
+import { MonitorStatus, STATUS_LABEL } from '../common/components/monitor_status';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 
-export const MonitorDetailsStatus: React.FC = () => {
-  const theme = useTheme();
+export const MonitorDetailsStatus = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
 
   const { monitor } = useSelectedMonitor();
 
   if (!monitor) {
-    return null;
+    return (
+      <EuiDescriptionList
+        align="left"
+        compressed={false}
+        listItems={[{ title: STATUS_LABEL, description: <EuiLoadingContent lines={1} /> }]}
+      />
+    );
   }
 
-  const isBrowserType = monitor.type === 'browser';
-
-  const badge = pingsLoading ? (
-    <EuiLoadingSpinner size="s" />
-  ) : !latestPing ? (
-    <EuiBadge color="default">{PENDING_LABEL}</EuiBadge>
-  ) : latestPing.monitor.status === 'up' ? (
-    <EuiBadge color={theme.eui.euiColorVis0}>{isBrowserType ? SUCCESS_LABEL : UP_LABEL}</EuiBadge>
-  ) : (
-    <EuiBadge color={theme.eui.euiColorVis9}>{isBrowserType ? FAILED_LABEL : DOWN_LABEL}</EuiBadge>
+  return (
+    <MonitorStatus
+      status={latestPing?.monitor.status}
+      monitor={monitor}
+      loading={pingsLoading}
+      compressed={false}
+    />
   );
-
-  return <EuiDescriptionList listItems={[{ title: STATUS_LABEL, description: badge }]} />;
 };
-
-const STATUS_LABEL = i18n.translate('xpack.synthetics.monitorStatus.statusLabel', {
-  defaultMessage: 'Status',
-});
-
-const FAILED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.failedLabel', {
-  defaultMessage: 'Failed',
-});
-
-const PENDING_LABEL = i18n.translate('xpack.synthetics.monitorStatus.pendingLabel', {
-  defaultMessage: 'Pending',
-});
-
-const SUCCESS_LABEL = i18n.translate('xpack.synthetics.monitorStatus.succeededLabel', {
-  defaultMessage: 'Succeeded',
-});
-
-const UP_LABEL = i18n.translate('xpack.synthetics.monitorStatus.upLabel', {
-  defaultMessage: 'Up',
-});
-
-const DOWN_LABEL = i18n.translate('xpack.synthetics.monitorStatus.downLabel', {
-  defaultMessage: 'Down',
-});

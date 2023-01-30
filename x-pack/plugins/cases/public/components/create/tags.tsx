@@ -10,6 +10,7 @@ import React, { memo, useMemo } from 'react';
 import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { useGetTags } from '../../containers/use_get_tags';
+import * as i18n from './translations';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -39,6 +40,7 @@ const TagsComponent: React.FC<Props> = ({ isLoading }) => {
           disabled: isLoading || isLoadingTags,
           options,
           noSuggestions: false,
+          customOptionText: i18n.ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX,
         },
       }}
     />

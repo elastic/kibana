@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
     "isolatedModules": true
   },
   "include": [
@@ -13,8 +11,14 @@
     "../../../typings/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../../plugins/usage_collection/tsconfig.json" },
-    { "path": "../../plugins/telemetry/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics-client",
+    "@kbn/i18n",
+    "@kbn/logging",
+    "@kbn/core-test-helpers-kbn-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

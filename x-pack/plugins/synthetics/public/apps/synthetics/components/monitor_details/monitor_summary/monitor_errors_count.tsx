@@ -6,36 +6,52 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface MonitorErrorsCountProps {
   from: string;
   to: string;
+  monitorId: string[];
 }
 
-export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
+export const MonitorErrorsCount = ({ monitorId, from, to }: MonitorErrorsCountProps) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
 
-  const monitorId = useMonitorQueryId();
+  const selectedLocation = useSelectedLocation();
+
+  const time = useMemo(() => ({ from, to }), [from, to]);
+
+  if (!selectedLocation || !monitorId) {
+    return null;
+  }
 
   return (
     <ExploratoryViewEmbeddable
+      align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
         {
-          time: props,
-          reportDefinitions: { 'monitor.id': [monitorId] },
+          time,
+          reportDefinitions: {
+            'monitor.id': monitorId,
+            'observer.geo.name': [selectedLocation?.label],
+          },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
-          name: 'synthetics-series-1',
+          name: ERRORS_LABEL,
         },
       ]}
     />
   );
 };
+
+export const ERRORS_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.errors', {
+  defaultMessage: 'Errors',
+});

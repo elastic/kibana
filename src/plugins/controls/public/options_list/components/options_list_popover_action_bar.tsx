@@ -22,6 +22,7 @@ import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public'
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
+import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -31,8 +32,8 @@ interface OptionsListPopoverProps {
 
 export const OptionsListPopoverActionBar = ({
   showOnlySelected,
-  setShowOnlySelected,
   updateSearchString,
+  setShowOnlySelected,
 }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const {
@@ -46,6 +47,8 @@ export const OptionsListPopoverActionBar = ({
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality);
   const searchString = select((state) => state.componentState.searchString);
+
+  const hideSort = select((state) => state.explicitInput.hideSort);
 
   return (
     <div className="optionsList__actions">
@@ -87,21 +90,11 @@ export const OptionsListPopoverActionBar = ({
               </EuiToolTip>
             )}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-            >
-              <EuiButtonIcon
-                size="s"
-                color="danger"
-                iconType="eraser"
-                data-test-subj="optionsList-control-clear-all-selections"
-                aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                onClick={() => dispatch(clearSelections({}))}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
+          {!hideSort && (
+            <EuiFlexItem grow={false}>
+              <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
@@ -117,9 +110,28 @@ export const OptionsListPopoverActionBar = ({
                 aria-pressed={showOnlySelected}
                 color={showOnlySelected ? 'primary' : 'text'}
                 display={showOnlySelected ? 'base' : 'empty'}
-                aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                data-test-subj="optionsList-control-show-only-selected"
                 onClick={() => setShowOnlySelected(!showOnlySelected)}
+                data-test-subj="optionsList-control-show-only-selected"
+                aria-label={
+                  showOnlySelected
+                    ? OptionsListStrings.popover.getAllOptionsButtonTitle()
+                    : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
+                }
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+            >
+              <EuiButtonIcon
+                size="s"
+                color="danger"
+                iconType="eraser"
+                onClick={() => dispatch(clearSelections({}))}
+                data-test-subj="optionsList-control-clear-all-selections"
+                aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
               />
             </EuiToolTip>
           </EuiFlexItem>

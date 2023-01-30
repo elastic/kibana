@@ -21,10 +21,11 @@ export const createGetPingHistogramRoute: UMRestApiRouteFactory = (libs: UMServe
       filters: schema.maybe(schema.string()),
       bucketSize: schema.maybe(schema.string()),
       query: schema.maybe(schema.string()),
+      timeZone: schema.string(),
     }),
   },
   handler: async ({ uptimeEsClient, request }): Promise<any> => {
-    const { dateStart, dateEnd, monitorId, filters, bucketSize, query } = request.query;
+    const { dateStart, dateEnd, monitorId, filters, bucketSize, query, timeZone } = request.query;
 
     return await libs.requests.getPingHistogram({
       uptimeEsClient,
@@ -34,6 +35,7 @@ export const createGetPingHistogramRoute: UMRestApiRouteFactory = (libs: UMServe
       filters,
       bucketSize,
       query,
+      timeZone,
     });
   },
 });

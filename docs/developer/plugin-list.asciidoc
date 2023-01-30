@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target_node/src/plugin_list/generate_plugin_list.js
+  You can update the template within packages/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts
 
 ////
 
@@ -177,7 +177,15 @@ for use in their own application.
 
 
 |{kib-repo}blob/{branch}/src/plugins/files/README.md[files]
-|File upload, download, sharing, and serving over HTTP implementation in Kibana.
+|The files service provides functionality to manage, retrieve, share files in Kibana.
+
+
+|{kib-repo}blob/{branch}/src/plugins/files_management/README.md[filesManagement]
+|Minimal interface for admins to manage files in Kibana.
+
+
+|{kib-repo}blob/{branch}/src/plugins/ftr_apis/README.md[ftrApis]
+|This plugin exposes a set of APIs used internally during functional tests by the FTR.
 
 
 |{kib-repo}blob/{branch}/src/plugins/guided_onboarding/README.md[guidedOnboarding]
@@ -186,6 +194,11 @@ for use in their own application.
 
 |{kib-repo}blob/{branch}/src/plugins/home/README.md[home]
 |Moves the legacy ui/registry/feature_catalogue module for registering "features" that should be shown in the home page's feature catalogue to a service within a "home" plugin. The feature catalogue refered to here should not be confused with the "feature" plugin for registering features used to derive UI capabilities for feature controls.
+
+
+|{kib-repo}blob/{branch}/src/plugins/image_embeddable/README.md[imageEmbeddable]
+|This plugin contains image embeddable. Image embeddable allows to embed images into the dashboard.
+Images can be added either by URL or by uploading the image file via file service.
 
 
 |{kib-repo}blob/{branch}/src/plugins/input_control_vis/README.md[inputControlVis]
@@ -436,6 +449,14 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Integrates with DriftChat in order to provide live support to our Elastic Cloud users. This plugin should only run on Elastic Cloud.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
+|Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_defend/README.md[cloudDefend]
+|This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
 |The Cloud Experiments Service provides the necessary APIs to implement A/B testing scenarios, fetching the variations in configuration and reporting back metrics to track conversion rates of the experiments.
 
@@ -458,6 +479,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cross_cluster_replication/README.md[crossClusterReplication]
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/custom_branding/README.md[customBranding]
+|This is a plugin to configure custom branding.
+This plugin is currently under active development; do not use.
 
 
 |<<dashboard-enhanced-plugin>>
@@ -713,7 +739,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
-|Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. It will only be enabled on the last minor before the next major release. This is controlled via the config: xpack.upgrade_assistant.readonly (#101296).
+|Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]

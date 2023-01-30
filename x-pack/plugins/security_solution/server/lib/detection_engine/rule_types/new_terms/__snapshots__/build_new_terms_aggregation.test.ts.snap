@@ -135,3 +135,37 @@ Object {
   },
 }
 `;
+
+exports[`aggregations buildRecentTermsAgg builds a correct composite aggregation with multiple fields 1`] = `
+Object {
+  "new_terms": Object {
+    "composite": Object {
+      "after": undefined,
+      "size": 10000,
+      "sources": Array [
+        Object {
+          "host.name": Object {
+            "terms": Object {
+              "field": "host.name",
+            },
+          },
+        },
+        Object {
+          "host.port": Object {
+            "terms": Object {
+              "field": "host.port",
+            },
+          },
+        },
+        Object {
+          "host.url": Object {
+            "terms": Object {
+              "field": "host.url",
+            },
+          },
+        },
+      ],
+    },
+  },
+}
+`;

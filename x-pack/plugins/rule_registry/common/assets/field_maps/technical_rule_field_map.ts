@@ -79,6 +79,11 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
+  [Fields.ALERT_CASE_IDS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   [Fields.ALERT_RULE_AUTHOR]: {
     type: 'keyword',
     array: false,
@@ -186,6 +191,31 @@ export const technicalRuleFieldMap = {
   },
   [Fields.ALERT_RULE_VERSION]: {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [Fields.ALERT_SUPPRESSION_FIELD]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [Fields.ALERT_SUPPRESSION_VALUE]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [Fields.ALERT_SUPPRESSION_START]: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  [Fields.ALERT_SUPPRESSION_END]: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  [Fields.ALERT_SUPPRESSION_DOCS_COUNT]: {
+    type: 'long',
     array: false,
     required: false,
   },

@@ -116,7 +116,8 @@ describe('DatePicker', () => {
     });
 
     // It updates the URL when it doesn't contain the range.
-    expect(mockHistoryPush).toHaveBeenCalledTimes(1);
+    expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
+    expect(mockHistoryPush).toHaveBeenCalledTimes(0);
 
     wrapper.find(EuiSuperDatePicker).props().onTimeChange({
       start: 'now-90m',
@@ -124,7 +125,7 @@ describe('DatePicker', () => {
       isInvalid: false,
       isQuickSelection: true,
     });
-    expect(mockHistoryPush).toHaveBeenCalledTimes(2);
+    expect(mockHistoryPush).toHaveBeenCalledTimes(1);
     expect(mockHistoryPush).toHaveBeenLastCalledWith(
       expect.objectContaining({
         search: 'rangeFrom=now-90m&rangeTo=now-60m',
@@ -133,7 +134,7 @@ describe('DatePicker', () => {
   });
 
   it('enables auto-refresh when refreshPaused is false', async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     const { wrapper } = mountDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
@@ -148,7 +149,7 @@ describe('DatePicker', () => {
   });
 
   it('disables auto-refresh when refreshPaused is true', async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     mountDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',

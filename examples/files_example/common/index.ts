@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { FileKind, FileImageMetadata } from '@kbn/files-plugin/common';
+import type { FileKind } from '@kbn/files-plugin/common';
+import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 
 export const PLUGIN_ID = 'filesExample';
 export const PLUGIN_NAME = 'Files example';
@@ -17,7 +18,7 @@ const httpTags = {
 
 export const exampleFileKind: FileKind = {
   id: PLUGIN_ID,
-  allowedMimeTypes: ['image/png'],
+  allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'text/plain'],
   http: {
     create: httpTags,
     delete: httpTags,

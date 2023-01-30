@@ -6,7 +6,7 @@
  */
 
 import React, { VFC } from 'react';
-import { EuiButtonEmpty, EuiContextMenuItem, EuiCopy } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiCopy } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const COPY_ICON = 'copyClipboard';
@@ -77,6 +77,33 @@ export const CopyToClipboardContextMenu: VFC<CopyToClipboardProps> = ({
       >
         {COPY_TITLE}
       </EuiContextMenuItem>
+    )}
+  </EuiCopy>
+);
+
+/**
+ * Takes a string and copies it to the clipboard.
+ *
+ * This component renders an {@link EuiButtonIcon}.
+ *
+ * @returns An EuiCopy element
+ */
+export const CopyToClipboardButtonIcon: VFC<CopyToClipboardProps> = ({
+  value,
+  'data-test-subj': dataTestSub,
+}) => (
+  <EuiCopy textToCopy={value}>
+    {(copy) => (
+      <EuiButtonIcon
+        aria-label={COPY_TITLE}
+        iconType={COPY_ICON}
+        iconSize="s"
+        color="primary"
+        onClick={copy}
+        data-test-subj={dataTestSub}
+      >
+        {COPY_TITLE}
+      </EuiButtonIcon>
     )}
   </EuiCopy>
 );

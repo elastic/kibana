@@ -9,62 +9,31 @@ import { JsonObject } from '@kbn/utility-types';
 import { get } from 'lodash';
 import { combineLatest, filter, map, Observable, startWith } from 'rxjs';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
-import { parseIntervalAsMinute } from '../lib/intervals';
 import { unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { ConcreteTaskInstance } from '../task';
 import { isTaskRunEvent, TaskRun, TaskTiming } from '../task_events';
 import { MonitoredStat } from './monitoring_stats_stream';
 import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
-import { createRunningAveragedStat } from './task_run_calcultors';
 
 export interface BackgroundTaskUtilizationStat extends JsonObject {
   adhoc: AdhocTaskStat;
-  recurring: RecurringTaskStat;
+  recurring: TaskStat;
 }
 
 interface TaskStat extends JsonObject {
   ran: {
     service_time: {
-      actual: number[]; // total service time for running recurring tasks
-      adjusted: number[]; // total service time adjusted for polling interval
-      task_counter: number[]; // recurring tasks counter, only increases for the lifetime of the process
+      actual: number; // total service time for running recurring tasks
+      adjusted: number; // total service time adjusted for polling interval
+      task_counter: number; // recurring tasks counter, only increases for the lifetime of the process
     };
   };
 }
 
 interface AdhocTaskStat extends TaskStat {
   created: {
-    counter: number[]; // counter for number of ad hoc tasks created
-  };
-}
-
-interface RecurringTaskStat extends TaskStat {
-  tasks_per_min: number[];
-}
-
-export interface SummarizedBackgroundTaskUtilizationStat extends JsonObject {
-  adhoc: {
-    created: {
-      counter: number;
-    };
-    ran: {
-      service_time: {
-        actual: number;
-        adjusted: number;
-        task_counter: number;
-      };
-    };
-  };
-  recurring: {
-    tasks_per_min: number;
-    ran: {
-      service_time: {
-        actual: number;
-        adjusted: number;
-        task_counter: number;
-      };
-    };
+    counter: number; // counter for number of ad hoc tasks created
   };
 }
 
@@ -107,13 +76,13 @@ export function createBackgroundTaskUtilizationAggregator(
       startWith({
         adhoc: {
           created: {
-            counter: [],
+            counter: 0,
           },
           ran: {
             service_time: {
-              actual: [],
-              adjusted: [],
-              task_counter: [],
+              actual: 0,
+              adjusted: 0,
+              task_counter: 0,
             },
           },
         },
@@ -122,12 +91,11 @@ export function createBackgroundTaskUtilizationAggregator(
     taskRunRecurringEvents$.pipe(
       startWith({
         recurring: {
-          tasks_per_min: [],
           ran: {
             service_time: {
-              actual: [],
-              adjusted: [],
-              task_counter: [],
+              actual: 0,
+              adjusted: 0,
+              task_counter: 0,
             },
           },
         },
@@ -155,37 +123,6 @@ function hasTiming(taskEvent: TaskLifecycleEvent) {
   return !!taskEvent?.timing;
 }
 
-export function summarizeUtilizationStat({ adhoc, recurring }: BackgroundTaskUtilizationStat): {
-  value: SummarizedBackgroundTaskUtilizationStat;
-} {
-  return {
-    value: {
-      adhoc: {
-        created: {
-          counter: calculateSum(adhoc.created.counter),
-        },
-        ran: {
-          service_time: {
-            actual: calculateSum(adhoc.ran.service_time.actual),
-            adjusted: calculateSum(adhoc.ran.service_time.adjusted),
-            task_counter: calculateSum(adhoc.ran.service_time.task_counter),
-          },
-        },
-      },
-      recurring: {
-        tasks_per_min: calculateSum(recurring.tasks_per_min),
-        ran: {
-          service_time: {
-            actual: calculateSum(recurring.ran.service_time.actual),
-            adjusted: calculateSum(recurring.ran.service_time.adjusted),
-            task_counter: calculateSum(recurring.ran.service_time.task_counter),
-          },
-        },
-      },
-    },
-  };
-}
-
 export function summarizeUtilizationStats({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   last_update,
@@ -195,24 +132,26 @@ export function summarizeUtilizationStats({
   stats: MonitoredStat<BackgroundTaskUtilizationStat> | undefined;
 }): {
   last_update: string;
-  stats: MonitoredStat<SummarizedBackgroundTaskUtilizationStat> | null;
+  stats: MonitoredStat<BackgroundTaskUtilizationStat> | null;
 } {
+  const utilizationStats = stats?.value;
   return {
     last_update,
-    stats: stats
-      ? {
-          timestamp: stats.timestamp,
-          ...summarizeUtilizationStat(stats.value),
-        }
-      : null,
+    stats:
+      stats && utilizationStats
+        ? {
+            timestamp: stats.timestamp,
+            value: utilizationStats,
+          }
+        : null,
   };
 }
 
 function createTaskRunEventToAdhocStat(runningAverageWindowSize: number) {
-  const createdCounterQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const actualQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const adjustedQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const taskCounterQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  let createdCounter = 0;
+  let actualCounter = 0;
+  let adjustedCounter = 0;
+  let taskCounter = 0;
   return (
     timing: TaskTiming,
     adHocTaskCounter: AdHocTaskCounter,
@@ -224,13 +163,13 @@ function createTaskRunEventToAdhocStat(runningAverageWindowSize: number) {
     return {
       adhoc: {
         created: {
-          counter: createdCounterQueue(created),
+          counter: (createdCounter += created),
         },
         ran: {
           service_time: {
-            actual: actualQueue(duration),
-            adjusted: adjustedQueue(adjusted),
-            task_counter: taskCounterQueue(1),
+            actual: (actualCounter += duration),
+            adjusted: (adjustedCounter += adjusted),
+            task_counter: (taskCounter += 1),
           },
         },
       },
@@ -239,25 +178,22 @@ function createTaskRunEventToAdhocStat(runningAverageWindowSize: number) {
 }
 
 function createTaskRunEventToRecurringStat(runningAverageWindowSize: number) {
-  const tasksPerMinQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const actualQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const adjustedQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const taskCounterQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  let actualCounter = 0;
+  let adjustedCounter = 0;
+  let taskCounter = 0;
   return (
     timing: TaskTiming,
     task: ConcreteTaskInstance,
     pollInterval: number
   ): Pick<BackgroundTaskUtilizationStat, 'recurring'> => {
     const { duration, adjusted } = getServiceTimeStats(timing, pollInterval);
-    const interval = parseIntervalAsMinute(task.schedule?.interval!);
     return {
       recurring: {
-        tasks_per_min: tasksPerMinQueue(1 / interval),
         ran: {
           service_time: {
-            actual: actualQueue(duration),
-            adjusted: adjustedQueue(adjusted),
-            task_counter: taskCounterQueue(1),
+            actual: (actualCounter += duration),
+            adjusted: (adjustedCounter += adjusted),
+            task_counter: (taskCounter += 1),
           },
         },
       },
@@ -269,8 +205,4 @@ function getServiceTimeStats(timing: TaskTiming, pollInterval: number) {
   const duration = timing!.stop - timing!.start;
   const adjusted = Math.ceil(duration / pollInterval) * pollInterval;
   return { duration, adjusted };
-}
-
-function calculateSum(arr: number[]) {
-  return arr.reduce((acc, s) => (acc += s), 0);
 }

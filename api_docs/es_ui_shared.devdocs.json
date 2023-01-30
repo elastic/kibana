@@ -1826,9 +1826,9 @@
           "({ error, response, handleCustomError, }: EsErrorHandlerParams) => ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
+            "section": "def-common.IKibanaResponse",
             "text": "IKibanaResponse"
           },
           "<any>"

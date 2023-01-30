@@ -184,3 +184,65 @@ documents where any sub-field of `http.response` contains “error”, use the f
 -------------------
 http.response.*: error
 -------------------
+
+[discrete]
+=== Querying nested fields
+
+Querying {ref}/nested.html[nested fields] requires a special syntax. Consider the
+following document, where `user` is a nested field:
+
+[source,yaml]
+-------------------
+{
+  "user" : [
+    {
+      "first" : "John",
+      "last" :  "Smith"
+    },
+    {
+      "first" : "Alice",
+      "last" :  "White"
+    }
+  ]
+}
+-------------------
+
+To find documents where a single value inside the `user` array contains a first name of
+“Alice” and last name of “White”, use the following:
+
+[source,yaml]
+-------------------
+user:{ first: "Alice" and last: "White" }
+-------------------
+
+Because nested fields can be inside other nested fields,
+you must specify the full path of the nested field you want to query.
+For example, consider the following document where `user` and `names` are both nested fields:
+
+[source,yaml]
+-------------------
+{
+  "user": [
+    {
+      "names": [
+        {
+          "first": "John",
+          "last": "Smith"
+        },
+        {
+          "first": "Alice",
+          "last": "White"
+        }
+      ]
+    }
+  ]
+}
+-------------------
+
+To find documents where a single value inside the `user.names` array contains a first name of “Alice” *and*
+last name of “White”, use the following:
+
+[source,yaml]
+-------------------
+user.names:{ first: "Alice" and last: "White" }
+-------------------

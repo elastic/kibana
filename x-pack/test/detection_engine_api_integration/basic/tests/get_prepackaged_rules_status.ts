@@ -21,6 +21,8 @@ import {
   getSimpleRule,
   deleteAllTimelines,
 } from '../../utils';
+import { createPrebuiltRuleAssetSavedObjects } from '../../utils/create_prebuilt_rule_saved_objects';
+import { deleteAllPrebuiltRules } from '../../utils/delete_all_prebuilt_rules';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -32,12 +34,14 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('getting prepackaged rules status', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
+        await createPrebuiltRuleAssetSavedObjects(es);
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
         await deleteAllAlerts(supertest, log);
         await deleteAllTimelines(es);
+        await deleteAllPrebuiltRules(es);
       });
 
       it('should return expected JSON keys of the pre-packaged rules and pre-packaged timelines status', async () => {

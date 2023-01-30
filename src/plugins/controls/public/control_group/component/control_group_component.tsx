@@ -30,7 +30,7 @@ import {
 } from '@dnd-kit/core';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { ControlGroupReduxState } from '../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
@@ -38,7 +38,7 @@ import { ControlClone, SortableControl } from './control_group_sortable_item';
 
 export const ControlGroup = () => {
   // Redux embeddable container Context
-  const reduxContainerContext = useReduxContainerContext<
+  const reduxContext = useReduxEmbeddableContext<
     ControlGroupReduxState,
     typeof controlGroupReducers
   >();
@@ -46,7 +46,7 @@ export const ControlGroup = () => {
     actions: { setControlOrders },
     useEmbeddableSelector: select,
     useEmbeddableDispatch,
-  } = reduxContainerContext;
+  } = reduxContext;
   const dispatch = useEmbeddableDispatch();
 
   // current state

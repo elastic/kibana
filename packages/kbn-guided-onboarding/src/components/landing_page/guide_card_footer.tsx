@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiButton, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiProgress, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GuideId, GuideState } from '../../types';
-import { UseCase } from './use_case_card';
+import type { GuideCardUseCase } from './guide_card';
 
 const viewGuideLabel = i18n.translate(
   'guidedOnboardingPackage.gettingStarted.guideCard.startGuide.buttonLabel',
@@ -48,22 +48,37 @@ const progressBarLabelCss = css`
 
 export interface GuideCardFooterProps {
   guides: GuideState[];
-  useCase: UseCase;
-  activateGuide: (useCase: UseCase, guideState?: GuideState) => void;
+  useCase: GuideCardUseCase;
+  telemetryId: string;
+  activateGuide: (useCase: GuideCardUseCase, guideState?: GuideState) => Promise<void>;
 }
-export const GuideCardFooter = ({ guides, useCase, activateGuide }: GuideCardFooterProps) => {
+export const GuideCardFooter = ({
+  guides,
+  useCase,
+  telemetryId,
+  activateGuide,
+}: GuideCardFooterProps) => {
   const guideState = guides.find((guide) => guide.guideId === (useCase as GuideId));
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const activateGuideCallback = useCallback(async () => {
+    setIsLoading(true);
+    await activateGuide(useCase, guideState);
+    setIsLoading(false);
+  }, [activateGuide, guideState, useCase]);
   const viewGuideButton = (
-    <div className="eui-textCenter">
-      <EuiButton
-        // Used for FS tracking
-        data-test-subj={`onboarding--guideCard--view--${useCase}`}
-        fill
-        onClick={() => activateGuide(useCase, guideState)}
-      >
-        {viewGuideLabel}
-      </EuiButton>
-    </div>
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          isLoading={isLoading}
+          // Used for FS tracking
+          data-test-subj={`onboarding--guideCard--view--${telemetryId}`}
+          fill
+          onClick={activateGuideCallback}
+        >
+          {viewGuideLabel}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
   // guide has not started yet
   if (!guideState || guideState.status === 'not_started') {
@@ -88,6 +103,9 @@ export const GuideCardFooter = ({ guides, useCase, activateGuide }: GuideCardFoo
           max={numberSteps}
           size="s"
           label={completedLabel}
+          labelProps={{
+            css: progressBarLabelCss,
+          }}
         />
         <EuiSpacer size="l" />
         {viewGuideButton}
@@ -108,16 +126,19 @@ export const GuideCardFooter = ({ guides, useCase, activateGuide }: GuideCardFoo
         }}
       />
       <EuiSpacer size="l" />
-      <div className="eui-textCenter">
-        <EuiButton
-          // Used for FS tracking
-          data-test-subj={`onboarding--guideCard--continue--${useCase}`}
-          fill
-          onClick={() => activateGuide(useCase, guideState)}
-        >
-          {continueGuideLabel}
-        </EuiButton>
-      </div>
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            isLoading={isLoading}
+            // Used for FS tracking
+            data-test-subj={`onboarding--guideCard--continue--${telemetryId}`}
+            fill
+            onClick={activateGuideCallback}
+          >
+            {continueGuideLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

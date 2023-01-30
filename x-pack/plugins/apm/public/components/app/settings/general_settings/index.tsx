@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   apmLabsButton,
-  apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
   defaultApmServiceEnvironment,
   enableComparisonByDefault,
@@ -28,7 +27,6 @@ import { BottomBarActions } from '../bottom_bar_actions';
 const apmSettingsKeys = [
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
-  apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
   enableInspectEsQueries,
   apmLabsButton,
@@ -70,7 +68,12 @@ export function GeneralSettings() {
   return (
     <>
       <EuiCallOut
-        title={
+        title={i18n.translate('xpack.apm.apmSettings.callOutTitle', {
+          defaultMessage: 'Looking for all settings?',
+        })}
+        iconType="search"
+      >
+        <p>
           <FormattedMessage
             id="xpack.apm.apmSettings.kibanaLink"
             defaultMessage="The full list of APM options can be found in {link}"
@@ -82,15 +85,14 @@ export function GeneralSettings() {
                   })}
                 >
                   {i18n.translate('xpack.apm.apmSettings.kibanaLink.label', {
-                    defaultMessage: 'Kibana advanced settings',
+                    defaultMessage: 'Kibana advanced settings.',
                   })}
                 </EuiLink>
               ),
             }}
           />
-        }
-        iconType="iInCircle"
-      />
+        </p>
+      </EuiCallOut>
       <EuiSpacer />
       {apmSettingsKeys.map((settingKey) => {
         const editableConfig = settingsEditableConfig[settingKey];

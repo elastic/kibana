@@ -9,37 +9,51 @@
 import type {
   SortOrder,
   AggregationsAggregationContainer,
-  Id as EsId,
+  SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 
 type KueryNode = any;
 
 /**
+ * An object reference for use in find operation options
+ *
  * @public
  */
 export interface SavedObjectsFindOptionsReference {
+  /** The type of the saved object */
   type: string;
+  /** The ID of the saved object */
   id: string;
 }
 
 /**
+ * Point-in-time parameters
+ *
  * @public
  */
 export interface SavedObjectsPitParams {
+  /** The ID of point-in-time */
   id: string;
+  /** Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`. */
   keepAlive?: string;
 }
 
 /**
+ * Options for finding saved objects
  *
  * @public
  */
 export interface SavedObjectsFindOptions {
+  /** the type or types of objects to find */
   type: string | string[];
+  /** the page of results to return */
   page?: number;
+  /** the number of objects per page */
   perPage?: number;
+  /** which field to sort by */
   sortField?: string;
+  /** sort order, ascending or descending */
   sortOrder?: SortOrder;
   /**
    * An array of fields to include in the results
@@ -54,39 +68,35 @@ export interface SavedObjectsFindOptions {
   /**
    * Use the sort values from the previous page to retrieve the next page of results.
    */
-  searchAfter?: EsId[];
+  searchAfter?: SortResults;
   /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.
    */
   rootSearchFields?: string[];
-
   /**
    * Search for documents having a reference to the specified objects.
    * Use `hasReferenceOperator` to specify the operator to use when searching for multiple references.
    */
   hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
-
   /**
    * The operator to use when searching by multiple references using the `hasReference` option. Defaults to `OR`
    */
   hasReferenceOperator?: 'AND' | 'OR';
-
   /**
    * Search for documents *not* having a reference to the specified objects.
    * Use `hasNoReferenceOperator` to specify the operator to use when searching for multiple references.
    */
   hasNoReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
-
   /**
    * The operator to use when searching by multiple references using the `hasNoReference` option. Defaults to `OR`
    */
   hasNoReferenceOperator?: 'AND' | 'OR';
-
   /**
    * The search operator to use with the provided filter. Defaults to `OR`
    */
   defaultSearchOperator?: 'AND' | 'OR';
+  /** filter string for the search query */
   filter?: string | KueryNode;
   /**
    * A record of aggregations to perform.
@@ -110,6 +120,7 @@ export interface SavedObjectsFindOptions {
    * @alpha
    */
   aggs?: Record<string, AggregationsAggregationContainer>;
+  /** array of namespaces to search */
   namespaces?: string[];
   /**
    * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved
@@ -128,6 +139,7 @@ export interface SavedObjectsFindOptions {
 }
 
 /**
+ * Results for a find operation
  *
  * @public
  */
@@ -164,7 +176,7 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
    * await savedObjectsClient.closePointInTime(page2.pit_id);
    * ```
    */
-  sort?: string[];
+  sort?: SortResults;
 }
 
 /**
@@ -176,10 +188,16 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
  * @public
  */
 export interface SavedObjectsFindResponse<T = unknown, A = unknown> {
+  /** aggregations from the search query response */
   aggregations?: A;
+  /** array of found saved objects */
   saved_objects: Array<SavedObjectsFindResult<T>>;
+  /** the total number of objects */
   total: number;
+  /** the number of objects per page */
   per_page: number;
+  /** the current page number */
   page: number;
+  /** the point-in-time ID (undefined if not applicable) */
   pit_id?: string;
 }

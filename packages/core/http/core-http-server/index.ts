@@ -97,6 +97,8 @@ export type {
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
   LifecycleResponseFactory,
+  RawRequest,
+  FakeRawRequest,
 } from './src/router';
 export { validBodyOutput, RouteValidationError } from './src/router';
 

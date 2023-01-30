@@ -232,7 +232,7 @@ export const getLegacyMetricVisualization = ({
             ? [
                 {
                   columnId: props.state.accessor,
-                  triggerIcon: hasColoring ? 'colorBy' : undefined,
+                  triggerIconType: hasColoring ? 'colorBy' : undefined,
                   palette: hasColoring ? stops.map(({ color }) => color) : undefined,
                 },
               ]
@@ -312,8 +312,28 @@ export const getLegacyMetricVisualization = ({
     );
   },
 
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
+  getVisualizationInfo(state: LegacyMetricState) {
+    const dimensions = [];
+    if (state.accessor) {
+      dimensions.push({
+        id: state.accessor,
+        name: i18n.translate('xpack.lens.metric.label', {
+          defaultMessage: 'Metric',
+        }),
+        dimensionType: 'metric',
+      });
+    }
+
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: 'metric',
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
   },
 });

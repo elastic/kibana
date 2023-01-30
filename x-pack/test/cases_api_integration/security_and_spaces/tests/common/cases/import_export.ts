@@ -21,22 +21,23 @@ import {
   CaseAttributes,
   CaseUserActionAttributes,
   CasePostRequest,
-  CaseUserActionResponse,
   PushedUserAction,
   ConnectorUserAction,
   CommentUserAction,
   CreateCaseUserAction,
   CaseStatuses,
   CaseSeverity,
+  CaseUserActionDeprecatedResponse,
 } from '@kbn/cases-plugin/common/api';
+import { ESCaseSeverity, ESCaseStatus } from '@kbn/cases-plugin/server/services/cases/types';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   deleteAllCaseItems,
   createCase,
   createComment,
   findCases,
-  getCaseUserActions,
 } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -162,11 +163,11 @@ const expectImportToHaveOneCase = async (supertestService: supertest.SuperTest<s
   expect(findResponse.cases[0].description).to.eql('super description');
 };
 
-const expectImportToHaveCreateCaseUserAction = (userAction: CaseUserActionResponse) => {
+const expectImportToHaveCreateCaseUserAction = (userAction: CaseUserActionDeprecatedResponse) => {
   expect(userAction.action).to.eql('create');
 };
 
-const expectImportToHavePushUserAction = (userAction: CaseUserActionResponse) => {
+const expectImportToHavePushUserAction = (userAction: CaseUserActionDeprecatedResponse) => {
   const pushedUserAction = userAction as PushedUserAction;
   expect(userAction.action).to.eql('push_to_service');
   expect(userAction.type).to.eql('pushed');
@@ -177,7 +178,7 @@ const expectImportToHavePushUserAction = (userAction: CaseUserActionResponse) =>
   );
 };
 
-const expectImportToHaveUpdateConnector = (userAction: CaseUserActionResponse) => {
+const expectImportToHaveUpdateConnector = (userAction: CaseUserActionDeprecatedResponse) => {
   const connectorUserAction = userAction as ConnectorUserAction;
   expect(userAction.action).to.eql('update');
   expect(userAction.type).to.eql('connector');
@@ -205,8 +206,8 @@ const expectExportToHaveCaseSavedObject = (
   expect(createdCaseSO.attributes.connector.name).to.eql(caseRequest.connector.name);
   expect(createdCaseSO.attributes.connector.fields).to.eql([]);
   expect(createdCaseSO.attributes.settings).to.eql(caseRequest.settings);
-  expect(createdCaseSO.attributes.status).to.eql(CaseStatuses.open);
-  expect(createdCaseSO.attributes.severity).to.eql(CaseSeverity.LOW);
+  expect(createdCaseSO.attributes.status).to.eql(ESCaseStatus.OPEN);
+  expect(createdCaseSO.attributes.severity).to.eql(ESCaseSeverity.LOW);
   expect(createdCaseSO.attributes.duration).to.eql(null);
   expect(createdCaseSO.attributes.tags).to.eql(caseRequest.tags);
 };

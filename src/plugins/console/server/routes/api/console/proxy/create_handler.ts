@@ -43,7 +43,7 @@ function filterHeaders(originalHeaders: object, headersToKeep: string[]): object
   return pick(originalHeaders, headersToKeepNormalized);
 }
 
-function getRequestConfig(
+export function getRequestConfig(
   headers: object,
   esConfig: ESConfigForProxy,
   uri: string,
@@ -167,6 +167,10 @@ export const createHandler =
           return response.customError({
             statusCode: 502,
             body: e,
+            headers: {
+              'x-console-proxy-status-code': '502',
+              'x-console-proxy-status-text': 'Bad Gateway',
+            },
           });
         }
         // Otherwise, try the next host...
@@ -179,22 +183,18 @@ export const createHandler =
       headers: { warning },
     } = esIncomingMessage!;
 
-    if (method.toUpperCase() !== 'HEAD') {
-      return response.custom({
-        statusCode: statusCode!,
-        body: esIncomingMessage!,
-        headers: {
-          warning: warning || '',
-        },
-      });
-    }
-
-    return response.custom({
-      statusCode: statusCode!,
-      body: `${statusCode} - ${statusMessage}`,
+    const isHeadRequest = method.toUpperCase() === 'HEAD';
+    return response.ok({
+      body: isHeadRequest ? `${statusCode} - ${statusMessage}` : esIncomingMessage!,
       headers: {
         warning: warning || '',
-        'Content-Type': 'text/plain',
+        // We need to set the status code and status text as headers so that the client can access them
+        // in the response. This is needed because the client is using them to show the status of the request
+        // in the UI. By sending them as headers we avoid logging out users if the status code is 403. E.g.
+        // if the user is not authorized to access the cluster, we don't want to log them out. (See https://github.com/elastic/kibana/issues/140536)
+        'x-console-proxy-status-code': String(statusCode) || '',
+        'x-console-proxy-status-text': statusMessage || '',
+        ...(isHeadRequest && { 'Content-Type': 'text/plain' }),
       },
     });
   };

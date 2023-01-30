@@ -19,7 +19,7 @@ import { UseField } from './use_field';
 
 describe('<UseField />', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -175,7 +175,6 @@ describe('<UseField />', () => {
         typeof value === 'string' ? value : JSON.stringify(value);
 
       const setup = registerTestBed(TestComp, {
-        defaultProps: { onStateChangeSpy },
         memoryRouter: { wrapComponent: false },
       });
 
@@ -347,7 +346,9 @@ describe('<UseField />', () => {
       expect(isValid).toBeUndefined(); // Initially the form validity is undefined...
 
       await act(async () => {
-        await formHook!.validate(); // ...until we validate the form
+        const validatePromise = formHook!.validate(); // ...until we validate the form
+        jest.advanceTimersByTime(0);
+        await validatePromise;
       });
 
       ({ isValid } = formHook);

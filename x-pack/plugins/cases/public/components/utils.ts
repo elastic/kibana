@@ -93,3 +93,7 @@ export const getConnectorIcon = (
 export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
   return connector?.isDeprecated ?? false;
 };
+
+export const removeItemFromSessionStorage = (key: string) => {
+  window.sessionStorage.removeItem(key);
+};

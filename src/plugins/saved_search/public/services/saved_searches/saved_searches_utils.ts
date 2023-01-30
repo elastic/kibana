@@ -45,10 +45,12 @@ export const fromSavedSearchAttributes = (
   hideAggregatedPreview: attributes.hideAggregatedPreview,
   rowHeight: attributes.rowHeight,
   isTextBasedQuery: attributes.isTextBasedQuery,
+  usesAdHocDataView: attributes.usesAdHocDataView,
   timeRestore: attributes.timeRestore,
   timeRange: attributes.timeRange,
   refreshInterval: attributes.refreshInterval,
   rowsPerPage: attributes.rowsPerPage,
+  breakdownField: attributes.breakdownField,
 });
 
 export const toSavedSearchAttributes = (
@@ -66,8 +68,10 @@ export const toSavedSearchAttributes = (
   hideAggregatedPreview: savedSearch.hideAggregatedPreview,
   rowHeight: savedSearch.rowHeight,
   isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
+  usesAdHocDataView: savedSearch.usesAdHocDataView,
   timeRestore: savedSearch.timeRestore ?? false,
   timeRange: savedSearch.timeRange,
   refreshInterval: savedSearch.refreshInterval,
   rowsPerPage: savedSearch.rowsPerPage,
+  breakdownField: savedSearch.breakdownField,
 });

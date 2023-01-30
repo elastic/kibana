@@ -8,7 +8,7 @@
 
 import { Env } from '@kbn/config';
 import { getDocLinksMeta, getDocLinks } from '@kbn/doc-links';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 
 export const getDocVersion = () => {
@@ -21,3 +21,6 @@ export const getMigrationDocLink = () => {
   const docLinks = getDocLinks({ kibanaBranch: env.packageInfo.branch });
   return docLinks.kibanaUpgradeSavedObjects;
 };
+
+export const delay = (seconds: number) =>
+  new Promise((resolve) => setTimeout(resolve, seconds * 1000));

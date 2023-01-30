@@ -19,7 +19,6 @@ export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToRules = `/rules`;
 export const routeToLogs = `/logs`;
-export const routeToRuleDetails = `/rule/:ruleId`;
 export const routeToInternalAlerts = `/alerts`;
 export const legacyRouteToRules = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
@@ -89,3 +88,22 @@ export const LOCKED_COLUMNS = [
 export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS.slice(1)];
 export const GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = ['rule_name', ...LOCKED_COLUMNS];
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
+
+export const CONNECTOR_EXECUTION_LOG_COLUMN_IDS = [
+  'connector_id',
+  'space_ids',
+  'id',
+  'timestamp',
+  'status',
+  'connector_name',
+  'message',
+  'execution_duration',
+  'schedule_delay',
+  'timed_out',
+] as const;
+
+export const CONNECTOR_LOCKED_COLUMNS = ['timestamp', 'status', 'connector_name', 'message'];
+
+export const GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
+  ...CONNECTOR_LOCKED_COLUMNS,
+];

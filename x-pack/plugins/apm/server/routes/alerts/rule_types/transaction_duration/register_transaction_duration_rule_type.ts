@@ -17,6 +17,8 @@ import { asDuration } from '@kbn/observability-plugin/common/utils/formatters';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import {
@@ -31,7 +33,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -77,6 +79,7 @@ export function registerTransactionDurationRuleType({
   ruleDataClient,
   config$,
   logger,
+  observability,
   basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -94,25 +97,31 @@ export function registerTransactionDurationRuleType({
     },
     actionVariables: {
       context: [
-        apmActionVariables.serviceName,
-        apmActionVariables.transactionType,
+        ...(observability.getAlertDetailsConfig()?.apm.enabled
+          ? [apmActionVariables.alertDetailsUrl]
+          : []),
         apmActionVariables.environment,
-        apmActionVariables.threshold,
-        apmActionVariables.triggerValue,
         apmActionVariables.interval,
         apmActionVariables.reason,
+        apmActionVariables.serviceName,
+        apmActionVariables.transactionType,
+        apmActionVariables.threshold,
+        apmActionVariables.triggerValue,
         apmActionVariables.viewInAppUrl,
       ],
     },
     producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: async ({ services, params }) => {
+    executor: async ({ params: ruleParams, services, spaceId }) => {
       const config = await firstValueFrom(config$);
-      const ruleParams = params;
+
+      const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
+        services;
+
       const indices = await getApmIndices({
         config,
-        savedObjectsClient: services.savedObjectsClient,
+        savedObjectsClient,
       });
 
       // only query transaction events when set to 'never',
@@ -185,34 +194,37 @@ export function registerTransactionDurationRuleType({
       };
 
       const response = await alertingEsClient({
-        scopedClusterClient: services.scopedClusterClient,
+        scopedClusterClient,
         params: searchParams,
       });
 
       if (!response.aggregations) {
-        return {};
+        return { state: {} };
       }
 
       // Converts threshold to microseconds because this is the unit used on transactionDuration
       const thresholdMicroseconds = ruleParams.threshold * 1000;
 
       const triggeredBuckets = [];
+
       for (const bucket of response.aggregations.series.buckets) {
         const [serviceName, environment, transactionType] = bucket.key;
+
         const transactionDuration =
           'avgLatency' in bucket // only true if ruleParams.aggregationType === 'avg'
             ? bucket.avgLatency.value
             : bucket.pctLatency.values[0].value;
+
         if (
           transactionDuration !== null &&
           transactionDuration > thresholdMicroseconds
         ) {
           triggeredBuckets.push({
-            serviceName,
             environment,
+            serviceName,
+            sourceFields: getServiceGroupFields(bucket),
             transactionType,
             transactionDuration,
-            sourceFields: getServiceGroupFields(bucket),
           });
         }
       }
@@ -224,36 +236,45 @@ export function registerTransactionDurationRuleType({
         transactionDuration,
         sourceFields,
       } of triggeredBuckets) {
+        const environmentLabel = getEnvironmentLabel(environment);
+
         const durationFormatter = getDurationFormatter(transactionDuration);
         const transactionDurationFormatted =
           durationFormatter(transactionDuration).formatted;
-        const reasonMessage = formatTransactionDurationReason({
+
+        const reason = formatTransactionDurationReason({
+          aggregationType: String(ruleParams.aggregationType),
+          asDuration,
           measured: transactionDuration,
           serviceName,
           threshold: thresholdMicroseconds,
-          asDuration,
-          aggregationType: String(ruleParams.aggregationType),
           windowSize: ruleParams.windowSize,
           windowUnit: ruleParams.windowUnit,
         });
 
-        const relativeViewInAppUrl = getAlertUrlTransaction(
-          serviceName,
-          getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
-          transactionType
+        const id = `${ApmRuleType.TransactionDuration}_${environmentLabel}`;
+
+        const alertUuid = getAlertUuid(id);
+
+        const alertDetailsUrl = getAlertDetailsUrl(
+          basePath,
+          spaceId,
+          alertUuid
         );
 
-        const viewInAppUrl = basePath.publicBaseUrl
-          ? new URL(
-              basePath.prepend(relativeViewInAppUrl),
-              basePath.publicBaseUrl
-            ).toString()
-          : relativeViewInAppUrl;
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          getAlertUrlTransaction(
+            serviceName,
+            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
+            transactionType
+          )
+        );
+
         services
           .alertWithLifecycle({
-            id: `${ApmRuleType.TransactionDuration}_${getEnvironmentLabel(
-              environment
-            )}`,
+            id,
             fields: {
               [SERVICE_NAME]: serviceName,
               ...getEnvironmentEsField(environment),
@@ -261,23 +282,24 @@ export function registerTransactionDurationRuleType({
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
               [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
-              [ALERT_REASON]: reasonMessage,
+              [ALERT_REASON]: reason,
               ...sourceFields,
             },
           })
           .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-            transactionType,
-            serviceName,
-            environment: getEnvironmentLabel(environment),
-            threshold: thresholdMicroseconds,
-            triggerValue: transactionDurationFormatted,
+            alertDetailsUrl,
+            environment: environmentLabel,
             interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
-            reason: reasonMessage,
+            reason,
+            serviceName,
+            threshold: thresholdMicroseconds,
+            transactionType,
+            triggerValue: transactionDurationFormatted,
             viewInAppUrl,
           });
       }
 
-      return {};
+      return { state: {} };
     },
   });
 

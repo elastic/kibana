@@ -273,6 +273,20 @@ describe('builtin helpers', () => {
         .toCompileTo('0. goodbye!  0 0 0 1 After 0 1. Goodbye!  1 0 1 1 After 1 cruel world!');
     });
 
+    // TODO: This test has been added to the `4.x` branch of the handlebars.js repo along with a code-fix,
+    // but a new version of the handlebars package containing this fix has not yet been published to npm.
+    //
+    // Before enabling this code, a new version of handlebars needs to be released and the corresponding
+    // updates needs to be applied to this implementation.
+    //
+    // See: https://github.com/handlebars-lang/handlebars.js/commit/30dbf0478109ded8f12bb29832135d480c17e367
+    it.skip('each with block params and strict compilation', () => {
+      expectTemplate('{{#each goodbyes as |value index|}}{{index}}. {{value.text}}!{{/each}}')
+        .withCompileOptions({ strict: true })
+        .withInput({ goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }] })
+        .toCompileTo('0. goodbye!1. Goodbye!');
+    });
+
     it('each object with @index', () => {
       expectTemplate('{{#each goodbyes}}{{@index}}. {{text}}! {{/each}}cruel {{world}}!')
         .withInput({
@@ -462,6 +476,8 @@ describe('builtin helpers', () => {
       console.log = $log;
       console.info = $info;
       console.error = $error;
+
+      global.kbnHandlebarsEnv = null;
     });
 
     it('should call logger at default level', function () {
@@ -495,32 +511,38 @@ describe('builtin helpers', () => {
     });
 
     it('should output to info', function () {
-      let called;
+      let calls = 0;
+      const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
 
       console.info = function (info) {
         expect('whee').toEqual(info);
-        called = true;
-        console.info = $info;
-        console.log = $log;
+        calls++;
+        if (calls === callsExpected) {
+          console.info = $info;
+          console.log = $log;
+        }
       };
       console.log = function (log) {
         expect('whee').toEqual(log);
-        called = true;
-        console.info = $info;
-        console.log = $log;
+        calls++;
+        if (calls === callsExpected) {
+          console.info = $info;
+          console.log = $log;
+        }
       };
 
       expectTemplate('{{log blah}}').withInput({ blah: 'whee' }).toCompileTo('');
-      expect(true).toEqual(called);
+      expect(calls).toEqual(callsExpected);
     });
 
     it('should log at data level', function () {
-      let called;
+      let calls = 0;
+      const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
 
       console.error = function (log) {
         expect('whee').toEqual(log);
-        called = true;
-        console.error = $error;
+        calls++;
+        if (calls === callsExpected) console.error = $error;
       };
 
       expectTemplate('{{log blah}}')
@@ -528,18 +550,19 @@ describe('builtin helpers', () => {
         .withRuntimeOptions({ data: { level: '03' } })
         .withCompileOptions({ data: true })
         .toCompileTo('');
-      expect(true).toEqual(called);
+      expect(calls).toEqual(callsExpected);
     });
 
     it('should handle missing logger', function () {
-      let called = false;
+      let calls = 0;
+      const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
 
       // @ts-expect-error
       console.error = undefined;
       console.log = function (log) {
         expect('whee').toEqual(log);
-        called = true;
-        console.log = $log;
+        calls++;
+        if (calls === callsExpected) console.log = $log;
       };
 
       expectTemplate('{{log blah}}')
@@ -547,15 +570,16 @@ describe('builtin helpers', () => {
         .withRuntimeOptions({ data: { level: '03' } })
         .withCompileOptions({ data: true })
         .toCompileTo('');
-      expect(true).toEqual(called);
+      expect(calls).toEqual(callsExpected);
     });
 
     it('should handle string log levels', function () {
-      let called;
+      let calls = 0;
+      const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
 
       console.error = function (log) {
         expect('whee').toEqual(log);
-        called = true;
+        calls++;
       };
 
       expectTemplate('{{log blah}}')
@@ -563,28 +587,29 @@ describe('builtin helpers', () => {
         .withRuntimeOptions({ data: { level: 'error' } })
         .withCompileOptions({ data: true })
         .toCompileTo('');
-      expect(true).toEqual(called);
+      expect(calls).toEqual(callsExpected);
 
-      called = false;
+      calls = 0;
 
       expectTemplate('{{log blah}}')
         .withInput({ blah: 'whee' })
         .withRuntimeOptions({ data: { level: 'ERROR' } })
         .withCompileOptions({ data: true })
         .toCompileTo('');
-      expect(true).toEqual(called);
+      expect(calls).toEqual(callsExpected);
     });
 
     it('should handle hash log levels [1]', function () {
-      let called;
+      let calls = 0;
+      const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
 
       console.error = function (log) {
         expect('whee').toEqual(log);
-        called = true;
+        calls++;
       };
 
       expectTemplate('{{log blah level="error"}}').withInput({ blah: 'whee' }).toCompileTo('');
-      expect(true).toEqual(called);
+      expect(calls).toEqual(callsExpected);
     });
 
     it('should handle hash log levels [2]', function () {
@@ -604,31 +629,33 @@ describe('builtin helpers', () => {
     });
 
     it('should pass multiple log arguments', function () {
-      let called;
+      let calls = 0;
+      const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
 
       console.info = console.log = function (log1, log2, log3) {
         expect('whee').toEqual(log1);
         expect('foo').toEqual(log2);
         expect(1).toEqual(log3);
-        called = true;
-        console.log = $log;
+        calls++;
+        if (calls === callsExpected) console.log = $log;
       };
 
       expectTemplate('{{log blah "foo" 1}}').withInput({ blah: 'whee' }).toCompileTo('');
-      expect(true).toEqual(called);
+      expect(calls).toEqual(callsExpected);
     });
 
     it('should pass zero log arguments', function () {
-      let called;
+      let calls = 0;
+      const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
 
       console.info = console.log = function () {
         expect(arguments.length).toEqual(0);
-        called = true;
-        console.log = $log;
+        calls++;
+        if (calls === callsExpected) console.log = $log;
       };
 
       expectTemplate('{{log}}').withInput({ blah: 'whee' }).toCompileTo('');
-      expect(called).toEqual(true);
+      expect(calls).toEqual(callsExpected);
     });
     /* eslint-enable no-console */
   });

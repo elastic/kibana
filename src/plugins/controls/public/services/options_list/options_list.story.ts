@@ -18,12 +18,15 @@ let optionsListRequestMethod = async (request: OptionsListRequest, abortSignal: 
     setTimeout(
       () =>
         r({
-          suggestions: [],
+          suggestions: {},
           totalCardinality: 100,
+          rejected: false,
         }),
       120
     )
   );
+
+const clearOptionsListCacheMock = () => {};
 
 export const replaceOptionsListMethod = (
   newMethod: (request: OptionsListRequest, abortSignal: AbortSignal) => Promise<OptionsListResponse>
@@ -32,5 +35,6 @@ export const replaceOptionsListMethod = (
 export const optionsListServiceFactory: OptionsListServiceFactory = () => {
   return {
     runOptionsListRequest: optionsListRequestMethod,
+    clearOptionsListCache: clearOptionsListCacheMock,
   };
 };

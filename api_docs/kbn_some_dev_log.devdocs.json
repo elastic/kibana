@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/some-dev-log",
-        "id": "def-server.SomeDevLog",
+        "id": "def-common.SomeDevLog",
         "type": "Interface",
         "tags": [],
         "label": "SomeDevLog",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/some-dev-log",
-            "id": "def-server.SomeDevLog.info",
+            "id": "def-common.SomeDevLog.info",
             "type": "Function",
             "tags": [],
             "label": "info",
@@ -43,7 +51,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.info.$1",
+                "id": "def-common.SomeDevLog.info.$1",
                 "type": "string",
                 "tags": [],
                 "label": "msg",
@@ -58,7 +66,7 @@
               },
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.info.$2",
+                "id": "def-common.SomeDevLog.info.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "rest",
@@ -76,7 +84,7 @@
           },
           {
             "parentPluginId": "@kbn/some-dev-log",
-            "id": "def-server.SomeDevLog.warning",
+            "id": "def-common.SomeDevLog.warning",
             "type": "Function",
             "tags": [],
             "label": "warning",
@@ -92,7 +100,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.warning.$1",
+                "id": "def-common.SomeDevLog.warning.$1",
                 "type": "string",
                 "tags": [],
                 "label": "msg",
@@ -107,7 +115,7 @@
               },
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.warning.$2",
+                "id": "def-common.SomeDevLog.warning.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "rest",
@@ -125,7 +133,7 @@
           },
           {
             "parentPluginId": "@kbn/some-dev-log",
-            "id": "def-server.SomeDevLog.error",
+            "id": "def-common.SomeDevLog.error",
             "type": "Function",
             "tags": [],
             "label": "error",
@@ -141,7 +149,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.error.$1",
+                "id": "def-common.SomeDevLog.error.$1",
                 "type": "string",
                 "tags": [],
                 "label": "msg",
@@ -156,7 +164,7 @@
               },
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.error.$2",
+                "id": "def-common.SomeDevLog.error.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "rest",
@@ -174,7 +182,7 @@
           },
           {
             "parentPluginId": "@kbn/some-dev-log",
-            "id": "def-server.SomeDevLog.success",
+            "id": "def-common.SomeDevLog.success",
             "type": "Function",
             "tags": [],
             "label": "success",
@@ -190,7 +198,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.success.$1",
+                "id": "def-common.SomeDevLog.success.$1",
                 "type": "string",
                 "tags": [],
                 "label": "msg",
@@ -205,7 +213,7 @@
               },
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.success.$2",
+                "id": "def-common.SomeDevLog.success.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "rest",
@@ -223,7 +231,7 @@
           },
           {
             "parentPluginId": "@kbn/some-dev-log",
-            "id": "def-server.SomeDevLog.debug",
+            "id": "def-common.SomeDevLog.debug",
             "type": "Function",
             "tags": [],
             "label": "debug",
@@ -239,7 +247,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.debug.$1",
+                "id": "def-common.SomeDevLog.debug.$1",
                 "type": "string",
                 "tags": [],
                 "label": "msg",
@@ -254,7 +262,7 @@
               },
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.debug.$2",
+                "id": "def-common.SomeDevLog.debug.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "rest",
@@ -272,7 +280,7 @@
           },
           {
             "parentPluginId": "@kbn/some-dev-log",
-            "id": "def-server.SomeDevLog.verbose",
+            "id": "def-common.SomeDevLog.verbose",
             "type": "Function",
             "tags": [],
             "label": "verbose",
@@ -288,7 +296,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.verbose.$1",
+                "id": "def-common.SomeDevLog.verbose.$1",
                 "type": "string",
                 "tags": [],
                 "label": "msg",
@@ -303,7 +311,7 @@
               },
               {
                 "parentPluginId": "@kbn/some-dev-log",
-                "id": "def-server.SomeDevLog.verbose.$2",
+                "id": "def-common.SomeDevLog.verbose.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "rest",
@@ -327,7 +335,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/some-dev-log",
-        "id": "def-server.SomeLogLevel",
+        "id": "def-common.SomeLogLevel",
         "type": "Type",
         "tags": [],
         "label": "SomeLogLevel",
@@ -343,14 +351,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

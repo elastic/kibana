@@ -7,9 +7,11 @@
 
 import expect from '@kbn/expect';
 
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { ES_TEST_INDEX_NAME, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import {
   createConnector,
   ES_GROUPS_TO_WRITE,
@@ -35,10 +37,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     esTestIndexToolOutput,
     esTestIndexToolDataStream,
     createEsDocumentsInGroups,
+    createGroupedEsDocumentsInGroups,
   } = getRuleServices(getService);
 
-  // Failing: See https://github.com/elastic/kibana/issues/143870
-  describe.skip('rule', async () => {
+  describe('rule', async () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
@@ -127,7 +129,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         },
       ] as const,
     ].forEach(([searchType, initData]) =>
-      it(`runs correctly: threshold on hit count < > for ${searchType} search type`, async () => {
+      it(`runs correctly: threshold on ungrouped hit count < > for ${searchType} search type`, async () => {
         // write documents from now to the future end date in groups
         await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
         await initData();
@@ -152,6 +154,306 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           } else {
             expect(previousTimestamp).not.to.be.empty();
           }
+        }
+      })
+    );
+
+    [
+      [
+        'esQuery',
+        async () => {
+          await createRule({
+            name: 'never fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            aggType: 'avg',
+            aggField: 'testedValue',
+          });
+          await createRule({
+            name: 'always fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            aggType: 'avg',
+            aggField: 'testedValue',
+          });
+        },
+      ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataView = await indexPatterns.create(
+            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
+            { override: true },
+            getUrlPrefix(Spaces.space1.id)
+          );
+          await createRule({
+            name: 'never fire',
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+            aggType: 'avg',
+            aggField: 'testedValue',
+          });
+          await createRule({
+            name: 'always fire',
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+            aggType: 'avg',
+            aggField: 'testedValue',
+          });
+        },
+      ] as const,
+    ].forEach(([searchType, initData]) =>
+      it(`runs correctly: threshold on ungrouped agg metric < > for ${searchType} search type`, async () => {
+        // write documents from now to the future end date in groups
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+        await initData();
+
+        const docs = await waitForDocs(2);
+        for (let i = 0; i < docs.length; i++) {
+          const doc = docs[i];
+          const { previousTimestamp, hits } = doc._source;
+          const { name, title, message } = doc._source.params;
+
+          expect(name).to.be('always fire');
+          expect(title).to.be(`rule 'always fire' matched query`);
+          const messagePattern =
+            /rule 'always fire' is active:\n\n- Value: \d+.?\d*\n- Conditions Met: Number of matching documents where avg of testedValue is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+          expect(message).to.match(messagePattern);
+          expect(hits).not.to.be.empty();
+
+          // during the first execution, the latestTimestamp value should be empty
+          // since this rule always fires, the latestTimestamp value should be updated each execution
+          if (!i) {
+            expect(previousTimestamp).to.be.empty();
+          } else {
+            expect(previousTimestamp).not.to.be.empty();
+          }
+        }
+      })
+    );
+
+    [
+      [
+        'esQuery',
+        async () => {
+          await createRule({
+            name: 'never fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            groupBy: 'top',
+            termField: 'group',
+            termSize: 2,
+          });
+          await createRule({
+            name: 'always fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            groupBy: 'top',
+            termField: 'group',
+            termSize: 2,
+          });
+        },
+      ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataView = await indexPatterns.create(
+            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
+            { override: true },
+            getUrlPrefix(Spaces.space1.id)
+          );
+          await createRule({
+            name: 'never fire',
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+            groupBy: 'top',
+            termField: 'group',
+            termSize: 2,
+          });
+          await createRule({
+            name: 'always fire',
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+            groupBy: 'top',
+            termField: 'group',
+            termSize: 2,
+          });
+        },
+      ] as const,
+    ].forEach(([searchType, initData]) =>
+      it(`runs correctly: threshold on grouped hit count < > for ${searchType} search type`, async () => {
+        // write documents from now to the future end date in groups
+        await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+        await initData();
+
+        const docs = await waitForDocs(2);
+        for (let i = 0; i < docs.length; i++) {
+          const doc = docs[i];
+          const { previousTimestamp, hits } = doc._source;
+          const { name, title, message } = doc._source.params;
+
+          expect(name).to.be('always fire');
+          const titlePattern = /rule 'always fire' matched query for group group-\d/;
+          expect(title).to.match(titlePattern);
+          const messagePattern =
+            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents for group \"group-\d\" is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+          expect(message).to.match(messagePattern);
+          expect(hits).not.to.be.empty();
+
+          expect(previousTimestamp).to.be.empty();
+        }
+      })
+    );
+
+    [
+      [
+        'esQuery',
+        async () => {
+          await createRule({
+            name: 'never fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            groupBy: 'top',
+            termField: 'group',
+            termSize: 2,
+            aggType: 'avg',
+            aggField: 'testedValue',
+          });
+          await createRule({
+            name: 'always fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            groupBy: 'top',
+            termField: 'group',
+            termSize: 2,
+            aggType: 'avg',
+            aggField: 'testedValue',
+          });
+        },
+      ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataView = await indexPatterns.create(
+            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
+            { override: true },
+            getUrlPrefix(Spaces.space1.id)
+          );
+          await createRule({
+            name: 'never fire',
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+            groupBy: 'top',
+            termField: 'group',
+            termSize: 2,
+            aggType: 'avg',
+            aggField: 'testedValue',
+          });
+          await createRule({
+            name: 'always fire',
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+            groupBy: 'top',
+            termField: 'group',
+            termSize: 2,
+            aggType: 'avg',
+            aggField: 'testedValue',
+          });
+        },
+      ] as const,
+    ].forEach(([searchType, initData]) =>
+      it(`runs correctly: threshold on grouped agg metric < > for ${searchType} search type`, async () => {
+        // write documents from now to the future end date in groups
+        await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+        await initData();
+
+        const docs = await waitForDocs(2);
+        for (let i = 0; i < docs.length; i++) {
+          const doc = docs[i];
+          const { previousTimestamp, hits } = doc._source;
+          const { name, title, message } = doc._source.params;
+
+          expect(name).to.be('always fire');
+          const titlePattern = /rule 'always fire' matched query for group group-\d/;
+          expect(title).to.match(titlePattern);
+          const messagePattern =
+            /rule 'always fire' is active:\n\n- Value: \d+.?\d*\n- Conditions Met: Number of matching documents for group \"group-\d\" where avg of testedValue is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+          expect(message).to.match(messagePattern);
+          expect(hits).not.to.be.empty();
+
+          expect(previousTimestamp).to.be.empty();
         }
       })
     );
@@ -221,6 +523,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: use epoch millis - threshold on hit count < > for ${searchType} search type`, async () => {
         // write documents from now to the future end date in groups
+        const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
+        endDate = new Date(endDateMillis).toISOString();
         await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
         await initData();
 
@@ -239,7 +543,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
           // during the first execution, the latestTimestamp value should be empty
           // since this rule always fires, the latestTimestamp value should be updated each execution
-          if (!i) {
+          if (i === 0) {
             expect(previousTimestamp).to.be.empty();
           } else {
             expect(previousTimestamp).not.to.be.empty();
@@ -696,6 +1000,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       notifyWhen?: string;
       indexName?: string;
       excludeHitsFromPreviousRun?: boolean;
+      aggType?: string;
+      aggField?: string;
+      groupBy?: string;
+      termField?: string;
+      termSize?: number;
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -771,6 +1080,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
             searchType: params.searchType,
+            aggType: params.aggType ?? 'count',
+            groupBy: params.groupBy ?? 'all',
+            aggField: params.aggField,
+            termField: params.termField,
+            termSize: params.termSize,
             ...(params.excludeHitsFromPreviousRun !== undefined && {
               excludeHitsFromPreviousRun: params.excludeHitsFromPreviousRun,
             }),

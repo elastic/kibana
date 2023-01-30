@@ -8,13 +8,17 @@
 import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
-import type { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  IKibanaResponse,
+  KibanaResponseFactory,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
-import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { SanitizedRule, BulkActionSkipResult } from '@kbn/alerting-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
-
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -26,6 +30,13 @@ import {
   PerformBulkActionRequestBody,
   PerformBulkActionRequestQuery,
 } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type {
+  NormalizedRuleError,
+  RuleDetailsInError,
+  BulkEditActionResponse,
+  BulkEditActionResults,
+  BulkEditActionSummary,
+} from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/response_schema';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
@@ -35,6 +46,7 @@ import { initPromisePool } from '../../../../../../utils/promise_pool';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { deleteRules } from '../../../logic/crud/delete_rules';
 import { duplicateRule } from '../../../logic/actions/duplicate_rule';
+import { duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 import { findRules } from '../../../logic/search/find_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
@@ -55,18 +67,7 @@ const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
 const MAX_ROUTE_CONCURRENCY = 5;
 
-interface RuleDetailsInError {
-  id: string;
-  name?: string;
-}
-interface NormalizedRuleError {
-  message: string;
-  status_code: number;
-  err_code?: BulkActionsDryRunErrCode;
-  rules: RuleDetailsInError[];
-}
-
-type BulkActionError =
+export type BulkActionError =
   | PromisePoolError<string>
   | PromisePoolError<RuleAlertType>
   | BulkOperationError;
@@ -123,61 +124,66 @@ const buildBulkResponse = (
     updated = [],
     created = [],
     deleted = [],
+    skipped = [],
   }: {
     isDryRun?: boolean;
     errors?: BulkActionError[];
     updated?: RuleAlertType[];
     created?: RuleAlertType[];
     deleted?: RuleAlertType[];
+    skipped?: BulkActionSkipResult[];
   }
-) => {
+): IKibanaResponse<BulkEditActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
+  const numSkipped = skipped.length;
   const numFailed = errors.length;
-  const summary = {
+
+  const summary: BulkEditActionSummary = {
     failed: numFailed,
     succeeded: numSucceeded,
-    total: numSucceeded + numFailed,
+    skipped: numSkipped,
+    total: numSucceeded + numFailed + numSkipped,
   };
 
   // if response is for dry_run, empty lists of rules returned, as rules are not actually updated and stored within ES
   // thus, it's impossible to return reliably updated/duplicated/deleted rules
-  const results = isDryRun
+  const results: BulkEditActionResults = isDryRun
     ? {
         updated: [],
         created: [],
         deleted: [],
+        skipped: [],
       }
     : {
         updated: updated.map((rule) => internalRuleToAPIResponse(rule)),
         created: created.map((rule) => internalRuleToAPIResponse(rule)),
         deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
+        skipped,
       };
 
   if (numFailed > 0) {
-    return response.custom({
+    return response.custom<BulkEditActionResponse>({
       headers: { 'content-type': 'application/json' },
-      body: Buffer.from(
-        JSON.stringify({
-          message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
-          status_code: 500,
-          attributes: {
-            errors: normalizeErrorResponse(errors),
-            results,
-            summary,
-          },
-        })
-      ),
+      body: {
+        message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
+        status_code: 500,
+        attributes: {
+          errors: normalizeErrorResponse(errors),
+          results,
+          summary,
+        },
+      },
       statusCode: 500,
     });
   }
 
-  return response.ok({
-    body: {
-      success: true,
-      rules_count: summary.total,
-      attributes: { results, summary },
-    },
-  });
+  const responseBody: BulkEditActionResponse = {
+    success: true,
+    rules_count: summary.total,
+    attributes: { results, summary },
+  };
+
+  return response.ok({ body: responseBody });
 };
 
 const fetchRulesByQueryOrIds = async ({
@@ -323,7 +329,6 @@ export const performBulkActionRoute = (
         ]);
 
         const rulesClient = ctx.alerting.getRulesClient();
-        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
         const exceptionsClient = ctx.lists?.getExceptionListClient();
         const savedObjectsClient = ctx.core.savedObjects.client;
 
@@ -339,7 +344,7 @@ export const performBulkActionRoute = (
         // handling this action before switch statement as bulkEditRules fetch rules within
         // rulesClient method, hence there is no need to use fetchRulesByQueryOrIds utility
         if (body.action === BulkActionType.edit && !isDryRun) {
-          const { rules, errors } = await bulkEditRules({
+          const { rules, errors, skipped } = await bulkEditRules({
             rulesClient,
             filter: query,
             ids: body.ids,
@@ -370,6 +375,7 @@ export const performBulkActionRoute = (
             updated: migrationOutcome.results
               .filter(({ result }) => result)
               .map(({ result }) => result),
+            skipped,
             errors: [...errors, ...migrationOutcome.errors],
           });
         }
@@ -474,7 +480,6 @@ export const performBulkActionRoute = (
                 await deleteRules({
                   ruleId: migratedRule.id,
                   rulesClient,
-                  ruleExecutionLog,
                 });
 
                 return null;
@@ -497,18 +502,46 @@ export const performBulkActionRoute = (
                 if (isDryRun) {
                   return rule;
                 }
-
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
                   rule,
                 });
+                let shouldDuplicateExceptions = true;
+                if (body.duplicate !== undefined) {
+                  shouldDuplicateExceptions = body.duplicate.include_exceptions;
+                }
 
-                const createdRule = await rulesClient.create({
-                  data: duplicateRule(migratedRule),
+                const duplicateRuleToCreate = await duplicateRule({
+                  rule: migratedRule,
                 });
 
-                return createdRule;
+                const createdRule = await rulesClient.create({
+                  data: duplicateRuleToCreate,
+                });
+
+                // we try to create exceptions after rule created, and then update rule
+                const exceptions = shouldDuplicateExceptions
+                  ? await duplicateExceptions({
+                      ruleId: rule.params.ruleId,
+                      exceptionLists: rule.params.exceptionsList,
+                      exceptionsClient,
+                    })
+                  : [];
+
+                const updatedRule = await rulesClient.update({
+                  id: createdRule.id,
+                  data: {
+                    ...duplicateRuleToCreate,
+                    params: {
+                      ...duplicateRuleToCreate.params,
+                      exceptionsList: exceptions,
+                    },
+                  },
+                });
+
+                // TODO: figureout why types can't return just updatedRule
+                return { ...createdRule, ...updatedRule };
               },
               abortSignal: abortController.signal,
             });

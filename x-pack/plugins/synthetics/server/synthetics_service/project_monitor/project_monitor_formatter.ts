@@ -13,6 +13,7 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
@@ -71,7 +72,7 @@ export const FAILED_TO_UPDATE_MONITORS = i18n.translate(
 export class ProjectMonitorFormatter {
   private projectId: string;
   private spaceId: string;
-  private locations: Locations;
+  private publicLocations: Locations;
   private privateLocations: PrivateLocation[];
   private savedObjectsClient: SavedObjectsClientContract;
   private encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -87,8 +88,6 @@ export class ProjectMonitorFormatter {
   private writeIntegrationPoliciesPermissions?: boolean;
 
   constructor({
-    locations,
-    privateLocations,
     savedObjectsClient,
     encryptedSavedObjectsClient,
     projectId,
@@ -98,8 +97,6 @@ export class ProjectMonitorFormatter {
     syntheticsMonitorClient,
     request,
   }: {
-    locations: Locations;
-    privateLocations: PrivateLocation[];
     savedObjectsClient: SavedObjectsClientContract;
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
     projectId: string;
@@ -111,8 +108,6 @@ export class ProjectMonitorFormatter {
   }) {
     this.projectId = projectId;
     this.spaceId = spaceId;
-    this.locations = locations;
-    this.privateLocations = privateLocations;
     this.savedObjectsClient = savedObjectsClient;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
@@ -120,10 +115,33 @@ export class ProjectMonitorFormatter {
     this.server = server;
     this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
     this.request = request;
+    this.publicLocations = [];
+    this.privateLocations = [];
   }
 
+  init = async () => {
+    const locationsPromise = getAllLocations(
+      this.server,
+      this.syntheticsMonitorClient,
+      this.savedObjectsClient
+    );
+    const existingMonitorsPromise = this.getProjectMonitorsForProject();
+
+    const [locations, existingMonitors] = await Promise.all([
+      locationsPromise,
+      existingMonitorsPromise,
+    ]);
+
+    const { publicLocations, privateLocations } = locations;
+
+    this.publicLocations = publicLocations;
+    this.privateLocations = privateLocations;
+
+    return existingMonitors;
+  };
+
   public configureAllProjectMonitors = async () => {
-    const existingMonitors = await this.getProjectMonitorsForProject();
+    const existingMonitors = await this.init();
 
     const normalizedNewMonitors: SyntheticsMonitor[] = [];
     const normalizedUpdateMonitors: Array<{
@@ -161,7 +179,6 @@ export class ProjectMonitorFormatter {
             ),
             payload: monitor,
           });
-          continue;
         } else if (previousMonitor) {
           this.updatedMonitors.push(monitor.id);
           normalizedUpdateMonitors.push({ monitor: normM as MonitorFields, previousMonitor });
@@ -197,7 +214,7 @@ export class ProjectMonitorFormatter {
 
       const { normalizedFields: normalizedMonitor, errors } = normalizeProjectMonitor({
         monitor,
-        locations: this.locations,
+        locations: this.publicLocations,
         privateLocations: this.privateLocations,
         projectId: this.projectId,
         namespace: this.spaceId,
@@ -258,7 +275,8 @@ export class ProjectMonitorFormatter {
       );
     }
 
-    await finder.close();
+    // no need to wait for it
+    finder.close();
 
     return hits;
   };
@@ -336,6 +354,13 @@ export class ProjectMonitorFormatter {
     errors: ServiceLocationErrors;
     updatedCount: number;
   }> => {
+    if (monitors.length === 0) {
+      return {
+        editedMonitors: [],
+        errors: [],
+        updatedCount: 0,
+      };
+    }
     const decryptedPreviousMonitors = await this.getDecryptedMonitors(
       monitors.map((m) => m.previousMonitor)
     );
