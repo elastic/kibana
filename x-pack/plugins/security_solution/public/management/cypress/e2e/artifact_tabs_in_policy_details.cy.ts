@@ -82,6 +82,7 @@ const visitPolicyDetailsPage = () => {
   cy.visit('/app/security/administration/policy');
   cy.getBySel('policyNameCellLink').eq(0).click({ force: true });
   cy.getBySel('policyDetailsPage').should('exist');
+  cy.get('#settings').should('exist'); // waiting for Policy Settings tab
 };
 
 describe('Artifact tabs in Policy Details page', () => {
