@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -40,6 +42,7 @@ const Wrapper = styled.div`
 
 const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   className,
+  extraActions,
   getLensAttributes,
   inputId = InputsModelId.global,
   inspectIndex = 0,
@@ -51,6 +54,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   timerange,
   title,
   stackByField,
+  widthDefaultActions = true,
 }) => {
   const { lens } = useKibana().services;
 
@@ -139,56 +143,76 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     [attributes, canUseEditor]
   );
 
-  const items = useMemo(
-    () => [
-      <EuiContextMenuItem
-        icon="inspect"
-        key="visualizationActionsInspect"
-        onClick={handleInspectButtonClick}
-        disabled={disableInspectButton}
-        data-test-subj="viz-actions-inspect"
-      >
-        {INSPECT}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        icon="visArea"
-        key="visualizationActionsOpenInLens"
-        data-test-subj="viz-actions-open-in-lens"
-        disabled={disabledOpenInLens}
-        onClick={onOpenInLens}
-      >
-        {OPEN_IN_LENS}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        disabled={isAddToNewCaseDisabled}
-        icon="plusInCircle"
-        key="visualizationActionsAddToNewCase"
-        onClick={onAddToNewCaseClicked}
-        data-test-subj="viz-actions-add-to-new-case"
-      >
-        {ADD_TO_NEW_CASE}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        disabled={isAddToExistingCaseDisabled}
-        data-test-subj="viz-actions-add-to-existing-case"
-        icon="plusInCircle"
-        key="visualizationActionsAddToExistingCase"
-        onClick={onAddToExistingCaseClicked}
-      >
-        {ADD_TO_EXISTING_CASE}
-      </EuiContextMenuItem>,
-    ],
-    [
-      disableInspectButton,
-      disabledOpenInLens,
-      handleInspectButtonClick,
-      isAddToExistingCaseDisabled,
-      isAddToNewCaseDisabled,
-      onAddToExistingCaseClicked,
-      onAddToNewCaseClicked,
-      onOpenInLens,
-    ]
-  );
+  const items = useMemo(() => {
+    const context = {} as ActionExecutionContext<object>;
+    const extraActionsItems =
+      extraActions?.map((item: Action) => {
+        return (
+          <EuiContextMenuItem
+            icon={item?.getIconType(context)}
+            key={item.id}
+            onClick={() => item.execute(context)}
+            data-test-subj={`viz-actions-${item.id}`}
+          >
+            {item.getDisplayName(context)}
+          </EuiContextMenuItem>
+        );
+      }) ?? [];
+    return [
+      ...(extraActionsItems ? extraActionsItems : []),
+      ...(widthDefaultActions
+        ? [
+            <EuiContextMenuItem
+              icon="inspect"
+              key="visualizationActionsInspect"
+              onClick={handleInspectButtonClick}
+              disabled={disableInspectButton}
+              data-test-subj="viz-actions-inspect"
+            >
+              {INSPECT}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              disabled={isAddToNewCaseDisabled}
+              icon="plusInCircle"
+              key="visualizationActionsAddToNewCase"
+              onClick={onAddToNewCaseClicked}
+              data-test-subj="viz-actions-add-to-new-case"
+            >
+              {ADD_TO_NEW_CASE}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              disabled={isAddToExistingCaseDisabled}
+              data-test-subj="viz-actions-add-to-existing-case"
+              icon="plusInCircle"
+              key="visualizationActionsAddToExistingCase"
+              onClick={onAddToExistingCaseClicked}
+            >
+              {ADD_TO_EXISTING_CASE}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              icon="visArea"
+              key="visualizationActionsOpenInLens"
+              data-test-subj="viz-actions-open-in-lens"
+              disabled={disabledOpenInLens}
+              onClick={onOpenInLens}
+            >
+              {OPEN_IN_LENS}
+            </EuiContextMenuItem>,
+          ]
+        : []),
+    ];
+  }, [
+    disableInspectButton,
+    disabledOpenInLens,
+    extraActions,
+    handleInspectButtonClick,
+    isAddToExistingCaseDisabled,
+    isAddToNewCaseDisabled,
+    onAddToExistingCaseClicked,
+    onAddToNewCaseClicked,
+    onOpenInLens,
+    widthDefaultActions,
+  ]);
 
   const button = useMemo(
     () => (
@@ -205,7 +229,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
 
   return (
     <Wrapper className={className}>
-      {request !== null && response !== null && (
+      {items.length > 0 && (
         <EuiPopover
           button={button}
           isOpen={isPopoverOpen}
