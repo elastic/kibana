@@ -120,7 +120,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      for (const testConfig of testJobConfigs) {
+        await ml.api.deleteDataFrameAnalyticsJobES(testConfig.config.id!);
+      }
+
       await ml.api.cleanMlIndices();
+      await ml.api.syncSavedObjects();
     });
 
     testJobConfigs.forEach((testConfig) => {
