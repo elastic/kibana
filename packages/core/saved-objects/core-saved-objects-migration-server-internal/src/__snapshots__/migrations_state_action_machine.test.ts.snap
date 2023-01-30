@@ -103,6 +103,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "siem-detection-engine-rule-status",
                       },
                     },
@@ -290,6 +295,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -489,6 +499,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "siem-detection-engine-rule-status",
                       },
                     },
@@ -684,6 +699,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -929,6 +949,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "siem-detection-engine-rule-status",
                       },
                     },
@@ -1127,6 +1152,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
