@@ -272,7 +272,6 @@ const AdditionalContext = rt.type({
   hits: rt.type({
     hits: rt.array(
       rt.partial({
-        _source: rt.record(rt.string, rt.UnknownRecord),
         fields: rt.record(rt.string, rt.array(rt.unknown)),
       })
     ),
