@@ -1131,7 +1131,7 @@ const getFieldsSet = (groupBy: string[] | undefined, validPrefix: string[]): Set
   );
 };
 
-const hostFieldsToExclude = ['disk', 'network', 'cpu'];
+const fieldsToExclude = ['disk', 'network', 'cpu', 'memory'];
 
 const formatFields = (
   contextFields: AdditionalContext | undefined,
@@ -1141,7 +1141,7 @@ const formatFields = (
   const formattedContextFields: Record<string, any> = {};
 
   Object.entries(contextFields).forEach(([key, value]) => {
-    if (key in availableFields && !excludeHostField(key)) {
+    if (key in availableFields && !excludeField(key)) {
       const fieldType = (Object.keys(availableFields[key]) as ES_FIELD_TYPES[])?.[0];
       if (
         fieldType === ES_FIELD_TYPES.KEYWORD ||
@@ -1158,6 +1158,6 @@ const formatFields = (
   return unflattenObject(formattedContextFields);
 };
 
-const excludeHostField = (key: string): boolean => {
-  return hostFieldsToExclude.includes(key.split('.')?.[1]);
+const excludeField = (key: string): boolean => {
+  return fieldsToExclude.includes(key.split('.')?.[1]);
 };
