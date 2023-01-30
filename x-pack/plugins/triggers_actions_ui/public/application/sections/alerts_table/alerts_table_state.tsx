@@ -138,7 +138,7 @@ const AlertsTableState = ({
       ? localAlertsTableConfig?.columns ?? []
       : columnConfigByClient;
 
-  const storageAlertsTable = useRef<AlertsTableStorage>({
+  const getStorageConfig = () => ({
     columns: columnsLocal,
     sort:
       localAlertsTableConfig &&
@@ -153,22 +153,9 @@ const AlertsTableState = ({
         ? localAlertsTableConfig?.visibleColumns ?? []
         : columnsLocal.map((c) => c.id),
   });
+  const storageAlertsTable = useRef<AlertsTableStorage>(getStorageConfig());
 
-  storageAlertsTable.current = {
-    columns: localAlertsTableConfig?.columns ?? columnsLocal,
-    sort:
-      localAlertsTableConfig &&
-      localAlertsTableConfig.sort &&
-      !isEmpty(localAlertsTableConfig?.sort)
-        ? localAlertsTableConfig?.sort ?? []
-        : alertsTableConfiguration?.sort ?? [],
-    visibleColumns:
-      localAlertsTableConfig &&
-      localAlertsTableConfig.visibleColumns &&
-      !isEmpty(localAlertsTableConfig?.visibleColumns)
-        ? localAlertsTableConfig?.visibleColumns ?? []
-        : columnsLocal.map((c) => c.id),
-  };
+  storageAlertsTable.current = getStorageConfig();
 
   const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
   const [pagination, setPagination] = useState({

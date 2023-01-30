@@ -45,10 +45,10 @@ export const UpdatedFlexGroup = styled(EuiFlexGroup)<{
       : $hasRightOffset && position === 'absolute'
       ? `margin-right: ${theme.eui.euiSizeXL};`
       : `margin-right: ${theme.eui.euiSizeXS};`}
-  position: ${({ position }) => {
-    return position === 'relative'
-      ? `display: flex; justify-content:center; align-items:center`
-      : `position: absolute`;
+  ${({ position }) => {
+    return position === 'absolute'
+      ? `position: absolute`
+      : `display: flex; justify-content:center; align-items:center`;
   }};
   display: inline-flex;
   z-index: ${({ theme }) => theme.eui.euiZLevel1 - 3};
