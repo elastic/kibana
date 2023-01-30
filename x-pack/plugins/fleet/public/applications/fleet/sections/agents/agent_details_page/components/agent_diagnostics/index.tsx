@@ -48,6 +48,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
   const [isLoading, setIsLoading] = useState(true);
   const [diagnosticsEntries, setDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
   const [prevDiagnosticsEntries, setPrevDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
+  const [loadInterval, setLoadInterval] = useState(10000);
 
   const loadData = useCallback(async () => {
     try {
@@ -59,8 +60,20 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       if (!uploadsResponse.data) {
         throw new Error('No data');
       }
-      setDiagnosticEntries(uploadsResponse.data.items);
+      const entries = uploadsResponse.data.items;
+      setDiagnosticEntries(entries);
       setIsLoading(false);
+
+      // query faster if an action is in progress, for quicker feedback
+      if (
+        entries.some(
+          (entry) => entry.status === 'IN_PROGRESS' || entry.status === 'AWAITING_UPLOAD'
+        )
+      ) {
+        setLoadInterval(3000);
+      } else {
+        setLoadInterval(10000);
+      }
     } catch (err) {
       notifications.toasts.addError(err, {
         title: i18n.translate(
@@ -71,13 +84,13 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         ),
       });
     }
-  }, [agent.id, notifications.toasts]);
+  }, [agent.id, notifications.toasts, setLoadInterval]);
 
   useEffect(() => {
     loadData();
     const interval: ReturnType<typeof setInterval> | null = setInterval(async () => {
       loadData();
-    }, 10000);
+    }, loadInterval);
 
     const cleanup = () => {
       if (interval) {
@@ -86,7 +99,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     };
 
     return cleanup;
-  }, [loadData]);
+  }, [loadData, loadInterval]);
 
   useEffect(() => {
     setPrevDiagnosticEntries(diagnosticsEntries);
