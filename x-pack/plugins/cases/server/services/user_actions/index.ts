@@ -88,6 +88,16 @@ interface ConnectorFieldsBeforePushAggsResult {
   };
 }
 
+interface UserActionsStatsAggsResult {
+  total: number;
+  totals: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+}
+
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;
   private readonly _finder: UserActionFinder;
@@ -657,6 +667,50 @@ export class CaseUserActionService {
               },
             },
           },
+        },
+      },
+    };
+  }
+
+  public async getCaseUserActionStats({ caseId, filter }: { caseId: string; filter?: KueryNode }) {
+    const response = await this.context.unsecuredSavedObjectsClient.find<
+      CaseUserActionAttributesWithoutConnectorId,
+      UserActionsStatsAggsResult
+    >({
+      type: CASE_USER_ACTION_SAVED_OBJECT,
+      hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+      page: 1,
+      perPage: 1,
+      sortField: defaultSortField,
+      aggs: CaseUserActionService.buildUserActionStatsAgg(),
+      filter,
+    });
+
+    const result = {
+      total: response.total,
+      total_comments: 0,
+      total_other_actions: 0,
+    };
+
+    response.aggregations?.totals.buckets.forEach(({ key, doc_count: docCount }) => {
+      if (key === 'comment') {
+        result.total_comments = docCount;
+      }
+    });
+
+    result.total_other_actions = result.total - result.total_comments;
+
+    return result;
+  }
+
+  private static buildUserActionStatsAgg(): Record<
+    string,
+    estypes.AggregationsAggregationContainer
+  > {
+    return {
+      totals: {
+        terms: {
+          field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`,
         },
       },
     };

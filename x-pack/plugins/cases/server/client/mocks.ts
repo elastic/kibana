@@ -90,9 +90,10 @@ type UserActionsSubClientMock = jest.Mocked<UserActionsSubClient>;
 
 const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
   return {
+    find: jest.fn(),
     getAll: jest.fn(),
     getConnectors: jest.fn(),
-    find: jest.fn(),
+    stats: fn.jest(),
   };
 };
 

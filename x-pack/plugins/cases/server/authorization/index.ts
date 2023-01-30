@@ -343,4 +343,12 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'user actions',
     savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
   },
+  [ReadOperations.GetUserActionStats]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_USER_ACTION_OPERATION,
+    action: 'case_user_action_get_stats',
+    verbs: accessVerbs,
+    docType: 'user actions',
+    savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+  },
 };
