@@ -3550,6 +3550,20 @@
             "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.NavigationSection.isBetaFeature",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isBetaFeature",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
