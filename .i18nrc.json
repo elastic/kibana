@@ -80,7 +80,7 @@
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": ["src/plugins/telemetry", "src/plugins/telemetry_management_section"],
     "timelion": ["src/plugins/vis_types/timelion"],
-    "uiActions": "src/plugins/ui_actions",
+    "uiActions": ["src/plugins/ui_actions", "packages/kbn-ui-actions-browser/src"],
     "uiActionsEnhanced": "src/plugins/ui_actions_enhanced",
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/plugins/usage_collection",
