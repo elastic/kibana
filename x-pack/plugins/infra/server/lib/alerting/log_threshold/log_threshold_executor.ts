@@ -1138,7 +1138,7 @@ const formatFields = (
   availableFields: Record<string, Record<string, FieldCapsFieldCapability>>
 ): AdditionalContext | undefined => {
   if (!contextFields) return undefined;
-  const newContextFields: Record<string, any> = {};
+  const formattedContextFields: Record<string, any> = {};
 
   Object.entries(contextFields).forEach(([key, value]) => {
     if (key in availableFields && !excludeHostField(key)) {
@@ -1148,14 +1148,14 @@ const formatFields = (
         fieldType === ES_FIELD_TYPES.OBJECT ||
         fieldType === ES_FIELD_TYPES.TEXT
       ) {
-        newContextFields[key] = value?.[0];
+        formattedContextFields[key] = value?.[0];
       } else {
-        newContextFields[key] = value;
+        formattedContextFields[key] = value;
       }
     }
   });
 
-  return unflattenObject(newContextFields);
+  return unflattenObject(formattedContextFields);
 };
 
 const excludeHostField = (key: string): boolean => {
