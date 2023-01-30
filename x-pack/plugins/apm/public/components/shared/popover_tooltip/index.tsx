@@ -12,7 +12,6 @@ interface PopoverTooltipProps {
   ariaLabel?: string;
   iconType?: string;
   children: React.ReactNode;
-  iconType?: string;
 }
 
 export function PopoverTooltip({
