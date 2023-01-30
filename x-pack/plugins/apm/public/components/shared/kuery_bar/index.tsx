@@ -163,7 +163,6 @@ export function KueryBar(props: {
         props.onSubmit(inputValue.trim());
         return;
       }
-
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
