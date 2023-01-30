@@ -313,11 +313,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
+    skip: !selectedGroup || selectedGroup === 'none',
   });
 
   useEffect(() => {
-    setAlertsQuery(queryGroups);
-  }, [queryGroups, setAlertsQuery]);
+    if (selectedGroup) {
+      setAlertsQuery(queryGroups);
+    }
+  }, [queryGroups, selectedGroup, setAlertsQuery]);
 
   useInspectButton({
     deleteQuery,
