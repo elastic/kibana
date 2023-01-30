@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
-import { EsHitRecord } from '../../../types';
+import type { RecordsFetchResponse, EsHitRecord } from '../../../types';
 import { buildDataTableRecordList } from '../../../utils/build_data_record';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { FetchDeps } from './fetch_all';
@@ -21,7 +21,7 @@ import { FetchDeps } from './fetch_all';
 export const fetchDocuments = (
   searchSource: ISearchSource,
   { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
-) => {
+): Promise<RecordsFetchResponse> => {
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
@@ -61,5 +61,5 @@ export const fetchDocuments = (
       })
     );
 
-  return lastValueFrom(fetch$);
+  return lastValueFrom(fetch$).then((records) => ({ records }));
 };
