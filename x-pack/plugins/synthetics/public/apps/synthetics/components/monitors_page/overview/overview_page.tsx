@@ -79,7 +79,7 @@ export const OverviewPage: React.FC = () => {
 
   if (
     !search &&
-    enablementLoading &&
+    !enablementLoading &&
     isEnabled &&
     !monitorsLoading &&
     syntheticsMonitors.length === 0
@@ -110,14 +110,14 @@ export const OverviewPage: React.FC = () => {
       <EuiSpacer />
       {Boolean(!monitorsLoaded || syntheticsMonitors?.length > 0) && (
         <>
-          <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="m" wrap>
+            <EuiFlexItem grow={2}>
               <OverviewStatus />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={3} style={{ minWidth: 300 }}>
               <OverviewErrors />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={3} style={{ minWidth: 300 }}>
               <OverviewAlerts />
             </EuiFlexItem>
           </EuiFlexGroup>

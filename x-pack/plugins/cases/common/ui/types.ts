@@ -22,6 +22,7 @@ import type {
   SingleCaseMetricsResponse,
   CommentResponse,
   CaseResponse,
+  UserActionFindResponse,
   CommentResponseAlertsType,
   CasesFindResponse,
   CasesStatusResponse,
@@ -77,6 +78,9 @@ export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
 export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
+export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
+  userActions: CaseUserActions[];
+};
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
 export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
@@ -137,6 +141,7 @@ export type SingleCaseMetricsFeature =
 export enum SortFieldCase {
   closedAt = 'closedAt',
   createdAt = 'createdAt',
+  updatedAt = 'updatedAt',
   severity = 'severity',
   status = 'status',
   title = 'title',

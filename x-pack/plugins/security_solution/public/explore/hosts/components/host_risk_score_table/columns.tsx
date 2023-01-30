@@ -7,22 +7,16 @@
 
 import React from 'react';
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../common/components/drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
-import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import type { HostRiskScoreColumns } from '.';
-
 import * as i18n from './translations';
 import { HostsTableType } from '../../store/model';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields } from '../../../../../common/search_strategy';
 import { RiskScore } from '../../../components/risk_score/severity/common';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -37,31 +31,20 @@ export const getHostRiskScoreColumns = ({
     sortable: true,
     render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
-        const id = escapeDataProviderId(`host-risk-score-table-hostName-${hostName}`);
         return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              excluded: false,
-              id,
-              name: hostName,
-              kqlQuery: '',
-              queryMatch: { field: 'host.name', value: hostName, operator: IS_OPERATOR },
+          <CellActions
+            mode={CellActionsMode.HOVER}
+            visibleCellActions={5}
+            showActionTooltips
+            triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+            field={{
+              name: 'host.name',
+              value: hostName,
+              type: 'keyword',
             }}
-            isAggregatable={true}
-            fieldType={'keyword'}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
-              )
-            }
-          />
+          >
+            <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
+          </CellActions>
         );
       }
       return getEmptyTagValue();

@@ -380,9 +380,44 @@
             }
           }
         },
-        "operationId": "bulk-install-packages"
-      },
-      "parameters": []
+        "operationId": "bulk-install-packages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "prerelease",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "list of package names to install"
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "force install to ignore package verification errors"
+                  }
+                },
+                "required": [
+                  "packages"
+                ]
+              }
+            }
+          }
+        }
+      }
     },
     "/epm/packages/{pkgkey}": {
       "get": {
@@ -443,6 +478,15 @@
             "name": "pkgkey",
             "in": "path",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "prerelease",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
           }
         ],
         "deprecated": true
@@ -695,6 +739,15 @@
           "name": "full",
           "description": "Return all fields from the package manifest, not just those supported by the Elastic Package Registry",
           "in": "query"
+        },
+        {
+          "in": "query",
+          "name": "prerelease",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          },
+          "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
         }
       ],
       "post": {
@@ -1316,6 +1369,9 @@
           },
           {
             "$ref": "#/components/parameters/sort_order"
+          },
+          {
+            "$ref": "#/components/parameters/with_metrics"
           }
         ],
         "security": [
@@ -1516,7 +1572,12 @@
             }
           }
         },
-        "operationId": "get-agent"
+        "operationId": "get-agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/with_metrics"
+          }
+        ]
       },
       "put": {
         "summary": "Agent - Update",
@@ -4655,6 +4716,15 @@
             "desc"
           ]
         }
+      },
+      "with_metrics": {
+        "name": "withMetrics",
+        "in": "query",
+        "description": "Return agent metrics, false by default",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
       }
     },
     "schemas": {
@@ -5322,6 +5392,19 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/agent_component"
+            }
+          },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "cpu_avg": {
+                "type": "number",
+                "description": "Average agent CPU usage during the last 5 minute, number between 0-1"
+              },
+              "memory_size_byte_avg": {
+                "type": "number",
+                "description": "Average agent memory consumption during the last 5 minute"
+              }
             }
           }
         },

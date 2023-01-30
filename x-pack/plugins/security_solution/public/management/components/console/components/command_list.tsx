@@ -124,7 +124,8 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         type: 'updateInputTextEnteredState',
         payload: () => {
           return {
-            textEntered: text,
+            leftOfCursorText: text,
+            rightOfCursorText: '',
           };
         },
       });

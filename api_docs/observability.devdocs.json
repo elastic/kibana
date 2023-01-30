@@ -55,6 +55,98 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.convertTo",
+        "type": "Function",
+        "tags": [],
+        "label": "convertTo",
+        "description": [
+          "\nConverts a microseconds value into the unit defined."
+        ],
+        "signature": [
+          "({\n  unit,\n  microseconds,\n  defaultValue = NOT_AVAILABLE_LABEL,\n  extended,\n}: { unit: DurationTimeUnit; microseconds: ",
+          "Maybe",
+          "<number>; defaultValue?: string | undefined; extended?: boolean | undefined; }) => ConvertedDuration"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.convertTo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  unit,\n  microseconds,\n  defaultValue = NOT_AVAILABLE_LABEL,\n  extended,\n}",
+            "description": [],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.convertTo.$1.unit",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "unit",
+                "description": [],
+                "signature": [
+                  "\"microseconds\" | ",
+                  "TimeUnit"
+                ],
+                "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.convertTo.$1.microseconds",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "microseconds",
+                "description": [],
+                "signature": [
+                  "number | null | undefined"
+                ],
+                "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.convertTo.$1.defaultValue",
+                "type": "string",
+                "tags": [],
+                "label": "defaultValue",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.convertTo.$1.extended",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "extended",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.createEsParams",
         "type": "Function",
         "tags": [],
@@ -738,7 +830,7 @@
           },
           " | undefined; list: () => string[]; }; selectedAlertId?: string | undefined; } & ",
           "CommonProps",
-          " & { as?: \"div\" | undefined; } & _EuiFlyoutProps & Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof _EuiFlyoutProps> & Omit<Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, \"key\" | keyof React.HTMLAttributes<HTMLDivElement> | \"css\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }, \"children\" | \"ref\" | \"type\" | \"onError\" | \"hidden\" | \"color\" | \"id\" | \"className\" | \"size\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"key\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"onClose\" | \"data-test-subj\" | \"css\" | \"as\" | \"paddingSize\" | \"focusTrapProps\" | \"ownFocus\" | \"maxWidth\" | \"hideCloseButton\" | \"closeButtonAriaLabel\" | \"closeButtonProps\" | \"closeButtonPosition\" | \"maskProps\" | \"outsideClickCloses\" | \"side\" | \"pushMinBreakpoint\">, \"children\" | \"type\" | \"onError\" | \"hidden\" | \"color\" | \"id\" | \"alert\" | \"className\" | \"size\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"key\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"onClose\" | \"data-test-subj\" | \"css\" | \"as\" | \"paddingSize\" | \"focusTrapProps\" | \"ownFocus\" | \"alerts\" | \"maxWidth\" | \"hideCloseButton\" | \"closeButtonAriaLabel\" | \"closeButtonProps\" | \"closeButtonPosition\" | \"maskProps\" | \"outsideClickCloses\" | \"side\" | \"pushMinBreakpoint\" | \"isInApp\" | \"observabilityRuleTypeRegistry\" | \"selectedAlertId\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }> & { readonly _result: ({ alert, alerts, isInApp, observabilityRuleTypeRegistry, onClose, selectedAlertId, }: AlertsFlyoutProps) => JSX.Element | null; }"
+          " & { as?: \"div\" | undefined; } & _EuiFlyoutProps & Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof _EuiFlyoutProps> & Omit<Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, \"key\" | keyof React.HTMLAttributes<HTMLDivElement> | \"css\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }, \"children\" | \"ref\" | \"type\" | \"onError\" | \"hidden\" | \"color\" | \"id\" | \"className\" | \"size\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"placeholder\" | \"security\" | \"key\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"onClose\" | \"data-test-subj\" | \"css\" | \"as\" | \"paddingSize\" | \"focusTrapProps\" | \"ownFocus\" | \"maxWidth\" | \"hideCloseButton\" | \"closeButtonAriaLabel\" | \"closeButtonProps\" | \"closeButtonPosition\" | \"maskProps\" | \"outsideClickCloses\" | \"side\" | \"pushMinBreakpoint\">, \"children\" | \"type\" | \"onError\" | \"hidden\" | \"color\" | \"id\" | \"alert\" | \"className\" | \"size\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"placeholder\" | \"security\" | \"key\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"onClose\" | \"data-test-subj\" | \"css\" | \"as\" | \"paddingSize\" | \"focusTrapProps\" | \"ownFocus\" | \"alerts\" | \"maxWidth\" | \"hideCloseButton\" | \"closeButtonAriaLabel\" | \"closeButtonProps\" | \"closeButtonPosition\" | \"maskProps\" | \"outsideClickCloses\" | \"side\" | \"pushMinBreakpoint\" | \"isInApp\" | \"observabilityRuleTypeRegistry\" | \"selectedAlertId\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }> & { readonly _result: ({ alert, alerts, isInApp, observabilityRuleTypeRegistry, onClose, selectedAlertId, }: AlertsFlyoutProps) => JSX.Element | null; }"
         ],
         "path": "x-pack/plugins/observability/public/index.ts",
         "deprecated": false,
@@ -3458,6 +3550,20 @@
             "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.NavigationSection.isBetaFeature",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isBetaFeature",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3846,19 +3952,37 @@
         "children": [
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.usageCollection",
+            "id": "def-public.ObservabilityPublicPluginsStart.actionTypeRegistry",
             "type": "Object",
             "tags": [],
-            "label": "usageCollection",
+            "label": "actionTypeRegistry",
             "description": [],
             "signature": [
+              "{ get: (id: string) => ",
               {
-                "pluginId": "usageCollection",
+                "pluginId": "triggersActionsUi",
                 "scope": "public",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-public.UsageCollectionSetup",
-                "text": "UsageCollectionSetup"
-              }
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.ActionTypeModel",
+                "text": "ActionTypeModel"
+              },
+              "<unknown, unknown, any>; list: () => ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.ActionTypeModel",
+                "text": "ActionTypeModel"
+              },
+              "<unknown, unknown, any>[]; has: (id: string) => boolean; register: (objectType: ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.ActionTypeModel",
+                "text": "ActionTypeModel"
+              },
+              "<unknown, unknown, any>) => void; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -3886,100 +4010,22 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.embeddable",
-            "type": "Object",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableStart",
-                "text": "EmbeddableStart"
-              }
-            ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.home",
-            "type": "Object",
-            "tags": [],
-            "label": "home",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "home",
-                "scope": "public",
-                "docId": "kibHomePluginApi",
-                "section": "def-public.HomePublicPluginStart",
-                "text": "HomePublicPluginStart"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.share",
+            "id": "def-public.ObservabilityPublicPluginsStart.charts",
             "type": "CompoundType",
             "tags": [],
-            "label": "share",
-            "description": [],
-            "signature": [
-              "{ toggleShareContextMenu: (options: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.ShowShareMenuOptions",
-                "text": "ShowShareMenuOptions"
-              },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; }"
-            ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.triggersActionsUi",
-            "type": "Object",
-            "tags": [],
-            "label": "triggersActionsUi",
+            "label": "charts",
             "description": [],
             "signature": [
               {
-                "pluginId": "triggersActionsUi",
+                "pluginId": "charts",
                 "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.TriggersAndActionsUIPublicPluginStart",
-                "text": "TriggersAndActionsUIPublicPluginStart"
-              }
+                "docId": "kibChartsPluginApi",
+                "section": "def-public.ChartsPluginSetup",
+                "text": "ChartsPluginSetup"
+              },
+              " & { activeCursor: ",
+              "ActiveCursor",
+              "; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -4027,6 +4073,66 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.discover",
+            "type": "Object",
+            "tags": [],
+            "label": "discover",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverStart",
+                "text": "DiscoverStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableStart",
+                "text": "EmbeddableStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.guidedOnboarding",
+            "type": "Object",
+            "tags": [],
+            "label": "guidedOnboarding",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "public",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-public.GuidedOnboardingPluginStart",
+                "text": "GuidedOnboardingPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.lens",
             "type": "Object",
             "tags": [],
@@ -4047,18 +4153,18 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.discover",
+            "id": "def-public.ObservabilityPublicPluginsStart.licensing",
             "type": "Object",
             "tags": [],
-            "label": "discover",
+            "label": "licensing",
             "description": [],
             "signature": [
               {
-                "pluginId": "discover",
+                "pluginId": "licensing",
                 "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.DiscoverStart",
-                "text": "DiscoverStart"
+                "docId": "kibLicensingPluginApi",
+                "section": "def-public.LicensingPluginStart",
+                "text": "LicensingPluginStart"
               }
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -4129,44 +4235,6 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.actionTypeRegistry",
-            "type": "Object",
-            "tags": [],
-            "label": "actionTypeRegistry",
-            "description": [],
-            "signature": [
-              "{ get: (id: string) => ",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
-                "text": "ActionTypeModel"
-              },
-              "<unknown, unknown, any>; list: () => ",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
-                "text": "ActionTypeModel"
-              },
-              "<unknown, unknown, any>[]; has: (id: string) => boolean; register: (objectType: ",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
-                "text": "ActionTypeModel"
-              },
-              "<unknown, unknown, any>) => void; }"
-            ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.security",
             "type": "Object",
             "tags": [],
@@ -4187,19 +4255,39 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.guidedOnboarding",
-            "type": "Object",
+            "id": "def-public.ObservabilityPublicPluginsStart.share",
+            "type": "CompoundType",
             "tags": [],
-            "label": "guidedOnboarding",
+            "label": "share",
             "description": [],
             "signature": [
+              "{ toggleShareContextMenu: (options: ",
               {
-                "pluginId": "guidedOnboarding",
+                "pluginId": "share",
                 "scope": "public",
-                "docId": "kibGuidedOnboardingPluginApi",
-                "section": "def-public.GuidedOnboardingPluginStart",
-                "text": "GuidedOnboardingPluginStart"
-              }
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -4220,6 +4308,67 @@
                 "section": "def-public.SpacesApi",
                 "text": "SpacesApi"
               }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.triggersActionsUi",
+            "type": "Object",
+            "tags": [],
+            "label": "triggersActionsUi",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.TriggersAndActionsUIPublicPluginStart",
+                "text": "TriggersAndActionsUIPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.usageCollection",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCollection",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "public",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-public.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.home",
+            "type": "Object",
+            "tags": [],
+            "label": "home",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.HomePublicPluginStart",
+                "text": "HomePublicPluginStart"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -6890,29 +7039,29 @@
                   "ExplainResponse",
                   "<TDocument>>; }; features: ",
                   "default",
-                  "; fieldCaps: { (this: That, params?: ",
+                  "; fieldCaps: { (this: That, params: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  " | undefined, options?: ",
+                  ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
-                  ">; (this: That, params?: ",
+                  ">; (this: That, params: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  " | undefined, options?: ",
+                  ", options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
                   "FieldCapsResponse",
-                  ", unknown>>; (this: That, params?: ",
+                  ", unknown>>; (this: That, params: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  " | undefined, options?: ",
+                  ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
@@ -8175,29 +8324,29 @@
                   "ExplainResponse",
                   "<TDocument>>; }; features: ",
                   "default",
-                  "; fieldCaps: { (this: That, params?: ",
+                  "; fieldCaps: { (this: That, params: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  " | undefined, options?: ",
+                  ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
-                  ">; (this: That, params?: ",
+                  ">; (this: That, params: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  " | undefined, options?: ",
+                  ", options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
                   "FieldCapsResponse",
-                  ", unknown>>; (this: That, params?: ",
+                  ", unknown>>; (this: That, params: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  " | undefined, options?: ",
+                  ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
@@ -9641,115 +9790,7 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/slos\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos\", ",
-          "PartialC",
-          "<{ query: ",
-          "PartialC",
-          "<{ name: ",
-          "StringC",
-          "; indicatorTypes: ",
-          "Type",
-          "<string[], string, unknown>; page: ",
-          "StringC",
-          "; perPage: ",
-          "StringC",
-          "; sortBy: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"name\">, ",
-          "LiteralC",
-          "<\"indicatorType\">]>; sortDirection: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"asc\">, ",
-          "LiteralC",
-          "<\"desc\">]>; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"DELETE /api/observability/slos/{id}\", ",
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", void, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos/{id}\", ",
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
+          "{ \"PUT /api/observability/slos/{id}\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "public",
@@ -9962,6 +10003,146 @@
             "text": "ObservabilityRouteHandlerResources"
           },
           ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"POST /internal/observability/slos/_historical_summary\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/observability/slos/_historical_summary\", ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ sloIds: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { [x: string]: ({ date: string; } & { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; })[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"GET /api/observability/slos\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/slos\", ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ name: ",
+          "StringC",
+          "; indicatorTypes: ",
+          "Type",
+          "<string[], string, unknown>; page: ",
+          "StringC",
+          "; perPage: ",
+          "StringC",
+          "; sortBy: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"name\">, ",
+          "LiteralC",
+          "<\"indicatorType\">]>; sortDirection: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"asc\">, ",
+          "LiteralC",
+          "<\"desc\">]>; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"DELETE /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", void, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10263,115 +10444,7 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/slos\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos\", ",
-          "PartialC",
-          "<{ query: ",
-          "PartialC",
-          "<{ name: ",
-          "StringC",
-          "; indicatorTypes: ",
-          "Type",
-          "<string[], string, unknown>; page: ",
-          "StringC",
-          "; perPage: ",
-          "StringC",
-          "; sortBy: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"name\">, ",
-          "LiteralC",
-          "<\"indicatorType\">]>; sortDirection: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"asc\">, ",
-          "LiteralC",
-          "<\"desc\">]>; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"DELETE /api/observability/slos/{id}\", ",
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", void, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "public",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-public.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /api/observability/slos/{id}\", ",
-          "TypeC",
-          "<{ path: ",
-          "TypeC",
-          "<{ id: ",
-          "StringC",
-          "; }>; }>, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteHandlerResources",
-            "text": "ObservabilityRouteHandlerResources"
-          },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
-          {
-            "pluginId": "observability",
-            "scope": "server",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-server.ObservabilityRouteCreateOptions",
-            "text": "ObservabilityRouteCreateOptions"
-          },
-          "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
+          "{ \"PUT /api/observability/slos/{id}\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "public",
@@ -10584,6 +10657,146 @@
             "text": "ObservabilityRouteHandlerResources"
           },
           ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"POST /internal/observability/slos/_historical_summary\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/observability/slos/_historical_summary\", ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ sloIds: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { [x: string]: ({ date: string; } & { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; })[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"GET /api/observability/slos\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/slos\", ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ name: ",
+          "StringC",
+          "; indicatorTypes: ",
+          "Type",
+          "<string[], string, unknown>; page: ",
+          "StringC",
+          "; perPage: ",
+          "StringC",
+          "; sortBy: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"name\">, ",
+          "LiteralC",
+          "<\"indicatorType\">]>; sortDirection: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"asc\">, ",
+          "LiteralC",
+          "<\"desc\">]>; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"DELETE /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", void, ",
           {
             "pluginId": "observability",
             "scope": "server",

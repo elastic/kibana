@@ -124,6 +124,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     enterpriseSearch: {
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
+      behavioralAnalyticsEvents: `${ENTERPRISE_SEARCH_DOCS}analytics-events.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
@@ -414,6 +415,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       anomalyDetection: `${MACHINE_LEARNING_DOCS}ml-ad-overview.html`,
       anomalyDetectionJobs: `${MACHINE_LEARNING_DOCS}ml-ad-finding-anomalies.html`,
       anomalyDetectionConfiguringCategories: `${MACHINE_LEARNING_DOCS}ml-configuring-categories.html`,
+      anomalyDetectionScoreExplanation: `${MACHINE_LEARNING_DOCS}ml-ad-explain.html`,
       anomalyDetectionBucketSpan: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-bucket-span`,
       anomalyDetectionCardinality: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-cardinality`,
       anomalyDetectionCreateJobs: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-create-job`,
