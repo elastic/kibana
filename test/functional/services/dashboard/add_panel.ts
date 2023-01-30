@@ -112,12 +112,17 @@ export class DashboardAddPanelService extends FtrService {
     // Clear all toasts that could hide pagination controls
     await this.common.clearAllToasts();
 
-    const isNext = await this.testSubjects.exists('pagination-button-next');
+    const addPanel = await this.testSubjects.find('dashboardAddPanel');
+
+    const isNext = await this.testSubjects.descendantExists('pagination-button-next', addPanel);
     if (!isNext) {
       return false;
     }
 
-    const pagerNextButton = await this.testSubjects.find('pagination-button-next');
+    const pagerNextButton = await this.testSubjects.findDescendant(
+      'pagination-button-next',
+      addPanel
+    );
 
     const isDisabled = await pagerNextButton.getAttribute('disabled');
     if (isDisabled != null) {
