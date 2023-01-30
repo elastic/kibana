@@ -399,6 +399,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   };
 
   reload = () => {
+    // clear cache when reload is requested
+    this.optionsListService.clearOptionsListCache();
     this.runOptionsListQuery();
   };
 

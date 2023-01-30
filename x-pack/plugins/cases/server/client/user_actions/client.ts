@@ -5,34 +5,44 @@
  * 2.0.
  */
 
-import type { GetCaseConnectorsResponse } from '../../../common/api';
-import type { ICaseUserActionsResponse } from '../typedoc_interfaces';
+import type {
+  GetCaseConnectorsResponse,
+  UserActionFindResponse,
+  CaseUserActionsDeprecatedResponse,
+} from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import { get } from './get';
 import { getConnectors } from './connectors';
-import type { GetConnectorsRequest, UserActionGet } from './types';
+import type { GetConnectorsRequest, UserActionFind, UserActionGet } from './types';
+import { find } from './find';
+import type { CasesClient } from '../client';
 
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.
  */
 export interface UserActionsSubClient {
+  find(params: UserActionFind): Promise<UserActionFindResponse>;
   /**
    * Retrieves all user actions for a particular case.
    */
-  getAll(clientArgs: UserActionGet): Promise<ICaseUserActionsResponse>;
+  getAll(params: UserActionGet): Promise<CaseUserActionsDeprecatedResponse>;
   /**
    * Retrieves all the connectors used within a given case
    */
-  getConnectors(clientArgs: GetConnectorsRequest): Promise<GetCaseConnectorsResponse>;
+  getConnectors(params: GetConnectorsRequest): Promise<GetCaseConnectorsResponse>;
 }
 
 /**
  * Creates an API object for interacting with the user action entities
  */
-export const createUserActionsSubClient = (clientArgs: CasesClientArgs): UserActionsSubClient => {
+export const createUserActionsSubClient = (
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): UserActionsSubClient => {
   const attachmentSubClient: UserActionsSubClient = {
-    getAll: (params: UserActionGet) => get(params, clientArgs),
-    getConnectors: (params: GetConnectorsRequest) => getConnectors(params, clientArgs),
+    find: (params) => find(params, casesClient, clientArgs),
+    getAll: (params) => get(params, clientArgs),
+    getConnectors: (params) => getConnectors(params, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

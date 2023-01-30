@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { filter, head, orderBy, pipe, has, sortBy } from 'lodash/fp';
+import { has, sortBy } from 'lodash/fp';
 
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import * as i18n from './translations';
@@ -62,7 +62,7 @@ export const useNotableAnomaliesSearch = ({
 
   const { notableAnomaliesJobs, query } = useMemo(() => {
     const newNotableAnomaliesJobs = securityJobs.filter(({ id }) =>
-      NOTABLE_ANOMALIES_IDS.some((notableJobId) => matchJobId(id, notableJobId))
+      NOTABLE_ANOMALIES_IDS.some((notableJobId) => id === notableJobId)
     );
 
     const newQuery = getAggregatedAnomaliesQuery({
@@ -132,7 +132,8 @@ function formatResultData(
   notableAnomaliesJobs: SecurityJob[]
 ): AnomaliesCount[] {
   const unsortedAnomalies: AnomaliesCount[] = NOTABLE_ANOMALIES_IDS.map((notableJobId) => {
-    const job = findJobWithId(notableJobId)(notableAnomaliesJobs);
+    const job = notableAnomaliesJobs.find(({ id }) => id === notableJobId);
+
     const bucket = buckets.find(({ key }) => key === job?.id);
     const hasUserName = has("entity.hits.hits[0]._source['user.name']", bucket);
 
@@ -146,20 +147,3 @@ function formatResultData(
 
   return sortBy(['name'], unsortedAnomalies);
 }
-
-/**
- * ML module allows users to add a prefix to the job id.
- * So we need to match jobs that end with the notableJobId.
- */
-const matchJobId = (jobId: string, notableJobId: NotableAnomaliesJobId) =>
-  jobId.endsWith(notableJobId);
-
-/**
- * When multiple jobs match a notable job id, it returns the most recent one.
- */
-const findJobWithId = (notableJobId: NotableAnomaliesJobId) =>
-  pipe<SecurityJob[][], SecurityJob[], SecurityJob[], SecurityJob | undefined>(
-    filter<SecurityJob>(({ id }) => matchJobId(id, notableJobId)),
-    orderBy<SecurityJob>('latestTimestampSortValue', 'desc'),
-    head
-  );

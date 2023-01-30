@@ -32,6 +32,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
   const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
   const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
+  const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
   const exclude = optionsList.select((state) => state.explicitInput.exclude);
   const loading = optionsList.select((state) => state.output.loading);
@@ -116,7 +117,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       >
         {hasSelections || existsSelected
           ? selectionDisplayNode
-          : OptionsListStrings.control.getPlaceholder()}
+          : placeholder ?? OptionsListStrings.control.getPlaceholder()}
       </EuiFilterButton>
     </div>
   );

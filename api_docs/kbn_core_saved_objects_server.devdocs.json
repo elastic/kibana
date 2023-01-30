@@ -58,21 +58,14 @@
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.AddAuditEventParams.outcome",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "outcome",
             "description": [
               "\nThe outcome of the operation\n'failure' | 'success' | 'unknown'"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/ecs",
-                "scope": "common",
-                "docId": "kibKbnEcsPluginApi",
-                "section": "def-common.EcsEventOutcome",
-                "text": "EcsEventOutcome"
-              },
-              " | undefined"
+              "string | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
@@ -1753,6 +1746,32 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.ISavedObjectTypeRegistry.getVisibleToHttpApisTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getVisibleToHttpApisTypes",
+            "description": [
+              "\nReturns all visible {@link SavedObjectsType | types} exposed to the global SO HTTP APIs\n\nA visibleToHttpApis type is a type that doesn't explicitly define `hidden=true` nor `hiddenFromHttpApis=true` during registration."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.ISavedObjectTypeRegistry.getAllTypes",
             "type": "Function",
             "tags": [],
@@ -1958,6 +1977,40 @@
               {
                 "parentPluginId": "@kbn/core-saved-objects-server",
                 "id": "def-common.ISavedObjectTypeRegistry.isHidden.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.ISavedObjectTypeRegistry.isHiddenFromHttpApis",
+            "type": "Function",
+            "tags": [],
+            "label": "isHiddenFromHttpApis",
+            "description": [
+              "\nReturns the `hiddenFromHttpApis` property for a given type, or `false` if\nthe type is not registered"
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-common.ISavedObjectTypeRegistry.isHiddenFromHttpApis.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -2746,6 +2799,30 @@
           {
             "plugin": "savedSearch",
             "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
           }
         ],
         "children": [
@@ -5429,6 +5506,22 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsType.hiddenFromHttpApis",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hiddenFromHttpApis",
+            "description": [
+              "\nIs the type hidden from the http APIs. If `hiddenFromHttpApis:true`, repositories will have access to the type but the type is not exposed via the HTTP APIs.\nIt is recommended to hide types registered with 'hidden=false' from the httpApis for backward compatibility in the HTTP layer.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObjectsType.namespaceType",
             "type": "CompoundType",
             "tags": [],
@@ -5699,10 +5792,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/pinned_events.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/logic/rule_execution_log/execution_saved_object/saved_objects_type.ts"
               },
               {
                 "plugin": "securitySolution",

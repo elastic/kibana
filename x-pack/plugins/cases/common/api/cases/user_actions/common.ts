@@ -8,6 +8,10 @@
 import * as rt from 'io-ts';
 import { UserRT } from '../../user';
 
+/**
+ * These values are used in a number of places including to define the accepted values in the
+ * user_actions/_find api. These values should not be removed only new values can be added.
+ */
 export const ActionTypes = {
   assignees: 'assignees',
   comment: 'comment',
@@ -43,11 +47,23 @@ export const UserActionCommonAttributesRt = rt.type({
   action: ActionsRt,
 });
 
-export const CaseUserActionSavedObjectIdsRt = rt.type({
+/**
+ * This should only be used for the getAll route and it should be removed when the route is removed
+ * @deprecated use CaseUserActionInjectedIdsRt instead
+ */
+export const CaseUserActionInjectedDeprecatedIdsRt = rt.type({
   action_id: rt.string,
   case_id: rt.string,
   comment_id: rt.union([rt.string, rt.null]),
 });
 
+export const CaseUserActionInjectedIdsRt = rt.type({
+  comment_id: rt.union([rt.string, rt.null]),
+});
+
 export type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonAttributesRt>;
-export type UserActionWithResponse<T> = T & rt.TypeOf<typeof CaseUserActionSavedObjectIdsRt>;
+export type UserActionWithResponse<T> = T & { id: string; version: string } & rt.TypeOf<
+    typeof CaseUserActionInjectedIdsRt
+  >;
+export type UserActionWithDeprecatedResponse<T> = T &
+  rt.TypeOf<typeof CaseUserActionInjectedDeprecatedIdsRt>;

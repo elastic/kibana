@@ -491,9 +491,12 @@ export const colourPalette: ColourPalette = { ...TIMING_PALETTE, ...MIME_TYPE_PA
 export const formatTooltipHeading = (index: number, fullText: string): string =>
   isNaN(index) ? fullText : `${index}. ${fullText}`;
 
-export const formatMillisecond = (ms: number, digits?: number) => {
-  if (ms < 1000) {
+export const formatMillisecond = (
+  ms: number,
+  { maxMillis = 1000, digits }: { digits?: number; maxMillis?: number }
+) => {
+  if (ms < maxMillis) {
     return `${ms.toFixed(digits ?? 0)} ms`;
   }
-  return `${(ms / 1000).toFixed(digits ?? 1)} s`;
+  return `${(ms / 1000).toFixed(digits ?? 2)} s`;
 };
