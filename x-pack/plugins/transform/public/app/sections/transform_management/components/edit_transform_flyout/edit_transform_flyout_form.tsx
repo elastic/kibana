@@ -21,11 +21,21 @@ import { EditTransformNumFailureRetries } from './edit_transform_num_failure_ret
 
 export const EditTransformFlyoutForm: FC = () => (
   <EuiForm>
-    <EditTransformFlyoutFormTextInputHelper field="description" label="Description" />
+    <EditTransformFlyoutFormTextInputHelper
+      field="description"
+      label={i18n.translate(`xpack.transform.transformList.editFlyoutFormDescriptionLabel`, {
+        defaultMessage: 'Description',
+      })}
+    />
     <EditTransformFlyoutFormTextInputHelper
       field="frequency"
-      label="Frequency"
-      helpText="The interval to check for changes in source indices when the transform runs continuously."
+      label={i18n.translate(`xpack.transform.transformList.editFlyoutFormFrequencyLabel`, {
+        defaultMessage: 'Frequency',
+      })}
+      helpText={i18n.translate(`xpack.transform.transformList.editFlyoutForm$FrequencyHelpText`, {
+        defaultMessage:
+          'The interval to check for changes in source indices when the transform runs continuously.',
+      })}
     />
 
     <EuiSpacer size="l" />

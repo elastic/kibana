@@ -124,10 +124,26 @@ export const EditTransformRetentionPolicy: FC = () => {
                 />
               </EuiFormRow>
             ) : (
-              <EditTransformFlyoutFormTextInputHelper field="retentionPolicyField" label="Field" />
+              <EditTransformFlyoutFormTextInputHelper
+                field="retentionPolicyField"
+                label={i18n.translate(
+                  `xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel`,
+                  {
+                    defaultMessage: 'Field',
+                  }
+                )}
+              />
             )
           }
-          <EditTransformFlyoutFormTextInputHelper field="retentionPolicyMaxAge" label="Max age" />
+          <EditTransformFlyoutFormTextInputHelper
+            field="retentionPolicyMaxAge"
+            label={i18n.translate(
+              `xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeLabel`,
+              {
+                defaultMessage: 'Max age',
+              }
+            )}
+          />
         </div>
       )}
     </>

@@ -76,19 +76,8 @@ export const EditTransformFlyoutFormTextInputHelper: FC<
     <EditTransformFlyoutFormTextInput
       dataTestSubj={`transformEditFlyout${upperCaseField}Input`}
       errorMessages={errorMessages}
-      helpText={
-        helpText
-          ? i18n.translate(
-              `xpack.transform.transformList.editFlyoutForm${upperCaseField}HelpText`,
-              {
-                defaultMessage: helpText,
-              }
-            )
-          : undefined
-      }
-      label={i18n.translate(`xpack.transform.transformList.editFlyoutForm${upperCaseField}Label`, {
-        defaultMessage: label,
-      })}
+      helpText={helpText}
+      label={label}
       onChange={(valueUpdate) => formField({ field, value: valueUpdate })}
       value={value}
       placeholder={
