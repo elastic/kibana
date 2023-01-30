@@ -29737,7 +29737,6 @@
     "xpack.securitySolution.expandedValue.links.viewUserSummary": "查看用户摘要",
     "xpack.securitySolution.expandedValue.showTopN.showTopValues": "显示排名最前值",
     "xpack.securitySolution.featureCatalogueDescription": "预防、收集、检测和响应威胁，以对整个基础架构提供统一的保护。",
-    "xpack.securitySolution.featureRegistr.subFeatures.fileOperations": "文件操作",
     "xpack.securitySolution.featureRegistry.deleteSubFeatureDetails": "删除案例和注释",
     "xpack.securitySolution.featureRegistry.deleteSubFeatureName": "删除",
     "xpack.securitySolution.featureRegistry.linkSecuritySolutionCaseTitle": "案例",
