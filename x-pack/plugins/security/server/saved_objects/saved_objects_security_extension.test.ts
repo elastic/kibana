@@ -120,37 +120,41 @@ describe('#authorize (unpublished by interface)', () => {
     addAuditEventSpy.mockClear();
   });
 
-  describe('without enforce', () => {
-    const fullyAuthorizedCheckPrivilegesResponse = {
-      hasAllRequested: true,
-      privileges: {
-        kibana: [
-          { privilege: 'mock-saved_object:a/bulk_update', authorized: true },
-          { privilege: 'login:', authorized: true },
-          { resource: 'x', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
-          { resource: 'x', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
-          { resource: 'y', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
-          { resource: 'y', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
-        ],
-      },
-    } as CheckPrivilegesResponse;
+  const fullyAuthorizedCheckPrivilegesResponse = {
+    hasAllRequested: true,
+    privileges: {
+      kibana: [
+        { privilege: 'mock-saved_object:a/bulk_update', authorized: true },
+        { privilege: 'mock-saved_object:a/create', authorized: true },
+        { privilege: 'login:', authorized: true },
+        { resource: 'x', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
+        { resource: 'x', privilege: 'mock-saved_object:b/create', authorized: true },
+        { resource: 'x', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
+        { resource: 'x', privilege: 'mock-saved_object:c/create', authorized: true },
+        { resource: 'y', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
+        { resource: 'y', privilege: 'mock-saved_object:b/create', authorized: true },
+        { resource: 'y', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
+        { resource: 'y', privilege: 'mock-saved_object:c/create', authorized: true },
+      ],
+    },
+  } as CheckPrivilegesResponse;
 
+  describe('without enforce', () => {
     // These arguments are used for all unit tests below
     const types = new Set(['a', 'b', 'c']);
     const spaces = new Set(['x', 'y']);
-    const actions = new Set([SecurityAction.BULK_UPDATE]);
+    const actions = new Set([SecurityAction.BULK_UPDATE, SecurityAction.CREATE]);
 
     test('checks authorization with expected actions, types, and spaces', async () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
-      // ToDo: replace with call to authorizeUpdate
       // Disable to test method
       // eslint-disable-next-line dot-notation
       await securityExtension['authorize']({ types, spaces, actions });
       expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
       expect(checkAuthorizationSpy).toHaveBeenCalledWith({
-        actions: new Set(['bulk_update']),
+        actions: new Set(['bulk_update', 'create']),
         spaces,
         types,
         options: { allowGlobalResource: false },
@@ -159,34 +163,16 @@ describe('#authorize (unpublished by interface)', () => {
       expect(checkPrivileges).toHaveBeenCalledWith(
         [
           'mock-saved_object:a/bulk_update',
+          'mock-saved_object:a/create',
           'mock-saved_object:b/bulk_update',
+          'mock-saved_object:b/create',
           'mock-saved_object:c/bulk_update',
+          'mock-saved_object:c/create',
           'login:',
         ],
         [...spaces]
       );
       expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
-    });
-
-    test('calls checkPrivileges with expected privilege actions and spaces', async () => {
-      const { securityExtension, checkPrivileges } = setup();
-      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
-
-      // Disable to test method
-      // eslint-disable-next-line dot-notation
-      await securityExtension['authorize']({ types, spaces, actions });
-      expect(checkPrivileges).toHaveBeenCalledWith(
-        [
-          // 'mock-saved_object:a/create',
-          'mock-saved_object:a/bulk_update',
-          // 'mock-saved_object:b/create',
-          'mock-saved_object:b/bulk_update',
-          // 'mock-saved_object:c/create',
-          'mock-saved_object:c/bulk_update',
-          'login:',
-        ],
-        [...spaces]
-      );
     });
 
     test('throws an error when `types` is empty', async () => {
@@ -248,7 +234,7 @@ describe('#authorize (unpublished by interface)', () => {
         status: 'fully_authorized',
         typeMap: new Map()
           .set('a', {
-            // create: { isGloballyAuthorized: true, authorizedSpaces: [] },
+            create: { isGloballyAuthorized: true, authorizedSpaces: [] },
             bulk_update: { isGloballyAuthorized: true, authorizedSpaces: [] },
             // Technically, 'login:' is not a saved object action, it is a Kibana privilege -- however, we include it in the `typeMap` results
             // for ease of use with the `redactNamespaces` function. The user is never actually authorized to "login" for a given object type,
@@ -256,12 +242,12 @@ describe('#authorize (unpublished by interface)', () => {
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           })
           .set('b', {
-            // create: { authorizedSpaces: ['x', 'y'] },
+            create: { authorizedSpaces: ['x', 'y'] },
             bulk_update: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           })
           .set('c', {
-            // create: { authorizedSpaces: ['x', 'y'] },
+            create: { authorizedSpaces: ['x', 'y'] },
             bulk_update: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
@@ -277,18 +263,18 @@ describe('#authorize (unpublished by interface)', () => {
             // For type 'a', the user is authorized to use 'create' action but not 'update' action (all spaces)
             // For type 'b', the user is authorized to use 'create' action but not 'update' action (both spaces)
             // For type 'c', the user is authorized to use both actions in space 'x' but not space 'y'
-            // { privilege: 'mock-saved_object:a/create', authorized: true },
+            { privilege: 'mock-saved_object:a/create', authorized: true },
             { privilege: 'mock-saved_object:a/bulk_update', authorized: false },
             { privilege: 'mock-saved_object:a/bulk_update', authorized: true }, // fail-secure check
-            // { resource: 'x', privilege: 'mock-saved_object:b/create', authorized: true },
+            { resource: 'x', privilege: 'mock-saved_object:b/create', authorized: true },
             { resource: 'x', privilege: 'mock-saved_object:b/bulk_update', authorized: false },
-            // { resource: 'x', privilege: 'mock-saved_object:c/create', authorized: true },
-            // { privilege: 'mock-saved_object:c/create', authorized: false }, // inverse fail-secure check
+            { resource: 'x', privilege: 'mock-saved_object:c/create', authorized: true },
+            { privilege: 'mock-saved_object:c/create', authorized: false }, // inverse fail-secure check
             { resource: 'x', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
             { resource: 'x', privilege: 'login:', authorized: true },
-            // { resource: 'y', privilege: 'mock-saved_object:b/create', authorized: true },
+            { resource: 'y', privilege: 'mock-saved_object:b/create', authorized: true },
             { resource: 'y', privilege: 'mock-saved_object:b/bulk_update', authorized: false },
-            // { resource: 'y', privilege: 'mock-saved_object:c/create', authorized: false },
+            { resource: 'y', privilege: 'mock-saved_object:c/create', authorized: false },
             { resource: 'y', privilege: 'mock-saved_object:c/bulk_update', authorized: false },
             { privilege: 'mock-saved_object:c/bulk_update', authorized: true }, // fail-secure check
             { resource: 'y', privilege: 'mock-saved_object:c/bulk_update', authorized: true }, // fail-secure check
@@ -309,16 +295,16 @@ describe('#authorize (unpublished by interface)', () => {
         status: 'partially_authorized',
         typeMap: new Map()
           .set('a', {
-            // bulk_update: { isGloballyAuthorized: true, authorizedSpaces: [] },
+            create: { isGloballyAuthorized: true, authorizedSpaces: [] },
             ['login:']: { authorizedSpaces: ['x', 'y'] },
           })
           .set('b', {
-            // bulk_update: { authorizedSpaces: ['x', 'y'] },
+            create: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { authorizedSpaces: ['x', 'y'] },
           })
           .set('c', {
             bulk_update: { authorizedSpaces: ['x'] },
-            // update: { authorizedSpaces: ['x'] },
+            create: { authorizedSpaces: ['x'] },
             ['login:']: { authorizedSpaces: ['x', 'y'] },
           }),
       });
@@ -403,21 +389,7 @@ describe('#authorize (unpublished by interface)', () => {
     // These arguments are used for all unit tests below
     const types = new Set(['a', 'b', 'c']);
     const spaces = new Set(['x', 'y']);
-    const actions = new Set([SecurityAction.BULK_UPDATE]);
-
-    const fullyAuthorizedCheckPrivilegesResponse = {
-      hasAllRequested: true,
-      privileges: {
-        kibana: [
-          { privilege: 'mock-saved_object:a/bulk_update', authorized: true },
-          { privilege: 'login:', authorized: true },
-          { resource: 'x', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
-          { resource: 'x', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
-          { resource: 'y', privilege: 'mock-saved_object:b/bulk_update', authorized: true },
-          { resource: 'y', privilege: 'mock-saved_object:c/bulk_update', authorized: true },
-        ],
-      },
-    } as CheckPrivilegesResponse;
+    const actions = new Set([SecurityAction.BULK_UPDATE, SecurityAction.CREATE]);
 
     const partiallyAuthorizedCheckPrivilegesResponse = {
       hasAllRequested: false,
@@ -461,7 +433,7 @@ describe('#authorize (unpublished by interface)', () => {
           ]),
         });
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: undefined,
           event: {
@@ -476,6 +448,21 @@ describe('#authorize (unpublished by interface)', () => {
             saved_object: undefined,
           },
           message: 'User is updating saved objects',
+        });
+        expect(auditLogger.log).toHaveBeenCalledWith({
+          error: undefined,
+          event: {
+            action: AuditAction.CREATE,
+            category: ['database'],
+            outcome: 'unknown',
+            type: ['creation'],
+          },
+          kibana: {
+            add_to_spaces: undefined,
+            delete_from_spaces: undefined,
+            saved_object: undefined,
+          },
+          message: 'User is creating saved objects',
         });
       });
 
@@ -497,7 +484,7 @@ describe('#authorize (unpublished by interface)', () => {
           auditOptions: { useSuccessOutcome: true },
         });
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: undefined,
           event: {
@@ -512,6 +499,21 @@ describe('#authorize (unpublished by interface)', () => {
             saved_object: undefined,
           },
           message: 'User has updated saved objects',
+        });
+        expect(auditLogger.log).toHaveBeenCalledWith({
+          error: undefined,
+          event: {
+            action: AuditAction.CREATE,
+            category: ['database'],
+            outcome: 'success',
+            type: ['creation'],
+          },
+          kibana: {
+            add_to_spaces: undefined,
+            delete_from_spaces: undefined,
+            saved_object: undefined,
+          },
+          message: 'User has created saved objects',
         });
       });
 
@@ -541,9 +543,10 @@ describe('#authorize (unpublished by interface)', () => {
           },
         });
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
+        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length * 2); // 2 actions
+        let i = 1;
         for (const obj of auditObjects) {
-          expect(auditLogger.log).toHaveBeenCalledWith({
+          expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
             error: undefined,
             event: {
               action: AuditAction.UPDATE,
@@ -560,6 +563,26 @@ describe('#authorize (unpublished by interface)', () => {
               },
             },
             message: `User is updating ${obj.type} [id=${obj.id}]`,
+          });
+        }
+        for (const obj of auditObjects) {
+          expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
+            error: undefined,
+            event: {
+              action: AuditAction.CREATE,
+              category: ['database'],
+              outcome: 'unknown',
+              type: ['creation'],
+            },
+            kibana: {
+              add_to_spaces: undefined,
+              delete_from_spaces: undefined,
+              saved_object: {
+                id: obj.id,
+                type: obj.type,
+              },
+            },
+            message: `User is creating ${obj.type} [id=${obj.id}]`,
           });
         }
       });
@@ -591,9 +614,10 @@ describe('#authorize (unpublished by interface)', () => {
           },
         });
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
+        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length * 2); // two action
+        let i = 1;
         for (const obj of auditObjects) {
-          expect(auditLogger.log).toHaveBeenCalledWith({
+          expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
             error: undefined,
             event: {
               action: AuditAction.UPDATE,
@@ -610,6 +634,26 @@ describe('#authorize (unpublished by interface)', () => {
               },
             },
             message: `User has updated ${obj.type} [id=${obj.id}]`,
+          });
+        }
+        for (const obj of auditObjects) {
+          expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
+            error: undefined,
+            event: {
+              action: AuditAction.CREATE,
+              category: ['database'],
+              outcome: 'success',
+              type: ['creation'],
+            },
+            kibana: {
+              add_to_spaces: undefined,
+              delete_from_spaces: undefined,
+              saved_object: {
+                id: obj.id,
+                type: obj.type,
+              },
+            },
+            message: `User has created ${obj.type} [id=${obj.id}]`,
           });
         }
       });
@@ -662,7 +706,7 @@ describe('#authorize (unpublished by interface)', () => {
           auditOptions: { bypassOnFailure: true },
         });
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledTimes(actions.size);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: undefined,
           event: {
@@ -677,6 +721,21 @@ describe('#authorize (unpublished by interface)', () => {
             saved_object: undefined,
           },
           message: 'User is updating saved objects',
+        });
+        expect(auditLogger.log).toHaveBeenCalledWith({
+          error: undefined,
+          event: {
+            action: AuditAction.CREATE,
+            category: ['database'],
+            outcome: 'unknown',
+            type: ['creation'],
+          },
+          kibana: {
+            add_to_spaces: undefined,
+            delete_from_spaces: undefined,
+            saved_object: undefined,
+          },
+          message: 'User is creating saved objects',
         });
       });
     });
@@ -1028,155 +1087,6 @@ describe('#authorize (unpublished by interface)', () => {
         })
       ).rejects.toThrowError('No actions specified for authorization check');
     });
-    //   const { securityExtension, checkPrivileges, auditLogger } = setup();
-
-    //   // Disable to test method
-    //   // eslint-disable-next-line dot-notation
-    //   securityExtension['authorize']({
-    //     types,
-    //     spaces,
-    //     actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
-    //   });
-    //   expect(checkPrivileges).not.toHaveBeenCalled();
-    //   expect(auditLogger.log).toBeCalledTimes(1);
-    //   expect(auditLogger.log).toHaveBeenCalledWith({
-    //     error: undefined,
-    //     event: {
-    //       action: AuditAction.CLOSE_POINT_IN_TIME,
-    //       category: ['database'],
-    //       outcome: 'unknown',
-    //       type: ['deletion'],
-    //     },
-    //     kibana: {
-    //       add_to_spaces: undefined,
-    //       delete_from_spaces: undefined,
-    //       saved_object: undefined,
-    //     },
-    //     message: 'User is closing point-in-time saved objects',
-    //   });
-    // });
-
-    // test(`adds an audit event with success outcome when 'useSuccessOutcome' is true`, async () => {
-    //   const { securityExtension, checkPrivileges, auditLogger } = setup();
-
-    //   // Disable to test method
-    //   // eslint-disable-next-line dot-notation
-    //   await securityExtension['authorize']({
-    //     types,
-    //     spaces,
-    //     actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
-    //     auditOptions: { useSuccessOutcome: true },
-    //   });
-    //   expect(checkPrivileges).not.toHaveBeenCalled();
-    //   expect(auditLogger.log).toBeCalledTimes(1);
-    //   expect(auditLogger.log).toHaveBeenCalledWith({
-    //     error: undefined,
-    //     event: {
-    //       action: AuditAction.CLOSE_POINT_IN_TIME,
-    //       category: ['database'],
-    //       outcome: 'success',
-    //       type: ['deletion'],
-    //     },
-    //     kibana: {
-    //       add_to_spaces: undefined,
-    //       delete_from_spaces: undefined,
-    //       saved_object: undefined,
-    //     },
-    //     message: 'User has closed point-in-time saved objects',
-    //   });
-    // });
-
-    // test(`adds an audit event per object when 'objects' is populated`, async () => {
-    //   const { securityExtension, checkPrivileges, auditLogger } = setup();
-
-    //   const auditObjects = [
-    //     { type: 'a', id: '1' },
-    //     { type: 'b', id: '2' },
-    //     { type: 'c', id: '3' },
-    //   ];
-
-    //   // Disable to test method
-    //   // eslint-disable-next-line dot-notation
-    //   await securityExtension['authorize']({
-    //     types,
-    //     spaces,
-    //     actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
-    //     auditOptions: { objects: auditObjects },
-    //   });
-    //   expect(checkPrivileges).not.toHaveBeenCalled();
-    //   expect(auditLogger.log).toBeCalledTimes(3);
-    //   for (const obj of auditObjects) {
-    //     expect(auditLogger.log).toHaveBeenCalledWith({
-    //       error: undefined,
-    //       event: {
-    //         action: AuditAction.CLOSE_POINT_IN_TIME,
-    //         category: ['database'],
-    //         outcome: 'unknown',
-    //         type: ['deletion'],
-    //       },
-    //       kibana: {
-    //         add_to_spaces: undefined,
-    //         delete_from_spaces: undefined,
-    //         saved_object: {
-    //           id: obj.id,
-    //           type: obj.type,
-    //         },
-    //       },
-    //       message: `User is closing point-in-time ${obj.type} [id=${obj.id}]`,
-    //     });
-    //   }
-    // });
-
-    // test(`adds an audit event per object with success outcome when 'objects' is populated and 'useSuccessOutcome' is true`, async () => {
-    //   const { securityExtension, checkPrivileges, auditLogger } = setup();
-
-    //   // Disable to test method
-    //   // eslint-disable-next-line dot-notation
-    //   await securityExtension['authorize']({
-    //     types,
-    //     spaces,
-    //     actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
-    //     auditOptions: { useSuccessOutcome: true },
-    //   });
-    //   expect(checkPrivileges).not.toHaveBeenCalled();
-    //   expect(auditLogger.log).toBeCalledTimes(1);
-    //   expect(auditLogger.log).toHaveBeenCalledWith({
-    //     error: undefined,
-    //     event: {
-    //       action: AuditAction.CLOSE_POINT_IN_TIME,
-    //       category: ['database'],
-    //       outcome: 'success',
-    //       type: ['deletion'],
-    //     },
-    //     kibana: {
-    //       add_to_spaces: undefined,
-    //       delete_from_spaces: undefined,
-    //       saved_object: undefined,
-    //     },
-    //     message: 'User has closed point-in-time saved objects',
-    //   });
-    // });
-
-    // test(`does not add an audit event when 'bypassOnSuccess' is true`, async () => {
-    //   const { securityExtension, checkPrivileges, auditLogger } = setup();
-
-    //   const auditObjects = [
-    //     { type: 'a', id: '1' },
-    //     { type: 'b', id: '2' },
-    //     { type: 'c', id: '3' },
-    //   ];
-
-    //   // Disable to test method
-    //   // eslint-disable-next-line dot-notation
-    //   await securityExtension['authorize']({
-    //     types,
-    //     spaces,
-    //     actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
-    //     auditOptions: { objects: auditObjects, bypassOnSuccess: true },
-    //   });
-    //   expect(checkPrivileges).not.toHaveBeenCalled();
-    //   expect(auditLogger.log).not.toHaveBeenCalled();
-    // });
   });
 
   describe('scecurity actions with no audit action', () => {
@@ -1185,6 +1095,7 @@ describe('#authorize (unpublished by interface)', () => {
     const spaces = new Set(['x', 'y']);
     // Check conflicts is currently the only security action without an audit action
     const actions = new Set([SecurityAction.CHECK_CONFLICTS]);
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     const fullyAuthorizedCheckPrivilegesResponse = {
       hasAllRequested: true,
       privileges: {
