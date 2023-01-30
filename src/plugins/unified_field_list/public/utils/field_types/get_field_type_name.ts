@@ -41,7 +41,11 @@ export function getFieldTypeName(type?: string) {
   switch (knownType) {
     case KNOWN_FIELD_TYPES.DOCUMENT:
       return i18n.translate('unifiedFieldList.fieldNameIcons.recordAriaLabel', {
-        defaultMessage: 'Records', // TODO: check if we need to rename it
+        defaultMessage: 'Records',
+      });
+    case KNOWN_FIELD_TYPES.BINARY:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.binaryAriaLabel', {
+        defaultMessage: 'Binary',
       });
     case KNOWN_FIELD_TYPES.BOOLEAN:
       return i18n.translate('unifiedFieldList.fieldNameIcons.booleanAriaLabel', {
@@ -62,6 +66,10 @@ export function getFieldTypeName(type?: string) {
     case KNOWN_FIELD_TYPES.DATE_RANGE:
       return i18n.translate('unifiedFieldList.fieldNameIcons.dateRangeFieldAriaLabel', {
         defaultMessage: 'Date range',
+      });
+    case KNOWN_FIELD_TYPES.DENSE_VECTOR:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.denseVectorFieldAriaLabel', {
+        defaultMessage: 'Dense vector',
       });
     case KNOWN_FIELD_TYPES.GAUGE:
       return i18n.translate('unifiedFieldList.fieldNameIcons.gaugeFieldAriaLabel', {
@@ -87,6 +95,10 @@ export function getFieldTypeName(type?: string) {
       return i18n.translate('unifiedFieldList.fieldNameIcons.ipRangeFieldAriaLabel', {
         defaultMessage: 'IP range',
       });
+    case KNOWN_FIELD_TYPES.FLATTENED:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.flattenedFieldAriaLabel', {
+        defaultMessage: 'Flattened',
+      });
     case KNOWN_FIELD_TYPES.MURMUR3:
       return i18n.translate('unifiedFieldList.fieldNameIcons.murmur3FieldAriaLabel', {
         defaultMessage: 'Murmur3',
@@ -94,6 +106,22 @@ export function getFieldTypeName(type?: string) {
     case KNOWN_FIELD_TYPES.NUMBER:
       return i18n.translate('unifiedFieldList.fieldNameIcons.numberFieldAriaLabel', {
         defaultMessage: 'Number',
+      });
+    case KNOWN_FIELD_TYPES.RANK_FEATURE:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.rankFeatureFieldAriaLabel', {
+        defaultMessage: 'Rank feature',
+      });
+    case KNOWN_FIELD_TYPES.RANK_FEATURES:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.rankFeaturesFieldAriaLabel', {
+        defaultMessage: 'Rank features',
+      });
+    case KNOWN_FIELD_TYPES.POINT:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.pointFieldAriaLabel', {
+        defaultMessage: 'Point',
+      });
+    case KNOWN_FIELD_TYPES.SHAPE:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.shapeFieldAriaLabel', {
+        defaultMessage: 'Shape',
       });
     case KNOWN_FIELD_TYPES.STRING:
       return i18n.translate('unifiedFieldList.fieldNameIcons.stringFieldAriaLabel', {

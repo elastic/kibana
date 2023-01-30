@@ -12,11 +12,13 @@ import { useTheme } from '../../../hooks/use_theme';
 import { ContainerType } from '../../../../common/service_metadata';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getAgentIcon } from '../agent_icon/get_agent_icon';
+import { getServerlessIcon } from '../agent_icon/get_serverless_icon';
 import { CloudDetails } from './cloud_details';
 import { ServerlessDetails } from './serverless_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
+import { ServerlessType } from '../../../../common/serverless';
 
 interface Props {
   serviceName: string;
@@ -29,6 +31,26 @@ const cloudIcons: Record<string, string> = {
   aws: 'logoAWS',
   azure: 'logoAzure',
 };
+
+function getServerlessTitle(serverlessType?: ServerlessType): string {
+  switch (serverlessType) {
+    case ServerlessType.AWS_LAMBDA: {
+      return i18n.translate('xpack.apm.serviceIcons.aws_lambda', {
+        defaultMessage: 'AWS Lambda',
+      });
+    }
+    case ServerlessType.AZURE_FUNCTIONS: {
+      return i18n.translate('xpack.apm.serviceIcons.azure_functions', {
+        defaultMessage: 'Azure Functions',
+      });
+    }
+    default: {
+      return i18n.translate('xpack.apm.serviceIcons.serverless', {
+        defaultMessage: 'Serverless',
+      });
+    }
+  }
+}
 
 export function getCloudIcon(provider?: string) {
   if (provider) {
@@ -139,12 +161,10 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
     {
       key: 'serverless',
       icon: {
-        type: getAgentIcon(icons?.serverlessType, theme.darkMode) || 'node',
+        type: getServerlessIcon(icons?.serverlessType) || 'node',
       },
       isVisible: !!icons?.serverlessType,
-      title: i18n.translate('xpack.apm.serviceIcons.serverless', {
-        defaultMessage: 'Serverless',
-      }),
+      title: getServerlessTitle(icons?.serverlessType),
       component: <ServerlessDetails serverless={details?.serverless} />,
     },
     {
