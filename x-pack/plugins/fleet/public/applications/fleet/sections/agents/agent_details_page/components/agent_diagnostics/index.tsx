@@ -37,6 +37,10 @@ const FlexStartEuiFlexItem = styled(EuiFlexItem)`
   align-self: flex-start;
 `;
 
+const MarginedIcon = styled(EuiIcon)`
+  margin-right: 7px;
+`;
+
 export interface AgentDiagnosticsProps {
   agent: Agent;
 }
@@ -125,7 +129,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     }
   }, [prevDiagnosticsEntries, diagnosticsEntries, notifications.toasts]);
 
-  const errorIcon = <EuiIcon type="alert" color="red" />;
+  const errorIcon = <MarginedIcon type="alert" color="red" />;
   const getErrorMessage = (error?: string) => (error ? `Error: ${error}` : '');
 
   const columns: Array<EuiTableFieldDataColumnType<AgentDiagnostics>> = [
@@ -139,15 +143,15 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
             <EuiIcon type="download" /> &nbsp; {currentItem?.name}
           </EuiLink>
         ) : currentItem?.status === 'IN_PROGRESS' || currentItem?.status === 'AWAITING_UPLOAD' ? (
-          <EuiText color="subdued">
+          <EuiLink color="subdued" disabled>
             <EuiLoadingSpinner /> &nbsp;
             <FormattedMessage
               id="xpack.fleet.requestDiagnostics.generatingText"
               defaultMessage="Generating diagnostics file..."
             />
-          </EuiText>
+          </EuiLink>
         ) : (
-          <EuiText color="subdued">
+          <EuiLink color="subdued" disabled>
             {currentItem?.status ? (
               <EuiToolTip
                 content={
@@ -164,7 +168,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
             )}
             &nbsp;
             {currentItem?.name}
-          </EuiText>
+          </EuiLink>
         );
       },
     },
@@ -176,7 +180,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         const currentItem = diagnosticsEntries.find((item) => item.id === id);
         return (
           <EuiText color={currentItem?.status === 'READY' ? 'default' : 'subdued'}>
-            {formatDate(currentItem?.createTime, 'll')}
+            {formatDate(currentItem?.createTime, 'lll')}
           </EuiText>
         );
       },

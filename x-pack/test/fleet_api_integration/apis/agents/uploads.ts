@@ -132,5 +132,49 @@ export default function (providerContext: FtrProviderContext) {
         'attachment; filename="elastic-agent-diagnostics-2022-10-07T12-00-00Z-00.zip"'
       );
     });
+
+    it('should return failed status with error message', async () => {
+      await esClient.create({
+        index: AGENT_ACTIONS_INDEX,
+        id: new Date().toISOString(),
+        refresh: true,
+        body: {
+          type: 'REQUEST_DIAGNOSTICS',
+          action_id: 'action2',
+          agents: ['agent2'],
+          '@timestamp': '2022-10-07T11:00:00.000Z',
+        },
+      });
+      await esClient.create(
+        {
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          id: new Date().toISOString(),
+          refresh: true,
+          body: {
+            action_id: 'action2',
+            agent_id: 'agent2',
+            '@timestamp': '2022-10-07T12:00:00.000Z',
+            data: {},
+            error: 'rate limit exceeded',
+          },
+        },
+        ES_INDEX_OPTIONS
+      );
+
+      const { body } = await supertest
+        .get(`/api/fleet/agents/agent2/uploads`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(body.items[0]).to.eql({
+        actionId: 'action2',
+        createTime: '2022-10-07T11:00:00.000Z',
+        filePath: '',
+        id: 'action2',
+        name: 'elastic-agent-diagnostics-2022-10-07T11-00-00Z-00.zip',
+        status: 'FAILED',
+        error: 'rate limit exceeded',
+      });
+    });
   });
 }

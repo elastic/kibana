@@ -72,9 +72,9 @@ export async function getAgentUploads(
     const file = await getFile(action.actionId);
     const fileName =
       file?.name ??
-      `elastic-agent-diagnostics-${moment(action.timestamp!).format(
-        'YYYY-MM-DDTHH:mm:ss'
-      )}Z-00.zip`;
+      `elastic-agent-diagnostics-${moment
+        .utc(action.timestamp!)
+        .format('YYYY-MM-DDTHH-mm-ss')}Z-00.zip`;
     const filePath = file ? agentRouteService.getAgentFileDownloadLink(file.id, file.name) : '';
     const result = {
       actionId: action.actionId,
@@ -99,6 +99,7 @@ async function _getRequestDiagnosticsActions(
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
     size: SO_SEARCH_LIMIT,
+    sort: { '@timestamp': 'desc' },
     query: {
       bool: {
         must: [
@@ -158,7 +159,7 @@ async function _getRequestDiagnosticsActions(
       const actionResult = actionResults.find((result) => result.actionId === action.actionId);
       return {
         actionId: action.actionId,
-        timestamp: actionResult?.timestamp ?? action.timestamp,
+        timestamp: action.timestamp,
         fileId: actionResult?.fileId,
         error: actionResult?.error,
       };
