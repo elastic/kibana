@@ -150,7 +150,7 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
             <p>
               <FormattedMessage
                 id="xpack.fleet.packagePolicyEditor.stepConfigure.experimentalFeaturesRolloverWarning"
-                defaultMessage="After changing these settings, you need to manually rollover the existing data stream for changes to take effect. {learnMoreLink}"
+                defaultMessage="After changing these settings, you need to manually roll over the existing data stream for changes to take effect. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
                     <EuiLink href={docLinks.links.fleet.datastreamsManualRollover} target="_blank">
