@@ -13,10 +13,13 @@ import {
   useEuiShadow,
   EuiPanel,
   EuiLoadingSpinner,
+  EuiContextMenuPanelItemDescriptor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { PRIVATE_AVAILABLE_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import {
   manualTestMonitorAction,
   manualTestRunInProgressSelector,
@@ -98,7 +101,10 @@ export function ActionsPopover({
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const locationName = useLocationName({ locationId: monitor.location.id });
+  const location = useLocationName({ locationId: monitor.location.id });
+  const locationName = location?.label || monitor.location.id;
+
+  const isPrivateLocation = !Boolean(location?.isServiceManaged);
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
@@ -160,7 +166,7 @@ export function ActionsPopover({
 
   const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
 
-  let popoverItems = [
+  let popoverItems: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: actionsMenuGoToMonitorName,
       icon: 'sortRight',
@@ -168,11 +174,17 @@ export function ActionsPopover({
     },
     quickInspectPopoverItem,
     {
-      name: runTestManually,
+      name: isPrivateLocation ? (
+        <EuiToolTip content={PRIVATE_AVAILABLE_LABEL}>
+          <span>{runTestManually}</span>
+        </EuiToolTip>
+      ) : (
+        runTestManually
+      ),
       icon: 'beaker',
-      disabled: testInProgress,
+      disabled: testInProgress || isPrivateLocation,
       onClick: () => {
-        dispatch(manualTestMonitorAction.get(monitor.configId));
+        dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
         dispatch(setFlyoutConfig(null));
         setIsPopoverOpen(false);
       },

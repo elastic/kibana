@@ -6,8 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import type { UseGetCaseUserActions } from './use_get_case_user_actions';
-import { getPushedInfo, useGetCaseUserActions } from './use_get_case_user_actions';
+import type { UseFindCaseUserActions } from './use_find_case_user_actions';
+import { getPushedInfo, useFindCaseUserActions } from './use_find_case_user_actions';
 import {
   basicCase,
   basicPush,
@@ -16,6 +16,7 @@ import {
   getJiraConnector,
   getUserAction,
   jiraFields,
+  findCaseUserActionsResponse,
 } from './mock';
 import { Actions } from '../../common/api';
 import React from 'react';
@@ -38,16 +39,16 @@ const wrapper: React.FC<string> = ({ children }) => (
   <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
 );
 
-describe('useGetCaseUserActions', () => {
+describe('useFindCaseUserActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
-  it('returns proper state on getCaseUserActions', async () => {
+  it('returns proper state on findCaseUserActions', async () => {
     await act(async () => {
-      const { result } = renderHook<string, UseGetCaseUserActions>(
-        () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+      const { result } = renderHook<string, UseFindCaseUserActions>(
+        () => useFindCaseUserActions(basicCase.id, basicCase.connector.id),
         { wrapper }
       );
       await waitFor(() => {
@@ -55,8 +56,8 @@ describe('useGetCaseUserActions', () => {
           expect.objectContaining({
             ...initialData,
             data: {
-              caseUserActions,
               caseServices: {},
+              caseUserActions: [...findCaseUserActionsResponse.userActions],
               hasDataToPush: true,
               participants: [elasticUser],
               profileUids: new Set(),
@@ -71,13 +72,13 @@ describe('useGetCaseUserActions', () => {
   });
 
   it('shows a toast error when the API returns an error', async () => {
-    const spy = jest.spyOn(api, 'getCaseUserActions').mockRejectedValue(new Error("C'est la vie"));
+    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(new Error("C'est la vie"));
 
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(
-      () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+    const { waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
+      () => useFindCaseUserActions(basicCase.id, basicCase.connector.id),
       { wrapper }
     );
     await waitForNextUpdate();
@@ -87,17 +88,18 @@ describe('useGetCaseUserActions', () => {
 
   describe('getProfileUids', () => {
     it('aggregates the uids from the createdBy field of a user action', async () => {
-      jest
-        .spyOn(api, 'getCaseUserActions')
-        .mockReturnValue(
-          Promise.resolve([
-            getUserAction('pushed', Actions.add, { createdBy: { profileUid: '456' } }),
-          ])
-        );
+      jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
+        Promise.resolve({
+          page: 1,
+          perPage: 1000,
+          total: 20,
+          userActions: [getUserAction('pushed', Actions.add, { createdBy: { profileUid: '456' } })],
+        })
+      );
 
       await act(async () => {
-        const { result } = renderHook<string, UseGetCaseUserActions>(
-          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+        const { result } = renderHook<string, UseFindCaseUserActions>(
+          () => useFindCaseUserActions(basicCase.id, basicCase.connector.id),
           { wrapper }
         );
 
@@ -112,17 +114,22 @@ describe('useGetCaseUserActions', () => {
     });
 
     it('aggregates the uids from a push', async () => {
-      jest.spyOn(api, 'getCaseUserActions').mockReturnValue(
-        Promise.resolve([
-          getUserAction('pushed', Actions.add, {
-            payload: { externalService: { pushedBy: { profileUid: '123' } } },
-          }),
-        ])
+      jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
+        Promise.resolve({
+          page: 1,
+          perPage: 1000,
+          total: 20,
+          userActions: [
+            getUserAction('pushed', Actions.add, {
+              payload: { externalService: { pushedBy: { profileUid: '123' } } },
+            }),
+          ],
+        })
       );
 
       await act(async () => {
-        const { result } = renderHook<string, UseGetCaseUserActions>(
-          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+        const { result } = renderHook<string, UseFindCaseUserActions>(
+          () => useFindCaseUserActions(basicCase.id, basicCase.connector.id),
           { wrapper }
         );
 
@@ -137,15 +144,18 @@ describe('useGetCaseUserActions', () => {
     });
 
     it('aggregates the uids from an assignment add user action', async () => {
-      jest
-        .spyOn(api, 'getCaseUserActions')
-        .mockReturnValue(
-          Promise.resolve([...caseUserActions, getUserAction('assignees', Actions.add)])
-        );
+      jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
+        Promise.resolve({
+          page: 1,
+          perPage: 1000,
+          total: 20,
+          userActions: [...caseUserActions, getUserAction('assignees', Actions.add)],
+        })
+      );
 
       await act(async () => {
-        const { result } = renderHook<string, UseGetCaseUserActions>(
-          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+        const { result } = renderHook<string, UseFindCaseUserActions>(
+          () => useFindCaseUserActions(basicCase.id, basicCase.connector.id),
           { wrapper }
         );
 
@@ -161,19 +171,22 @@ describe('useGetCaseUserActions', () => {
     });
 
     it('ignores duplicate uids', async () => {
-      jest
-        .spyOn(api, 'getCaseUserActions')
-        .mockReturnValue(
-          Promise.resolve([
+      jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
+        Promise.resolve({
+          page: 1,
+          perPage: 1000,
+          total: 20,
+          userActions: [
             ...caseUserActions,
             getUserAction('assignees', Actions.add),
             getUserAction('assignees', Actions.add),
-          ])
-        );
+          ],
+        })
+      );
 
       await act(async () => {
-        const { result } = renderHook<string, UseGetCaseUserActions>(
-          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+        const { result } = renderHook<string, UseFindCaseUserActions>(
+          () => useFindCaseUserActions(basicCase.id, basicCase.connector.id),
           { wrapper }
         );
 
@@ -189,15 +202,18 @@ describe('useGetCaseUserActions', () => {
     });
 
     it('aggregates the uids from an assignment delete user action', async () => {
-      jest
-        .spyOn(api, 'getCaseUserActions')
-        .mockReturnValue(
-          Promise.resolve([...caseUserActions, getUserAction('assignees', Actions.delete)])
-        );
+      jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
+        Promise.resolve({
+          page: 1,
+          perPage: 1000,
+          total: 20,
+          userActions: [...caseUserActions, getUserAction('assignees', Actions.delete)],
+        })
+      );
 
       await act(async () => {
-        const { result } = renderHook<string, UseGetCaseUserActions>(
-          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+        const { result } = renderHook<string, UseFindCaseUserActions>(
+          () => useFindCaseUserActions(basicCase.id, basicCase.connector.id),
           { wrapper }
         );
 
