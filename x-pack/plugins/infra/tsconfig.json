@@ -52,7 +52,8 @@
     "@kbn/lens-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/core-analytics-server",
-    "@kbn/analytics-client"
+    "@kbn/analytics-client",
+    "@kbn/cases-plugin"
   ],
   "exclude": ["target/**/*"]
 }
