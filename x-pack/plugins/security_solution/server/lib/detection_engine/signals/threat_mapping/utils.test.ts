@@ -18,6 +18,8 @@ import {
   combineResults,
   decodeThreatMatchNamedQuery,
   encodeThreatMatchNamedQuery,
+  getMatchedFields,
+  getSignalValueMap,
 } from './utils';
 
 describe('utils', () => {
@@ -763,6 +765,122 @@ describe('utils', () => {
       expect(() => buildExecutionIntervalValidator('badString')).toThrowError(
         'Unable to parse rule interval (badString); stopping rule execution since allotted duration is undefined'
       );
+    });
+  });
+
+  describe('getMatchedFields', () => {
+    it('return empty fields if there no mappings', () => {
+      const fields = getMatchedFields([]);
+      expect(fields).toEqual({
+        source: [],
+        threat: [],
+      });
+    });
+
+    it('return fields for source and threat indecies', () => {
+      const fields = getMatchedFields([
+        {
+          entries: [
+            {
+              field: 'host.name',
+              type: 'mapping',
+              value: 'threat.indicator.host.name',
+            },
+          ],
+        },
+        {
+          entries: [
+            {
+              field: 'source.ip',
+              type: 'mapping',
+              value: 'threat.indicator.source.ip',
+            },
+            {
+              field: 'url.full',
+              type: 'mapping',
+              value: 'threat.indicator.url.full',
+            },
+          ],
+        },
+      ]);
+
+      expect(fields).toEqual({
+        source: ['host.name', 'source.ip', 'url.full'],
+        threat: [
+          'threat.indicator.host.name',
+          'threat.indicator.source.ip',
+          'threat.indicator.url.full',
+        ],
+      });
+    });
+  });
+
+  describe('getSignalValueMap', () => {
+    it('return empy object if there no events', () => {
+      const valueMap = getSignalValueMap({
+        eventList: [],
+        threatMatchedFields: {
+          source: [],
+          threat: [],
+        },
+      });
+      expect(valueMap).toEqual({});
+    });
+
+    it('return empy object if there some events but no fields', () => {
+      const valueMap = getSignalValueMap({
+        eventList: [
+          {
+            _id: '1',
+            _index: 'index-1',
+            fields: {
+              'host.name': ['host-1'],
+            },
+          },
+        ],
+        threatMatchedFields: {
+          source: [],
+          threat: [],
+        },
+      });
+      expect(valueMap).toEqual({});
+    });
+    it('return value map for event list and coresponding fields', () => {
+      const createEvent = (id: string, fields: Record<string, any>) => ({
+        _id: id,
+        _index: `index`,
+        fields,
+      });
+      const valueMap = getSignalValueMap({
+        eventList: [
+          createEvent('1', {
+            'host.name': ['host-1'],
+            'source.ip': ['source-1'],
+          }),
+          createEvent('2', {
+            'host.name': ['host-2'],
+            'source.ip': ['source-2'],
+          }),
+          createEvent('3', {
+            'host.name': ['host-1'],
+            'source.ip': ['source-2'],
+          }),
+        ],
+        threatMatchedFields: {
+          source: ['host.name', 'source.ip', 'url.full'],
+          threat: [],
+        },
+      });
+      expect(valueMap).toEqual({
+        'host.name': {
+          'host-1': ['1', '3'],
+          'host-2': ['2'],
+        },
+        'source.ip': {
+          'source-1': ['1'],
+          'source-2': ['2', '3'],
+        },
+      });
     });
   });
 });

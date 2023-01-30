@@ -210,6 +210,8 @@ export const getSignalValueMap = ({
   eventList.reduce<SignalValuesMap>((acc, event) => {
     threatMatchedFields.source.forEach((field) => {
       const fieldValue = get(event.fields, field)?.[0];
+      if (!fieldValue) return;
+
       if (!acc[field]) {
         acc[field] = {};
       }
