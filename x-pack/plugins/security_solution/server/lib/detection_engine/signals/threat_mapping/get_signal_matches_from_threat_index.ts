@@ -9,6 +9,7 @@ import type { GetThreatListOptions, ThreatMatchNamedQuery } from './types';
 import { getThreatList } from './get_threat_list';
 import { decodeThreatMatchNamedQuery } from './utils';
 
+import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';
 interface GetSignalsMatchesFromThreatIndexOptions {
   threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
   eventsCount: number;
@@ -30,12 +31,13 @@ export const getSignalsMatchesFromThreatIndex = async ({
 
     threatList.hits.hits.forEach((threatHit) => {
       const matchedQueries = threatHit?.matched_queries || [];
-      if (!threatHit._source) {
-        return;
-      }
 
       matchedQueries.forEach((mq) => {
         const matchDecoded = decodeThreatMatchNamedQuery(mq);
+
+        if (disabledMap.get(matchDecoded.id)) {
+          return;
+        }
 
         const threatQuery = {
           id: threatHit._id,
@@ -44,10 +46,6 @@ export const getSignalsMatchesFromThreatIndex = async ({
           value: matchDecoded.value,
         };
 
-        if (disabledMap.get(matchDecoded.id)) {
-          return;
-        }
-
         const signalMatch = mapper.get(matchDecoded.id);
 
         if (!signalMatch) {
@@ -55,9 +53,9 @@ export const getSignalsMatchesFromThreatIndex = async ({
           return;
         }
 
-        if (signalMatch.length === 100) {
+        if (signalMatch.length === MAX_NUMBER_OF_SIGNAL_MATCHES) {
           disabledMap.set(matchDecoded.id, true);
-        } else if (signalMatch.length < 100) {
+        } else if (signalMatch.length < MAX_NUMBER_OF_SIGNAL_MATCHES) {
           signalMatch.push(threatQuery);
         }
       });

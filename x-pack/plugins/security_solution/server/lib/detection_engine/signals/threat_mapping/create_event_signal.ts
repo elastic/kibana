@@ -212,7 +212,7 @@ export const createEventSignal = async ({
         index: threatIndex,
         ruleExecutionLogger,
         threatListConfig: {
-          _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
+          _source: false,
           fields: undefined,
         },
         pitId: threatPitId,
