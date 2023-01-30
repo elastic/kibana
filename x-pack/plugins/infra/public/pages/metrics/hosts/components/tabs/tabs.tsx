@@ -23,7 +23,7 @@ interface WrapperProps {
 const Wrapper = ({ children }: WrapperProps) => {
   return (
     <>
-      <EuiSpacer size="s" />
+      <EuiSpacer />
       {children}
     </>
   );

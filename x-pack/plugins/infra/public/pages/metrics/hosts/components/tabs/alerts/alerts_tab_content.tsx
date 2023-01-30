@@ -6,17 +6,33 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import React from 'react';
-import { InfraClientStartDeps } from '../../../../../../types';
+import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../../types';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 
-import { infraAlertFeatureIds } from './config';
+import {
+  ALERTS_PER_PAGE,
+  ALERTS_TABLE_ID,
+  infraAlertFeatureId,
+  infraAlertFeatureIds,
+} from './config';
 
 export const AlertsTabContent = () => {
-  const { services } = useKibana<InfraClientStartDeps>();
-  const { charts, triggersActionsUi } = services;
+  const { services } = useKibana<InfraClientCoreStart & InfraClientStartDeps>();
+  const { application, cases, charts, triggersActionsUi } = services;
 
-  const { getAlertSummaryWidget: AlertSummaryWidget } = triggersActionsUi;
+  const {
+    alertsTableConfigurationRegistry,
+    getAlertSummaryWidget: AlertSummaryWidget,
+    getAlertsStateTable: AlertsStateTable,
+  } = triggersActionsUi;
+
+  const uiCapabilities = application?.capabilities;
+
+  const casesCapabilities = cases.helpers.getUICapabilities(uiCapabilities.observabilityCases);
+
+  const CasesContext = cases.ui.getCasesContext();
 
   const { dateRangeTimestamp } = useUnifiedSearchContext();
 
@@ -28,30 +44,31 @@ export const AlertsTabContent = () => {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
 
+  const esQuery = {
+    bool: {
+      must: [],
+      filter: [
+        {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: from,
+              lte: to,
+            },
+          },
+        },
+      ],
+      should: [],
+      must_not: [],
+    },
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        here goes the alert summary
         <AlertSummaryWidget
           featureIds={infraAlertFeatureIds}
-          filter={{
-            bool: {
-              must: [],
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      format: 'strict_date_optional_time',
-                      gte: from,
-                      lte: to,
-                    },
-                  },
-                },
-              ],
-              should: [],
-              must_not: [],
-            },
-          }}
+          filter={esQuery}
           fullSize
           timeRange={{
             utcFrom: from,
@@ -63,27 +80,58 @@ export const AlertsTabContent = () => {
         />
       </EuiFlexItem>
       <EuiFlexItem>here goes the filter group button</EuiFlexItem>
-      <EuiFlexItem>
-        Here goes the table
-        {/* <CasesContext
-          owner={[observabilityFeatureId]}
-          permissions={userCasesPermissions}
-          features={{ alerts: { sync: false } }}
-        >
-          {esQuery && (
+      {esQuery && (
+        <EuiFlexItem>
+          <CasesContext
+            owner={[infraAlertFeatureId]}
+            permissions={casesCapabilities}
+            features={{ alerts: { sync: false } }}
+          >
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
-              id={ALERTS_TABLE_ID}
+              featureIds={infraAlertFeatureIds}
               flyoutSize="s"
-              featureIds={observabilityAlertFeatureIds}
+              id={ALERTS_TABLE_ID}
+              pageSize={ALERTS_PER_PAGE}
               query={esQuery}
               showExpandToDetails={false}
-              pageSize={ALERTS_PER_PAGE}
             />
-          )}
-        </CasesContext> */}
-      </EuiFlexItem>
+          </CasesContext>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
+
+// {
+//   "bool": {
+//     "should": [
+//       {
+//         "bool": {
+//           "should": [
+//             {
+//               "match_phrase": {
+//                 "host.name": "gke-edge-lite-oblt-edge-lite-oblt-poo-ac0838be-dvt6"
+//               }
+//             }
+//           ],
+//           "minimum_should_match": 1
+//         }
+//       },
+//       {
+//         "bool": {
+//           "should": [
+//             {
+//               "match_phrase": {
+//                 "host.name": "gke-edge-lite-oblt-edge-lite-oblt-poo-ac0838be-md8s"
+//               }
+//             }
+//           ],
+//           "minimum_should_match": 1
+//         }
+//       }
+//     ],
+//       "minimum_should_match": 1
+//   }
+// }
