@@ -108,7 +108,7 @@ export const MessageList = ({
             className="lnsWorkspaceWarningList__item"
             data-test-subj={`lens-message-list-${message.severity}`}
           >
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 {message.severity === 'error' ? (
                   <EuiIcon type={IconError} color="danger" />
