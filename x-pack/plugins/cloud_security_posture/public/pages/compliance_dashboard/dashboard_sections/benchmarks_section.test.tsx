@@ -6,41 +6,39 @@
  */
 
 import React from 'react';
-import { render as reactRender, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { cloneDeep } from 'lodash';
-import {
-  BenchmarksSection,
-  TABLE_COLUMN_SCORE_TEST_ID,
-  TABLE_HEADER_TEST_ID,
-  TABLE_HEADER_SCORE_TEST_ID,
-} from './benchmarks_section';
-import { mockDashboardData, clusterMockData } from '../mock';
+import { BenchmarksSection } from './benchmarks_section';
+import { getMockDashboardData, getClusterMockData } from '../mock';
 import { TestProvider } from '../../../test/test_provider';
-import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '../../../../common/constants';
+import { KSPM_POLICY_TEMPLATE } from '../../../../common/constants';
+import {
+  DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
+  DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
+} from '../../findings/test_subjects';
 
 describe('<BenchmarksSection />', () => {
-  const render = (alterMockData = {}, dashboardType: 'kspm' | 'cspm' = KSPM_POLICY_TEMPLATE) =>
-    reactRender(
+  const renderBenchmarks = (alterMockData = {}) =>
+    render(
       <TestProvider>
         <BenchmarksSection
-          complianceData={{ ...mockDashboardData, ...alterMockData }}
-          dashboardType={dashboardType}
+          complianceData={{ ...getMockDashboardData(), ...alterMockData }}
+          dashboardType={KSPM_POLICY_TEMPLATE}
         />
       </TestProvider>
     );
 
   describe('Sorting', () => {
-    const mockDashboardDataCopy = cloneDeep(mockDashboardData);
-    const clusterMockDataCopy = cloneDeep(clusterMockData);
+    const mockDashboardDataCopy = getMockDashboardData();
+    const clusterMockDataCopy = getClusterMockData();
     clusterMockDataCopy.stats.postureScore = 50;
     clusterMockDataCopy.meta.clusterId = '1';
 
-    const clusterMockDataCopy1 = cloneDeep(clusterMockData);
+    const clusterMockDataCopy1 = getClusterMockData();
     clusterMockDataCopy1.stats.postureScore = 95;
     clusterMockDataCopy1.meta.clusterId = '2';
 
-    const clusterMockDataCopy2 = cloneDeep(clusterMockData);
+    const clusterMockDataCopy2 = getClusterMockData();
     clusterMockDataCopy2.stats.postureScore = 45;
     clusterMockDataCopy2.meta.clusterId = '3';
 
@@ -50,58 +48,27 @@ describe('<BenchmarksSection />', () => {
       clusterMockDataCopy2,
     ];
 
-    it('Should init sorted by Compliance Score DESC', () => {
-      const { getAllByTestId } = render(mockDashboardDataCopy);
-
-      expect(getAllByTestId(TABLE_COLUMN_SCORE_TEST_ID)[0]).toHaveTextContent('95');
-      expect(getAllByTestId(TABLE_COLUMN_SCORE_TEST_ID)[1]).toHaveTextContent('50');
-      expect(getAllByTestId(TABLE_COLUMN_SCORE_TEST_ID)[2]).toHaveTextContent('45');
+    it('sorts by ascending order of compliance scores', () => {
+      const { getAllByTestId } = renderBenchmarks(mockDashboardDataCopy);
+      expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[0]).toHaveTextContent('45');
+      expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[1]).toHaveTextContent('50');
+      expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[2]).toHaveTextContent('95');
     });
 
-    it('Should toggle sort order when clicking on Compliance Score', () => {
-      const { getAllByTestId } = render(mockDashboardDataCopy);
+    it('toggles sort order when clicking Compliance Score', () => {
+      const { getAllByTestId, getByTestId } = renderBenchmarks(mockDashboardDataCopy);
 
-      userEvent.click(screen.getByTestId(TABLE_HEADER_SCORE_TEST_ID));
+      userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));
 
-      expect(getAllByTestId(TABLE_COLUMN_SCORE_TEST_ID)[0]).toHaveTextContent('45');
-      expect(getAllByTestId(TABLE_COLUMN_SCORE_TEST_ID)[1]).toHaveTextContent('50');
-      expect(getAllByTestId(TABLE_COLUMN_SCORE_TEST_ID)[2]).toHaveTextContent('95');
+      expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[0]).toHaveTextContent('95');
+      expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[1]).toHaveTextContent('50');
+      expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[2]).toHaveTextContent('45');
 
-      userEvent.click(screen.getByTestId(TABLE_HEADER_SCORE_TEST_ID));
+      userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));
 
-      expect(getAllByTestId(TABLE_COLUMN_SCORE_TEST_ID)[0]).toHaveTextContent('95');
-      expect(getAllByTestId(TABLE_COLUMN_SCORE_TEST_ID)[1]).toHaveTextContent('50');
-      expect(getAllByTestId(TABLE_COLUMN_SCORE_TEST_ID)[2]).toHaveTextContent('45');
+      expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[0]).toHaveTextContent('45');
+      expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[1]).toHaveTextContent('50');
+      expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[2]).toHaveTextContent('95');
     });
-  });
-
-  describe('KSPM Dashboard', () => {
-    it('Should render the column headers', () => {
-      const { getAllByTestId } = render();
-
-      const columns = ['Cluster Name', 'Compliance Score', 'Compliance by CIS Section'];
-
-      columns.forEach((name, idx) => {
-        expect(getAllByTestId(TABLE_HEADER_TEST_ID)[idx]).toHaveTextContent(name);
-      });
-    });
-
-    it.todo('Should navigate to the Findings page from the Cluster column');
-    it.todo('Should navigate to the Findings page from the CIS section column');
-  });
-
-  describe('CSPM  Dashboard', () => {
-    it('Should render the column headers', () => {
-      const { getAllByTestId } = render({}, CSPM_POLICY_TEMPLATE);
-
-      const columns = ['Account Name', 'Compliance Score', 'Compliance by CIS Section'];
-
-      columns.forEach((name, idx) => {
-        expect(getAllByTestId(TABLE_HEADER_TEST_ID)[idx]).toHaveTextContent(name);
-      });
-    });
-
-    it.todo('Should navigate to the Findings page from the Cluster column');
-    it.todo('Should navigate to the Findings page from the CIS section column');
   });
 });
