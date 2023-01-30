@@ -89,6 +89,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     isLive,
     skip: !hasActionResultsPrivileges,
   });
+
   const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
   const {
     application: { getUrlForApp },

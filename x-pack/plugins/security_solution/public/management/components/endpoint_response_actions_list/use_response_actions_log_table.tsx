@@ -24,6 +24,7 @@ import {
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useKibana } from '../../../common/lib/kibana';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { FormattedDate } from '../../../common/components/formatted_date';
@@ -107,6 +108,10 @@ export const useResponseActionsLogTable = ({
   showHostNames: boolean;
   totalItemCount: number;
 }) => {
+  const {
+    services: { osquery },
+  } = useKibana();
+  const { OsqueryResults } = osquery;
   const getTestId = useTestIdGenerator('response-actions-list');
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
@@ -138,6 +143,7 @@ export const useResponseActionsLogTable = ({
           : undefined;
 
         const command = getUiCommand(_command);
+        const isOsquery = command === 'osquery';
         const isGetFileCommand = command === 'get-file';
         const dataList = [
           {
@@ -164,14 +170,21 @@ export const useResponseActionsLogTable = ({
             title: OUTPUT_MESSAGES.expandSection.comment,
             description: comment ? comment : emptyValue,
           },
-        ].map(({ title, description }) => {
-          return {
-            title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
-            description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
-          };
-        });
+        ];
+
+        const descriptionList = isOsquery
+          ? []
+          : dataList.map(({ title, description }) => {
+              return {
+                title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
+                description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
+              };
+            });
 
         const getOutputContent = () => {
+          if (isOsquery) {
+            return <OsqueryResults agentIds={item.agents} ecsData={null} actionId={item.id} />;
+          }
           if (isExpired) {
             return OUTPUT_MESSAGES.hasExpired(command);
           }
@@ -219,12 +232,13 @@ export const useResponseActionsLogTable = ({
             <EuiFlexGroup
               data-test-subj={getTestId('details-tray')}
               direction="column"
-              style={{ maxHeight: 270, overflowY: 'auto' }}
+              // TODO check if this maxHeight is really necessary
+              // style={{ maxHeight: 270, overflowY: 'auto' }}
               className="eui-yScrollWithShadows"
               gutterSize="s"
             >
               <EuiFlexItem grow={false}>
-                <StyledDescriptionList listItems={dataList} />
+                <StyledDescriptionList listItems={descriptionList} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <StyledDescriptionListOutput listItems={outputList} />
@@ -235,7 +249,7 @@ export const useResponseActionsLogTable = ({
       }
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
-    [getTestId, itemIdToExpandedRowMap]
+    [OsqueryResults, getTestId, itemIdToExpandedRowMap]
   );
   // memoized callback for toggleDetails
   const onClickCallback = useCallback(

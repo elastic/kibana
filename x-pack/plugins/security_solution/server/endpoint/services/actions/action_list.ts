@@ -7,9 +7,16 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { reduce } from 'lodash';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
+import type {
+  OsqueryActivityLogActionResponse,
+  ActionDetails,
+  ActionListApiResponse,
+  ActivityLogActionResponse,
+  EndpointActivityLogActionResponse,
+} from '../../../../common/endpoint/types';
 import type { ResponseActionStatus } from '../../../../common/endpoint/service/response_actions/constants';
 
 import { getActions, getActionResponses } from '../../utils/action_list_helpers';
@@ -260,34 +267,67 @@ const getActionDetailsList = async ({
   // compute action details list for each action id
   const actionDetails: ActionListApiResponse['data'] = normalizedActionRequests.map((action) => {
     // pick only those responses that match the current action id
-    const matchedResponses = categorizedResponses.filter((categorizedResponse) =>
-      categorizedResponse.type === 'response'
-        ? categorizedResponse.item.data.EndpointActions.action_id === action.id
-        : categorizedResponse.item.data.action_id === action.id
+    const matchedResponses = reduce(
+      categorizedResponses,
+      (
+        acc: Array<
+          | ActivityLogActionResponse
+          | EndpointActivityLogActionResponse
+          | OsqueryActivityLogActionResponse
+        >,
+        categorizedResponse
+      ) => {
+        if (categorizedResponse.type === 'osqueryResponse') {
+          if (
+            action.additionalData?.queriesIds?.includes(
+              categorizedResponse.item.data.EndpointActions.action_id
+            )
+          ) {
+            const responseWithActionId = categorizedResponse;
+            responseWithActionId.item.data.EndpointActions.root_action_id = action.id;
+            return [...acc, responseWithActionId];
+          }
+          return acc;
+        }
+        if (categorizedResponse.type === 'response') {
+          if (categorizedResponse.item.data.EndpointActions.action_id === action.id) {
+            return [...acc, categorizedResponse];
+          }
+        } else {
+          if (categorizedResponse.item.data.action_id === action.id) {
+            return [...acc, categorizedResponse];
+          }
+        }
+        return acc;
+      },
+      []
     );
 
     // find the specific response's details using that set of matching responses
-    const { isCompleted, completedAt, wasSuccessful, errors, agentState } = getActionCompletionInfo(
-      action.agents,
-      matchedResponses
-    );
+    const { isCompleted, completedAt, wasSuccessful, partiallySuccessful, errors, agentState } =
+      getActionCompletionInfo(action.agents, matchedResponses);
 
     const { isExpired, status } = getActionStatus({
       expirationDate: action.expiration,
       isCompleted,
       wasSuccessful,
+      partiallySuccessful,
     });
 
     // NOTE: `outputs` is not returned in this service because including it on a list of data
     // could result in a very large response unnecessarily. In the future, we might include
     // an option to optionally include it.
+
     const actionRecord: ActionListApiResponse['data'][number] = {
       id: action.id,
       agents: action.agents,
-      hosts: action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
-        acc[id] = { name: agentsHostInfo[id] ?? '' };
-        return acc;
-      }, {}),
+      hosts: action.agents.reduce<ActionDetails['hosts']>(
+        (acc: Record<string, { name: string }>, id: string) => {
+          acc[id] = { name: agentsHostInfo[id] ?? '' };
+          return acc;
+        },
+        {}
+      ),
       command: action.command,
       startedAt: action.createdAt,
       isCompleted,

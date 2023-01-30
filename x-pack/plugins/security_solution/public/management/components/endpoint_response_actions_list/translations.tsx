@@ -133,6 +133,9 @@ export const UX_MESSAGES = Object.freeze({
     failed: i18n.translate('xpack.securitySolution.responseActionsList.list.item.badge.failed', {
       defaultMessage: 'Failed',
     }),
+    partial: i18n.translate('xpack.securitySolution.responseActionsList.list.item.badge.partial', {
+      defaultMessage: 'Partial',
+    }),
     pending: i18n.translate('xpack.securitySolution.responseActionsList.list.item.badge.pending', {
       defaultMessage: 'Pending',
     }),

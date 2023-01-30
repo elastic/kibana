@@ -109,7 +109,6 @@ export const useOsqueryTab = ({
   const alertId = rawEventData._id;
 
   const { data: actionsData } = fetchAllLiveQueries({
-    filterQuery: { term: { alert_ids: alertId } },
     activePage: 0,
     limit: 100,
     sortField: '@timestamp',
@@ -121,9 +120,9 @@ export const useOsqueryTab = ({
   const agentIds = expandedEventFieldsObject.agent?.id;
 
   return {
-    id: EventsViewType.osqueryView,
+    id: EventsViewType.responseActionsResultsView,
     'data-test-subj': 'osqueryViewTab',
-    name: i18n.OSQUERY_VIEW,
+    name: i18n.RESPONSE_ACTION_VIEW,
     append: (
       <EuiNotificationBadge data-test-subj="osquery-actions-notification">
         {actionItems.length}

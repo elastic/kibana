@@ -119,6 +119,8 @@ export type FilterItems = Array<{
 export const getActionStatus = (status: ResponseActionStatus): string => {
   if (status === 'failed') {
     return UX_MESSAGES.badge.failed;
+  } else if (status === 'partial') {
+    return UX_MESSAGES.badge.partial;
   } else if (status === 'successful') {
     return UX_MESSAGES.badge.successful;
   } else if (status === 'pending') {

@@ -79,9 +79,7 @@ export const createResponseActionHandler = async (
     agent: {
       id: agents,
     },
-    alert: {
-      id: params.alert_ids,
-    },
+    alert_ids: params.alert_ids,
     EndpointActions: {
       action_id: actionID,
       expiration: moment().add(2, 'weeks').toISOString(),

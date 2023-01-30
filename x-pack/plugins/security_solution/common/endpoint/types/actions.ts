@@ -69,6 +69,8 @@ export const ActivityLogItemTypes = {
   RESPONSE: 'response' as const,
   FLEET_ACTION: 'fleetAction' as const,
   FLEET_RESPONSE: 'fleetResponse' as const,
+  OSQUERY_ACTION: 'osqueryAction' as const,
+  OSQUERY_RESPONSE: 'osqueryResponse' as const,
 };
 
 interface EcsError {
@@ -90,7 +92,7 @@ interface EndpointActionFields<
 interface ActionRequestFields {
   expiration: string;
   type: 'INPUT_ACTION';
-  input_type: 'endpoint';
+  input_type: 'endpoint' | 'osquery';
 }
 
 interface ActionResponseFields {
@@ -114,6 +116,30 @@ export interface LogsEndpointAction {
   };
 }
 
+export interface OsqueryAction {
+  action_id: string;
+  '@timestamp': string;
+  input_type: 'osquery';
+  expiration: string;
+  type: 'INPUT_ACTION';
+  alert_ids: string[];
+  agents: string[];
+  user_id: string;
+  queries: Array<Record<string, unknown>>;
+}
+
+export interface OsqueryResponse extends ActionResponseFields {
+  action_id: string;
+  '@timestamp': string;
+  agent_id: string;
+  action_input_type: 'osquery';
+  action_data: {
+    [key: string]: unknown;
+    command: ResponseActionsApiCommandNames;
+  };
+  command: 'osquery';
+}
+
 /**
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
@@ -129,6 +155,41 @@ export interface LogsEndpointActionResponse<TOutputContent extends object = obje
     data: Pick<EndpointActionData<never, TOutputContent>, 'comment' | 'command' | 'output'>;
   };
   error?: EcsError;
+}
+
+export interface LogsOsqueryResponse<TOutputContent extends object = object> {
+  '@timestamp': string;
+  agent: {
+    id: string | string[];
+  };
+  EndpointActions: ActionResponseFields & {
+    action_id: string;
+    data: OsqueryResponse;
+    error?: string;
+    root_action_id: string;
+  };
+  error?: EcsError;
+}
+
+export interface LogsOsqueryAction {
+  '@timestamp': string;
+  agent: {
+    id: string[];
+  };
+  EndpointActions: {
+    data: {
+      command: 'osquery';
+      comment: string;
+    };
+    action_id: string;
+    input_type: 'osquery';
+    expiration: string;
+    type: 'INPUT_ACTION';
+    queriesIds: string[];
+  };
+  user: {
+    id: string;
+  };
 }
 
 interface ResponseActionParametersWithPid {
@@ -235,6 +296,22 @@ export interface ActivityLogActionResponse {
   };
 }
 
+export interface OsqueryActivityLogAction {
+  type: typeof ActivityLogItemTypes.OSQUERY_ACTION;
+  item: {
+    id: string;
+    data: EndpointAction;
+  };
+}
+
+export interface OsqueryActivityLogActionResponse {
+  type: typeof ActivityLogItemTypes.OSQUERY_RESPONSE;
+  item: {
+    id: string;
+    data: LogsOsqueryResponse;
+  };
+}
+
 /**
  * One of the possible Response Action Log entry - Either a Fleet Action request, Fleet action response,
  * Endpoint action request and/or endpoint action response.
@@ -243,7 +320,9 @@ export type ActivityLogEntry =
   | ActivityLogAction
   | ActivityLogActionResponse
   | EndpointActivityLogAction
-  | EndpointActivityLogActionResponse;
+  | EndpointActivityLogActionResponse
+  | OsqueryActivityLogAction
+  | OsqueryActivityLogActionResponse;
 
 export interface ActivityLog {
   page: number;
@@ -330,6 +409,7 @@ export interface ActionDetails<
     {
       isCompleted: boolean;
       wasSuccessful: boolean;
+      partiallySuccessful: boolean;
       errors: undefined | string[];
       completedAt: string | undefined;
     }

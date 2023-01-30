@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
+export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful', 'partial'] as const;
 export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
 
 /**
@@ -17,6 +17,7 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'suspend-process',
   'running-processes',
   'get-file',
+  'osquery',
 ] as const;
 
 export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
@@ -45,6 +46,7 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'suspend-process',
   'processes',
   'get-file',
+  'osquery',
 ] as const;
 
 export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];

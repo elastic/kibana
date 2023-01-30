@@ -92,3 +92,13 @@ export const ENDPOINT_ERROR_CODES: Record<string, number> = {
 };
 
 export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';
+
+/** for index patterns `.logs-osquery_manager.actions-*` */
+export const OSQUERY_BASE = '.logs-osquery_manager';
+export const OSQUERY_ACTIONS_DS = `${OSQUERY_BASE}.actions`;
+export const OSQUERY_RESULTS_DS = `${OSQUERY_BASE}.results`;
+export const OSQUERY_ACTIONS_INDEX = `${OSQUERY_ACTIONS_DS}-*`;
+export const OSQUERY_ACTION_RESPONSES_DS = `${OSQUERY_BASE}.action.responses`;
+export const OSQUERY_ACTION_RESPONSES_INDEX = `${OSQUERY_ACTION_RESPONSES_DS}-*`;
+
+export const OSQUERY_LIVE_QUERY_ROUTE = `/api/osquery/live_queries`;

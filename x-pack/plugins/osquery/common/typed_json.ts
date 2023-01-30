@@ -12,6 +12,7 @@ export type ESQuery =
   | ESRangeQuery
   | ESQueryStringQuery
   | ESMatchQuery
+  | ESMatchPhraseQuery
   | ESTermQuery
   | ESBoolQuery
   | ESExistsQuery
@@ -50,6 +51,10 @@ export interface ESTermQuery {
 
 export interface ESExistsQuery {
   exists: Record<string, string>;
+}
+
+export interface ESMatchPhraseQuery {
+  match_phrase: Record<string, string>;
 }
 
 export interface ESBoolQuery {

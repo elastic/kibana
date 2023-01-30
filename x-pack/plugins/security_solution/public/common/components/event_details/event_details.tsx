@@ -66,14 +66,15 @@ export type EventViewId =
   | EventsViewType.jsonView
   | EventsViewType.summaryView
   | EventsViewType.threatIntelView
-  | EventsViewType.osqueryView;
+  | EventsViewType.responseActionsResultsView;
 
 export enum EventsViewType {
   tableView = 'table-view',
   jsonView = 'json-view',
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
-  osqueryView = 'osquery-results-view',
+  responseActionsResultsView = 'response-actions--results-view',
+  osqueryView = 'response-actions--results-view',
 }
 
 interface Props {

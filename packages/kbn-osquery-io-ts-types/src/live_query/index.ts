@@ -122,3 +122,51 @@ export const queries = t.union([arrayQueries, objectQueries]);
 export type Queries = t.TypeOf<typeof queries>;
 export const queriesOrUndefined = t.union([arrayQueries, t.undefined]); // in the future we might need to support `objectQueries` so use `queries` instead of `arrayQueries` - now removing this because of strange type issue where query is a number
 export type QueriesOrUndefined = t.TypeOf<typeof queriesOrUndefined>;
+
+export const createLiveQueryRequestBodySchema = t.partial({
+  agent_ids: t.array(t.string),
+  agent_all: t.union([t.boolean, t.undefined]),
+  agent_platforms: t.array(t.string),
+  agent_policy_ids: t.array(t.string),
+  query: queryOrUndefined,
+  queries: queriesOrUndefined,
+  saved_query_id: savedQueryIdOrUndefined,
+  ecs_mapping: ecsMappingOrUndefined,
+  pack_id: packIdOrUndefined,
+  alert_ids: t.array(t.string),
+  case_ids: t.array(t.string),
+  event_ids: t.array(t.string),
+  metadata: t.union([t.object, t.undefined]),
+});
+
+export type CreateLiveQueryRequestBodySchema = t.OutputOf<typeof createLiveQueryRequestBodySchema>;
+
+// TODO check if we can't reuse something else, or at least refactor into io-ts
+export interface LiveQueryDetailsItem {
+  action_id: string;
+  expiration: string;
+  '@timestamp': string;
+  agent_all: boolean;
+  agent_ids: string[];
+  agent_platforoms: string[];
+  agent_policy_ids: string[];
+  agents: string[];
+  user_id?: string;
+  pack_id?: string;
+  pack_name?: string;
+  pack_prebuilt?: boolean;
+  status?: string;
+  queries?: PackQueriesQuery[];
+}
+
+export interface PackQueriesQuery {
+  action_id: string;
+  id: string;
+  query: string;
+  agents: string[];
+  ecs_mapping?: ECSMapping;
+  version?: string;
+  platform?: string;
+  saved_query_id?: string;
+  expiration?: string;
+}
