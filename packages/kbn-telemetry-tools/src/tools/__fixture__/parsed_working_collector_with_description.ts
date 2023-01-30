@@ -10,7 +10,7 @@ import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedCollectorWithDescription: ParsedUsageCollection = [
-  'src/fixtures/telemetry_collectors/working_collector_with_description.ts',
+  'packages/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/working_collector_with_description.ts',
   {
     collectorName: 'my_working_collector_with_description',
     schema: {

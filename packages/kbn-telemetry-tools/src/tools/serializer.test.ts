@@ -7,35 +7,15 @@
  */
 
 import * as ts from 'typescript';
-import * as path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { getDescriptor, TelemetryKinds } from './serializer';
 import { traverseNodes } from './ts_parser';
-import { compilerHost } from './compiler_host';
-
-export function loadFixtureProgram(fixtureName: string) {
-  const fixturePath = path.resolve(
-    REPO_ROOT,
-    `src/fixtures/telemetry_collectors/${fixtureName}.ts`
-  );
-  const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
-  if (!tsConfig) {
-    throw new Error('Could not find a valid tsconfig.json.');
-  }
-  const program = ts.createProgram([fixturePath], tsConfig as any, compilerHost);
-  const checker = program.getTypeChecker();
-  const sourceFile = program.getSourceFile(fixturePath);
-  if (!sourceFile) {
-    throw Error('sourceFile is undefined!');
-  }
-  return { program, checker, sourceFile };
-}
+import { loadFixtureProgram } from './test_utils';
 
 describe('getDescriptor', () => {
   const usageInterfaces = new Map<string, ts.InterfaceDeclaration | ts.TypeAliasDeclaration>();
   let tsProgram: ts.Program;
   beforeAll(() => {
-    const { program, sourceFile } = loadFixtureProgram('constants');
+    const { program, sourceFile } = loadFixtureProgram('telemetry_collectors/constants.ts');
     tsProgram = program;
     for (const node of traverseNodes(sourceFile)) {
       if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {

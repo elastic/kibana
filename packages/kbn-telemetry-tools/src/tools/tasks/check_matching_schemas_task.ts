@@ -9,13 +9,13 @@
 import * as path from 'path';
 import { TaskContext } from './task_context';
 import { checkMatchingMapping } from '../check_collector_integrity';
-import { readFileAsync } from '../utils';
+import { readFile } from 'fs/promises';
 
 export function checkMatchingSchemasTask({ roots }: TaskContext, throwOnDiff: boolean) {
   return roots.map((root) => ({
     task: async () => {
       const fullPath = path.resolve(process.cwd(), root.config.output);
-      const esMappingString = await readFileAsync(fullPath, 'utf-8');
+      const esMappingString = await readFile(fullPath, 'utf-8');
       const esMapping = JSON.parse(esMappingString);
 
       if (root.parsedCollections) {

@@ -7,11 +7,10 @@
  */
 
 import globby from 'globby';
-import * as ts from 'typescript';
 import * as path from 'path';
 import { parseUsageCollection } from './ts_parser';
 import { TelemetryRC } from './config';
-import { compilerHost } from './compiler_host';
+import { createKibanaProgram, getAllSourceFiles } from './compiler_host';
 
 export async function getProgramPaths({
   root,
@@ -52,15 +51,8 @@ export async function getProgramPaths({
 }
 
 export function* extractCollectors(fullPaths: string[], tsConfig: any) {
-  const program = ts.createProgram(fullPaths, tsConfig, compilerHost);
-  program.getTypeChecker();
-  const sourceFiles = fullPaths.map((fullPath) => {
-    const sourceFile = program.getSourceFile(fullPath);
-    if (!sourceFile) {
-      throw Error(`Unable to get sourceFile ${fullPath}.`);
-    }
-    return sourceFile;
-  });
+  const program = createKibanaProgram(fullPaths, tsConfig);
+  const sourceFiles = getAllSourceFiles(fullPaths, program);
 
   for (const sourceFile of sourceFiles) {
     yield* parseUsageCollection(sourceFile, program);

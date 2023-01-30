@@ -7,8 +7,8 @@
  */
 
 import * as path from 'path';
-import { readFileAsync } from './utils';
 import { TELEMETRY_RC } from './constants';
+import { readFile } from 'fs/promises';
 
 export interface TelemetryRC {
   root: string;
@@ -22,7 +22,7 @@ export async function readRcFile(rcRoot: string) {
   }
 
   const rcFile = path.resolve(rcRoot, TELEMETRY_RC);
-  const configString = await readFileAsync(rcFile, 'utf8');
+  const configString = await readFile(rcFile, 'utf8');
   return JSON.parse(configString);
 }
 

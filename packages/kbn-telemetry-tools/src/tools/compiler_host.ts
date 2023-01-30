@@ -57,3 +57,23 @@ export const compilerHost: ts.CompilerHost = {
     return results;
   },
 };
+
+export function getAllSourceFiles(fullPaths: string[], program: ts.Program): ts.SourceFile[] {
+  return fullPaths.map((fullPath) => {
+    const sourceFile = program.getSourceFile(fullPath);
+    if (!sourceFile) {
+      throw Error(`Unable to get sourceFile ${fullPath}.`);
+    }
+    return sourceFile;
+  });
+}
+
+export function createKibanaProgram(
+  fullPaths: string[],
+  tsConfig: any,
+): ts.Program {
+  const program = ts.createProgram(fullPaths, tsConfig, compilerHost);
+  program.getTypeChecker();
+  
+  return program; 
+}
