@@ -13,7 +13,7 @@ import { resolve } from 'path';
 import url from 'url';
 
 import { getConfigPath, getConfigDirectory } from '@kbn/utils';
-import { fromRoot, isKibanaDistributable } from '@kbn/repo-info';
+import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {
@@ -61,17 +61,17 @@ const pluginPathCollector = pathCollector();
  * @param {'push' | 'unshift'} method
  */
 function maybeAddConfig(name, configs, method) {
-  const path = resolve(getConfigDirectory(), name)
+  const path = resolve(getConfigDirectory(), name);
   try {
     if (statSync(path).isFile()) {
-      configs[method](path)
+      configs[method](path);
     }
   } catch (err) {
     if (err.code === 'ENOENT') {
       return;
     }
 
-    throw err
+    throw err;
   }
 }
 
@@ -79,11 +79,14 @@ function maybeAddConfig(name, configs, method) {
  * @returns {string[]}
  */
 function getEnvConfigs() {
-  const val = process.env.KBN_CONFIG_PATHS
+  const val = process.env.KBN_CONFIG_PATHS;
   if (typeof val === 'string') {
-    return val.split(',').filter(v => !!v).map(p => resolve(p.trim()))
+    return val
+      .split(',')
+      .filter((v) => !!v)
+      .map((p) => resolve(p.trim()));
   }
-  return []
+  return [];
 }
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
@@ -233,11 +236,7 @@ export default function (program) {
 
   command.action(async function (opts) {
     const unknownOptions = this.getUnknownOptions();
-    const configs = [
-      getConfigPath(),
-      ...getEnvConfigs(),
-      ...(opts.config || [])
-    ];
+    const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
 
     // we "unshift" .serverless. config so that it only overrides defaults
     if (opts.serverless) {
