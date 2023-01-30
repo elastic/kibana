@@ -13,11 +13,11 @@ import { LEFT_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { useFieldStatsTrigger } from '../../../../../jobs/new_job/utils/use_field_stats_trigger';
+import { useFieldStatsTrigger } from '../../../../../components/field_stats_flyout/use_field_stats_trigger';
 import {
   FieldForStats,
   FieldStatsInfoButton,
-} from '../../../../../jobs/new_job/common/components/field_stats_info_button';
+} from '../../../../../components/field_stats_flyout/field_stats_info_button';
 import { FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';

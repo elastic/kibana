@@ -21,8 +21,8 @@ import { debounce, cloneDeep } from 'lodash';
 
 import { Query } from '@kbn/data-plugin/common/query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { FieldForStats } from '../../../../../jobs/new_job/common/components/field_stats_info_button';
-import { useFieldStatsTrigger } from '../../../../../jobs/new_job/utils/use_field_stats_trigger';
+import { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+import { useFieldStatsTrigger } from '../../../../../components/field_stats_flyout/use_field_stats_trigger';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
