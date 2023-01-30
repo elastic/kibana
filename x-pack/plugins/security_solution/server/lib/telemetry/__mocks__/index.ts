@@ -15,7 +15,7 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/packag
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
 import { stubEndpointMetricsResponse } from './metrics';
 import { prebuiltRuleAlertsResponse } from './prebuilt_rule_alerts';
-import { ESClusterInfo, ESLicense } from '../types';
+import type { ESClusterInfo, ESLicense } from '../types';
 
 export const createMockTelemetryEventsSender = (
   enableTelemetry?: boolean,

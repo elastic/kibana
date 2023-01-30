@@ -805,13 +805,11 @@ describe('test advanced policy config overlap ', () => {
 
 describe('test metrics response to value list meta data', () => {
   test('can succeed when metrics response is fully populated', async () => {
-    jest
-      .useFakeTimers()
-      .setSystemTime(new Date('2023-01-30'));
+    jest.useFakeTimers().setSystemTime(new Date('2023-01-30'));
     const stubMetricResponses = {
       listMetricsResponse: {
         aggregations: {
-          total_value_list_count: { value: 5},
+          total_value_list_count: { value: 5 },
           type_breakdown: {
             buckets: [
               {
