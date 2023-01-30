@@ -128,7 +128,7 @@ export const TEST_SCHEDULED_LABEL = i18n.translate(
 );
 
 export const PRIVATE_AVAILABLE_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.testNow.available.private',
+  'xpack.synthetics.app.testNow.available.private',
   {
     defaultMessage: `You can't manually start tests on a private location.`,
   }
