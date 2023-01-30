@@ -7,7 +7,13 @@
 
 import { getEndpointSecurityPolicyManager } from '../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
 import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
-import { removeAllArtifacts } from '../tasks/artifacts';
+import {
+  createPerPolicyArtifact,
+  createArtifactList,
+  removeAllArtifacts,
+  removeArtifactsFromLists,
+  yieldFirstPolicyID,
+} from '../tasks/artifacts';
 import { loadEndpointDataForEventFiltersIfNeeded } from '../tasks/load_endpoint_data';
 import { login, loginWithCustomRole, loginWithRole, ROLE } from '../tasks/login';
 import { performUserActions } from '../tasks/perform_user_actions';
@@ -23,7 +29,6 @@ const loginWithPrivilegeRead = (privilegePrefix: string) => {
 
 const loginWithPrivilegeNone = (privilegePrefix: string) => {
   const roleWithoutArtifactPrivilege = getRoleWithoutArtifactPrivilege(privilegePrefix);
-
   loginWithCustomRole('roleWithoutArtifactPrivilege', roleWithoutArtifactPrivilege);
 };
 
@@ -83,14 +88,19 @@ describe('Artifact tabs in Policy Details page', () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();
-    removeAllArtifacts();
   });
 
   after(() => {
+    login();
     removeAllArtifacts();
   });
 
   for (const testData of getArtifactsListTestsData()) {
+    beforeEach(() => {
+      login();
+      removeArtifactsFromLists(testData.createRequestBody.list_id);
+    });
+
     describe(`${testData.title} tab`, () => {
       it(`[NONE] User cannot see the tab for ${testData.title}`, () => {
         loginWithPrivilegeNone(testData.privilegePrefix);
@@ -139,6 +149,12 @@ describe('Artifact tabs in Policy Details page', () => {
       });
 
       context(`Given there are no assigned ${testData.title} entries`, () => {
+        beforeEach(() => {
+          login();
+          createArtifactList(testData.createRequestBody.list_id);
+          createPerPolicyArtifact(testData.artifactName, testData.createRequestBody);
+        });
+
         it(`[READ] User CANNOT Manage or Assign ${testData.title} artifacts`, () => {
           loginWithPrivilegeRead(testData.privilegePrefix);
           visitArtifactTab(testData.tabId);
@@ -175,6 +191,14 @@ describe('Artifact tabs in Policy Details page', () => {
       });
 
       context(`Given there are assigned ${testData.title} entries`, () => {
+        beforeEach(() => {
+          login();
+          createArtifactList(testData.createRequestBody.list_id);
+          yieldFirstPolicyID().then((policyID) => {
+            createPerPolicyArtifact(testData.artifactName, testData.createRequestBody, policyID);
+          });
+        });
+
         it(`[READ] User can see ${testData.title} artifacts but CANNOT assign or remove from policy`, () => {
           loginWithPrivilegeRead(testData.privilegePrefix);
           visitArtifactTab(testData.tabId);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { FormAction } from '../tasks/perform_user_actions';
 
 interface FormEditingDescription {
@@ -31,6 +32,12 @@ interface ArtifactsFixtureType {
   delete: {
     confirmSelector: string;
     card: string;
+  };
+
+  createRequestBody: {
+    list_id: string;
+    entries: object[];
+    os_types: string[];
   };
 }
 
@@ -135,6 +142,31 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     },
     urlPath: 'trusted_apps',
     emptyState: 'trustedAppsListPage-emptyState',
+
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+      entries: [
+        {
+          entries: [
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'abcd',
+            },
+          ],
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+        },
+      ],
+      os_types: ['windows'],
+    },
   },
   {
     title: 'Event Filters',
@@ -237,6 +269,19 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     },
     urlPath: 'event_filters',
     emptyState: 'EventFiltersListPage-emptyState',
+
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+      entries: [
+        {
+          field: 'destination.ip',
+          operator: 'included',
+          type: 'match',
+          value: '1.2.3.4',
+        },
+      ],
+      os_types: ['windows'],
+    },
   },
   {
     title: 'Blocklist',
@@ -347,6 +392,25 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     },
     urlPath: 'blocklist',
     emptyState: 'blocklistPage-emptyState',
+
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+      entries: [
+        {
+          field: 'file.Ext.code_signature',
+          entries: [
+            {
+              field: 'subject_name',
+              value: ['wegwergwegw'],
+              type: 'match_any',
+              operator: 'included',
+            },
+          ],
+          type: 'nested',
+        },
+      ],
+      os_types: ['windows'],
+    },
   },
   {
     title: 'Host isolation exceptions',
@@ -430,5 +494,18 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     },
     urlPath: 'host_isolation_exceptions',
     emptyState: 'hostIsolationExceptionsListPage-emptyState',
+
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
+      entries: [
+        {
+          field: 'destination.ip',
+          operator: 'included',
+          type: 'match',
+          value: '1.2.3.4',
+        },
+      ],
+      os_types: ['windows', 'linux', 'macos'],
+    },
   },
 ];
