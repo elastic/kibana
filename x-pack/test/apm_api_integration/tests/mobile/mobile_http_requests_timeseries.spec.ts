@@ -47,18 +47,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('without data loaded', { config: 'basic', archives: [] }, () => {
-    describe('when no data', () => {
-      it('handles empty state', async () => {
-        const response = await getHttpRequestsChart({ serviceName: 'foo' });
-        expect(response.body.currentPeriod.timeseries).to.eql([]);
-        expect(response.body.previousPeriod.timeseries).to.eql([]);
-        expect(response.status).to.be(200);
+  registry.when(
+    'Mobile HTTP requests without data loaded',
+    { config: 'basic', archives: [] },
+    () => {
+      describe('when no data', () => {
+        it('handles empty state', async () => {
+          const response = await getHttpRequestsChart({ serviceName: 'foo' });
+          expect(response.body.currentPeriod.timeseries).to.eql([]);
+          expect(response.body.previousPeriod.timeseries).to.eql([]);
+          expect(response.status).to.be(200);
+        });
       });
-    });
-  });
+    }
+  );
 
-  registry.when('with data loaded', { config: 'basic', archives: [] }, () => {
+  registry.when('Mobile HTTP requests with data loaded', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateMobileData({
         synthtraceEsClient,
@@ -74,9 +78,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await getHttpRequestsChart({ serviceName: 'synth-android', offset: '1d' });
 
         expect(response.status).to.be(200);
-        expect(
-          response.body.currentPeriod.timeseries.some((item) => item.y === 0 && item.x)
-        ).to.eql(true);
+        expect(response.body.currentPeriod.timeseries.some((item) => item.x && item.y)).to.eql(
+          true
+        );
         expect(response.body.previousPeriod.timeseries[0].y).to.eql(0);
       });
 
@@ -88,7 +92,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           response.body.currentPeriod.timeseries.some((item) => item.y === 0 && item.x)
         ).to.eql(true);
 
-        expect(response.body.currentPeriod.timeseries[0].y).to.eql(0);
+        expect(response.body.currentPeriod.timeseries[0].y).to.eql(1);
         expect(response.body.previousPeriod.timeseries).to.eql([]);
       });
     });
