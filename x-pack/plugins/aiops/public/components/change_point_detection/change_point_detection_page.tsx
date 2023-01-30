@@ -70,7 +70,7 @@ export const ChangePointDetectionPage: FC = () => {
     [updateRequestParams]
   );
 
-  const selectControlCss = { width: '200px' };
+  const selectControlCss = { width: '300px' };
 
   return (
     <div data-test-subj="aiopsChangePointDetectionPage">
