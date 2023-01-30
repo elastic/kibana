@@ -31,21 +31,24 @@ export async function getAgentUploads(
   esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentDiagnostics[]> {
-  const getFile = async (fileId: string) => {
-    if (!fileId) return;
+  const getFile = async (actionId: string) => {
     try {
       const fileResponse = await esClient.search({
         index: FILE_STORAGE_METADATA_AGENT_INDEX,
         query: {
           bool: {
             filter: {
-              term: { upload_id: fileId },
+              bool: {
+                must: [{ term: { agent_id: agentId } }, { term: { action_id: actionId } }],
+              },
             },
           },
         },
       });
-      if (fileResponse.hits.total === 0) {
-        appContextService.getLogger().debug(`No matches for upload_id ${fileId}`);
+      if (fileResponse.hits.hits.length === 0) {
+        appContextService
+          .getLogger()
+          .debug(`No matches for action_id ${actionId} and agent_id ${agentId}`);
         return;
       }
       return {
@@ -66,7 +69,7 @@ export async function getAgentUploads(
 
   const results = [];
   for (const action of actions) {
-    const file = action.fileId ? await getFile(action.fileId) : undefined;
+    const file = await getFile(action.actionId);
     const fileName = file?.name ?? `${moment(action.timestamp!).format('YYYY-MM-DD HH:mm:ss')}.zip`;
     const filePath = file ? agentRouteService.getAgentFileDownloadLink(file.id, file.name) : '';
     const result = {
