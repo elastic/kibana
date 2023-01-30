@@ -10,11 +10,9 @@ import { cloneDeep } from 'lodash';
 import { processAlerts, updateAlertFlappingHistory } from './process_alerts';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
-import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
 
 describe('processAlerts', () => {
-  const flappingSettings = DEFAULT_FLAPPING_SETTINGS;
-
   let clock: sinon.SinonFakeTimers;
 
   beforeAll(() => {
@@ -59,7 +57,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(newAlerts).toEqual({ '1': newAlert });
@@ -97,7 +95,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(newAlerts).toEqual({ '1': newAlert1, '2': newAlert2 });
@@ -143,7 +141,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(activeAlerts).toEqual({
@@ -181,7 +179,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(activeAlerts).toEqual({
@@ -229,7 +227,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(activeAlerts).toEqual({
@@ -287,7 +285,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(activeAlerts).toEqual({
@@ -348,7 +346,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       });
 
       expect(
@@ -391,7 +389,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'] });
@@ -419,7 +417,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(recoveredAlerts).toEqual({});
@@ -449,7 +447,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
@@ -488,7 +486,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
@@ -527,7 +525,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       });
 
       expect(recoveredAlerts).toEqual(updatedAlerts);
@@ -557,7 +555,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: false,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(recoveredAlerts).toEqual({});
@@ -603,7 +601,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: true,
         alertLimit: 7,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(recoveredAlerts).toEqual({});
@@ -639,7 +637,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: true,
         alertLimit: 7,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(activeAlerts).toEqual({
@@ -699,7 +697,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: true,
         alertLimit: MAX_ALERTS,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(Object.keys(activeAlerts).length).toEqual(MAX_ALERTS);
@@ -733,7 +731,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`
@@ -784,7 +782,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`
@@ -821,7 +819,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`
@@ -877,7 +875,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
@@ -911,7 +909,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
@@ -953,7 +951,7 @@ describe('processAlerts', () => {
         hasReachedAlertLimit: false,
         alertLimit: 10,
         autoRecoverAlerts: true,
-        flappingSettings: { ...flappingSettings, enabled: false },
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`
@@ -1020,7 +1018,7 @@ describe('processAlerts', () => {
           hasReachedAlertLimit: true,
           alertLimit: 10,
           autoRecoverAlerts: true,
-          flappingSettings,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         });
 
         expect(activeAlerts).toMatchInlineSnapshot(`
@@ -1057,7 +1055,7 @@ describe('processAlerts', () => {
           hasReachedAlertLimit: true,
           alertLimit: 10,
           autoRecoverAlerts: true,
-          flappingSettings,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         });
 
         expect(activeAlerts).toMatchInlineSnapshot(`
@@ -1119,7 +1117,7 @@ describe('processAlerts', () => {
           hasReachedAlertLimit: true,
           alertLimit: 10,
           autoRecoverAlerts: true,
-          flappingSettings,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         });
 
         expect(activeAlerts).toMatchInlineSnapshot(`
@@ -1196,7 +1194,7 @@ describe('processAlerts', () => {
           hasReachedAlertLimit: true,
           alertLimit: 10,
           autoRecoverAlerts: true,
-          flappingSettings: { ...flappingSettings, enabled: false },
+          flappingSettings: DISABLE_FLAPPING_SETTINGS,
         });
 
         expect(activeAlerts).toMatchInlineSnapshot(`
@@ -1243,7 +1241,7 @@ describe('processAlerts', () => {
       const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
         meta: { flappingHistory: [false, false] },
       });
-      updateAlertFlappingHistory(flappingSettings, alert, true);
+      updateAlertFlappingHistory(DEFAULT_FLAPPING_SETTINGS, alert, true);
       expect(alert.getFlappingHistory()).toEqual([false, false, true]);
     });
 
@@ -1252,7 +1250,7 @@ describe('processAlerts', () => {
       const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
         meta: { flappingHistory },
       });
-      updateAlertFlappingHistory(flappingSettings, alert, true);
+      updateAlertFlappingHistory(DEFAULT_FLAPPING_SETTINGS, alert, true);
       const fh = alert.getFlappingHistory() || [];
       expect(fh.length).toEqual(20);
       const result = new Array(19).fill(false);
@@ -1264,7 +1262,7 @@ describe('processAlerts', () => {
       const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
         meta: { flappingHistory },
       });
-      updateAlertFlappingHistory(flappingSettings, alert, true);
+      updateAlertFlappingHistory(DEFAULT_FLAPPING_SETTINGS, alert, true);
       const fh = alert.getFlappingHistory() || [];
       expect(fh.length).toEqual(20);
       const result = new Array(19).fill(false);

@@ -9,12 +9,11 @@ import { pick } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { setFlapping, isAlertFlapping } from './set_flapping';
-import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
 
 describe('setFlapping', () => {
   const flapping = new Array(16).fill(false).concat([true, true, true, true]);
   const notFlapping = new Array(20).fill(false);
-  const flappingSettings = DEFAULT_FLAPPING_SETTINGS;
 
   test('should set flapping on alerts', () => {
     const activeAlerts = {
@@ -31,7 +30,7 @@ describe('setFlapping', () => {
       '4': new Alert('4', { meta: { flapping: true, flappingHistory: notFlapping } }),
     };
 
-    setFlapping(flappingSettings, activeAlerts, recoveredAlerts);
+    setFlapping(DEFAULT_FLAPPING_SETTINGS, activeAlerts, recoveredAlerts);
     const fields = ['1.meta.flapping', '2.meta.flapping', '3.meta.flapping', '4.meta.flapping'];
     expect(pick(activeAlerts, fields)).toMatchInlineSnapshot(`
       Object {
@@ -98,7 +97,7 @@ describe('setFlapping', () => {
       '4': new Alert('4', { meta: { flapping: true, flappingHistory: notFlapping } }),
     };
 
-    setFlapping({ ...flappingSettings, enabled: false }, activeAlerts, recoveredAlerts);
+    setFlapping(DISABLE_FLAPPING_SETTINGS, activeAlerts, recoveredAlerts);
     const fields = ['1.meta.flapping', '2.meta.flapping', '3.meta.flapping', '4.meta.flapping'];
     expect(pick(activeAlerts, fields)).toMatchInlineSnapshot(`
       Object {
@@ -160,7 +159,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory },
           }
         );
-        expect(isAlertFlapping(flappingSettings, alert)).toEqual(true);
+        expect(isAlertFlapping(DEFAULT_FLAPPING_SETTINGS, alert)).toEqual(true);
       });
 
       test("returns false the flap count doesn't exceed the threshold", () => {
@@ -171,7 +170,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory },
           }
         );
-        expect(isAlertFlapping(flappingSettings, alert)).toEqual(false);
+        expect(isAlertFlapping(DEFAULT_FLAPPING_SETTINGS, alert)).toEqual(false);
       });
 
       test('returns true if not at capacity and the flap count exceeds the threshold', () => {
@@ -182,7 +181,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory },
           }
         );
-        expect(isAlertFlapping(flappingSettings, alert)).toEqual(true);
+        expect(isAlertFlapping(DEFAULT_FLAPPING_SETTINGS, alert)).toEqual(true);
       });
     });
 
@@ -195,7 +194,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isAlertFlapping(flappingSettings, alert)).toEqual(true);
+        expect(isAlertFlapping(DEFAULT_FLAPPING_SETTINGS, alert)).toEqual(true);
       });
 
       test("returns true if not at capacity and the flap count doesn't exceed the threshold", () => {
@@ -206,7 +205,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isAlertFlapping(flappingSettings, alert)).toEqual(true);
+        expect(isAlertFlapping(DEFAULT_FLAPPING_SETTINGS, alert)).toEqual(true);
       });
 
       test('returns true if not at capacity and the flap count exceeds the threshold', () => {
@@ -217,7 +216,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isAlertFlapping(flappingSettings, alert)).toEqual(true);
+        expect(isAlertFlapping(DEFAULT_FLAPPING_SETTINGS, alert)).toEqual(true);
       });
 
       test("returns false if at capacity and the flap count doesn't exceed the threshold", () => {
@@ -228,7 +227,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isAlertFlapping(flappingSettings, alert)).toEqual(false);
+        expect(isAlertFlapping(DEFAULT_FLAPPING_SETTINGS, alert)).toEqual(false);
       });
     });
   });

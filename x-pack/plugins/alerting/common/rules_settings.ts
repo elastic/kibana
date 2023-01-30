@@ -49,3 +49,8 @@ export const DEFAULT_FLAPPING_SETTINGS: RulesSettingsFlappingProperties = {
   lookBackWindow: 20,
   statusChangeThreshold: 4,
 };
+
+export const DISABLE_FLAPPING_SETTINGS: RulesSettingsFlappingProperties = {
+  ...DEFAULT_FLAPPING_SETTINGS,
+  enabled: false,
+};

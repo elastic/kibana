@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
+import {
+  DEFAULT_FLAPPING_SETTINGS,
+  DISABLE_FLAPPING_SETTINGS,
+} from '@kbn/alerting-plugin/common/rules_settings';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { cloneDeep } from 'lodash';
 import { getAlertsForNotification } from './get_alerts_for_notification';
 
 describe('getAlertsForNotification', () => {
-  const flappingSettings = DEFAULT_FLAPPING_SETTINGS;
-
   const alert1 = {
     event: {
       'kibana.alert.status': ALERT_STATUS_RECOVERED,
@@ -42,7 +43,8 @@ describe('getAlertsForNotification', () => {
 
   test('should set pendingRecoveredCount to zero for all active alerts', () => {
     const trackedEvents = [alert4];
-    expect(getAlertsForNotification(flappingSettings, trackedEvents)).toMatchInlineSnapshot(`
+    expect(getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents))
+      .toMatchInlineSnapshot(`
       Array [
         Object {
           "event": Object {
@@ -60,7 +62,8 @@ describe('getAlertsForNotification', () => {
 
   test('should not remove alerts if the num of recovered alerts is not at the limit', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    expect(getAlertsForNotification(flappingSettings, trackedEvents)).toMatchInlineSnapshot(`
+    expect(getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents))
+      .toMatchInlineSnapshot(`
       Array [
         Object {
           "event": Object {
@@ -89,7 +92,7 @@ describe('getAlertsForNotification', () => {
 
   test('should reset counts and not modify alerts if flapping is disabled', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    expect(getAlertsForNotification({ ...flappingSettings, enabled: false }, trackedEvents))
+    expect(getAlertsForNotification(DISABLE_FLAPPING_SETTINGS, trackedEvents))
       .toMatchInlineSnapshot(`
       Array [
         Object {

@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
 import { getAlertsForNotification } from '.';
 import { Alert } from '../alert';
 
 describe('getAlertsForNotification', () => {
-  const flappingSettings = DEFAULT_FLAPPING_SETTINGS;
-
   test('should set pendingRecoveredCount to zero for all active alerts', () => {
     const alert1 = new Alert('1', { meta: { flapping: true, pendingRecoveredCount: 3 } });
     const alert2 = new Alert('2', { meta: { flapping: false } });
 
     const { newAlerts, activeAlerts } = getAlertsForNotification(
-      flappingSettings,
+      DEFAULT_FLAPPING_SETTINGS,
       'default',
       {
         '1': alert1,
@@ -70,7 +68,7 @@ describe('getAlertsForNotification', () => {
 
     const { newAlerts, activeAlerts, recoveredAlerts, currentRecoveredAlerts } =
       getAlertsForNotification(
-        flappingSettings,
+        DEFAULT_FLAPPING_SETTINGS,
         'default',
         {},
         {},
@@ -162,7 +160,7 @@ describe('getAlertsForNotification', () => {
 
     const { newAlerts, activeAlerts, recoveredAlerts, currentRecoveredAlerts } =
       getAlertsForNotification(
-        { ...flappingSettings, enabled: false },
+        DISABLE_FLAPPING_SETTINGS,
         'default',
         {},
         {},

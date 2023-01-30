@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
+import {
+  DEFAULT_FLAPPING_SETTINGS,
+  DISABLE_FLAPPING_SETTINGS,
+} from '@kbn/alerting-plugin/common/rules_settings';
 import { getUpdatedFlappingHistory } from './get_updated_flapping_history';
 
 describe('getUpdatedFlappingHistory', () => {
-  const flappingSettings = DEFAULT_FLAPPING_SETTINGS;
-
   type TestRuleState = Record<string, unknown> & {
     aRuleStateKey: string;
   };
@@ -21,7 +22,15 @@ describe('getUpdatedFlappingHistory', () => {
   test('sets flapping state to true if the alert is new', () => {
     const state = { wrapped: initialRuleState, trackedAlerts: {}, trackedAlertsRecovered: {} };
     expect(
-      getUpdatedFlappingHistory(flappingSettings, 'TEST_ALERT_0', state, true, false, false, [])
+      getUpdatedFlappingHistory(
+        DEFAULT_FLAPPING_SETTINGS,
+        'TEST_ALERT_0',
+        state,
+        true,
+        false,
+        false,
+        []
+      )
     ).toMatchInlineSnapshot(`
       Array [
         true,
@@ -45,7 +54,15 @@ describe('getUpdatedFlappingHistory', () => {
       trackedAlertsRecovered: {},
     };
     expect(
-      getUpdatedFlappingHistory(flappingSettings, 'TEST_ALERT_0', state, false, false, true, [])
+      getUpdatedFlappingHistory(
+        DEFAULT_FLAPPING_SETTINGS,
+        'TEST_ALERT_0',
+        state,
+        false,
+        false,
+        true,
+        []
+      )
     ).toMatchInlineSnapshot(`
       Array [
         false,
@@ -71,7 +88,7 @@ describe('getUpdatedFlappingHistory', () => {
     const recoveredIds = ['TEST_ALERT_0'];
     expect(
       getUpdatedFlappingHistory(
-        flappingSettings,
+        DEFAULT_FLAPPING_SETTINGS,
         'TEST_ALERT_0',
         state,
         true,
@@ -105,7 +122,7 @@ describe('getUpdatedFlappingHistory', () => {
     const recoveredIds = ['TEST_ALERT_0'];
     expect(
       getUpdatedFlappingHistory(
-        flappingSettings,
+        DEFAULT_FLAPPING_SETTINGS,
         'TEST_ALERT_0',
         state,
         false,
@@ -139,7 +156,7 @@ describe('getUpdatedFlappingHistory', () => {
     const recoveredIds = ['TEST_ALERT_0'];
     expect(
       getUpdatedFlappingHistory(
-        flappingSettings,
+        DEFAULT_FLAPPING_SETTINGS,
         'TEST_ALERT_0',
         state,
         false,
@@ -172,7 +189,7 @@ describe('getUpdatedFlappingHistory', () => {
     };
     expect(
       getUpdatedFlappingHistory(
-        { ...flappingSettings, enabled: false },
+        DISABLE_FLAPPING_SETTINGS,
         'TEST_ALERT_0',
         state,
         false,
