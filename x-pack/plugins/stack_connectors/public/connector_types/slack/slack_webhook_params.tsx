@@ -9,11 +9,11 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { SlackActionParams } from '../types';
+import { WebhookParams } from '../../../common/slack/types';
 
-export const SlackWebhookParamsFields: React.FunctionComponent<
-  ActionParamsProps<SlackActionParams>
-> = (props) => {
+export const SlackWebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookParams>> = (
+  props
+) => {
   const { actionParams, editAction, index, errors, messageVariables, defaultMessage } = props;
   const { message } = actionParams;
 
@@ -38,7 +38,7 @@ export const SlackWebhookParamsFields: React.FunctionComponent<
       index={index}
       editAction={editAction}
       messageVariables={messageVariables}
-      paramsProperty={'message'}
+      paramsProperty="message"
       inputTargetValue={message}
       label={i18n.translate('xpack.stackConnectors.components.slack.messageTextAreaFieldLabel', {
         defaultMessage: 'Message',

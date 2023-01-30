@@ -458,13 +458,15 @@ describe('execute', () => {
       const variables = {
         rogue: '*bold*',
       };
-      const params = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+      const params = connectorType.renderParameterTemplates!(paramsWithTemplates, variables) as {
+        message: string;
+      };
       expect(params.message).toBe('`*bold*`');
     });
   });
 
   describe('Web API', () => {
-    test.only('renders parameter templates as expected', async () => {
+    test('renders parameter templates as expected', async () => {
       expect(connectorType.renderParameterTemplates).toBeTruthy();
       const paramsWithTemplates = {
         subAction: 'postMessage' as const,

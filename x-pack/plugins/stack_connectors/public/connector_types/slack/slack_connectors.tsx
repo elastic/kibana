@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { useEffect, useState } from 'react';
+import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { ButtonGroupField, HiddenField } from '@kbn/triggers-actions-ui-plugin/public';
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { HiddenField } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
 import { SlackWebApiActionsFields } from './slack_web_api_connectors';
 import { SlackWebhookActionFields } from './slack_webhook_connectors';
-
-const getSlackType = (arg: { type: string } | null | undefined) => {
-  if (!arg) return 'web_api';
-  return arg.type === 'webhook' ? 'webhook' : 'web_api';
-};
 
 const slackTypeButtons = [
   {
@@ -35,39 +30,39 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
   readOnly,
   registerPreSubmitValidator,
 }) => {
+  const [selectedSlackType, setSelectedSlackType] = useState('web_api');
+
+  const onChange = (id: string) => {
+    setSelectedSlackType(id);
+  };
+
   const { setFieldValue } = useFormContext();
-  const [{ config, __internal__ }] = useFormData({
-    watch: ['config.type', '__internal__.type'],
-  });
-
-  const selectedAuthDefaultValue = 'web_api';
-
-  const slackType = config?.type === 'webhook' ? 'webhook' : 'web_api';
-
   useEffect(() => {
-    setFieldValue('config.type', getSlackType(__internal__));
-  }, [__internal__, setFieldValue]);
+    setFieldValue('config.type', selectedSlackType);
+  }, [selectedSlackType, setFieldValue]);
 
   return (
     <>
       <EuiSpacer size="xs" />
-      <ButtonGroupField
-        defaultValue={selectedAuthDefaultValue}
-        path={'__internal__.type'}
-        label={i18n.BASIC_AUTH_LABEL}
+      <EuiButtonGroup
+        isFullWidth
+        buttonSize="m"
+        color="primary"
         legend={i18n.BASIC_AUTH_BUTTON_GROUP_LEGEND}
         options={slackTypeButtons}
+        idSelected={selectedSlackType}
+        onChange={onChange}
       />
       <HiddenField path={'config.type'} config={{ defaultValue: 'web_api' }} />
       <EuiSpacer size="m" />
-      {slackType === 'webhook' ? (
+      {selectedSlackType === 'webhook' ? (
         <SlackWebhookActionFields
           isEdit={isEdit}
           readOnly={readOnly}
           registerPreSubmitValidator={registerPreSubmitValidator}
         />
       ) : null}
-      {slackType === 'web_api' ? (
+      {selectedSlackType === 'web_api' ? (
         <>
           <SlackWebApiActionsFields
             isEdit={isEdit}

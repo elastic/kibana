@@ -17,7 +17,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
 ) => {
   const { actionConnector } = props;
   const { type: slackType } = (actionConnector as unknown as SlackActionConnector).config;
-  console.log('slackType', slackType);
+
   return (
     <>
       {slackType === 'webhook' ? <SlackWebhookParamsFields {...props} /> : null}

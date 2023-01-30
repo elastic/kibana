@@ -172,7 +172,7 @@ export const SlackWebApiParamsFields: React.FunctionComponent<
           editAction('subActionParams', { channels, text: value }, index)
         }
         messageVariables={messageVariables}
-        paramsProperty={'text'}
+        paramsProperty="webApi"
         inputTargetValue={text}
         label={i18n.translate('xpack.stackConnectors.components.slack.messageTextAreaFieldLabel', {
           defaultMessage: 'Message',
