@@ -6,7 +6,7 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
@@ -41,8 +41,8 @@ export const getUseActionColumnHook =
 
     const columnHeaders = columns;
 
-    return {
-      renderCustomActionsRow: ({
+    const renderCustomActionsRow = useCallback(
+      ({
         rowIndex,
         cveProps,
         setIsActionLoading,
@@ -92,6 +92,11 @@ export const getUseActionColumnHook =
           />
         );
       },
+      [columnHeaders, loadingEventIds, showCheckboxes, leadingControlColumns, selectedEventIds]
+    );
+
+    return {
+      renderCustomActionsRow,
       width: 124,
     };
   };

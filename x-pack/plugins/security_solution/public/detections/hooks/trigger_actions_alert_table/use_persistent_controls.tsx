@@ -63,8 +63,8 @@ export const getPersistentControlsHook = (tableId: TableId) => {
       ]
     );
 
-    return {
-      right: (
+    const rightTopMenu = useMemo(
+      () => (
         <RightTopMenu
           position="relative"
           tableView={tableView}
@@ -77,6 +77,11 @@ export const getPersistentControlsHook = (tableId: TableId) => {
           showInspect={false}
         />
       ),
+      [tableView, handleChangeTableView, additionalFiltersComponent]
+    );
+
+    return {
+      right: rightTopMenu,
     };
   };
 

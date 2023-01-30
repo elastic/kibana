@@ -10,12 +10,12 @@ import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { get } from 'lodash';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
-import { TableId } from '../../../../common/types';
+import type { TableId } from '../../../../common/types';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../common/lib/cell_actions/constants';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -43,18 +43,17 @@ export const getUseCellActionsHook = (
     const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
     const viewMode =
-      useShallowEqualSelector(
-        (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).viewMode
-      ) ?? tableDefaults.viewMode;
+      useShallowEqualSelector((state) => (getTable(state, tableId) ?? tableDefaults).viewMode) ??
+      tableDefaults.viewMode;
 
-    if (viewMode === VIEW_SELECTION.eventRenderedView) {
-      // No cell actions are needed when eventRenderedView
-      return { getCellActions: () => [] };
-    }
+    const getCellActions = useCallback(
+      (columnId: string) => {
+        if (viewMode === VIEW_SELECTION.eventRenderedView) {
+          // No cell actions are needed when eventRenderedView
+          return [];
+        }
 
-    return {
-      getCellActions: (columnId: string) =>
-        defaultCellActions.map((dca) => {
+        return defaultCellActions.map((dca) => {
           return dca({
             browserFields,
             data: data as TimelineNonEcsData[][],
@@ -80,7 +79,13 @@ export const getUseCellActionsHook = (
             pageSize,
             closeCellPopover: dataGridRef?.closeCellPopover,
           });
-        }),
+        });
+      },
+      [browserFields, columns, data, dataGridRef, ecsData, pageSize, viewMode]
+    );
+
+    return {
+      getCellActions,
       visibleCellActions: 5,
       disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
     };
