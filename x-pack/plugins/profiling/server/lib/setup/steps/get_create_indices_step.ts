@@ -106,95 +106,101 @@ export function getCreateIndicesStep({
             })
             .catch(catchResourceAlreadyExistsException);
         }),
-        esClient.indices.create({
-          index: SQ_EXECUTABLES_INDEX,
-          settings: {
-            index: {
-              refresh_interval: '10s',
-            },
-          },
-          mappings: {
-            _source: {
-              mode: 'synthetic',
-            } as MappingSourceField,
-            properties: {
-              'ecs.version': {
-                type: 'keyword',
-                index: true,
-              },
-              'Executable.file.id': {
-                type: 'keyword',
-                index: false,
-              },
-              'Time.created': {
-                type: 'date',
-                index: true,
-              },
-              'Symbolization.time.next': {
-                type: 'date',
-                index: true,
-              },
-              'Symbolization.retries': {
-                type: 'short',
-                index: true,
+        esClient.indices
+          .create({
+            index: SQ_EXECUTABLES_INDEX,
+            settings: {
+              index: {
+                refresh_interval: '10s',
               },
             },
-          },
-        }),
-        esClient.indices.create({
-          index: LEAFFRAMES_INDEX,
-          settings: {
-            index: {
-              refresh_interval: '10s',
-            },
-          },
-          mappings: {
-            _source: {
-              mode: 'synthetic',
-            } as MappingSourceField,
-            properties: {
-              'ecs.version': {
-                type: 'keyword',
-                index: true,
-              },
-              'Stacktrace.frame.id': {
-                type: 'keyword',
-                index: false,
-              },
-              'Time.created': {
-                type: 'date',
-                index: true,
-              },
-              'Symbolization.time.next': {
-                type: 'date',
-                index: true,
-              },
-              'Symbolization.retries': {
-                type: 'short',
-                index: true,
+            mappings: {
+              _source: {
+                mode: 'synthetic',
+              } as MappingSourceField,
+              properties: {
+                'ecs.version': {
+                  type: 'keyword',
+                  index: true,
+                },
+                'Executable.file.id': {
+                  type: 'keyword',
+                  index: false,
+                },
+                'Time.created': {
+                  type: 'date',
+                  index: true,
+                },
+                'Symbolization.time.next': {
+                  type: 'date',
+                  index: true,
+                },
+                'Symbolization.retries': {
+                  type: 'short',
+                  index: true,
+                },
               },
             },
-          },
-        }),
-        esClient.indices.create({
-          index: ILM_LOCK_INDEX,
-          settings: {
-            index: {
-              hidden: true,
-            },
-          },
-          mappings: {
-            properties: {
-              '@timestamp': {
-                type: 'date',
-                format: 'epoch_second',
-              },
-              phase: {
-                type: 'keyword',
+          })
+          .catch(catchResourceAlreadyExistsException),
+        esClient.indices
+          .create({
+            index: LEAFFRAMES_INDEX,
+            settings: {
+              index: {
+                refresh_interval: '10s',
               },
             },
-          },
-        }),
+            mappings: {
+              _source: {
+                mode: 'synthetic',
+              } as MappingSourceField,
+              properties: {
+                'ecs.version': {
+                  type: 'keyword',
+                  index: true,
+                },
+                'Stacktrace.frame.id': {
+                  type: 'keyword',
+                  index: false,
+                },
+                'Time.created': {
+                  type: 'date',
+                  index: true,
+                },
+                'Symbolization.time.next': {
+                  type: 'date',
+                  index: true,
+                },
+                'Symbolization.retries': {
+                  type: 'short',
+                  index: true,
+                },
+              },
+            },
+          })
+          .catch(catchResourceAlreadyExistsException),
+        esClient.indices
+          .create({
+            index: ILM_LOCK_INDEX,
+            settings: {
+              index: {
+                hidden: true,
+              },
+            },
+            mappings: {
+              properties: {
+                '@timestamp': {
+                  type: 'date',
+                  format: 'epoch_second',
+                },
+                phase: {
+                  type: 'keyword',
+                },
+              },
+            },
+          })
+          .catch(catchResourceAlreadyExistsException),
       ]);
     },
   };

@@ -6,6 +6,7 @@
  */
 
 import { ProfilingSetupStep, ProfilingSetupStepFactoryOptions } from '../types';
+import { catchResourceAlreadyExistsException } from './catch_resource_already_exists_exception';
 import ilmProfiling from './ilm_profiling.json';
 
 const LIFECYCLE_POLICY_NAME = 'profiling';
@@ -31,10 +32,12 @@ export function getIlmStep({
       );
     },
     init: async () => {
-      await esClient.ilm.putLifecycle({
-        name: LIFECYCLE_POLICY_NAME,
-        policy: ilmProfiling,
-      });
+      await esClient.ilm
+        .putLifecycle({
+          name: LIFECYCLE_POLICY_NAME,
+          policy: ilmProfiling,
+        })
+        .catch(catchResourceAlreadyExistsException);
     },
   };
 }
