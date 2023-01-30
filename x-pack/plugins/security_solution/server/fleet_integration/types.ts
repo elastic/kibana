@@ -8,7 +8,7 @@
 export interface PolicyCreateEndpointConfig {
   type: 'endpoint';
   endpointConfig: {
-    preset: 'NGAV' | 'EDREssential' | 'EDRComplete';
+    preset: 'NGAV' | 'EDREssential' | 'EDRComplete' | 'DataCollection';
   };
 }
 

@@ -42,6 +42,13 @@ export const EDR_NOTE = i18n.translate(
   }
 );
 
+export const DATA_COLLECTION = i18n.translate(
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOptionDataCollection',
+  {
+    defaultMessage: 'Data Collection',
+  }
+);
+
 export const ENDPOINT = i18n.translate(
   'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOption',
   {

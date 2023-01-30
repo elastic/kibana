@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { calculateBucketSize } from './calculate_bucket_size';
-export { useOverviewMetrics } from './use_metrics';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Enterprisesearch', () => {
+    loadTestFile(require.resolve('./overview'));
+  });
+}
