@@ -19,6 +19,7 @@ import { useLensAttributes } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { HostLensAttributesTypes } from '../../../../../../common/visualizations';
+import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 
 export interface MetricChartProps {
   title: string;
@@ -37,6 +38,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
     onSubmit,
   } = useUnifiedSearchContext();
   const { metricsDataView } = useMetricsDataViewContext();
+  const { baseRequest } = useHostsViewContext();
   const {
     services: { lens },
   } = useKibana<InfraClientSetupDeps>();
@@ -111,6 +113,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
             query={unifiedSearchQuery}
             filters={unifiedSearchFilters}
             extraActions={extraAction}
+            lastReloadRequestTime={baseRequest.requestTs}
             executionContext={{
               type: 'infrastructure_observability_hosts_view',
               name: `Hosts View ${type} Chart`,
