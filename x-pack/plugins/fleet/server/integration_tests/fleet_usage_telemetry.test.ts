@@ -181,13 +181,52 @@ describe('fleet usage telemetry', () => {
 
     await esClient.create({
       index: 'logs-elastic_agent-default',
-      id: 'log1',
+      id: 'panic1',
       body: {
         log: {
           level: 'error',
         },
         '@timestamp': new Date().toISOString(),
         message: 'stderr panic close of closed channel',
+      },
+      refresh: 'wait_for',
+    });
+
+    await esClient.create({
+      index: 'logs-elastic_agent-default',
+      id: 'panic2',
+      body: {
+        log: {
+          level: 'error',
+        },
+        '@timestamp': new Date(Date.now() - 1000 * 60).toISOString(),
+        message: 'stderr panic some other panic',
+      },
+      refresh: 'wait_for',
+    });
+
+    await esClient.create({
+      index: 'logs-elastic_agent-default',
+      id: 'not-panic',
+      body: {
+        log: {
+          level: 'error',
+        },
+        '@timestamp': new Date().toISOString(),
+        message: 'this should not be included in metrics',
+      },
+      refresh: 'wait_for',
+    });
+
+    await esClient.create({
+      index: 'logs-elastic_agent-default',
+      id: 'panic-outside-time-range',
+      body: {
+        log: {
+          level: 'error',
+        },
+        '@timestamp': new Date(Date.now() - 2000 * 60 * 60).toISOString(),
+        message: 'stderr panic this should not be included in metrics',
       },
       refresh: 'wait_for',
     });
@@ -286,6 +325,16 @@ describe('fleet usage telemetry', () => {
           ],
         },
         agent_policies: { count: 3, output_types: ['elasticsearch'] },
+        agent_logs_panics_last_hour: [
+          {
+            '@timestamp': expect.any(String),
+            message: 'stderr panic close of closed channel',
+          },
+          {
+            '@timestamp': expect.any(String),
+            message: 'stderr panic some other panic',
+          },
+        ],
         // agent_logs_top_errors: ['stderr panic close of closed channel'],
         // fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
       })
