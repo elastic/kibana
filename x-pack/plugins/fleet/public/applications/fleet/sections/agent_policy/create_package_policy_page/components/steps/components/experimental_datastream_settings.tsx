@@ -134,7 +134,7 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
             <h5>
               <FormattedMessage
                 id="xpack.fleet.packagePolicyEditor.experimentalSettings.title"
-                defaultMessage="Indexing settings (experimental)"
+                defaultMessage="Indexing settings (technical preview)"
               />
             </h5>
           </EuiTitle>
@@ -144,32 +144,14 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
             <p>
               <FormattedMessage
                 id="xpack.fleet.packagePolicyEditor.stepConfigure.experimentalFeaturesDescription"
-                defaultMessage="These settings control how your data streams' backing indices are stored. These are {experimentalFeatures} and may have effects on other properties."
-                values={{
-                  experimentalFeatures: (
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.fleet.packagePolicyEditor.experimentalFeatureText"
-                        defaultMessage="experimental features"
-                      />
-                    </strong>
-                  ),
-                }}
+                defaultMessage="Choose how you want to store backing indices for this data stream. Changing these settings may affect other properties."
               />
             </p>
             <p>
               <FormattedMessage
                 id="xpack.fleet.packagePolicyEditor.stepConfigure.experimentalFeaturesRolloverWarning"
-                defaultMessage="Note: toggling these features requires a {rollover} of your existing data streams to take effect. {learnMoreLink}"
+                defaultMessage="After changing these settings, you need to manually rollover the existing data stream for changes to take effect. {learnMoreLink}"
                 values={{
-                  rollover: (
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.fleet.packagePolicyEditor.experimentalFeatureRolloverText"
-                        defaultMessage="manual rollover"
-                      />
-                    </strong>
-                  ),
                   learnMoreLink: (
                     <EuiLink href={docLinks.links.fleet.datastreamsManualRollover} target="_blank">
                       {i18n.translate(
