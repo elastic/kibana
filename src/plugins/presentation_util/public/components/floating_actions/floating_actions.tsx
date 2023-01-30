@@ -9,7 +9,6 @@ import React, { FC, ReactElement, useCallback, useRef, useState } from 'react';
 
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import useMount from 'react-use/lib/useMount';
 
 export interface FloatingActionsProps {
   className?: string;
