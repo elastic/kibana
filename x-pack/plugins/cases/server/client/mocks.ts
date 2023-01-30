@@ -93,7 +93,7 @@ const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
     find: jest.fn(),
     getAll: jest.fn(),
     getConnectors: jest.fn(),
-    stats: fn.jest(),
+    stats: jest.fn(),
   };
 };
 
