@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { type FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import { useMlKibana } from '../../../contexts/kibana';
 import { FieldStatsFlyoutProvider } from '../../../components/field_stats_flyout';
 import { useMlContext } from '../../../contexts/ml';
 import { ml } from '../../../services/ml_api_service';
@@ -57,6 +59,17 @@ export const Page: FC<Props> = ({ jobId }) => {
 
   const mlContext = useMlContext();
   const { currentDataView } = mlContext;
+  const { services } = useMlKibana();
+  const fieldStatsServices: FieldStatsServices = useMemo(() => {
+    const { uiSettings, data, fieldFormats, charts } = services;
+    return {
+      uiSettings,
+      dataViews: data.dataViews,
+      data,
+      fieldFormats,
+      charts,
+    };
+  }, [services]);
 
   const createAnalyticsForm = useCreateAnalyticsForm();
   const { state } = createAnalyticsForm;
@@ -181,7 +194,7 @@ export const Page: FC<Props> = ({ jobId }) => {
           )}
         </span>
       </MlPageHeader>
-      <FieldStatsFlyoutProvider>
+      <FieldStatsFlyoutProvider dataView={currentDataView} fieldStatsServices={fieldStatsServices}>
         <EuiPageBody restrictWidth={1200}>
           <EuiFlexGroup>
             <EuiFlexItem>

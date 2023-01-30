@@ -12,7 +12,12 @@ import { isEqual } from 'lodash';
 import { LEFT_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useFieldStatsFlyoutContext } from '../../../../../components/field_stats_flyout';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { useFieldStatsTrigger } from '../../../../../jobs/new_job/utils/use_field_stats_trigger';
+import {
+  FieldForStats,
+  FieldStatsInfoButton,
+} from '../../../../../jobs/new_job/common/components/field_stats_info_button';
 import { FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
@@ -55,7 +60,7 @@ export const AnalysisFieldsTable: FC<{
       itemsPerPage: number;
     }>({ pageIndex: 0, itemsPerPage: 5 });
 
-    const { setIsFlyoutVisible, setFieldName } = useFieldStatsFlyoutContext();
+    const { handleFieldStatsButtonClick } = useFieldStatsTrigger();
 
     const columns = [
       {
@@ -72,17 +77,21 @@ export const AnalysisFieldsTable: FC<{
           }
         ),
         id: 'name',
-        render: ({ name }: { name: string }) => {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        render: ({ name, mapping_types }: { name: string; mapping_types: string[] }) => {
+          const field: FieldForStats = {
+            id: name,
+            type: (Array.isArray(mapping_types) && mapping_types.length > 0
+              ? mapping_types[0]
+              : 'number') as ES_FIELD_TYPES,
+          };
           return (
             <>
-              <button
-                onClick={() => {
-                  setFieldName(name);
-                  setIsFlyoutVisible(true);
-                }}
-              >
-                {name}
-              </button>
+              <FieldStatsInfoButton
+                field={field}
+                label={name}
+                onButtonClick={handleFieldStatsButtonClick}
+              />
             </>
           );
         },

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionsListProps, EuiComboBoxOptionOption } from '@elastic/eui';
 
 interface Props {
   options: EuiComboBoxOptionOption[];
@@ -15,7 +15,9 @@ interface Props {
   changeHandler(d: EuiComboBoxOptionOption[]): void;
   testSubj?: string;
   isDisabled?: boolean;
-  renderOption?: EuiComboBox['renderOption'];
+  renderOption?: EuiComboBoxOptionsListProps<
+    string | number | string[] | undefined
+  >['renderOption'];
 }
 
 export const DropDown: React.FC<Props> = ({

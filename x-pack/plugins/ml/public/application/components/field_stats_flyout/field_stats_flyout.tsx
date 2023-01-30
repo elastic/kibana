@@ -28,7 +28,6 @@ export const FieldStatsFlyout: FC<{
   dataView: DataView;
   fieldStatsServices: FieldStatsServices;
 }> = ({ dataView, fieldStatsServices }) => {
-  console.log('fieldStatsServices', fieldStatsServices);
   const { setIsFlyoutVisible, isFlyoutVisible, fieldName } = useFieldStatsFlyoutContext();
 
   const closeFlyout = useCallback(() => setIsFlyoutVisible(false), []); // eslint-disable-line react-hooks/exhaustive-deps

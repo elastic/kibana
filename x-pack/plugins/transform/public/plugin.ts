@@ -24,6 +24,7 @@ import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
 
 export interface PluginsDependencies {
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -34,7 +35,6 @@ export interface PluginsDependencies {
   spaces?: SpacesApi;
   alerting?: AlertingSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  charts?: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
 }
 

@@ -14,14 +14,14 @@
     "share",
     "triggersActionsUi",
     "fieldFormats",
-    "unifiedSearch"
+    "unifiedSearch",
+    "charts"
   ],
   "optionalPlugins": [
     "security",
     "usageCollection",
     "spaces",
     "alerting",
-    "charts"
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [

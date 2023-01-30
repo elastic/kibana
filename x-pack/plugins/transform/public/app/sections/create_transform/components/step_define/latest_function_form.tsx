@@ -9,6 +9,7 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
+import { useAppDependencies } from '../../../../app_dependencies';
 import { LatestFunctionService } from './hooks/use_latest_function_config';
 
 interface LatestFunctionFormProps {
@@ -22,6 +23,10 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
   copyToClipboardDescription,
   latestFunctionService,
 }) => {
+  const {
+    ml: { useFieldStatsTrigger },
+  } = useAppDependencies();
+  const { renderOption, closeFlyout } = useFieldStatsTrigger();
   return (
     <>
       <EuiFormRow
@@ -45,9 +50,11 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
             latestFunctionService.updateLatestFunctionConfig({
               unique_key: selected,
             });
+            closeFlyout();
           }}
           isClearable={false}
           data-test-subj="transformWizardUniqueKeysSelector"
+          renderOption={renderOption}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -82,9 +89,11 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
                 latestFunctionService.updateLatestFunctionConfig({
                   sort: { value: selected[0].value, label: selected[0].label as string },
                 });
+                closeFlyout();
               }}
               isClearable={false}
               data-test-subj="transformWizardSortFieldSelector"
+              renderOption={renderOption}
             />
           )}
           {latestFunctionService.sortFieldOptions.length === 0 && (

@@ -11,6 +11,7 @@ import { EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { type DropDownOptionWithField } from '../step_define/common/get_pivot_dropdown_options';
 import { DropDownOption } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
 import { AggListForm } from '../aggregation_list';
@@ -27,7 +28,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
     const {
       ml: { useFieldStatsTrigger, FieldStatsInfoButton },
     } = useAppDependencies();
-    const { handleFieldStatsButtonClick, closeFlyout } = useFieldStatsTrigger();
+    const { handleFieldStatsButtonClick, closeFlyout, renderOption } = useFieldStatsTrigger();
 
     const {
       addAggregation,
@@ -41,29 +42,27 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
     const { aggList, aggOptions, aggOptionsData, groupByList, groupByOptions, groupByOptionsData } =
       state;
 
-    const options: EuiComboBoxOptionOption[] = useMemo(
+    const aggOptionsWithFieldStats: EuiComboBoxOptionOption[] = useMemo(
       () =>
-        aggOptions.map((opt) => {
-          const f = { id: opt.label, type: opt.type };
+        aggOptions.map(({ label, field, options }: DropDownOptionWithField) => {
           const aggOption: DropDownOption = {
             isGroupLabelOption: true,
-            key: f.id,
+            key: field.id,
             // @ts-ignore Purposefully passing label as element instead of string
             // for more robust rendering
             label: (
               <FieldStatsInfoButton
-                field={f}
-                label={f.id}
+                field={field}
+                label={label}
                 onButtonClick={handleFieldStatsButtonClick}
               />
             ),
-            options: opt.options ?? [],
+            options: options ?? [],
           };
           return aggOption;
         }),
-      [handleFieldStatsButtonClick]
+      [aggOptions, FieldStatsInfoButton, handleFieldStatsButtonClick]
     );
-    console.log('aggOptions', aggOptions, options);
     return (
       <PivotConfigurationContext.Provider value={{ actions, state }}>
         <EuiFormRow
@@ -86,6 +85,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
                 defaultMessage: 'Add a group by field ...',
               })}
               testSubj="transformGroupBySelection"
+              renderOption={renderOption}
             />
           </>
         </EuiFormRow>
@@ -111,7 +111,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
                 addAggregation(option);
                 closeFlyout();
               }}
-              options={options}
+              options={aggOptionsWithFieldStats}
               placeholder={i18n.translate(
                 'xpack.transform.stepDefineForm.aggregationsPlaceholder',
                 {

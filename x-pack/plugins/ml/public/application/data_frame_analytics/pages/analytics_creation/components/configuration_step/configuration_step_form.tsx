@@ -20,6 +20,9 @@ import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
 
 import { Query } from '@kbn/data-plugin/common/query';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { FieldForStats } from '../../../../../jobs/new_job/common/components/field_stats_info_button';
+import { useFieldStatsTrigger } from '../../../../../jobs/new_job/utils/use_field_stats_trigger';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
@@ -81,13 +84,26 @@ function getIndexDataQuery(savedSearchQuery: SavedSearchQuery, jobConfigQuery: a
   return savedSearchQuery !== null ? savedSearchQuery : jobConfigQuery;
 }
 
+type RuntimeMappingFieldType =
+  | ES_FIELD_TYPES.BOOLEAN
+  | ES_FIELD_TYPES.DATE
+  | ES_FIELD_TYPES.DOUBLE
+  | ES_FIELD_TYPES.GEO_POINT
+  | ES_FIELD_TYPES.IP
+  | ES_FIELD_TYPES.KEYWORD
+  | ES_FIELD_TYPES.LONG;
+
+interface RuntimeOption extends EuiComboBoxOptionOption {
+  field: FieldForStats;
+}
 function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: RuntimeMappingsType) {
-  const runtimeOptions: EuiComboBoxOptionOption[] = [];
+  const runtimeOptions: RuntimeOption[] = [];
   Object.keys(runtimeMappings).forEach((id) => {
     const field = runtimeMappings[id];
     if (isRuntimeField(field) && shouldAddAsDepVarOption(id, field.type, jobType)) {
       runtimeOptions.push({
         label: id,
+        field: { id, type: field.type as RuntimeMappingFieldType },
       });
     }
   });
@@ -140,6 +156,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     useEstimatedMml,
   } = form;
 
+  console.log('dependentVariableOptions', dependentVariableOptions);
   const isJobTypeWithDepVar =
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
   const dependentVariableEmpty = isJobTypeWithDepVar && dependentVariable === '';
@@ -154,6 +171,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   });
 
   const toastNotifications = getToastNotifications();
+  const { renderOption } = useFieldStatsTrigger();
 
   const setJobConfigQuery: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
     if (update.query) {
@@ -207,6 +225,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           if (shouldAddAsDepVarOption(field.id, field.type, jobType)) {
             depVarOptions.push({
               label: field.id,
+              field,
             });
 
             if (formState.dependentVariable === field.id) {
@@ -670,6 +689,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
                 loadingDepVarOptions ? ' loading' : ' loaded'
               }`}
+              renderOption={renderOption}
             />
           </EuiFormRow>
         </Fragment>

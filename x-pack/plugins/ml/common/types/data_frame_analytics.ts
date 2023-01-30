@@ -138,6 +138,7 @@ export interface EvaluateMetrics {
 
 export interface FieldSelectionItem
   extends Omit<estypes.MlDataframeAnalyticsFieldSelection, 'mapping_types'> {
+  // @todo: update mapping type to be es type
   mapping_types?: string[];
 }
 

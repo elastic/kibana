@@ -36,10 +36,12 @@ import type { GetMlSharedImportsReturnType } from '../shared_imports';
 
 export interface AppDependencies {
   application: ApplicationStart;
+  charts: ChartsPluginStart;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   docLinks: DocLinksStart;
+  fieldFormats: FieldFormatsStart;
   http: HttpSetup;
   i18n: I18nStart;
   notifications: NotificationsSetup;
@@ -56,8 +58,6 @@ export interface AppDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionStart;
-  charts?: ChartsPluginStart;
-  fieldFormats: FieldFormatsStart;
 }
 
 export const useAppDependencies = () => {
