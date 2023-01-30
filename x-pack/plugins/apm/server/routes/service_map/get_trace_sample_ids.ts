@@ -36,6 +36,7 @@ export async function getTraceSampleIds({
   start,
   end,
   serviceGroupKuery,
+  kuery,
 }: {
   serviceName?: string;
   environment: string;
@@ -44,6 +45,7 @@ export async function getTraceSampleIds({
   start: number;
   end: number;
   serviceGroupKuery?: string;
+  kuery?: string;
 }) {
   const query = {
     bool: {
@@ -51,6 +53,7 @@ export async function getTraceSampleIds({
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...kqlQuery(serviceGroupKuery),
+        ...kqlQuery(kuery),
         ...termQuery(SERVICE_NAME, serviceName),
       ],
     },
@@ -60,7 +63,7 @@ export async function getTraceSampleIds({
   let events = [ProcessorEvent.span, ProcessorEvent.transaction];
 
   // perf optimization that is only possible on the global service map with no filters
-  if (isGlobalServiceMap) {
+  if (isGlobalServiceMap && !(kuery || serviceGroupKuery)) {
     events = [ProcessorEvent.span];
     query.bool.filter.push({
       exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
@@ -140,6 +143,7 @@ export async function getTraceSampleIds({
       },
     },
   };
+  console.log(JSON.stringify(params));
 
   try {
     const tracesSampleResponse = await apmEventClient.search(

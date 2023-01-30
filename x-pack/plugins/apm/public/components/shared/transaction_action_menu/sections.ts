@@ -18,6 +18,8 @@ import { getDiscoverQuery } from '../links/discover_links/discover_transaction_l
 import { getInfraHref } from '../links/infra_link';
 import { fromQuery } from '../links/url_helpers';
 import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();
@@ -40,6 +42,8 @@ export const getSections = ({
   location: Location;
   urlParams: ApmUrlParams;
 }) => {
+  const apmRouter = useApmRouter();
+
   if (!transaction) return [];
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
@@ -204,6 +208,28 @@ export const getSections = ({
     },
   ];
 
+  const serviceMapHref = apmRouter.link('/service-map', {
+    query: {
+      rangeFrom: urlParams.rangeFrom ?? 'now-15m',
+      rangeTo: urlParams.rangeTo ?? 'now',
+      environment: ENVIRONMENT_ALL.value,
+      kuery: `trace.id : "${transaction.trace.id}"`,
+      serviceGroup: '',
+      comparisonEnabled: false,
+    },
+  });
+  const serviceMapActions: Action[] = [
+    {
+      key: 'serviceMap',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showInServiceMapLinkLabel',
+        { defaultMessage: 'Show in service map' }
+      ),
+      href: serviceMapHref,
+      condition: true,
+    },
+  ];
+
   const sectionRecord: SectionRecord = {
     observability: [
       {
@@ -276,6 +302,22 @@ export const getSections = ({
           }
         ),
         actions: uptimeActions,
+      },
+      {
+        key: 'serviceMap',
+        title: i18n.translate(
+          'xpack.apm.transactionActionMenu.serviceMap.title',
+          {
+            defaultMessage: 'Service map',
+          }
+        ),
+        subtitle: i18n.translate(
+          'xpack.apm.transactionActionMenu.serviceMap.subtitle',
+          {
+            defaultMessage: 'View service map filtered by this trace.',
+          }
+        ),
+        actions: serviceMapActions,
       },
     ],
     kibana: [{ key: 'kibana', actions: kibanaActions }],

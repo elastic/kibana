@@ -151,11 +151,6 @@ export function KueryBar(props: {
         return;
       }
 
-      if (typeof props.onSubmit === 'function') {
-        props.onSubmit(inputValue.trim());
-        return;
-      }
-
       history.push({
         ...location,
         search: fromQuery({
@@ -163,6 +158,12 @@ export function KueryBar(props: {
           kuery: inputValue.trim(),
         }),
       });
+
+      if (typeof props.onSubmit === 'function') {
+        props.onSubmit(inputValue.trim());
+        return;
+      }
+
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }

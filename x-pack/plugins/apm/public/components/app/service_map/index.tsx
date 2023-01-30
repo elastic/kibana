@@ -38,7 +38,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
     <>
-      <SearchBar showKueryBar={false} />
+      <SearchBar />
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceAround"
@@ -137,6 +137,7 @@ export function ServiceMap({
             environment,
             serviceName,
             serviceGroup: serviceGroupId,
+            kuery,
           },
         },
       });
@@ -186,7 +187,7 @@ export function ServiceMap({
 
   return (
     <>
-      <SearchBar showKueryBar={false} showTimeComparison />
+      <SearchBar showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div
           data-test-subj="ServiceMap"

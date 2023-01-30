@@ -11,6 +11,8 @@ import {
   EuiHorizontalRule,
   EuiPopover,
   EuiTitle,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, {
@@ -207,6 +209,18 @@ export function Popover({
           <EuiTitle size="xxs">
             <h3 style={{ wordBreak: 'break-all' }}>
               {selectedElementData.label ?? selectedElementId}
+              {kuery && (
+                <EuiToolTip
+                  position="bottom"
+                  content="The KQL filter is not applied in the displayed stats."
+                >
+                  <EuiIcon
+                    tabIndex={0}
+                    type="iInCircle"
+                    title="Icon with tooltip"
+                  />
+                </EuiToolTip>
+              )}
             </h3>
           </EuiTitle>
           <EuiHorizontalRule margin="xs" />
