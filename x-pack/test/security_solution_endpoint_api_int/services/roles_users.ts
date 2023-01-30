@@ -15,6 +15,7 @@ import { getSocManager } from '@kbn/security-solution-plugin/scripts/endpoint/co
 import { getPlatformEngineer } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/platform_engineer';
 import { getEndpointOperationsAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/endpoint_operations_analyst';
 import { getEndpointSecurityPolicyManager } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
+import { getWithResponseActionsRole } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/with_response_actions_role';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -28,6 +29,7 @@ export enum ROLE {
   platform_engineer = 'platformEngineer',
   endpoint_operations_analyst = 'endpointOperationsAnalyst',
   endpoint_security_policy_manager = 'endpointSecurityPolicyManager',
+  response_actions_role = 'executeResponseActions',
 }
 
 const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
@@ -39,6 +41,7 @@ const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
   platformEngineer: getPlatformEngineer(),
   endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
   endpointSecurityPolicyManager: getEndpointSecurityPolicyManager(),
+  executeResponseActions: getWithResponseActionsRole(),
 };
 
 export function RolesUsersProvider({ getService }: FtrProviderContext) {

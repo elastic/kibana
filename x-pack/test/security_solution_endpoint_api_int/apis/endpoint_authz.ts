@@ -13,6 +13,7 @@ import {
   BASE_POLICY_RESPONSE_ROUTE,
   ENDPOINTS_ACTION_LIST_ROUTE,
   GET_PROCESSES_ROUTE,
+  GET_FILE_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
@@ -20,6 +21,7 @@ import {
   METADATA_TRANSFORMS_STATUS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
+  EXECUTE_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -110,6 +112,22 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         path: SUSPEND_PROCESS_ROUTE,
         body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
+      },
+    ];
+
+    const canWriteFileOperationsApiList: ApiCallsInterface[] = [
+      {
+        method: 'post',
+        path: GET_FILE_ROUTE,
+        body: { endpoint_ids: ['one'], parameters: { path: '/opt/file/doc.txt' } },
+      },
+    ];
+
+    const canWriteExecuteOperationsApiList: ApiCallsInterface[] = [
+      {
+        method: 'post',
+        path: EXECUTE_ROUTE,
+        body: { endpoint_ids: ['one'], parameters: { command: 'ls -la' } },
       },
     ];
 
@@ -251,6 +269,8 @@ export default function ({ getService }: FtrProviderContext) {
         ...canReadActionsLogManagementApiList,
         ...canIsolateHostApiList,
         ...canWriteProcessOperationsApiList,
+        ...canWriteExecuteOperationsApiList,
+        ...canWriteFileOperationsApiList,
         ...superuserApiList,
       ]) {
         it(`should return 200 when [${apiListItem.method.toUpperCase()} ${
