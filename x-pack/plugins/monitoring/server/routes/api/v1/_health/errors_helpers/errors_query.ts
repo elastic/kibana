@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MetricbeatMonitoredProduct, PackagesMonitoredProduct, QueryOptions } from '../types';
+import type { MonitoredProduct, QueryOptions } from '../types';
 
 const MAX_BUCKET_SIZE = 50;
 
@@ -14,7 +14,7 @@ const MAX_BUCKET_SIZE = 50;
  * Each module (beats, kibana...) can contain one or multiple metricsets with error messages
  */
 interface ErrorsQueryOptions extends QueryOptions {
-  products: MetricbeatMonitoredProduct[] | PackagesMonitoredProduct[];
+  products: Array<Exclude<MonitoredProduct, MonitoredProduct.Cluster>>;
   errorQueryType: 'metricbeatErrorsQuery' | 'packageErrorsQuery';
   errorQueryIsDataStream?: boolean;
 }
@@ -47,7 +47,7 @@ export const errorsQuery = ({
               },
               {
                 range: {
-                  timestamp: {
+                  '@timestamp': {
                     gte: timeRange.min,
                     lte: timeRange.max,
                   },

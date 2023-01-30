@@ -173,16 +173,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
       });
 
-      it('handles clicking on recovered correctly', async () => {
-        const recoveredAlerts =
-          await observability.components.alertSummaryWidget.getCompactRecoveredAlertSelector();
-        await recoveredAlerts.click();
+      it('handles clicking on widget correctly', async () => {
+        const compactWidget =
+          await observability.components.alertSummaryWidget.getCompactWidgetSelector();
+        await compactWidget.click();
 
         const url = await browser.getCurrentUrl();
         const { from, to } = await observability.components.alertSearchBar.getAbsoluteTimeRange();
 
         expect(url.includes('tabId=alerts')).to.be(true);
-        expect(url.includes('status%3Arecovered')).to.be(true);
+        expect(url.includes('status%3Aall')).to.be(true);
         expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
         expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
       });
