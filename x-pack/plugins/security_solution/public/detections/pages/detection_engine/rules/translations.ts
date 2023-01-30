@@ -659,6 +659,20 @@ export const TAGS = i18n.translate(
   }
 );
 
+export const SEARCH_TAGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.searchTagsPlaceholder',
+  {
+    defaultMessage: 'Search tags',
+  }
+);
+
+export const RULES_TAG_SEARCH = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.rulesTagSearchText',
+  {
+    defaultMessage: 'Rules tag search',
+  }
+);
+
 export const NO_TAGS_AVAILABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.noTagsAvailableDescription',
   {

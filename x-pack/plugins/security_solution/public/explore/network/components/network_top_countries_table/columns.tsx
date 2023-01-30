@@ -10,6 +10,7 @@ import numeral from '@elastic/numeral';
 import React from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import { CountryFlagAndName } from '../source_destination/country_flag';
 import type {
   NetworkTopCountriesEdges,
   TopNetworkTablesEcsField,
@@ -17,7 +18,7 @@ import type {
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 import { networkModel } from '../../store';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
-import { defaultToEmptyTag, getEmptyTagValue } from '../../../../common/components/empty_value';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { Columns } from '../../../components/paginated_table';
 import * as i18n from './translations';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
@@ -66,7 +67,7 @@ export const getNetworkTopCountriesColumns = (
               type: 'keyword',
             }}
           >
-            {defaultToEmptyTag(geo)}
+            <CountryFlagAndName countryCode={geo} />
           </CellActions>
         );
       } else {
