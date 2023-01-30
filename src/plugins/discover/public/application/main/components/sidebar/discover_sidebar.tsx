@@ -287,6 +287,8 @@ export function DiscoverSidebarComponent({
     return null;
   }
 
+  console.log('*** discover sidebar', fieldListFiltersProps);
+
   return (
     <EuiPageSideBar
       className="dscSidebar"

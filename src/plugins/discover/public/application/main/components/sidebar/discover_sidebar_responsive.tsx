@@ -214,7 +214,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           }
           break;
         case FetchStatus.COMPLETE:
-          if (isPlainRecordType || !props.useNewFieldsApi) {
+          if (!isPlainRecordType || !props.useNewFieldsApi) {
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
               payload: {
@@ -224,9 +224,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                 isPlainRecord: isPlainRecordType,
               },
             });
-          }
-          /*
-          if (isPlainRecordType) {
+          } else {
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
               payload: {
@@ -239,7 +237,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
             });
           }
-          */
+
           break;
         case FetchStatus.ERROR:
           dispatchSidebarStateAction({
