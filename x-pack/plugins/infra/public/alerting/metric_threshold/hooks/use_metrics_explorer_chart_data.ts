@@ -75,7 +75,7 @@ const mapMetricThresholdMetricToMetricsExplorerMetric = (metric: MetricExpressio
   if (metric.aggType === 'count') {
     return {
       name: metric.name,
-      aggregation: metric.aggType as MetricExplorerCustomMetricAggregations,
+      aggregation: 'count' as MetricExplorerCustomMetricAggregations,
       filter: metric.filter,
     };
   }
