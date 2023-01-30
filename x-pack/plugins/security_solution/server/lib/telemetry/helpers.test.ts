@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { createMockPackagePolicy } from './__mocks__';
+import { createMockPackagePolicy, stubClusterInfo, stubLicenseInfo } from './__mocks__';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
@@ -21,7 +21,7 @@ import {
   isPackagePolicyList,
   templateExceptionList,
   addDefaultAdvancedPolicyConfigSettings,
-  metricsResponseToValueListMetaData,
+  formatValueListMetaData,
   tlog,
   setIsElasticCloudDeployment,
   createTaskMetric,
@@ -805,6 +805,9 @@ describe('test advanced policy config overlap ', () => {
 
 describe('test metrics response to value list meta data', () => {
   test('can succeed when metrics response is fully populated', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-01-30'));
     const stubMetricResponses = {
       listMetricsResponse: {
         aggregations: {
@@ -858,8 +861,12 @@ describe('test metrics response to value list meta data', () => {
         },
       },
     };
-    const response = metricsResponseToValueListMetaData(stubMetricResponses);
+    const response = formatValueListMetaData(stubMetricResponses, stubClusterInfo, stubLicenseInfo);
     expect(response).toEqual({
+      '@timestamp': '2023-01-30T00:00:00.000Z',
+      cluster_uuid: '5Pr5PXRQQpGJUTn0czAvKQ',
+      cluster_name: 'elasticsearch',
+      license_id: '4a7dde08-e5f8-4e50-80f8-bc85b72b4934',
       total_list_count: 5,
       types: [
         {
@@ -901,8 +908,12 @@ describe('test metrics response to value list meta data', () => {
       indicatorMatchMetricsResponse: {},
     };
     // @ts-ignore
-    const response = metricsResponseToValueListMetaData(stubMetricResponses);
+    const response = formatValueListMetaData(stubMetricResponses, stubClusterInfo, stubLicenseInfo);
     expect(response).toEqual({
+      '@timestamp': '2023-01-30T00:00:00.000Z',
+      cluster_uuid: '5Pr5PXRQQpGJUTn0czAvKQ',
+      cluster_name: 'elasticsearch',
+      license_id: '4a7dde08-e5f8-4e50-80f8-bc85b72b4934',
       total_list_count: 0,
       types: [],
       lists: [],
