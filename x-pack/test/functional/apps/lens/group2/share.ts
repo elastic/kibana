@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
 
-  describe('lens share tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/149163
+  describe.skip('lens share tests', () => {
     before(async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
     });

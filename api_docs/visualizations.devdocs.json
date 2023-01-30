@@ -6857,6 +6857,20 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.VIS_EVENT_TO_TRIGGER.multiFilter",
+            "type": "string",
+            "tags": [],
+            "label": "multiFilter",
+            "description": [],
+            "signature": [
+              "\"MULTI_VALUE_CLICK_TRIGGER\""
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick",
             "type": "string",
             "tags": [],
