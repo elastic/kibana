@@ -82,13 +82,4 @@ describe('AllCasesSelectorModal', () => {
 
     expect(res.queryByTestId('cases-metrics-stats')).toBeFalsy();
   });
-
-  it('should show the create case button', async () => {
-    const res = appMockRenderer.render(<AllCasesSelectorModal {...defaultProps} />);
-    await waitFor(() => {
-      expect(res.getByTestId('cases-table')).toBeInTheDocument();
-    });
-
-    expect(res.getByTestId('cases-table-add-case-filter-bar')).toBeInTheDocument();
-  });
 });

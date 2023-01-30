@@ -29,7 +29,7 @@ export interface AllCasesSelectorModalProps {
 
 const Modal = styled(EuiModal)`
   ${({ theme }) => `
-    min-width: ${theme.eui.euiBreakpoints.l};
+    min-width: ${theme.eui.euiBreakpoints.m};
     max-width: ${theme.eui.euiBreakpoints.xl};
   `}
 `;
