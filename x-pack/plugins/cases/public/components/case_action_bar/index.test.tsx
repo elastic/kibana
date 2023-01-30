@@ -19,14 +19,14 @@ import {
   noUpdateCasesPermissions,
   TestProviders,
 } from '../../common/mock';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 
-jest.mock('../../containers/use_get_case_user_actions');
+jest.mock('../../containers/use_find_case_user_actions');
 jest.mock('../case_view/use_on_refresh_case_view_page');
 
-const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
-const defaultUseGetCaseUserActions = {
+const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
+const defaultUseFindCaseUserActions = {
   data: {
     caseUserActions: [...caseUserActions, getAlertUserAction()],
     caseServices: {},
@@ -54,7 +54,7 @@ describe('CaseActionBar', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
   });
 
   it('renders', () => {
@@ -75,7 +75,7 @@ describe('CaseActionBar', () => {
   });
 
   it('shows a loading bar when user actions are loaded', async () => {
-    useGetCaseUserActionsMock.mockReturnValue({
+    useFindCaseUserActionsMock.mockReturnValue({
       data: undefined,
       isLoading: true,
     });

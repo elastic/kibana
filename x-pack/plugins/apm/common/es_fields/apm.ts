@@ -125,6 +125,7 @@ export const METRIC_JAVA_GC_COUNT = 'jvm.gc.count';
 export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
 
 export const METRICSET_NAME = 'metricset.name';
+export const METRICSET_INTERVAL = 'metricset.interval';
 
 export const LABEL_NAME = 'labels.name';
 

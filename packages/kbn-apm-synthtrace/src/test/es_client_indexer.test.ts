@@ -33,6 +33,13 @@ describe('Synthtrace ES Client indexer', () => {
       target: '',
       version: '',
       client: {
+        cluster: {
+          getComponentTemplate: async () => {
+            return {
+              component_templates: [],
+            };
+          },
+        },
         helpers: {
           bulk: async (options: any) => {
             datasource = options.datasource;
@@ -65,7 +72,7 @@ describe('Synthtrace ES Client indexer', () => {
 
     const events = await toArray(datasource);
 
-    expect(events.length).toBe(9);
+    expect(events.length).toBe(24);
 
     const mapped = events.map((event) =>
       pick(event, '@timestamp', 'processor.event', 'metricset.name')
@@ -155,7 +162,9 @@ describe('Synthtrace ES Client indexer', () => {
 
     expect(transactions.length).toBe(RATE * CARDINALITY * MINUTES);
 
-    const txMetrics = events.filter((event) => event.metricset?.name === 'transaction');
+    const txMetrics = events.filter(
+      (event) => event.metricset?.name === 'transaction' && event.metricset?.interval === '1m'
+    );
 
     expect(txMetrics.length).toBe(MINUTES * CARDINALITY);
 
