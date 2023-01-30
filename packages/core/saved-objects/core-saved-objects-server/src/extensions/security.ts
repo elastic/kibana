@@ -312,16 +312,49 @@ export interface EnforceAuthorizationParams<A extends string> {
  * valid audit actions for use in AddAuditEventParams.
  */
 export enum AuditAction {
+  /**
+   * For create & bulk create operations
+   */
   CREATE = 'saved_object_create',
+  /**
+   * For get & bulk get operations
+   */
   GET = 'saved_object_get',
+  /**
+   * For resolve and bulk resolve operations
+   */
   RESOLVE = 'saved_object_resolve',
+  /**
+   * For update and bulk update operations
+   */
   UPDATE = 'saved_object_update',
+  /**
+   * For delete and bulk delete operations
+   */
   DELETE = 'saved_object_delete',
+  /**
+   * For the find operation
+   */
   FIND = 'saved_object_find',
+  /**
+   * For the remove references to operation
+   */
   REMOVE_REFERENCES = 'saved_object_remove_references',
+  /**
+   * For the open point in time for type to operation
+   */
   OPEN_POINT_IN_TIME = 'saved_object_open_point_in_time',
+  /**
+   * For the close point in time operation
+   */
   CLOSE_POINT_IN_TIME = 'saved_object_close_point_in_time',
+  /**
+   * For the Collect References operation and for collect references for the update objects spaces operation
+   */
   COLLECT_MULTINAMESPACE_REFERENCES = 'saved_object_collect_multinamespace_references', // this is separate from 'saved_object_get' because the user is only accessing an object's metadata
+  /**
+   * For the update objects spaces operation
+   */
   UPDATE_OBJECTS_SPACES = 'saved_object_update_objects_spaces', // this is separate from 'saved_object_update' because the user is only updating an object's metadata
 }
 
