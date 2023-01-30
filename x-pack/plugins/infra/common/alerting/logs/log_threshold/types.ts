@@ -271,7 +271,7 @@ const chartPreviewHistogramBucket = rt.type({
 const AdditionalContext = rt.type({
   hits: rt.type({
     hits: rt.array(
-      rt.partial({
+      rt.type({
         fields: rt.record(rt.string, rt.array(rt.unknown)),
       })
     ),

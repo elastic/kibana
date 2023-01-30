@@ -1075,7 +1075,7 @@ export const FIRED_ACTIONS: ActionGroup<'logs.threshold.fired'> = {
 };
 
 const getContextAggregation = (
-  params: Pick<RuleParams, 'timeSize' | 'timeUnit' | 'groupBy'> & { criteria: CountCriteria }
+  params: Pick<RuleParams, 'groupBy'> & { criteria: CountCriteria }
 ) => {
   const validPrefixForContext = ['host', 'cloud', 'orchestrator', 'container', 'labels', 'tags'];
   const positiveCriteria = params.criteria.filter((criterion: Criterion) =>
