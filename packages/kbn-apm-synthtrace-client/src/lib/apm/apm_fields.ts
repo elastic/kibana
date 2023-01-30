@@ -130,6 +130,7 @@ export type ApmFields = Fields<{
     'processor.name': string;
     'session.id': string;
     'trace.id': string;
+    'transaction.aggregation.overflow_count': number;
     'transaction.duration.us': number;
     'transaction.id': string;
     'transaction.name': string;
