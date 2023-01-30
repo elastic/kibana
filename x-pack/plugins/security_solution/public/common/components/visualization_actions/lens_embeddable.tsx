@@ -200,7 +200,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             stackByField={stackByField}
             timerange={timerange}
             title={inspectTitle}
-            widthDefaultActions={false}
+            withDefaultActions={false}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
