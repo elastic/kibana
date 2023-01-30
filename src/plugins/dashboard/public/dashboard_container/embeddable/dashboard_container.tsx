@@ -417,6 +417,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
     this.domNode = dom;
 
+    this.domNode.className = 'dashboardContainer';
+
     const { Wrapper: DashboardReduxWrapper } = this.reduxEmbeddableTools;
     ReactDOM.render(
       <I18nProvider>

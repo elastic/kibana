@@ -88,6 +88,8 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
           css={floatingActionStyles}
           onMouseOver={showFloatingActions}
           onFocus={showFloatingActions}
+          onMouseLeave={hideFloatingActions}
+          onBlur={hideFloatingActions}
         >
           {actions}
         </div>
