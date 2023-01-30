@@ -161,8 +161,8 @@ image::images/connectors-with-missing-secrets.png[Connectors with missing secret
 [[create-connectors]]
 === Preconfigured connectors
 
-For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure connectors>>
-before {kib} starts.
+For out-of-the-box and standardized connectors, refer to
+<pre-configured-connectors,preconfigured connectors>>.
 
 [float]
 [[montoring-connectors]]
