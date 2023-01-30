@@ -38,6 +38,40 @@ const GridStyles: EuiDataGridStyle = {
   fontSize: 's',
 };
 
+const basicRenderCellValue = ({
+  data,
+  columnId,
+}: {
+  data: Array<{ field: string; value: string[] }>;
+  columnId: string;
+}) => {
+  const value = data.find((d) => d.field === columnId)?.value ?? [];
+  if (Array.isArray(value)) {
+    return <>{value.length ? value.join() : '--'}</>;
+  }
+  return <>{value}</>;
+};
+
+const renderAlertLifecycleStatus = ({
+  data,
+  columnId,
+}: {
+  data: Array<{ field: string; value: string[] }>;
+  columnId: string;
+}) => {
+  const alertStatus = data.find((d) => d.field === ALERT_STATUS)?.value ?? [];
+  if (Array.isArray(alertStatus) && alertStatus.length) {
+    const flapping = data.find((d) => d.field === ALERT_FLAPPING)?.value ?? [];
+    return (
+      <AlertLifecycleStatusBadge
+        alertStatus={alertStatus.join() as AlertStatus}
+        flapping={flapping[0]}
+      />
+    );
+  }
+  return basicRenderCellValue({ data, columnId });
+};
+
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
   const alertsData = props.useFetchAlertsData();
@@ -219,20 +253,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
-  const basicRenderCellValue = ({
-    data,
-    columnId,
-  }: {
-    data: Array<{ field: string; value: string[] }>;
-    columnId: string;
-  }) => {
-    const value = data.find((d) => d.field === columnId)?.value ?? [];
-    if (Array.isArray(value)) {
-      return <>{value.length ? value.join() : '--'}</>;
-    }
-    return <>{value}</>;
-  };
-
   const renderCellValue = useCallback(
     () =>
       props.alertsTableConfiguration?.getRenderCellValue
@@ -242,23 +262,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         : basicRenderCellValue,
     [handleFlyoutAlert, props.alertsTableConfiguration]
   )();
-
-  const renderAlertLifecycleStatus = useCallback(
-    ({ data, columnId }: { data: Array<{ field: string; value: string[] }>; columnId: string }) => {
-      const alertStatus = data.find((d) => d.field === ALERT_STATUS)?.value ?? [];
-      if (Array.isArray(alertStatus) && alertStatus.length) {
-        const flapping = data.find((d) => d.field === ALERT_FLAPPING)?.value ?? [];
-        return (
-          <AlertLifecycleStatusBadge
-            alertStatus={alertStatus.join() as AlertStatus}
-            flapping={flapping[0]}
-          />
-        );
-      }
-      return basicRenderCellValue({ data, columnId });
-    },
-    []
-  );
 
   const handleRenderCellValue = useCallback(
     (_props: EuiDataGridCellValueElementProps) => {
@@ -291,7 +294,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       pagination.pageSize,
       renderCellValue,
       showAlertStatusWithFlapping,
-      renderAlertLifecycleStatus,
     ]
   );
 
