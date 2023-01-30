@@ -76,7 +76,7 @@ export function getDocumentTypeFilterForServiceMetrics() {
   return [
     {
       term: {
-        [METRICSET_NAME]: 'service',
+        [METRICSET_NAME]: 'service_transaction',
       },
     },
   ];

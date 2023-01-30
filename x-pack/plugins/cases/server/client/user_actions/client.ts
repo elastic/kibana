@@ -7,9 +7,8 @@
 
 import type {
   GetCaseConnectorsResponse,
-  CaseUserActionsResponse,
   UserActionFindResponse,
-  GetCaseUsersResponse,
+  CaseUserActionsDeprecatedResponse,
 } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import { get } from './get';
@@ -27,7 +26,7 @@ export interface UserActionsSubClient {
   /**
    * Retrieves all user actions for a particular case.
    */
-  getAll(params: UserActionGet): Promise<CaseUserActionsResponse>;
+  getAll(params: UserActionGet): Promise<CaseUserActionsDeprecatedResponse>;
   /**
    * Retrieves all the connectors used within a given case
    */

@@ -10463,9 +10463,9 @@
             "signature": [
               "() => Readonly<Record<string, ",
               {
-                "pluginId": "@kbn/core-ui-settings-common",
+                "pluginId": "@kbn/core-ui-settings-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.PublicUiSettingsParams",
                 "text": "PublicUiSettingsParams"
               },
@@ -19329,9 +19329,9 @@
             "signature": [
               "[key: string]:  ",
               {
-                "pluginId": "@kbn/core-ui-settings-common",
+                "pluginId": "@kbn/core-ui-settings-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.PublicUiSettingsParams",
                 "text": "PublicUiSettingsParams"
               },
@@ -20337,9 +20337,7 @@
         "type": "Type",
         "tags": [],
         "label": "PublicUiSettingsParams",
-        "description": [
-          "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
-        ],
+        "description": [],
         "signature": [
           "{ name?: string | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; options?: string[] | number[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; type?: ",
           {
@@ -20367,7 +20365,7 @@
           },
           " | undefined; }"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47803,15 +47801,15 @@
               "\nReturns registered uiSettings values {@link UiSettingsParams}"
             ],
             "signature": [
-              "() => Readonly<Record<string, ",
+              "() => Readonly<Record<string, Omit<",
               {
                 "pluginId": "@kbn/core-ui-settings-common",
                 "scope": "common",
                 "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.PublicUiSettingsParams",
-                "text": "PublicUiSettingsParams"
+                "section": "def-common.UiSettingsParams",
+                "text": "UiSettingsParams"
               },
-              ">>"
+              "<unknown>, \"schema\">>>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
@@ -62533,10 +62531,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/logic/rule_execution_log/execution_saved_object/saved_objects_type.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_saved_object_mappings.ts"
               },
               {
@@ -69853,47 +69847,6 @@
           "<ContextType>"
         ],
         "path": "src/core/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.PublicUiSettingsParams",
-        "type": "Type",
-        "tags": [],
-        "label": "PublicUiSettingsParams",
-        "description": [
-          "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
-        ],
-        "signature": [
-          "{ name?: string | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; options?: string[] | number[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; type?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
-          " | undefined; deprecation?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.DeprecationSettings",
-            "text": "DeprecationSettings"
-          },
-          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; scope?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsScope",
-            "text": "UiSettingsScope"
-          },
-          " | undefined; }"
-        ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
