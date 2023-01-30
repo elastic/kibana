@@ -16,8 +16,6 @@ import type {
   AlertsProgressBarData,
 } from '../alerts_progress_bar_panel/types';
 
-export type AggregationType = 'Severity' | 'Type' | 'Top';
-
 export type SummaryChartsAgg = Partial<AlertsBySeverityAgg | AlertsByTypeAgg | AlertsByGroupingAgg>;
 
 export type SummaryChartsData = SeverityData | AlertsTypeData | AlertsProgressBarData;

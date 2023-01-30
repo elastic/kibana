@@ -87,7 +87,6 @@ const renderUseSummaryChartData = (props: Partial<UseAlertsQueryProps> = {}) =>
   renderHook<UseAlertsQueryProps, ReturnType<UseAlerts>>(
     () =>
       useSummaryChartData({
-        aggregationType: 'Severity',
         aggregations: aggregations.severityAggregations,
         uniqueQueryId: 'test',
         signalIndexName: 'signal-alerts',
@@ -182,7 +181,6 @@ describe('get severity chart data', () => {
     it('should return default values', () => {
       const { result } = renderUseSummaryChartData({
         aggregations: aggregations.alertTypeAggregations,
-        aggregationType: 'Type',
       });
 
       expect(result.current).toEqual({
@@ -207,7 +205,6 @@ describe('get severity chart data', () => {
 
       const { result } = renderUseSummaryChartData({
         aggregations: aggregations.alertTypeAggregations,
-        aggregationType: 'Type',
       });
       expect(result.current).toEqual({
         items: alertTypeMock.parsedAlerts,
@@ -226,7 +223,6 @@ describe('get severity chart data', () => {
     it('should return default values', () => {
       const { result } = renderUseSummaryChartData({
         aggregations: aggregations.alertsGroupingAggregations('host.name'),
-        aggregationType: 'Top',
       });
 
       expect(result.current).toEqual({
@@ -251,7 +247,6 @@ describe('get severity chart data', () => {
 
       const { result } = renderUseSummaryChartData({
         aggregations: aggregations.alertsGroupingAggregations('host.name'),
-        aggregationType: 'Top',
       });
       expect(result.current).toEqual({
         items: alertsGroupingMock.parsedAlerts,

@@ -9,6 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import type { AlertsProgressBarData } from './types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
+import * as i18n from './translations';
 
 const ProgressWrapper = styled.div`
   height: 160px;
@@ -39,7 +40,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
       {!isLoading && data.length === 0 ? (
         <>
           <EuiText size="s" textAlign="center" data-test-subj="empty-proress-bar">
-            {'No items found'}
+            {i18n.EMPTY_DATA_MESSAGE}
           </EuiText>
           <EuiHorizontalRule margin="xs" />
         </>
@@ -58,7 +59,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
                 size="s"
                 value={item.percentage}
                 label={
-                  item.label === 'Other' ? (
+                  item.key === 'Other' ? (
                     item.label
                   ) : (
                     <DefaultDraggable

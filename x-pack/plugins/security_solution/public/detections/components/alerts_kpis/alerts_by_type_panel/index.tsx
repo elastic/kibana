@@ -29,7 +29,6 @@ export const AlertsByTypePanel: React.FC<ChartsPanelProps> = ({
   const uniqueQueryId = useMemo(() => `${ALERTS_BY_TYPE_CHART_ID}-${uuid()}`, []);
 
   const { items, isLoading } = useSummaryChartData({
-    aggregationType: 'Type',
     aggregations: alertTypeAggregations,
     filters,
     query,

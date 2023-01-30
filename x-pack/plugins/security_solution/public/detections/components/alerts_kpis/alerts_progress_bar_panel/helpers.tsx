@@ -10,6 +10,7 @@ import type { AlertsByGroupingAgg, AlertsProgressBarData } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { BucketItem } from '../../../../../common/search_strategy/security_solution/cti';
 import type { SummaryChartsData } from '../alerts_summary_charts_panel/types';
+import * as i18n from './translations';
 
 export const parseAlertsGroupingData = (
   response: AlertSearchResponse<{}, AlertsByGroupingAgg>
@@ -23,7 +24,7 @@ export const parseAlertsGroupingData = (
   const total =
     buckets.reduce((acc: number, group: BucketItem) => acc + group.doc_count, 0) + other;
 
-  const topHosts = buckets.map((group) => {
+  const topAlerts = buckets.map((group) => {
     return {
       key: group.key,
       value: group.doc_count,
@@ -32,14 +33,14 @@ export const parseAlertsGroupingData = (
     };
   });
 
-  topHosts.push({
+  topAlerts.push({
     key: 'Other',
     value: other,
     percentage: Math.round((other / total) * 1000) / 10,
-    label: 'Other',
+    label: i18n.OTHER,
   });
 
-  return topHosts;
+  return topAlerts;
 };
 
 export const isAlertsProgressBarData = (

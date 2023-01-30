@@ -7,8 +7,22 @@
 import { i18n } from '@kbn/i18n';
 
 export const ALERT_BY_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.alertsByHost.hostChartTitle',
+  'xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.chartTitle',
   {
     defaultMessage: 'Top alerts by',
+  }
+);
+
+export const EMPTY_DATA_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.noItemsFoundMessage',
+  {
+    defaultMessage: 'No items found',
+  }
+);
+
+export const OTHER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.otherGroup',
+  {
+    defaultMessage: 'Other',
   }
 );

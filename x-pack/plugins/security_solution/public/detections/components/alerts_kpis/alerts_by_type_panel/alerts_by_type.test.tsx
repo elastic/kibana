@@ -10,6 +10,8 @@ import { TestProviders } from '../../../../common/mock';
 import { AlertsByType } from './alerts_by_type';
 import { parsedAlerts } from './mock_data';
 
+const display = 'alerts-by-type-palette-display';
+
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('react-router-dom', () => {
@@ -35,15 +37,13 @@ describe('Alert by type chart', () => {
           <AlertsByType {...defaultProps} />
         </TestProviders>
       );
-      expect(
-        container.querySelector('[data-test-subj="alerts-by-type-palette-display"]')
-      ).toBeInTheDocument();
-      expect(
-        container.querySelector('[data-test-subj="alerts-by-type-palette-display"]')?.textContent
-      ).toContain('Detection:0');
-      expect(
-        container.querySelector('[data-test-subj="alerts-by-type-palette-display"]')?.textContent
-      ).toContain('Prevention:0');
+      expect(container.querySelector(`[data-test-subj="${display}"]`)).toBeInTheDocument();
+      expect(container.querySelector(`[data-test-subj="${display}"]`)?.textContent).toContain(
+        'Detection:0'
+      );
+      expect(container.querySelector(`[data-test-subj="${display}"]`)?.textContent).toContain(
+        'Prevention:0'
+      );
     });
   });
 
@@ -70,15 +70,13 @@ describe('Alert by type chart', () => {
           <AlertsByType data={parsedAlerts} isLoading={false} />
         </TestProviders>
       );
-      expect(
-        container.querySelector('[data-test-subj="alerts-by-type-palette-display"]')
-      ).toBeInTheDocument();
-      expect(
-        container.querySelector('[data-test-subj="alerts-by-type-palette-display"]')?.textContent
-      ).toContain('Detection:583');
-      expect(
-        container.querySelector('[data-test-subj="alerts-by-type-palette-display"]')?.textContent
-      ).toContain('Prevention:6');
+      expect(container.querySelector(`[data-test-subj="${display}"]`)).toBeInTheDocument();
+      expect(container.querySelector(`[data-test-subj="${display}"]`)?.textContent).toContain(
+        'Detection:583'
+      );
+      expect(container.querySelector(`[data-test-subj="${display}"]`)?.textContent).toContain(
+        'Prevention:6'
+      );
     });
   });
 

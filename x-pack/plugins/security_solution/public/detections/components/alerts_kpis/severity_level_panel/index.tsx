@@ -30,7 +30,6 @@ export const SeverityLevelPanel: React.FC<ChartsPanelProps> = ({
   const uniqueQueryId = useMemo(() => `${SEVERITY_DONUT_CHART_ID}-${uuid()}`, []);
 
   const { items, isLoading } = useSummaryChartData({
-    aggregationType: 'Severity',
     aggregations: severityAggregations,
     filters,
     query,

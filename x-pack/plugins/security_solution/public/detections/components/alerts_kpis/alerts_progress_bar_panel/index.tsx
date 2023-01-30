@@ -41,7 +41,6 @@ export const AlertsProgressBarPanel: React.FC<ChartsPanelProps> = ({
   }, []);
 
   const { items, isLoading } = useSummaryChartData({
-    aggregationType: 'Top',
     aggregations,
     filters,
     query,

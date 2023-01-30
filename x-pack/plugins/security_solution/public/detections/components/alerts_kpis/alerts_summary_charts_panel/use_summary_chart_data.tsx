@@ -9,7 +9,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { buildEsQuery } from '@kbn/es-query';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
-import type { SummaryChartsAgg, SummaryChartsData, AggregationType } from './types';
+import type { SummaryChartsAgg, SummaryChartsData } from './types';
 import type { EntityFilter } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -26,7 +26,6 @@ export type UseAlerts = (props: UseAlertsQueryProps) => {
 
 export interface UseAlertsQueryProps {
   aggregations: {};
-  aggregationType: AggregationType;
   uniqueQueryId: string;
   signalIndexName: string | null;
   skip?: boolean;
@@ -74,7 +73,6 @@ export const getAlertsQuery = ({
 });
 
 export const useSummaryChartData: UseAlerts = ({
-  aggregationType,
   aggregations,
   uniqueQueryId,
   entityFilter,
@@ -143,7 +141,7 @@ export const useSummaryChartData: UseAlerts = ({
       setItems(parseData(data));
     }
     setUpdatedAt(Date.now());
-  }, [data, aggregationType]);
+  }, [data]);
 
   const refetch = useCallback(() => {
     if (!skip && refetchQuery) {
