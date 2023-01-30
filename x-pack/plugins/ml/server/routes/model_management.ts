@@ -21,10 +21,10 @@ import { itemTypeLiterals } from './schemas/saved_objects';
 
 export function modelManagementRoutes({ router, routeGuard }: RouteInitialization) {
   /**
-   * @apiGroup TrainedModels
+   * @apiGroup ModelManagement
    *
    * @api {get} /api/ml/model_management/nodes_overview Get node overview about the models allocation
-   * @apiName GetTrainedModelsNodesOverview
+   * @apiName GetModelManagementNodesOverview
    * @apiDescription Retrieves the list of ML nodes with memory breakdown and allocated models info
    */
   router.get(
@@ -54,11 +54,11 @@ export function modelManagementRoutes({ router, routeGuard }: RouteInitializatio
   );
 
   /**
-   * @apiGroup SystemRoutes
+   * @apiGroup ModelManagement
    *
-   * @api {get} /api/ml/memory_usage Get the amount of ML nodes
-   * @apiName MlNodeCount
-   * @apiDescription Returns the amount of ML nodes.
+   * @api {get} /api/ml/model_management/memory_usage Memory usage for jobs and trained models
+   * @apiName GetModelManagementMemoryUsage
+   * @apiDescription Returns the memory usage for jobs and trained models
    */
   router.get(
     {
