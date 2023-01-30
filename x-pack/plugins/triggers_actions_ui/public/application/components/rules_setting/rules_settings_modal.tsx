@@ -261,13 +261,11 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   return (
     <EuiModal data-test-subj="rulesSettingsModal" onClose={onClose} maxWidth={880}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h3>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.rulesSettings.modal.title"
-              defaultMessage="Rule settings"
-            />
-          </h3>
+        <EuiModalHeaderTitle component="h3">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.rulesSettings.modal.title"
+            defaultMessage="Rule settings"
+          />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
