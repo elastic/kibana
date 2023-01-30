@@ -216,7 +216,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           !('selectionStyle' in operationDefinition) ||
           operationDefinition.selectionStyle !== 'hidden'
       )
-      .filter(({ type }) => fieldByOperation[type]?.size || operationWithoutField.has(type))
+      .filter(({ type }) => fieldByOperation.get(type)?.size || operationWithoutField.has(type))
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
@@ -338,7 +338,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
-            const possibleFields = fieldByOperation[operationType] || new Set();
+            const possibleFields = fieldByOperation.get(operationType) ?? new Set<string>();
 
             let newLayer: IndexPatternLayer;
             if (possibleFields.size === 1) {
