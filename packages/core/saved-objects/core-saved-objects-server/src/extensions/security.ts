@@ -837,7 +837,7 @@ export interface ISavedObjectsSecurityExtension {
 
   /**
    * Performs saved object audit logging for the delete method of the SecureSpacesClientWrapper
-   * @param spaceId - the id of the space where deletion is being performed
+   * @param spaceId - the id of the space being deleted
    * @param objects - the objects to audit
    */
   auditObjectsForSpaceDeletion: <T = unknown>(

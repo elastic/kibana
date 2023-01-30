@@ -58,6 +58,11 @@ export interface SavedObjectReference {
   id: string;
 }
 
+/**
+ * Definition of the Saved Object interface
+ *
+ * @public
+ */
 export interface SavedObject<T = unknown> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
