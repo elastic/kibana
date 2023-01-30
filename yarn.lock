@@ -389,12 +389,7 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
-"@babel/parser@^7.1.0", "@babel/parser@^7.10.3", "@babel/parser@^7.12.11", "@babel/parser@^7.12.7", "@babel/parser@^7.14.7", "@babel/parser@^7.20.7":
-  version "7.20.7"
-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.20.7.tgz#66fe23b3c8569220817d5feb8b9dcdc95bb4f71b"
-  integrity sha512-T3Z9oHybU+0vZlY9CiDSJQTD5ZapcW18ZctFMi0MOAl/4BjFF4ul7NVSARLdbGO5vDqy9eQiGTV0LtKfvCYvcg==
-
-"@babel/parser@^7.20.13":
+"@babel/parser@^7.1.0", "@babel/parser@^7.10.3", "@babel/parser@^7.12.11", "@babel/parser@^7.12.7", "@babel/parser@^7.14.7", "@babel/parser@^7.20.13", "@babel/parser@^7.20.7":
   version "7.20.13"
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.20.13.tgz#ddf1eb5a813588d2fb1692b70c6fce75b945c088"
   integrity sha512-gFDLKMfpiXCsjt4za2JA9oTMn70CeseCehb11kRZgvd7+F67Hih3OHOK24cRrWECJ/ljfPGac6ygXAs/C8kIvw==
@@ -1186,14 +1181,7 @@
     core-js-pure "^3.25.1"
     regenerator-runtime "^0.13.10"
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.3", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.4", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
-  version "7.20.7"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.20.7.tgz#fcb41a5a70550e04a7b708037c7c32f7f356d8fd"
-  integrity sha512-UF0tvkUtxwAgZ5W/KrkHf0Rn0fdnLDU9ScxBrEVNUprE/MzirjK4MJUX1/BVDv00Sv8cljtukVK1aky++X1SjQ==
-  dependencies:
-    regenerator-runtime "^0.13.11"
-
-"@babel/runtime@^7.20.13":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.13", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.4", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
   version "7.20.13"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.20.13.tgz#7055ab8a7cff2b8f6058bf6ae45ff84ad2aded4b"
   integrity sha512-gt3PKXs0DBoL9xCvOIIZ2NEqAGZqHjAnmVbfQtB620V0uReIQutpel14KcneZuer7UioY8ALKZ7iocavvzTNFA==
@@ -1209,23 +1197,7 @@
     "@babel/parser" "^7.20.7"
     "@babel/types" "^7.20.7"
 
-"@babel/traverse@^7.10.3", "@babel/traverse@^7.12.11", "@babel/traverse@^7.12.9", "@babel/traverse@^7.13.0", "@babel/traverse@^7.19.0", "@babel/traverse@^7.19.1", "@babel/traverse@^7.20.10", "@babel/traverse@^7.20.12", "@babel/traverse@^7.20.7", "@babel/traverse@^7.4.5", "@babel/traverse@^7.7.2":
-  version "7.20.12"
-  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.20.12.tgz#7f0f787b3a67ca4475adef1f56cb94f6abd4a4b5"
-  integrity sha512-MsIbFN0u+raeja38qboyF8TIT7K0BFzz/Yd/77ta4MsUsmP2RAnidIlwq7d5HFQrH/OZJecGV6B71C4zAgpoSQ==
-  dependencies:
-    "@babel/code-frame" "^7.18.6"
-    "@babel/generator" "^7.20.7"
-    "@babel/helper-environment-visitor" "^7.18.9"
-    "@babel/helper-function-name" "^7.19.0"
-    "@babel/helper-hoist-variables" "^7.18.6"
-    "@babel/helper-split-export-declaration" "^7.18.6"
-    "@babel/parser" "^7.20.7"
-    "@babel/types" "^7.20.7"
-    debug "^4.1.0"
-    globals "^11.1.0"
-
-"@babel/traverse@^7.20.13":
+"@babel/traverse@^7.10.3", "@babel/traverse@^7.12.11", "@babel/traverse@^7.12.9", "@babel/traverse@^7.13.0", "@babel/traverse@^7.19.0", "@babel/traverse@^7.19.1", "@babel/traverse@^7.20.10", "@babel/traverse@^7.20.12", "@babel/traverse@^7.20.13", "@babel/traverse@^7.20.7", "@babel/traverse@^7.4.5", "@babel/traverse@^7.7.2":
   version "7.20.13"
   resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.20.13.tgz#817c1ba13d11accca89478bd5481b2d168d07473"
   integrity sha512-kMJXfF0T6DIS9E8cgdLCSAL+cuCK+YEZHWiLK0SXpTo8YRj5lpJu3CDNKiIBCne4m9hhTIqUg6SYTAI39tAiVQ==
