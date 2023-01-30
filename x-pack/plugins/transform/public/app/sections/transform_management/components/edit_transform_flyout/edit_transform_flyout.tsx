@@ -11,14 +11,12 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -28,12 +26,13 @@ import { isManagedTransform } from '../../../../common/managed_transforms_utils'
 
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
+import { EditTransformApiErrorCallout } from './edit_transform_api_error_callout';
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
 import {
-  useEditTransformFlyoutConfig,
-  useEditTransformApiErrorMessage,
+  useEditTransformFlyout,
   EditTransformFlyoutProvider,
+  TRANSFORM_HOOK,
 } from './use_edit_transform_flyout';
 import { EditTransformUpdateButton } from './edit_transform_update_button';
 
@@ -62,8 +61,7 @@ interface EditTransformFlyoutConsumerProps {
 export const EditTransformFlyoutConsumer: FC<EditTransformFlyoutConsumerProps> = ({
   closeFlyout,
 }) => {
-  const config = useEditTransformFlyoutConfig();
-  const errorMessage = useEditTransformApiErrorMessage();
+  const config = useEditTransformFlyout(TRANSFORM_HOOK.config);
 
   return (
     <EuiFlyout
@@ -94,24 +92,7 @@ export const EditTransformFlyoutConsumer: FC<EditTransformFlyoutConsumerProps> =
       ) : null}
       <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
         <EditTransformFlyoutForm />
-        {errorMessage !== undefined && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.transform.transformList.editTransformGenericErrorMessage',
-                {
-                  defaultMessage:
-                    'An error occurred calling the API endpoint to update transforms.',
-                }
-              )}
-              color="danger"
-              iconType="alert"
-            >
-              <p>{errorMessage}</p>
-            </EuiCallOut>
-          </>
-        )}
+        <EditTransformApiErrorCallout />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

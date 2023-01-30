@@ -10,14 +10,11 @@ import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import {
-  useEditTransformFlyoutStateFormFieldDocsPerSecond,
-  useEditTransformFlyoutActions,
-} from './use_edit_transform_flyout';
+import { useEditTransformFlyout, TRANSFORM_HOOK } from './use_edit_transform_flyout';
 
 export const EditTransformDocsPerSecond: FC = () => {
-  const { errorMessages, value } = useEditTransformFlyoutStateFormFieldDocsPerSecond();
-  const { formField } = useEditTransformFlyoutActions();
+  const { errorMessages, value } = useEditTransformFlyout(TRANSFORM_HOOK.docsPerSecond);
+  const { formField } = useEditTransformFlyout(TRANSFORM_HOOK.actions);
 
   return (
     <EditTransformFlyoutFormTextInput

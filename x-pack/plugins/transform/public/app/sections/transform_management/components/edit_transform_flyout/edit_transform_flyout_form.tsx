@@ -11,8 +11,7 @@ import { EuiAccordion, EuiForm, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { EditTransformDescription } from './edit_transform_description';
-import { EditTransformFrequency } from './edit_transform_frequency';
+import { EditTransformFlyoutFormTextInputHelper } from './edit_transform_flyout_form_text_input';
 import { EditTransformRetentionPolicy } from './edit_transform_retention_policy';
 import { EditTransformDestinationIndex } from './edit_transform_destination_index';
 import { EditTransformIngestPipeline } from './edit_transform_ingest_pipeline';
@@ -22,8 +21,12 @@ import { EditTransformNumFailureRetries } from './edit_transform_num_failure_ret
 
 export const EditTransformFlyoutForm: FC = () => (
   <EuiForm>
-    <EditTransformDescription />
-    <EditTransformFrequency />
+    <EditTransformFlyoutFormTextInputHelper field="description" label="Description" />
+    <EditTransformFlyoutFormTextInputHelper
+      field="frequency"
+      label="Frequency"
+      helpText="The interval to check for changes in source indices when the transform runs continuously."
+    />
 
     <EuiSpacer size="l" />
 

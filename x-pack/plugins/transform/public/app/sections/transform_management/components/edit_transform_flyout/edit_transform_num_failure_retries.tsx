@@ -10,14 +10,11 @@ import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import {
-  useEditTransformFlyoutStateFormFieldNumFailureRetries,
-  useEditTransformFlyoutActions,
-} from './use_edit_transform_flyout';
+import { useEditTransformFlyout, TRANSFORM_HOOK } from './use_edit_transform_flyout';
 
 export const EditTransformNumFailureRetries: FC = () => {
-  const { errorMessages, value } = useEditTransformFlyoutStateFormFieldNumFailureRetries();
-  const { formField } = useEditTransformFlyoutActions();
+  const { errorMessages, value } = useEditTransformFlyout(TRANSFORM_HOOK.numFailureRetries);
+  const { formField } = useEditTransformFlyout(TRANSFORM_HOOK.actions);
 
   return (
     <EditTransformFlyoutFormTextInput

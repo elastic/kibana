@@ -15,23 +15,17 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import { useAppDependencies } from '../../../../app_dependencies';
 
-import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import {
-  useEditTransformFlyoutDataViewId,
-  useEditTransformFlyoutStateFormFieldRetentionPolicy,
-  useEditTransformFlyoutStateFormSections,
-  useEditTransformFlyoutActions,
-} from './use_edit_transform_flyout';
+import { EditTransformFlyoutFormTextInputHelper } from './edit_transform_flyout_form_text_input';
+import { useEditTransformFlyout, TRANSFORM_HOOK } from './use_edit_transform_flyout';
 
 export const EditTransformRetentionPolicy: FC = () => {
   const appDeps = useAppDependencies();
   const dataViewsClient = appDeps.data.dataViews;
 
-  const dataViewId = useEditTransformFlyoutDataViewId();
-  const formSections = useEditTransformFlyoutStateFormSections();
-  const { retentionPolicyField, retentionPolicyMaxAge } =
-    useEditTransformFlyoutStateFormFieldRetentionPolicy();
-  const { formField, formSection } = useEditTransformFlyoutActions();
+  const dataViewId = useEditTransformFlyout(TRANSFORM_HOOK.dataViewId);
+  const formSections = useEditTransformFlyout(TRANSFORM_HOOK.stateFormSection);
+  const retentionPolicyField = useEditTransformFlyout(TRANSFORM_HOOK.retentionPolicyField);
+  const { formField, formSection } = useEditTransformFlyout(TRANSFORM_HOOK.actions);
 
   const [dateFieldNames, setDateFieldNames] = useState<string[]>([]);
 
@@ -130,36 +124,10 @@ export const EditTransformRetentionPolicy: FC = () => {
                 />
               </EuiFormRow>
             ) : (
-              <EditTransformFlyoutFormTextInput
-                dataTestSubj="transformEditFlyoutRetentionPolicyFieldInput"
-                errorMessages={retentionPolicyField.errorMessages}
-                label={i18n.translate(
-                  'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
-                  {
-                    defaultMessage: 'Field',
-                  }
-                )}
-                onChange={(valueUpdate) =>
-                  formField({ field: 'retentionPolicyField', value: valueUpdate })
-                }
-                value={retentionPolicyField.value}
-              />
+              <EditTransformFlyoutFormTextInputHelper field="retentionPolicyField" label="Field" />
             )
           }
-          <EditTransformFlyoutFormTextInput
-            dataTestSubj="transformEditFlyoutRetentionPolicyMaxAgeInput"
-            errorMessages={retentionPolicyMaxAge.errorMessages}
-            label={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormRetentionMaxAgeFieldLabel',
-              {
-                defaultMessage: 'Max age',
-              }
-            )}
-            onChange={(valueUpdate) =>
-              formField({ field: 'retentionPolicyMaxAge', value: valueUpdate })
-            }
-            value={retentionPolicyMaxAge.value}
-          />
+          <EditTransformFlyoutFormTextInputHelper field="retentionPolicyMaxAge" label="Max age" />
         </div>
       )}
     </>

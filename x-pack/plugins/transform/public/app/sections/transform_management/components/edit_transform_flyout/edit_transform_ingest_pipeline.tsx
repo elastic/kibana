@@ -16,14 +16,11 @@ import { isEsIngestPipelines } from '../../../../../../common/api_schemas/type_g
 import { useApi } from '../../../../hooks/use_api';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import {
-  useEditTransformFlyoutStateFormFieldDestinationIngestPipeline,
-  useEditTransformFlyoutActions,
-} from './use_edit_transform_flyout';
+import { useEditTransformFlyout, TRANSFORM_HOOK } from './use_edit_transform_flyout';
 
 export const EditTransformIngestPipeline: FC = () => {
-  const { errorMessages, value } = useEditTransformFlyoutStateFormFieldDestinationIngestPipeline();
-  const { formField } = useEditTransformFlyoutActions();
+  const { errorMessages, value } = useEditTransformFlyout(TRANSFORM_HOOK.destinationIngestPipeline);
+  const { formField } = useEditTransformFlyout(TRANSFORM_HOOK.actions);
 
   const api = useApi();
 

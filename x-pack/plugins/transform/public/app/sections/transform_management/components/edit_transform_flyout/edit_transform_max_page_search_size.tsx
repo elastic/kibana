@@ -10,15 +10,13 @@ import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import {
-  useEditTransformFlyoutStateFormFieldMaxPageSearchSize,
-  useEditTransformFlyoutActions,
-} from './use_edit_transform_flyout';
+import { useEditTransformFlyout, TRANSFORM_HOOK } from './use_edit_transform_flyout';
 
 export const EditTransformMaxPageSearchSize: FC = () => {
-  const { defaultValue, errorMessages, value } =
-    useEditTransformFlyoutStateFormFieldMaxPageSearchSize();
-  const { formField } = useEditTransformFlyoutActions();
+  const { defaultValue, errorMessages, value } = useEditTransformFlyout(
+    TRANSFORM_HOOK.maxPageSearchSize
+  );
+  const { formField } = useEditTransformFlyout(TRANSFORM_HOOK.actions);
 
   return (
     <EditTransformFlyoutFormTextInput

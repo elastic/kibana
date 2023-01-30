@@ -7,7 +7,7 @@
 
 import constate from 'constate';
 import { isEqual, merge } from 'lodash';
-import { useReducer } from 'react';
+import { useMemo, useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { numberValidator } from '@kbn/ml-agg-utils';
@@ -35,7 +35,7 @@ import {
 // The outer most level reducer defines a flat structure of names for form fields.
 // This is a flat structure regardless of whether the final request object will be nested.
 // For example, `destinationIndex` and `destinationIngestPipeline` will later be nested under `dest`.
-type EditTransformFormFields =
+export type EditTransformFormFields =
   | 'description'
   | 'destinationIndex'
   | 'destinationIngestPipeline'
@@ -557,44 +557,50 @@ interface EditTransformFlyoutOptions {
   dataViewId?: string;
 }
 
-export const useEditTransformFlyout = ({ config, dataViewId }: EditTransformFlyoutOptions) => {
+const useEditTransformFlyoutInternal = ({ config, dataViewId }: EditTransformFlyoutOptions) => {
   const [state, dispatch] = useReducer(formReducerFactory(config), getDefaultState(config));
-  return { config, dataViewId, state, dispatch };
+
+  const actions = useMemo(
+    () => ({
+      apiError: (payload: ApiErrorAction['payload']) => dispatch({ name: 'api_error', payload }),
+      formField: (payload: FormFieldAction['payload']) =>
+        dispatch({
+          name: 'form_field',
+          payload,
+        }),
+      formSection: (payload: FormSectionAction['payload']) =>
+        dispatch({ name: 'form_section', payload }),
+    }),
+    []
+  );
+  return { config, dataViewId, state, actions };
 };
 
-export type UseEditTransformFlyoutReturnType = ReturnType<typeof useEditTransformFlyout>;
+export enum TRANSFORM_HOOK {
+  config,
+  dataViewId,
+  actions,
+  stateFormSection,
+  description,
+  destinationIndex,
+  docsPerSecond,
+  frequency,
+  destinationIngestPipeline,
+  maxPageSearchSize,
+  numFailureRetries,
+  retentionPolicyField,
+  retentionPolicyMaxAge,
+  requestConfig,
+  updateButtonDisabled,
+  apiErrorMessage,
+}
 
 // wrap hook with the constate factory to create context provider and custom hooks based on selectors
-const [
-  EditTransformFlyoutProvider,
-  useEditTransformFlyoutConfig,
-  useEditTransformFlyoutDataViewId,
-  useEditTransformFlyoutActions,
-  useEditTransformFlyoutStateFormSections,
-  useEditTransformFlyoutStateFormFieldDescription,
-  useEditTransformFlyoutStateFormFieldDestinationIndex,
-  useEditTransformFlyoutStateFormFieldDocsPerSecond,
-  useEditTransformFlyoutStateFormFieldFrequency,
-  useEditTransformFlyoutStateFormFieldDestinationIngestPipeline,
-  useEditTransformFlyoutStateFormFieldMaxPageSearchSize,
-  useEditTransformFlyoutStateFormFieldNumFailureRetries,
-  useEditTransformFlyoutStateFormFieldRetentionPolicy,
-  useEditTransformFlyoutRequestConfig,
-  useEditTransformUpdateButtonDisabled,
-  useEditTransformApiErrorMessage,
-] = constate(
-  useEditTransformFlyout,
+const [EditTransformFlyoutProvider, ...editTransformHooks] = constate(
+  useEditTransformFlyoutInternal,
   (d) => d.config,
   (d) => d.dataViewId,
-  (d) => ({
-    apiError: (payload: ApiErrorAction['payload']) => d.dispatch({ name: 'api_error', payload }),
-    formField: (payload: FormFieldAction['payload']) =>
-      d.dispatch({
-        name: 'form_field',
-        payload,
-      }),
-    formSection: (payload: FormSectionAction['payload']) => ({ name: 'form_section', payload }),
-  }),
+  (d) => d.actions,
   (d) => d.state.formSections,
   (d) => d.state.formFields.description,
   (d) => d.state.formFields.destinationIndex,
@@ -603,30 +609,21 @@ const [
   (d) => d.state.formFields.destinationIngestPipeline,
   (d) => d.state.formFields.maxPageSearchSize,
   (d) => d.state.formFields.numFailureRetries,
-  (d) => ({
-    retentionPolicyField: d.state.formFields.retentionPolicyField,
-    retentionPolicyMaxAge: d.state.formFields.retentionPolicyMaxAge,
-  }),
+  (d) => d.state.formFields.retentionPolicyField,
+  (d) => d.state.formFields.retentionPolicyMaxAge,
   (d) => applyFormStateToTransformConfig(d.config, d.state),
   (d) => !d.state.isFormValid || !d.state.isFormTouched,
   (d) => d.state.apiErrorMessage
 );
 
-export {
-  EditTransformFlyoutProvider,
-  useEditTransformFlyoutConfig,
-  useEditTransformFlyoutDataViewId,
-  useEditTransformFlyoutActions,
-  useEditTransformFlyoutStateFormSections,
-  useEditTransformFlyoutStateFormFieldDescription,
-  useEditTransformFlyoutStateFormFieldDestinationIndex,
-  useEditTransformFlyoutStateFormFieldDocsPerSecond,
-  useEditTransformFlyoutStateFormFieldFrequency,
-  useEditTransformFlyoutStateFormFieldDestinationIngestPipeline,
-  useEditTransformFlyoutStateFormFieldMaxPageSearchSize,
-  useEditTransformFlyoutStateFormFieldNumFailureRetries,
-  useEditTransformFlyoutStateFormFieldRetentionPolicy,
-  useEditTransformFlyoutRequestConfig,
-  useEditTransformUpdateButtonDisabled,
-  useEditTransformApiErrorMessage,
+type EditTransformHooks = typeof editTransformHooks;
+type Indices = Exclude<keyof EditTransformHooks, keyof any[]> & string;
+type EditTransformHooksIndex<I extends number> = Indices extends Exclude<Indices, `${I}`>
+  ? never
+  : I;
+
+export const useEditTransformFlyout = <I extends number>(hookIndex: EditTransformHooksIndex<I>) => {
+  return editTransformHooks[hookIndex]() as ReturnType<EditTransformHooks[I]>;
 };
+
+export { EditTransformFlyoutProvider };
