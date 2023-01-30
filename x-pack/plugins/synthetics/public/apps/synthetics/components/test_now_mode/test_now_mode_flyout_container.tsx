@@ -61,9 +61,14 @@ export function TestNowModeFlyoutContainer() {
     <TestNowModeFlyout
       testRun={
         flyoutOpenTestRun?.testRunId && flyoutOpenTestRun?.monitor
-          ? { id: flyoutOpenTestRun.testRunId, monitor: flyoutOpenTestRun.monitor }
+          ? {
+              id: flyoutOpenTestRun.testRunId,
+              monitor: flyoutOpenTestRun.monitor,
+              name: flyoutOpenTestRun.name,
+            }
           : undefined
       }
+      name={flyoutOpenTestRun.name}
       inProgress={
         flyoutOpenTestRun.status === 'in-progress' || flyoutOpenTestRun.status === 'loading'
       }

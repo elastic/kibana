@@ -38,7 +38,7 @@ export type WaitResult = Either<Error, ElasticsearchClient>;
 
 export class RuleDataClient implements IRuleDataClient {
   private _isWriteEnabled: boolean = false;
-  private _isWriteInitializationFailed: boolean = false;
+  private _writeInitializationError: RuleDataWriterInitializationError | undefined = undefined;
   private _isWriterCacheEnabled: boolean = true;
 
   // Writers cached by namespace
@@ -72,12 +72,12 @@ export class RuleDataClient implements IRuleDataClient {
     this._isWriteEnabled = isEnabled;
   }
 
-  private get writeInitializationFailed(): boolean {
-    return this._isWriteInitializationFailed;
+  private get writeInitializationError(): RuleDataWriterInitializationError | undefined {
+    return this._writeInitializationError;
   }
 
-  private set writeInitializationFailed(isFailed: boolean) {
-    this._isWriteInitializationFailed = isFailed;
+  private set writeInitializationError(error: RuleDataWriterInitializationError | undefined) {
+    this._writeInitializationError = error;
   }
 
   public isWriteEnabled(): boolean {
@@ -172,10 +172,9 @@ export class RuleDataClient implements IRuleDataClient {
 
   private async initializeWriter(namespace: string): Promise<IRuleDataWriter> {
     const isWriteEnabled = () => this.writeEnabled;
-    const isWriteInitializationError = () => this.writeInitializationFailed;
-    const turnOffWriteDueToInitializationError = () => {
+    const turnOffWriteDueToInitializationError = (error: RuleDataWriterInitializationError) => {
       this.writeEnabled = false;
-      this.writeInitializationFailed = true;
+      this.writeInitializationError = error;
     };
 
     const { indexInfo, resourceInstaller } = this.options;
@@ -184,10 +183,18 @@ export class RuleDataClient implements IRuleDataClient {
     // Wait until both index and namespace level resources have been installed / updated.
     if (!isWriteEnabled()) {
       this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
-      throw new RuleDataWriteDisabledError({
-        reason: isWriteInitializationError() ? 'error' : 'config',
-        registrationContext: indexInfo.indexOptions.registrationContext,
-      });
+      if (this.writeInitializationError != null) {
+        throw new RuleDataWriteDisabledError({
+          reason: 'error',
+          registrationContext: indexInfo.indexOptions.registrationContext,
+          message: this.writeInitializationError.message,
+        });
+      } else {
+        throw new RuleDataWriteDisabledError({
+          reason: 'config',
+          registrationContext: indexInfo.indexOptions.registrationContext,
+        });
+      }
     }
 
     try {
@@ -217,7 +224,7 @@ export class RuleDataClient implements IRuleDataClient {
         this.options.logger.error(
           `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
         );
-        turnOffWriteDueToInitializationError();
+        turnOffWriteDueToInitializationError(error);
       }
 
       throw error;

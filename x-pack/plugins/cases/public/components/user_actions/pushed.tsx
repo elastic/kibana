@@ -14,7 +14,7 @@ import { Actions, NONE_CONNECTOR_ID } from '../../../common/api';
 import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
-import type { CaseServices } from '../../containers/use_get_case_user_actions';
+import type { CaseServices } from '../../containers/use_find_case_user_actions';
 import type { CaseExternalService } from '../../containers/types';
 
 const getPushInfo = (

@@ -9,9 +9,10 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/source_selection';
@@ -21,7 +22,7 @@ export const analyticsSourceSelectionRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/data_frame_analytics/source_selection',
+  path: createPath(ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   title: i18n.translate('xpack.ml.dataFrameAnalytics.sourceSelection.docTitle', {
     defaultMessage: 'Source Selection',

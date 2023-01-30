@@ -38,7 +38,9 @@ export const RunTestManually = () => {
         isLoading={!Boolean(monitor) || testInProgress}
         onClick={() => {
           if (monitor) {
-            dispatch(manualTestMonitorAction.get(monitor.config_id));
+            dispatch(
+              manualTestMonitorAction.get({ configId: monitor.config_id, name: monitor.name })
+            );
           }
         }}
       >
