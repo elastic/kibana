@@ -125,6 +125,9 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     }
   }, [prevDiagnosticsEntries, diagnosticsEntries, notifications.toasts]);
 
+  const errorIcon = <EuiIcon type="alert" color="red" />;
+  const getErrorMessage = (error?: string) => (error ? `Error: ${error}` : '');
+
   const columns: Array<EuiTableFieldDataColumnType<AgentDiagnostics>> = [
     {
       field: 'id',
@@ -145,9 +148,20 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           </EuiText>
         ) : (
           <EuiText color="subdued">
-            <EuiToolTip content={`Diagnostics status: ${currentItem?.status}`}>
-              <EuiIcon type="alert" color="red" />
-            </EuiToolTip>
+            {currentItem?.status ? (
+              <EuiToolTip
+                content={
+                  <>
+                    <p>Diagnostics status: {currentItem?.status}</p>
+                    <p>{getErrorMessage(currentItem?.error)}</p>
+                  </>
+                }
+              >
+                {errorIcon}
+              </EuiToolTip>
+            ) : (
+              errorIcon
+            )}
             &nbsp;
             {currentItem?.name}
           </EuiText>

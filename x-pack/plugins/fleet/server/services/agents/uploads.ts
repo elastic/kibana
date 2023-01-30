@@ -67,7 +67,7 @@ export async function getAgentUploads(
 
   const actions = await _getRequestDiagnosticsActions(esClient, agentId);
 
-  const results = [];
+  const results: AgentDiagnostics[] = [];
   for (const action of actions) {
     const file = await getFile(action.actionId);
     const fileName = file?.name ?? `${moment(action.timestamp!).format('YYYY-MM-DD HH:mm:ss')}.zip`;
@@ -79,6 +79,7 @@ export async function getAgentUploads(
       name: fileName,
       createTime: action.timestamp!,
       filePath,
+      error: action.error,
     };
     results.push(result);
   }
