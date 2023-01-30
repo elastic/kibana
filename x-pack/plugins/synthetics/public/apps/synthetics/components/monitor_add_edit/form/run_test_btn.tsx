@@ -31,6 +31,7 @@ export const RunTestButton = () => {
       setInProgress(true);
       setTestRun({
         id: uuidv4(),
+        name: config.name,
         monitor: format(config) as MonitorFieldsType,
       });
     }
@@ -80,6 +81,7 @@ export const RunTestButton = () => {
           errors={data?.errors ?? []}
           isPushing={Boolean(isPushing)}
           testRun={testRun}
+          name={testRun.name}
           inProgress={inProgress}
           onClose={() => {
             setTestRun(undefined);
@@ -125,10 +127,10 @@ export const TEST_SCHEDULED_LABEL = i18n.translate(
   }
 );
 
-const PRIVATE_AVAILABLE_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.testNow.available.private',
+export const PRIVATE_AVAILABLE_LABEL = i18n.translate(
+  'xpack.synthetics.app.testNow.available.private',
   {
-    defaultMessage: `You can't currently test monitors running on private locations on demand.`,
+    defaultMessage: `You can't manually start tests on a private location.`,
   }
 );
 
