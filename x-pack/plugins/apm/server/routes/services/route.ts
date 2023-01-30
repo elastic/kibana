@@ -58,6 +58,7 @@ import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/cre
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getServicesAlerts } from './get_services/get_service_alerts';
+import { ServerlessType } from '../../../common/serverless';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -364,10 +365,11 @@ const serviceAgentRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (
     resources
-  ): Promise<
-    | { agentName?: undefined; runtimeName?: undefined }
-    | { agentName: string | undefined; runtimeName: string | undefined }
-  > => {
+  ): Promise<{
+    agentName?: string;
+    runtimeName?: string;
+    serverlessType?: ServerlessType;
+  }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
@@ -1220,6 +1222,7 @@ const serviceAlertsRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
+    query: t.intersection([rangeRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -1229,13 +1232,18 @@ const serviceAlertsRoute = createApmServerRoute({
     alertsCount: number;
   }> => {
     const { params } = resources;
-
+    const {
+      query: { start, end, environment },
+    } = params;
     const { serviceName } = params.path;
 
     const apmAlertsClient = await getApmAlertsClient(resources);
     const servicesAlerts = await getServicesAlerts({
       serviceName,
       apmAlertsClient,
+      environment,
+      start,
+      end,
     });
 
     return servicesAlerts.length > 0
