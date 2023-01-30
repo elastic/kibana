@@ -44,7 +44,7 @@ describe('getSelectedGroupBadgeMetrics', () => {
       doc_count: 1,
     });
     expect(
-      badgesUserName.find((badge) => badge.title === 'Hosts:' && badge.value === 1)
+      badgesUserName.find((badge) => badge.title === `IP's:` && badge.value === 1)
     ).toBeTruthy();
   });
 

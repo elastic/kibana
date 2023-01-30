@@ -40,7 +40,109 @@ describe('getAlertsGroupingQuery', () => {
       ],
     });
 
-    expect(groupingQuery).toBe({});
+    expect(groupingQuery).toStrictEqual({
+      _source: false,
+      aggs: {
+        alertsCount: {
+          terms: {
+            exclude: ['alerts'],
+            field: 'kibana.alert.rule.producer',
+          },
+        },
+        groupsNumber: {
+          cardinality: {
+            field: 'kibana.alert.rule.name',
+          },
+        },
+        stackByMultipleFields0: {
+          aggs: {
+            alertsCount: {
+              cardinality: {
+                field: 'kibana.alert.uuid',
+              },
+            },
+            bucket_truncate: {
+              bucket_sort: {
+                from: 0,
+                size: 25,
+                sort: undefined,
+              },
+            },
+            countSeveritySubAggregation: {
+              cardinality: {
+                field: 'kibana.alert.severity',
+              },
+            },
+            hostsCountAggregation: {
+              cardinality: {
+                field: 'host.name',
+              },
+            },
+            ruleTags: {
+              terms: {
+                field: 'kibana.alert.rule.tags',
+              },
+            },
+            severitiesSubAggregation: {
+              terms: {
+                field: 'kibana.alert.severity',
+              },
+            },
+            usersCountAggregation: {
+              cardinality: {
+                field: 'user.name',
+              },
+            },
+          },
+          multi_terms: {
+            terms: [
+              {
+                field: 'kibana.alert.rule.name',
+              },
+              {
+                field: 'kibana.alert.rule.description',
+              },
+            ],
+          },
+        },
+      },
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                filter: [
+                  {
+                    match_phrase: {
+                      'kibana.alert.workflow_status': 'acknowledged',
+                    },
+                  },
+                ],
+                must: [],
+                must_not: [
+                  {
+                    exists: {
+                      field: 'kibana.alert.building_block_type',
+                    },
+                  },
+                ],
+                should: [],
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: '2022-12-29T22:57:34.029Z',
+                  lte: '2023-01-28T22:57:29.029Z',
+                },
+              },
+            },
+          ],
+        },
+      },
+      runtime_mappings: {},
+      size: 0,
+    });
   });
 
   it('returns default query with aggregations if the field specific metrics was not defined', () => {
@@ -75,6 +177,82 @@ describe('getAlertsGroupingQuery', () => {
       ],
     });
 
-    expect(groupingQuery).toBe({});
+    expect(groupingQuery).toStrictEqual({
+      _source: false,
+      aggs: {
+        alertsCount: {
+          terms: {
+            exclude: ['alerts'],
+            field: 'kibana.alert.rule.producer',
+          },
+        },
+        groupsNumber: {
+          cardinality: {
+            field: 'process.name',
+          },
+        },
+        stackByMultipleFields0: {
+          aggs: {
+            alertsCount: {
+              cardinality: {
+                field: 'kibana.alert.uuid',
+              },
+            },
+            bucket_truncate: {
+              bucket_sort: {
+                from: 0,
+                size: 25,
+                sort: undefined,
+              },
+            },
+            rulesCountAggregation: {
+              cardinality: {
+                field: 'kibana.alert.rule.rule_id',
+              },
+            },
+          },
+          terms: {
+            field: 'process.name',
+            size: 10000,
+          },
+        },
+      },
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                filter: [
+                  {
+                    match_phrase: {
+                      'kibana.alert.workflow_status': 'acknowledged',
+                    },
+                  },
+                ],
+                must: [],
+                must_not: [
+                  {
+                    exists: {
+                      field: 'kibana.alert.building_block_type',
+                    },
+                  },
+                ],
+                should: [],
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: '2022-12-29T22:57:34.029Z',
+                  lte: '2023-01-28T22:57:29.029Z',
+                },
+              },
+            },
+          ],
+        },
+      },
+      runtime_mappings: {},
+      size: 0,
+    });
   });
 });

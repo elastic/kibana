@@ -355,6 +355,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     () => (
       <GroupsSelector
         groupSelected={selectedGroup}
+        data-test-subj="alerts-table-group-selector"
         onGroupChange={(groupSelection?: string) => {
           storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, groupSelection);
           setGroupsActivePage(0);
