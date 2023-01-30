@@ -39,7 +39,7 @@ export function SuggestionsSelect({
   dataTestSubj,
   isClearable = true,
   prepend,
-  serviceName = '',
+  serviceName,
 }: SuggestionsSelectProps) {
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
