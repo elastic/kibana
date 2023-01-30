@@ -32,6 +32,7 @@ import {
   EVENT_CONTAINER_TABLE_NOT_LOADING,
   CLOSED_ALERTS_FILTER_BTN,
   OPENED_ALERTS_FILTER_BTN,
+  ACKNOWLEDGED_ALERTS_FILTER_BTN,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -176,7 +177,7 @@ export const refreshAlertPageFilter = () => {
   // lot of unncessary traffic. Cypress is too fast and we cannot wait for a minute
   // to trigger a reload of Page Filters.
   // It is faster to refresh the page which will reload the Page Filter values
-  cy.reload();
+  // cy.reload();
   waitForAlerts();
 };
 
@@ -207,7 +208,15 @@ export const goToClosedAlertsOnRuleDetailsPage = () => {
 };
 
 export const goToClosedAlerts = () => {
-  selectPageFilterValue(0, 'closed');
+  cy.get(CLOSED_ALERTS_FILTER_BTN).click();
+  /*
+   * below line commented because alertPageFiltersEnabled feature flag
+   * is disabled by default
+   * Target: enable by default in v8.8
+   *
+   * selectPageFilterValue(0, 'closed');
+   *
+   * */
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
@@ -224,7 +233,15 @@ export const goToOpenedAlertsOnRuleDetailsPage = () => {
 };
 
 export const goToOpenedAlerts = () => {
-  selectPageFilterValue(0, 'open');
+  cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
+  /*
+   * below line commented because alertPageFiltersEnabled feature flag
+   * is disabled by default
+   * Target: enable by default in v8.8
+   *
+   * selectPageFilterValue(0, 'open');
+   *
+   */
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };
@@ -250,7 +267,15 @@ export const clearGroupByTopInput = () => {
 };
 
 export const goToAcknowledgedAlerts = () => {
-  selectPageFilterValue(0, 'acknowledged');
+  /*
+   * below line commented because alertPageFiltersEnabled feature flag
+   * is disabled by default
+   * Target: enable by default in v8.8
+   *
+   * selectPageFilterValue(0, 'acknowledged');
+   *
+   */
+  cy.get(ACKNOWLEDGED_ALERTS_FILTER_BTN).click();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
@@ -282,7 +307,14 @@ export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: n
 };
 
 export const waitForAlerts = () => {
-  waitForPageFilters();
+  /*
+   * below line commented because alertpagefiltersenabled feature flag
+   * is disabled by default
+   * target: enable by default in v8.8
+   *
+   * waitforpagefilters();
+   *
+   * */
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
   cy.get(EVENT_CONTAINER_TABLE_NOT_LOADING).should('be.visible');
@@ -333,5 +365,12 @@ export const waitForPageFilters = () => {
 export const resetFilters = () => {
   cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
   cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
-  waitForPageFilters();
+  /*
+   * below line commented because alertpagefiltersenabled feature flag
+   * is disabled by default
+   * target: enable by default in v8.8
+   *
+   * waitforpagefilters();
+   *
+   * */
 };
