@@ -7,39 +7,6 @@
 
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
-export const cspRuleSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
-  dynamic: false,
-  properties: {
-    metadata: {
-      type: 'object',
-      properties: {
-        name: {
-          type: 'keyword',
-          fields: {
-            text: {
-              type: 'text',
-            },
-          },
-        },
-      },
-    },
-    package_policy_id: {
-      type: 'keyword',
-    },
-    policy_id: {
-      type: 'keyword',
-    },
-    enabled: {
-      type: 'boolean',
-      fields: {
-        keyword: {
-          type: 'keyword',
-        },
-      },
-    },
-  },
-};
-
 export const cspRuleTemplateSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {

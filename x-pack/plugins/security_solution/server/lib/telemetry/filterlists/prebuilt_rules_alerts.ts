@@ -10,6 +10,7 @@ import type { AllowlistFields } from './types';
 export const prebuiltRuleAllowlistFields: AllowlistFields = {
   _id: true,
   id: true,
+  package_version: true,
   '@timestamp': true,
   // Base alert fields
   'kibana.alert.ancestors': true,

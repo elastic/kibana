@@ -147,5 +147,6 @@ export const endpointAllowlistFields: AllowlistFields = {
   host: {
     os: true,
   },
+  package_version: true,
   ...allowlistBaseEventFields,
 };

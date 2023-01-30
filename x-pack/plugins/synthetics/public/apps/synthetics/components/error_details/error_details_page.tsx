@@ -26,7 +26,7 @@ export function ErrorDetailsPage() {
 
   const checkGroupId = failedTests?.[0]?.monitor.check_group ?? '';
 
-  const { data, isFailed, failedStep, loading: stepsLoading } = useJourneySteps(checkGroupId);
+  const { data, isFailedStep, failedStep, loading: stepsLoading } = useJourneySteps(checkGroupId);
 
   const lastTestRun = failedTests?.[0];
 
@@ -35,6 +35,8 @@ export function ErrorDetailsPage() {
   useErrorDetailsBreadcrumbs([{ text: startedAt }]);
 
   const stepDetails = useStepDetails({ checkGroup: lastTestRun?.monitor.check_group });
+
+  const isBrowser = data?.details?.journey.monitor.type === 'browser';
 
   return (
     <div>
@@ -47,8 +49,12 @@ export function ErrorDetailsPage() {
           <PanelWithTitle title="Failed tests">
             <FailedTestsList failedTests={failedTests} loading={loading} />
           </PanelWithTitle>
-          <EuiSpacer size="m" />
-          <StepDetails {...stepDetails} />
+          {isBrowser && (
+            <>
+              <EuiSpacer size="m" />
+              <StepDetails {...stepDetails} />
+            </>
+          )}
           <EuiSpacer size="m" />
           <LastTestRunComponent
             latestPing={lastTestRun}
@@ -61,7 +67,7 @@ export function ErrorDetailsPage() {
         <EuiFlexItem grow={1} style={{ height: 'fit-content' }}>
           <PanelWithTitle>
             {data?.details?.journey && failedStep && (
-              <StepImage ping={data?.details?.journey} step={failedStep} isFailed={isFailed} />
+              <StepImage ping={data?.details?.journey} step={failedStep} isFailed={isFailedStep} />
             )}
           </PanelWithTitle>
 

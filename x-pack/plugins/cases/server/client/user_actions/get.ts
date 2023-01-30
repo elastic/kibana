@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import type { CaseUserActionsResponse, CaseUserActionResponse } from '../../../common/api';
-import { CaseUserActionsResponseRt } from '../../../common/api';
+import type { CaseUserActionsDeprecatedResponse } from '../../../common/api';
+import { CaseUserActionsDeprecatedResponseRt } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import type { UserActionGet } from './types';
+import { extractAttributes } from './utils';
 
 export const get = async (
   { caseId }: UserActionGet,
   clientArgs: CasesClientArgs
-): Promise<CaseUserActionsResponse> => {
+): Promise<CaseUserActionsDeprecatedResponse> => {
   const {
     services: { userActionService },
     logger,
@@ -36,7 +36,7 @@ export const get = async (
 
     const resultsToEncode = extractAttributes(userActions);
 
-    return CaseUserActionsResponseRt.encode(resultsToEncode);
+    return CaseUserActionsDeprecatedResponseRt.encode(resultsToEncode);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve user actions case id: ${caseId}: ${error}`,
@@ -45,9 +45,3 @@ export const get = async (
     });
   }
 };
-
-function extractAttributes(
-  userActions: SavedObjectsFindResponse<CaseUserActionResponse>
-): CaseUserActionsResponse {
-  return userActions.saved_objects.map((so) => so.attributes);
-}
