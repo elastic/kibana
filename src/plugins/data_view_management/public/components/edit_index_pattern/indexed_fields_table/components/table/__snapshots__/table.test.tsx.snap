@@ -4,13 +4,11 @@ exports[`Table render conflict summary modal  1`] = `
 <React.Fragment>
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <h1>
-        <FormattedMessage
-          defaultMessage="This field has a type conflict"
-          id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
-          values={Object {}}
-        />
-      </h1>
+      <FormattedMessage
+        defaultMessage="This field has a type conflict"
+        id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
+        values={Object {}}
+      />
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
