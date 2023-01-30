@@ -14,7 +14,6 @@ import type {
   ActionConnector,
   CaseFullExternalService,
   CaseResponse,
-  CaseUserActionsResponse,
   CommentResponse,
   User,
   CaseAttributes,
@@ -22,6 +21,7 @@ import type {
   ConnectorMappingsAttributes,
   CaseField,
   ThirdPartyField,
+  CaseUserActionsDeprecatedResponse,
 } from '../../../common/api';
 import { CommentType, ActionTypes, CaseStatuses } from '../../../common/api';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
@@ -33,7 +33,7 @@ import * as i18n from './translations';
 
 interface CreateIncidentArgs {
   theCase: CaseResponse;
-  userActions: CaseUserActionsResponse;
+  userActions: CaseUserActionsDeprecatedResponse;
   connector: ActionConnector;
   alerts: CasesClientGetAlertsResponse;
   casesConnectors: CasesConnectorsMap;
@@ -54,7 +54,7 @@ type LatestPushInfo = { index: number; pushedInfo: CaseFullExternalService } | n
 
 export const getLatestPushInfo = (
   connectorId: string,
-  userActions: CaseUserActionsResponse
+  userActions: CaseUserActionsDeprecatedResponse
 ): LatestPushInfo => {
   for (const [index, action] of [...userActions].reverse().entries()) {
     if (isPushedUserAction(action) && connectorId === action.payload.externalService.connector_id) {
@@ -238,7 +238,7 @@ export const formatComments = ({
 }: {
   theCase: CaseResponse;
   latestPushInfo: LatestPushInfo;
-  userActions: CaseUserActionsResponse;
+  userActions: CaseUserActionsDeprecatedResponse;
   spaceId: string;
   userProfiles?: Map<string, UserProfile>;
   publicBaseUrl?: IBasePath['publicBaseUrl'];

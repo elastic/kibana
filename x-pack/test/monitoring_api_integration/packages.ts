@@ -7,7 +7,10 @@
 
 import path from 'path';
 
-const PACKAGES = [{ name: 'beat', version: '0.0.1' }];
+const PACKAGES = [
+  { name: 'beat', version: '0.0.1' },
+  { name: 'enterprisesearch', version: '1.0.0' },
+];
 
 export const getPackagesArgs = (): string[] => {
   return PACKAGES.flatMap((pkg, i) => {
