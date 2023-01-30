@@ -16,7 +16,7 @@ const POSSIBLE_LOCALHOST_VALUES: readonly string[] = [
 ];
 
 export const getLocalhostRealIp = async (): Promise<string> => {
-  // TODO:PT find better way to get host machine public IP
+  // TODO:PT find better way to get host machine public IP. Command below is not x-platform
 
   return execa.commandSync(
     "ipconfig getifaddr `scutil --dns |awk -F'[()]' '$1~/if_index/ {print $2;exit;}'`",

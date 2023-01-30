@@ -7,6 +7,7 @@
 
 import { userInfo } from 'os';
 import execa from 'execa';
+import nodeFetch from 'node-fetch';
 import { getEndpointPackageInfo } from '../../../common/endpoint/index_data';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { fetchAgentPolicyEnrollmentKey, fetchFleetServerUrl } from '../common/fleet_services';
@@ -34,7 +35,7 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
         .then((response) => {
           const agentPolicy = response.agentPolicies[0];
 
-          log.info(`New agent policy with Endpoint integration created in fleet:
+          log.info(`New agent policy with Endpoint integration created:
     Name: ${agentPolicy.name}
     Id:   ${agentPolicy.id}`);
 
@@ -74,14 +75,17 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
 
     // FIXME:PT need to get the version from input args
     const agentDownloadUrl = await getAgentDownloadUrl('8.7.0-SNAPSHOT');
-    const agentFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
-    const vmDirName = agentFile.replace(/\.tar\.gz$/, '');
+    const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
+    const vmDirName = agentDownloadedFile.replace(/\.tar\.gz$/, '');
 
-    log.info(`Downloading and installing agent from:\n    ${agentDownloadUrl}`);
+    log.info(`Downloading and installing agent`);
+    log.verbose(`Agent download:\n    ${agentDownloadUrl}`);
 
-    await execa.command(`multipass exec ${vmName} -- curl -L ${agentDownloadUrl} -o ${agentFile}`);
-    await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentFile}`);
-    await execa.command(`multipass exec ${vmName} -- rm -f ${agentFile}`);
+    await execa.command(
+      `multipass exec ${vmName} -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`
+    );
+    await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentDownloadedFile}`);
+    await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
 
     const agentEnrollArgs = [
       'exec',
@@ -149,18 +153,28 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
 };
 
 const getAgentDownloadUrl = async (version: string): Promise<string> => {
+  const { log } = getRuntimeServices();
   const isSnapshot = version.indexOf(`SNAPSHOT`);
   let urlRoot = `https://artifacts.elastic.co/downloads/beats/elastic-agent`;
   // const archType = arch(); // FIXME:PT use arch and maybe platform to build download file name
   const agentFile = `/elastic-agent-${version}-linux-arm64.tar.gz`;
 
   if (isSnapshot) {
-    // Call: https://snapshots.elastic.co/latest/master.json
-    //      get `build_id`
-    // then build URL:
-    //    https://snapshots.elastic.co/8.7.0-1604eae1/downloads/beats/elastic-agent/elastic-agent-8.7.0-SNAPSHOT-linux-arm64.tar.gz
+    const snapshotDownloadsInfoUrl = 'https://snapshots.elastic.co/latest/master.json';
+    const snapshotRepoInfo: { build_id: string } = await nodeFetch(snapshotDownloadsInfoUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`${response.statusText} (HTTP ${response.status})`);
+        }
 
-    urlRoot = `https://snapshots.elastic.co/8.7.0-1604eae1/downloads/beats/elastic-agent`;
+        return response.json();
+      })
+      .catch((error) => {
+        log.verbose(`Attempt to retrieve [${snapshotDownloadsInfoUrl}] failed with: ${error}`);
+        throw error;
+      });
+
+    urlRoot = `https://snapshots.elastic.co/${snapshotRepoInfo.build_id}/downloads/beats/elastic-agent`;
   }
 
   return `${urlRoot}${agentFile}`;
