@@ -279,22 +279,24 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
+  const replaceStepConfigurePackagePolicy = replaceDefineStepView && packageInfo?.name && (
+    <ExtensionWrapper>
+      <replaceDefineStepView.Component
+        agentPolicy={agentPolicy}
+        packageInfo={packageInfo}
+        newPolicy={packagePolicy}
+        onChange={handleExtensionViewOnChange}
+        validationResults={validationResults}
+        integrationInfo={integrationInfo}
+        isEditPage={false}
+      />
+    </ExtensionWrapper>
+  );
+
   const stepConfigurePackagePolicy = useMemo(
     () =>
       isPackageInfoLoading || !isInitialized ? (
         <Loading />
-      ) : replaceDefineStepView && packageInfo?.name ? (
-        <ExtensionWrapper>
-          <replaceDefineStepView.Component
-            agentPolicy={agentPolicy}
-            packageInfo={packageInfo}
-            newPolicy={packagePolicy}
-            onChange={handleExtensionViewOnChange}
-            validationResults={validationResults}
-            integrationInfo={integrationInfo}
-            isEditPage={false}
-          />
-        </ExtensionWrapper>
       ) : packageInfo ? (
         <>
           <StepDefinePackagePolicy
@@ -340,10 +342,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updatePackagePolicy,
       validationResults,
       formState,
+      integrationInfo?.name,
       extensionView,
       handleExtensionViewOnChange,
-      integrationInfo,
-      replaceDefineStepView,
     ]
   );
 
@@ -353,7 +354,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'Configure integration',
       }),
       'data-test-subj': 'dataCollectionSetupStep',
-      children: stepConfigurePackagePolicy,
+      children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
     },
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {

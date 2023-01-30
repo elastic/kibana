@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { omit } from 'lodash';
-import { useParams, useRouteMatch } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -42,7 +42,7 @@ import {
 } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
-import type { AddToPolicyParams, EditPackagePolicyFrom } from '../create_package_policy_page/types';
+import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
@@ -86,7 +86,6 @@ export const EditPackagePolicyForm = memo<{
   forceUpgrade?: boolean;
   from?: EditPackagePolicyFrom;
 }>(({ packagePolicyId, forceUpgrade = false, from = 'edit' }) => {
-  const params = useParams<AddToPolicyParams>();
   const { application, notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -116,14 +115,6 @@ export const EditPackagePolicyForm = memo<{
   } = usePackagePolicyWithRelatedData(packagePolicyId, {
     forceUpgrade,
   });
-
-  const integrationInfo = useMemo(
-    () =>
-      packageInfo?.policy_templates?.find(
-        (policyTemplate) => policyTemplate.name === params.integration
-      ),
-    [packageInfo?.policy_templates, params]
-  );
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
 
@@ -257,6 +248,14 @@ export const EditPackagePolicyForm = memo<{
     packagePolicy.package?.name ?? '',
     'package-policy-edit-tabs'
   );
+
+  if (replaceDefineStepView && extensionView) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      "'package-policy-edit' is ignored when 'package-policy-replace-define-step' is defined"
+    );
+  }
+
   const tabsViews = extensionTabsView?.tabs;
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -287,76 +286,55 @@ export const EditPackagePolicyForm = memo<{
       : [],
   };
 
-  if (replaceDefineStepView && extensionView) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      "'package-policy-edit' is ignored when 'package-policy-replace-define-step' is defined"
-    );
-  }
-
   const configurePackage = useMemo(
     () =>
       agentPolicy && packageInfo ? (
-        replaceDefineStepView && originalPackagePolicy ? (
-          <ExtensionWrapper>
-            <replaceDefineStepView.Component
+        <>
+          {selectedTab === 0 && (
+            <StepDefinePackagePolicy
               agentPolicy={agentPolicy}
               packageInfo={packageInfo}
-              policy={originalPackagePolicy}
-              newPolicy={packagePolicy}
-              onChange={handleExtensionViewOnChange}
-              validationResults={validationResults}
-              integrationInfo={integrationInfo}
+              packagePolicy={packagePolicy}
+              updatePackagePolicy={updatePackagePolicy}
+              validationResults={validationResults!}
+              submitAttempted={formState === 'INVALID'}
               isEditPage={true}
             />
-          </ExtensionWrapper>
-        ) : (
-          <>
-            {selectedTab === 0 && (
-              <StepDefinePackagePolicy
-                agentPolicy={agentPolicy}
-                packageInfo={packageInfo}
-                packagePolicy={packagePolicy}
-                updatePackagePolicy={updatePackagePolicy}
-                validationResults={validationResults!}
-                submitAttempted={formState === 'INVALID'}
-                isEditPage={true}
-              />
-            )}
-            {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
-            {!extensionView && selectedTab === 0 && (
-              <StepConfigurePackagePolicy
-                packageInfo={packageInfo}
-                packagePolicy={packagePolicy}
-                updatePackagePolicy={updatePackagePolicy}
-                validationResults={validationResults!}
-                submitAttempted={formState === 'INVALID'}
-                isEditPage={true}
-              />
-            )}
+          )}
 
-            {extensionView &&
-              packagePolicy.policy_id &&
-              packagePolicy.package?.name &&
-              originalPackagePolicy && (
-                <ExtensionWrapper>
-                  {selectedTab > 0 && tabsViews ? (
-                    React.createElement(tabsViews[selectedTab - 1].Component, {
-                      policy: originalPackagePolicy,
-                      newPolicy: packagePolicy,
-                      onChange: handleExtensionViewOnChange,
-                    })
-                  ) : (
-                    <extensionView.Component
-                      policy={originalPackagePolicy}
-                      newPolicy={packagePolicy}
-                      onChange={handleExtensionViewOnChange}
-                    />
-                  )}
-                </ExtensionWrapper>
-              )}
-          </>
-        )
+          {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
+          {!extensionView && selectedTab === 0 && (
+            <StepConfigurePackagePolicy
+              packageInfo={packageInfo}
+              packagePolicy={packagePolicy}
+              updatePackagePolicy={updatePackagePolicy}
+              validationResults={validationResults!}
+              submitAttempted={formState === 'INVALID'}
+              isEditPage={true}
+            />
+          )}
+
+          {extensionView &&
+            packagePolicy.policy_id &&
+            packagePolicy.package?.name &&
+            originalPackagePolicy && (
+              <ExtensionWrapper>
+                {selectedTab > 0 && tabsViews ? (
+                  React.createElement(tabsViews[selectedTab - 1].Component, {
+                    policy: originalPackagePolicy,
+                    newPolicy: packagePolicy,
+                    onChange: handleExtensionViewOnChange,
+                  })
+                ) : (
+                  <extensionView.Component
+                    policy={originalPackagePolicy}
+                    newPolicy={packagePolicy}
+                    onChange={handleExtensionViewOnChange}
+                  />
+                )}
+              </ExtensionWrapper>
+            )}
+        </>
       ) : null,
     [
       agentPolicy,
@@ -370,9 +348,22 @@ export const EditPackagePolicyForm = memo<{
       handleExtensionViewOnChange,
       selectedTab,
       tabsViews,
-      integrationInfo,
-      replaceDefineStepView,
     ]
+  );
+
+  const replaceConfigurePackage = replaceDefineStepView && originalPackagePolicy && packageInfo && (
+    <ExtensionWrapper>
+      <replaceDefineStepView.Component
+        agentPolicy={agentPolicy}
+        packageInfo={packageInfo}
+        policy={originalPackagePolicy}
+        newPolicy={packagePolicy}
+        onChange={handleExtensionViewOnChange}
+        validationResults={validationResults}
+        integrationInfo={integrationInfo}
+        isEditPage={true}
+      />
+    </ExtensionWrapper>
   );
 
   const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
@@ -435,7 +426,7 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="xxl" />
               </>
             )}
-            {configurePackage}
+            {replaceConfigurePackage || configurePackage}
             {/* Extra space to accomodate the EuiBottomBar height */}
             <EuiSpacer size="xxl" />
             <EuiSpacer size="xxl" />
