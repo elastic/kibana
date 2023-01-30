@@ -57,12 +57,10 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
       <>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h1>
-              <FormattedMessage
-                id="visualizations.newVisWizard.title"
-                defaultMessage="New visualization"
-              />
-            </h1>
+            <FormattedMessage
+              id="visualizations.newVisWizard.title"
+              defaultMessage="New visualization"
+            />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>

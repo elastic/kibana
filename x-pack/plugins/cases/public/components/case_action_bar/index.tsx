@@ -21,7 +21,7 @@ import type { Case } from '../../../common/ui/types';
 import type { CaseStatuses } from '../../../common/api';
 import * as i18n from '../case_view/translations';
 import { Actions } from './actions';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import { StatusContextMenu } from './status_context_menu';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import type { OnUpdateFields } from '../case_view/types';
@@ -68,7 +68,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     [onUpdateField]
   );
 
-  const { data: userActionsData, isLoading: isLoadingUserActions } = useGetCaseUserActions(
+  const { data: userActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
     caseData.id,
     caseData.connector.id
   );
