@@ -30,6 +30,7 @@ import { TimeRange } from '@kbn/es-query';
 import { hasTimeRange, TimeRangeInput } from './customize_panel_action';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { IEmbeddable, Embeddable, EmbeddableOutput, CommonlyUsedRange } from '../../../..';
+import { canInheritTimeRange } from './can_inherit_time_range';
 
 type PanelSettings = {
   title?: string;
@@ -67,17 +68,12 @@ function isTimeRangeCompatible(embeddable: IEmbeddable) {
   const isImage = embeddable.type === 'image';
 
   return Boolean(
-    embeddable &&
-      embeddable.parent &&
-      hasTimeRange(embeddable) &&
-      !isInputControl &&
-      !isMarkdown &&
-      !isImage
+    embeddable && hasTimeRange(embeddable) && !isInputControl && !isMarkdown && !isImage
   );
 }
 
 export const CustomizePanelEditor = (props: CustomizePanelProps) => {
-  const { onClose, embeddable } = props;
+  const { onClose, embeddable, dateFormat } = props;
   const timeRangeCompatible = isTimeRangeCompatible(embeddable);
   const [hideTitle, setHideTitle] = useState(embeddable.getInput().hidePanelTitles);
   const [panelDescription, setPanelDescription] = useState(
@@ -121,6 +117,51 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
 
     embeddable.updateInput(newPanelSettings);
     onClose();
+  };
+
+  const renderCustomTimeRangeComponent = () => {
+    if (!timeRangeCompatible) return null;
+
+    return (
+      <>
+        {canInheritTimeRange(embeddable as Embeddable<TimeRangeInput>) ? (
+          <EuiFormRow>
+            <EuiSwitch
+              checked={!inheritTimeRange}
+              data-test-subj="customizePanelShowCustomTimeRange"
+              id="showCustomTimeRange"
+              label={
+                <FormattedMessage
+                  defaultMessage="Apply custom time range to panel"
+                  id="embeddableApi.customizePanel.flyout.optionsMenuForm.showCustomTimeRangeSwitch"
+                />
+              }
+              onChange={(e) => setInheritTimeRange(!e.target.checked)}
+            />
+          </EuiFormRow>
+        ) : null}
+        {!inheritTimeRange ? (
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="embeddableApi.customizePanel.flyout.optionsMenuForm.panelTimeRangeFormRowLabel"
+                defaultMessage="Panel time range"
+              />
+            }
+          >
+            <EuiSuperDatePicker
+              start={panelTimeRange?.from ?? undefined}
+              end={panelTimeRange?.to ?? undefined}
+              onTimeChange={({ start, end }) => setPanelTimeRange({ from: start, to: end })}
+              showUpdateButton={false}
+              dateFormat={dateFormat}
+              commonlyUsedRanges={commonlyUsedRangesForDatePicker}
+              data-test-subj="customizePanelTimeRangeDatePicker"
+            />
+          </EuiFormRow>
+        ) : null}
+      </>
+    );
   };
 
   return (
@@ -240,50 +281,13 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               )}
             />
           </EuiFormRow>
-          {timeRangeCompatible ? (
-            <>
-              <EuiFormRow>
-                <EuiSwitch
-                  checked={!inheritTimeRange}
-                  data-test-subj="customizePanelShowCustomTimeRange"
-                  id="showCustomTimeRange"
-                  label={
-                    <FormattedMessage
-                      defaultMessage="Apply custom time range to panel"
-                      id="embeddableApi.customizePanel.flyout.optionsMenuForm.showCustomTimeRangeSwitch"
-                    />
-                  }
-                  onChange={(e) => setInheritTimeRange(!e.target.checked)}
-                />
-              </EuiFormRow>
-              {!inheritTimeRange ? (
-                <EuiFormRow
-                  label={
-                    <FormattedMessage
-                      id="embeddableApi.customizePanel.flyout.optionsMenuForm.panelTimeRangeFormRowLabel"
-                      defaultMessage="Panel time range"
-                    />
-                  }
-                >
-                  <EuiSuperDatePicker
-                    start={panelTimeRange?.from ?? undefined}
-                    end={panelTimeRange?.to ?? undefined}
-                    onTimeChange={({ start, end }) => setPanelTimeRange({ from: start, to: end })}
-                    showUpdateButton={false}
-                    dateFormat={props.dateFormat}
-                    commonlyUsedRanges={commonlyUsedRangesForDatePicker}
-                    data-test-subj="customizePanelTimeRangeDatePicker"
-                  />
-                </EuiFormRow>
-              ) : null}
-            </>
-          ) : null}
+          {renderCustomTimeRangeComponent()}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
+            <EuiButtonEmpty data-test-subj="cancelCustomizePanelButton" onClick={onClose}>
               <FormattedMessage
                 id="embeddableApi.customizePanel.flyout.cancelButtonTitle"
                 defaultMessage="Cancel"
