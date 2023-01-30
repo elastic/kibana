@@ -68,6 +68,8 @@ export default function (providerContext: FtrProviderContext) {
           doc_as_upsert: true,
           doc: {
             upload_id: 'file1',
+            action_id: 'action1',
+            agent_id: 'agent1',
             file: {
               ChunkSize: 4194304,
               extension: 'zip',
