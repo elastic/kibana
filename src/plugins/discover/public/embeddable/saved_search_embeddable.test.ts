@@ -16,7 +16,7 @@ import { discoverServiceMock } from '../__mocks__/services';
 import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
 import { render } from 'react-dom';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 
