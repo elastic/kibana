@@ -13,9 +13,9 @@ import { EuiSelectable } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
-import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
+import { MAX_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
 
@@ -55,7 +55,8 @@ export const OptionsListPopoverSuggestions = ({
   const canLoadMoreSuggestions = useMemo(
     () =>
       totalCardinality
-        ? Object.keys(availableOptions ?? {}).length < Math.min(totalCardinality, 1000)
+        ? Object.keys(availableOptions ?? {}).length <
+          Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
         : false,
     [availableOptions, totalCardinality]
   );
@@ -109,7 +110,7 @@ export const OptionsListPopoverSuggestions = ({
         label: OptionsListStrings.popover.getLoadingMoreMessage(),
         isGroupLabel: true,
       });
-    } else if (options.length === 1000) {
+    } else if (options.length === MAX_OPTIONS_LIST_REQUEST_SIZE) {
       options.push({
         key: 'no-more-option',
         className: 'optionslist--endOfOptionsGroupLabel',
@@ -135,7 +136,7 @@ export const OptionsListPopoverSuggestions = ({
     const { scrollTop, scrollHeight, clientHeight } = listbox;
     if (scrollTop + clientHeight >= scrollHeight - parseInt(euiThemeVars.euiSizeXXL, 10)) {
       // reached the bottom of the list
-      loadMoreSuggestions(totalCardinality ?? 1000);
+      loadMoreSuggestions(totalCardinality ?? MAX_OPTIONS_LIST_REQUEST_SIZE);
     }
   }, [loadMoreSuggestions, totalCardinality]);
 

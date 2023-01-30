@@ -17,7 +17,7 @@ import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public'
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListPopover } from './options_list_popover';
 import { optionsListReducers } from '../options_list_reducers';
-import { OptionsListReduxState } from '../types';
+import { MAX_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
 
 import './options_list.scss';
 
@@ -90,7 +90,7 @@ export const OptionsListControl = ({
 
   const loadMoreSuggestions = useCallback(
     (cardinality: number) => {
-      loadMoreSubject.next(Math.min(cardinality, 1000));
+      loadMoreSubject.next(Math.min(cardinality, MAX_OPTIONS_LIST_REQUEST_SIZE));
     },
     [loadMoreSubject]
   );

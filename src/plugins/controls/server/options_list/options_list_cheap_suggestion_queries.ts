@@ -136,7 +136,7 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       return {
         suggestions: buckets
           .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
-          .slice(0, 1000) // only return top 10 results
+          .slice(0, 10) // only return top 10 results
           .reduce((suggestions, suggestion: EsBucket) => {
             return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
           }, {}),
