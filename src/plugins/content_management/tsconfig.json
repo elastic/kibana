@@ -6,9 +6,6 @@
   "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/config-schema",
-    "@kbn/i18n-react",
-    "@kbn/core-http-request-handler-context-server"
   ],
   "exclude": [
     "target/**/*",
