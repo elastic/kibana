@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { CaseUserActions, CaseExternalService } from '../../common/ui/types';
 import type { CaseConnector } from '../../common/api';
 import { ActionTypes, NONE_CONNECTOR_ID } from '../../common/api';
-import { getCaseUserActions } from './api';
+import { findCaseUserActions } from './api';
 import {
   isPushedUserAction,
   isConnectorUserAction,
@@ -235,18 +235,21 @@ export const getProfileUids = (userActions: CaseUserActions[]) => {
   return uids;
 };
 
-export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) => {
+export const useFindCaseUserActions = (caseId: string, caseConnectorId: string) => {
   const toasts = useToasts();
   const abortCtrlRef = new AbortController();
+
   return useQuery(
     casesQueriesKeys.userActions(caseId, caseConnectorId),
     async () => {
-      const response = await getCaseUserActions(caseId, abortCtrlRef.signal);
-      const participants = !isEmpty(response)
-        ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
+      const response = await findCaseUserActions(caseId, abortCtrlRef.signal);
+      const participants = !isEmpty(response.userActions)
+        ? uniqBy('createdBy.username', response.userActions).map((cau) => cau.createdBy)
         : [];
 
-      const caseUserActions = !isEmpty(response) ? response : [];
+      const caseUserActions: CaseUserActions[] = !isEmpty(response.userActions)
+        ? response.userActions
+        : [];
       const pushedInfo = getPushedInfo(caseUserActions, caseConnectorId);
       const profileUids = getProfileUids(caseUserActions);
 
@@ -270,4 +273,4 @@ export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) =
   );
 };
 
-export type UseGetCaseUserActions = ReturnType<typeof useGetCaseUserActions>;
+export type UseFindCaseUserActions = ReturnType<typeof useFindCaseUserActions>;

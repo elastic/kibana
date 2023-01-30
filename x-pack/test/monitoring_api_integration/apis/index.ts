@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./beats'));
     loadTestFile(require.resolve('./elasticsearch'));
+    loadTestFile(require.resolve('./enterprisesearch'));
   });
 }
