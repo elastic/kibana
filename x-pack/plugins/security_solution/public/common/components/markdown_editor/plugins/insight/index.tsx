@@ -15,7 +15,8 @@ import { useInsightQuery } from './use_insight_query';
 import { useInsightDataProviders } from './use_insight_data_providers';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
-import type { AbsoluteTimeRange } from '../../../../store/inputs/model';
+import { getTimeRangeSettings } from '../../../../utils/default_date_settings';
+import type { TimeRange } from '../../../../store/inputs/model';
 
 interface InsightComponentProps {
   label?: string;
@@ -117,12 +118,23 @@ const InsightComponent = ({ label, description, providers }: InsightComponentPro
   const { totalCount, isQueryLoading, oldestTimestamp, hasError } = useInsightQuery({
     dataProviders,
   });
-  const timerange: AbsoluteTimeRange = useMemo(() => {
-    return {
-      kind: 'absolute',
-      from: oldestTimestamp ?? '',
-      to: new Date().toISOString(),
-    };
+  const timerange: TimeRange = useMemo(() => {
+    if (oldestTimestamp != null) {
+      return {
+        kind: 'absolute',
+        from: oldestTimestamp,
+        to: new Date().toISOString(),
+      };
+    } else {
+      const { to, from, fromStr, toStr } = getTimeRangeSettings();
+      return {
+        kind: 'relative',
+        to,
+        from,
+        fromStr,
+        toStr,
+      };
+    }
   }, [oldestTimestamp]);
   if (isQueryLoading) {
     return <EuiLoadingSpinner size="l" />;

@@ -63,15 +63,11 @@ import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './rules_list_notify_badge';
 import { RulesListTableStatusCell } from './rules_list_table_status_cell';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import {
-  RulesListColumns,
-  RulesListVisibleColumns,
-  useRulesListColumnSelector,
-} from './rules_list_column_selector';
+import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
 
 interface RuleTypeState {
   isLoading: boolean;
-  isInitialized: boolean;
+  initialLoad: boolean;
   data: RuleTypeIndex;
 }
 
@@ -143,7 +139,7 @@ export interface RulesListTableProps {
     onLoading: (isLoading: boolean) => void
   ) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
-  visibleColumns?: RulesListVisibleColumns[];
+  visibleColumns?: string[];
 }
 
 interface ConvertRulesToTableItemsOpts {
@@ -165,7 +161,7 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
       actionsCount: rule.actions.length,
       ruleType: ruleTypeIndex.get(rule.ruleTypeId)?.name ?? rule.ruleTypeId,
       isEditable:
-        hasAllPrivilege(rule, ruleTypeIndex.get(rule.ruleTypeId)) &&
+        hasAllPrivilege(rule.consumer, ruleTypeIndex.get(rule.ruleTypeId)) &&
         (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
       enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
       showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
@@ -215,7 +211,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
   const [isLoadingMap, setIsLoadingMap] = useState<Record<string, boolean>>({});
 
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
@@ -282,7 +278,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
   );
 
   const renderRuleStatusDropdown = useCallback(
-    (ruleEnabled: boolean | undefined, rule: RuleTableItem) => {
+    (rule: RuleTableItem) => {
       return (
         <RuleStatusDropdown
           hideSnoozeOption
@@ -329,11 +325,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
   }, [isPageSelected, onSelectPage, onSelectRow, isRowSelected]);
 
   const ruleOutcomeColumnField = useMemo(() => {
-    if (isRuleLastRunOutcomeEnabled) {
-      return 'lastRun.outcome';
+    if (isRuleUsingExecutionStatus) {
+      return 'executionStatus.status';
     }
-    return 'executionStatus.status';
-  }, [isRuleLastRunOutcomeEnabled]);
+    return 'lastRun.outcome';
+  }, [isRuleUsingExecutionStatus]);
 
   const getRulesTableColumns = useCallback((): RulesListColumns[] => {
     return [
@@ -699,7 +695,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '10%',
         'data-test-subj': 'rulesTableCell-status',
         render: (_enabled: boolean | undefined, rule: RuleTableItem) => {
-          return renderRuleStatusDropdown(rule.enabled, rule);
+          return renderRuleStatusDropdown(rule);
         },
       },
       {
@@ -893,7 +889,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             pageIndex: page.index,
             pageSize: page.size,
             /* Don't display rule count until we have the rule types initialized */
-            totalItemCount: ruleTypesState.isInitialized === false ? 0 : rulesState.totalItemCount,
+            totalItemCount: ruleTypesState.initialLoad ? 0 : rulesState.totalItemCount,
           }}
           onChange={({
             page: changedPage,

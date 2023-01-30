@@ -187,7 +187,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
         name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isInUseColumnTitle', {
           defaultMessage: 'Usage count',
         }),
-        sortable: true,
+        sortable: ({ usedBy }: ComponentTemplateListItem) => usedBy.length,
         render: (usedBy: string[]) => {
           if (usedBy.length) {
             return usedBy.length;

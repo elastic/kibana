@@ -14,6 +14,7 @@ import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 import type { ShardsArray } from '../../../../common/schemas/common/utils';
 import { ShardsPolicyField } from './shards_policy_field';
 import { ShardsPercentageField } from './shards_percentage_field';
+import { overflowCss } from '../../utils';
 
 const StyledButtonWrapper = styled.div`
   margin-top: ${(props: { index: number }) => props.index === 0 && '16px'};
@@ -44,18 +45,18 @@ const ShardsFormComponent = ({
 
   return (
     <>
-      <EuiFlexGroup data-test-subj="packShardsForm" alignItems="flexStart" gutterSize="s">
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
-            <EuiFlexItem>
-              <ShardsPolicyField
-                index={index}
-                control={control}
-                hideLabel={index !== 0}
-                options={options}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      <EuiFlexGroup
+        data-test-subj={`packShardsForm-${index}`}
+        alignItems="flexStart"
+        gutterSize="s"
+      >
+        <EuiFlexItem css={overflowCss}>
+          <ShardsPolicyField
+            index={index}
+            control={control}
+            hideLabel={index !== 0}
+            options={options}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="s">

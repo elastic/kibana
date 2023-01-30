@@ -17,11 +17,14 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation } from 'react-router-dom';
 
-import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { TableListView } from '@kbn/content-management-table-list';
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { findListItems } from '../../utils/saved_visualize_utils';
+import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
+import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import {
@@ -30,11 +33,11 @@ import {
   SAVED_OBJECTS_PER_PAGE_SETTING,
 } from '../..';
 import type { VisualizationListItem } from '../..';
-import { VisualizeServices } from '../types';
+import type { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
 import { getNoItemsMessage, getCustomColumn } from '../utils';
 import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
-import { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
+import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
 
 interface VisualizeUserContent extends VisualizationListItem, UserContentCommonSchema {
   type: string;
@@ -86,10 +89,13 @@ export const VisualizeListing = () => {
       visualizeCapabilities,
       dashboardCapabilities,
       kbnUrlStateStorage,
+      overlays,
+      savedObjectsTagging,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
   const closeNewVisModal = useRef(() => {});
+  const visualizedUserContent = useRef<VisualizeUserContent[]>();
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
@@ -166,14 +172,82 @@ export const VisualizeListing = () => {
         listingLimit,
         references,
         referencesToExclude
-      ).then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => ({
-        total,
-        hits: hits
+      ).then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => {
+        const content = hits
           .filter((result: any) => isLabsEnabled || result.type?.stage !== 'experimental')
-          .map(toTableListViewSavedObject),
-      }));
+          .map(toTableListViewSavedObject);
+
+        visualizedUserContent.current = content;
+
+        return {
+          total,
+          hits: content,
+        };
+      });
     },
     [listingLimit, uiSettings, savedObjects.client]
+  );
+
+  const onContentEditorSave = useCallback(
+    async (args: { id: string; title: string; description?: string; tags: string[] }) => {
+      const content = visualizedUserContent.current?.find(({ id }) => id === args.id);
+
+      if (content) {
+        await updateBasicSoAttributes(
+          content.id,
+          content.type,
+          {
+            title: args.title,
+            description: args.description ?? '',
+            tags: args.tags,
+          },
+          { savedObjectsClient: savedObjects.client, overlays, savedObjectsTagging }
+        );
+      }
+    },
+    [overlays, savedObjects.client, savedObjectsTagging]
+  );
+
+  const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
+    () => ({
+      title: [
+        {
+          type: 'warning',
+          async fn(value, id) {
+            if (id) {
+              const content = visualizedUserContent.current?.find((c) => c.id === id);
+              if (content) {
+                try {
+                  await checkForDuplicateTitle(
+                    {
+                      id,
+                      title: value,
+                      lastSavedTitle: content.title,
+                      getEsType: () => content.type,
+                    },
+                    false,
+                    false,
+                    () => {},
+                    { savedObjectsClient: savedObjects.client, overlays }
+                  );
+                } catch (e) {
+                  return i18n.translate(
+                    'visualizations.visualizeListingDeleteErrorTitle.duplicateWarning',
+                    {
+                      defaultMessage: 'Saving "{value}" creates a duplicate title.',
+                      values: {
+                        value,
+                      },
+                    }
+                  );
+                }
+              }
+            }
+          },
+        },
+      ],
+    }),
+    [overlays, savedObjects.client]
   );
 
   const deleteItems = useCallback(
@@ -229,6 +303,11 @@ export const VisualizeListing = () => {
       listingLimit={listingLimit}
       initialPageSize={initialPageSize}
       initialFilter={''}
+      contentEditor={{
+        isReadonly: !visualizeCapabilities.save,
+        onSave: onContentEditorSave,
+        customValidators: contentEditorValidators,
+      }}
       emptyPrompt={noItemsFragment}
       entityName={i18n.translate('visualizations.listing.table.entityName', {
         defaultMessage: 'visualization',

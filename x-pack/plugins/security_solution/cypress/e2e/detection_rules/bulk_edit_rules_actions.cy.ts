@@ -99,7 +99,6 @@ describe('Detection rules, bulk edit of rule actions', () => {
           name: ruleNameToAssert,
         },
         '1',
-        '100m',
         500,
         actions
       );
@@ -151,7 +150,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
       addSlackRuleAction(expectedSlackMessage);
 
       submitBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfRulesToBeEdited });
+      waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfRulesToBeEdited });
 
       // check if rule has been updated
       goToEditRuleActionsSettingsOf(ruleNameToAssert);
@@ -182,7 +181,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
       );
 
       submitBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfRulesToBeEdited });
+      waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfRulesToBeEdited });
 
       // check if rule has been updated
       goToEditRuleActionsSettingsOf(ruleNameToAssert);
@@ -205,7 +204,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
       addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);
 
       submitBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+      waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfCustomRulesToBeEdited });
 
       // check if rule has been updated
       goToEditRuleActionsSettingsOf(ruleNameToAssert);

@@ -16,12 +16,11 @@ export const apmServiceInventoryOptimizedSorting =
 export const apmServiceGroupMaxNumberOfServices =
   'observability:apmServiceGroupMaxNumberOfServices';
 export const apmTraceExplorerTab = 'observability:apmTraceExplorerTab';
-export const apmOperationsTab = 'observability:apmOperationsTab';
 export const apmLabsButton = 'observability:apmLabsButton';
 export const enableInfrastructureHostsView = 'observability:enableInfrastructureHostsView';
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
-export const enableServiceMetrics = 'observability:apmEnableServiceMetrics';
 export const enableAgentExplorerView = 'observability:apmAgentExplorerView';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
 export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequestCostPerMillion';
 export const enableCriticalPath = 'observability:apmEnableCriticalPath';
+export const profilingElasticsearchPlugin = 'observability:profilingElasticsearchPlugin';

@@ -33,7 +33,8 @@ export function registerApmRuleTypes(
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlErrorCount(
-          String(fields[SERVICE_NAME][0]!),
+          // TODO:fix SERVICE_NAME when we move it to initializeIndex
+          String(fields[SERVICE_NAME]![0]),
           fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0])
         ),
       };
@@ -46,6 +47,12 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
+    alertDetailsAppSection: lazy(
+      () =>
+        import(
+          '../ui_components/alert_details_app_section/alert_details_app_section'
+        )
+    ),
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.errorCount.defaultActionMessage',
@@ -73,9 +80,10 @@ export function registerApmRuleTypes(
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlTransaction(
-          String(fields[SERVICE_NAME][0]!),
+          // TODO:fix SERVICE_NAME when we move it to initializeIndex
+          String(fields[SERVICE_NAME]![0]),
           fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-          String(fields[TRANSACTION_TYPE][0]!)
+          String(fields[TRANSACTION_TYPE]![0])
         ),
       };
     },
@@ -89,6 +97,12 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
+    alertDetailsAppSection: lazy(
+      () =>
+        import(
+          '../ui_components/alert_details_app_section/alert_details_app_section'
+        )
+    ),
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
@@ -116,9 +130,10 @@ export function registerApmRuleTypes(
     format: ({ fields, formatters: { asPercent } }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
-        String(fields[SERVICE_NAME][0]!),
+        // TODO:fix SERVICE_NAME when we move it to initializeIndex
+        String(fields[SERVICE_NAME]![0]),
         fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-        String(fields[TRANSACTION_TYPE][0]!)
+        String(fields[TRANSACTION_TYPE]![0])
       ),
     }),
     iconClass: 'bell',
@@ -131,6 +146,12 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
+    alertDetailsAppSection: lazy(
+      () =>
+        import(
+          '../ui_components/alert_details_app_section/alert_details_app_section'
+        )
+    ),
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionErrorRate.defaultActionMessage',
@@ -155,9 +176,10 @@ export function registerApmRuleTypes(
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
-        String(fields[SERVICE_NAME][0]!),
+        // TODO:fix SERVICE_NAME when we move it to initializeIndex
+        String(fields[SERVICE_NAME]![0]),
         fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-        String(fields[TRANSACTION_TYPE][0]!)
+        String(fields[TRANSACTION_TYPE]![0])
       ),
     }),
     iconClass: 'bell',
@@ -170,6 +192,12 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
+    alertDetailsAppSection: lazy(
+      () =>
+        import(
+          '../ui_components/alert_details_app_section/alert_details_app_section'
+        )
+    ),
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionDurationAnomaly.defaultActionMessage',

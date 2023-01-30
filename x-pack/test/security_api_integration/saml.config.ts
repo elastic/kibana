@@ -15,10 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const idpPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
 
-  const testEndpointsPlugin = resolve(
-    __dirname,
-    '../security_functional/fixtures/common/test_endpoints'
-  );
+  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
   const auditLogPath = resolve(__dirname, './fixtures/audit/saml.log');
 

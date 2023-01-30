@@ -6,18 +6,12 @@
  */
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { differenceBy, isEqual } from 'lodash';
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  EuiIcon,
-  EuiPortal,
-} from '@elastic/eui';
+import type { EuiBasicTable } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
@@ -27,23 +21,20 @@ import {
   sendGetAgents,
   sendGetAgentStatus,
   useUrlParams,
-  useLink,
   useBreadcrumbs,
-  useKibanaVersion,
   useStartServices,
   useFlyoutContext,
   sendGetAgentTags,
 } from '../../../hooks';
-import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
+import { AgentEnrollmentFlyout } from '../../../components';
 import {
   AgentStatusKueryHelper,
-  isAgentUpgradeable,
+  ExperimentalFeaturesService,
   policyHasFleetServer,
 } from '../../../services';
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
-  AgentHealth,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
   FleetServerCloudUnhealthyCallout,
@@ -56,28 +47,21 @@ import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagno
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
-import { Tags } from './components/tags';
 import { TagsAddRemove } from './components/tags_add_remove';
-import { TableRowActions } from './components/table_row_actions';
-import { EmptyPrompt } from './components/empty_prompt';
 import { AgentActivityFlyout } from './components';
+import { TableRowActions } from './components/table_row_actions';
+import { AgentListTable } from './components/agent_list_table';
+import { EmptyPrompt } from './components/empty_prompt';
 
 const REFRESH_INTERVAL_MS = 30000;
 
-function safeMetadata(val: any) {
-  if (typeof val !== 'string') {
-    return '-';
-  }
-  return val;
-}
-
 export const AgentListPage: React.FunctionComponent<{}> = () => {
+  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
+
   const { notifications, cloud } = useStartServices();
   useBreadcrumbs('agent_list');
-  const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasFleetAllPrivileges = useAuthz().fleet.all;
-  const kibanaVersion = useKibanaVersion();
 
   // Agent data states
   const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
@@ -109,16 +93,22 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<string[]>([]);
 
   // Status for filtering
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([
+    'healthy',
+    'unhealthy',
+    'updating',
+    'offline',
+  ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const isUsingFilter =
+  const isUsingFilter = !!(
     search.trim() ||
     selectedAgentPolicies.length ||
     selectedStatus.length ||
     selectedTags.length ||
-    showUpgradeable;
+    showUpgradeable
+  );
 
   const clearFilters = useCallback(() => {
     setDraftKuery('');
@@ -151,6 +141,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
     undefined
   );
+
+  const onTableChange = ({
+    page,
+    sort,
+  }: {
+    page?: { index: number; size: number };
+    sort?: { field: keyof Agent; direction: 'asc' | 'desc' };
+  }) => {
+    const newPagination = {
+      ...pagination,
+      currentPage: page!.index + 1,
+      pageSize: page!.size,
+    };
+    setPagination(newPagination);
+    setSortField(sort!.field);
+    setSortOrder(sort!.direction);
+  };
 
   // Kuery
   const kuery = useMemo(() => {
@@ -187,6 +194,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               return AgentStatusKueryHelper.buildKueryForUpdatingAgents();
             case 'inactive':
               return AgentStatusKueryHelper.buildKueryForInactiveAgents();
+            case 'unenrolled':
+              return AgentStatusKueryHelper.buildKueryForUnenrolledAgents();
           }
 
           return undefined;
@@ -205,7 +214,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [search, selectedAgentPolicies, selectedTags, selectedStatus]);
 
   const showInactive = useMemo(() => {
-    return selectedStatus.includes('inactive');
+    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
 
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -225,11 +234,29 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     return field;
   };
 
-  const sorting = {
-    sort: {
-      field: sortField,
-      direction: sortOrder,
-    },
+  const renderActions = (agent: Agent) => {
+    const agentPolicy =
+      typeof agent.policy_id === 'string' ? agentPoliciesIndexedById[agent.policy_id] : undefined;
+
+    // refreshing agent tags passed to TagsAddRemove component
+    if (agentToAddRemoveTags?.id === agent.id && !isEqual(agent.tags, agentToAddRemoveTags.tags)) {
+      setAgentToAddRemoveTags(agent);
+    }
+    return (
+      <TableRowActions
+        agent={agent}
+        agentPolicy={agentPolicy}
+        onReassignClick={() => setAgentToReassign(agent)}
+        onUnenrollClick={() => setAgentToUnenroll(agent)}
+        onUpgradeClick={() => setAgentToUpgrade(agent)}
+        onAddRemoveTagsClick={(button) => {
+          setTagsPopoverButton(button);
+          setAgentToAddRemoveTags(agent);
+          setShowTagsAddRemove(!showTagsAddRemove);
+        }}
+        onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
+      />
+    );
   };
 
   const isLoadingVar = useRef<boolean>(false);
@@ -257,6 +284,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               sortOrder,
               showInactive,
               showUpgradeable,
+              withMetrics: displayAgentMetrics,
             }),
             sendGetAgentStatus({
               kuery: kuery && kuery !== '' ? kuery : undefined,
@@ -295,7 +323,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             unhealthy: agentsStatusResponse.data.results.error,
             offline: agentsStatusResponse.data.results.offline,
             updating: agentsStatusResponse.data.results.updating,
-            inactive: agentsResponse.data.totalInactive,
+            inactive: agentsStatusResponse.data.results.inactive,
+            unenrolled: agentsStatusResponse.data.results.unenrolled,
           });
 
           const newAllTags = agentTagsResponse.data.items;
@@ -332,6 +361,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       notifications.toasts,
       sortField,
       sortOrder,
+      displayAgentMetrics,
     ]
   );
 
@@ -413,151 +443,38 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setAgentActivityFlyoutOpen(true);
   }, [setAgentActivityFlyoutOpen]);
 
-  const columns = [
-    {
-      field: HOSTNAME_FIELD,
-      sortable: true,
-      name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
-        defaultMessage: 'Host',
-      }),
-      width: '185px',
-      render: (host: string, agent: Agent) => (
-        <EuiLink href={getHref('agent_details', { agentId: agent.id })}>
-          {safeMetadata(host)}
-        </EuiLink>
-      ),
-    },
-    {
-      field: 'active',
-      sortable: false,
-      width: '85px',
-      name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
-        defaultMessage: 'Status',
-      }),
-      render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
-    },
-    {
-      field: 'tags',
-      sortable: false,
-      width: '210px',
-      name: i18n.translate('xpack.fleet.agentList.tagsColumnTitle', {
-        defaultMessage: 'Tags',
-      }),
-      render: (tags: string[] = [], agent: any) => <Tags tags={tags} />,
-    },
-    {
-      field: 'policy_id',
-      sortable: true,
-      name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
-        defaultMessage: 'Agent policy',
-      }),
-      width: '260px',
-      render: (policyId: string, agent: Agent) => {
-        const agentPolicy = agentPoliciesIndexedById[policyId];
-        const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
-
-        return (
-          <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
-            {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />}
-            {showWarning && (
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                  <EuiIcon size="m" type="alert" color="warning" />
-                  &nbsp;
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.outOfDateLabel"
-                    defaultMessage="Out-of-date"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        );
-      },
-    },
-    {
-      field: VERSION_FIELD,
-      sortable: true,
-      width: '135px',
-      name: i18n.translate('xpack.fleet.agentList.versionTitle', {
-        defaultMessage: 'Version',
-      }),
-      render: (version: string, agent: Agent) => (
-        <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
-          <EuiFlexItem grow={false} className="eui-textNoWrap">
-            {safeMetadata(version)}
-          </EuiFlexItem>
-          {isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion) ? (
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                <EuiIcon size="m" type="alert" color="warning" />
-                &nbsp;
-                <FormattedMessage
-                  id="xpack.fleet.agentList.agentUpgradeLabel"
-                  defaultMessage="Upgrade available"
-                />
-              </EuiText>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      ),
-    },
-    {
-      field: 'last_checkin',
-      sortable: true,
-      name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
-        defaultMessage: 'Last activity',
-      }),
-      width: '180px',
-      render: (lastCheckin: string, agent: any) =>
-        lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
-    },
-    {
-      name: i18n.translate('xpack.fleet.agentList.actionsColumnTitle', {
-        defaultMessage: 'Actions',
-      }),
-      actions: [
-        {
-          render: (agent: Agent) => {
-            const agentPolicy =
-              typeof agent.policy_id === 'string'
-                ? agentPoliciesIndexedById[agent.policy_id]
-                : undefined;
-
-            // refreshing agent tags passed to TagsAddRemove component
-            if (
-              agentToAddRemoveTags?.id === agent.id &&
-              !isEqual(agent.tags, agentToAddRemoveTags.tags)
-            ) {
-              setAgentToAddRemoveTags(agent);
-            }
-            return (
-              <TableRowActions
-                agent={agent}
-                agentPolicy={agentPolicy}
-                onReassignClick={() => setAgentToReassign(agent)}
-                onUnenrollClick={() => setAgentToUnenroll(agent)}
-                onUpgradeClick={() => setAgentToUpgrade(agent)}
-                onAddRemoveTagsClick={(button) => {
-                  setTagsPopoverButton(button);
-                  setAgentToAddRemoveTags(agent);
-                  setShowTagsAddRemove(!showTagsAddRemove);
-                }}
-                onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
-              />
-            );
-          },
-        },
-      ],
-      width: '100px',
-    },
-  ];
-
   const refreshAgents = ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
     fetchData({ refreshTags });
     setShowAgentActivityTour({ isOpen: true });
   };
 
+  const noItemsMessage =
+    isLoading && currentRequestRef?.current === 1 ? (
+      <FormattedMessage
+        id="xpack.fleet.agentList.loadingAgentsMessage"
+        defaultMessage="Loading agents…"
+      />
+    ) : isUsingFilter ? (
+      <FormattedMessage
+        id="xpack.fleet.agentList.noFilteredAgentsPrompt"
+        defaultMessage="No agents found. {clearFiltersLink}"
+        values={{
+          clearFiltersLink: (
+            <EuiLink onClick={() => clearFilters()}>
+              <FormattedMessage
+                id="xpack.fleet.agentList.clearFiltersLinkText"
+                defaultMessage="Clear filters"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    ) : (
+      <EmptyPrompt
+        hasFleetAllPrivileges={hasFleetAllPrivileges}
+        setEnrollmentFlyoutState={setEnrollmentFlyoutState}
+      />
+    );
   return (
     <>
       {isAgentActivityFlyoutOpen ? (
@@ -699,89 +616,21 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       />
       <EuiSpacer size="s" />
       {/* Agent list table */}
-      <EuiBasicTable<Agent>
-        ref={tableRef}
-        className="fleet__agentList__table"
-        data-test-subj="fleetAgentListTable"
-        loading={isLoading}
-        hasActions={true}
-        noItemsMessage={
-          isLoading && currentRequestRef.current === 1 ? (
-            <FormattedMessage
-              id="xpack.fleet.agentList.loadingAgentsMessage"
-              defaultMessage="Loading agents…"
-            />
-          ) : isUsingFilter ? (
-            <FormattedMessage
-              id="xpack.fleet.agentList.noFilteredAgentsPrompt"
-              defaultMessage="No agents found. {clearFiltersLink}"
-              values={{
-                clearFiltersLink: (
-                  <EuiLink onClick={() => clearFilters()}>
-                    <FormattedMessage
-                      id="xpack.fleet.agentList.clearFiltersLinkText"
-                      defaultMessage="Clear filters"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          ) : (
-            <EmptyPrompt
-              hasFleetAllPrivileges={hasFleetAllPrivileges}
-              setEnrollmentFlyoutState={setEnrollmentFlyoutState}
-            />
-          )
-        }
-        items={
-          totalAgents
-            ? showUpgradeable
-              ? agents.filter(
-                  (agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion)
-                )
-              : agents
-            : []
-        }
-        itemId="id"
-        columns={columns}
-        pagination={{
-          pageIndex: pagination.currentPage - 1,
-          pageSize: pagination.pageSize,
-          totalItemCount: Math.min(totalAgents, SO_SEARCH_LIMIT),
-          pageSizeOptions,
-        }}
-        isSelectable={true}
-        selection={{
-          onSelectionChange,
-          selectable: isAgentSelectable,
-          selectableMessage: (selectable, agent) => {
-            if (selectable) return '';
-            if (!agent.active) {
-              return 'This agent is not active';
-            }
-            if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
-              return 'This action is not available for agents enrolled in an externally managed agent policy';
-            }
-            return '';
-          },
-        }}
-        onChange={({
-          page,
-          sort,
-        }: {
-          page?: { index: number; size: number };
-          sort?: { field: keyof Agent; direction: 'asc' | 'desc' };
-        }) => {
-          const newPagination = {
-            ...pagination,
-            currentPage: page!.index + 1,
-            pageSize: page!.size,
-          };
-          setPagination(newPagination);
-          setSortField(sort!.field);
-          setSortOrder(sort!.direction);
-        }}
-        sorting={sorting}
+      <AgentListTable
+        agents={agents}
+        sortField={sortField}
+        pageSizeOptions={pageSizeOptions}
+        sortOrder={sortOrder}
+        isLoading={isLoading}
+        agentPoliciesIndexedById={agentPoliciesIndexedById}
+        renderActions={renderActions}
+        onSelectionChange={onSelectionChange}
+        tableRef={tableRef}
+        showUpgradeable={showUpgradeable}
+        onTableChange={onTableChange}
+        pagination={pagination}
+        noItemsMessage={noItemsMessage}
+        totalAgents={Math.min(totalAgents, SO_SEARCH_LIMIT)}
       />
     </>
   );

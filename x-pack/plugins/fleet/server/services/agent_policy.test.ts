@@ -9,6 +9,8 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { PackagePolicyRestrictionRelatedError } from '../errors';
+
 import type {
   AgentPolicy,
   FullAgentPolicy,
@@ -169,7 +171,31 @@ describe('agent policy', () => {
 
     it('should run package policy delete external callbacks', async () => {
       await agentPolicyService.delete(soClient, esClient, 'mocked');
-      expect(packagePolicyService.runDeleteExternalCallbacks).toHaveBeenCalledWith([
+      expect(packagePolicyService.runPostDeleteExternalCallbacks).toHaveBeenCalledWith([
+        { id: 'package-1' },
+      ]);
+    });
+
+    it('should throw error for agent policy which has managed package poolicy', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          is_managed: true,
+        },
+      ] as any);
+      try {
+        await agentPolicyService.delete(soClient, esClient, 'mocked');
+      } catch (e) {
+        expect(e.message).toEqual(
+          new PackagePolicyRestrictionRelatedError(
+            `Cannot delete agent policy mocked that contains managed package policies`
+          ).message
+        );
+      }
+
+      await agentPolicyService.delete(soClient, esClient, 'mocked', { force: true });
+
+      expect(packagePolicyService.runPostDeleteExternalCallbacks).toHaveBeenCalledWith([
         { id: 'package-1' },
       ]);
     });
@@ -541,6 +567,61 @@ describe('agent policy', () => {
           expect.objectContaining({ id: 'my-unique-id' })
         );
       });
+    });
+  });
+
+  describe('getInactivityTimeouts', () => {
+    const createPolicySO = (id: string, inactivityTimeout: number) => ({
+      id,
+      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      attributes: { inactivity_timeout: inactivityTimeout },
+      references: [],
+      score: 1,
+    });
+
+    const createMockSoClientThatReturns = (policies: Array<ReturnType<typeof createPolicySO>>) => {
+      const mockSoClient = savedObjectsClientMock.create();
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: policies,
+        page: 1,
+        per_page: 10,
+        total: policies.length,
+      });
+      return mockSoClient;
+    };
+
+    it('should return empty array if no policies with inactivity timeouts', async () => {
+      const mockSoClient = createMockSoClientThatReturns([]);
+      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([]);
+    });
+    it('should return single inactivity timeout', async () => {
+      const mockSoClient = createMockSoClientThatReturns([createPolicySO('policy1', 1000)]);
+
+      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([
+        { inactivityTimeout: 1000, policyIds: ['policy1'] },
+      ]);
+    });
+    it('should return group policies with same inactivity timeout', async () => {
+      const mockSoClient = createMockSoClientThatReturns([
+        createPolicySO('policy1', 1000),
+        createPolicySO('policy2', 1000),
+      ]);
+
+      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([
+        { inactivityTimeout: 1000, policyIds: ['policy1', 'policy2'] },
+      ]);
+    });
+    it('should return handle single and grouped policies', async () => {
+      const mockSoClient = createMockSoClientThatReturns([
+        createPolicySO('policy1', 1000),
+        createPolicySO('policy2', 1000),
+        createPolicySO('policy3', 2000),
+      ]);
+
+      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([
+        { inactivityTimeout: 1000, policyIds: ['policy1', 'policy2'] },
+        { inactivityTimeout: 2000, policyIds: ['policy3'] },
+      ]);
     });
   });
 });

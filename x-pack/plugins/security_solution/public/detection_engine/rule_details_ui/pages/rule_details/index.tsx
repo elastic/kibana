@@ -31,22 +31,21 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
+import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
-import { TableId } from '../../../../../common/types/timeline';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { tableDefaults } from '../../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../../common/store/data_table';
 import {
-  getRulesUrl,
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -87,7 +86,7 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { Display } from '../../../../hosts/pages/display';
+import { Display } from '../../../../explore/hosts/pages/display';
 
 import {
   focusUtilityBarAction,
@@ -123,10 +122,7 @@ import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_wit
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  AlertsTableFilterGroup,
-  FILTER_OPEN,
-} from '../../../../detections/components/alerts_table/alerts_filter_group';
+import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
@@ -675,12 +671,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <HeaderPage
-                backOptions={{
-                  path: getRulesUrl(),
-                  text: i18n.BACK_TO_RULES,
-                  pageId: SecurityPageName.rules,
-                  dataTestSubj: 'ruleDetailsBackToAllRules',
-                }}
                 border
                 subtitle={subTitle}
                 subtitle2={
@@ -812,7 +802,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
-              <SecuritySolutionTabNavigation navTabs={pageTabs} />
+              <TabNavigationWithBreadcrumbs navTabs={pageTabs} />
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>

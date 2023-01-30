@@ -123,6 +123,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps =
     },
     [closeModal, dispatch, handleOnRowClick, props]
   );
+
   return {
     open: openModal,
     close: closeModal,

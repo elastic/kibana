@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { createRootRoute } from './root';
+export { RootRoute } from './root';

@@ -1,0 +1,13 @@
+server:
+  port: ${PORT}
+  host: ${HOST}
+
+kibana:
+  hosts:
+    - http://localhost:65537/api/status/ok
+  requestTimeout: 2s
+
+logging:
+  root:
+    appenders: ['console']
+    level: 'all'

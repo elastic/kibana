@@ -7,9 +7,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { createQuery } from '../../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';

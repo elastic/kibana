@@ -26,7 +26,6 @@ exports[`Footer multiple features, multiple layers: locked should show paginatio
       <EuiFormRow
         describedByIds={Array []}
         display="rowCompressed"
-        fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         labelType="label"

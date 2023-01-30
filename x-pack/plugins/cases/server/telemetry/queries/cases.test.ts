@@ -7,6 +7,7 @@
 
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ESCaseStatus } from '../../services/cases/types';
 import type { CaseAggregationResult } from '../types';
 import { getCasesTelemetryData } from './cases';
 
@@ -93,7 +94,7 @@ describe('getCasesTelemetryData', () => {
         status: {
           buckets: [
             {
-              key: 'open',
+              key: ESCaseStatus.OPEN,
               doc_count: 2,
             },
           ],

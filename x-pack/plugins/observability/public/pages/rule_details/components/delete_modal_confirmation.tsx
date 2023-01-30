@@ -7,7 +7,10 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { HttpSetup } from '@kbn/core/public';
+import type {
+  BulkOperationAttributes,
+  BulkOperationResponse,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import {
   confirmModalText,
@@ -28,14 +31,8 @@ export function DeleteModalConfirmation({
   setIsLoadingState,
 }: {
   idsToDelete: string[];
-  apiDeleteCall: ({
-    ids,
-    http,
-  }: {
-    ids: string[];
-    http: HttpSetup;
-  }) => Promise<{ successes: string[]; errors: string[] }>;
-  onDeleted: (deleted: string[]) => void;
+  apiDeleteCall: ({ ids, http }: BulkOperationAttributes) => Promise<BulkOperationResponse>;
+  onDeleted: () => void;
   onCancel: () => void;
   onErrors: () => void;
   singleTitle: string;
@@ -69,11 +66,12 @@ export function DeleteModalConfirmation({
       onConfirm={async () => {
         setDeleteModalVisibility(false);
         setIsLoadingState(true);
-        const { successes, errors } = await apiDeleteCall({ ids: idsToDelete, http });
+        const { total, errors } = await apiDeleteCall({ ids: idsToDelete, http });
         setIsLoadingState(false);
 
-        const numSuccesses = successes.length;
         const numErrors = errors.length;
+        const numSuccesses = total - numErrors;
+
         if (numSuccesses > 0) {
           toasts.addSuccess(deleteSuccessText(numSuccesses, singleTitle, multipleTitle));
         }
@@ -82,7 +80,7 @@ export function DeleteModalConfirmation({
           toasts.addDanger(deleteErrorText(numErrors, singleTitle, multipleTitle));
           await onErrors();
         }
-        await onDeleted(successes);
+        await onDeleted();
       }}
       cancelButtonText={cancelButtonText}
       confirmButtonText={confirmButtonText(numIdsToDelete, singleTitle, multipleTitle)}

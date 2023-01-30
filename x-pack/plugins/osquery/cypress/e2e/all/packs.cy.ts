@@ -449,6 +449,12 @@ describe('ALL - Packs', () => {
           queries: {},
         });
       });
+      cy.visit('/app/fleet/policies');
+      cy.contains('td', 'testGlobal')
+        .parent()
+        .within(() => {
+          cy.contains('rev. 2').click();
+        });
     });
     it('add proper shard to policies packs config', () => {
       const shardPack = 'shardPack';
@@ -457,8 +463,14 @@ describe('ALL - Packs', () => {
       findFormFieldByRowsLabelAndType('Name', shardPack);
 
       cy.contains('Partial deployment (shards)').click();
-      cy.getBySel('shards-field-policy').type('Default{downArrow}{enter}');
-      cy.get('#shardsPercentage0').type('{backspace}{backspace}5');
+      cy.getBySel('packShardsForm-0').within(() => {
+        cy.getBySel('shards-field-policy').type('Default{downArrow}{enter}');
+        cy.get('#shardsPercentage0').type('{backspace}{backspace}5');
+      });
+      cy.getBySel('packShardsForm-1').within(() => {
+        cy.getBySel('shards-field-policy').type('{downArrow}{enter}');
+        cy.get('#shardsPercentage1').type('{backspace}{backspace}{backspace}');
+      });
       findAndClickButton('Save pack');
 
       cy.contains(`Successfully created "${shardPack}" pack`);
@@ -477,6 +489,13 @@ describe('ALL - Packs', () => {
       cy.contains(shardPack).click();
       cy.contains('Edit').click();
       cy.get('#shardsPercentage0').should('have.value', '15');
+      cy.getBySel('packShardsForm-1').within(() => {
+        cy.getBySel('shards-field-policy').contains('testGlobal');
+        cy.get('#shardsPercentage1').should('have.value', '0');
+      });
+      cy.getBySel('policyIdsComboBox').within(() => {
+        cy.contains('testGlobal').should('not.exist');
+      });
     });
   });
 });

@@ -14,7 +14,7 @@ import { LatencyAggregationType } from '../../../../../common/latency_aggregatio
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
-import { TimeseriesChart } from '../timeseries_chart';
+import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -38,7 +38,7 @@ const options: Array<{ value: LatencyAggregationType; text: string }> = [
   { value: LatencyAggregationType.p99, text: '99th percentile' },
 ];
 
-function filterNil<T>(value: T | null | undefined): value is T {
+export function filterNil<T>(value: T | null | undefined): value is T {
   return value != null;
 }
 
@@ -53,7 +53,10 @@ export function LatencyChart({ height, kuery }: Props) {
   } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
     '/services/{serviceName}/transactions',
-    '/services/{serviceName}/transactions/view'
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions',
+    '/mobile-services/{serviceName}/transactions/view'
   );
 
   const { environment } = useEnvironmentsContext();
@@ -126,7 +129,7 @@ export function LatencyChart({ height, kuery }: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <TimeseriesChart
+        <TimeseriesChartWithContext
           height={height}
           fetchStatus={latencyChartsStatus}
           id="latencyChart"

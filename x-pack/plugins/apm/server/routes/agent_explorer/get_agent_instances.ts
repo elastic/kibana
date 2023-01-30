@@ -18,7 +18,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 

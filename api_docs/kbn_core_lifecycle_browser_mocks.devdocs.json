@@ -58,7 +58,19 @@
                 "section": "def-common.ApplicationSetup",
                 "text": "ApplicationSetup"
               },
-              ">; docLinks: jest.Mock<any, any>; executionContext: jest.Mocked<",
+              ">; customBranding: { customBranding$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-custom-branding-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
+                "section": "def-common.CustomBranding",
+                "text": "CustomBranding"
+              },
+              ">; hasCustomBranding$: ",
+              "Observable",
+              "<boolean>; }; docLinks: jest.Mock<any, any>; executionContext: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-browser",
                 "scope": "common",
@@ -93,14 +105,26 @@
               ">; chrome: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
               "InternalChromeStart",
-              ">; docLinks: ",
+              ">; customBranding: { customBranding$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-custom-branding-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
+                "section": "def-common.CustomBranding",
+                "text": "CustomBranding"
+              },
+              ">; hasCustomBranding$: ",
+              "Observable",
+              "<boolean>; }; docLinks: ",
               {
                 "pluginId": "@kbn/core-doc-links-browser",
                 "scope": "common",
@@ -135,9 +159,9 @@
               ">; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.MockedKeys",
+                "section": "def-common.MockedKeys",
                 "text": "MockedKeys"
               },
               "<",
@@ -151,9 +175,9 @@
               ">; overlays: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
@@ -172,7 +196,23 @@
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
-              ">; savedObjects: jest.Mocked<",
+              ">; settings: { client: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; globalClient: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; }; savedObjects: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-browser",
                 "scope": "common",
@@ -196,7 +236,7 @@
                 "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
               },
-              ">; injectedMetadata: { getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]> & ((name: string, defaultValue?: any) => unknown); }; fatalErrors: jest.Mocked<",
+              ">; fatalErrors: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
                 "scope": "common",
@@ -215,9 +255,9 @@
               "; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.MockedKeys",
+                "section": "def-common.MockedKeys",
                 "text": "MockedKeys"
               },
               "<",
@@ -236,7 +276,23 @@
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
-              ">; deprecations: undefined; injectedMetadata: { getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]> & ((name: string, defaultValue?: any) => unknown); }; theme: jest.Mocked<",
+              ">; settings: { client: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; globalClient: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; }; deprecations: undefined; theme: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
@@ -294,14 +350,26 @@
               ">; chrome: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
               "InternalChromeStart",
-              ">; docLinks: ",
+              ">; customBranding: { customBranding$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-custom-branding-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
+                "section": "def-common.CustomBranding",
+                "text": "CustomBranding"
+              },
+              ">; hasCustomBranding$: ",
+              "Observable",
+              "<boolean>; }; docLinks: ",
               {
                 "pluginId": "@kbn/core-doc-links-browser",
                 "scope": "common",
@@ -336,9 +404,9 @@
               ">; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.MockedKeys",
+                "section": "def-common.MockedKeys",
                 "text": "MockedKeys"
               },
               "<",
@@ -352,9 +420,9 @@
               ">; overlays: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
@@ -373,7 +441,23 @@
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
-              ">; savedObjects: jest.Mocked<",
+              ">; settings: { client: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; globalClient: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; }; savedObjects: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-browser",
                 "scope": "common",
@@ -397,7 +481,7 @@
                 "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
               },
-              ">; injectedMetadata: { getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]> & ((name: string, defaultValue?: any) => unknown); }; fatalErrors: jest.Mocked<",
+              ">; fatalErrors: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
                 "scope": "common",

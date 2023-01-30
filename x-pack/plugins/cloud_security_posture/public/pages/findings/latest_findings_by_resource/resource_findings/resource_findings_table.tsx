@@ -13,6 +13,7 @@ import {
   type EuiBasicTableColumn,
   type EuiTableActionsColumnType,
   type EuiBasicTableProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
@@ -23,6 +24,7 @@ import {
   type OnAddFilter,
 } from '../../layout/findings_layout';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
+import { getSelectedRowStyle } from '../../utils/utils';
 
 interface Props {
   items: CspFinding[];
@@ -41,7 +43,12 @@ const ResourceFindingsTableComponent = ({
   setTableOptions,
   onAddFilter,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
+
+  const getRowProps = (row: CspFinding) => ({
+    style: getSelectedRowStyle(euiTheme, row, selectedFinding),
+  });
 
   const columns: [
     EuiTableActionsColumnType<CspFinding>,
@@ -50,10 +57,9 @@ const ResourceFindingsTableComponent = ({
     () => [
       getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
+      baseFindingsColumns['rule.benchmark.rule_number'],
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['rule.benchmark.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
-      baseFindingsColumns['rule.tags'],
       baseFindingsColumns['@timestamp'],
     ],
     [onAddFilter]
@@ -83,6 +89,7 @@ const ResourceFindingsTableComponent = ({
         onChange={setTableOptions}
         pagination={pagination}
         sorting={sorting}
+        rowProps={getRowProps}
       />
       {selectedFinding && (
         <FindingsRuleFlyout

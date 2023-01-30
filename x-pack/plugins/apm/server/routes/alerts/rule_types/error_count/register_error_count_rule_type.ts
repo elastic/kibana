@@ -34,7 +34,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
@@ -223,7 +223,7 @@ export function registerErrorCountRuleType({
               });
           });
 
-        return {};
+        return { state: {} };
       },
     })
   );

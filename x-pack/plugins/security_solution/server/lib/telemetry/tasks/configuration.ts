@@ -36,6 +36,7 @@ export function createTelemetryConfigurationTaskConfig() {
         const configArtifact = (await artifactService.getArtifact(
           artifactName
         )) as unknown as TelemetryConfiguration;
+        tlog(logger, `New telemetry configuration artifact: ${JSON.stringify(configArtifact)}`);
         telemetryConfiguration.max_detection_alerts_batch =
           configArtifact.max_detection_alerts_batch;
         telemetryConfiguration.telemetry_max_buffer_size = configArtifact.telemetry_max_buffer_size;

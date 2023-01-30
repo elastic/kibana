@@ -11,13 +11,17 @@ import Fs from 'fs';
 import Util from 'util';
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const logFilePath = Path.join(__dirname, 'saved_object_type_validation.log');
@@ -30,7 +34,7 @@ async function removeLogFile() {
 }
 
 function createRoot() {
-  return kbnTestServer.createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       migrations: {
         skip: false,
@@ -122,7 +126,7 @@ const savedObjectTypes: SavedObjectsType[] = [
 ];
 
 describe('validates saved object types when a schema is provided', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
   let coreSetup: InternalCoreSetup;
   let coreStart: InternalCoreStart;
@@ -131,7 +135,7 @@ describe('validates saved object types when a schema is provided', () => {
   beforeAll(async () => {
     await removeLogFile();
 
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {

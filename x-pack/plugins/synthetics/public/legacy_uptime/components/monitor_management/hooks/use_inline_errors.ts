@@ -6,12 +6,14 @@
  */
 
 import { useSelector } from 'react-redux';
-import moment from 'moment';
 import { useMemo } from 'react';
 import { useEsSearch } from '@kbn/observability-plugin/public';
 import { monitorManagementListSelector } from '../../../state/selectors';
 import { Ping } from '../../../../../common/runtime_types';
-import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../../common/constants/client_defaults';
+import {
+  EXCLUDE_RUN_ONCE_FILTER,
+  getTimeSpanFilter,
+} from '../../../../../common/constants/client_defaults';
 import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
 import { useInlineErrorsCount } from './use_inline_errors_count';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../common/constants';
@@ -51,14 +53,7 @@ export const getInlineErrorFilters = () => [
       ],
     },
   },
-  {
-    range: {
-      'monitor.timespan': {
-        lte: moment().toISOString(),
-        gte: moment().subtract(5, 'minutes').toISOString(),
-      },
-    },
-  },
+  getTimeSpanFilter(),
   EXCLUDE_RUN_ONCE_FILTER,
 ];
 

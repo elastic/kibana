@@ -6,6 +6,12 @@
 
 Retrieves a connector by ID.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+====
+
 [discrete]
 [[get-connector-api-request]]
 === {api-request-title}
@@ -17,7 +23,7 @@ Retrieves a connector by ID.
 [discrete]
 === {api-prereq-title}
 
-You must have `read` privileges for the *Actions and Connectors* feature in the
+You must have `read` privileges for the *{connectors-feature}* feature in the
 *Management* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 

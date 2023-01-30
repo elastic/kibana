@@ -12,7 +12,11 @@ import type { AgentPolicy, Output, DownloadSource } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
 
-import { getFullAgentPolicy, transformOutputToFullPolicyOutput } from './full_agent_policy';
+import {
+  generateFleetConfig,
+  getFullAgentPolicy,
+  transformOutputToFullPolicyOutput,
+} from './full_agent_policy';
 import { getMonitoringPermissions } from './monitoring_permissions';
 
 const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as jest.Mock<
@@ -52,43 +56,42 @@ jest.mock('../fleet_server_host', () => {
 jest.mock('../agent_policy');
 
 jest.mock('../output', () => {
+  const OUTPUTS: { [k: string]: Output } = {
+    'data-output-id': {
+      id: 'data-output-id',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Data output',
+      // @ts-ignore
+      type: 'elasticsearch',
+      hosts: ['http://es-data.co:9201'],
+    },
+    'monitoring-output-id': {
+      id: 'monitoring-output-id',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Monitoring output',
+      // @ts-ignore
+      type: 'elasticsearch',
+      hosts: ['http://es-monitoring.co:9201'],
+    },
+    'test-id': {
+      id: 'test-id',
+      is_default: true,
+      is_default_monitoring: true,
+      name: 'default',
+      // @ts-ignore
+      type: 'elasticsearch',
+      hosts: ['http://127.0.0.1:9201'],
+    },
+  };
   return {
     outputService: {
       getDefaultDataOutputId: async () => 'test-id',
       getDefaultMonitoringOutputId: async () => 'test-id',
-      get: (soClient: any, id: string): Output => {
-        switch (id) {
-          case 'data-output-id':
-            return {
-              id: 'data-output-id',
-              is_default: false,
-              is_default_monitoring: false,
-              name: 'Data output',
-              // @ts-ignore
-              type: 'elasticsearch',
-              hosts: ['http://es-data.co:9201'],
-            };
-          case 'monitoring-output-id':
-            return {
-              id: 'monitoring-output-id',
-              is_default: false,
-              is_default_monitoring: false,
-              name: 'Monitoring output',
-              // @ts-ignore
-              type: 'elasticsearch',
-              hosts: ['http://es-monitoring.co:9201'],
-            };
-          default:
-            return {
-              id: 'test-id',
-              is_default: true,
-              is_default_monitoring: true,
-              name: 'default',
-              // @ts-ignore
-              type: 'elasticsearch',
-              hosts: ['http://127.0.0.1:9201'],
-            };
-        }
+      get: (soClient: any, id: string): Output => OUTPUTS[id] || OUTPUTS['test-id'],
+      bulkGet: async (soClient: any, ids: string[]): Promise<Output[]> => {
+        return ids.map((id) => OUTPUTS[id] || OUTPUTS['test-id']);
       },
     },
   };
@@ -228,7 +231,7 @@ describe('getFullAgentPolicy', () => {
       },
       agent: {
         download: {
-          source_uri: 'http://default-registry.co',
+          sourceURI: 'http://default-registry.co',
         },
         monitoring: {
           namespace: 'default',
@@ -264,7 +267,7 @@ describe('getFullAgentPolicy', () => {
       },
       agent: {
         download: {
-          source_uri: 'http://default-registry.co',
+          sourceURI: 'http://default-registry.co',
         },
         monitoring: {
           namespace: 'default',
@@ -349,7 +352,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy?.outputs.default).toBeDefined();
   });
 
-  it('should return the source_uri from the agent policy', async () => {
+  it('should return the sourceURI from the agent policy', async () => {
     mockAgentPolicy({
       namespace: 'default',
       revision: 1,
@@ -373,7 +376,7 @@ describe('getFullAgentPolicy', () => {
       },
       agent: {
         download: {
-          source_uri: 'http://custom-registry-test',
+          sourceURI: 'http://custom-registry-test',
         },
         monitoring: {
           namespace: 'default',
@@ -435,6 +438,36 @@ ssl.test: 123
     `);
   });
 
+  it('should works with proxy', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+        proxy_id: 'proxy-1',
+      },
+      {
+        id: 'proxy-1',
+        name: 'Proxy 1',
+        url: 'https://proxy1.fr',
+        is_preconfigured: false,
+      }
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "http://host.fr",
+        ],
+        "proxy_url": "https://proxy1.fr",
+        "type": "elasticsearch",
+      }
+    `);
+  });
+
   it('should return placeholder ES_USERNAME and ES_PASSWORD for elasticsearch output type in standalone ', () => {
     const policyOutput = transformOutputToFullPolicyOutput(
       {
@@ -445,6 +478,7 @@ ssl.test: 123
         name: 'test output',
         type: 'elasticsearch',
       },
+      undefined,
       true
     );
 
@@ -470,6 +504,7 @@ ssl.test: 123
         name: 'test output',
         type: 'logstash',
       },
+      undefined,
       true
     );
 
@@ -479,6 +514,87 @@ ssl.test: 123
           "host.fr:3332",
         ],
         "type": "logstash",
+      }
+    `);
+  });
+});
+
+describe('generateFleetConfig', () => {
+  it('should work without proxy', () => {
+    const res = generateFleetConfig(
+      {
+        host_urls: ['https://test.fr'],
+      } as any,
+      []
+    );
+
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "https://test.fr",
+        ],
+      }
+    `);
+  });
+
+  it('should work with proxy', () => {
+    const res = generateFleetConfig(
+      {
+        host_urls: ['https://test.fr'],
+        proxy_id: 'proxy-1',
+      } as any,
+      [
+        {
+          id: 'proxy-1',
+          url: 'https://proxy.fr',
+        } as any,
+      ]
+    );
+
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "https://test.fr",
+        ],
+        "proxy_url": "https://proxy.fr",
+      }
+    `);
+  });
+
+  it('should work with proxy with headers and certificate authorities', () => {
+    const res = generateFleetConfig(
+      {
+        host_urls: ['https://test.fr'],
+        proxy_id: 'proxy-1',
+      } as any,
+      [
+        {
+          id: 'proxy-1',
+          url: 'https://proxy.fr',
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          proxy_headers: { Authorization: 'xxx' },
+        } as any,
+      ]
+    );
+
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "https://test.fr",
+        ],
+        "proxy_headers": Object {
+          "Authorization": "xxx",
+        },
+        "proxy_url": "https://proxy.fr",
+        "ssl": Object {
+          "certificate_authorities": Array [
+            Array [
+              "/tmp/ssl/ca.crt",
+            ],
+          ],
+          "renegotiation": "never",
+          "verification_mode": "",
+        },
       }
     `);
   });

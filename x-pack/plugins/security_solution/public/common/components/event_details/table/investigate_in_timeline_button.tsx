@@ -23,14 +23,18 @@ import { useCreateTimeline } from '../../../../timelines/components/timeline/pro
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 
-export const InvestigateInTimelineButton: React.FunctionComponent<{
+export interface InvestigateInTimelineButtonProps {
   asEmptyButton: boolean;
   dataProviders: DataProvider[] | null;
   filters?: Filter[] | null;
   timeRange?: TimeRange;
   keepDataView?: boolean;
   isDisabled?: boolean;
-}> = ({ asEmptyButton, children, dataProviders, filters, timeRange, keepDataView, ...rest }) => {
+}
+
+export const InvestigateInTimelineButton: React.FunctionComponent<
+  InvestigateInTimelineButtonProps
+> = ({ asEmptyButton, children, dataProviders, filters, timeRange, keepDataView, ...rest }) => {
   const dispatch = useDispatch();
 
   const getDataViewsSelector = useMemo(

@@ -20,7 +20,7 @@ import { FilterGroup } from '../components/overview/filter_group/filter_group';
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
-    min-width: 800px;
+    min-width: 700px;
     @media only screen and (max-width: 1128px) {
       min-width: 500px;
     }

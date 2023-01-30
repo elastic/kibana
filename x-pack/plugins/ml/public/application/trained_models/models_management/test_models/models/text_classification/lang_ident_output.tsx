@@ -20,7 +20,7 @@ export const getLangIdentOutputComponent = (inferrer: LangIdentInference) => (
 );
 
 const LangIdentOutput: FC<{ inferrer: LangIdentInference }> = ({ inferrer }) => {
-  const result = useObservable(inferrer.getInferenceResult$());
+  const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
   }
@@ -57,10 +57,12 @@ const LanguageIdent: FC<{
 
   return (
     <>
-      <EuiText size="s">{inputText}</EuiText>
+      <EuiText size="s" data-test-subj={'mlTestModelLangIdentInputText'}>
+        {inputText}
+      </EuiText>
       <EuiSpacer size="s" />
       <EuiTitle size="xxs">
-        <h4>{title}</h4>
+        <h4 data-test-subj={'mlTestModelLangIdentTitle'}>{title}</h4>
       </EuiTitle>
 
       <EuiSpacer />

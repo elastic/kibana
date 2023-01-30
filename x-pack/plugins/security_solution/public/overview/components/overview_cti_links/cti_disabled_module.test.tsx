@@ -21,7 +21,6 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
 import { mockTheme } from './mock';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { createKibanaContextProviderMock } from '../../../common/lib/kibana/kibana_react.mock';
 
 const MockKibanaContextProvider = createKibanaContextProviderMock();
@@ -32,23 +31,11 @@ describe('CtiDisabledModule', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   it('renders splitPanel with "danger" variant', () => {

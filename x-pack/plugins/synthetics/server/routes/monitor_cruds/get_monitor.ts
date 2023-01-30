@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import { ConfigKey, MonitorOverviewItem, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
@@ -53,27 +54,30 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
     query: QuerySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const queryResult = await getMonitors(
-      request.query,
-      syntheticsMonitorClient.syntheticsService,
-      savedObjectsClient
-    );
-
-    const countResult = isMonitorsQueryFiltered(request.query)
-      ? await savedObjectsClient.find({
+    const totalCountQuery = async () => {
+      if (isMonitorsQueryFiltered(request.query)) {
+        return savedObjectsClient.find({
           type: syntheticsMonitorType,
           perPage: 0,
           page: 1,
-        })
-      : queryResult;
+        });
+      }
+    };
+
+    const [queryResult, totalCount] = await Promise.all([
+      getMonitors(request.query, syntheticsMonitorClient.syntheticsService, savedObjectsClient),
+      totalCountQuery(),
+    ]);
+
+    const absoluteTotal = totalCount?.total ?? queryResult.total;
 
     const { saved_objects: monitors, per_page: perPageT, ...rest } = queryResult;
 
     return {
       ...rest,
       monitors,
+      absoluteTotal,
       perPage: perPageT,
-      absoluteTotal: countResult.total,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
     };
   },
@@ -91,7 +95,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       type: syntheticsMonitorType,
       sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
       sortOrder,
-      perPage: 500,
+      perPage: 1000,
       search: query ? `${query}*` : undefined,
       searchFields: SEARCH_FIELDS,
     });
@@ -104,17 +108,20 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       /* collect all monitor ids for use
        * in filtering overview requests */
       result.saved_objects.forEach((monitor) => {
-        const id = monitor.id;
-        allMonitorIds.push(id);
+        const id = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
+        const configId = monitor.attributes[ConfigKey.CONFIG_ID];
+        allMonitorIds.push(configId);
 
-        /* for reach location, add a config item */
+        /* for each location, add a config item */
         const locations = monitor.attributes[ConfigKey.LOCATIONS];
         locations.forEach((location) => {
           const config = {
             id,
+            configId,
             name: monitor.attributes[ConfigKey.NAME],
             location,
             isEnabled: monitor.attributes[ConfigKey.ENABLED],
+            isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
           };
           allMonitors.push(config);
           total++;

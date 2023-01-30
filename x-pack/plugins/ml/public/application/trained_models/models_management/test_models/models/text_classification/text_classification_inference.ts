@@ -6,12 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { estypes } from '@elastic/elasticsearch';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getTextClassificationOutputComponent } from './text_classification_output';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 
 export class TextClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
@@ -25,13 +27,20 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
     }),
   ];
 
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
+
+    this.initialize();
+  }
+
   public async inferText() {
     return this.runInfer<RawTextClassificationResponse>(
-      (inputText: string) => {
-        return {
-          docs: [{ [this.inputField]: inputText }],
-          inference_config: this.getInferenceConfig(this.getNumTopClassesConfig()),
-        };
+      () => {
+        return this.getInferenceConfig(this.getNumTopClassesConfig());
       },
       (resp, inputText) => {
         return processResponse(resp, this.model, inputText);
@@ -44,7 +53,7 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
       return {
         response: processInferenceResult(doc._source[this.inferenceType], this.model),
         rawResponse: doc._source[this.inferenceType],
-        inputText: doc._source[this.inputField],
+        inputText: doc._source[this.getInputField()],
       };
     });
   }

@@ -118,9 +118,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -165,9 +165,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-server.PluginInitializerContext",
+                    "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<unknown>"
@@ -191,9 +191,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -202,14 +202,14 @@
               "APMPluginSetupDependencies",
               ") => { config$: ",
               "Observable",
-              "<Readonly<{} & { indices: Readonly<{} & { metric: string; error: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+              "<Readonly<{} & { indices: Readonly<{} & { metric: string; error: string; span: string; transaction: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
-              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; }>>; getApmIndices: () => Promise<Readonly<{ sourcemap: string; error: string; onboarding: string; span: string; transaction: string; metric: string; apmAgentConfigurationIndex: string; apmCustomLinkIndex: string; }>>; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
+              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; }>>; getApmIndices: () => Promise<Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>>; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>; context: ",
@@ -232,9 +232,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -275,11 +275,13 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
+              ", plugins: ",
+              "APMPluginStartDependencies",
               ") => void"
             ],
             "path": "x-pack/plugins/apm/server/plugin.ts",
@@ -296,11 +298,26 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
+                ],
+                "path": "x-pack/plugins/apm/server/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "apm",
+                "id": "def-server.APMPlugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "APMPluginStartDependencies"
                 ],
                 "path": "x-pack/plugins/apm/server/plugin.ts",
                 "deprecated": false,
@@ -353,9 +370,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -374,9 +391,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
+                "section": "def-common.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
               " & { licensing: Promise<",
@@ -431,7 +448,7 @@
             "label": "config",
             "description": [],
             "signature": [
-              "{ readonly indices: Readonly<{} & { metric: string; error: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+              "{ readonly indices: Readonly<{} & { metric: string; error: string; span: string; transaction: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
               "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; }"
             ],
@@ -449,9 +466,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
@@ -532,9 +549,9 @@
               ">; }; observability: { setup: { getAlertDetailsConfig(): Readonly<{} & { metrics: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
+                "section": "def-common.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
               " & { licensing: Promise<",
@@ -548,9 +565,9 @@
               ">; }, request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => Promise<{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
@@ -793,7 +810,7 @@
         "label": "APIEndpoint",
         "description": [],
         "signature": [
-          "\"POST /internal/apm/data_view/static\" | \"GET /internal/apm/data_view/title\" | \"GET /internal/apm/environments\" | \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics\" | \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name\" | \"POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}\" | \"GET /internal/apm/services/{serviceName}/errors/distribution\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions\" | \"POST /internal/apm/latency/overall_distribution/transactions\" | \"GET /internal/apm/services/{serviceName}/metrics/charts\" | \"GET /internal/apm/services/{serviceName}/metrics/nodes\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/charts\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/summary\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances\" | \"GET /internal/apm/observability_overview\" | \"GET /internal/apm/observability_overview/has_data\" | \"GET /internal/apm/service-map\" | \"GET /internal/apm/service-map/service/{serviceName}\" | \"GET /internal/apm/service-map/dependency\" | \"GET /internal/apm/services\" | \"POST /internal/apm/services/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/metadata/details\" | \"GET /internal/apm/services/{serviceName}/metadata/icons\" | \"GET /internal/apm/services/{serviceName}/agent\" | \"GET /internal/apm/services/{serviceName}/transaction_types\" | \"GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata\" | \"GET /api/apm/services/{serviceName}/annotation/search\" | \"POST /api/apm/services/{serviceName}/annotation\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}\" | \"GET /internal/apm/services/{serviceName}/throughput\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/dependencies\" | \"GET /internal/apm/services/{serviceName}/dependencies/breakdown\" | \"GET /internal/apm/services/{serviceName}/anomaly_charts\" | \"GET /internal/apm/sorted_and_filtered_services\" | \"GET /internal/apm/service-groups\" | \"GET /internal/apm/service-group\" | \"POST /internal/apm/service-group\" | \"DELETE /internal/apm/service-group\" | \"GET /internal/apm/service-group/services\" | \"GET /internal/apm/service_groups/services_count\" | \"GET /internal/apm/suggestions\" | \"GET /internal/apm/traces/{traceId}\" | \"GET /internal/apm/traces\" | \"GET /internal/apm/traces/{traceId}/root_transaction\" | \"GET /internal/apm/transactions/{transactionId}\" | \"GET /internal/apm/traces/find\" | \"POST /internal/apm/traces/aggregated_critical_path\" | \"GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics\" | \"GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/latency\" | \"GET /internal/apm/services/{serviceName}/transactions/traces/samples\" | \"GET /internal/apm/services/{serviceName}/transaction/charts/breakdown\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/error_rate\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name\" | \"GET /internal/apm/rule_types/transaction_error_rate/chart_preview\" | \"GET /internal/apm/rule_types/transaction_duration/chart_preview\" | \"GET /internal/apm/rule_types/error_count/chart_preview\" | \"GET /api/apm/settings/agent-configuration\" | \"GET /api/apm/settings/agent-configuration/view\" | \"DELETE /api/apm/settings/agent-configuration\" | \"PUT /api/apm/settings/agent-configuration\" | \"POST /api/apm/settings/agent-configuration/search\" | \"GET /api/apm/settings/agent-configuration/environments\" | \"GET /api/apm/settings/agent-configuration/agent_name\" | \"GET /internal/apm/settings/anomaly-detection/jobs\" | \"POST /internal/apm/settings/anomaly-detection/jobs\" | \"GET /internal/apm/settings/anomaly-detection/environments\" | \"POST /internal/apm/settings/anomaly-detection/update_to_v3\" | \"GET /internal/apm/settings/apm-index-settings\" | \"GET /internal/apm/settings/apm-indices\" | \"POST /internal/apm/settings/apm-indices/save\" | \"GET /internal/apm/settings/custom_links/transaction\" | \"GET /internal/apm/settings/custom_links\" | \"POST /internal/apm/settings/custom_links\" | \"PUT /internal/apm/settings/custom_links/{id}\" | \"DELETE /internal/apm/settings/custom_links/{id}\" | \"GET /api/apm/sourcemaps\" | \"POST /api/apm/sourcemaps\" | \"DELETE /api/apm/sourcemaps/{id}\" | \"GET /internal/apm/fleet/has_apm_policies\" | \"GET /internal/apm/fleet/agents\" | \"POST /api/apm/fleet/apm_server_schema\" | \"GET /internal/apm/fleet/apm_server_schema/unsupported\" | \"GET /internal/apm/fleet/migration_check\" | \"POST /internal/apm/fleet/cloud_apm_package_policy\" | \"GET /internal/apm/fleet/java_agent_versions\" | \"GET /internal/apm/dependencies/top_dependencies\" | \"GET /internal/apm/dependencies/upstream_services\" | \"GET /internal/apm/dependencies/metadata\" | \"GET /internal/apm/dependencies/charts/latency\" | \"GET /internal/apm/dependencies/charts/throughput\" | \"GET /internal/apm/dependencies/charts/error_rate\" | \"GET /internal/apm/dependencies/operations\" | \"GET /internal/apm/dependencies/charts/distribution\" | \"GET /internal/apm/dependencies/operations/spans\" | \"GET /internal/apm/correlations/field_candidates/transactions\" | \"GET /internal/apm/correlations/field_value_stats/transactions\" | \"POST /internal/apm/correlations/field_value_pairs/transactions\" | \"POST /internal/apm/correlations/significant_correlations/transactions\" | \"POST /internal/apm/correlations/p_values/transactions\" | \"GET /internal/apm/fallback_to_transactions\" | \"GET /internal/apm/has_data\" | \"GET /internal/apm/event_metadata/{processorEvent}/{id}\" | \"GET /internal/apm/agent_keys\" | \"GET /internal/apm/agent_keys/privileges\" | \"POST /internal/apm/api_key/invalidate\" | \"POST /api/apm/agent_keys\" | \"GET /internal/apm/storage_explorer\" | \"GET /internal/apm/services/{serviceName}/storage_details\" | \"GET /internal/apm/storage_chart\" | \"GET /internal/apm/storage_explorer/privileges\" | \"GET /internal/apm/storage_explorer_summary_stats\" | \"GET /internal/apm/storage_explorer/is_cross_cluster_search\" | \"GET /internal/apm/storage_explorer/get_services\" | \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents\" | \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/children\" | \"GET /internal/apm/services/{serviceName}/infrastructure_attributes\" | \"GET /internal/apm/debug-telemetry\" | \"GET /internal/apm/time_range_metadata\" | \"GET /internal/apm/settings/labs\" | \"GET /internal/apm/get_agents_per_service\" | \"GET /internal/apm/services/{serviceName}/agent_instances\" | \"GET /internal/apm/services/{serviceName}/mobile/filters\""
+          "\"POST /internal/apm/data_view/static\" | \"GET /internal/apm/data_view/title\" | \"GET /internal/apm/environments\" | \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics\" | \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name\" | \"POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/samples\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}\" | \"GET /internal/apm/services/{serviceName}/errors/distribution\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions\" | \"POST /internal/apm/latency/overall_distribution/transactions\" | \"GET /internal/apm/services/{serviceName}/metrics/charts\" | \"GET /internal/apm/services/{serviceName}/metrics/nodes\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/charts\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/summary\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances\" | \"GET /internal/apm/observability_overview\" | \"GET /internal/apm/observability_overview/has_data\" | \"GET /internal/apm/service-map\" | \"GET /internal/apm/service-map/service/{serviceName}\" | \"GET /internal/apm/service-map/dependency\" | \"GET /internal/apm/services\" | \"POST /internal/apm/services/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/metadata/details\" | \"GET /internal/apm/services/{serviceName}/metadata/icons\" | \"GET /internal/apm/services/{serviceName}/agent\" | \"GET /internal/apm/services/{serviceName}/transaction_types\" | \"GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata\" | \"GET /api/apm/services/{serviceName}/annotation/search\" | \"POST /api/apm/services/{serviceName}/annotation\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}\" | \"GET /internal/apm/services/{serviceName}/throughput\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/dependencies\" | \"GET /internal/apm/services/{serviceName}/dependencies/breakdown\" | \"GET /internal/apm/services/{serviceName}/anomaly_charts\" | \"GET /internal/apm/sorted_and_filtered_services\" | \"GET /internal/apm/services/{serviceName}/alerts_count\" | \"GET /internal/apm/service-groups\" | \"GET /internal/apm/service-group\" | \"POST /internal/apm/service-group\" | \"DELETE /internal/apm/service-group\" | \"GET /internal/apm/service-group/services\" | \"GET /internal/apm/service-group/counts\" | \"GET /internal/apm/suggestions\" | \"GET /internal/apm/traces/{traceId}\" | \"GET /internal/apm/traces\" | \"GET /internal/apm/traces/{traceId}/root_transaction\" | \"GET /internal/apm/transactions/{transactionId}\" | \"GET /internal/apm/traces/find\" | \"POST /internal/apm/traces/aggregated_critical_path\" | \"GET /internal/apm/traces/{traceId}/transactions/{transactionId}\" | \"GET /internal/apm/traces/{traceId}/spans/{spanId}\" | \"GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics\" | \"GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/latency\" | \"GET /internal/apm/services/{serviceName}/transactions/traces/samples\" | \"GET /internal/apm/services/{serviceName}/transaction/charts/breakdown\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/error_rate\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name\" | \"GET /internal/apm/rule_types/transaction_error_rate/chart_preview\" | \"GET /internal/apm/rule_types/transaction_duration/chart_preview\" | \"GET /internal/apm/rule_types/error_count/chart_preview\" | \"GET /api/apm/settings/agent-configuration\" | \"GET /api/apm/settings/agent-configuration/view\" | \"DELETE /api/apm/settings/agent-configuration\" | \"PUT /api/apm/settings/agent-configuration\" | \"POST /api/apm/settings/agent-configuration/search\" | \"GET /api/apm/settings/agent-configuration/environments\" | \"GET /api/apm/settings/agent-configuration/agent_name\" | \"GET /internal/apm/settings/anomaly-detection/jobs\" | \"POST /internal/apm/settings/anomaly-detection/jobs\" | \"GET /internal/apm/settings/anomaly-detection/environments\" | \"POST /internal/apm/settings/anomaly-detection/update_to_v3\" | \"GET /internal/apm/settings/apm-index-settings\" | \"GET /internal/apm/settings/apm-indices\" | \"POST /internal/apm/settings/apm-indices/save\" | \"GET /internal/apm/settings/custom_links/transaction\" | \"GET /internal/apm/settings/custom_links\" | \"POST /internal/apm/settings/custom_links\" | \"PUT /internal/apm/settings/custom_links/{id}\" | \"DELETE /internal/apm/settings/custom_links/{id}\" | \"GET /api/apm/sourcemaps\" | \"POST /api/apm/sourcemaps\" | \"DELETE /api/apm/sourcemaps/{id}\" | \"POST /internal/apm/sourcemaps/migrate_fleet_artifacts\" | \"GET /internal/apm/fleet/has_apm_policies\" | \"GET /internal/apm/fleet/agents\" | \"POST /api/apm/fleet/apm_server_schema\" | \"GET /internal/apm/fleet/apm_server_schema/unsupported\" | \"GET /internal/apm/fleet/migration_check\" | \"POST /internal/apm/fleet/cloud_apm_package_policy\" | \"GET /internal/apm/fleet/java_agent_versions\" | \"GET /internal/apm/dependencies/top_dependencies\" | \"GET /internal/apm/dependencies/upstream_services\" | \"GET /internal/apm/dependencies/metadata\" | \"GET /internal/apm/dependencies/charts/latency\" | \"GET /internal/apm/dependencies/charts/throughput\" | \"GET /internal/apm/dependencies/charts/error_rate\" | \"GET /internal/apm/dependencies/operations\" | \"GET /internal/apm/dependencies/charts/distribution\" | \"GET /internal/apm/dependencies/operations/spans\" | \"GET /internal/apm/correlations/field_candidates/transactions\" | \"GET /internal/apm/correlations/field_value_stats/transactions\" | \"POST /internal/apm/correlations/field_value_pairs/transactions\" | \"POST /internal/apm/correlations/significant_correlations/transactions\" | \"POST /internal/apm/correlations/p_values/transactions\" | \"GET /internal/apm/fallback_to_transactions\" | \"GET /internal/apm/has_data\" | \"GET /internal/apm/event_metadata/{processorEvent}/{id}\" | \"GET /internal/apm/agent_keys\" | \"GET /internal/apm/agent_keys/privileges\" | \"POST /internal/apm/api_key/invalidate\" | \"POST /api/apm/agent_keys\" | \"GET /internal/apm/storage_explorer\" | \"GET /internal/apm/services/{serviceName}/storage_details\" | \"GET /internal/apm/storage_chart\" | \"GET /internal/apm/storage_explorer/privileges\" | \"GET /internal/apm/storage_explorer_summary_stats\" | \"GET /internal/apm/storage_explorer/is_cross_cluster_search\" | \"GET /internal/apm/storage_explorer/get_services\" | \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents\" | \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/children\" | \"GET /internal/apm/services/{serviceName}/infrastructure_attributes\" | \"GET /internal/apm/debug-telemetry\" | \"GET /internal/apm/time_range_metadata\" | \"GET /internal/apm/settings/labs\" | \"GET /internal/apm/get_agents_per_service\" | \"GET /internal/apm/services/{serviceName}/agent_instances\" | \"GET /internal/apm/services/{serviceName}/mobile/filters\" | \"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions\" | \"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests\" | \"GET /internal/apm/mobile-services/{serviceName}/stats\""
         ],
         "path": "x-pack/plugins/apm/server/routes/apm_routes/get_global_apm_server_route_repository.ts",
         "deprecated": false,
@@ -823,7 +840,7 @@
         "label": "APMConfig",
         "description": [],
         "signature": [
-          "{ readonly indices: Readonly<{} & { metric: string; error: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+          "{ readonly indices: Readonly<{} & { metric: string; error: string; span: string; transaction: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
           "SearchAggregatedTransactionSetting",
           "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; }"
         ],
@@ -840,7 +857,7 @@
         "label": "ApmIndicesConfigName",
         "description": [],
         "signature": [
-          "\"metric\" | \"error\" | \"span\" | \"transaction\" | \"sourcemap\" | \"onboarding\""
+          "\"metric\" | \"error\" | \"span\" | \"transaction\" | \"onboarding\""
         ],
         "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
@@ -855,12 +872,214 @@
         "label": "APMServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /internal/apm/services/{serviceName}/mobile/filters\": ",
+          "{ \"GET /internal/apm/mobile-services/{serviceName}/stats\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm/mobile-services/{serviceName}/stats\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ serviceName: ",
+          "StringC",
+          "; }>; query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ kuery: ",
+          "StringC",
+          "; }>, ",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>, ",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ENVIRONMENT_NOT_DEFINED\">, ",
+          "LiteralC",
+          "<\"ENVIRONMENT_ALL\">, ",
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">]>; }>, ",
+          "PartialC",
+          "<{ offset: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ transactionType: ",
+          "StringC",
+          "; }>]>; }>, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", ",
+          "MobilePeriodStats",
+          ", ",
+          "APMRouteCreateOptions",
+          ">; \"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ serviceName: ",
+          "StringC",
+          "; }>; query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ kuery: ",
+          "StringC",
+          "; }>, ",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>, ",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ENVIRONMENT_NOT_DEFINED\">, ",
+          "LiteralC",
+          "<\"ENVIRONMENT_ALL\">, ",
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">]>; }>, ",
+          "PartialC",
+          "<{ offset: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ transactionType: ",
+          "StringC",
+          "; transactionName: ",
+          "StringC",
+          "; }>]>; }>, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", ",
+          "HttpRequestsTimeseries",
+          ", ",
+          "APMRouteCreateOptions",
+          ">; \"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ serviceName: ",
+          "StringC",
+          "; }>; query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ kuery: ",
+          "StringC",
+          "; }>, ",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>, ",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ENVIRONMENT_NOT_DEFINED\">, ",
+          "LiteralC",
+          "<\"ENVIRONMENT_ALL\">, ",
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">]>; }>, ",
+          "PartialC",
+          "<{ offset: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ transactionType: ",
+          "StringC",
+          "; transactionName: ",
+          "StringC",
+          "; }>]>; }>, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", ",
+          "SessionsTimeseries",
+          ", ",
+          "APMRouteCreateOptions",
+          ">; \"GET /internal/apm/services/{serviceName}/mobile/filters\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/mobile/filters\", ",
@@ -918,9 +1137,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/agent_instances\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/agent_instances\", ",
@@ -978,9 +1197,9 @@
           ">; \"GET /internal/apm/get_agents_per_service\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/get_agents_per_service\", ",
@@ -1042,9 +1261,9 @@
           ">; \"GET /internal/apm/settings/labs\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/settings/labs\", undefined, ",
@@ -1060,9 +1279,9 @@
           ">; \"GET /internal/apm/time_range_metadata\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/time_range_metadata\", ",
@@ -1098,9 +1317,9 @@
           ">; \"GET /internal/apm/debug-telemetry\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/debug-telemetry\", undefined, ",
@@ -1116,9 +1335,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/infrastructure_attributes\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/infrastructure_attributes\", ",
@@ -1172,9 +1391,9 @@
           ">; \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/children\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/traces/{traceId}/span_links/{spanId}/children\", ",
@@ -1212,9 +1431,9 @@
           ">; \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents\", ",
@@ -1296,9 +1515,9 @@
           ">; \"GET /internal/apm/storage_explorer/get_services\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/storage_explorer/get_services\", ",
@@ -1366,9 +1585,9 @@
           ">; \"GET /internal/apm/storage_explorer/is_cross_cluster_search\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/storage_explorer/is_cross_cluster_search\", undefined, ",
@@ -1384,9 +1603,9 @@
           ">; \"GET /internal/apm/storage_explorer_summary_stats\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/storage_explorer_summary_stats\", ",
@@ -1464,9 +1683,9 @@
           ">; \"GET /internal/apm/storage_explorer/privileges\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/storage_explorer/privileges\", undefined, ",
@@ -1482,9 +1701,9 @@
           ">; \"GET /internal/apm/storage_chart\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/storage_chart\", ",
@@ -1562,9 +1781,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/storage_details\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/storage_details\", ",
@@ -1654,9 +1873,9 @@
           ">; \"GET /internal/apm/storage_explorer\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/storage_explorer\", ",
@@ -1736,9 +1955,9 @@
           ">; \"POST /api/apm/agent_keys\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /api/apm/agent_keys\", ",
@@ -1774,9 +1993,9 @@
           ">; \"POST /internal/apm/api_key/invalidate\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/api_key/invalidate\", ",
@@ -1798,9 +2017,9 @@
           ">; \"GET /internal/apm/agent_keys/privileges\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/agent_keys/privileges\", undefined, ",
@@ -1816,9 +2035,9 @@
           ">; \"GET /internal/apm/agent_keys\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/agent_keys\", undefined, ",
@@ -1842,9 +2061,9 @@
           ">; \"GET /internal/apm/event_metadata/{processorEvent}/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/event_metadata/{processorEvent}/{id}\", ",
@@ -1908,9 +2127,9 @@
           ">; \"GET /internal/apm/has_data\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/has_data\", undefined, ",
@@ -1926,9 +2145,9 @@
           ">; \"GET /internal/apm/fallback_to_transactions\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/fallback_to_transactions\", ",
@@ -1958,9 +2177,9 @@
           ">; \"POST /internal/apm/correlations/p_values/transactions\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/correlations/p_values/transactions\", ",
@@ -2032,9 +2251,9 @@
           ">; \"POST /internal/apm/correlations/significant_correlations/transactions\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/correlations/significant_correlations/transactions\", ",
@@ -2114,9 +2333,9 @@
           ">; \"POST /internal/apm/correlations/field_value_pairs/transactions\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/correlations/field_value_pairs/transactions\", ",
@@ -2182,9 +2401,9 @@
           ">; \"GET /internal/apm/correlations/field_value_stats/transactions\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/correlations/field_value_stats/transactions\", ",
@@ -2256,9 +2475,9 @@
           ">; \"GET /internal/apm/correlations/field_candidates/transactions\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/correlations/field_candidates/transactions\", ",
@@ -2316,9 +2535,9 @@
           ">; \"GET /internal/apm/dependencies/operations/spans\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/dependencies/operations/spans\", ",
@@ -2382,9 +2601,9 @@
           ">; \"GET /internal/apm/dependencies/charts/distribution\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/dependencies/charts/distribution\", ",
@@ -2446,9 +2665,9 @@
           ">; \"GET /internal/apm/dependencies/operations\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/dependencies/operations\", ",
@@ -2510,9 +2729,9 @@
           ">; \"GET /internal/apm/dependencies/charts/error_rate\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/dependencies/charts/error_rate\", ",
@@ -2574,9 +2793,9 @@
           ">; \"GET /internal/apm/dependencies/charts/throughput\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/dependencies/charts/throughput\", ",
@@ -2638,9 +2857,9 @@
           ">; \"GET /internal/apm/dependencies/charts/latency\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/dependencies/charts/latency\", ",
@@ -2702,9 +2921,9 @@
           ">; \"GET /internal/apm/dependencies/metadata\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/dependencies/metadata\", ",
@@ -2734,9 +2953,9 @@
           ">; \"GET /internal/apm/dependencies/upstream_services\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/dependencies/upstream_services\", ",
@@ -2822,9 +3041,9 @@
           ">; \"GET /internal/apm/dependencies/top_dependencies\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/dependencies/top_dependencies\", ",
@@ -2904,9 +3123,9 @@
           ">; \"GET /internal/apm/fleet/java_agent_versions\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/fleet/java_agent_versions\", undefined, ",
@@ -2922,9 +3141,9 @@
           ">; \"POST /internal/apm/fleet/cloud_apm_package_policy\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/fleet/cloud_apm_package_policy\", undefined, ",
@@ -2948,9 +3167,9 @@
           ">; \"GET /internal/apm/fleet/migration_check\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/fleet/migration_check\", undefined, ",
@@ -2974,9 +3193,9 @@
           ">; \"GET /internal/apm/fleet/apm_server_schema/unsupported\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/fleet/apm_server_schema/unsupported\", undefined, ",
@@ -2992,9 +3211,9 @@
           ">; \"POST /api/apm/fleet/apm_server_schema\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /api/apm/fleet/apm_server_schema\", ",
@@ -3020,9 +3239,9 @@
           ">; \"GET /internal/apm/fleet/agents\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/fleet/agents\", undefined, ",
@@ -3038,9 +3257,9 @@
           ">; \"GET /internal/apm/fleet/has_apm_policies\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/fleet/has_apm_policies\", undefined, ",
@@ -3053,12 +3272,30 @@
           },
           ", { hasApmPolicies: boolean; }, ",
           "APMRouteCreateOptions",
+          ">; \"POST /internal/apm/sourcemaps/migrate_fleet_artifacts\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/apm/sourcemaps/migrate_fleet_artifacts\", undefined, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", void, ",
+          "APMRouteCreateOptions",
           ">; \"DELETE /api/apm/sourcemaps/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"DELETE /api/apm/sourcemaps/{id}\", ",
@@ -3080,9 +3317,9 @@
           ">; \"POST /api/apm/sourcemaps\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /api/apm/sourcemaps\", ",
@@ -3097,7 +3334,7 @@
           "StringC",
           "; sourcemap: ",
           "Type",
-          "<{ version: number; sources: string[]; mappings: string; } & { names?: string[] | undefined; file?: string | undefined; sourceRoot?: string | undefined; sourcesContent?: string[] | undefined; }, string | Buffer, unknown>; }>; }>, ",
+          "<{ version: number; sources: string[]; mappings: string; } & { names?: string[] | undefined; file?: string | undefined; sourceRoot?: string | undefined; sourcesContent?: (string | null)[] | undefined; }, string | Buffer, unknown>; }>; }>, ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -3118,12 +3355,20 @@
           ">; \"GET /api/apm/sourcemaps\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"GET /api/apm/sourcemaps\", undefined, ",
+          "<\"GET /api/apm/sourcemaps\", ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ page: ",
+          "Type",
+          "<number, unknown, unknown>; perPage: ",
+          "Type",
+          "<number, unknown, unknown>; }>; }>, ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -3133,14 +3378,14 @@
           },
           ", { artifacts: ",
           "ArtifactSourceMap",
-          "[]; } | undefined, ",
+          "[]; total: number; } | undefined, ",
           "APMRouteCreateOptions",
           ">; \"DELETE /internal/apm/settings/custom_links/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"DELETE /internal/apm/settings/custom_links/{id}\", ",
@@ -3162,9 +3407,9 @@
           ">; \"PUT /internal/apm/settings/custom_links/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"PUT /internal/apm/settings/custom_links/{id}\", ",
@@ -3218,9 +3463,9 @@
           ">; \"POST /internal/apm/settings/custom_links\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/settings/custom_links\", ",
@@ -3270,9 +3515,9 @@
           ">; \"GET /internal/apm/settings/custom_links\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/settings/custom_links\", ",
@@ -3302,9 +3547,9 @@
           ">; \"GET /internal/apm/settings/custom_links/transaction\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/settings/custom_links/transaction\", ",
@@ -3334,9 +3579,9 @@
           ">; \"POST /internal/apm/settings/apm-indices/save\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/settings/apm-indices/save\", ",
@@ -3364,9 +3609,9 @@
           ">; \"GET /internal/apm/settings/apm-indices\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/settings/apm-indices\", undefined, ",
@@ -3384,9 +3629,9 @@
           ">; \"GET /internal/apm/settings/apm-index-settings\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/settings/apm-index-settings\", undefined, ",
@@ -3397,14 +3642,14 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { apmIndexSettings: { configurationName: \"metric\" | \"error\" | \"span\" | \"transaction\" | \"sourcemap\" | \"onboarding\"; defaultValue: string; savedValue: string | undefined; }[]; }, ",
+          ", { apmIndexSettings: { configurationName: \"metric\" | \"error\" | \"span\" | \"transaction\" | \"onboarding\"; defaultValue: string; savedValue: string | undefined; }[]; }, ",
           "APMRouteCreateOptions",
           ">; \"POST /internal/apm/settings/anomaly-detection/update_to_v3\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/settings/anomaly-detection/update_to_v3\", undefined, ",
@@ -3420,9 +3665,9 @@
           ">; \"GET /internal/apm/settings/anomaly-detection/environments\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/settings/anomaly-detection/environments\", undefined, ",
@@ -3438,9 +3683,9 @@
           ">; \"POST /internal/apm/settings/anomaly-detection/jobs\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/settings/anomaly-detection/jobs\", ",
@@ -3480,9 +3725,9 @@
           ">; \"GET /internal/apm/settings/anomaly-detection/jobs\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/settings/anomaly-detection/jobs\", undefined, ",
@@ -3500,9 +3745,9 @@
           ">; \"GET /api/apm/settings/agent-configuration/agent_name\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /api/apm/settings/agent-configuration/agent_name\", ",
@@ -3524,9 +3769,9 @@
           ">; \"GET /api/apm/settings/agent-configuration/environments\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /api/apm/settings/agent-configuration/environments\", ",
@@ -3548,9 +3793,9 @@
           ">; \"POST /api/apm/settings/agent-configuration/search\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /api/apm/settings/agent-configuration/search\", ",
@@ -3582,9 +3827,9 @@
           ", ",
           {
             "pluginId": "@kbn/es-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnEsTypesPluginApi",
-            "section": "def-server.SearchHit",
+            "section": "def-common.SearchHit",
             "text": "SearchHit"
           },
           "<",
@@ -3594,9 +3839,9 @@
           ">; \"PUT /api/apm/settings/agent-configuration\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"PUT /api/apm/settings/agent-configuration\", ",
@@ -3648,9 +3893,9 @@
           ">; \"DELETE /api/apm/settings/agent-configuration\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"DELETE /api/apm/settings/agent-configuration\", ",
@@ -3676,9 +3921,9 @@
           ">; \"GET /api/apm/settings/agent-configuration/view\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /api/apm/settings/agent-configuration/view\", ",
@@ -3704,9 +3949,9 @@
           ">; \"GET /api/apm/settings/agent-configuration\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /api/apm/settings/agent-configuration\", undefined, ",
@@ -3724,9 +3969,9 @@
           ">; \"GET /internal/apm/rule_types/transaction_duration/chart_preview\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/rule_types/transaction_duration/chart_preview\", ",
@@ -3796,9 +4041,9 @@
           ">; \"GET /internal/apm/rule_types/error_count/chart_preview\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/rule_types/error_count/chart_preview\", ",
@@ -3868,9 +4113,9 @@
           ">; \"GET /internal/apm/rule_types/transaction_error_rate/chart_preview\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/rule_types/transaction_error_rate/chart_preview\", ",
@@ -3940,9 +4185,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name\", ",
@@ -4014,9 +4259,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate\", ",
@@ -4086,9 +4331,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/transactions/charts/error_rate\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/transactions/charts/error_rate\", ",
@@ -4162,9 +4407,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/transaction/charts/breakdown\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/transaction/charts/breakdown\", ",
@@ -4226,9 +4471,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/transactions/traces/samples\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/transactions/traces/samples\", ",
@@ -4298,9 +4543,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/transactions/charts/latency\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/transactions/charts/latency\", ",
@@ -4386,9 +4631,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics\", ",
@@ -4484,9 +4729,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics\", ",
@@ -4555,12 +4800,78 @@
           },
           ", { transactionGroups: { transactionType: string; name: string; latency: number | null; throughput: number; errorRate: number; impact: number; }[]; isAggregationAccurate: boolean; bucketSize: number; }, ",
           "APMRouteCreateOptions",
+          ">; \"GET /internal/apm/traces/{traceId}/spans/{spanId}\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm/traces/{traceId}/spans/{spanId}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ traceId: ",
+          "StringC",
+          "; spanId: ",
+          "StringC",
+          "; }>; query: ",
+          "UnionC",
+          "<[",
+          "PartialC",
+          "<{ parentTransactionId: ",
+          "StringC",
+          "; }>, ",
+          "UndefinedC",
+          "]>; }>, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", { span?: ",
+          "Span",
+          " | undefined; parentTransaction?: ",
+          "Transaction",
+          " | undefined; }, ",
+          "APMRouteCreateOptions",
+          ">; \"GET /internal/apm/traces/{traceId}/transactions/{transactionId}\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm/traces/{traceId}/transactions/{transactionId}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ traceId: ",
+          "StringC",
+          "; transactionId: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", ",
+          "Transaction",
+          ", ",
+          "APMRouteCreateOptions",
           ">; \"POST /internal/apm/traces/aggregated_critical_path\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/traces/aggregated_critical_path\", ",
@@ -4626,9 +4937,9 @@
           ">; \"GET /internal/apm/traces/find\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/traces/find\", ",
@@ -4688,9 +4999,9 @@
           ">; \"GET /internal/apm/transactions/{transactionId}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/transactions/{transactionId}\", ",
@@ -4714,9 +5025,9 @@
           ">; \"GET /internal/apm/traces/{traceId}/root_transaction\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/traces/{traceId}/root_transaction\", ",
@@ -4740,9 +5051,9 @@
           ">; \"GET /internal/apm/traces\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/traces\", ",
@@ -4800,9 +5111,9 @@
           ">; \"GET /internal/apm/traces/{traceId}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/traces/{traceId}\", ",
@@ -4812,12 +5123,18 @@
           "<{ traceId: ",
           "StringC",
           "; }>; query: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ start: ",
           "Type",
           "<number, string, unknown>; end: ",
           "Type",
-          "<number, string, unknown>; }>; }>, ",
+          "<number, string, unknown>; }>, ",
+          "TypeC",
+          "<{ entryTransactionId: ",
+          "StringC",
+          "; }>]>; }>, ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -4825,20 +5142,18 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { exceedsMax: boolean; traceDocs: (",
+          ", { traceItems: ",
+          "TraceItems",
+          "; entryTransaction?: ",
           "Transaction",
-          " | ",
-          "Span",
-          ")[]; errorDocs: ",
-          "APMError",
-          "[]; linkedChildrenOfSpanCountBySpanId: Record<string, number>; }, ",
+          " | undefined; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/suggestions\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/suggestions\", ",
@@ -4871,23 +5186,15 @@
           },
           ", { terms: string[]; }, ",
           "APMRouteCreateOptions",
-          ">; \"GET /internal/apm/service_groups/services_count\": ",
+          ">; \"GET /internal/apm/service-group/counts\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"GET /internal/apm/service_groups/services_count\", ",
-          "TypeC",
-          "<{ query: ",
-          "TypeC",
-          "<{ start: ",
-          "Type",
-          "<number, string, unknown>; end: ",
-          "Type",
-          "<number, string, unknown>; }>; }>, ",
+          "<\"GET /internal/apm/service-group/counts\", undefined, ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -4895,14 +5202,14 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { servicesCounts: Record<string, number>; }, ",
+          ", ServiceGroupCounts, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/service-group/services\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/service-group/services\", ",
@@ -4934,9 +5241,9 @@
           ">; \"DELETE /internal/apm/service-group\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"DELETE /internal/apm/service-group\", ",
@@ -4958,9 +5265,9 @@
           ">; \"POST /internal/apm/service-group\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/service-group\", ",
@@ -4999,14 +5306,16 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", void, ",
+          ", ",
+          "SavedServiceGroup",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/service-group\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/service-group\", ",
@@ -5030,9 +5339,9 @@
           ">; \"GET /internal/apm/service-groups\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/service-groups\", undefined, ",
@@ -5047,12 +5356,64 @@
           "SavedServiceGroup",
           "[]; }, ",
           "APMRouteCreateOptions",
+          ">; \"GET /internal/apm/services/{serviceName}/alerts_count\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm/services/{serviceName}/alerts_count\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ serviceName: ",
+          "StringC",
+          "; }>; query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>, ",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ENVIRONMENT_NOT_DEFINED\">, ",
+          "LiteralC",
+          "<\"ENVIRONMENT_ALL\">, ",
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">]>; }>]>; }>, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", { serviceName: string; alertsCount: number; }, ",
+          "APMRouteCreateOptions",
           ">; \"GET /internal/apm/sorted_and_filtered_services\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/sorted_and_filtered_services\", ",
@@ -5108,9 +5469,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/anomaly_charts\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/anomaly_charts\", ",
@@ -5166,9 +5527,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/dependencies/breakdown\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/dependencies/breakdown\", ",
@@ -5222,9 +5583,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/dependencies\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/dependencies\", ",
@@ -5300,9 +5661,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics\", ",
@@ -5406,9 +5767,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics\", ",
@@ -5484,9 +5845,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/throughput\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/throughput\", ",
@@ -5556,9 +5917,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}\", ",
@@ -5610,9 +5971,9 @@
           ">; \"POST /api/apm/services/{serviceName}/annotation\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /api/apm/services/{serviceName}/annotation\", ",
@@ -5660,9 +6021,9 @@
           ">; \"GET /api/apm/services/{serviceName}/annotation/search\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /api/apm/services/{serviceName}/annotation/search\", ",
@@ -5714,9 +6075,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata\", ",
@@ -5772,9 +6133,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/transaction_types\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/transaction_types\", ",
@@ -5802,9 +6163,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/agent\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/agent\", ",
@@ -5827,14 +6188,16 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { agentName?: undefined; runtimeName?: undefined; } | { agentName: string | undefined; runtimeName: string | undefined; }, ",
+          ", { agentName?: string | undefined; runtimeName?: string | undefined; serverlessType?: ",
+          "ServerlessType",
+          " | undefined; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/metadata/icons\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/metadata/icons\", ",
@@ -5864,9 +6227,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/metadata/details\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/metadata/details\", ",
@@ -5896,9 +6259,9 @@
           ">; \"POST /internal/apm/services/detailed_statistics\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/services/detailed_statistics\", ",
@@ -5964,9 +6327,9 @@
           ">; \"GET /internal/apm/services\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services\", ",
@@ -6027,20 +6390,20 @@
           "AgentName",
           "; } | { serviceName: string; healthStatus: ",
           "ServiceHealthStatus",
-          "; }, { serviceName: string; transactionType: string; environments: string[]; agentName: ",
+          "; } | { serviceName: string; alertsCount: number; }, { serviceName: string; transactionType: string; environments: string[]; agentName: ",
           "AgentName",
           "; latency: number | null; transactionErrorRate: number; throughput: number; } & { serviceName: string; environments: string[]; agentName: ",
           "AgentName",
           "; } & { serviceName: string; healthStatus: ",
           "ServiceHealthStatus",
-          "; }>; }, ",
+          "; } & { serviceName: string; alertsCount: number; }>; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/service-map/dependency\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/service-map/dependency\", ",
@@ -6098,9 +6461,9 @@
           ">; \"GET /internal/apm/service-map/service/{serviceName}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/service-map/service/{serviceName}\", ",
@@ -6158,9 +6521,9 @@
           ">; \"GET /internal/apm/service-map\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/service-map\", ",
@@ -6216,9 +6579,9 @@
           ">; \"GET /internal/apm/observability_overview/has_data\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/observability_overview/has_data\", undefined, ",
@@ -6236,9 +6599,9 @@
           ">; \"GET /internal/apm/observability_overview\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/observability_overview\", ",
@@ -6270,9 +6633,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances\", ",
@@ -6334,9 +6697,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview\", ",
@@ -6390,9 +6753,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/metrics/serverless/summary\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/metrics/serverless/summary\", ",
@@ -6450,9 +6813,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/metrics/serverless/charts\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/metrics/serverless/charts\", ",
@@ -6522,9 +6885,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/metrics/nodes\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/metrics/nodes\", ",
@@ -6578,9 +6941,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/metrics/charts\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/metrics/charts\", ",
@@ -6644,9 +7007,9 @@
           ">; \"POST /internal/apm/latency/overall_distribution/transactions\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/latency/overall_distribution/transactions\", ",
@@ -6744,9 +7107,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions\", ",
@@ -6810,9 +7173,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/errors/distribution\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/errors/distribution\", ",
@@ -6873,15 +7236,79 @@
           "Maybe",
           "<number>; }[]; bucketSize: number; }, ",
           "APMRouteCreateOptions",
-          ">; \"GET /internal/apm/services/{serviceName}/errors/{groupId}\": ",
+          ">; \"GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"GET /internal/apm/services/{serviceName}/errors/{groupId}\", ",
+          "<\"GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ serviceName: ",
+          "StringC",
+          "; groupId: ",
+          "StringC",
+          "; errorId: ",
+          "StringC",
+          "; }>; query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ENVIRONMENT_NOT_DEFINED\">, ",
+          "LiteralC",
+          "<\"ENVIRONMENT_ALL\">, ",
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">]>; }>, ",
+          "TypeC",
+          "<{ kuery: ",
+          "StringC",
+          "; }>, ",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>]>; }>, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", { transaction: ",
+          "Transaction",
+          " | undefined; error: ",
+          "APMError",
+          "; }, ",
+          "APMRouteCreateOptions",
+          ">; \"GET /internal/apm/services/{serviceName}/errors/{groupId}/samples\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "public",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-public.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm/services/{serviceName}/errors/{groupId}/samples\", ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -6929,18 +7356,14 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { transaction: ",
-          "Transaction",
-          " | undefined; error: ",
-          "APMError",
-          "; occurrencesCount: number; }, ",
+          ", { errorSampleIds: string[]; occurrencesCount: number; }, ",
           "APMRouteCreateOptions",
           ">; \"POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics\", ",
@@ -7014,9 +7437,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name\", ",
@@ -7078,9 +7501,9 @@
           ">; \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics\", ",
@@ -7144,9 +7567,9 @@
           ">; \"GET /internal/apm/environments\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/environments\", ",
@@ -7186,9 +7609,9 @@
           ">; \"GET /internal/apm/data_view/title\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /internal/apm/data_view/title\", undefined, ",
@@ -7204,9 +7627,9 @@
           ">; \"POST /internal/apm/data_view/static\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /internal/apm/data_view/static\", undefined, ",
@@ -7256,7 +7679,7 @@
           "description": [],
           "signature": [
             "Observable",
-            "<Readonly<{} & { indices: Readonly<{} & { metric: string; error: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+            "<Readonly<{} & { indices: Readonly<{} & { metric: string; error: string; span: string; transaction: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
             "SearchAggregatedTransactionSetting",
             "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; }>>"
           ],
@@ -7272,7 +7695,7 @@
           "label": "getApmIndices",
           "description": [],
           "signature": [
-            "() => Promise<Readonly<{ sourcemap: string; error: string; onboarding: string; span: string; transaction: string; metric: string; apmAgentConfigurationIndex: string; apmCustomLinkIndex: string; }>>"
+            "() => Promise<Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>>"
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,
@@ -7291,9 +7714,9 @@
             "(params: { debug?: boolean | undefined; request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
+              "section": "def-common.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>; context: ",
@@ -7341,9 +7764,9 @@
                   "signature": [
                     {
                       "pluginId": "@kbn/core-http-server",
-                      "scope": "server",
+                      "scope": "common",
                       "docId": "kibKbnCoreHttpServerPluginApi",
-                      "section": "def-server.KibanaRequest",
+                      "section": "def-common.KibanaRequest",
                       "text": "KibanaRequest"
                     },
                     "<unknown, unknown, unknown, any>"
@@ -7362,9 +7785,9 @@
                   "signature": [
                     {
                       "pluginId": "@kbn/core-http-request-handler-context-server",
-                      "scope": "server",
+                      "scope": "common",
                       "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                      "section": "def-server.RequestHandlerContext",
+                      "section": "def-common.RequestHandlerContext",
                       "text": "RequestHandlerContext"
                     },
                     " & { licensing: Promise<",

@@ -1,18 +1,35 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "stripInternal": true,
     "types": ["jest", "node"]
   },
   "include": [
     "**/*.ts",
     "**/*.js",
+    "src/jest/jest_flags.json",
   ],
   "exclude": [
     "types/**/*",
-    "**/__fixtures__/**/*"
+    "**/__fixtures__/**/*",
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/dev-utils",
+    "@kbn/std",
+    "@kbn/tooling-log",
+    "@kbn/get-repo-files",
+    "@kbn/peggy",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/ci-stats-reporter",
+    "@kbn/repo-info",
+    "@kbn/es",
+    "@kbn/dev-proc-runner",
+    "@kbn/jest-serializers",
+    "@kbn/stdio-dev-helpers",
+    "@kbn/babel-register",
+    "@kbn/repo-packages",
   ]
 }

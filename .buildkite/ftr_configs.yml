@@ -7,6 +7,7 @@ disabled:
   - x-pack/test/functional/config.base.js
   - x-pack/test/detection_engine_api_integration/security_and_spaces/config.base.ts
   - x-pack/test/functional_enterprise_search/base_config.ts
+  - x-pack/test/localization/config.base.ts
   - test/server_integration/config.base.js
 
   # QA suites that are run out-of-band
@@ -20,6 +21,9 @@ disabled:
   - x-pack/test/fleet_cypress/config.ts
   - x-pack/test/fleet_cypress/visual_config.ts
   - x-pack/test/functional_enterprise_search/cypress.config.ts
+  - x-pack/test/defend_workflows_cypress/cli_config.ts
+  - x-pack/test/defend_workflows_cypress/config.ts
+  - x-pack/test/defend_workflows_cypress/visual_config.ts
   - x-pack/test/osquery_cypress/cli_config.ts
   - x-pack/test/osquery_cypress/config.ts
   - x-pack/test/osquery_cypress/visual_config.ts
@@ -75,7 +79,6 @@ enabled:
   - test/functional/apps/dashboard/group3/config.ts
   - test/functional/apps/dashboard/group4/config.ts
   - test/functional/apps/dashboard/group5/config.ts
-  - test/functional/apps/dashboard/group6/config.ts
   - test/functional/apps/discover/ccs_compatibility/config.ts
   - test/functional/apps/discover/classic/config.ts
   - test/functional/apps/discover/embeddable/config.ts
@@ -96,6 +99,7 @@ enabled:
   - test/functional/apps/visualize/replaced_vislib_chart_types/config.ts
   - test/functional/config.ccs.ts
   - test/functional/config.firefox.js
+  - test/health_gateway/config.ts
   - test/interactive_setup_api_integration/enrollment_flow.config.ts
   - test/interactive_setup_api_integration/manual_configuration_flow_without_tls.config.ts
   - test/interactive_setup_api_integration/manual_configuration_flow.config.ts
@@ -116,9 +120,13 @@ enabled:
   - test/server_integration/http/ssl/config.js
   - test/ui_capabilities/newsfeed_err/config.ts
   - x-pack/test/accessibility/config.ts
+  - x-pack/test/localization/config.ja_jp.ts
+  - x-pack/test/localization/config.fr_fr.ts
+  - x-pack/test/localization/config.zh_cn.ts
   - x-pack/test/alerting_api_integration/basic/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config.ts
+  - x-pack/test/alerting_api_integration/security_and_spaces/group3/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/test/alerting_api_integration/spaces_only/config.ts
   - x-pack/test/api_integration_basic/config.ts
@@ -133,6 +141,8 @@ enabled:
   - x-pack/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/test/cases_api_integration/spaces_only/config.ts
+  - x-pack/test/cloud_security_posture_functional/config.ts
+  - x-pack/test/cloud_security_posture_api/config.ts
   - x-pack/test/detection_engine_api_integration/basic/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group2/config.ts
@@ -150,12 +160,12 @@ enabled:
   - x-pack/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.ts
   - x-pack/test/fleet_functional/config.ts
+  - x-pack/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/test/functional_basic/config.ts
   - x-pack/test/functional_cors/config.ts
   - x-pack/test/functional_embedded/config.ts
   - x-pack/test/functional_enterprise_search/without_host_configured.config.ts
   - x-pack/test/functional_execution_context/config.ts
-  - x-pack/test/functional_synthetics/config.js
   - x-pack/test/functional_with_es_ssl/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
   - x-pack/test/functional/apps/aiops/config.ts
@@ -181,6 +191,7 @@ enabled:
   - x-pack/test/functional/apps/lens/group3/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/tsvb/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/agg_based/config.ts
+  - x-pack/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/test/functional/apps/license_management/config.ts
   - x-pack/test/functional/apps/logstash/config.ts
   - x-pack/test/functional/apps/management/config.ts
@@ -217,6 +228,7 @@ enabled:
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
   - x-pack/test/lists_api_integration/security_and_spaces/config.ts
+  - x-pack/test/monitoring_api_integration/config.ts
   - x-pack/test/observability_api_integration/basic/config.ts
   - x-pack/test/observability_api_integration/trial/config.ts
   - x-pack/test/observability_functional/with_rac_write.config.ts
@@ -252,9 +264,11 @@ enabled:
   - x-pack/test/security_api_integration/oidc.config.ts
   - x-pack/test/security_api_integration/pki.config.ts
   - x-pack/test/security_api_integration/saml.config.ts
+  - x-pack/test/security_api_integration/saml_cloud.config.ts
   - x-pack/test/security_api_integration/session_idle.config.ts
   - x-pack/test/security_api_integration/session_invalidate.config.ts
   - x-pack/test/security_api_integration/session_lifespan.config.ts
+  - x-pack/test/security_api_integration/session_concurrent_limit.config.ts
   - x-pack/test/security_api_integration/token.config.ts
   - x-pack/test/security_api_integration/user_profiles.config.ts
   - x-pack/test/security_functional/login_selector.config.ts
@@ -284,3 +298,4 @@ enabled:
   - x-pack/performance/journeys/data_stress_test_lens.ts
   - x-pack/performance/journeys/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys/ecommerce_dashboard_tsvb_gauge_only.ts
+  - x-pack/performance/journeys/dashboard_listing_page.ts

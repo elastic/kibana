@@ -42,6 +42,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
     pagination,
     emptyViewerTitle,
     emptyViewerBody,
+    emptyViewerButtonText,
     viewerStatus,
     ruleReferences,
     showAddExceptionFlyout,
@@ -68,6 +69,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
           onConfirm={handleConfirmExceptionFlyout}
           data-test-subj="addExceptionItemFlyoutInList"
           showAlertCloseOptions={false} // TODO ask if we need it
+          isNonTimeline={true}
           // ask if we need the add to rule/list section and which list should we link the exception here
         />
       ) : viewerStatus === ViewerStatus.EMPTY || viewerStatus === ViewerStatus.LOADING ? (
@@ -94,7 +96,11 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
               />
             )}
             <SearchBar
-              addExceptionButtonText={i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON}
+              addExceptionButtonText={
+                listType === ExceptionListTypeEnum.ENDPOINT
+                  ? i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON_ENDPOINT
+                  : i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON
+              }
               listType={listType as ExceptionListTypeEnum}
               onSearch={onSearch}
               onAddExceptionClick={onAddExceptionClick}
@@ -110,6 +116,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
               exceptions={exceptions}
               emptyViewerTitle={emptyViewerTitle}
               emptyViewerBody={emptyViewerBody}
+              emptyViewerButtonText={emptyViewerButtonText}
               pagination={pagination}
               lastUpdated={lastUpdated}
               onPaginationChange={onPaginationChange}

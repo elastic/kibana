@@ -7,6 +7,7 @@
  */
 
 export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME, ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
+export { defaultImageFileKind } from './default_image_file_kind';
 
 export type {
   File,
@@ -22,7 +23,6 @@ export type {
   FileSavedObject,
   BaseFileMetadata,
   FileShareOptions,
-  FileImageMetadata,
   FileUnshareOptions,
   BlobStorageSettings,
   UpdatableFileMetadata,

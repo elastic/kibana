@@ -13,15 +13,9 @@ import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../../common/runtime_types';
-import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
+import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 
-export const MonitorDetailsLink = ({
-  basePath,
-  monitor,
-}: {
-  basePath: string;
-  monitor: EncryptedSyntheticsSavedMonitor;
-}) => {
+export const MonitorDetailsLink = ({ monitor }: { monitor: EncryptedSyntheticsSavedMonitor }) => {
   const lastSelectedLocationId = useSelector(selectSelectedLocationId);
   const monitorHasLocation = monitor[ConfigKey.LOCATIONS]?.find(
     (loc) => loc.id === lastSelectedLocationId
@@ -32,13 +26,9 @@ export const MonitorDetailsLink = ({
     lastSelectedLocationId && monitorHasLocation ? lastSelectedLocationId : firstMonitorLocationId;
 
   const monitorDetailLinkUrl = useMonitorDetailLocator({
-    monitorId: monitor[ConfigKey.CONFIG_ID],
+    configId: monitor[ConfigKey.CONFIG_ID],
     locationId,
   });
 
-  return (
-    <>
-      <EuiLink href={monitorDetailLinkUrl}>{monitor.name}</EuiLink>
-    </>
-  );
+  return <EuiLink href={monitorDetailLinkUrl}>{monitor.name}</EuiLink>;
 };

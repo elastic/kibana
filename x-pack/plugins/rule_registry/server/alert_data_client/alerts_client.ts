@@ -11,11 +11,16 @@ import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import {
   AlertConsumers,
+  ALERT_TIME_RANGE,
+  ALERT_STATUS,
   getEsQueryConfig,
   getSafeSortIds,
   isValidFeatureId,
   STATUS_VALUES,
   ValidFeatureId,
+  ALERT_STATUS_RECOVERED,
+  ALERT_END,
+  ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
 
 import {
@@ -29,9 +34,10 @@ import {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from '@kbn/alerting-plugin/server';
-import { Logger, ElasticsearchClient, EcsEventOutcome } from '@kbn/core/server';
+import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { isEmpty } from 'lodash';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -92,6 +98,15 @@ interface GetAlertParams {
   index?: string;
 }
 
+interface GetAlertSummaryParams {
+  id?: string;
+  gte: string;
+  lte: string;
+  featureIds: string[];
+  filter?: estypes.QueryDslQueryContainer[];
+  fixedInterval?: string;
+}
+
 interface SingleSearchAfterAndAudit {
   id?: string | null | undefined;
   query?: string | object | undefined;
@@ -131,7 +146,7 @@ export class AlertsClient {
 
   private getOutcome(
     operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get
-  ): { outcome: EcsEventOutcome } {
+  ): { outcome: EcsEvent['outcome'] } {
     return {
       outcome: operation === WriteOperations.Update ? 'unknown' : 'success',
     };
@@ -496,6 +511,115 @@ export class AlertsClient {
       return alert.hits.hits[0]._source;
     } catch (error) {
       this.logger.error(`get threw an error: ${error}`);
+      throw error;
+    }
+  }
+
+  public async getAlertSummary({
+    gte,
+    lte,
+    featureIds,
+    filter,
+    fixedInterval = '1m',
+  }: GetAlertSummaryParams) {
+    try {
+      const indexToUse = await this.getAuthorizedAlertsIndices(featureIds);
+
+      if (isEmpty(indexToUse)) {
+        throw Boom.badRequest('no featureIds were provided for getting alert summary');
+      }
+
+      // first search for the alert by id, then use the alert info to check if user has access to it
+      const responseAlertSum = await this.singleSearchAfterAndAudit({
+        index: (indexToUse ?? []).join(),
+        operation: ReadOperations.Get,
+        aggs: {
+          active_alerts_bucket: {
+            date_histogram: {
+              field: ALERT_TIME_RANGE,
+              fixed_interval: fixedInterval,
+              hard_bounds: {
+                min: gte,
+                max: lte,
+              },
+              extended_bounds: {
+                min: gte,
+                max: lte,
+              },
+              min_doc_count: 0,
+            },
+          },
+          recovered_alerts: {
+            filter: {
+              term: {
+                [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+              },
+            },
+            aggs: {
+              container: {
+                date_histogram: {
+                  field: ALERT_END,
+                  fixed_interval: fixedInterval,
+                  extended_bounds: {
+                    min: gte,
+                    max: lte,
+                  },
+                  min_doc_count: 0,
+                },
+              },
+            },
+          },
+          count: {
+            terms: { field: ALERT_STATUS },
+          },
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  [ALERT_TIME_RANGE]: {
+                    gt: gte,
+                    lt: lte,
+                  },
+                },
+              },
+              ...(filter ? filter : []),
+            ],
+          },
+        },
+        size: 0,
+      });
+
+      let activeAlertCount = 0;
+      let recoveredAlertCount = 0;
+      (
+        (responseAlertSum.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase)
+          .buckets as estypes.AggregationsStringTermsBucketKeys[]
+      ).forEach((b) => {
+        if (b.key === ALERT_STATUS_ACTIVE) {
+          activeAlertCount = b.doc_count;
+        } else if (b.key === ALERT_STATUS_RECOVERED) {
+          recoveredAlertCount = b.doc_count;
+        }
+      });
+
+      return {
+        activeAlertCount,
+        recoveredAlertCount,
+        activeAlerts:
+          (
+            responseAlertSum.aggregations
+              ?.active_alerts_bucket as estypes.AggregationsAutoDateHistogramAggregate
+          )?.buckets ?? [],
+        recoveredAlerts:
+          (
+            (responseAlertSum.aggregations?.recovered_alerts as estypes.AggregationsFilterAggregate)
+              ?.container as estypes.AggregationsAutoDateHistogramAggregate
+          )?.buckets ?? [],
+      };
+    } catch (error) {
+      this.logger.error(`getAlertSummary threw an error: ${error}`);
       throw error;
     }
   }

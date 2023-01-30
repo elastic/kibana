@@ -22,10 +22,15 @@ const getScriptedPhraseValue = (filter: PhraseFilter) =>
 
 export function getPhraseDisplayValue(
   filter: PhraseFilter | ScriptedPhraseFilter,
-  formatter?: FieldFormat
-) {
+  formatter?: FieldFormat,
+  fieldType?: string
+): string {
   const value = filter.meta.value ?? filter.meta.params.query;
-  return formatter?.convert(value) ?? value ?? '';
+  const updatedValue = fieldType === 'number' && !value ? 0 : value;
+  if (formatter?.convert) {
+    return formatter.convert(updatedValue);
+  }
+  return updatedValue === undefined ? '' : `${updatedValue}`;
 }
 
 const getParams = (filter: PhraseFilter) => {

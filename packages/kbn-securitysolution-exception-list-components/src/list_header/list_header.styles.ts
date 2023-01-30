@@ -24,7 +24,7 @@ export const textCss = css`
   margin-left: ${euiThemeVars.euiSizeXS};
 `;
 export const descriptionContainerCss = css`
-  margin-top: -${euiThemeVars.euiSizeXXL};
+  margin-top: -${euiThemeVars.euiSizeL};
   margin-bottom: -${euiThemeVars.euiSizeL};
 `;
 

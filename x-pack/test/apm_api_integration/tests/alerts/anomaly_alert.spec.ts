@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
+import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 import { waitForRuleStatus } from './wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -19,6 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const ml = getService('ml');
   const log = getService('log');
+  const es = getService('es');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
 
@@ -72,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with ml jobs', () => {
         before(async () => {
-          await createAndRunApmMlJob({ environment: 'production', ml });
+          await createAndRunApmMlJobs({ es, ml, environments: ['production'] });
         });
 
         after(async () => {

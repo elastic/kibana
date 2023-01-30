@@ -193,7 +193,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     }),
     groupLabel,
     maxBuckets: 2,
-    isExperimental: true,
     toolbarPopover: {
       categoryOptions: [],
       numberOptions,
@@ -209,7 +208,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     }),
     groupLabel,
     maxBuckets: 1,
-    isExperimental: true,
     toolbarPopover: {
       isDisabled: true,
       categoryOptions: [],

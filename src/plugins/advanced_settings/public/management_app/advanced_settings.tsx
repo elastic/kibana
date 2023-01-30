@@ -246,7 +246,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
     return (
       <div>
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup>
           <EuiFlexItem>
             <PageTitle />
           </EuiFlexItem>

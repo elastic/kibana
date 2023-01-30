@@ -9,7 +9,7 @@ import React, { FC, Fragment, useState, useEffect } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';

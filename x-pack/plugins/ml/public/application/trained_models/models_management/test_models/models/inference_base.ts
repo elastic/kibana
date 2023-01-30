@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, Subscription } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 
+import { map } from 'rxjs/operators';
 import { MLHttpFetchError } from '../../../../../../common/util/errors';
 import { SupportedPytorchTasksType } from '../../../../../../common/constants/trained_models';
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
@@ -58,13 +59,19 @@ export enum INPUT_TYPE {
 export abstract class InferenceBase<TInferResponse> {
   protected abstract readonly inferenceType: InferenceType;
   protected abstract readonly inferenceTypeLabel: string;
-  protected inputField: string;
   protected readonly modelInputField: string;
-  private inputText$ = new BehaviorSubject<string[]>([]);
+
+  protected inputText$ = new BehaviorSubject<string[]>([]);
+  private inputField$ = new BehaviorSubject<string>('');
   private inferenceResult$ = new BehaviorSubject<TInferResponse[] | null>(null);
   private inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
   private runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
+  private isValid$ = new BehaviorSubject<boolean>(false);
+  private pipeline$ = new BehaviorSubject<estypes.IngestPipeline>({});
+
   protected readonly info: string[] = [];
+
+  private subscriptions$: Subscription = new Subscription();
 
   constructor(
     protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
@@ -72,7 +79,49 @@ export abstract class InferenceBase<TInferResponse> {
     protected readonly inputType: INPUT_TYPE
   ) {
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
-    this.inputField = this.modelInputField;
+    this.inputField$.next(this.modelInputField);
+  }
+
+  public destroy() {
+    this.subscriptions$.unsubscribe();
+  }
+
+  protected initialize(
+    additionalValidators?: Array<Observable<boolean>>,
+    additionalChanges?: Array<Observable<unknown>>
+  ) {
+    this.initializeValidators(additionalValidators);
+    this.initializePipeline(additionalChanges);
+  }
+
+  private initializeValidators(additionalValidators?: Array<Observable<boolean>>) {
+    const validators$: Array<Observable<boolean>> = [
+      this.inputText$.pipe(map((inputText) => inputText.some((t) => t !== ''))),
+      ...(additionalValidators ? additionalValidators : []),
+    ];
+
+    this.subscriptions$.add(
+      combineLatest(validators$)
+        .pipe(
+          map((validationResults) => {
+            return validationResults.every((v) => !!v);
+          })
+        )
+        .subscribe(this.isValid$)
+    );
+  }
+
+  private initializePipeline(additionalChanges?: Array<Observable<unknown>>) {
+    const formObservables$: Array<Observable<unknown>> = [
+      this.inputField$.asObservable(),
+      ...(additionalChanges ? additionalChanges : []),
+    ];
+
+    this.subscriptions$.add(
+      combineLatest(formObservables$).subscribe(() => {
+        this.pipeline$.next(this.generatePipeline());
+      })
+    );
   }
 
   public setStopped() {
@@ -102,7 +151,6 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   public reset() {
-    this.setInputField(undefined);
     this.inputText$.next([]);
     this.inferenceResult$.next(null);
     this.inferenceError$.next(null);
@@ -110,7 +158,16 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   public setInputField(field: string | undefined) {
-    this.inputField = field === undefined ? this.modelInputField : field;
+    // if the field is not set, change to be the same as the model input field
+    this.inputField$.next(field === undefined ? this.modelInputField : field);
+  }
+
+  public getInputField() {
+    return this.inputField$.getValue();
+  }
+
+  public getInputField$() {
+    return this.inputField$.asObservable();
   }
 
   public setInputText(text: string[]) {
@@ -121,16 +178,40 @@ export abstract class InferenceBase<TInferResponse> {
     return this.inputText$.asObservable();
   }
 
+  public getInputText() {
+    return this.inputText$.getValue();
+  }
+
   public getInferenceResult$() {
     return this.inferenceResult$.asObservable();
+  }
+
+  public getInferenceResult() {
+    return this.inferenceResult$.getValue();
   }
 
   public getInferenceError$() {
     return this.inferenceError$.asObservable();
   }
 
+  public getInferenceError() {
+    return this.inferenceError$.getValue();
+  }
+
   public getRunningState$() {
     return this.runningState$.asObservable();
+  }
+
+  public getRunningState() {
+    return this.runningState$.getValue();
+  }
+
+  public getIsValid$() {
+    return this.isValid$.asObservable();
+  }
+
+  public getIsValid() {
+    return this.isValid$.getValue();
   }
 
   protected abstract getInputComponent(): JSX.Element | null;
@@ -143,10 +224,18 @@ export abstract class InferenceBase<TInferResponse> {
   protected abstract inferText(): Promise<TInferResponse[]>;
   protected abstract inferIndex(): Promise<TInferResponse[]>;
 
-  public getPipeline(): estypes.IngestPipeline {
+  public generatePipeline(): estypes.IngestPipeline {
     return {
       processors: this.getProcessors(),
     };
+  }
+
+  public getPipeline$() {
+    return this.pipeline$.asObservable();
+  }
+
+  public getPipeline(): estypes.IngestPipeline {
+    return this.pipeline$.getValue();
   }
 
   protected getBasicProcessors(
@@ -157,7 +246,7 @@ export abstract class InferenceBase<TInferResponse> {
         model_id: this.model.model_id,
         target_field: this.inferenceType,
         field_map: {
-          [this.inputField]: this.modelInputField,
+          [this.inputField$.getValue()]: this.modelInputField,
         },
         ...(inferenceConfigOverrides && Object.keys(inferenceConfigOverrides).length
           ? { inference_config: this.getInferenceConfig(inferenceConfigOverrides) }
@@ -179,17 +268,20 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   protected async runInfer<TRawInferResponse>(
-    getInferBody: (inputText: string) => estypes.MlInferTrainedModelRequest['body'],
+    getInferenceConfig: () => estypes.MlInferenceConfigUpdateContainer | void,
     processResponse: (resp: TRawInferResponse, inputText: string) => TInferResponse
   ): Promise<TInferResponse[]> {
     try {
       this.setRunning();
       const inputText = this.inputText$.getValue()[0];
-      const body = getInferBody(inputText);
+      const inferenceConfig = getInferenceConfig();
 
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
-        body,
+        {
+          docs: this.getInferDocs(),
+          ...(inferenceConfig ? { inference_config: inferenceConfig } : {}),
+        },
         DEFAULT_INFERENCE_TIME_OUT
       )) as unknown as TRawInferResponse;
 
@@ -226,10 +318,14 @@ export abstract class InferenceBase<TInferResponse> {
 
   protected abstract getProcessors(): estypes.IngestProcessorContainer[];
 
+  protected getInferDocs() {
+    return [{ [this.inputField$.getValue()]: this.inputText$.getValue()[0] }];
+  }
+
   protected getPipelineDocs() {
     return this.inputText$.getValue().map((v) => ({
       _source: {
-        [this.inputField]: v,
+        [this.inputField$.getValue()]: v,
       },
     }));
   }

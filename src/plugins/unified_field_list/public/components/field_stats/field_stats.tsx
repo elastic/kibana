@@ -34,6 +34,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
+import { showExamplesForField } from '../../../common/utils/field_examples_calculator';
 import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation } from '../../../common/types';
 import { canProvideStatsForField } from '../../../common/utils/field_stats_utils';
@@ -186,7 +187,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         toDate,
         dslQuery:
           dslQuery ??
-          buildEsQuery(loadedDataView, query ?? [], filters, getEsQueryConfig(uiSettings)),
+          buildEsQuery(loadedDataView, query ?? [], filters ?? [], getEsQueryConfig(uiSettings)),
         abortController: abortControllerRef.current,
       });
 
@@ -208,12 +209,14 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   useEffect(() => {
     fetchData();
+  }, [dataViewOrDataViewId, field, dslQuery, query, filters, fromDate, toDate, services]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
     return () => {
       isCanceledRef.current = true;
       abortControllerRef.current?.abort();
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
@@ -262,8 +265,8 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   if (!dataView) {
     return null;
   }
-
   const formatter = dataView.getFormatterForField(field);
+
   let title = <></>;
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
@@ -378,33 +381,36 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
     title = (
-      <EuiButtonGroup
-        buttonSize="compressed"
-        isFullWidth
-        legend={i18n.translate('unifiedFieldList.fieldStats.displayToggleLegend', {
-          defaultMessage: 'Toggle either the',
-        })}
-        options={[
-          {
-            label: i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
-              defaultMessage: 'Top values',
-            }),
-            id: 'topValues',
-            'data-test-subj': `${dataTestSubject}-buttonGroup-topValuesButton`,
-          },
-          {
-            label: i18n.translate('unifiedFieldList.fieldStats.fieldDistributionLabel', {
-              defaultMessage: 'Distribution',
-            }),
-            id: 'histogram',
-            'data-test-subj': `${dataTestSubject}-buttonGroup-distributionButton`,
-          },
-        ]}
-        onChange={(optionId: string) => {
-          setShowingHistogram(optionId === 'histogram');
-        }}
-        idSelected={showingHistogram ? 'histogram' : 'topValues'}
-      />
+      <>
+        <EuiButtonGroup
+          buttonSize="compressed"
+          isFullWidth
+          legend={i18n.translate('unifiedFieldList.fieldStats.displayToggleLegend', {
+            defaultMessage: 'Toggle either the',
+          })}
+          options={[
+            {
+              label: i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
+                defaultMessage: 'Top values',
+              }),
+              id: 'topValues',
+              'data-test-subj': `${dataTestSubject}-buttonGroup-topValuesButton`,
+            },
+            {
+              label: i18n.translate('unifiedFieldList.fieldStats.fieldDistributionLabel', {
+                defaultMessage: 'Distribution',
+              }),
+              id: 'histogram',
+              'data-test-subj': `${dataTestSubject}-buttonGroup-distributionButton`,
+            },
+          ]}
+          onChange={(optionId: string) => {
+            setShowingHistogram(optionId === 'histogram');
+          }}
+          idSelected={showingHistogram ? 'histogram' : 'topValues'}
+        />
+        <EuiSpacer size="xs" />
+      </>
     );
   } else if (field.type === 'date') {
     title = (
@@ -420,12 +426,12 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     title = (
       <EuiTitle size="xxxs">
         <h6>
-          {field.aggregatable
-            ? i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
-                defaultMessage: 'Top values',
-              })
-            : i18n.translate('unifiedFieldList.fieldStats.examplesLabel', {
+          {showExamplesForField(field)
+            ? i18n.translate('unifiedFieldList.fieldStats.examplesLabel', {
                 defaultMessage: 'Examples',
+              })
+            : i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
+                defaultMessage: 'Top values',
               })}
         </h6>
       </EuiTitle>

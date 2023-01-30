@@ -146,6 +146,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   const [initializationError, setInitializationError] = useState<Error | null>(null);
 
   const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
+  const isDebugPath = !!useRouteMatch(FLEET_ROUTING_PATHS.debug);
 
   useEffect(() => {
     (async () => {
@@ -192,6 +193,10 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         {isPermissionsLoading ? <Loading /> : <PermissionsError error={permissionsError!} />}
       </ErrorLayout>
     );
+  }
+  // Debug page moved outside of initialization to allow debugging when setup failed
+  if (isDebugPath) {
+    return <DebugPage setupError={initializationError} isInitialized={isInitialized} />;
   }
 
   if (!isInitialized || initializationError) {
@@ -326,10 +331,6 @@ export const AppRoutes = memo(
 
           <Route path={FLEET_ROUTING_PATHS.settings}>
             <SettingsApp />
-          </Route>
-
-          <Route path={FLEET_ROUTING_PATHS.debug}>
-            <DebugPage />
           </Route>
 
           {/* TODO: Move this route to the Integrations app */}

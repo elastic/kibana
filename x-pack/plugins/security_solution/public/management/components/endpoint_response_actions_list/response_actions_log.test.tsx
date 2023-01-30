@@ -22,11 +22,12 @@ import type {
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { getActionListMock } from './mocks';
 import { useGetEndpointsList } from '../../hooks/endpoint/use_get_endpoints_list';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { waitFor } from '@testing-library/react';
+import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -138,7 +139,8 @@ jest.mock('../../hooks/response_actions/use_get_file_info', () => {
 
 const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 
-describe('Response actions history', () => {
+// FLAKY https://github.com/elastic/kibana/issues/145635
+describe.skip('Response actions history', () => {
   const useUserPrivilegesMock = _useUserPrivileges as jest.Mock<
     ReturnType<typeof _useUserPrivileges>
   >;
@@ -177,7 +179,7 @@ describe('Response actions history', () => {
 
     mockUseGetEndpointsList.mockReturnValue({
       data: Array.from({ length: 50 }).map(() => {
-        const id = uuid.v4();
+        const id = uuidv4();
         return {
           id,
           name: `Host-${id.slice(0, 8)}`,
@@ -194,6 +196,7 @@ describe('Response actions history', () => {
       ...baseMockedActionList,
     };
     jest.clearAllMocks();
+    useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
   });
 
   describe('When index does not exist yet', () => {

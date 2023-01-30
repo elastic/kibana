@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../../__mocks__/kea_logic';
 import { connectorIndex } from '../../../__mocks__/view_index.mock';
+
+import { ConnectorStatus } from '../../../../../../common/types/connectors';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { CachedFetchIndexApiLogic } from '../../../api/index/cached_fetch_index_api_logic';
@@ -23,6 +25,7 @@ const DEFAULT_VALUES = {
   isEditing: false,
   localConfigState: {},
   localConfigView: [],
+  shouldStartInEditMode: false,
 };
 
 describe('ConnectorConfigurationLogic', () => {
@@ -30,7 +33,6 @@ describe('ConnectorConfigurationLogic', () => {
   const { mount: mountIndexNameLogic } = new LogicMounter(IndexNameLogic);
   const { mount: mountFetchIndexApiWrapperLogic } = new LogicMounter(CachedFetchIndexApiLogic);
   const { mount: mountIndexViewLogic } = new LogicMounter(IndexViewLogic);
-  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,31 +67,6 @@ describe('ConnectorConfigurationLogic', () => {
         ...DEFAULT_VALUES,
         configState: { foo: { label: 'thirdBar', value: 'fourthBar' } },
         configView: [{ key: 'foo', label: 'thirdBar', value: 'fourthBar' }],
-      });
-    });
-    describe('makeRequest', () => {
-      it('should call clearFlashMessages', () => {
-        ConnectorConfigurationLogic.actions.makeRequest({
-          configuration: {},
-          connectorId: 'id',
-          indexName: 'name',
-        });
-        expect(clearFlashMessages).toHaveBeenCalled();
-      });
-    });
-    describe('apiError', () => {
-      it('should call flashAPIError', () => {
-        ConnectorConfigurationLogic.actions.apiError('error' as any);
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
-      });
-    });
-    describe('apiSuccess', () => {
-      it('should call flashAPIError', () => {
-        ConnectorConfigurationLogic.actions.apiSuccess({
-          configuration: {},
-          indexName: 'name',
-        });
-        expect(flashSuccessToast).toHaveBeenCalledWith('Configuration successfully updated');
       });
     });
     describe('setLocalConfigEntry', () => {
@@ -145,6 +122,26 @@ describe('ConnectorConfigurationLogic', () => {
           ...DEFAULT_VALUES,
           index: connectorIndex,
           isEditing: true,
+        });
+      });
+      it('should set isEditing if connector has a config definition and shouldStartInEditMode is true', () => {
+        ConnectorConfigurationLogic.actions.setShouldStartInEditMode(true);
+        ConnectorConfigurationLogic.actions.fetchIndexApiSuccess({
+          ...connectorIndex,
+          connector: { ...connectorIndex.connector, status: ConnectorStatus.NEEDS_CONFIGURATION },
+        });
+        expect(ConnectorConfigurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          configState: connectorIndex.connector.configuration,
+          configView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          index: {
+            ...connectorIndex,
+            connector: { ...connectorIndex.connector, status: ConnectorStatus.NEEDS_CONFIGURATION },
+          },
+          isEditing: true,
+          localConfigState: connectorIndex.connector.configuration,
+          localConfigView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          shouldStartInEditMode: true,
         });
       });
     });

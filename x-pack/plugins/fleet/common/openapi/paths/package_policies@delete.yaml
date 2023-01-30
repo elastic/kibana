@@ -1,6 +1,6 @@
 post:
   summary: Package policy - Delete
-  operationId: delete-package-policy
+  operationId: post-delete-package-policy
   requestBody:
     content:
       application/json:

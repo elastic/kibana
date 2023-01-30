@@ -28,6 +28,7 @@ import {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
+import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
 import {
   AlertSuppression,
@@ -75,7 +76,7 @@ import type {
   RuleCreateProps,
   RuleUpdateProps,
 } from '../../../../common/detection_engine/rule_schema';
-import type { SortOrder } from '../../../../common/detection_engine/schemas/common';
+import { SortOrder } from '../../../../common/detection_engine/schemas/common';
 
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
@@ -201,11 +202,12 @@ export const RulesSchema = t.array(RuleSchema);
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
 
-export interface PaginationOptions {
-  page: number;
-  perPage: number;
-  total: number;
-}
+export type PaginationOptions = t.TypeOf<typeof PaginationOptions>;
+export const PaginationOptions = t.type({
+  page: PositiveInteger,
+  perPage: PositiveInteger,
+  total: PositiveInteger,
+});
 
 export interface FetchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
@@ -214,24 +216,27 @@ export interface FetchRulesProps {
   signal?: AbortSignal;
 }
 
-export type RulesSortingFields =
-  | 'created_at'
-  | 'enabled'
-  | 'execution_summary.last_execution.date'
-  | 'execution_summary.last_execution.metrics.execution_gap_duration_s'
-  | 'execution_summary.last_execution.metrics.total_indexing_duration_ms'
-  | 'execution_summary.last_execution.metrics.total_search_duration_ms'
-  | 'execution_summary.last_execution.status'
-  | 'name'
-  | 'risk_score'
-  | 'severity'
-  | 'updated_at'
-  | 'version';
+export type RulesSortingFields = t.TypeOf<typeof RulesSortingFields>;
+export const RulesSortingFields = t.union([
+  t.literal('created_at'),
+  t.literal('enabled'),
+  t.literal('execution_summary.last_execution.date'),
+  t.literal('execution_summary.last_execution.metrics.execution_gap_duration_s'),
+  t.literal('execution_summary.last_execution.metrics.total_indexing_duration_ms'),
+  t.literal('execution_summary.last_execution.metrics.total_search_duration_ms'),
+  t.literal('execution_summary.last_execution.status'),
+  t.literal('name'),
+  t.literal('risk_score'),
+  t.literal('severity'),
+  t.literal('updated_at'),
+  t.literal('version'),
+]);
 
-export interface SortingOptions {
-  field: RulesSortingFields;
-  order: SortOrder;
-}
+export type SortingOptions = t.TypeOf<typeof SortingOptions>;
+export const SortingOptions = t.type({
+  field: RulesSortingFields,
+  order: SortOrder,
+});
 
 export interface FilterOptions {
   filter: string;

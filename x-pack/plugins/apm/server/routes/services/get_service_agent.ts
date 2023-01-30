@@ -11,8 +11,11 @@ import {
   AGENT_NAME,
   SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+  CLOUD_PROVIDER,
+  CLOUD_SERVICE_NAME,
+} from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getServerlessTypeFromCloudData } from '../../../common/serverless';
 
 interface ServiceAgent {
   agent?: {
@@ -20,6 +23,12 @@ interface ServiceAgent {
   };
   service?: {
     runtime?: {
+      name?: string;
+    };
+  };
+  cloud?: {
+    provider?: string;
+    service?: {
       name?: string;
     };
   };
@@ -48,7 +57,12 @@ export async function getServiceAgent({
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: [AGENT_NAME, SERVICE_RUNTIME_NAME],
+      _source: [
+        AGENT_NAME,
+        SERVICE_RUNTIME_NAME,
+        CLOUD_PROVIDER,
+        CLOUD_SERVICE_NAME,
+      ],
       query: {
         bool: {
           filter: [
@@ -60,11 +74,23 @@ export async function getServiceAgent({
               },
             },
           ],
-          should: {
-            exists: {
-              field: SERVICE_RUNTIME_NAME,
+          should: [
+            {
+              exists: {
+                field: SERVICE_RUNTIME_NAME,
+              },
             },
-          },
+            {
+              exists: {
+                field: CLOUD_PROVIDER,
+              },
+            },
+            {
+              exists: {
+                field: CLOUD_SERVICE_NAME,
+              },
+            },
+          ],
         },
       },
       sort: {
@@ -81,6 +107,16 @@ export async function getServiceAgent({
     return {};
   }
 
-  const { agent, service } = response.hits.hits[0]._source as ServiceAgent;
-  return { agentName: agent?.name, runtimeName: service?.runtime?.name };
+  const { agent, service, cloud } = response.hits.hits[0]
+    ._source as ServiceAgent;
+  const serverlessType = getServerlessTypeFromCloudData(
+    cloud?.provider,
+    cloud?.service?.name
+  );
+
+  return {
+    agentName: agent?.name,
+    runtimeName: service?.runtime?.name,
+    serverlessType,
+  };
 }

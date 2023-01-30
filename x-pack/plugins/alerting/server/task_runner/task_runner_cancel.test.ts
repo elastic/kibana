@@ -13,6 +13,7 @@ import {
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  Rule,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -49,6 +50,9 @@ import {
   generateActionOpts,
 } from './fixtures';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -65,6 +69,9 @@ const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
+const dataViewsMock = {
+  dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+} as DataViewsServerPluginStart;
 
 describe('Task Runner Cancel', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
@@ -105,7 +112,9 @@ describe('Task Runner Cancel', () => {
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
     data: dataPlugin,
+    dataViews: dataViewsMock,
     savedObjects: savedObjectsService,
+    share: {} as SharePluginStart,
     uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
     actionsPlugin: actionsMock.createStart(),
@@ -156,8 +165,9 @@ describe('Task Runner Cancel', () => {
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
     );
-    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -217,8 +227,9 @@ describe('Task Runner Cancel', () => {
         lastRun: {
           alertsCount: {},
           outcome: 'failed',
-          outcomeMsg:
+          outcomeMsg: [
             'test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m',
+          ],
           warning: 'timeout',
         },
         monitoring: {
@@ -240,6 +251,7 @@ describe('Task Runner Cancel', () => {
           },
         },
         nextRun: '1970-01-01T00:00:10.000Z',
+        running: false,
       },
       { refresh: false, namespace: undefined }
     );
@@ -262,6 +274,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
@@ -329,6 +342,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     // setting cancelAlertsOnRuleTimeout for ruleType to false here
@@ -390,6 +404,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(

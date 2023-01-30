@@ -2,69 +2,73 @@
 
 exports[`StartTrial component when trial is allowed display for basic license 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
   >
     <div
-      class="euiCard__content emotion-euiCard__content-vertical"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
-      <p
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <span
-          class="emotion-euiCard__text-center"
-        >
-          Start a 30-day trial
-        </span>
-      </p>
       <div
-        class="euiText emotion-euiText-s-euiCard__description"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span>
-            Experience what machine learning, advanced security, and all our other 
-            <a
-              class="euiLink emotion-euiLink-primary"
-              href="https://www.elastic.co/subscriptions"
-              rel="noopener"
-              target="_blank"
-            >
-              subscription features
-              <span
-                class="emotion-euiLink__externalIcon"
-                data-euiicon-type="popout"
-              >
-                External link
-              </span>
-              <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-              >
-                (opens in a new tab or window)
-              </span>
-            </a>
-             have to offer.
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <span
+            class="emotion-euiCard__text-center"
+          >
+            Start a 30-day trial
           </span>
         </p>
-      </div>
-    </div>
-    <div
-      class="emotion-euiCard__footer"
-    >
-      <button
-        class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
-        data-test-subj="startTrialButton"
-        type="button"
-      >
-        <span
-          class="emotion-euiButtonDisplayContent"
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
         >
-          Start trial
-        </span>
-      </button>
+          <p>
+            <span>
+              Experience what machine learning, advanced security, and all our other 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://www.elastic.co/subscriptions"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                subscription features
+                <span
+                  class="emotion-euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                >
+                  External link
+                </span>
+                <span
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+               have to offer.
+            </span>
+          </p>
+        </div>
+      </div>
+      <div
+        class="emotion-euiCard__footer"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+          data-test-subj="startTrialButton"
+          type="button"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Start trial
+          </span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -72,69 +76,73 @@ exports[`StartTrial component when trial is allowed display for basic license 1`
 
 exports[`StartTrial component when trial is allowed should display for expired enterprise license 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
   >
     <div
-      class="euiCard__content emotion-euiCard__content-vertical"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
-      <p
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <span
-          class="emotion-euiCard__text-center"
-        >
-          Start a 30-day trial
-        </span>
-      </p>
       <div
-        class="euiText emotion-euiText-s-euiCard__description"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span>
-            Experience what machine learning, advanced security, and all our other 
-            <a
-              class="euiLink emotion-euiLink-primary"
-              href="https://www.elastic.co/subscriptions"
-              rel="noopener"
-              target="_blank"
-            >
-              subscription features
-              <span
-                class="emotion-euiLink__externalIcon"
-                data-euiicon-type="popout"
-              >
-                External link
-              </span>
-              <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-              >
-                (opens in a new tab or window)
-              </span>
-            </a>
-             have to offer.
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <span
+            class="emotion-euiCard__text-center"
+          >
+            Start a 30-day trial
           </span>
         </p>
-      </div>
-    </div>
-    <div
-      class="emotion-euiCard__footer"
-    >
-      <button
-        class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
-        data-test-subj="startTrialButton"
-        type="button"
-      >
-        <span
-          class="emotion-euiButtonDisplayContent"
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
         >
-          Start trial
-        </span>
-      </button>
+          <p>
+            <span>
+              Experience what machine learning, advanced security, and all our other 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://www.elastic.co/subscriptions"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                subscription features
+                <span
+                  class="emotion-euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                >
+                  External link
+                </span>
+                <span
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+               have to offer.
+            </span>
+          </p>
+        </div>
+      </div>
+      <div
+        class="emotion-euiCard__footer"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+          data-test-subj="startTrialButton"
+          type="button"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Start trial
+          </span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -142,69 +150,73 @@ exports[`StartTrial component when trial is allowed should display for expired e
 
 exports[`StartTrial component when trial is allowed should display for expired platinum license 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
   >
     <div
-      class="euiCard__content emotion-euiCard__content-vertical"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
-      <p
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <span
-          class="emotion-euiCard__text-center"
-        >
-          Start a 30-day trial
-        </span>
-      </p>
       <div
-        class="euiText emotion-euiText-s-euiCard__description"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span>
-            Experience what machine learning, advanced security, and all our other 
-            <a
-              class="euiLink emotion-euiLink-primary"
-              href="https://www.elastic.co/subscriptions"
-              rel="noopener"
-              target="_blank"
-            >
-              subscription features
-              <span
-                class="emotion-euiLink__externalIcon"
-                data-euiicon-type="popout"
-              >
-                External link
-              </span>
-              <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-              >
-                (opens in a new tab or window)
-              </span>
-            </a>
-             have to offer.
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <span
+            class="emotion-euiCard__text-center"
+          >
+            Start a 30-day trial
           </span>
         </p>
-      </div>
-    </div>
-    <div
-      class="emotion-euiCard__footer"
-    >
-      <button
-        class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
-        data-test-subj="startTrialButton"
-        type="button"
-      >
-        <span
-          class="emotion-euiButtonDisplayContent"
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
         >
-          Start trial
-        </span>
-      </button>
+          <p>
+            <span>
+              Experience what machine learning, advanced security, and all our other 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://www.elastic.co/subscriptions"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                subscription features
+                <span
+                  class="emotion-euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                >
+                  External link
+                </span>
+                <span
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+               have to offer.
+            </span>
+          </p>
+        </div>
+      </div>
+      <div
+        class="emotion-euiCard__footer"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+          data-test-subj="startTrialButton"
+          type="button"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Start trial
+          </span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -212,69 +224,73 @@ exports[`StartTrial component when trial is allowed should display for expired p
 
 exports[`StartTrial component when trial is allowed should display for gold license 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
   >
     <div
-      class="euiCard__content emotion-euiCard__content-vertical"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
-      <p
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <span
-          class="emotion-euiCard__text-center"
-        >
-          Start a 30-day trial
-        </span>
-      </p>
       <div
-        class="euiText emotion-euiText-s-euiCard__description"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span>
-            Experience what machine learning, advanced security, and all our other 
-            <a
-              class="euiLink emotion-euiLink-primary"
-              href="https://www.elastic.co/subscriptions"
-              rel="noopener"
-              target="_blank"
-            >
-              subscription features
-              <span
-                class="emotion-euiLink__externalIcon"
-                data-euiicon-type="popout"
-              >
-                External link
-              </span>
-              <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-              >
-                (opens in a new tab or window)
-              </span>
-            </a>
-             have to offer.
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <span
+            class="emotion-euiCard__text-center"
+          >
+            Start a 30-day trial
           </span>
         </p>
-      </div>
-    </div>
-    <div
-      class="emotion-euiCard__footer"
-    >
-      <button
-        class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
-        data-test-subj="startTrialButton"
-        type="button"
-      >
-        <span
-          class="emotion-euiButtonDisplayContent"
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
         >
-          Start trial
-        </span>
-      </button>
+          <p>
+            <span>
+              Experience what machine learning, advanced security, and all our other 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://www.elastic.co/subscriptions"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                subscription features
+                <span
+                  class="emotion-euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                >
+                  External link
+                </span>
+                <span
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+               have to offer.
+            </span>
+          </p>
+        </div>
+      </div>
+      <div
+        class="emotion-euiCard__footer"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+          data-test-subj="startTrialButton"
+          type="button"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Start trial
+          </span>
+        </button>
+      </div>
     </div>
   </div>
 </div>

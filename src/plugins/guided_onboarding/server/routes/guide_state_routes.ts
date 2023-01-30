@@ -7,7 +7,7 @@
  */
 
 import { IRouter, SavedObjectsClient } from '@kbn/core/server';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH } from '../../common';
 import { findAllGuides } from '../helpers';
 
 export const registerGetGuideStateRoute = (router: IRouter) => {

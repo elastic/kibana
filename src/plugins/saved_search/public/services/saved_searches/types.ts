@@ -33,6 +33,7 @@ export interface SavedSearchAttributes {
   };
   hideChart: boolean;
   isTextBasedQuery: boolean;
+  usesAdHocDataView?: boolean;
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };
@@ -45,6 +46,7 @@ export interface SavedSearchAttributes {
   refreshInterval?: RefreshInterval;
 
   rowsPerPage?: number;
+  breakdownField?: string;
 }
 
 /** @internal **/
@@ -73,6 +75,7 @@ export interface SavedSearch {
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
   isTextBasedQuery?: boolean;
+  usesAdHocDataView?: boolean;
 
   // for restoring time range with a saved search
   timeRestore?: boolean;
@@ -80,4 +83,5 @@ export interface SavedSearch {
   refreshInterval?: RefreshInterval;
 
   rowsPerPage?: number;
+  breakdownField?: string;
 }

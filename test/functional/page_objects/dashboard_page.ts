@@ -281,6 +281,13 @@ export class DashboardPageObject extends FtrService {
     return await this.testSubjects.exists('dashboardEditMode');
   }
 
+  public async ensureDashboardIsInEditMode() {
+    if (await this.getIsInViewMode()) {
+      await this.switchToEditMode();
+    }
+    await this.waitForRenderComplete();
+  }
+
   public async clickCancelOutOfEditMode(accept = true) {
     this.log.debug('clickCancelOutOfEditMode');
     if (await this.getIsInViewMode()) return;
@@ -322,6 +329,12 @@ export class DashboardPageObject extends FtrService {
     if (switchMode) {
       await this.clickCancelOutOfEditMode();
     }
+  }
+
+  public async expectUnsavedChangesBadge() {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+    });
   }
 
   public async clickNewDashboard(continueEditing = false) {
@@ -788,5 +801,16 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelChartDebugState(panelIndex: number) {
     return await this.elasticChart.getChartDebugData(undefined, panelIndex);
+  }
+
+  public async isNotificationExists(panelIndex = 0) {
+    const panel = (await this.getDashboardPanels())[panelIndex];
+    try {
+      const notification = await panel.findByClassName('embPanel__optionsMenuPopover-notification');
+      return Boolean(notification);
+    } catch (e) {
+      // if not found then this is false
+      return false;
+    }
   }
 }

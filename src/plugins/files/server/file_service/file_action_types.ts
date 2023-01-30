@@ -47,10 +47,6 @@ export interface UpdateFileArgs {
    */
   id: string;
   /**
-   * File kind, must correspond to a registered {@link FileKind}.
-   */
-  fileKind: string;
-  /**
    * Attributes to update.
    */
   attributes: UpdatableFileMetadata;
@@ -64,10 +60,6 @@ export interface DeleteFileArgs {
    * File ID.
    */
   id: string;
-  /**
-   * File kind, must correspond to a registered {@link FileKind}.
-   */
-  fileKind: string;
 }
 
 /**
@@ -78,10 +70,6 @@ export interface GetByIdArgs {
    * File ID.
    */
   id: string;
-  /**
-   * File kind, must correspond to a registered {@link FileKind}.
-   */
-  fileKind: string;
 }
 
 /**
@@ -103,9 +91,17 @@ export interface FindFileArgs extends Pagination {
    */
   extension?: string[];
   /**
+   * File mime type(s).
+   */
+  mimeType?: string[];
+  /**
    * File status(es).
    */
   status?: string[];
+  /**
+   * ID of user who created the file.
+   */
+  user?: string[];
   /**
    * File metadata values. These values are governed by the consumer.
    */

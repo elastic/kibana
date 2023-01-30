@@ -16,7 +16,7 @@ import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
@@ -28,6 +28,7 @@ import {
   TableChangeType,
   DatasourceDimensionTriggerProps,
   DataSourceInfo,
+  UserMessage,
 } from '../../types';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
@@ -92,7 +93,9 @@ export function getTextBasedDatasource({
     indexPatterns: IndexPatternMap
   ) => {
     const context = state.initialContext;
-    if (context && 'dataViewSpec' in context && context.dataViewSpec.title) {
+    // on text based mode we offer suggestions for the query and not for a specific field
+    if (fieldName) return [];
+    if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
       const indexPattern = indexPatterns[indexPatternId];
 
@@ -162,7 +165,7 @@ export function getTextBasedDatasource({
     checkIntegrity: () => {
       return [];
     },
-    getErrorMessages: (state) => {
+    getUserMessages: (state) => {
       const errors: Error[] = [];
 
       Object.values(state.layers).forEach((layer) => {
@@ -171,21 +174,15 @@ export function getTextBasedDatasource({
         }
       });
       return errors.map((err) => {
-        return {
+        const message: UserMessage = {
+          severity: 'error',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'visualization' }, { id: 'textBasedLanguagesQueryInput' }],
           shortMessage: err.message,
           longMessage: err.message,
         };
+        return message;
       });
-    },
-    getUnifiedSearchErrors: (state) => {
-      const errors: Error[] = [];
-
-      Object.values(state.layers).forEach((layer) => {
-        if (layer.errors && layer.errors.length > 0) {
-          errors.push(...layer.errors);
-        }
-      });
-      return errors;
     },
     initialize(
       state?: TextBasedPersistedState,
@@ -707,7 +704,14 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     isEqual: () => true,
-    getDatasourceInfo: (state, references, indexPatterns) => {
+    getDatasourceInfo: async (state, references, dataViewsService) => {
+      const indexPatterns: DataView[] = [];
+      for (const { index } of Object.values(state.layers)) {
+        const dataView = await dataViewsService?.get(index);
+        if (dataView) {
+          indexPatterns.push(dataView);
+        }
+      }
       return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
         const columns = Object.entries(layer.columns).map(([colId, col]) => {
           return {
@@ -719,6 +723,9 @@ export function getTextBasedDatasource({
               isBucketed: Boolean(col?.meta?.type !== 'number'),
               hasTimeShift: false,
               hasReducedTimeRange: false,
+              fields: [col.fieldName],
+              type: col.meta?.type || 'unknown',
+              filter: undefined,
             },
           };
         });

@@ -21,6 +21,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       });
 
       loadTestFile(require.resolve('./find'));
+      loadTestFile(require.resolve('./find_with_post'));
       loadTestFile(require.resolve('./create'));
       loadTestFile(require.resolve('./delete'));
       loadTestFile(require.resolve('./disable'));
@@ -30,11 +31,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./get_alert_state'));
       loadTestFile(require.resolve('./get_alert_summary'));
       loadTestFile(require.resolve('./rule_types'));
-      loadTestFile(require.resolve('./bulk_edit'));
-      loadTestFile(require.resolve('./bulk_delete'));
-      loadTestFile(require.resolve('./bulk_enable'));
       loadTestFile(require.resolve('./retain_api_key'));
-      loadTestFile(require.resolve('./clone'));
     });
   });
 }

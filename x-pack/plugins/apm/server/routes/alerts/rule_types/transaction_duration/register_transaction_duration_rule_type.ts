@@ -33,7 +33,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -199,7 +199,7 @@ export function registerTransactionDurationRuleType({
       });
 
       if (!response.aggregations) {
-        return {};
+        return { state: {} };
       }
 
       // Converts threshold to microseconds because this is the unit used on transactionDuration
@@ -299,7 +299,7 @@ export function registerTransactionDurationRuleType({
           });
       }
 
-      return {};
+      return { state: {} };
     },
   });
 

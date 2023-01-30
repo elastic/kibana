@@ -32,6 +32,8 @@ export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
 
+export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
+
 export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
@@ -73,7 +75,7 @@ export const RULES_TABLE = '[data-test-subj="rules-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
-export const RULES_MONITORING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
+export const RULES_MONITORING_TABLE = '[role="tablist"] > [data-test-subj="navigation-monitoring"]';
 
 export const SEVERITY = '[data-test-subj="severity"]';
 

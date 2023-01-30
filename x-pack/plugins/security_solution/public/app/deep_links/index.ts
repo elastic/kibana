@@ -234,15 +234,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             defaultMessage: 'Exception lists',
           }),
         ],
-        deepLinks: [
-          {
-            id: SecurityPageName.sharedExceptionListDetails,
-            title: 'List Details',
-            path: '/exceptions/shared/:exceptionListId',
-            navLinkStatus: AppNavLinkStatus.hidden,
-            searchable: false,
-          },
-        ],
       },
     ],
   },
@@ -526,7 +517,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
       },
       {
         ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
-        deepLinks: [getSecuritySolutionLink<SecurityPageName>('rules')],
       },
     ],
   },

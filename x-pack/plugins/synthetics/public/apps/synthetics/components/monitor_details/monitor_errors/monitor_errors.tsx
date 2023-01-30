@@ -7,94 +7,90 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiIcon,
+  EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FailedTestsCount } from './failed_tests_count';
-import { useGetUrlParams } from '../../../hooks';
+import { useMonitorErrors } from '../hooks/use_monitor_errors';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
-import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
-import { ErrorsList } from './errors_list';
-import { MonitorFailedTests } from './failed_tests';
+import { ErrorsTabContent } from './errors_tab_content';
 
 export const MonitorErrors = () => {
-  const { euiTheme } = useEuiTheme();
+  const { errorStates, loading, data } = useMonitorErrors();
 
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const initialLoading = loading && !data;
 
-  const time = useMemo(
-    () => ({ from: dateRangeStart, to: dateRangeEnd }),
-    [dateRangeEnd, dateRangeStart]
-  );
+  const emptyState = !loading && errorStates.length === 0;
 
   return (
     <>
       <SyntheticsDatePicker fullWidth={true} />
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <EuiPanel hasBorder>
-            <EuiTitle size="xs">
-              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{OVERVIEW_LABEL}</h3>
-            </EuiTitle>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <MonitorErrorsCount to={dateRangeEnd} from={dateRangeStart} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <FailedTestsCount to={dateRangeEnd} from={dateRangeStart} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={3}>
-          <EuiPanel hasBorder>
-            <EuiTitle size="xs">
-              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{FAILED_TESTS_LABEL}</h3>
-            </EuiTitle>
-            <MonitorFailedTests time={time} />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={2}>
-          <EuiPanel hasBorder>
-            <EuiTitle size="xs">
-              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{ERRORS_LABEL}</h3>
-            </EuiTitle>
-            <ErrorsList />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiPanel hasBorder>
-            <EuiTitle size="xs">
-              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>
-                {FAILED_TESTS_BY_STEPS_LABEL}
-              </h3>
-            </EuiTitle>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {initialLoading && <LoadingErrors />}
+      {emptyState && <EmptyErrors />}
+      <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
+        <ErrorsTabContent errorStates={errorStates} loading={loading} />
+      </div>
     </>
   );
 };
 
-const ERRORS_LABEL = i18n.translate('xpack.synthetics.errors.label', {
-  defaultMessage: 'Errors',
+const LoadingErrors = () => {
+  return (
+    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '65vh' }}>
+      <EuiFlexItem grow={false} style={{ textAlign: 'center' }}>
+        <span>
+          <EuiLoadingSpinner size="xxl" />
+        </span>
+        <EuiSpacer size="m" />
+        <EuiTitle size="m">
+          <h3>{CHEKCING_FOR_ERRORS}</h3>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
+
+        <EuiText color="subdued">{LOADING_DESCRIPTION}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const EmptyErrors = () => {
+  return (
+    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '65vh' }}>
+      <EuiFlexItem grow={false} style={{ textAlign: 'center' }}>
+        <span>
+          <EuiIcon type="checkInCircleFilled" color="success" size="xl" />
+        </span>
+        <EuiSpacer size="m" />
+        <EuiTitle size="m">
+          <h3>{NO_ERRORS_FOUND}</h3>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
+
+        <EuiText color="subdued">{KEEP_CALM}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const KEEP_CALM = i18n.translate('xpack.synthetics.errors.keepCalm', {
+  defaultMessage: 'Keep calm and carry on.',
 });
 
-const OVERVIEW_LABEL = i18n.translate('xpack.synthetics.errors.overview', {
-  defaultMessage: 'Overview',
+const NO_ERRORS_FOUND = i18n.translate('xpack.synthetics.errors.noErrorsFound', {
+  defaultMessage: 'No errors found',
 });
 
-const FAILED_TESTS_LABEL = i18n.translate('xpack.synthetics.errors.failedTests', {
-  defaultMessage: 'Failed tests',
+const LOADING_DESCRIPTION = i18n.translate('xpack.synthetics.errors.loadingDescription', {
+  defaultMessage: 'This will take just a second.',
 });
 
-const FAILED_TESTS_BY_STEPS_LABEL = i18n.translate('xpack.synthetics.errors.failedTests.byStep', {
-  defaultMessage: 'Failed tests by step',
+const CHEKCING_FOR_ERRORS = i18n.translate('xpack.synthetics.errors.checkingForErrors', {
+  defaultMessage: 'Checking for errors',
 });

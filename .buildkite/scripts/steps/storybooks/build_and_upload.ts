@@ -14,6 +14,7 @@ import path from 'path';
 const STORYBOOKS = [
   'apm',
   'canvas',
+  'cases',
   'ci_composite',
   'cloud_chat',
   'coloring',
@@ -31,7 +32,6 @@ const STORYBOOKS = [
   'expression_reveal_image',
   'expression_shape',
   'expression_tagcloud',
-  'files',
   'fleet',
   'home',
   'infra',

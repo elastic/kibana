@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-        "id": "def-server.ElasticV3ServerShipper",
+        "id": "def-common.ElasticV3ServerShipper",
         "type": "Class",
         "tags": [],
         "label": "ElasticV3ServerShipper",
@@ -22,9 +30,9 @@
         "signature": [
           {
             "pluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnAnalyticsShippersElasticV3ServerPluginApi",
-            "section": "def-server.ElasticV3ServerShipper",
+            "section": "def-common.ElasticV3ServerShipper",
             "text": "ElasticV3ServerShipper"
           },
           " implements ",
@@ -42,7 +50,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "id": "def-server.ElasticV3ServerShipper.shipperName",
+            "id": "def-common.ElasticV3ServerShipper.shipperName",
             "type": "string",
             "tags": [],
             "label": "shipperName",
@@ -55,7 +63,7 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "id": "def-server.ElasticV3ServerShipper.telemetryCounter$",
+            "id": "def-common.ElasticV3ServerShipper.telemetryCounter$",
             "type": "Object",
             "tags": [],
             "label": "telemetryCounter$",
@@ -80,7 +88,7 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "id": "def-server.ElasticV3ServerShipper.Unnamed",
+            "id": "def-common.ElasticV3ServerShipper.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -96,7 +104,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-                "id": "def-server.ElasticV3ServerShipper.Unnamed.$1",
+                "id": "def-common.ElasticV3ServerShipper.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -119,7 +127,7 @@
               },
               {
                 "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-                "id": "def-server.ElasticV3ServerShipper.Unnamed.$2",
+                "id": "def-common.ElasticV3ServerShipper.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "initContext",
@@ -145,7 +153,7 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "id": "def-server.ElasticV3ServerShipper.extendContext",
+            "id": "def-common.ElasticV3ServerShipper.extendContext",
             "type": "Function",
             "tags": [],
             "label": "extendContext",
@@ -169,7 +177,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-                "id": "def-server.ElasticV3ServerShipper.extendContext.$1",
+                "id": "def-common.ElasticV3ServerShipper.extendContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "newContext",
@@ -195,7 +203,7 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "id": "def-server.ElasticV3ServerShipper.optIn",
+            "id": "def-common.ElasticV3ServerShipper.optIn",
             "type": "Function",
             "tags": [],
             "label": "optIn",
@@ -211,7 +219,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-                "id": "def-server.ElasticV3ServerShipper.optIn.$1",
+                "id": "def-common.ElasticV3ServerShipper.optIn.$1",
                 "type": "boolean",
                 "tags": [],
                 "label": "isOptedIn",
@@ -231,7 +239,7 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "id": "def-server.ElasticV3ServerShipper.reportEvents",
+            "id": "def-common.ElasticV3ServerShipper.reportEvents",
             "type": "Function",
             "tags": [],
             "label": "reportEvents",
@@ -255,7 +263,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-                "id": "def-server.ElasticV3ServerShipper.reportEvents.$1",
+                "id": "def-common.ElasticV3ServerShipper.reportEvents.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "events",
@@ -282,7 +290,25 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "id": "def-server.ElasticV3ServerShipper.shutdown",
+            "id": "def-common.ElasticV3ServerShipper.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nTriggers a flush of the internal queue to attempt to send any events held in the queue\nand resolves the returned promise once the queue is emptied."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
+            "id": "def-common.ElasticV3ServerShipper.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
@@ -306,7 +332,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-        "id": "def-server.ElasticV3ShipperOptions",
+        "id": "def-common.ElasticV3ShipperOptions",
         "type": "Interface",
         "tags": [],
         "label": "ElasticV3ShipperOptions",
@@ -319,7 +345,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "id": "def-server.ElasticV3ShipperOptions.channelName",
+            "id": "def-common.ElasticV3ShipperOptions.channelName",
             "type": "string",
             "tags": [],
             "label": "channelName",
@@ -332,7 +358,7 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "id": "def-server.ElasticV3ShipperOptions.version",
+            "id": "def-common.ElasticV3ShipperOptions.version",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -345,7 +371,7 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "id": "def-server.ElasticV3ShipperOptions.sendTo",
+            "id": "def-common.ElasticV3ShipperOptions.sendTo",
             "type": "CompoundType",
             "tags": [],
             "label": "sendTo",
@@ -361,7 +387,7 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
-            "id": "def-server.ElasticV3ShipperOptions.debug",
+            "id": "def-common.ElasticV3ShipperOptions.debug",
             "type": "CompoundType",
             "tags": [],
             "label": "debug",
@@ -379,14 +405,6 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

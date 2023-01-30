@@ -18,7 +18,7 @@ import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/tab
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PROJECT_LABEL } from '../../common/translations';
+import { PROJECT_LABEL } from '../../../../../common/translations/translations';
 import {
   CommonFields,
   ConfigKey,
@@ -180,7 +180,6 @@ export const MonitorManagementList = ({
       }),
       sortable: true,
       render: (urls: string, { hosts }: TCPSimpleFields | ICMPSimpleFields) => urls || hosts,
-      truncateText: true,
       textOnly: true,
     },
     {
@@ -205,6 +204,7 @@ export const MonitorManagementList = ({
       }),
       render: (fields: EncryptedSyntheticsMonitorWithId) => (
         <Actions
+          key={fields[ConfigKey.CONFIG_ID]}
           configId={fields[ConfigKey.CONFIG_ID]}
           name={fields[ConfigKey.NAME]}
           isDisabled={!canEdit}

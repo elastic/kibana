@@ -8,12 +8,14 @@
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { isRegistryEnabled, getRegistryUrlFromTestEnv } from '../registry';
+import { ROLE } from '../services/roles_users';
 
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
   describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
+    const rolesUsersProvider = getService('rolesUsersProvider');
 
     const log = getService('log');
 
@@ -24,9 +26,22 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     const registryUrl = getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
+    const roles = Object.values(ROLE);
     before(async () => {
       await ingestManager.setup();
+
+      // create role/user
+      for (const role of roles) {
+        await rolesUsersProvider.createRole({ predefinedRole: role });
+        await rolesUsersProvider.createUser({ name: role, roles: [role] });
+      }
     });
+    after(async () => {
+      // delete role/user
+      await rolesUsersProvider.deleteUsers(roles);
+      await rolesUsersProvider.deleteRoles(roles);
+    });
+
     loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./policy'));

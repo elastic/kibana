@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -11,15 +11,19 @@
     "common/**/*.ts",
     "../../../typings/**/*",
   ],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/charts/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../../plugins/alerting/tsconfig.json" },
-    { "path": "../../plugins/triggers_actions_ui/tsconfig.json" },
-    { "path": "../../plugins/features/tsconfig.json" },
-    { "path": "../../../examples/developer_examples/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/data-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/features-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/i18n",
+    "@kbn/core-application-common",
   ]
 }

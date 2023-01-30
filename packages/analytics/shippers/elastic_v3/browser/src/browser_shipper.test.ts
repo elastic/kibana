@@ -33,7 +33,7 @@ describe('ElasticV3BrowserShipper', () => {
   let fetchMock: jest.Mock;
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     fetchMock = jest.fn().mockResolvedValue({
       status: 200,

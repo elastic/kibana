@@ -69,6 +69,7 @@ export const getExportedRulesCounts = async (blob: Blob): Promise<BulkActionSumm
   const details = await getExportedRulesDetails(blob);
 
   return {
+    skipped: 0,
     succeeded: details.exported_rules_count,
     failed: details.missing_rules_count,
     total: details.exported_rules_count + details.missing_rules_count,

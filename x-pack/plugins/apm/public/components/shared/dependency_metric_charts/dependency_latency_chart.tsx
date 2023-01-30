@@ -12,7 +12,7 @@ import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
-import { TimeseriesChart } from '../charts/timeseries_chart';
+import { TimeseriesChartWithContext } from '../charts/timeseries_chart_with_context';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -117,7 +117,7 @@ export function DependencyLatencyChart({
   const latencyFormatter = getDurationFormatter(maxY);
 
   return (
-    <TimeseriesChart
+    <TimeseriesChartWithContext
       height={height}
       fetchStatus={status}
       id="latencyChart"

@@ -9,11 +9,15 @@
 import Hapi from '@hapi/hapi';
 import h2o2 from '@hapi/h2o2';
 import { URL } from 'url';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
-import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import {
   declareGetRoute,
   declareDeleteRoute,
@@ -28,7 +32,7 @@ import {
   setProxyInterrupt,
 } from './repository_with_proxy_utils';
 
-let esServer: kbnTestServer.TestElasticsearchUtils;
+let esServer: TestElasticsearchUtils;
 let hapiServer: Hapi.Server;
 
 const registerSOTypes = (setup: InternalCoreSetup) => {
@@ -74,7 +78,7 @@ describe('404s from proxies', () => {
   beforeAll(async () => {
     setProxyInterrupt(null);
 
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
     });
     esServer = await startES();
@@ -110,7 +114,7 @@ describe('404s from proxies', () => {
     await hapiServer.start();
 
     // Setup kibana configured to use proxy as ES backend
-    root = kbnTestServer.createRootWithCorePlugins({
+    root = createRootWithCorePlugins({
       elasticsearch: {
         hosts: [`http://${esHostname}:${proxyPort}`],
       },

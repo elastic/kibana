@@ -26,13 +26,14 @@ import {
   useBaseEsQuery,
   usePersistedQuery,
 } from '../utils/utils';
-import { PageTitle, PageTitleText } from '../layout/findings_layout';
+import { LimitedResultsBar, PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { findingsNavigation } from '../../../common/navigation/constants';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
+import { useLimitProperties } from '../utils/get_limit_properties';
 
 const getDefaultQuery = ({
   query,
@@ -41,7 +42,7 @@ const getDefaultQuery = ({
   query,
   filters,
   pageIndex: 0,
-  sortDirection: 'desc',
+  sortDirection: 'asc',
 });
 
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
@@ -92,6 +93,12 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const error = findingsGroupByResource.error || baseEsQuery.error;
 
   const slicedPage = usePageSlice(findingsGroupByResource.data?.page, urlQuery.pageIndex, pageSize);
+
+  const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
+    total: findingsGroupByResource.data?.total,
+    pageIndex: urlQuery.pageIndex,
+    pageSize,
+  });
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
@@ -162,7 +169,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             pagination={getPaginationTableParams({
               pageSize,
               pageIndex: urlQuery.pageIndex,
-              totalItemCount: findingsGroupByResource.data?.total || 0,
+              totalItemCount: limitedTotalItemCount,
             })}
             setTableOptions={({ sort, page }) => {
               setPageSize(page.size);
@@ -172,7 +179,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
               });
             }}
             sorting={{
-              sort: { field: 'failed_findings', direction: urlQuery.sortDirection },
+              sort: { field: 'compliance_score', direction: urlQuery.sortDirection },
             }}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({
@@ -189,6 +196,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
           />
         </>
       )}
+      {isLastLimitedPage && <LimitedResultsBar />}
     </div>
   );
 };

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, ReactNode } from 'react';
-import { EuiFlexGrid } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 
 interface Props {
   children: ReactNode;
@@ -14,8 +14,8 @@ interface Props {
 }
 export const ExpandedRowContent: FC<Props> = ({ children, dataTestSubj }) => {
   return (
-    <EuiFlexGrid data-test-subj={dataTestSubj} gutterSize={'s'}>
+    <EuiFlexGroup data-test-subj={dataTestSubj} gutterSize={'s'}>
       {children}
-    </EuiFlexGrid>
+    </EuiFlexGroup>
   );
 };

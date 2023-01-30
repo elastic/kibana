@@ -12,6 +12,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { createUICapabilities } from '@kbn/cases-plugin/common';
 
+import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import { APP_ID, CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { savedObjectTypes } from './saved_objects';
 import type { ConfigType } from './config';
@@ -105,15 +106,15 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
   {
     requireAllSpaces: true,
     privilegesTooltip: i18n.translate(
-      'xpack.securitySolution.featureRegistry.subFeatures.actionsLogManagement.privilegesTooltip',
+      'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory.privilegesTooltip',
       {
-        defaultMessage: 'All Spaces is required for Actions Log Management access.',
+        defaultMessage: 'All Spaces is required for Response Actions History access.',
       }
     ),
     name: i18n.translate(
-      'xpack.securitySolution.featureRegistry.subFeatures.actionsLogManagement',
+      'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory',
       {
-        defaultMessage: 'Actions Log Management',
+        defaultMessage: 'Response Actions History',
       }
     ),
     privilegeGroups: [
@@ -296,18 +297,24 @@ const subFeatures: SubFeatureConfig[] = [
         groupType: 'mutually_exclusive',
         privileges: [
           {
-            api: [`${APP_ID}-writeTrustedApplications`, `${APP_ID}-readTrustedApplications`],
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeTrustedApplications`,
+              `${APP_ID}-readTrustedApplications`,
+            ],
             id: 'trusted_applications_all',
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeTrustedApplications', 'readTrustedApplications'],
           },
           {
-            api: [`${APP_ID}-readTrustedApplications`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedApplications`],
             id: 'trusted_applications_read',
             includeIn: 'none',
             name: 'Read',
@@ -341,6 +348,9 @@ const subFeatures: SubFeatureConfig[] = [
         privileges: [
           {
             api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
               `${APP_ID}-writeHostIsolationExceptions`,
               `${APP_ID}-readHostIsolationExceptions`,
             ],
@@ -348,13 +358,13 @@ const subFeatures: SubFeatureConfig[] = [
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
           },
           {
-            api: [`${APP_ID}-readHostIsolationExceptions`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
             id: 'host_isolation_exceptions_read',
             includeIn: 'none',
             name: 'Read',
@@ -384,18 +394,24 @@ const subFeatures: SubFeatureConfig[] = [
         groupType: 'mutually_exclusive',
         privileges: [
           {
-            api: [`${APP_ID}-writeBlocklist`, `${APP_ID}-readBlocklist`],
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeBlocklist`,
+              `${APP_ID}-readBlocklist`,
+            ],
             id: 'blocklist_all',
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeBlocklist', 'readBlocklist'],
           },
           {
-            api: [`${APP_ID}-readBlocklist`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readBlocklist`],
             id: 'blocklist_read',
             includeIn: 'none',
             name: 'Read',
@@ -425,18 +441,24 @@ const subFeatures: SubFeatureConfig[] = [
         groupType: 'mutually_exclusive',
         privileges: [
           {
-            api: [`${APP_ID}-writeEventFilters`, `${APP_ID}-readEventFilters`],
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeEventFilters`,
+              `${APP_ID}-readEventFilters`,
+            ],
             id: 'event_filters_all',
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeEventFilters', 'readEventFilters'],
           },
           {
-            api: [`${APP_ID}-readEventFilters`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readEventFilters`],
             id: 'event_filters_read',
             includeIn: 'none',
             name: 'Read',
@@ -545,7 +567,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         all: [
           'alert',
           'exception-list',
-          'exception-list-agnostic',
+          EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
           CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
@@ -573,7 +595,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         all: [],
         read: [
           'exception-list',
-          'exception-list-agnostic',
+          EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
           CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,

@@ -17,19 +17,28 @@ import {
   registerRoutesMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
-import { BehaviorSubject } from 'rxjs';
-import { RawPackageInfo, Env } from '@kbn/config';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { skip } from 'rxjs/operators';
+import { type RawPackageInfo, Env } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SavedObjectsClientFactoryProvider } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsClientFactoryProvider,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+} from '@kbn/core-saved-objects-server';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+import {
+  SavedObjectsClientProvider,
+  SavedObjectsRepository,
+} from '@kbn/core-saved-objects-api-server-internal';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { SavedObjectsService } from './saved_objects_service';
@@ -192,30 +201,121 @@ describe('SavedObjectsService', () => {
       });
     });
 
-    describe('#addClientWrapper', () => {
-      it('registers the wrapper to the clientProvider', async () => {
+    describe('#extensions', () => {
+      it('registers the encryption extension to the clientProvider', async () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
-
-        const wrapperA = jest.fn();
-        const wrapperB = jest.fn();
-
-        setup.addClientWrapper(1, 'A', wrapperA);
-        setup.addClientWrapper(2, 'B', wrapperB);
+        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
+        setup.setEncryptionExtension(encryptionExtension);
 
         await soService.start(createStartDeps());
 
-        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledTimes(2);
-        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
-          1,
-          'A',
-          wrapperA
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: encryptionExtension,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: undefined,
+          })
         );
-        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
-          2,
-          'B',
-          wrapperB
+      });
+
+      it('registers the security extension to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const securityExtension: jest.Mocked<SavedObjectsSecurityExtensionFactory> = jest.fn();
+        setup.setSecurityExtension(securityExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: undefined,
+            securityExtensionFactory: securityExtension,
+            spacesExtensionFactory: undefined,
+          })
+        );
+      });
+
+      it('registers the spaces extension to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        setup.setSpacesExtension(spacesExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: undefined,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: spacesExtension,
+          })
+        );
+      });
+
+      it('registers a combination of extensions to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
+        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        setup.setEncryptionExtension(encryptionExtension);
+        setup.setSpacesExtension(spacesExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: encryptionExtension,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: spacesExtension,
+          })
+        );
+      });
+
+      it('registers all three extensions to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
+        const securityExtension: jest.Mocked<SavedObjectsSecurityExtensionFactory> = jest.fn();
+        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        setup.setEncryptionExtension(encryptionExtension);
+        setup.setSecurityExtension(securityExtension);
+        setup.setSpacesExtension(spacesExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: encryptionExtension,
+            securityExtensionFactory: securityExtension,
+            spacesExtensionFactory: spacesExtension,
+          })
+        );
+      });
+
+      it('registers no extensions to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: undefined,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: undefined,
+          })
         );
       });
     });
@@ -247,6 +347,21 @@ describe('SavedObjectsService', () => {
         const { getTypeRegistry } = await soService.setup(createSetupDeps());
 
         expect(getTypeRegistry()).toBe(typeRegistryInstanceMock);
+      });
+    });
+
+    describe('status$', () => {
+      it('return correct value when migration is skipped', async () => {
+        const coreContext = createCoreContext({ skipMigration: true });
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        await soService.start(createStartDeps(false));
+
+        const serviceStatus = await firstValueFrom(setup.status$.pipe(skip(1)));
+        expect(serviceStatus.level.toString()).toEqual('available');
+        expect(serviceStatus.summary).toEqual(
+          'SavedObjects service has completed migrations and is available'
+        );
       });
     });
   });
@@ -412,12 +527,6 @@ describe('SavedObjectsService', () => {
         setup.setClientFactoryProvider(jest.fn());
       }).toThrowErrorMatchingInlineSnapshot(
         `"cannot call \`setClientFactoryProvider\` after service startup."`
-      );
-
-      expect(() => {
-        setup.addClientWrapper(0, 'dummy', jest.fn());
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"cannot call \`addClientWrapper\` after service startup."`
       );
 
       expect(() => {

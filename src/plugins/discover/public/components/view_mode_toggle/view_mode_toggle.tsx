@@ -6,20 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiTabs,
-  EuiTab,
-  useEuiPaddingSize,
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiTabs, EuiTab, useEuiPaddingSize } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { i18n } from '@kbn/i18n';
-import { VIEW_MODE } from './constants';
+import { VIEW_MODE } from '../../../common/constants';
 import { SHOW_FIELD_STATISTICS } from '../../../common';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
@@ -35,10 +27,6 @@ export const DocumentViewModeToggle = ({
   const tabsCss = css`
     padding: 0 ${useEuiPaddingSize('s')};
     background-color: ${euiThemeVars.euiPageBackgroundColor};
-  `;
-
-  const badgeCellCss = css`
-    margin-left: ${useEuiPaddingSize('s')};
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -63,23 +51,10 @@ export const DocumentViewModeToggle = ({
         className="dscViewModeToggle__tab"
         data-test-subj="dscViewModeFieldStatsButton"
       >
-        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-          <EuiFlexItem>
-            <FormattedMessage
-              id="discover.viewModes.fieldStatistics.label"
-              defaultMessage="Field statistics"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem css={badgeCellCss}>
-            <EuiBetaBadge
-              label={i18n.translate('discover.viewModes.fieldStatistics.betaTitle', {
-                defaultMessage: 'Beta',
-              })}
-              size="s"
-              className="fieldStatsBetaBadge"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FormattedMessage
+          id="discover.viewModes.fieldStatistics.label"
+          defaultMessage="Field statistics"
+        />
       </EuiTab>
     </EuiTabs>
   );

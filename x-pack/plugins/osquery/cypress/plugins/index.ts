@@ -21,9 +21,13 @@
 /**
  * @type {Cypress.PluginConfig}
  */
+// TODO: we should be able to remove this ts-ignore while using isolatedModules
+// this is a skip for the errors created when typechecking with isolatedModules
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 module.exports = (on: any, config: any) => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-extraneous-dependencies
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('@cypress/code-coverage/task')(on, config);
 
   // `on` is used to hook into various events Cypress emits

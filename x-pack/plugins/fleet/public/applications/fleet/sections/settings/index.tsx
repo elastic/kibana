@@ -15,6 +15,7 @@ import {
   useGetDownloadSources,
   useGetFleetServerHosts,
   useFlyoutContext,
+  useGetFleetProxies,
 } from '../../hooks';
 import { FLEET_ROUTING_PATHS, pagePathGetters } from '../../constants';
 import { DefaultLayout } from '../../layouts';
@@ -26,39 +27,51 @@ import { SettingsPage } from './components/settings_page';
 import { withConfirmModalProvider } from './hooks/use_confirm_modal';
 import { FleetServerHostsFlyout } from './components/fleet_server_hosts_flyout';
 import { EditOutputFlyout } from './components/edit_output_flyout';
-import { useDeleteOutput } from './hooks/use_delete_output';
-import { useDeleteFleetServerHost } from './hooks/use_delete_fleet_server_host';
+import { useDeleteOutput, useDeleteFleetServerHost, useDeleteProxy } from './hooks';
 import { EditDownloadSourceFlyout } from './components/download_source_flyout';
 import { useDeleteDownloadSource } from './components/download_source_flyout/use_delete_download_source';
+import { FleetProxyFlyout } from './components/edit_fleet_proxy_flyout';
+
+function useSettingsAppData() {
+  const outputs = useGetOutputs();
+  const fleetServerHosts = useGetFleetServerHosts();
+  const downloadSources = useGetDownloadSources();
+  const proxies = useGetFleetProxies();
+
+  return { outputs, fleetServerHosts, downloadSources, proxies };
+}
 
 export const SettingsApp = withConfirmModalProvider(() => {
   useBreadcrumbs('settings');
   const history = useHistory();
 
-  const outputs = useGetOutputs();
-  const fleetServerHosts = useGetFleetServerHosts();
-  const downloadSources = useGetDownloadSources();
   const flyoutContext = useFlyoutContext();
+
+  const { outputs, fleetServerHosts, downloadSources, proxies } = useSettingsAppData();
 
   const { deleteOutput } = useDeleteOutput(outputs.resendRequest);
   const { deleteDownloadSource } = useDeleteDownloadSource(downloadSources.resendRequest);
   const { deleteFleetServerHost } = useDeleteFleetServerHost(fleetServerHosts.resendRequest);
+  const { deleteFleetProxy } = useDeleteProxy(proxies.resendRequest);
 
   const resendOutputRequest = outputs.resendRequest;
   const resendDownloadSourceRequest = downloadSources.resendRequest;
   const resendFleetServerHostsRequest = fleetServerHosts.resendRequest;
+  const resendProxiesRequest = proxies.resendRequest;
 
   const onCloseCallback = useCallback(() => {
     flyoutContext.closeFleetServerFlyout();
     resendOutputRequest();
     resendDownloadSourceRequest();
     resendFleetServerHostsRequest();
+    resendProxiesRequest();
     history.replace(pagePathGetters.settings()[1]);
   }, [
     flyoutContext,
     resendOutputRequest,
     resendDownloadSourceRequest,
     resendFleetServerHostsRequest,
+    resendProxiesRequest,
     history,
   ]);
 
@@ -68,7 +81,9 @@ export const SettingsApp = withConfirmModalProvider(() => {
     (fleetServerHosts.isLoading && fleetServerHosts.isInitialRequest) ||
     !fleetServerHosts.data?.items ||
     (downloadSources.isLoading && downloadSources.isInitialRequest) ||
-    !downloadSources.data?.items
+    !downloadSources.data?.items ||
+    (proxies.isLoading && proxies.isInitialRequest) ||
+    !proxies.data?.items
   ) {
     return (
       <DefaultLayout section="settings">
@@ -93,6 +108,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
               return (
                 <EuiPortal>
                   <FleetServerHostsFlyout
+                    proxies={proxies.data?.items ?? []}
                     onClose={onCloseCallback}
                     fleetServerHost={fleetServerHost}
                   />
@@ -107,8 +123,28 @@ export const SettingsApp = withConfirmModalProvider(() => {
           </Route>
           <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
             <EuiPortal>
-              <EditOutputFlyout onClose={onCloseCallback} />
+              <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
             </EuiPortal>
+          </Route>
+          <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>
+            <EuiPortal>
+              <FleetProxyFlyout onClose={onCloseCallback} />
+            </EuiPortal>
+          </Route>
+          <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_proxy}>
+            {(route: { match: { params: { itemId: string } } }) => {
+              const fleetProxy = proxies.data?.items.find(
+                (item) => route.match.params.itemId === item.id
+              );
+              if (!fleetProxy) {
+                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+              }
+              return (
+                <EuiPortal>
+                  <FleetProxyFlyout onClose={onCloseCallback} fleetProxy={fleetProxy} />
+                </EuiPortal>
+              );
+            }}
           </Route>
           <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
             {(route: { match: { params: { outputId: string } } }) => {
@@ -119,7 +155,11 @@ export const SettingsApp = withConfirmModalProvider(() => {
 
               return (
                 <EuiPortal>
-                  <EditOutputFlyout onClose={onCloseCallback} output={output} />
+                  <EditOutputFlyout
+                    proxies={proxies.data?.items ?? []}
+                    onClose={onCloseCallback}
+                    output={output}
+                  />
                 </EuiPortal>
               );
             }}
@@ -151,6 +191,8 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Switch>
       </Router>
       <SettingsPage
+        deleteFleetProxy={deleteFleetProxy}
+        proxies={proxies.data.items}
         outputs={outputs.data.items}
         fleetServerHosts={fleetServerHosts.data.items}
         deleteOutput={deleteOutput}

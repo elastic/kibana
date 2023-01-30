@@ -6,8 +6,17 @@
  */
 
 import { login, visit } from '../../tasks/login';
-import { openAddFilterPopover, fillAddFilterForm } from '../../tasks/search_bar';
-import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../screens/search_bar';
+import {
+  openAddFilterPopover,
+  fillAddFilterForm,
+  openKqlQueryBar,
+  fillKqlQueryBar,
+} from '../../tasks/search_bar';
+import {
+  AUTO_SUGGEST_AGENT_NAME,
+  AUTO_SUGGEST_HOST_NAME_VALUE,
+  GLOBAL_SEARCH_BAR_FILTER_ITEM,
+} from '../../screens/search_bar';
 import { getHostIpFilter } from '../../objects/filter';
 
 import { HOSTS_URL } from '../../urls/navigation';
@@ -16,6 +25,9 @@ import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 describe('SearchBar', () => {
   before(() => {
     login();
+  });
+
+  beforeEach(() => {
     visit(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });
@@ -28,5 +40,12 @@ describe('SearchBar', () => {
       'have.text',
       `${getHostIpFilter().key}: ${getHostIpFilter().value}`
     );
+  });
+
+  it('auto suggests fields from the data view and auto completes available field values', () => {
+    openKqlQueryBar();
+    cy.get(AUTO_SUGGEST_AGENT_NAME).should('be.visible');
+    fillKqlQueryBar(`host.name:`);
+    cy.get(AUTO_SUGGEST_HOST_NAME_VALUE).should('be.visible');
   });
 });

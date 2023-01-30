@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ValuesType } from 'utility-types';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { ValuesType } from 'utility-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
+import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const synthtraceClient = getService('synthtraceEsClient');
   const apmApiClient = getService('apmApiClient');
   const ml = getService('ml');
+  const es = getService('es');
 
   const start = '2021-01-01T12:00:00.000Z';
   const end = '2021-08-01T12:00:00.000Z';
@@ -50,7 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   type ServiceListItem = ValuesType<Awaited<ReturnType<typeof getSortedAndFilteredServices>>>;
 
-  registry.when.skip('Sorted and filtered services', { config: 'trial', archives: [] }, () => {
+  registry.when('Sorted and filtered services', { config: 'trial', archives: [] }, () => {
     before(async () => {
       const serviceA = apm
         .service({ name: SERVICE_NAME_PREFIX + 'a', environment: 'production', agentName: 'java' })
@@ -97,12 +98,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .timestamp(timestamp);
         });
 
-      await synthtraceClient.index(eventsWithinTimerange.merge(eventsOutsideOfTimerange));
+      await synthtraceClient.index([eventsWithinTimerange, eventsOutsideOfTimerange]);
 
-      await Promise.all([
-        createAndRunApmMlJob({ environment: 'production', ml }),
-        createAndRunApmMlJob({ environment: 'development', ml }),
-      ]);
+      await createAndRunApmMlJobs({ es, ml, environments: ['production', 'development'] });
     });
 
     after(() => {

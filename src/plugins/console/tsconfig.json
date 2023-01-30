@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
     // there is still a decent amount of JS in this plugin and we are taking
     // advantage of the fact that TS doesn't know the types of that code and
     // gives us `any`. Once that code is converted to .ts we can remove this
@@ -12,13 +10,28 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../dev_tools/tsconfig.json" },
-    { "path": "../es_ui_shared/tsconfig.json" },
-    { "path": "../home/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../share/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/dev-tools-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/share-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/i18n",
+    "@kbn/analytics",
+    "@kbn/utility-types",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-utility",
+    "@kbn/core-http-browser",
+    "@kbn/ace",
+    "@kbn/test-jest-helpers",
+    "@kbn/config-schema",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/web-worker-stub",
+    "@kbn/core-elasticsearch-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

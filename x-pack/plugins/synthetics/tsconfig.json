@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -15,27 +13,66 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    {
-      "path": "../alerting/tsconfig.json"
-    },
-    {
-      "path": "../ml/tsconfig.json"
-    },
-    {
-      "path": "../triggers_actions_ui/tsconfig.json"
-    },
-    {
-      "path": "../observability/tsconfig.json"
-    },
-    {
-      "path": "../fleet/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/unified_search/tsconfig.json"
-    }
-  ,
-    {
-      "path": "../index_lifecycle_management/tsconfig.json"
-    }
+    "@kbn/alerting-plugin",
+    "@kbn/ml-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/index-lifecycle-management-plugin",
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/server-http-tools",
+    "@kbn/datemath",
+    "@kbn/share-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/home-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/data-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/core-doc-links-browser",
+    "@kbn/usage-collection-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/ui-theme",
+    "@kbn/es-query",
+    "@kbn/test-jest-helpers",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-notifications-browser",
+    "@kbn/rison",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/licensing-plugin",
+    "@kbn/rule-registry-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/security-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/task-manager-plugin",
+    "@kbn/es-types",
+    "@kbn/core-http-server-mocks",
+    "@kbn/utility-types",
+    "@kbn/telemetry-plugin",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-common",
+    "@kbn/features-plugin",
+    "@kbn/bfetch-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-saved-objects-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

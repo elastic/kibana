@@ -36,7 +36,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import { asDecimalOrInteger } from '../../../../../common/utils/formatters';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
@@ -193,7 +193,7 @@ export function registerTransactionErrorRateRuleType({
         });
 
         if (!response.aggregations) {
-          return {};
+          return { state: {} };
         }
 
         const results = [];
@@ -295,7 +295,7 @@ export function registerTransactionErrorRateRuleType({
             });
         });
 
-        return {};
+        return { state: {} };
       },
     })
   );

@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import type { Columns } from '../../paginated_table';
+import type { Columns } from '../../../../explore/components/paginated_table';
 import type { Anomaly, AnomaliesByNetwork } from '../types';
-import { getRowItemDraggable } from '../../tables/helpers';
+import { getRowItemsWithActions } from '../../tables/helpers';
 import { createCompoundAnomalyKey } from './create_compound_key';
 import { NetworkDetailsLink } from '../../links';
 
 import * as i18n from './translations';
-import { NetworkType } from '../../../../network/store/model';
+import { NetworkType } from '../../../../explore/network/store/model';
 import type { FlowTarget } from '../../../../../common/search_strategy';
 import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
 
@@ -35,15 +35,14 @@ export const getAnomaliesNetworkTableColumns = (
     field: 'ip',
     sortable: true,
     render: (ip, anomaliesByNetwork) =>
-      getRowItemDraggable({
-        rowItem: ip,
-        attrName: anomaliesByNetwork.type,
+      getRowItemsWithActions({
+        values: [ip],
+        fieldName: anomaliesByNetwork.type,
         idPrefix: `anomalies-network-table-ip-${createCompoundAnomalyKey(
           anomaliesByNetwork.anomaly
         )}`,
-        render: (item) => <NetworkDetailsLink ip={item} flowTarget={flowTarget} />,
-        isAggregatable: true,
         fieldType: 'ip',
+        render: (item) => <NetworkDetailsLink ip={item} flowTarget={flowTarget} />,
       }),
   },
   ...getAnomaliesDefaultTableColumns(startDate, endDate),

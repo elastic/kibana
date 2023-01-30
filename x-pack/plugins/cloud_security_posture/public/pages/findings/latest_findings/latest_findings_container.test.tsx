@@ -16,7 +16,6 @@ import { TestProvider } from '../../../test/test_provider';
 import { getFindingsQuery } from './use_latest_findings';
 import { encodeQuery } from '../../../common/navigation/query_utils';
 import { useLocation } from 'react-router-dom';
-import { RisonObject } from 'rison-node';
 import { buildEsQuery } from '@kbn/es-query';
 import { getPaginationQuery } from '../utils/utils';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -52,7 +51,7 @@ describe('<LatestFindingsContainer />', () => {
     });
 
     (useLocation as jest.Mock).mockReturnValue({
-      search: encodeQuery(query as unknown as RisonObject),
+      search: encodeQuery(query),
     });
 
     render(

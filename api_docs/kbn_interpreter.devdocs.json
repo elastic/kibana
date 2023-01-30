@@ -752,6 +752,52 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.typedParse",
+        "type": "Function",
+        "tags": [],
+        "label": "typedParse",
+        "description": [],
+        "signature": [
+          "(input: string, options?: ",
+          "ParserOptions",
+          " | undefined) => any"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/parse.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.typedParse.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "path": "packages/kbn-ambient-common-types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.typedParse.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "ParserOptions",
+              " | undefined"
+            ],
+            "path": "packages/kbn-ambient-common-types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
@@ -934,21 +980,6 @@
           "[]; }>>"
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/interpreter",
-        "id": "def-common.typedParse",
-        "type": "Any",
-        "tags": [],
-        "label": "typedParse",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "packages/kbn-interpreter/src/common/lib/parse.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -36,6 +36,7 @@ export function createTelemetryFilterListArtifactTaskConfig() {
         const artifact = (await artifactService.getArtifact(
           artifactName
         )) as unknown as TelemetryFilterListArtifact;
+        tlog(logger, `New filterlist artifact: ${JSON.stringify(artifact)}`);
         filterList.endpointAlerts = artifact.endpoint_alerts;
         filterList.exceptionLists = artifact.exception_lists;
         filterList.prebuiltRulesAlerts = artifact.prebuilt_rules_alerts;

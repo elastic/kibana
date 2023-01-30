@@ -14,7 +14,7 @@ export const OverviewGridItem = ({
   onClick,
 }: {
   monitor: MonitorOverviewItem;
-  onClick: (id: string, location: string) => void;
+  onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
   const { data, loading, averageDuration } = useLast50DurationChart({
     locationId: monitor.location?.id,

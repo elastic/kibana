@@ -8,7 +8,6 @@
 export enum ErrorCode {
   ANALYTICS_COLLECTION_ALREADY_EXISTS = 'analytics_collection_already_exists',
   ANALYTICS_COLLECTION_NOT_FOUND = 'analytics_collection_not_found',
-  ANALYTICS_COLLECTION_NAME_INVALID = 'analytics_collection_name_invalid',
   CONNECTOR_DOCUMENT_ALREADY_EXISTS = 'connector_document_already_exists',
   CRAWLER_ALREADY_EXISTS = 'crawler_already_exists',
   DOCUMENT_NOT_FOUND = 'document_not_found',

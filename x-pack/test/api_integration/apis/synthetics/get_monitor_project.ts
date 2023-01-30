@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type SuperTest from 'supertest';
 import { format as formatUrl } from 'url';
 import {
@@ -39,14 +39,14 @@ export default function ({ getService }: FtrProviderContext) {
     const setUniqueIds = (request: LegacyProjectMonitorsRequest) => {
       return {
         ...request,
-        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuid.v4() })),
+        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
       };
     };
 
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.10.3')
+        .post('/api/fleet/epm/packages/synthetics/0.11.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);

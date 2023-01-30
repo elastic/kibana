@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FleetAuthzRouter } from '../../services/security';
+
 import { OUTPUT_API_ROUTES } from '../../constants';
 import {
   DeleteOutputRequestSchema,
@@ -13,7 +15,6 @@ import {
   PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
-import type { FleetAuthzRouter } from '../security';
 
 import {
   deleteOutputHandler,

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { InternalFieldErrors } from 'react-hook-form';
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, last, reject } from 'lodash';
@@ -40,15 +41,26 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
 
   const rootShards = watchRoot('shards');
 
+  const initialShardsArray = useMemo(() => {
+    const initialConvertedShards = convertShardsToArray(rootShards, agentPoliciesById);
+    if (!isEmpty(initialConvertedShards)) {
+      if (initialConvertedShards[initialConvertedShards.length - 1].policy.key) {
+        return [...initialConvertedShards, defaultShardData];
+      }
+
+      return initialConvertedShards;
+    }
+
+    return [defaultShardData];
+  }, [agentPoliciesById, rootShards]);
+
   const { control, watch, getFieldState, formState, resetField, setValue } = useForm<{
     shardsArray: ShardsArray;
   }>({
     mode: 'all',
     shouldUnregister: true,
     defaultValues: {
-      shardsArray: !isEmpty(convertShardsToArray(rootShards, agentPoliciesById))
-        ? [...convertShardsToArray(rootShards, agentPoliciesById), defaultShardData]
-        : [defaultShardData],
+      shardsArray: initialShardsArray,
     },
   });
   const { fields, remove, append } = useFieldArray({
@@ -100,7 +112,7 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
       <EuiSpacer size="s" />
 
       {fields.map((item, index, array) => (
-        <div key={item.id}>
+        <EuiFlexItem key={item.id}>
           <ShardsForm
             index={index}
             onDelete={remove}
@@ -108,7 +120,8 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
             control={control}
             options={options}
           />
-        </div>
+          <EuiSpacer size="xs" />
+        </EuiFlexItem>
       ))}
     </>
   );

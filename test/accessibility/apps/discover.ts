@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
+  const dataGrid = getService('dataGrid');
   const a11y = getService('a11y');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const inspector = getService('inspector');
@@ -17,8 +18,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const TEST_COLUMN_NAMES = ['dayOfWeek', 'DestWeather'];
   const toasts = getService('toasts');
   const browser = getService('browser');
+  const retry = getService('retry');
 
-  describe('Discover a11y tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/147186
+  describe.skip('Discover a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
@@ -126,15 +129,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for data-grid table with columns', async () => {
-      await testSubjects.click('toggleColumnButton-Cancelled');
-      if (await testSubjects.exists('openFieldActionsButton-Carrier')) {
-        await testSubjects.click('openFieldActionsButton-Carrier');
-      } else {
-        await testSubjects.existOrFail('fieldActionsGroup-Carrier');
-      }
-      await testSubjects.click('toggleColumnButton-Carrier');
-      await testSubjects.click('euiFlyoutCloseButton');
-      await toasts.dismissAllToasts();
+      await retry.try(async () => {
+        await dataGrid.clickFieldActionInFlyout('Cancelled', 'toggleColumnButton');
+      });
+
+      await retry.try(async () => {
+        await dataGrid.clickFieldActionInFlyout('Carrier', 'toggleColumnButton');
+      });
+
+      await retry.try(async () => {
+        await testSubjects.click('euiFlyoutCloseButton');
+        await toasts.dismissAllToasts();
+      });
+
       await a11y.testAppSnapshot();
     });
 

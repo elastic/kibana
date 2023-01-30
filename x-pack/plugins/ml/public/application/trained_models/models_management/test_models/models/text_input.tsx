@@ -22,13 +22,14 @@ export const TextInput: FC<{
     inferrer.setInputText([inputText]);
   }, [inputText, inferrer]);
 
-  const runningState = useObservable(inferrer.getRunningState$());
+  const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
 
   return (
     <EuiFormRow
       label={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.generalTextInput.inputTitle', {
         defaultMessage: 'Input text',
       })}
+      fullWidth
     >
       <EuiTextArea
         placeholder={
@@ -43,6 +44,7 @@ export const TextInput: FC<{
         onChange={(e) => {
           setInputText(e.target.value);
         }}
+        data-test-subj={`mlTestModelInputText`}
       />
     </EuiFormRow>
   );

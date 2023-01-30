@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { render } from '../utils/testing';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, SyntheticsUrlParamsHook } from './use_url_params';
-import { SyntheticsRefreshContext } from '../contexts';
+import { APP_DEFAULT_REFRESH_INTERVAL, SyntheticsRefreshContext } from '../contexts';
 
 interface MockUrlParamsComponentProps {
   hook: SyntheticsUrlParamsHook;
@@ -53,7 +53,13 @@ describe('useUrlParams', () => {
 
   it('accepts router props, updates URL params, and returns the current params', async () => {
     const { findByText, history } = render(
-      <SyntheticsRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
+      <SyntheticsRefreshContext.Provider
+        value={{
+          lastRefresh: 123,
+          refreshApp: jest.fn(),
+          refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
+        }}
+      >
         <UseUrlParamsTestComponent hook={useUrlParams} />
       </SyntheticsRefreshContext.Provider>
     );
@@ -71,7 +77,13 @@ describe('useUrlParams', () => {
 
   it('clears search when null is passed to params', async () => {
     const { findByText, history } = render(
-      <SyntheticsRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
+      <SyntheticsRefreshContext.Provider
+        value={{
+          lastRefresh: 123,
+          refreshApp: jest.fn(),
+          refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
+        }}
+      >
         <UseUrlParamsTestComponent hook={useUrlParams} updateParams={null} />
       </SyntheticsRefreshContext.Provider>
     );

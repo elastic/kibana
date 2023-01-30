@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MonitorOverviewResult, OverviewStatus } from '../../../../../common/runtime_types';
+import { MonitorOverviewResult, OverviewStatusState } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
@@ -19,8 +19,10 @@ export interface MonitorOverviewPageState {
 }
 
 export type MonitorOverviewFlyoutConfig = {
-  monitorId: string;
+  configId: string;
+  id: string;
   location: string;
+  locationId: string;
 } | null;
 
 export interface MonitorOverviewState {
@@ -29,7 +31,8 @@ export interface MonitorOverviewState {
   pageState: MonitorOverviewPageState;
   loading: boolean;
   loaded: boolean;
+  isErrorPopoverOpen?: string | null;
   error: IHttpSerializedFetchError | null;
-  status: OverviewStatus | null;
+  status: OverviewStatusState | null;
   statusError: IHttpSerializedFetchError | null;
 }

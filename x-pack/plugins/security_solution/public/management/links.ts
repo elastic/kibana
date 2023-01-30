@@ -8,10 +8,11 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { hasKibanaPrivilege } from '../../common/endpoint/service/authz/authz';
+import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
-  calculatePermissionsFromCapabilities,
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
@@ -128,7 +129,8 @@ export const links: LinkItem = {
       id: SecurityPageName.exceptions,
       title: EXCEPTIONS,
       description: i18n.translate('xpack.securitySolution.appLinks.exceptionsDescription', {
-        defaultMessage: 'Create and manage exceptions to prevent the creation of unwanted alerts.',
+        defaultMessage:
+          'Create and manage shared exception lists to prevent the creation of unwanted alerts.',
       }),
       landingIcon: IconExceptionLists,
       path: EXCEPTIONS_PATH,
@@ -232,63 +234,87 @@ const excludeLinks = (linkIds: SecurityPageName[]) => ({
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
 
-const getHostIsolationExceptionTotal = async (http: CoreStart['http']) => {
-  const hostIsolationExceptionsApiClientInstance =
-    HostIsolationExceptionsApiClient.getInstance(http);
-  const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
-  return summaryResponse.total;
-};
-
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
-  const { endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
-  const hasPermissionsForSecuritySolution = calculatePermissionsFromCapabilities(
-    core.application.capabilities
-  );
+
+  const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
+  const isEndpointRbacEnabled = endpointRbacEnabled || endpointRbacV1Enabled;
+
   const linksToExclude: SecurityPageName[] = [];
 
-  try {
-    const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const {
-      canReadActionsLogManagement,
-      canUnIsolateHost,
-      canIsolateHost,
-      canAccessEndpointManagement,
-    } = fleetAuthz
-      ? calculateEndpointAuthz(
-          licenseService,
-          fleetAuthz,
-          currentUserResponse.roles,
-          endpointRbacV1Enabled,
-          hasPermissionsForSecuritySolution
-        )
-      : getEndpointAuthzInitialState();
+  const currentUser = await plugins.security.authc.getCurrentUser();
 
-    if (!canReadActionsLogManagement) {
-      linksToExclude.push(SecurityPageName.responseActionsHistory);
-    }
+  const isPlatinumPlus = licenseService.isPlatinumPlus();
+  let hasHostIsolationExceptions: boolean = isPlatinumPlus;
 
-    if (!canIsolateHost && canUnIsolateHost) {
-      let shouldBeAbleToDeleteEntries: boolean;
-      try {
-        const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
-        // has an HIE entry and is a super user then set to TRUE
-        shouldBeAbleToDeleteEntries = hostExceptionCount !== 0 && canAccessEndpointManagement;
-      } catch {
-        shouldBeAbleToDeleteEntries = false;
-      }
+  // If not Platinum+ license and user has read permissions to security solution
+  // then check if Host Isolation Exceptions exist.
+  // *** IT IS IMPORTANT *** that  this HTTP call only be made if the user has access to the
+  // Lists plugin, else non-security solution users, especially when license is not Platinum,
+  // may see failed HTTP requests in the browser console. This is the reason that
+  // `hasKibanaPrivilege()` is used below.
+  if (
+    !isPlatinumPlus &&
+    fleetAuthz &&
+    hasKibanaPrivilege(
+      fleetAuthz,
+      isEndpointRbacEnabled,
+      currentUser.roles.includes('superuser'),
+      'readHostIsolationExceptions'
+    )
+  ) {
+    hasHostIsolationExceptions = await checkArtifactHasData(
+      HostIsolationExceptionsApiClient.getInstance(core.http)
+    );
+  }
 
-      if (!shouldBeAbleToDeleteEntries) {
-        linksToExclude.push(SecurityPageName.hostIsolationExceptions);
-      }
-    } else if (!canIsolateHost || !canAccessEndpointManagement) {
-      linksToExclude.push(SecurityPageName.hostIsolationExceptions);
-    }
-  } catch {
+  const {
+    canReadActionsLogManagement,
+    canReadHostIsolationExceptions,
+    canReadEndpointList,
+    canReadTrustedApplications,
+    canReadEventFilters,
+    canReadBlocklist,
+    canReadPolicyManagement,
+  } = fleetAuthz
+    ? calculateEndpointAuthz(
+        licenseService,
+        fleetAuthz,
+        currentUser.roles,
+        isEndpointRbacEnabled,
+        hasHostIsolationExceptions
+      )
+    : getEndpointAuthzInitialState();
+
+  if (!canReadEndpointList) {
+    linksToExclude.push(SecurityPageName.endpoints);
+  }
+
+  if (!canReadPolicyManagement) {
+    linksToExclude.push(SecurityPageName.policies);
+  }
+
+  if (!canReadActionsLogManagement) {
+    linksToExclude.push(SecurityPageName.responseActionsHistory);
+  }
+
+  if (!canReadHostIsolationExceptions) {
     linksToExclude.push(SecurityPageName.hostIsolationExceptions);
+  }
+
+  if (!canReadTrustedApplications) {
+    linksToExclude.push(SecurityPageName.trustedApps);
+  }
+
+  if (!canReadEventFilters) {
+    linksToExclude.push(SecurityPageName.eventFilters);
+  }
+
+  if (!canReadBlocklist) {
+    linksToExclude.push(SecurityPageName.blocklist);
   }
 
   return excludeLinks(linksToExclude);

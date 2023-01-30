@@ -16,6 +16,8 @@ import {
 } from './unit_to_seconds';
 import { INTERVAL_STRING_RE, GTE_INTERVAL_RE } from './interval_regex';
 
+const BUCKET_SIZE = 100;
+
 const calculateBucketData = (intervalString: string) => {
   const intervalStringMatch = intervalString.match(INTERVAL_STRING_RE);
 
@@ -62,7 +64,8 @@ const calculateBucketData = (intervalString: string) => {
 
 const calculateBucketSizeForAutoInterval = (timerange: MetricsAPITimerange): number | undefined => {
   const duration = moment.duration(timerange.to - timerange.from, 'ms');
-  const bucketSizeDuration = calculateAuto.near(100, duration);
+  const bucketSizeDuration = calculateAuto.near(BUCKET_SIZE, duration);
+
   if (bucketSizeDuration) {
     return bucketSizeDuration.asSeconds();
   }

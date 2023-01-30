@@ -75,7 +75,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
 
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
 
-  const { fleetServerHosts, isLoadingInitialRequest } = useFleetServerHostsForPolicy(
+  const { fleetServerHosts, fleetProxy, isLoadingInitialRequest } = useFleetServerHostsForPolicy(
     agentPolicyWithPackagePolicies
   );
 
@@ -190,6 +190,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
         ) : (
           <Instructions
             fleetServerHosts={fleetServerHosts}
+            fleetProxy={fleetProxy}
             setSelectedPolicyId={setSelectedPolicyId}
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}

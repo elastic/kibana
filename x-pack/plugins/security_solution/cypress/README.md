@@ -69,7 +69,7 @@ Tests run on buildkite PR pipeline is parallelized(current value = 4 parallel jo
 ```yml
     ...
     agents:
-      queue: ci-group-6
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     parallelism: 4

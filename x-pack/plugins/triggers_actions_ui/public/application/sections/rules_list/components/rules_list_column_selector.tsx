@@ -22,7 +22,7 @@ type RulesListTableColumns =
   | EuiTableActionsColumnType<RuleTableItem>;
 
 export type RulesListColumns = {
-  id?: RulesListVisibleColumns;
+  id?: RulesListVisibleColumns | string;
   selectorName?: string;
 } & RulesListTableColumns;
 
@@ -36,10 +36,9 @@ export type RulesListVisibleColumns =
   | 'ruleExecutionPercentile'
   | 'ruleExecutionSuccessRatio'
   | 'ruleExecutionStatus'
-  | 'ruleExecutionState'
-  | 'ruleLastRunOutcome';
+  | 'ruleExecutionState';
 
-const OriginalRulesListVisibleColumns: RulesListVisibleColumns[] = [
+export const originalRulesListVisibleColumns: RulesListVisibleColumns[] = [
   'ruleName',
   'ruleTags',
   'ruleExecutionStatusLastDate',
@@ -55,7 +54,7 @@ const OriginalRulesListVisibleColumns: RulesListVisibleColumns[] = [
 interface RulesListColumnSelector {
   allRuleColumns: RulesListColumns[];
   rulesListKey?: string;
-  visibleColumns?: RulesListVisibleColumns[];
+  visibleColumns?: string[];
 }
 
 type UseRulesListColumnSelector = [RulesListTableColumns[], React.ReactNode];
@@ -65,7 +64,7 @@ const RULES_LIST_COLUMNS_KEY = 'triggersActionsUi_rulesListColumns';
 export const useRulesListColumnSelector = ({
   allRuleColumns,
   rulesListKey = RULES_LIST_COLUMNS_KEY,
-  visibleColumns = OriginalRulesListVisibleColumns,
+  visibleColumns = originalRulesListVisibleColumns,
 }: RulesListColumnSelector): UseRulesListColumnSelector => {
   const { storage } = useKibana().services;
   const storageVisibleColumns = storage?.get(rulesListKey);

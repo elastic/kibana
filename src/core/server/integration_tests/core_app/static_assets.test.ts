@@ -7,13 +7,13 @@
  */
 
 import { Root } from '@kbn/core-root-server-internal';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 describe('Platform assets', function () {
   let root: Root;
 
   beforeAll(async function () {
-    root = kbnTestServer.createRoot({
+    root = createRoot({
       plugins: { initialize: false },
       elasticsearch: { skipStartupConnectionCheck: true },
     });
@@ -28,18 +28,18 @@ describe('Platform assets', function () {
   });
 
   it('exposes static assets', async () => {
-    await kbnTestServer.request.get(root, '/ui/favicons/favicon.svg').expect(200);
+    await request.get(root, '/ui/favicons/favicon.svg').expect(200);
   });
 
   it('returns 404 if not found', async function () {
-    await kbnTestServer.request.get(root, '/ui/favicons/not-a-favicon.svg').expect(404);
+    await request.get(root, '/ui/favicons/not-a-favicon.svg').expect(404);
   });
 
   it('does not expose folder content', async function () {
-    await kbnTestServer.request.get(root, '/ui/favicons/').expect(403);
+    await request.get(root, '/ui/favicons/').expect(403);
   });
 
   it('does not allow file tree traversing', async function () {
-    await kbnTestServer.request.get(root, '/ui/../../../../../README.md').expect(404);
+    await request.get(root, '/ui/../../../../../README.md').expect(404);
   });
 });

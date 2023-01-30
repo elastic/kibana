@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import { TelemetryUsageCounter } from '../typings';
 import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { listConfigurations } from '../settings/agent_configuration/list_configurations';
 import { getApmPackagePolicies } from './get_apm_package_policies';
-import { getPackagePolicyWithAgentConfigurations } from './register_fleet_policy_callbacks';
+import { getPackagePolicyWithAgentConfigurations } from './get_package_policy_decorators';
 import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 
 export async function syncAgentConfigsToApmPackagePolicies({
-  core,
+  coreStartPromise,
   fleetPluginStart,
   internalESClient,
   telemetryUsageCounter,
 }: {
-  core: { setup: CoreSetup; start: () => Promise<CoreStart> };
+  coreStartPromise: Promise<CoreStart>;
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
   internalESClient: APMInternalESClient;
   telemetryUsageCounter?: TelemetryUsageCounter;
@@ -35,16 +31,13 @@ export async function syncAgentConfigsToApmPackagePolicies({
       counterType: 'success',
     });
   }
-  const coreStart = await core.start();
+  const coreStart = await coreStartPromise;
   const esClient = coreStart.elasticsearch.client.asInternalUser;
   const [savedObjectsClient, agentConfigurations, packagePolicies] =
     await Promise.all([
-      getInternalSavedObjectsClient(core.setup),
+      getInternalSavedObjectsClient(coreStart),
       listConfigurations(internalESClient),
-      getApmPackagePolicies({
-        core,
-        fleetPluginStart,
-      }),
+      getApmPackagePolicies({ coreStart, fleetPluginStart }),
     ]);
 
   return Promise.all(

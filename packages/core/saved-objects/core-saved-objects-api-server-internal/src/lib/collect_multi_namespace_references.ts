@@ -7,15 +7,19 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectReferenceWithContext,
 } from '@kbn/core-saved-objects-api-server';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import {
+  AuditAction,
+  type ISavedObjectsSecurityExtension,
+  type ISavedObjectTypeRegistry,
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   type SavedObjectsSerializer,
   getObjectKey,
@@ -54,6 +58,7 @@ export interface CollectMultiNamespaceReferencesParams {
   serializer: SavedObjectsSerializer;
   getIndexForType: (type: string) => string;
   createPointInTimeFinder: CreatePointInTimeFinderFn;
+  securityExtension: ISavedObjectsSecurityExtension | undefined;
   objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
   options?: SavedObjectsCollectMultiNamespaceReferencesOptions;
 }
@@ -94,17 +99,17 @@ export async function collectMultiNamespaceReferences(
     };
   });
 
-  const objectsToFindAliasesFor = objectsWithContext
-    .filter(({ spaces }) => spaces.length !== 0)
-    .map(({ type, id }) => ({ type, id }));
+  const foundObjects = objectsWithContext.filter(({ spaces }) => spaces.length !== 0); // Any objects that have a non-empty `spaces` field are "found"
+  const objectsToFindAliasesFor = foundObjects.map(({ type, id }) => ({ type, id }));
   const aliasesMap = await findLegacyUrlAliases(
     createPointInTimeFinder,
     objectsToFindAliasesFor,
     ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
   );
-  const objectOriginsToSearchFor = objectsWithContext
-    .filter(({ spaces }) => spaces.length !== 0)
-    .map(({ type, id, originId }) => ({ type, origin: originId || id }));
+  const objectOriginsToSearchFor = foundObjects.map(({ type, id, originId }) => ({
+    type,
+    origin: originId || id,
+  }));
   const originsMap = await findSharedOriginObjects(
     createPointInTimeFinder,
     objectOriginsToSearchFor,
@@ -118,8 +123,12 @@ export async function collectMultiNamespaceReferences(
     return { ...obj, spacesWithMatchingAliases, spacesWithMatchingOrigins };
   });
 
+  // Now that we have *all* information for the object graph, if the Security extension is enabled, we can: check/enforce authorization,
+  // write audit events, filter the object graph, and redact spaces from the objects.
+  const filteredAndRedactedResults = await optionallyUseSecurity(results, params);
+
   return {
-    objects: results,
+    objects: filteredAndRedactedResults,
   };
 }
 
@@ -210,4 +219,197 @@ async function getObjectsAndReferences({
   }
 
   return { objectMap, inboundReferencesMap };
+}
+
+/**
+ * Checks/enforces authorization, writes audit events, filters the object graph, and redacts spaces from the share_to_space/bulk_get
+ * response. In other SavedObjectsRepository functions we do this before decrypting attributes. However, because of the
+ * share_to_space/bulk_get response logic involved in deciding between the exact match or alias match, it's cleaner to do authorization,
+ * auditing, filtering, and redaction all afterwards.
+ */
+async function optionallyUseSecurity(
+  objectsWithContext: SavedObjectReferenceWithContext[],
+  params: CollectMultiNamespaceReferencesParams
+) {
+  const { securityExtension, objects, options = {} } = params;
+  const { purpose, namespace } = options;
+  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+  if (!securityExtension) {
+    return objectsWithContext;
+  }
+
+  // Check authorization based on all *found* object types / spaces
+  const typesToAuthorize = new Set<string>();
+  const spacesToAuthorize = new Set<string>([namespaceString]);
+  const addSpacesToAuthorize = (spaces: string[] = []) => {
+    for (const space of spaces) spacesToAuthorize.add(space);
+  };
+  for (const obj of objectsWithContext) {
+    typesToAuthorize.add(obj.type);
+    addSpacesToAuthorize(obj.spaces);
+    addSpacesToAuthorize(obj.spacesWithMatchingAliases);
+    addSpacesToAuthorize(obj.spacesWithMatchingOrigins);
+  }
+  const action =
+    purpose === 'updateObjectsSpaces' ? ('share_to_space' as const) : ('bulk_get' as const);
+
+  // Enforce authorization based on all *requested* object types and the current space
+  const typesAndSpaces = objects.reduce(
+    (acc, { type }) => (acc.has(type) ? acc : acc.set(type, new Set([namespaceString]))), // Always enforce authZ for the active space
+    new Map<string, Set<string>>()
+  );
+
+  const { typeMap } = await securityExtension?.performAuthorization({
+    actions: new Set([action]),
+    types: typesToAuthorize,
+    spaces: spacesToAuthorize,
+    enforceMap: typesAndSpaces,
+    auditCallback: (error) => {
+      if (!error) return; // We will audit success results below, after redaction
+      for (const { type, id } of objects) {
+        securityExtension!.addAuditEvent({
+          action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
+          savedObject: { type, id },
+          error,
+        });
+      }
+    },
+  });
+
+  // Now, filter/redact the results. Most SOR functions just redact the `namespaces` field from each returned object. However, this function
+  // will actually filter the returned object graph itself.
+  // This is done in two steps: (1) objects which the user can't access *in this space* are filtered from the graph, and the
+  // graph is rearranged to avoid leaking information. (2) any spaces that the user can't access are redacted from each individual object.
+  // After we finish filtering, we can write audit events for each object that is going to be returned to the user.
+  const requestedObjectsSet = objects.reduce(
+    (acc, { type, id }) => acc.add(`${type}:${id}`),
+    new Set<string>()
+  );
+  const retrievedObjectsSet = objectsWithContext.reduce(
+    (acc, { type, id }) => acc.add(`${type}:${id}`),
+    new Set<string>()
+  );
+  const traversedObjects = new Set<string>();
+  const filteredObjectsMap = new Map<string, SavedObjectReferenceWithContext>();
+  const getIsAuthorizedForInboundReference = (inbound: { type: string; id: string }) => {
+    const found = filteredObjectsMap.get(`${inbound.type}:${inbound.id}`);
+    return found && !found.isMissing; // If true, this object can be linked back to one of the requested objects
+  };
+  let objectsToProcess = [...objectsWithContext];
+  while (objectsToProcess.length > 0) {
+    const obj = objectsToProcess.shift()!;
+    const { type, id, spaces, inboundReferences } = obj;
+    const objKey = `${type}:${id}`;
+    traversedObjects.add(objKey);
+    // Is the user authorized to access this object in this space?
+    let isAuthorizedForObject = true;
+    try {
+      // ToDo: this is the only remaining call to enforceAuthorization outside of the security extension
+      // This was a bit complicated to change now, but can ultimately be removed when authz logic is
+      // migrated from the repo level to the extension level.
+      securityExtension.enforceAuthorization({
+        typesAndSpaces: new Map([[type, new Set([namespaceString])]]),
+        action,
+        typeMap,
+      });
+    } catch (err) {
+      isAuthorizedForObject = false;
+    }
+    // Redact the inbound references so we don't leak any info about other objects that the user is not authorized to access
+    const redactedInboundReferences = inboundReferences.filter((inbound) => {
+      if (inbound.type === type && inbound.id === id) {
+        // circular reference, don't redact it
+        return true;
+      }
+      return getIsAuthorizedForInboundReference(inbound);
+    });
+    // If the user is not authorized to access at least one inbound reference of this object, then we should omit this object.
+    const isAuthorizedForGraph =
+      requestedObjectsSet.has(objKey) || // If true, this is one of the requested objects, and we checked authorization above
+      redactedInboundReferences.some(getIsAuthorizedForInboundReference);
+
+    if (isAuthorizedForObject && isAuthorizedForGraph) {
+      if (spaces.length) {
+        // Only generate success audit records for "non-empty results" with 1+ spaces
+        // ("empty result" means the object was a non-multi-namespace type, or hidden type, or not found)
+        securityExtension.addAuditEvent({
+          action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
+          savedObject: { type, id },
+        });
+      }
+      filteredObjectsMap.set(objKey, obj);
+    } else if (!isAuthorizedForObject && isAuthorizedForGraph) {
+      filteredObjectsMap.set(objKey, { ...obj, spaces: [], isMissing: true });
+    } else if (isAuthorizedForObject && !isAuthorizedForGraph) {
+      const hasUntraversedInboundReferences = inboundReferences.some(
+        (ref) =>
+          !traversedObjects.has(`${ref.type}:${ref.id}`) &&
+          retrievedObjectsSet.has(`${ref.type}:${ref.id}`)
+      );
+
+      if (hasUntraversedInboundReferences) {
+        // this object has inbound reference(s) that we haven't traversed yet; bump it to the back of the list
+        objectsToProcess = [...objectsToProcess, obj];
+      } else {
+        // There should never be a missing inbound reference.
+        // If there is, then something has gone terribly wrong.
+        const missingInboundReference = inboundReferences.find(
+          (ref) =>
+            !traversedObjects.has(`${ref.type}:${ref.id}`) &&
+            !retrievedObjectsSet.has(`${ref.type}:${ref.id}`)
+        );
+
+        if (missingInboundReference) {
+          throw new Error(
+            `Unexpected inbound reference to "${missingInboundReference.type}:${missingInboundReference.id}"`
+          );
+        }
+      }
+    }
+  }
+
+  const filteredAndRedactedObjects = [
+    ...filteredObjectsMap.values(),
+  ].map<SavedObjectReferenceWithContext>((obj) => {
+    const {
+      type,
+      id,
+      spaces,
+      spacesWithMatchingAliases,
+      spacesWithMatchingOrigins,
+      inboundReferences,
+    } = obj;
+    // Redact the inbound references so we don't leak any info about other objects that the user is not authorized to access
+    const redactedInboundReferences = inboundReferences.filter((inbound) => {
+      if (inbound.type === type && inbound.id === id) {
+        // circular reference, don't redact it
+        return true;
+      }
+      return getIsAuthorizedForInboundReference(inbound);
+    });
+
+    /** Simple wrapper for the `redactNamespaces` function that expects a saved object in its params. */
+    const getRedactedSpaces = (spacesArray: string[] | undefined) => {
+      if (!spacesArray) return;
+      const savedObject = { type, namespaces: spacesArray } as SavedObject; // Other SavedObject attributes aren't required
+      const result = securityExtension.redactNamespaces({ savedObject, typeMap });
+      return result.namespaces;
+    };
+    const redactedSpaces = getRedactedSpaces(spaces)!;
+    const redactedSpacesWithMatchingAliases = getRedactedSpaces(spacesWithMatchingAliases);
+    const redactedSpacesWithMatchingOrigins = getRedactedSpaces(spacesWithMatchingOrigins);
+    return {
+      ...obj,
+      spaces: redactedSpaces,
+      ...(redactedSpacesWithMatchingAliases && {
+        spacesWithMatchingAliases: redactedSpacesWithMatchingAliases,
+      }),
+      ...(redactedSpacesWithMatchingOrigins && {
+        spacesWithMatchingOrigins: redactedSpacesWithMatchingOrigins,
+      }),
+      inboundReferences: redactedInboundReferences,
+    };
+  });
+
+  return filteredAndRedactedObjects;
 }

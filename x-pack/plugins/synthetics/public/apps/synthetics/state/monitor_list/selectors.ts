@@ -14,11 +14,15 @@ export const selectMonitorListState = (state: SyntheticsAppState) => state.monit
 export const selectEncryptedSyntheticsSavedMonitors = createSelector(
   selectMonitorListState,
   (state) =>
-    state.data.monitors.map((monitor) => ({
+    state?.data.monitors.map((monitor) => ({
       ...monitor.attributes,
       id: monitor.attributes[ConfigKey.MONITOR_QUERY_ID],
       updated_at: monitor.updated_at,
+      created_at: monitor.created_at,
     })) as EncryptedSyntheticsSavedMonitor[]
 );
 export const selectMonitorUpsertStatuses = (state: SyntheticsAppState) =>
   state.monitorList.monitorUpsertStatuses;
+
+export const selectMonitorUpsertStatus = (configId: string) => (state: SyntheticsAppState) =>
+  state.monitorList.monitorUpsertStatuses?.[configId] ?? null;

@@ -8,10 +8,11 @@
 import React, { useMemo, useState, VFC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingLogo, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Indicator } from '../../../../../../common/types/indicator';
+import { IndicatorsFlyout } from '../../../../indicators/components/flyout';
 import { useStyles } from '../styles';
 import { useIndicatorById } from '../../../hooks';
 import { AttachmentMetadata } from '../../../utils';
-import { CasesFlyout } from '../flyout';
 
 export const INDICATOR_NAME_TEST_ID = 'tiCasesIndicatorName';
 export const INDICATOR_FEED_NAME_TEST_ID = 'tiCasesIndicatorFeedName';
@@ -19,7 +20,7 @@ export const INDICATOR_TYPE_TEST_ID = 'tiCasesIndicatorTYPE';
 
 export interface CommentChildrenProps {
   /**
-   * Id of the document (indicator) to be fetched
+   * Indicator's id of the indicator to fetch
    */
   id: string;
   /**
@@ -43,13 +44,14 @@ export const CommentChildren: VFC<CommentChildrenProps> = ({ id, metadata }) => 
   const flyoutFragment = useMemo(
     () =>
       expanded ? (
-        <CasesFlyout
-          metadata={metadata}
-          rawDocument={indicator as Record<string, unknown>}
+        <IndicatorsFlyout
+          indicator={indicator as Indicator}
           closeFlyout={() => setExpanded(false)}
+          kqlBarIntegration={true}
+          indicatorName={indicatorName}
         />
       ) : null,
-    [expanded, indicator, metadata]
+    [expanded, indicator, indicatorName]
   );
 
   if (isLoading) {

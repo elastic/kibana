@@ -79,7 +79,7 @@ const RootContainer = styled.div`
   padding-top: ${({ theme }) => theme.eui.euiSizeXS};
 
   .body {
-    min-height: ${({ theme }) => theme.eui.gutterTypes.gutterExtraLarge};
+    min-height: ${({ theme }) => theme.eui.euiSizeXXL};
 
     &-content {
       position: relative;

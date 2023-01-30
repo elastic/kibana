@@ -9,24 +9,19 @@ import { i18n } from '@kbn/i18n';
 import type {
   Embeddable,
   LensPublicStart,
-  LensSavedObjectAttributes,
-  FieldBasedIndexPatternColumn,
-  XYDataLayerConfig,
-  GenericIndexPatternColumn,
-  TermsIndexPatternColumn,
-  SeriesType,
-  XYLayerConfig,
   DataType,
+  ChartInfo,
+  LensSavedObjectAttributes,
 } from '@kbn/lens-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 
-export const COMPATIBLE_SERIES_TYPES: SeriesType[] = [
+export const COMPATIBLE_SERIES_TYPES = [
   'line',
   'bar',
   'bar_stacked',
@@ -38,7 +33,7 @@ export const COMPATIBLE_SERIES_TYPES: SeriesType[] = [
   'area_percentage_stacked',
 ];
 
-export const COMPATIBLE_LAYER_TYPE: XYDataLayerConfig['layerType'] = layerTypes.DATA;
+export const COMPATIBLE_LAYER_TYPE = layerTypes.DATA;
 
 export const COMPATIBLE_VISUALIZATION = 'lnsXY';
 
@@ -50,9 +45,10 @@ export const COMPATIBLE_SPLIT_FIELD_TYPES: DataType[] = [
 export async function redirectToADJobWizards(
   embeddable: Embeddable,
   layerIndex: number,
-  share: SharePluginStart
+  share: SharePluginStart,
+  lens: LensPublicStart
 ) {
-  const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(embeddable);
+  const { query, filters, to, from, vis } = await getJobsItemsFromEmbeddable(embeddable, lens);
   const locator = share.url.locators.get(ML_APP_LOCATOR);
 
   const url = await locator?.getUrl({
@@ -70,7 +66,15 @@ export async function redirectToADJobWizards(
   window.open(url, '_blank');
 }
 
-export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
+export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: LensPublicStart) {
+  if (!lens) {
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.lensNotFound', {
+        defaultMessage: 'Lens is not intialized',
+      })
+    );
+  }
+
   const { filters, timeRange, ...input } = embeddable.getInput();
   const query = input.query === undefined ? { query: '', language: 'kuery' } : input.query;
 
@@ -84,6 +88,7 @@ export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
   const { to, from } = timeRange;
 
   const vis = embeddable.getSavedVis();
+
   if (vis === undefined) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.visNotFound', {
@@ -92,10 +97,12 @@ export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
     );
   }
 
+  const chartInfo = await getChartInfoFromVisualization(lens, vis);
   const dashboard = embeddable.parent?.type === 'dashboard' ? embeddable.parent : undefined;
 
   return {
     vis,
+    chartInfo,
     from,
     to,
     query,
@@ -142,10 +149,10 @@ export function getMlFunction(operationType: string) {
 
 export async function getVisTypeFactory(lens: LensPublicStart) {
   const visTypes = await lens.getXyVisTypes();
-  return (layer: XYLayerConfig) => {
+  return (layer: ChartInfo['layers'][number]) => {
     switch (layer.layerType) {
       case layerTypes.DATA:
-        const type = visTypes.find((t) => t.id === layer.seriesType);
+        const type = visTypes.find((t) => t.id === layer.chartType);
         return {
           label: type?.fullLabel || type?.label || layer.layerType,
           icon: type?.icon ?? '',
@@ -169,7 +176,6 @@ export async function getVisTypeFactory(lens: LensPublicStart) {
         };
       default:
         return {
-          // @ts-expect-error just in case a new layer type appears in the future
           label: layer.layerType,
           icon: '',
         };
@@ -177,54 +183,63 @@ export async function getVisTypeFactory(lens: LensPublicStart) {
   };
 }
 
-export async function isCompatibleVisualizationType(savedObject: LensSavedObjectAttributes) {
-  const visualization = savedObject.state.visualization as { layers: XYLayerConfig[] };
+export async function isCompatibleVisualizationType(chartInfo: ChartInfo) {
   return (
-    savedObject.visualizationType === COMPATIBLE_VISUALIZATION &&
-    visualization.layers.some((l) => l.layerType === layerTypes.DATA)
+    chartInfo.visualizationType === COMPATIBLE_VISUALIZATION &&
+    chartInfo.layers.some((l) => l.layerType === layerTypes.DATA)
   );
 }
 
-export function isCompatibleLayer(layer: XYLayerConfig): layer is XYDataLayerConfig {
+export function isCompatibleLayer(layer: ChartInfo['layers'][number]) {
   return (
-    isDataLayer(layer) &&
     layer.layerType === COMPATIBLE_LAYER_TYPE &&
-    COMPATIBLE_SERIES_TYPES.includes(layer.seriesType)
+    layer.chartType &&
+    COMPATIBLE_SERIES_TYPES.includes(layer.chartType)
   );
 }
 
-export function isDataLayer(layer: XYLayerConfig): layer is XYDataLayerConfig {
-  return 'seriesType' in layer;
-}
-export function hasSourceField(
-  column: GenericIndexPatternColumn
-): column is FieldBasedIndexPatternColumn {
-  return 'sourceField' in column;
+export function isDataLayer(layer: ChartInfo['layers'][number]) {
+  return 'chartType' in layer;
 }
 
-export function isTermsField(column: GenericIndexPatternColumn): column is TermsIndexPatternColumn {
-  return column.operationType === 'terms' && 'params' in column;
+export function isTermsField(dimension: ChartInfo['layers'][number]['dimensions'][number]) {
+  return dimension.operation.type === 'terms';
 }
 
-export function isCompatibleSplitFieldType(column: GenericIndexPatternColumn) {
-  return COMPATIBLE_SPLIT_FIELD_TYPES.includes(column.dataType);
+export function isCompatibleSplitFieldType(
+  dimension: ChartInfo['layers'][number]['dimensions'][number]
+) {
+  return COMPATIBLE_SPLIT_FIELD_TYPES.includes(dimension.operation.dataType);
 }
 
-export function hasIncompatibleProperties(column: GenericIndexPatternColumn) {
-  return 'timeShift' in column || 'filter' in column;
+export function hasIncompatibleProperties(
+  dimension: ChartInfo['layers'][number]['dimensions'][number]
+) {
+  return dimension.operation.hasTimeShift || dimension.operation.filter;
 }
 
 export function createDetectors(
-  fields: FieldBasedIndexPatternColumn[],
-  splitField: FieldBasedIndexPatternColumn | null
+  fields: ChartInfo['layers'][number]['dimensions'],
+  splitField?: ChartInfo['layers'][number]['dimensions'][number]
 ) {
-  return fields.map(({ operationType, sourceField }) => {
-    const func = getMlFunction(operationType);
+  return fields.map(({ operation }) => {
+    const func = getMlFunction(operation.type);
     return {
       function: func,
       // don't use the source field if the detector is count
-      ...(func === 'count' ? {} : { field_name: sourceField }),
-      ...(splitField ? { partition_field_name: splitField.sourceField } : {}),
+      ...(func === 'count' ? {} : { field_name: operation.fields?.[0] }),
+      ...(splitField ? { partition_field_name: splitField.operation.fields?.[0] } : {}),
     };
   });
+}
+
+export async function getChartInfoFromVisualization(
+  lens: LensPublicStart,
+  vis: LensSavedObjectAttributes
+) {
+  const chartInfo = await (await (await lens.stateHelperApi()).chartInfo).getChartInfo(vis);
+  if (!chartInfo) {
+    throw new Error('Cannot create job, chart info is undefined');
+  }
+  return chartInfo;
 }

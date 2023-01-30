@@ -1,9 +1,7 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -11,5 +9,23 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/optimizer",
+    "@kbn/server-http-tools",
+    "@kbn/repo-info",
+    "@kbn/ci-stats-reporter",
+    "@kbn/jest-serializers",
+    "@kbn/stdio-dev-helpers",
+    "@kbn/tooling-log",
+    "@kbn/repo-source-classifier",
+    "@kbn/import-resolver",
+    "@kbn/picomatcher",
+  ],
+  "exclude": [
+    "target/**/*",
   ],
 }

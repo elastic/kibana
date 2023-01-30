@@ -20,7 +20,7 @@ import {
   getValueInSeconds,
   getOptionalArrayField,
   getOptionalListField,
-  getMultipleUrlsOrHostsError,
+  getInvalidUrlsOrHostsError,
   getUnsupportedKeysError,
 } from './common_fields';
 
@@ -47,8 +47,8 @@ export const getNormalizeICMPFields = ({
 
   /* Check if monitor has multiple hosts */
   const hosts = getOptionalListField(monitor.hosts);
-  if (hosts.length > 1) {
-    errors.push(getMultipleUrlsOrHostsError(monitor, 'hosts', version));
+  if (hosts.length !== 1) {
+    errors.push(getInvalidUrlsOrHostsError(monitor, 'hosts', version));
   }
 
   if (unsupportedKeys.length) {

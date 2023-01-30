@@ -41,6 +41,7 @@ export type {
   FieldBrowserProps,
   RuleDefinitionProps,
   RulesListVisibleColumns,
+  AlertSummaryTimeRange,
 } from './types';
 
 export type {
@@ -134,10 +135,8 @@ export { loadExecutionLogAggregations } from './application/lib/rule_api/load_ex
 export { loadActionErrorLog } from './application/lib/rule_api/load_action_error_log';
 export { loadRuleTypes } from './application/lib/rule_api/rule_types';
 export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
-export { deleteRules } from './application/lib/rule_api/delete';
-export { enableRule } from './application/lib/rule_api/enable';
-export { disableRule } from './application/lib/rule_api/disable';
 export { muteRule } from './application/lib/rule_api/mute';
+export { bulkDeleteRules } from './application/lib/rule_api/bulk_delete';
 export { unmuteRule } from './application/lib/rule_api/unmute';
 export { snoozeRule } from './application/lib/rule_api/snooze';
 export { unsnoozeRule } from './application/lib/rule_api/unsnooze';
@@ -149,6 +148,7 @@ export { loadActionTypes } from './application/lib/action_connector_api/connecto
 export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from './application/app';
+export type { BulkOperationAttributes, BulkOperationResponse } from './types';
 
 export const getNotifyWhenOptions = async () => {
   const { NOTIFY_WHEN_OPTIONS } = await import('./application/sections/rule_form/rule_notify_when');

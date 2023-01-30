@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, MouseEvent } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -24,6 +24,7 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import { _SingleRangeChangeEvent } from '@elastic/eui/src/components/form/range/types';
 import { i18n } from '@kbn/i18n';
 
 import { SAVE_BUTTON_LABEL } from '../../../../shared/constants';
@@ -91,10 +92,8 @@ export const GroupSourcePrioritization: React.FC = () => {
       {SAVE_BUTTON_LABEL}
     </EuiButton>
   );
-  const handleSliderChange = (
-    id: string,
-    e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>
-  ) => updatePriority(id, Number((e.target as HTMLInputElement).value));
+  const handleSliderChange = (id: string, e: _SingleRangeChangeEvent) =>
+    updatePriority(id, Number(e.currentTarget.value));
   const hasSources = contentSources.length > 0;
 
   const zeroState = (
@@ -150,9 +149,7 @@ export const GroupSourcePrioritization: React.FC = () => {
                     step={1}
                     showInput
                     value={activeSourcePriorities[id]}
-                    onChange={(e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) =>
-                      handleSliderChange(id, e)
-                    }
+                    onChange={(e) => handleSliderChange(id, e)}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

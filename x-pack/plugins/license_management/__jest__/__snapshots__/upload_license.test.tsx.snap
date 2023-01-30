@@ -53,6 +53,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
             <span
               aria-hidden="true"
               class="euiFilePicker__icon"
+              color="primary"
               data-euiicon-type="importAction"
             />
             <div
@@ -70,10 +71,10 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <a
             class="euiButtonEmpty css-9t7nyf-empty-primary"
@@ -93,10 +94,10 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
           </a>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="uploadLicenseButton"
             type="button"
           >
@@ -189,6 +190,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
             <span
               aria-hidden="true"
               class="euiFilePicker__icon"
+              color="primary"
               data-euiicon-type="importAction"
             />
             <div
@@ -206,10 +208,10 @@ exports[`UploadLicense should display an error when ES says license is expired 1
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <a
             class="euiButtonEmpty css-9t7nyf-empty-primary"
@@ -229,10 +231,10 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           </a>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="uploadLicenseButton"
             type="button"
           >
@@ -325,6 +327,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             <span
               aria-hidden="true"
               class="euiFilePicker__icon"
+              color="primary"
               data-euiicon-type="importAction"
             />
             <div
@@ -342,10 +345,10 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <a
             class="euiButtonEmpty css-9t7nyf-empty-primary"
@@ -365,10 +368,10 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           </a>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="uploadLicenseButton"
             type="button"
           >
@@ -461,6 +464,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
             <span
               aria-hidden="true"
               class="euiFilePicker__icon"
+              color="primary"
               data-euiicon-type="importAction"
             />
             <div
@@ -478,10 +482,10 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <a
             class="euiButtonEmpty css-9t7nyf-empty-primary"
@@ -501,10 +505,10 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           </a>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="uploadLicenseButton"
             type="button"
           >
@@ -597,6 +601,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             <span
               aria-hidden="true"
               class="euiFilePicker__icon"
+              color="primary"
               data-euiicon-type="importAction"
             />
             <div
@@ -614,10 +619,10 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <a
             class="euiButtonEmpty css-9t7nyf-empty-primary"
@@ -637,10 +642,10 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           </a>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="uploadLicenseButton"
             type="button"
           >

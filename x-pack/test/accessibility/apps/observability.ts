@@ -6,8 +6,6 @@
  */
 
 // a11y tests for spaces, space selection and space creation and feature controls
-
-import { describe } from 'mocha';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

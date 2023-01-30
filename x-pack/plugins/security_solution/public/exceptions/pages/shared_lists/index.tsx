@@ -10,6 +10,7 @@ import type { EuiSearchBarProps } from '@elastic/eui';
 
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPagination,
@@ -86,7 +87,12 @@ export const SharedLists = React.memo(() => {
   const loading = userInfoLoading || listsConfigLoading;
 
   const {
-    services: { http, notifications, timelines },
+    services: {
+      http,
+      notifications,
+      timelines,
+      application: { navigateToApp },
+    },
   } = useKibana();
   const { exportExceptionList, deleteExceptionList } = useApi(http);
 
@@ -94,9 +100,7 @@ export const SharedLists = React.memo(() => {
   const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
     exceptionReferenceModalInitialState
   );
-  const [filters, setFilters] = useState<ExceptionListFilter | undefined>({
-    types: [ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT],
-  });
+  const [filters, setFilters] = useState<ExceptionListFilter | undefined>();
 
   const [
     loadingExceptions,
@@ -108,7 +112,10 @@ export const SharedLists = React.memo(() => {
     setSort,
   ] = useExceptionLists({
     errorMessage: i18n.ERROR_EXCEPTION_LISTS,
-    filterOptions: filters,
+    filterOptions: {
+      ...filters,
+      types: [ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT],
+    },
     http,
     namespaceTypes: ['single', 'agnostic'],
     notifications,
@@ -383,10 +390,28 @@ export const SharedLists = React.memo(() => {
         <EuiFlexItem>
           <EuiPageHeader
             pageTitle={i18n.ALL_EXCEPTIONS}
-            description={timelines.getLastUpdated({
-              showUpdating: loading,
-              updatedAt: lastUpdated,
-            })}
+            description={
+              <>
+                <div>
+                  {"To view rule specific exceptions navigate to that rule's details page."}
+                  <EuiButtonIcon
+                    iconType="popout"
+                    aria-label="go-to-rules"
+                    color="primary"
+                    onClick={() =>
+                      navigateToApp('security', { openInNewTab: true, path: '/rules' })
+                    }
+                  />
+                </div>
+                {/* TODO: update the above text to incorporate a navigateToApp link to the rule management page */}
+                <div>
+                  {timelines.getLastUpdated({
+                    showUpdating: loading,
+                    updatedAt: lastUpdated,
+                  })}
+                </div>
+              </>
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -448,7 +473,11 @@ export const SharedLists = React.memo(() => {
           isBulkAction={false}
           showAlertCloseOptions
           onCancel={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
-          onConfirm={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
+          onConfirm={(didRuleChange: boolean) => {
+            setDisplayAddExceptionItemFlyout(false);
+            if (didRuleChange) handleRefresh();
+          }}
+          isNonTimeline={true}
         />
       )}
 

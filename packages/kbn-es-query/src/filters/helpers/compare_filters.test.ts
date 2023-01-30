@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { compareFilters, COMPARE_ALL_OPTIONS } from './compare_filters';
-import { buildEmptyFilter, buildQueryFilter, FilterStateStore } from '..';
+import { COMPARE_ALL_OPTIONS, compareFilters } from './compare_filters';
+import {
+  BooleanRelation,
+  buildCombinedFilter,
+  buildEmptyFilter,
+  buildQueryFilter,
+  FilterStateStore,
+} from '..';
+import { DataViewBase } from '../../..';
 
 describe('filter manager utilities', () => {
   describe('compare filters', () => {
@@ -176,6 +183,69 @@ describe('filter manager utilities', () => {
       f2.meta.index = 'dog';
 
       expect(compareFilters([f1], [f2], { index: true })).toBeFalsy();
+    });
+
+    test('should compare two AND filters as the same', () => {
+      const dataView: DataViewBase = {
+        id: 'logstash-*',
+        fields: [
+          {
+            name: 'bytes',
+            type: 'number',
+            scripted: false,
+          },
+        ],
+        title: 'dataView',
+      };
+
+      const f1 = buildQueryFilter({ query_string: { query: 'apache' } }, dataView.id!, '');
+      const f2 = buildQueryFilter({ query_string: { query: 'apache' } }, dataView.id!, '');
+      const f3 = buildCombinedFilter(BooleanRelation.AND, [f1, f2], dataView);
+      const f4 = buildCombinedFilter(BooleanRelation.AND, [f1, f2], dataView);
+
+      expect(compareFilters([f3], [f4])).toBeTruthy();
+    });
+
+    test('should compare an AND and OR filter as different', () => {
+      const dataView: DataViewBase = {
+        id: 'logstash-*',
+        fields: [
+          {
+            name: 'bytes',
+            type: 'number',
+            scripted: false,
+          },
+        ],
+        title: 'dataView',
+      };
+
+      const f1 = buildQueryFilter({ query_string: { query: 'apache' } }, dataView.id!, '');
+      const f2 = buildQueryFilter({ query_string: { query: 'apache' } }, dataView.id!, '');
+      const f3 = buildCombinedFilter(BooleanRelation.AND, [f1, f2], dataView);
+      const f4 = buildCombinedFilter(BooleanRelation.OR, [f1, f2], dataView);
+
+      expect(compareFilters([f3], [f4])).toBeFalsy();
+    });
+
+    test('should compare two different combined filters as different', () => {
+      const dataView: DataViewBase = {
+        id: 'logstash-*',
+        fields: [
+          {
+            name: 'bytes',
+            type: 'number',
+            scripted: false,
+          },
+        ],
+        title: 'dataView',
+      };
+
+      const f1 = buildQueryFilter({ query_string: { query: 'apache' } }, dataView.id!, '');
+      const f2 = buildQueryFilter({ query_string: { query: 'apaches' } }, dataView.id!, '');
+      const f3 = buildCombinedFilter(BooleanRelation.AND, [f1], dataView);
+      const f4 = buildCombinedFilter(BooleanRelation.AND, [f2], dataView);
+
+      expect(compareFilters([f3], [f4])).toBeFalsy();
     });
   });
 });

@@ -9,9 +9,9 @@ import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
-import { getPageRowIndex } from '@kbn/timelines-plugin/public';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { EmptyComponent, onFilterAdded, useKibanaServices } from './helpers';
+import { getPageRowIndex } from '../../components/data_table/pagination';
 
 export const getFilterForCellAction = ({
   data,

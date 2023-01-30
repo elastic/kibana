@@ -13,12 +13,13 @@ import { LIGHT_THEME } from '@elastic/charts';
 
 interface AlertStatusIndicatorProps {
   alertStatus: AlertStatus;
+  textSize?: 'xs' | 's' | 'm' | 'inherit';
 }
 
-export function AlertStatusIndicator({ alertStatus }: AlertStatusIndicatorProps) {
+export function AlertStatusIndicator({ alertStatus, textSize = 'xs' }: AlertStatusIndicatorProps) {
   if (alertStatus === ALERT_STATUS_ACTIVE) {
     return (
-      <EuiHealth color={LIGHT_THEME.colors.vizColors[2]} textSize="xs">
+      <EuiHealth color={LIGHT_THEME.colors.vizColors[2]} textSize={textSize}>
         {i18n.translate('xpack.observability.alertsTGrid.statusActiveDescription', {
           defaultMessage: 'Active',
         })}
@@ -27,7 +28,7 @@ export function AlertStatusIndicator({ alertStatus }: AlertStatusIndicatorProps)
   }
 
   return (
-    <EuiHealth color={LIGHT_THEME.colors.vizColors[1]} textSize="xs">
+    <EuiHealth color={LIGHT_THEME.colors.vizColors[1]} textSize={textSize}>
       <EuiText color="subdued" size="relative">
         {i18n.translate('xpack.observability.alertsTGrid.statusRecoveredDescription', {
           defaultMessage: 'Recovered',

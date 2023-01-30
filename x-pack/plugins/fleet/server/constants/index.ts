@@ -67,6 +67,8 @@ export {
   // Fleet server host
   DEFAULT_FLEET_SERVER_HOST_ID,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  // Proxy
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
   // Authz
   ENDPOINT_PRIVILEGES,
 } from '../../common/constants';

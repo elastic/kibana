@@ -10,15 +10,15 @@ import type supertest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
-import type { SavedObjectsClientContract, IUiSettingsClient } from '../../..';
 import {
   createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
-  TestUtils,
-  HttpMethod,
   getSupertest,
-} from '../../../../test_helpers/kbn_server';
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  type TestUtils,
+  type HttpMethod,
+} from '@kbn/core-test-helpers-kbn-server';
+import type { SavedObjectsClientContract, IUiSettingsClient } from '../../..';
 
 let servers: TestUtils;
 let esServer: TestElasticsearchUtils;
@@ -28,6 +28,7 @@ interface AllServices {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: Client;
   uiSettings: IUiSettingsClient;
+  uiSettingsGlobal: IUiSettingsClient;
   supertest: (method: HttpMethod, path: string) => supertest.Test;
 }
 
@@ -62,12 +63,14 @@ export function getServices() {
   );
 
   const uiSettings = kbn.coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+  const uiSettingsGlobal = kbn.coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
 
   services = {
     supertest: (method: HttpMethod, path: string) => getSupertest(kbn.root, method, path),
     esClient,
     savedObjectsClient,
     uiSettings,
+    uiSettingsGlobal,
   };
 
   return services;

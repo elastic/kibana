@@ -92,7 +92,6 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
         textField,
         filter,
         extraFields,
-        ignoreGlobalFilters,
       } = annotation;
       expressions.push({
         type: 'expression' as const,
@@ -112,7 +111,6 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               textField: textVisibility && textField ? [textField] : [],
               filter: filter ? [queryToAst(filter)] : [],
               extraFields: extraFields || [],
-              ignoreGlobalFilters: [Boolean(ignoreGlobalFilters)],
               isHidden: [Boolean(annotation.isHidden)],
             },
           },
@@ -130,7 +128,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
 
       const groupsExpressions = groups
         .filter((g) => g.annotations.some((a) => !a.isHidden))
-        .map(({ annotations, indexPatternId }): ExpressionAstExpression => {
+        .map(({ annotations, indexPatternId, ignoreGlobalFilters }): ExpressionAstExpression => {
           const indexPatternExpression: ExpressionAstExpression = {
             type: 'expression',
             chain: [
@@ -153,6 +151,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 arguments: {
                   dataView: [indexPatternExpression],
                   annotations: [...annotationExpressions],
+                  ignoreGlobalFilters: [Boolean(ignoreGlobalFilters)],
                 },
               },
             ],

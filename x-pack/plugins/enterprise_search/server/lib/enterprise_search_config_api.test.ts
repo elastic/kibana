@@ -13,7 +13,7 @@ import fetch from 'node-fetch';
 
 const { Response } = jest.requireActual('node-fetch');
 
-jest.mock('@kbn/utils', () => ({
+jest.mock('@kbn/repo-info', () => ({
   kibanaPackageJson: { version: '1.0.0' },
 }));
 
@@ -223,7 +223,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   });
 
   it('handles timeouts', async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     // Warning
     callEnterpriseSearchConfigAPI(mockDependencies);

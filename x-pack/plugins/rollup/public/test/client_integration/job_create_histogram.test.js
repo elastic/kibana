@@ -23,7 +23,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
   let startMock;
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());

@@ -7,8 +7,10 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NavigateToPath, useTimefilter } from '../../../contexts/kibana';
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_PAGES } from '../../../../locator';
+import { NavigateToPath } from '../../../contexts/kibana';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { checkFullLicense } from '../../../license';
 import {
@@ -23,7 +25,7 @@ export const calendarListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/calendars_list',
+  path: createPath(ML_PAGES.CALENDARS_MANAGE),
   title: i18n.translate('xpack.ml.settings.calendarList.docTitle', {
     defaultMessage: 'Calendars',
   }),

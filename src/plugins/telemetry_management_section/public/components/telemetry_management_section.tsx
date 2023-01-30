@@ -7,7 +7,15 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiCallOut, EuiForm, EuiLink, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiForm,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -92,10 +100,12 @@ export class TelemetryManagementSection extends Component<Props, State> {
       <Fragment>
         {showExample && (
           <TrackApplicationView viewId="optInExampleFlyout">
-            <OptInExampleFlyout
-              fetchExample={telemetryService.fetchExample}
-              onClose={this.toggleExample}
-            />
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
+              <OptInExampleFlyout
+                fetchExample={telemetryService.fetchExample}
+                onClose={this.toggleExample}
+              />
+            </React.Suspense>
           </TrackApplicationView>
         )}
         <EuiSplitPanel.Outer hasBorder>

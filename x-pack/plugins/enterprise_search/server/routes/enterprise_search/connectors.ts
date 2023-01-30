@@ -20,6 +20,7 @@ import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { fetchSyncJobsByConnectorId } from '../../lib/connectors/fetch_sync_jobs';
 import { cancelSyncs } from '../../lib/connectors/post_cancel_syncs';
+import { configureNativeConnector } from '../../lib/connectors/put_configure_native';
 import { updateFiltering } from '../../lib/connectors/put_update_filtering';
 import { updateFilteringDraft } from '../../lib/connectors/put_update_filtering_draft';
 import { startConnectorSync } from '../../lib/connectors/start_sync';
@@ -100,7 +101,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       validate: {
         body: schema.recordOf(
           schema.string(),
-          schema.object({ label: schema.string(), value: schema.string() })
+          schema.object({ label: schema.string(), value: schema.nullable(schema.string()) })
         ),
         params: schema.object({
           connectorId: schema.string(),
@@ -268,6 +269,23 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         request.body.status as ConnectorStatus
       );
       return response.ok({ body: result });
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/configure_native',
+      validate: {
+        body: schema.object({ service_type: schema.string() }),
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      await configureNativeConnector(client, request.params.connectorId, request.body.service_type);
+      return response.ok();
     })
   );
 

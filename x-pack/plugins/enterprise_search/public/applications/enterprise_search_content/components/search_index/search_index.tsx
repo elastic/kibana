@@ -33,7 +33,7 @@ import { baseBreadcrumbs } from '../search_indices';
 import { getHeaderActions } from './components/header_actions/header_actions';
 import { ConnectorConfiguration } from './connector/connector_configuration';
 import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
-import { ConnectorFiltering } from './connector/filtering/connector_filtering';
+import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
@@ -52,7 +52,7 @@ export enum SearchIndexTabId {
   PIPELINES = 'pipelines',
   // connector indices
   CONFIGURATION = 'configuration',
-  FILTERS = 'filters',
+  SYNC_RULES = 'sync_rules',
   SCHEDULING = 'scheduling',
   // crawler indices
   DOMAIN_MANAGEMENT = 'domain_management',
@@ -112,7 +112,7 @@ export const SearchIndex: React.FC = () => {
       content: <SearchIndexIndexMappings />,
       id: SearchIndexTabId.INDEX_MAPPINGS,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel', {
-        defaultMessage: 'Index Mappings',
+        defaultMessage: 'Index mappings',
       }),
     },
   ];
@@ -128,10 +128,10 @@ export const SearchIndex: React.FC = () => {
     ...(hasFilteringFeature
       ? [
           {
-            content: <ConnectorFiltering />,
-            id: SearchIndexTabId.FILTERS,
-            name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.filtersTabLabel', {
-              defaultMessage: 'Filters',
+            content: <ConnectorSyncRules />,
+            id: SearchIndexTabId.SYNC_RULES,
+            name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.syncRulesTabLabel', {
+              defaultMessage: 'Sync rules',
             }),
           },
         ]

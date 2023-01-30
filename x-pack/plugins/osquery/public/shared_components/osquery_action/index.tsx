@@ -21,6 +21,7 @@ export interface OsqueryActionProps {
   defaultValues?: {};
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
+  onSuccess?: () => void;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
@@ -28,6 +29,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   formType = 'simple',
   defaultValues,
   hideAgentsField,
+  onSuccess,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
@@ -50,7 +52,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
         body={
           <p>
             <FormattedMessage
-              id="xpack.osquery.action.missingPrivilleges"
+              id="xpack.osquery.action.missingPrivileges"
               defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
               // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
               values={{
@@ -91,6 +93,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
       formType={formType}
       agentId={agentId}
       hideAgentsField={hideAgentsField}
+      onSuccess={onSuccess}
       {...defaultValues}
     />
   );

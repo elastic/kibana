@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
-        "id": "def-server.getDeprecationsFor",
+        "id": "def-common.getDeprecationsFor",
         "type": "Function",
         "tags": [],
         "label": "getDeprecationsFor",
@@ -22,9 +30,9 @@
           "({ provider, settings, path, }: { provider: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-server.ConfigDeprecationProvider",
+            "section": "def-common.ConfigDeprecationProvider",
             "text": "ConfigDeprecationProvider"
           },
           "; settings?: Record<string, any> | undefined; path: string; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
@@ -35,7 +43,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
-            "id": "def-server.getDeprecationsFor.$1",
+            "id": "def-common.getDeprecationsFor.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  provider,\n  settings = {},\n  path,\n}",
@@ -46,7 +54,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
-                "id": "def-server.getDeprecationsFor.$1.provider",
+                "id": "def-common.getDeprecationsFor.$1.provider",
                 "type": "Function",
                 "tags": [],
                 "label": "provider",
@@ -55,17 +63,17 @@
                   "(factory: ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-server.ConfigDeprecationFactory",
+                    "section": "def-common.ConfigDeprecationFactory",
                     "text": "ConfigDeprecationFactory"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-server.ConfigDeprecation",
+                    "section": "def-common.ConfigDeprecation",
                     "text": "ConfigDeprecation"
                   },
                   "[]"
@@ -77,7 +85,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
-                    "id": "def-server.getDeprecationsFor.$1.provider.$1",
+                    "id": "def-common.getDeprecationsFor.$1.provider.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "factory",
@@ -85,9 +93,9 @@
                     "signature": [
                       {
                         "pluginId": "@kbn/config",
-                        "scope": "server",
+                        "scope": "common",
                         "docId": "kibKbnConfigPluginApi",
-                        "section": "def-server.ConfigDeprecationFactory",
+                        "section": "def-common.ConfigDeprecationFactory",
                         "text": "ConfigDeprecationFactory"
                       }
                     ],
@@ -99,7 +107,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
-                "id": "def-server.getDeprecationsFor.$1.settings",
+                "id": "def-common.getDeprecationsFor.$1.settings",
                 "type": "Object",
                 "tags": [],
                 "label": "settings",
@@ -113,7 +121,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
-                "id": "def-server.getDeprecationsFor.$1.path",
+                "id": "def-common.getDeprecationsFor.$1.path",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -130,7 +138,7 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
-        "id": "def-server.getDeprecationsForGlobalSettings",
+        "id": "def-common.getDeprecationsForGlobalSettings",
         "type": "Function",
         "tags": [],
         "label": "getDeprecationsForGlobalSettings",
@@ -139,9 +147,9 @@
           "({ provider, settings, }: { provider: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-server.ConfigDeprecationProvider",
+            "section": "def-common.ConfigDeprecationProvider",
             "text": "ConfigDeprecationProvider"
           },
           "; settings?: Record<string, any> | undefined; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
@@ -152,7 +160,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
-            "id": "def-server.getDeprecationsForGlobalSettings.$1",
+            "id": "def-common.getDeprecationsForGlobalSettings.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  provider,\n  settings = {},\n}",
@@ -163,7 +171,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
-                "id": "def-server.getDeprecationsForGlobalSettings.$1.provider",
+                "id": "def-common.getDeprecationsForGlobalSettings.$1.provider",
                 "type": "Function",
                 "tags": [],
                 "label": "provider",
@@ -172,17 +180,17 @@
                   "(factory: ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-server.ConfigDeprecationFactory",
+                    "section": "def-common.ConfigDeprecationFactory",
                     "text": "ConfigDeprecationFactory"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-server.ConfigDeprecation",
+                    "section": "def-common.ConfigDeprecation",
                     "text": "ConfigDeprecation"
                   },
                   "[]"
@@ -194,7 +202,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
-                    "id": "def-server.getDeprecationsForGlobalSettings.$1.provider.$1",
+                    "id": "def-common.getDeprecationsForGlobalSettings.$1.provider.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "factory",
@@ -202,9 +210,9 @@
                     "signature": [
                       {
                         "pluginId": "@kbn/config",
-                        "scope": "server",
+                        "scope": "common",
                         "docId": "kibKbnConfigPluginApi",
-                        "section": "def-server.ConfigDeprecationFactory",
+                        "section": "def-common.ConfigDeprecationFactory",
                         "text": "ConfigDeprecationFactory"
                       }
                     ],
@@ -216,7 +224,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
-                "id": "def-server.getDeprecationsForGlobalSettings.$1.settings",
+                "id": "def-common.getDeprecationsForGlobalSettings.$1.settings",
                 "type": "Object",
                 "tags": [],
                 "label": "settings",
@@ -235,14 +243,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

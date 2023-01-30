@@ -25,7 +25,7 @@ export type DataViewsServiceFactory = KibanaPluginServiceFactory<
 export const dataViewsServiceFactory: DataViewsServiceFactory = ({ startPlugins }, { notify }) => ({
   getDataViews: async () => {
     try {
-      const dataViews = await startPlugins.data.dataViews.getIdsWithTitle();
+      const dataViews = await startPlugins.dataViews.getIdsWithTitle();
       return dataViews.map(({ id, name, title }) => ({ id, name, title } as DataView));
     } catch (e) {
       notify.error(e, { title: strings.getIndicesFetchErrorMessage() });
@@ -34,14 +34,14 @@ export const dataViewsServiceFactory: DataViewsServiceFactory = ({ startPlugins 
     return [];
   },
   getFields: async (dataViewTitle: string) => {
-    const dataView = await startPlugins.data.dataViews.create({ title: dataViewTitle });
+    const dataView = await startPlugins.dataViews.create({ title: dataViewTitle });
 
     return dataView.fields
       .filter((field) => !field.name.startsWith('_'))
       .map((field) => field.name);
   },
   getDefaultDataView: async () => {
-    const dataView = await startPlugins.data.dataViews.getDefaultDataView();
+    const dataView = await startPlugins.dataViews.getDefaultDataView();
 
     return dataView
       ? { id: dataView.id, name: dataView.name, title: dataView.getIndexPattern() }

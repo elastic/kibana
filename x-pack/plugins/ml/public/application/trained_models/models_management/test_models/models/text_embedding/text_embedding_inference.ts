@@ -6,11 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { estypes } from '@elastic/elasticsearch';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getTextEmbeddingOutputComponent } from './text_embedding_output';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 
 export interface RawTextEmbeddingResponse {
   inference_results: Array<{ predicted_value: number[] }>;
@@ -37,13 +39,19 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
     }),
   ];
 
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
+
+    this.initialize();
+  }
+
   public async inferText() {
     return this.runInfer<RawTextEmbeddingResponse>(
-      (inputText: string) => {
-        return {
-          docs: [{ [this.inputField]: inputText }],
-        };
-      },
+      () => {},
       (resp, inputText) => {
         return processTextResponse(resp, inputText);
       }
@@ -52,7 +60,7 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
 
   protected async inferIndex() {
     return this.runPipelineSimulate((doc) => {
-      const inputText = doc._source[this.inputField];
+      const inputText = doc._source[this.getInputField()];
       return processIndexResponse(doc._source[this.inferenceType], inputText);
     });
   }

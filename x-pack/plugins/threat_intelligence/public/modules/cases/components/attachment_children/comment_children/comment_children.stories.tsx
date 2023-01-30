@@ -9,6 +9,7 @@ import React from 'react';
 import { Story } from '@storybook/react';
 import { of } from 'rxjs';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { generateMockFileIndicator } from '../../../../../../common/types/indicator';
 import { CommentChildren } from './comment_children';
 import { StoryProvidersComponent } from '../../../../../common/mocks/story_providers';
 import { AttachmentMetadata } from '../../../utils';
@@ -23,7 +24,6 @@ export const Default: Story<void> = () => {
     indicatorName: 'indicatorName',
     indicatorFeedName: 'indicatorFeedName',
     indicatorType: 'indicatorType',
-    indicatorFirstSeen: 'indicatorFirstSeen',
   };
 
   const response: IKibanaSearchResponse = {
@@ -31,12 +31,7 @@ export const Default: Story<void> = () => {
     isPartial: false,
     rawResponse: {
       hits: {
-        hits: [
-          {
-            prop1: 'prop1',
-            prop2: 'prop2',
-          },
-        ],
+        hits: [generateMockFileIndicator()],
       },
     },
   };
@@ -61,7 +56,6 @@ export const Loading: Story<void> = () => {
     indicatorName: 'indicatorName',
     indicatorFeedName: 'indicatorFeedName',
     indicatorType: 'indicatorType',
-    indicatorFirstSeen: 'indicatorFirstSeen',
   };
 
   const response: IKibanaSearchResponse = {

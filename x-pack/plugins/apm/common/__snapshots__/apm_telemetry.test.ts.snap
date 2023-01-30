@@ -845,16 +845,6 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             }
                           }
                         },
-                        "sourcemap": {
-                          "properties": {
-                            "1d": {
-                              "type": "long"
-                            },
-                            "all": {
-                              "type": "long"
-                            }
-                          }
-                        },
                         "onboarding": {
                           "properties": {
                             "1d": {
@@ -1005,13 +995,6 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                           }
                         },
                         "metric": {
-                          "properties": {
-                            "ms": {
-                              "type": "long"
-                            }
-                          }
-                        },
-                        "sourcemap": {
                           "properties": {
                             "ms": {
                               "type": "long"

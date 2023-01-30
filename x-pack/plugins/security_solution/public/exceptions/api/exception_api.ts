@@ -99,12 +99,12 @@ export const fetchListExceptionItems = async ({
   }
 };
 
-export const getExceptionItemsReferences = async (list: ExceptionListSchema) => {
+export const getExceptionItemsReferences = async (lists: ExceptionListSchema[]) => {
   try {
     const abortCtrl = new AbortController();
 
     const { references } = await findRuleExceptionReferences({
-      lists: [list].map((listInput) => ({
+      lists: lists.map((listInput) => ({
         id: listInput.id,
         listId: listInput.list_id,
         namespaceType: listInput.namespace_type,

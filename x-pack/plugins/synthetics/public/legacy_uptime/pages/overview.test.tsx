@@ -8,6 +8,7 @@
 import React from 'react';
 import { OverviewPageComponent } from './overview';
 import { render } from '../lib/helper/rtl_helpers';
+import { SIMPLE_SEARCH_PLACEHOLDER } from '../components/overview/query_bar/translations';
 
 describe('MonitorPage', () => {
   it('renders expected elements for valid props', async () => {
@@ -15,8 +16,6 @@ describe('MonitorPage', () => {
 
     expect(await findByText('No uptime monitors found')).toBeInTheDocument();
 
-    expect(
-      await findByPlaceholderText('Search by monitor ID, name, or url (E.g. http:// )')
-    ).toBeInTheDocument();
+    expect(await findByPlaceholderText(SIMPLE_SEARCH_PLACEHOLDER)).toBeInTheDocument();
   });
 });

@@ -8,14 +8,13 @@
 import { EuiFieldNumber, EuiRange } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping, METRIC_TYPES } from '@kbn/data-plugin/public';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import {
   buildExpression,
   buildExpressionFunction,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
-import { AggExpressionFunctionArgs } from '@kbn/data-plugin/common';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -29,9 +28,9 @@ import {
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../../shared_components';
-import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey, groupByKey } from './get_group_by_key';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -173,28 +172,25 @@ export const percentileOperation: OperationDefinition<
       }
     ).toAst();
   },
+
+  getGroupByKey: (agg) =>
+    getGroupByKey(agg, ['aggSinglePercentile'], [{ name: 'field' }, { name: 'percentile' }]),
+
   optimizeEsAggs: (_aggs, _esAggsIdMap, aggExpressionToEsAggsIdMap) => {
     let aggs = [..._aggs];
     const esAggsIdMap = { ..._esAggsIdMap };
 
-    const percentileExpressionsByArgs: Record<string, ExpressionAstExpressionBuilder[]> = {};
-
-    // group percentile dimensions by differentiating parameters
-    aggs.forEach((expressionBuilder) => {
-      const {
-        functions: [fnBuilder],
-      } = expressionBuilder;
-      if (fnBuilder.name === 'aggSinglePercentile') {
-        const groupByKey = `${fnBuilder.getArgument('field')?.[0]}-${
-          fnBuilder.getArgument('timeShift')?.[0]
-        }`;
-        if (!(groupByKey in percentileExpressionsByArgs)) {
-          percentileExpressionsByArgs[groupByKey] = [];
-        }
-
-        percentileExpressionsByArgs[groupByKey].push(expressionBuilder);
-      }
-    });
+    const percentileExpressionsByArgs = groupByKey<ExpressionAstExpressionBuilder>(
+      aggs,
+      (expressionBuilder) =>
+        getGroupByKey(
+          expressionBuilder,
+          ['aggSinglePercentile'],
+          // we don't group based on percentile value (just field) since we will put
+          // all the percentile values in the final multi-percentile agg
+          [{ name: 'field' }]
+        )
+    );
 
     const termsFuncs = aggs
       .map((agg) => agg.functions[0])
@@ -202,10 +198,23 @@ export const percentileOperation: OperationDefinition<
       ExpressionAstFunctionBuilder<AggFunctionsMapping['aggTerms']>
     >;
 
-    // collapse them into a single esAggs expression builder
+    // collapse each group of matching aggs into a single agg expression
     Object.values(percentileExpressionsByArgs).forEach((expressionBuilders) => {
       if (expressionBuilders.length <= 1) {
         // don't need to optimize if there aren't more than one
+        return;
+      }
+
+      const {
+        functions: [firstFnBuilder],
+      } = expressionBuilders[0];
+
+      const isGroupFiltered = firstFnBuilder.name === 'aggFilteredMetric';
+
+      if (isGroupFiltered) {
+        // Even though elasticsearch DSL would support this, it doesn't currently work in ESAggs to
+        // put an `aggPercentiles` (multiple) as the metric (`customMetric`) arg for
+        // an `aggFilteredMetric` expression function
         return;
       }
 
@@ -214,48 +223,24 @@ export const percentileOperation: OperationDefinition<
       aggs = aggs.filter((aggBuilder) => !expressionBuilders.includes(aggBuilder));
 
       const {
-        functions: [firstFnBuilder],
+        functions: [firstPercentileFunction],
       } = expressionBuilders[0];
 
-      const esAggsColumnId = firstFnBuilder.getArgument('id')![0];
-      const aggPercentilesConfig: AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILES> = {
+      const esAggsColumnId = firstPercentileFunction.getArgument('id')![0] as string;
+      const aggPercentilesConfig = {
         id: esAggsColumnId,
-        enabled: firstFnBuilder.getArgument('enabled')?.[0],
-        schema: firstFnBuilder.getArgument('schema')?.[0],
-        field: firstFnBuilder.getArgument('field')?.[0],
-        percents: [],
+        enabled: firstPercentileFunction.getArgument('enabled')?.[0] as boolean,
+        schema: firstPercentileFunction.getArgument('schema')?.[0] as string,
+        field: firstPercentileFunction.getArgument('field')?.[0] as string,
+        percents: [] as number[],
         // time shift is added to wrapping aggFilteredMetric if filter is set
-        timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
+        timeShift: firstPercentileFunction.getArgument('timeShift')?.[0] as string,
       };
 
-      const percentileToBuilder: Record<number, ExpressionAstExpressionBuilder> = {};
       for (const builder of expressionBuilders) {
         const percentile = builder.functions[0].getArgument('percentile')![0] as number;
 
-        if (percentile in percentileToBuilder) {
-          // found a duplicate percentile so let's optimize
-
-          const duplicateExpressionBuilder = percentileToBuilder[percentile];
-
-          const idForDuplicate = aggExpressionToEsAggsIdMap.get(duplicateExpressionBuilder);
-          const idForThisOne = aggExpressionToEsAggsIdMap.get(builder);
-
-          if (!idForDuplicate || !idForThisOne) {
-            throw new Error(
-              "Couldn't find esAggs ID for percentile expression builder... this should never happen."
-            );
-          }
-
-          esAggsIdMap[idForDuplicate].push(...esAggsIdMap[idForThisOne]);
-
-          delete esAggsIdMap[idForThisOne];
-
-          // remove current builder
-          expressionBuilders = expressionBuilders.filter((b) => b !== builder);
-        } else {
-          percentileToBuilder[percentile] = builder;
-          aggPercentilesConfig.percents!.push(percentile);
-        }
+        aggPercentilesConfig.percents!.push(percentile);
 
         // update any terms order-bys
         termsFuncs.forEach((func) => {
@@ -304,7 +289,6 @@ export const percentileOperation: OperationDefinition<
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
-      getDisallowedPreviousShiftMessage(layer, columnId),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   paramEditor: function PercentileParamEditor({

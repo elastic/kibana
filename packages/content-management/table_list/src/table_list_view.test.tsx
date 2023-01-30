@@ -9,9 +9,11 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import React, { useEffect } from 'react';
+import queryString from 'query-string';
 import moment, { Moment } from 'moment';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
+import type { LocationDescriptor, History } from 'history';
 
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
@@ -40,6 +42,13 @@ jest.mock('react-use/lib/useDebounce', () => {
   };
 });
 
+interface Router {
+  history: Partial<History>;
+  route: {
+    location: LocationDescriptor;
+  };
+}
+
 const requiredProps: TableListViewProps = {
   entityName: 'test',
   entityNamePlural: 'tests',
@@ -49,12 +58,17 @@ const requiredProps: TableListViewProps = {
   tableListTitle: 'test title',
   findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
   getDetailViewLink: () => 'http://elastic.co',
+  urlStateEnabled: false,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/145267
-describe.skip('TableListView', () => {
+const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
+const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
+const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+const yesterdayToString = new Date(yesterday.getTime()).toDateString();
+
+describe('TableListView', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -65,7 +79,7 @@ describe.skip('TableListView', () => {
     WithServices<TableListViewProps>(TableListView),
     {
       defaultProps: { ...requiredProps },
-      memoryRouter: { wrapComponent: false },
+      memoryRouter: { wrapComponent: true },
     }
   );
 
@@ -116,10 +130,6 @@ describe.skip('TableListView', () => {
   });
 
   describe('default columns', () => {
-    const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
-    const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
-    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
-    const yesterdayToString = new Date(yesterday.getTime()).toDateString();
     const hits: UserContentCommonSchema[] = [
       {
         id: '123',
@@ -261,27 +271,26 @@ describe.skip('TableListView', () => {
   describe('pagination', () => {
     const initialPageSize = 20;
     const totalItems = 30;
+    const updatedAt = new Date().toISOString();
 
     const hits: UserContentCommonSchema[] = [...Array(totalItems)].map((_, i) => ({
       id: `item${i}`,
       type: 'dashboard',
-      updatedAt: new Date().toISOString(),
+      updatedAt,
       attributes: {
         title: `Item ${i < 10 ? `0${i}` : i}`, // prefix with "0" for correct A-Z sorting
       },
       references: [],
     }));
 
-    const props = {
-      initialPageSize,
-      findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
-    };
-
     test('should limit the number of row to the `initialPageSize` provided', async () => {
       let testBed: TestBed;
 
       await act(async () => {
-        testBed = await setup(props);
+        testBed = await setup({
+          initialPageSize,
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+        });
       });
 
       const { component, table } = testBed!;
@@ -301,7 +310,10 @@ describe.skip('TableListView', () => {
       let testBed: TestBed;
 
       await act(async () => {
-        testBed = await setup(props);
+        testBed = await setup({
+          initialPageSize,
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+        });
       });
 
       const { component, table } = testBed!;
@@ -329,10 +341,12 @@ describe.skip('TableListView', () => {
 
   describe('column sorting', () => {
     const setupColumnSorting = registerTestBed<string, TableListViewProps>(
-      WithServices<TableListViewProps>(TableListView, { TagList: getTagList({ references: [] }) }),
+      WithServices<TableListViewProps>(TableListView, {
+        TagList: getTagList({ references: [] }),
+      }),
       {
         defaultProps: { ...requiredProps },
-        memoryRouter: { wrapComponent: false },
+        memoryRouter: { wrapComponent: true },
       }
     );
 
@@ -342,10 +356,6 @@ describe.skip('TableListView', () => {
       },
     });
 
-    const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
-    const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
-    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
-    const yesterdayToString = new Date(yesterday.getTime()).toDateString();
     const hits: UserContentCommonSchema[] = [
       {
         id: '123',
@@ -538,12 +548,12 @@ describe.skip('TableListView', () => {
     });
   });
 
-  describe('inspector', () => {
+  describe('content editor', () => {
     const setupInspector = registerTestBed<string, TableListViewProps>(
       WithServices<TableListViewProps>(TableListView),
       {
         defaultProps: { ...requiredProps },
-        memoryRouter: { wrapComponent: false },
+        memoryRouter: { wrapComponent: true },
       }
     );
 
@@ -570,13 +580,13 @@ describe.skip('TableListView', () => {
       },
     ];
 
-    test('should have an "inpect" button if the inspector is enabled', async () => {
+    test('should have an "inpect" button if the content editor is enabled', async () => {
       let testBed: TestBed;
 
       await act(async () => {
         testBed = await setupInspector({
           findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
-          inspector: { enabled: true },
+          contentEditor: { enabled: true },
         });
       });
 
@@ -584,8 +594,8 @@ describe.skip('TableListView', () => {
       component.update();
 
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
-      expect(tableCellsValues[0][2]).toBe('Inspect Item 1');
-      expect(tableCellsValues[1][2]).toBe('Inspect Item 2');
+      expect(tableCellsValues[0][2]).toBe('View Item 1 details');
+      expect(tableCellsValues[1][2]).toBe('View Item 2 details');
     });
   });
 
@@ -601,7 +611,7 @@ describe.skip('TableListView', () => {
       }),
       {
         defaultProps: { ...requiredProps },
-        memoryRouter: { wrapComponent: false },
+        memoryRouter: { wrapComponent: true },
       }
     );
 
@@ -736,6 +746,295 @@ describe.skip('TableListView', () => {
       [searchTerm] = getLastCallArgsFromFindItems();
       expect(getSearchBoxValue()).toBe(expected);
       expect(searchTerm).toBe(expected);
+    });
+  });
+
+  describe('url state', () => {
+    let router: Router | undefined;
+
+    const setupTagFiltering = registerTestBed<string, TableListViewProps>(
+      WithServices<TableListViewProps>(TableListView, {
+        getTagList: () => [
+          { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
+          { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
+        ],
+      }),
+      {
+        defaultProps: { ...requiredProps, urlStateEnabled: true },
+        memoryRouter: {
+          wrapComponent: true,
+          onRouter: (_router: Router) => {
+            router = _router;
+          },
+        },
+      }
+    );
+
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: '123',
+        updatedAt: yesterday.toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 1',
+          description: '',
+        },
+        references: [{ id: 'id-tag-1', name: 'tag-1', type: 'tag' }],
+      },
+      {
+        id: '456',
+        updatedAt: twoDaysAgo.toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 2',
+          description: '',
+        },
+        references: [{ id: 'id-tag-2', name: 'tag-2', type: 'tag' }],
+      },
+    ];
+
+    test('should read search term from URL', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      // Start with empty search box
+      expect(getSearchBoxValue()).toBe('');
+      expect(router?.history.location?.search).toBe('');
+
+      // Change the URL
+      await act(async () => {
+        if (router?.history.push) {
+          router.history.push({
+            search: `?${queryString.stringify({ s: 'hello' }, { encode: false })}`,
+          });
+        }
+      });
+      component.update();
+
+      // Search box is updated
+      expect(getSearchBoxValue()).toBe('hello');
+      expect(router?.history.location?.search).toBe('?s=hello');
+    });
+
+    test('should update the URL when changing the search term', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      // Enter new search term in box
+      await act(async () => {
+        find('tableListSearchBox').simulate('keyup', {
+          key: 'Enter',
+          target: { value: 'search-changed' },
+        });
+      });
+      component.update();
+
+      expect(router?.history.location?.search).toBe('?s=search-changed');
+    });
+
+    test('should filter by tag from the URL', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      const getLastCallArgsFromFindItems = () =>
+        findItems.mock.calls[findItems.mock.calls.length - 1];
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      let expected = '';
+      let [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+
+      // Change the URL to filter down by tag
+      await act(async () => {
+        if (router?.history.push) {
+          router.history.push({
+            search: `?${queryString.stringify({ s: 'tag:(tag-2)' }, { encode: false })}`,
+          });
+        }
+      });
+      component.update();
+
+      // The search bar should be updated
+      expected = 'tag:(tag-2)';
+      [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+    });
+
+    test('should update the URL when changing a tag from the filter dropdown', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      expect(router?.history.location?.search).toBe('');
+
+      const openTagFilterDropdown = async () => {
+        await act(async () => {
+          find('tagFilterPopoverButton').simulate('click');
+        });
+        component.update();
+      };
+
+      // Change tag selection in drop down should update the URL
+      await openTagFilterDropdown();
+
+      await act(async () => {
+        find('tag-searchbar-option-tag-2').simulate('click');
+      });
+      component.update();
+
+      expect(router?.history.location?.search).toBe('?s=tag:(tag-2)');
+    });
+
+    test('should set sort column and direction from URL', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      // Start with empty search box
+      expect(router?.history.location?.search).toBe('');
+
+      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['Item 1tag-1', yesterdayToString],
+        ['Item 2tag-2', twoDaysAgoToString],
+      ]);
+
+      // Change the URL
+      await act(async () => {
+        if (router?.history.push) {
+          router.history.push({
+            search: `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'asc' })}`,
+          });
+        }
+      });
+      component.update();
+
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      expect(tableCellsValues).toEqual([
+        ['Item 2tag-2', twoDaysAgoToString], // Sort got inverted
+        ['Item 1tag-1', yesterdayToString],
+      ]);
+
+      await act(async () => {
+        if (router?.history.push) {
+          router.history.push({
+            search: `?${queryString.stringify({ sort: 'title' })}`, // if dir not specified, asc by default
+          });
+        }
+      });
+      component.update();
+
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      expect(tableCellsValues).toEqual([
+        ['Item 1tag-1', yesterdayToString],
+        ['Item 2tag-2', twoDaysAgoToString],
+      ]);
+    });
+
+    test('should update the URL when changing the sort from the dropdown', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, table, find } = testBed!;
+      component.update();
+
+      const openSortSelect = () => {
+        act(() => {
+          testBed.find('tableSortSelectBtn').at(0).simulate('click');
+        });
+        component.update();
+      };
+
+      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      // Initial state
+      expect(router?.history.location?.search).toBe('');
+      expect(tableCellsValues).toEqual([
+        ['Item 1tag-1', yesterdayToString],
+        ['Item 2tag-2', twoDaysAgoToString],
+      ]);
+
+      // Change sort with dropdown
+      openSortSelect();
+      const filterOptions = find('sortSelect').find('li');
+
+      // Click 'Name Z-A'
+      act(() => {
+        filterOptions.at(1).simulate('click');
+      });
+      component.update();
+
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      // Updated state
+      expect(tableCellsValues).toEqual([
+        ['Item 2tag-2', twoDaysAgoToString],
+        ['Item 1tag-1', yesterdayToString],
+      ]);
+      expect(router?.history.location?.search).toBe('?sort=title&sortdir=desc');
     });
   });
 });

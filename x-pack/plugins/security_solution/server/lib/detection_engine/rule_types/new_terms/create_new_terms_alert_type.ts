@@ -193,6 +193,11 @@ export const createNewTermsAlertType = (
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
         const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
+        const newTermsRuntimeMappings = getNewTermsRuntimeMappings(
+          params.newTermsFields,
+          bucketsForField
+        );
+
         // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
         // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
         // response correspond to each new term.
@@ -209,7 +214,7 @@ export const createNewTermsAlertType = (
           }),
           runtimeMappings: {
             ...runtimeMappings,
-            ...getNewTermsRuntimeMappings(params.newTermsFields),
+            ...newTermsRuntimeMappings,
           },
           searchAfterSortIds: undefined,
           index: inputIndex,
@@ -255,7 +260,7 @@ export const createNewTermsAlertType = (
             }),
             runtimeMappings: {
               ...runtimeMappings,
-              ...getNewTermsRuntimeMappings(params.newTermsFields),
+              ...newTermsRuntimeMappings,
             },
             searchAfterSortIds: undefined,
             index: inputIndex,
@@ -294,6 +299,7 @@ export const createNewTermsAlertType = (
             mergeStrategy,
             indicesToQuery: inputIndex,
             alertTimestampOverride,
+            ruleExecutionLogger,
           });
 
           const bulkCreateResult = await bulkCreate(

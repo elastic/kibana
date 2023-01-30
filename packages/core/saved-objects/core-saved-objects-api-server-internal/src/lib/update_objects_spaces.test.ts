@@ -20,11 +20,22 @@ import type { SavedObjectsUpdateObjectsSpacesObject } from '@kbn/core-saved-obje
 import {
   SavedObjectsErrorHelpers,
   ALL_NAMESPACES_STRING,
+  setsAreEqual,
+  setMapsAreEqual,
 } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { UpdateObjectsSpacesParams } from './update_objects_spaces';
 import { updateObjectsSpaces } from './update_objects_spaces';
+import { AuditAction, type ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import {
+  checkAuthError,
+  enforceError,
+  setupPerformAuthFullyAuthorized,
+  setupPerformAuthEnforceFailure,
+  setupRedactPassthrough,
+} from '../test_helpers/repository.test.common';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
 type SetupParams = Partial<
   Pick<UpdateObjectsSpacesParams, 'objects' | 'spacesToAdd' | 'spacesToRemove' | 'options'>
@@ -47,7 +58,7 @@ const SHAREABLE_HIDDEN_OBJ_TYPE = 'type-c';
 const mockCurrentTime = new Date('2021-05-01T10:20:30Z');
 
 beforeAll(() => {
-  jest.useFakeTimers('modern');
+  jest.useFakeTimers();
   jest.setSystemTime(mockCurrentTime);
 });
 
@@ -67,7 +78,10 @@ describe('#updateObjectsSpaces', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `updateObjectsSpaces` */
-  function setup({ objects = [], spacesToAdd = [], spacesToRemove = [], options }: SetupParams) {
+  function setup(
+    { objects = [], spacesToAdd = [], spacesToRemove = [], options }: SetupParams,
+    securityExtension?: ISavedObjectsSecurityExtension
+  ) {
     const registry = typeRegistryMock.create();
     registry.isShareable.mockImplementation(
       (type) => [SHAREABLE_OBJ_TYPE, SHAREABLE_HIDDEN_OBJ_TYPE].includes(type) // NON_SHAREABLE_OBJ_TYPE is excluded
@@ -82,6 +96,7 @@ describe('#updateObjectsSpaces', () => {
       serializer,
       logger: loggerMock.create(),
       getIndexForType: (type: string) => `index-for-${type}`,
+      securityExtension,
       objects,
       spacesToAdd,
       spacesToRemove,
@@ -90,14 +105,16 @@ describe('#updateObjectsSpaces', () => {
   }
 
   /** Mocks the saved objects client so it returns the expected results */
-  function mockMgetResults(...results: Array<{ found: boolean }>) {
+  function mockMgetResults(
+    ...results: Array<{ found: false } | { found: true; namespaces: string[] }>
+  ) {
     client.mget.mockResponseOnce({
       docs: results.map((x) =>
         x.found
           ? {
               _id: 'doesnt-matter',
               _index: 'doesnt-matter',
-              _source: { namespaces: [EXISTING_SPACE] },
+              _source: { namespaces: x.namespaces },
               ...VERSION_PROPS,
               found: true,
             }
@@ -111,27 +128,8 @@ describe('#updateObjectsSpaces', () => {
   }
 
   /** Mocks the saved objects client so as to test unsupported server responding with 404 */
-  function mockMgetResultsNotFound(...results: Array<{ found: boolean }>) {
-    client.mget.mockResponseOnce(
-      {
-        docs: results.map((x) =>
-          x.found
-            ? {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                _source: { namespaces: [EXISTING_SPACE] },
-                ...VERSION_PROPS,
-                found: true,
-              }
-            : {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                found: false,
-              }
-        ),
-      },
-      { statusCode: 404, headers: {} }
-    );
+  function mockMgetResultsNotFound() {
+    client.mget.mockResponseOnce({ docs: [] }, { statusCode: 404, headers: {} });
   }
 
   /** Asserts that mget is called for the given objects */
@@ -220,7 +218,7 @@ describe('#updateObjectsSpaces', () => {
       const objects = [{ type: SHAREABLE_OBJ_TYPE, id: 'id-1' }];
       const spacesToAdd = ['foo-space'];
       const params = setup({ objects, spacesToAdd });
-      mockMgetResults({ found: true });
+      mockMgetResults({ found: true, namespaces: [EXISTING_SPACE] });
       client.bulk.mockReturnValueOnce(
         elasticsearchClientMock.createErrorTransportRequestPromise(new Error('bulk error'))
       );
@@ -231,39 +229,38 @@ describe('#updateObjectsSpaces', () => {
     it('returns mix of type errors, mget/bulk cluster errors, and successes', async () => {
       const obj1 = { type: SHAREABLE_HIDDEN_OBJ_TYPE, id: 'id-1' }; // invalid type (Not Found)
       const obj2 = { type: NON_SHAREABLE_OBJ_TYPE, id: 'id-2' }; // non-shareable type (Bad Request)
-      // obj3 below is mocking an example where a SOC wrapper attempted to retrieve it in a pre-flight request but it was not found.
-      // Since it has 'spaces: []', that indicates it should be skipped for cluster calls and just returned as a Not Found error.
-      // Realistically this would not be intermingled with other requested objects that do not have 'spaces' arrays, but it's fine for this
-      // specific test case.
-      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3', spaces: [] }; // does not exist (Not Found)
-      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' }; // mget error (found but doesn't exist in the current space)
-      const obj5 = { type: SHAREABLE_OBJ_TYPE, id: 'id-5' }; // mget error (Not Found)
-      const obj6 = { type: SHAREABLE_OBJ_TYPE, id: 'id-6' }; // bulk error (mocked as BULK_ERROR)
-      const obj7 = { type: SHAREABLE_OBJ_TYPE, id: 'id-7' }; // success
+      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' }; // mget error (found but doesn't exist in the current space)
+      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' }; // mget error (Not Found)
+      const obj5 = { type: SHAREABLE_OBJ_TYPE, id: 'id-5' }; // bulk error (mocked as BULK_ERROR)
+      const obj6 = { type: SHAREABLE_OBJ_TYPE, id: 'id-6' }; // success
 
-      const objects = [obj1, obj2, obj3, obj4, obj5, obj6, obj7];
+      const objects = [obj1, obj2, obj3, obj4, obj5, obj6];
       const spacesToAdd = ['foo-space'];
       const params = setup({ objects, spacesToAdd });
-      mockMgetResults({ found: true }, { found: false }, { found: true }, { found: true }); // results for obj4, obj5, obj6, and obj7
-      mockRawDocExistsInNamespace.mockReturnValueOnce(false); // for obj4
+      mockMgetResults(
+        { found: true, namespaces: ['another-space'] }, // result for obj3
+        { found: false }, // result for obj4
+        { found: true, namespaces: [EXISTING_SPACE] }, // result for obj5
+        { found: true, namespaces: [EXISTING_SPACE] } // result for obj6
+      );
+      mockRawDocExistsInNamespace.mockReturnValueOnce(false); // for obj3
+      mockRawDocExistsInNamespace.mockReturnValueOnce(true); // for obj5
       mockRawDocExistsInNamespace.mockReturnValueOnce(true); // for obj6
-      mockRawDocExistsInNamespace.mockReturnValueOnce(true); // for obj7
-      mockBulkResults({ error: true }, { error: false }); // results for obj6 and obj7
+      mockBulkResults({ error: true }, { error: false }); // results for obj5 and obj6
 
       const result = await updateObjectsSpaces(params);
       expect(client.mget).toHaveBeenCalledTimes(1);
-      expectMgetArgs(obj4, obj5, obj6, obj7);
+      expectMgetArgs(obj3, obj4, obj5, obj6);
       expect(mockRawDocExistsInNamespace).toHaveBeenCalledTimes(3);
       expect(client.bulk).toHaveBeenCalledTimes(1);
-      expectBulkArgs({ action: 'update', object: obj6 }, { action: 'update', object: obj7 });
+      expectBulkArgs({ action: 'update', object: obj5 }, { action: 'update', object: obj6 });
       expect(result.objects).toEqual([
         { ...obj1, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
         { ...obj2, spaces: [], error: expect.objectContaining({ error: 'Bad Request' }) },
         { ...obj3, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
         { ...obj4, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
-        { ...obj5, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
-        { ...obj6, spaces: [], error: BULK_ERROR },
-        { ...obj7, spaces: [EXISTING_SPACE, 'foo-space'] },
+        { ...obj5, spaces: [], error: BULK_ERROR },
+        { ...obj6, spaces: [EXISTING_SPACE, 'foo-space'] },
       ]);
     });
 
@@ -271,7 +268,7 @@ describe('#updateObjectsSpaces', () => {
       const objects = [{ type: SHAREABLE_OBJ_TYPE, id: 'id-1' }];
       const spacesToAdd = ['foo-space'];
       const params = setup({ objects, spacesToAdd });
-      mockMgetResultsNotFound({ found: true });
+      mockMgetResultsNotFound();
 
       await expect(() => updateObjectsSpaces(params)).rejects.toThrowError(
         SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError()
@@ -281,71 +278,62 @@ describe('#updateObjectsSpaces', () => {
 
   // Note: these test cases do not include requested objects that will result in errors (those are covered above)
   describe('cluster and module calls', () => {
-    it('mget call skips objects that have "spaces" defined', async () => {
-      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [EXISTING_SPACE] }; // will not be retrieved
-      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' }; // will be passed to mget
-
-      const objects = [obj1, obj2];
-      const spacesToAdd = ['foo-space'];
-      const params = setup({ objects, spacesToAdd });
-      mockMgetResults({ found: true }); // result for obj2
-      mockBulkResults({ error: false }, { error: false }); // results for obj1 and obj2
-
-      await updateObjectsSpaces(params);
-      expect(client.mget).toHaveBeenCalledTimes(1);
-      expectMgetArgs(obj2);
-    });
-
-    it('does not call mget if all objects have "spaces" defined', async () => {
-      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [EXISTING_SPACE] }; // will not be retrieved
-
+    it('makes mget call for objects', async () => {
+      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
       const objects = [obj1];
       const spacesToAdd = ['foo-space'];
       const params = setup({ objects, spacesToAdd });
+      mockMgetResults({ found: true, namespaces: [EXISTING_SPACE] }); // result for obj1
       mockBulkResults({ error: false }); // result for obj1
 
       await updateObjectsSpaces(params);
-      expect(client.mget).not.toHaveBeenCalled();
+      expect(client.mget).toHaveBeenCalledTimes(1);
+      expectMgetArgs(obj1);
     });
 
     describe('bulk call skips objects that will not be changed', () => {
       it('when adding spaces', async () => {
-        const space1 = 'space-to-add';
-        const space2 = 'other-space';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1] }; // will not be changed
-        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2', spaces: [space2] }; // will be updated
+        const otherSpace = 'space-to-add';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
 
         const objects = [obj1, obj2];
-        const spacesToAdd = [space1];
+        const spacesToAdd = [otherSpace];
         const params = setup({ objects, spacesToAdd });
-        // this test case does not call mget
+        mockMgetResults(
+          { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj1 -- will not be changed
+          { found: true, namespaces: [EXISTING_SPACE] } // result for obj2 -- will be updated to add otherSpace
+        );
         mockBulkResults({ error: false }); // result for obj2
 
         await updateObjectsSpaces(params);
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expectBulkArgs({
           action: 'update',
-          object: { ...obj2, namespaces: [space2, space1] },
+          object: { ...obj2, namespaces: [EXISTING_SPACE, otherSpace] },
         });
       });
 
       it('when removing spaces', async () => {
-        const space1 = 'space-to-remove';
-        const space2 = 'other-space';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space2] }; // will not be changed
-        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2', spaces: [space1, space2] }; // will be updated to remove space1
-        const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3', spaces: [space1] }; // will be deleted (since it would have no spaces left)
+        const otherSpace = 'other-space';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
+        const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
 
         const objects = [obj1, obj2, obj3];
-        const spacesToRemove = [space1];
+        const spacesToRemove = [EXISTING_SPACE];
         const params = setup({ objects, spacesToRemove });
-        // this test case does not call mget
+        mockMgetResults(
+          { found: true, namespaces: [ALL_NAMESPACES_STRING] }, // result for obj1 -- will not be changed
+          { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj2 -- will be updated to remove EXISTING_SPACE
+          { found: true, namespaces: [EXISTING_SPACE] } // result for obj3 -- will be deleted (since it would have no spaces left)
+        );
         mockBulkResults({ error: false }, { error: false }); // results for obj2 and obj3
 
         await updateObjectsSpaces(params);
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expectBulkArgs(
-          { action: 'update', object: { ...obj2, namespaces: [space2] } },
+          { action: 'update', object: { ...obj2, namespaces: [otherSpace] } },
           { action: 'delete', object: obj3 }
         );
       });
@@ -353,52 +341,61 @@ describe('#updateObjectsSpaces', () => {
       it('when adding and removing spaces', async () => {
         const space1 = 'space-to-add';
         const space2 = 'space-to-remove';
-        const space3 = 'other-space';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1] }; // will not be changed
-        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2', spaces: [space3] }; // will be updated to add space1
-        const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3', spaces: [space1, space2] }; // will be updated to remove space2
-        const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4', spaces: [space2, space3] }; // will be updated to add space1 and remove space2
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
+        const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
+        const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' };
 
         const objects = [obj1, obj2, obj3, obj4];
         const spacesToAdd = [space1];
         const spacesToRemove = [space2];
         const params = setup({ objects, spacesToAdd, spacesToRemove });
-        // this test case does not call mget
+        mockMgetResults(
+          { found: true, namespaces: [EXISTING_SPACE, space1] }, // result for obj1 -- will not be changed
+          { found: true, namespaces: [EXISTING_SPACE] }, // result for obj2 -- will be updated to add space1
+          { found: true, namespaces: [EXISTING_SPACE, space1, space2] }, // result for obj3 -- will be updated to remove space2
+          { found: true, namespaces: [EXISTING_SPACE, space2] } // result for obj3 -- will be updated to add space1 and remove space2
+        );
         mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
 
         await updateObjectsSpaces(params);
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expectBulkArgs(
-          { action: 'update', object: { ...obj2, namespaces: [space3, space1] } },
-          { action: 'update', object: { ...obj3, namespaces: [space1] } },
-          { action: 'update', object: { ...obj4, namespaces: [space3, space1] } }
+          { action: 'update', object: { ...obj2, namespaces: [EXISTING_SPACE, space1] } },
+          { action: 'update', object: { ...obj3, namespaces: [EXISTING_SPACE, space1] } },
+          { action: 'update', object: { ...obj4, namespaces: [EXISTING_SPACE, space1] } }
         );
       });
     });
 
     describe('does not call bulk if all objects do not need to be changed', () => {
       it('when adding spaces', async () => {
-        const space = 'space-to-add';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space] }; // will not be changed
+        const otherSpace = 'space-to-add';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
 
         const objects = [obj1];
-        const spacesToAdd = [space];
+        const spacesToAdd = [otherSpace];
         const params = setup({ objects, spacesToAdd });
-        // this test case does not call mget or bulk
+        mockMgetResults(
+          { found: true, namespaces: [EXISTING_SPACE, otherSpace] } // result for obj1 -- will not be changed
+        );
+        // this test case does not call bulk
 
         await updateObjectsSpaces(params);
         expect(client.bulk).not.toHaveBeenCalled();
       });
 
       it('when removing spaces', async () => {
-        const space1 = 'space-to-remove';
-        const space2 = 'other-space';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space2] }; // will not be changed
+        const otherSpace = 'space-to-remove';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
 
         const objects = [obj1];
-        const spacesToRemove = [space1];
+        const spacesToRemove = [otherSpace];
         const params = setup({ objects, spacesToRemove });
-        // this test case does not call mget or bulk
+        mockMgetResults(
+          { found: true, namespaces: [EXISTING_SPACE] } // result for obj1 -- will not be changed
+        );
+        // this test case does not call bulk
 
         await updateObjectsSpaces(params);
         expect(client.bulk).not.toHaveBeenCalled();
@@ -407,13 +404,16 @@ describe('#updateObjectsSpaces', () => {
       it('when adding and removing spaces', async () => {
         const space1 = 'space-to-add';
         const space2 = 'space-to-remove';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1] }; // will not be changed
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
 
         const objects = [obj1];
         const spacesToAdd = [space1];
         const spacesToRemove = [space2];
         const params = setup({ objects, spacesToAdd, spacesToRemove });
-        // this test case does not call mget or bulk
+        mockMgetResults(
+          { found: true, namespaces: [EXISTING_SPACE, space1] } // result for obj1 -- will not be changed
+        );
+        // this test case does not call bulk
 
         await updateObjectsSpaces(params);
         expect(client.bulk).not.toHaveBeenCalled();
@@ -424,33 +424,39 @@ describe('#updateObjectsSpaces', () => {
       it('does not delete aliases for objects that were not removed from any spaces', async () => {
         const space1 = 'space-to-add';
         const space2 = 'space-to-remove';
-        const space3 = 'other-space';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1] }; // will not be changed
-        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2', spaces: [space3] }; // will be updated
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
 
         const objects = [obj1, obj2];
         const spacesToAdd = [space1];
         const spacesToRemove = [space2];
         const params = setup({ objects, spacesToAdd, spacesToRemove });
-        // this test case does not call mget
+        mockMgetResults(
+          { found: true, namespaces: [EXISTING_SPACE, space1] }, // result for obj1 -- will not be changed
+          { found: true, namespaces: [EXISTING_SPACE] } // result for obj2 -- will be updated to add space1
+        );
         mockBulkResults({ error: false }); // result for obj2
 
         await updateObjectsSpaces(params);
         expect(client.bulk).toHaveBeenCalledTimes(1);
-        expectBulkArgs({ action: 'update', object: { ...obj2, namespaces: [space3, space1] } });
+        expectBulkArgs({
+          action: 'update',
+          object: { ...obj2, namespaces: [EXISTING_SPACE, space1] },
+        });
         expect(mockDeleteLegacyUrlAliases).not.toHaveBeenCalled();
         expect(params.logger.error).not.toHaveBeenCalled();
       });
 
       it('does not delete aliases for objects that were removed from spaces but were also added to All Spaces (*)', async () => {
-        const space2 = 'space-to-remove';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space2] };
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
 
         const objects = [obj1];
         const spacesToAdd = [ALL_NAMESPACES_STRING];
-        const spacesToRemove = [space2];
+        const spacesToRemove = [EXISTING_SPACE];
         const params = setup({ objects, spacesToAdd, spacesToRemove });
-        // this test case does not call mget
+        mockMgetResults(
+          { found: true, namespaces: [EXISTING_SPACE] } // result for obj1 -- will be updated to remove EXISTING_SPACE and add *
+        );
         mockBulkResults({ error: false }); // result for obj1
 
         await updateObjectsSpaces(params);
@@ -463,33 +469,36 @@ describe('#updateObjectsSpaces', () => {
         expect(params.logger.error).not.toHaveBeenCalled();
       });
 
-      it('deletes aliases for objects that were removed from specific spaces using "deleteBehavior: exclusive"', async () => {
+      it('deletes aliases for objects that were removed from specific spaces using "deleteBehavior: inclusive"', async () => {
         const space1 = 'space-to-remove';
-        const space2 = 'another-space-to-remove';
-        const space3 = 'other-space';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space3] }; // will not be changed
-        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1, space2, space3] }; // will be updated
-        const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1] }; // will be deleted
+        const space2 = 'other-space';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
+        const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
 
         const objects = [obj1, obj2, obj3];
-        const spacesToRemove = [space1, space2];
+        const spacesToRemove = [EXISTING_SPACE, space1];
         const params = setup({ objects, spacesToRemove });
-        // this test case does not call mget
+        mockMgetResults(
+          { found: true, namespaces: [ALL_NAMESPACES_STRING] }, // result for obj1 -- will not be changed
+          { found: true, namespaces: [EXISTING_SPACE, space1, space2] }, // result for obj2 -- will be updated to remove EXISTING_SPACE and space1
+          { found: true, namespaces: [EXISTING_SPACE] } // result for obj3 -- will be deleted
+        );
         mockBulkResults({ error: false }, { error: false }); // result2 for obj2 and obj3
 
         await updateObjectsSpaces(params);
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expectBulkArgs(
-          { action: 'update', object: { ...obj2, namespaces: [space3] } },
+          { action: 'update', object: { ...obj2, namespaces: [space2] } },
           { action: 'delete', object: obj3 }
         );
         expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledTimes(2);
         expect(mockDeleteLegacyUrlAliases).toHaveBeenNthCalledWith(
-          1, // the first call resulted in an error which generated a log message (see assertion below)
+          1,
           expect.objectContaining({
             type: obj2.type,
             id: obj2.id,
-            namespaces: [space1, space2],
+            namespaces: [EXISTING_SPACE, space1],
             deleteBehavior: 'inclusive',
           })
         );
@@ -498,42 +507,40 @@ describe('#updateObjectsSpaces', () => {
           expect.objectContaining({
             type: obj3.type,
             id: obj3.id,
-            namespaces: [space1],
+            namespaces: [EXISTING_SPACE],
             deleteBehavior: 'inclusive',
           })
         );
         expect(params.logger.error).not.toHaveBeenCalled();
       });
 
-      it('deletes aliases for objects that were removed from all spaces using "deleteBehavior: inclusive"', async () => {
-        const space1 = 'space-to-add';
-        const space2 = 'other-space';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space2] }; // will be updated to add space1
-        const obj2 = {
-          type: SHAREABLE_OBJ_TYPE,
-          id: 'id-2',
-          spaces: [space2, ALL_NAMESPACES_STRING], // will be updated to add space1 and remove *
-        };
+      it('deletes aliases for objects that were removed from all spaces using "deleteBehavior: exclusive"', async () => {
+        const otherSpace = 'space-to-add';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
 
         const objects = [obj1, obj2];
-        const spacesToAdd = [space1];
+        const spacesToAdd = [EXISTING_SPACE, otherSpace];
         const spacesToRemove = [ALL_NAMESPACES_STRING];
         const params = setup({ objects, spacesToAdd, spacesToRemove });
-        // this test case does not call mget
-        mockBulkResults({ error: false }); // result for obj1
+        mockMgetResults(
+          { found: true, namespaces: [EXISTING_SPACE] }, // result for obj1 -- will be updated to add otherSpace
+          { found: true, namespaces: [ALL_NAMESPACES_STRING] } // result for obj2 -- will be updated to remove * and add EXISTING_SPACE and otherSpace
+        );
+        mockBulkResults({ error: false }, { error: false }); // result for obj1 and obj2
 
         await updateObjectsSpaces(params);
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expectBulkArgs(
-          { action: 'update', object: { ...obj1, namespaces: [space2, space1] } },
-          { action: 'update', object: { ...obj2, namespaces: [space2, space1] } }
+          { action: 'update', object: { ...obj1, namespaces: [EXISTING_SPACE, otherSpace] } },
+          { action: 'update', object: { ...obj2, namespaces: [EXISTING_SPACE, otherSpace] } }
         );
         expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledTimes(1);
         expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledWith(
           expect.objectContaining({
             type: obj2.type,
             id: obj2.id,
-            namespaces: [space2, space1],
+            namespaces: [EXISTING_SPACE, otherSpace],
             deleteBehavior: 'exclusive',
           })
         );
@@ -541,20 +548,21 @@ describe('#updateObjectsSpaces', () => {
       });
 
       it('logs a message when deleteLegacyUrlAliases returns an error', async () => {
-        const space1 = 'space-to-remove';
-        const space2 = 'other-space';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1, space2] }; // will be updated
+        const otherSpace = 'other-space';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
 
         const objects = [obj1];
-        const spacesToRemove = [space1];
+        const spacesToRemove = [otherSpace];
         const params = setup({ objects, spacesToRemove });
-        // this test case does not call mget
+        mockMgetResults(
+          { found: true, namespaces: [EXISTING_SPACE, otherSpace] } // result for obj1 -- will be updated to remove otherSpace
+        );
         mockBulkResults({ error: false }); // result for obj1
         mockDeleteLegacyUrlAliases.mockRejectedValueOnce(new Error('Oh no!')); // result for deleting aliases for obj1
 
         await updateObjectsSpaces(params);
         expect(client.bulk).toHaveBeenCalledTimes(1);
-        expectBulkArgs({ action: 'update', object: { ...obj1, namespaces: [space2] } });
+        expectBulkArgs({ action: 'update', object: { ...obj1, namespaces: [EXISTING_SPACE] } });
         expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledTimes(1); // don't assert deleteLegacyUrlAliases args, we have tests for that above
         expect(params.logger.error).toHaveBeenCalledTimes(1);
         expect(params.logger.error).toHaveBeenCalledWith(
@@ -566,68 +574,324 @@ describe('#updateObjectsSpaces', () => {
 
   describe('returns expected results', () => {
     it('when adding spaces', async () => {
-      const space1 = 'space-to-add';
-      const space2 = 'other-space';
-      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1] }; // will not be changed
-      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2', spaces: [space2] }; // will be updated
+      const otherSpace = 'space-to-add';
+      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
 
       const objects = [obj1, obj2];
-      const spacesToAdd = [space1];
+      const spacesToAdd = [otherSpace];
       const params = setup({ objects, spacesToAdd });
-      // this test case does not call mget
+      mockMgetResults(
+        { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj1 -- will not be changed
+        { found: true, namespaces: [EXISTING_SPACE] } // result for obj2 -- will be updated to add otherSpace
+      );
       mockBulkResults({ error: false }); // result for obj2
 
       const result = await updateObjectsSpaces(params);
       expect(result.objects).toEqual([
-        { ...obj1, spaces: [space1] },
-        { ...obj2, spaces: [space2, space1] },
+        { ...obj1, spaces: [EXISTING_SPACE, otherSpace] },
+        { ...obj2, spaces: [EXISTING_SPACE, otherSpace] },
       ]);
     });
 
     it('when removing spaces', async () => {
-      const space1 = 'space-to-remove';
-      const space2 = 'other-space';
-      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space2] }; // will not be changed
-      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2', spaces: [space1, space2] }; // will be updated to remove space1
-      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3', spaces: [space1] }; // will be deleted (since it would have no spaces left)
+      const otherSpace = 'other-space';
+      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
+      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
 
       const objects = [obj1, obj2, obj3];
-      const spacesToRemove = [space1];
+      const spacesToRemove = [EXISTING_SPACE];
       const params = setup({ objects, spacesToRemove });
-      // this test case does not call mget
+      mockMgetResults(
+        { found: true, namespaces: [ALL_NAMESPACES_STRING] }, // result for obj1 -- will not be changed
+        { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj2 -- will be updated to remove EXISTING_SPACE
+        { found: true, namespaces: [EXISTING_SPACE] } // result for obj3 -- will be deleted (since it would have no spaces left)
+      );
       mockBulkResults({ error: false }, { error: false }); // results for obj2 and obj3
 
       const result = await updateObjectsSpaces(params);
       expect(result.objects).toEqual([
-        { ...obj1, spaces: [space2] },
-        { ...obj2, spaces: [space2] },
+        { ...obj1, spaces: [ALL_NAMESPACES_STRING] },
+        { ...obj2, spaces: [otherSpace] },
         { ...obj3, spaces: [] },
       ]);
     });
 
     it('when adding and removing spaces', async () => {
-      const space1 = 'space-to-add';
-      const space2 = 'space-to-remove';
-      const space3 = 'other-space';
-      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1] }; // will not be changed
-      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2', spaces: [space3] }; // will be updated to add space1
-      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3', spaces: [space1, space2] }; // will be updated to remove space2
-      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4', spaces: [space2, space3] }; // will be updated to add space1 and remove space2
+      const otherSpace = 'space-to-add';
+      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
+      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
+      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' };
 
       const objects = [obj1, obj2, obj3, obj4];
-      const spacesToAdd = [space1];
-      const spacesToRemove = [space2];
+      const spacesToAdd = [otherSpace];
+      const spacesToRemove = [EXISTING_SPACE];
       const params = setup({ objects, spacesToAdd, spacesToRemove });
-      // this test case does not call mget
+      mockMgetResults(
+        { found: true, namespaces: [ALL_NAMESPACES_STRING, otherSpace] }, // result for obj1 -- will not be changed
+        { found: true, namespaces: [ALL_NAMESPACES_STRING] }, // result for obj2 -- will be updated to add otherSpace
+        { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj3 -- will be updated to remove EXISTING_SPACE
+        { found: true, namespaces: [EXISTING_SPACE] } // result for obj4 -- will be updated to remove EXISTING_SPACE and add otherSpace
+      );
       mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
 
       const result = await updateObjectsSpaces(params);
       expect(result.objects).toEqual([
-        { ...obj1, spaces: [space1] },
-        { ...obj2, spaces: [space3, space1] },
-        { ...obj3, spaces: [space1] },
-        { ...obj4, spaces: [space3, space1] },
+        { ...obj1, spaces: [ALL_NAMESPACES_STRING, otherSpace] },
+        { ...obj2, spaces: [ALL_NAMESPACES_STRING, otherSpace] },
+        { ...obj3, spaces: [otherSpace] },
+        { ...obj4, spaces: [otherSpace] },
       ]);
+    });
+  });
+
+  describe(`with security extension`, () => {
+    let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
+    let params: UpdateObjectsSpacesParams;
+
+    afterEach(() => {
+      mockSecurityExt.performAuthorization.mockClear();
+      mockSecurityExt.redactNamespaces.mockClear();
+    });
+
+    describe(`errors`, () => {
+      beforeEach(() => {
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+        const objects = [obj1];
+        const spacesToAdd = ['foo-space'];
+        mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
+        params = setup({ objects, spacesToAdd }, mockSecurityExt);
+        mockMgetResults({ found: true, namespaces: [EXISTING_SPACE] }); // result for obj1
+        mockBulkResults({ error: false }); // result for obj1
+      });
+
+      test(`propagates error from es client bulk get`, async () => {
+        setupPerformAuthFullyAuthorized(mockSecurityExt);
+        setupRedactPassthrough(mockSecurityExt);
+
+        const error = SavedObjectsErrorHelpers.createBadRequestError('OOPS!');
+
+        mockGetBulkOperationError.mockReset();
+        client.bulk.mockReset();
+        client.bulk.mockImplementationOnce(() => {
+          throw error;
+        });
+
+        await expect(updateObjectsSpaces(params)).rejects.toThrow(error);
+      });
+
+      test(`propagates decorated error when performAuthorization rejects promise`, async () => {
+        mockSecurityExt.performAuthorization.mockRejectedValueOnce(checkAuthError);
+
+        await expect(updateObjectsSpaces(params)).rejects.toThrow(checkAuthError);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+      });
+
+      test(`propagates decorated error when unauthorized`, async () => {
+        setupPerformAuthEnforceFailure(mockSecurityExt);
+
+        await expect(updateObjectsSpaces(params)).rejects.toThrow(enforceError);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+      });
+
+      test(`adds audit event when not unauthorized`, async () => {
+        setupPerformAuthEnforceFailure(mockSecurityExt);
+
+        await expect(updateObjectsSpaces(params)).rejects.toThrow(enforceError);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+
+        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
+          action: AuditAction.UPDATE_OBJECTS_SPACES,
+          addToSpaces: params.spacesToAdd,
+          deleteFromSpaces: undefined,
+          savedObject: { type: params.objects[0].type, id: params.objects[0].id },
+          error: enforceError,
+        });
+      });
+
+      test(`returns error from es client bulk operation`, async () => {
+        setupPerformAuthFullyAuthorized(mockSecurityExt);
+        setupRedactPassthrough(mockSecurityExt);
+
+        mockGetBulkOperationError.mockReset();
+        client.bulk.mockReset();
+        mockBulkResults({ error: true });
+
+        const result = await updateObjectsSpaces(params);
+        expect(result).toEqual({
+          objects: [
+            {
+              error: BULK_ERROR,
+              id: params.objects[0].id,
+              spaces: [],
+              type: params.objects[0].type,
+            },
+          ],
+        });
+      });
+    });
+
+    describe('success', () => {
+      const defaultSpace = 'default';
+      const otherSpace = 'space-to-add';
+      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
+      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
+      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' };
+
+      const objects = [obj1, obj2, obj3, obj4];
+      const spacesToAdd = [otherSpace];
+      const spacesToRemove = [EXISTING_SPACE];
+
+      beforeEach(() => {
+        mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
+        params = setup({ objects, spacesToAdd, spacesToRemove }, mockSecurityExt);
+        mockMgetResults(
+          { found: true, namespaces: [ALL_NAMESPACES_STRING, otherSpace] }, // result for obj1 -- will not be changed
+          { found: true, namespaces: [ALL_NAMESPACES_STRING] }, // result for obj2 -- will be updated to add otherSpace
+          { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj3 -- will be updated to remove EXISTING_SPACE
+          { found: true, namespaces: [EXISTING_SPACE] } // result for obj4 -- will be updated to remove EXISTING_SPACE and add otherSpace
+        );
+        mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
+        setupPerformAuthFullyAuthorized(mockSecurityExt);
+        setupRedactPassthrough(mockSecurityExt);
+      });
+
+      test(`calls performAuthorization with correct actions, types, spaces, and enforce map`, async () => {
+        await updateObjectsSpaces(params);
+
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+        const expectedActions = new Set(['share_to_space']);
+        const expectedSpaces = new Set([defaultSpace, otherSpace, EXISTING_SPACE]);
+        const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
+        const expectedEnforceMap = new Map<string, Set<string>>();
+        expectedEnforceMap.set(
+          SHAREABLE_OBJ_TYPE,
+          new Set([defaultSpace, otherSpace, EXISTING_SPACE])
+        );
+
+        const {
+          actions: actualActions,
+          spaces: actualSpaces,
+          types: actualTypes,
+          enforceMap: actualEnforceMap,
+          options: actualOptions,
+        } = mockSecurityExt.performAuthorization.mock.calls[0][0];
+
+        expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
+        expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
+        expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+        expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+        expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
+      });
+
+      test(`adds audit event per object when successful`, async () => {
+        await updateObjectsSpaces(params);
+
+        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
+        objects.forEach((obj) => {
+          expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
+            action: AuditAction.UPDATE_OBJECTS_SPACES,
+            savedObject: { type: obj.type, id: obj.id },
+            outcome: 'unknown',
+            addToSpaces: spacesToAdd,
+            deleteFromSpaces: spacesToRemove,
+            error: undefined,
+          });
+        });
+      });
+    });
+
+    describe('all spaces', () => {
+      const defaultSpace = 'default';
+      const otherSpace = 'space-to-add';
+      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
+      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
+      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' };
+      const objects = [obj1, obj2, obj3, obj4];
+
+      const setupForAllSpaces = (spacesToAdd: string[], spacesToRemove: string[]) => {
+        mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
+        params = setup({ objects, spacesToAdd, spacesToRemove }, mockSecurityExt);
+        mockMgetResults(
+          { found: true, namespaces: [ALL_NAMESPACES_STRING, otherSpace] }, // result for obj1 -- will not be changed
+          { found: true, namespaces: [ALL_NAMESPACES_STRING] }, // result for obj2 -- will be updated to add otherSpace
+          { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj3 -- will be updated to remove EXISTING_SPACE
+          { found: true, namespaces: [EXISTING_SPACE] } // result for obj4 -- will be updated to remove EXISTING_SPACE and add otherSpace
+        );
+        mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
+        setupPerformAuthFullyAuthorized(mockSecurityExt);
+        setupRedactPassthrough(mockSecurityExt);
+      };
+
+      test(`calls performAuthorization with '*' when spacesToAdd includes '*'`, async () => {
+        const spacesToAdd = ['*'];
+        const spacesToRemove = [otherSpace];
+        setupForAllSpaces(spacesToAdd, spacesToRemove);
+        await updateObjectsSpaces(params);
+
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+        const expectedActions = new Set(['share_to_space']);
+        const expectedSpaces = new Set(['*', defaultSpace, otherSpace, EXISTING_SPACE]);
+        const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
+        const expectedEnforceMap = new Map<string, Set<string>>();
+        expectedEnforceMap.set(
+          SHAREABLE_OBJ_TYPE,
+          new Set([defaultSpace, otherSpace, ...spacesToAdd])
+        );
+
+        const {
+          actions: actualActions,
+          spaces: actualSpaces,
+          types: actualTypes,
+          enforceMap: actualEnforceMap,
+          options: actualOptions,
+        } = mockSecurityExt.performAuthorization.mock.calls[0][0];
+
+        expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
+        expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
+        expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+        expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+        expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
+      });
+
+      test(`calls performAuthorization with '*' when spacesToRemove includes '*'`, async () => {
+        const spacesToAdd = [otherSpace];
+        const spacesToRemove = ['*'];
+        setupForAllSpaces(spacesToAdd, spacesToRemove);
+        await updateObjectsSpaces(params);
+
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+        const expectedActions = new Set(['share_to_space']);
+        const expectedSpaces = new Set(['*', defaultSpace, otherSpace, EXISTING_SPACE]);
+        const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
+        const expectedEnforceMap = new Map<string, Set<string>>();
+        expectedEnforceMap.set(
+          SHAREABLE_OBJ_TYPE,
+          new Set([defaultSpace, otherSpace, ...spacesToRemove])
+        );
+
+        const {
+          actions: actualActions,
+          spaces: actualSpaces,
+          types: actualTypes,
+          enforceMap: actualEnforceMap,
+          options: actualOptions,
+        } = mockSecurityExt.performAuthorization.mock.calls[0][0];
+
+        expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
+        expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
+        expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+        expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+        expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
+      });
     });
   });
 });

@@ -80,7 +80,7 @@ describe('<TemplateCreate />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
     httpRequestsMockHelpers.setLoadNodesPluginsResponse([]);
@@ -120,6 +120,7 @@ describe('<TemplateCreate />', () => {
 
       await act(async () => {
         actions.clickNextButton();
+        jest.advanceTimersByTime(0);
       });
       component.update();
 
@@ -159,6 +160,7 @@ describe('<TemplateCreate />', () => {
       beforeEach(async () => {
         const { actions } = testBed;
         await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+        jest.advanceTimersByTime(0);
       });
 
       it('should set the correct page title', async () => {
@@ -445,10 +447,10 @@ describe('<TemplateCreate />', () => {
       test('should have 3 tabs', () => {
         const { find } = testBed;
 
-        expect(find('summaryTabContent').find('.euiTab').length).toBe(3);
+        expect(find('summaryTabContent').find('button.euiTab').length).toBe(3);
         expect(
           find('summaryTabContent')
-            .find('.euiTab')
+            .find('button.euiTab')
             .map((t) => t.text())
         ).toEqual(['Summary', 'Preview', 'Request']);
       });

@@ -1,0 +1,1483 @@
+////
+This content is generated from the open API specification.
+Any modifications made to this file will be overwritten.
+////
+
+++++
+<div class="openapi">
+  <h2>Access</h2>
+    <ol>
+      <li>APIKey KeyParamName:ApiKey KeyInQuery:false KeyInHeader:true</li>
+      <li>HTTP Basic Authentication</li>
+    </ol>
+
+  <h2><a name="__Methods">Methods</a></h2>
+  [ Jump to <a href="#__Models">Models</a> ]
+
+  <h3>Table of Contents </h3>
+  <div class="method-summary"></div>
+  <h4><a href="#Alerting">Alerting</a></h4>
+  <ul>
+  <li><a href="#createRule"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
+  <li><a href="#deleteRule"><code><span class="http-method">delete</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
+  <li><a href="#disableRule"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_disable</code></a></li>
+  <li><a href="#enableRule"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_enable</code></a></li>
+  <li><a href="#findRules"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rules/_find</code></a></li>
+  <li><a href="#getAlertingHealth"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/_health</code></a></li>
+  <li><a href="#getRule"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
+  <li><a href="#getRuleTypes"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule_types</code></a></li>
+  <li><a href="#muteAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute</code></a></li>
+  <li><a href="#muteAllAlerts"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all</code></a></li>
+  <li><a href="#unmuteAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute</code></a></li>
+  <li><a href="#unmuteAllAlerts"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all</code></a></li>
+  <li><a href="#updateRule"><code><span class="http-method">put</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
+  </ul>
+
+  <h1><a name="Alerting">Alerting</a></h1>
+  <div class="method"><a name="createRule"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></pre></div>
+    <div class="method-summary">Creates a rule. (<span class="nickname">createRule</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule you're creating. For example, you must have privileges for the <strong>Management &gt; Stack rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong> features, or <strong>Security</strong> features.  If the rule has actions, you must also have <code>read</code> privileges for the <strong>Management &gt; Actions and Connectors</strong> feature. NOTE: This API supports only token-based authentication. When you create a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If a user with different privileges updates the rule, its behavior might change.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An UUID v1 or v4 identifier for the rule. If you omit this parameter, an identifier is randomly generated. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">create_rule_request <a href="#create_rule_request">create_rule_request</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#rule_response_properties">rule_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "throttle" : "10m",
+  "created_at" : "2022-12-05T23:36:58.284Z",
+  "last_run" : {
+    "alerts_count" : {
+      "ignored" : 6,
+      "new" : 1,
+      "recovered" : 5,
+      "active" : 0
+    },
+    "outcome_msg" : "outcome_msg",
+    "warning" : "warning",
+    "outcome" : "succeeded"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "created_by" : "elastic",
+  "enabled" : true,
+  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+  "rule_type_id" : "monitoring_alert_cluster_health",
+  "tags" : [ "tags", "tags" ],
+  "api_key_owner" : "elastic",
+  "schedule" : {
+    "interval" : "1m"
+  },
+  "notify_when" : "onActiveAlert",
+  "next_run" : "2022-12-06T00:14:43.818Z",
+  "updated_at" : "2022-12-05T23:36:58.284Z",
+  "execution_status" : {
+    "last_execution_date" : "2022-12-06T00:13:43.89Z",
+    "last_duration" : 55,
+    "status" : "ok"
+  },
+  "name" : "cluster_health_rule",
+  "updated_by" : "elastic",
+  "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "mute_all" : false,
+  "actions" : [ {
+    "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+    "params" : {
+      "key" : ""
+    },
+    "group" : "default"
+  }, {
+    "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+    "params" : {
+      "key" : ""
+    },
+    "group" : "default"
+  } ],
+  "consumer" : "alerts"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#rule_response_properties">rule_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+    <h4 class="field-label">404</h4>
+    Object is not found.
+        <a href="#404_response">404_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteRule"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></pre></div>
+    <div class="method-summary">Deletes a rule. (<span class="nickname">deleteRule</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule you're deleting. For example, the <strong>Management</strong> &gt; <strong>Stack Rules</strong> feature, <strong>Analytics</strong> &gt; <strong>Discover</strong> or <strong>Machine Learning</strong> features, <strong>Observability</strong>, or <strong>Security</strong> features. WARNING: After you delete a rule, you cannot recover it.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+    <h4 class="field-label">404</h4>
+    Object is not found.
+        <a href="#404_response">404_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="disableRule"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_disable</code></pre></div>
+    <div class="method-summary">Disables a rule. (<span class="nickname">disableRule</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+    <h4 class="field-label">404</h4>
+    Object is not found.
+        <a href="#404_response">404_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="enableRule"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_enable</code></pre></div>
+    <div class="method-summary">Enables a rule. (<span class="nickname">enableRule</span>)</div>
+    <div class="method-notes">This API supports token-based authentication only. You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+    <h4 class="field-label">404</h4>
+    Object is not found.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="findRules"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/alerting/rules/_find</code></pre></div>
+    <div class="method-summary">Retrieves information about rules. (<span class="nickname">findRules</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rules you're seeking. For example, you must have privileges for the <strong>Management &gt; Stack rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong> features, or <strong>Security</strong> features. To find rules associated with the <strong>Stack Monitoring</strong> feature, use the <code>monitoring_user</code> built-in role.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">default_search_operator (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The default operator to use for the simple_query_string. default: OR </div><div class="param">fields (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The fields to return in the <code>attributes</code> key of the response. default: null </div><div class="param">filter (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; A KQL string that you filter with an attribute from your saved object. It should look like <code>savedObjectType.attributes.title: &quot;myTitle&quot;</code>. However, if you used a direct attribute of a saved object, such as <code>updatedAt</code>, you must define your filter, for example, <code>savedObjectType.updatedAt &gt; 2018-12-22</code>. default: null </div><div class="param">has_reference (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the rules that have a relation with the reference objects with a specific type and identifier. default: null </div><div class="param">page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">per_page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of rules to return per page. default: 20 </div><div class="param">search (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; An Elasticsearch simple_query_string query that filters the objects in the response. default: null </div><div class="param">search_fields (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The fields to perform the simple_query_string parsed query against. default: null </div><div class="param">sort_field (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines which field is used to sort the results. The field must exist in the <code>attributes</code> key of the response. default: null </div><div class="param">sort_order (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#findRules_200_response">findRules_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "per_page" : 6,
+  "total" : 1,
+  "data" : [ {
+    "throttle" : "10m",
+    "created_at" : "2022-12-05T23:36:58.284Z",
+    "last_run" : {
+      "alerts_count" : {
+        "ignored" : 6,
+        "new" : 1,
+        "recovered" : 5,
+        "active" : 0
+      },
+      "outcome_msg" : "outcome_msg",
+      "warning" : "warning",
+      "outcome" : "succeeded"
+    },
+    "params" : {
+      "key" : ""
+    },
+    "created_by" : "elastic",
+    "enabled" : true,
+    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+    "rule_type_id" : "monitoring_alert_cluster_health",
+    "tags" : [ "tags", "tags" ],
+    "api_key_owner" : "elastic",
+    "schedule" : {
+      "interval" : "1m"
+    },
+    "notify_when" : "onActiveAlert",
+    "next_run" : "2022-12-06T00:14:43.818Z",
+    "updated_at" : "2022-12-05T23:36:58.284Z",
+    "execution_status" : {
+      "last_execution_date" : "2022-12-06T00:13:43.89Z",
+      "last_duration" : 55,
+      "status" : "ok"
+    },
+    "name" : "cluster_health_rule",
+    "updated_by" : "elastic",
+    "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "mute_all" : false,
+    "actions" : [ {
+      "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+      "params" : {
+        "key" : ""
+      },
+      "group" : "default"
+    }, {
+      "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+      "params" : {
+        "key" : ""
+      },
+      "group" : "default"
+    } ],
+    "consumer" : "alerts"
+  }, {
+    "throttle" : "10m",
+    "created_at" : "2022-12-05T23:36:58.284Z",
+    "last_run" : {
+      "alerts_count" : {
+        "ignored" : 6,
+        "new" : 1,
+        "recovered" : 5,
+        "active" : 0
+      },
+      "outcome_msg" : "outcome_msg",
+      "warning" : "warning",
+      "outcome" : "succeeded"
+    },
+    "params" : {
+      "key" : ""
+    },
+    "created_by" : "elastic",
+    "enabled" : true,
+    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+    "rule_type_id" : "monitoring_alert_cluster_health",
+    "tags" : [ "tags", "tags" ],
+    "api_key_owner" : "elastic",
+    "schedule" : {
+      "interval" : "1m"
+    },
+    "notify_when" : "onActiveAlert",
+    "next_run" : "2022-12-06T00:14:43.818Z",
+    "updated_at" : "2022-12-05T23:36:58.284Z",
+    "execution_status" : {
+      "last_execution_date" : "2022-12-06T00:13:43.89Z",
+      "last_duration" : 55,
+      "status" : "ok"
+    },
+    "name" : "cluster_health_rule",
+    "updated_by" : "elastic",
+    "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "mute_all" : false,
+    "actions" : [ {
+      "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+      "params" : {
+        "key" : ""
+      },
+      "group" : "default"
+    }, {
+      "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+      "params" : {
+        "key" : ""
+      },
+      "group" : "default"
+    } ],
+    "consumer" : "alerts"
+  } ],
+  "page" : 0
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#findRules_200_response">findRules_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAlertingHealth"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/alerting/_health</code></pre></div>
+    <div class="method-summary">Retrieves the health status of the alerting framework. (<span class="nickname">getAlertingHealth</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Management &gt; Stack Rules</strong> feature or for at least one of the <strong>Analytics &gt; Discover</strong>, <strong>Analytics &gt; Machine Learning</strong>, <strong>Observability</strong>, or <strong>Security</strong> features.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#getAlertingHealth_200_response">getAlertingHealth_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "alerting_framework_health" : {
+    "execution_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    },
+    "read_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    },
+    "decryption_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    }
+  },
+  "alerting_framework_heath" : {
+    "_deprecated" : "This state property has a typo, use \"alerting_framework_health\" instead.",
+    "execution_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    },
+    "read_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    },
+    "decryption_health" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    }
+  },
+  "has_permanent_encryption_key" : true,
+  "is_sufficiently_secure" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#getAlertingHealth_200_response">getAlertingHealth_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getRule"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></pre></div>
+    <div class="method-summary">Retrieves a rule by its identifier. (<span class="nickname">getRule</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rules you're seeking. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong> features, or <strong>Security</strong> features. To get rules associated with the <strong>Stack Monitoring</strong> feature, use the <code>monitoring_user</code> built-in role.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#rule_response_properties">rule_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "throttle" : "10m",
+  "created_at" : "2022-12-05T23:36:58.284Z",
+  "last_run" : {
+    "alerts_count" : {
+      "ignored" : 6,
+      "new" : 1,
+      "recovered" : 5,
+      "active" : 0
+    },
+    "outcome_msg" : "outcome_msg",
+    "warning" : "warning",
+    "outcome" : "succeeded"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "created_by" : "elastic",
+  "enabled" : true,
+  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+  "rule_type_id" : "monitoring_alert_cluster_health",
+  "tags" : [ "tags", "tags" ],
+  "api_key_owner" : "elastic",
+  "schedule" : {
+    "interval" : "1m"
+  },
+  "notify_when" : "onActiveAlert",
+  "next_run" : "2022-12-06T00:14:43.818Z",
+  "updated_at" : "2022-12-05T23:36:58.284Z",
+  "execution_status" : {
+    "last_execution_date" : "2022-12-06T00:13:43.89Z",
+    "last_duration" : 55,
+    "status" : "ok"
+  },
+  "name" : "cluster_health_rule",
+  "updated_by" : "elastic",
+  "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "mute_all" : false,
+  "actions" : [ {
+    "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+    "params" : {
+      "key" : ""
+    },
+    "group" : "default"
+  }, {
+    "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+    "params" : {
+      "key" : ""
+    },
+    "group" : "default"
+  } ],
+  "consumer" : "alerts"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#rule_response_properties">rule_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+    <h4 class="field-label">404</h4>
+    Object is not found.
+        <a href="#404_response">404_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getRuleTypes"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule_types</code></pre></div>
+    <div class="method-summary">Retrieves a list of rule types. (<span class="nickname">getRuleTypes</span>)</div>
+    <div class="method-notes">If you have <code>read</code> privileges for one or more Kibana features, the API response contains information about the appropriate rule types. For example, there are rule types associated with the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong> features, and <strong>Security</strong> features. To get rule types associated with the <strong>Stack Monitoring</strong> feature, use the <code>monitoring_user</code> built-in role.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#getRuleTypes_200_response_inner">getRuleTypes_200_response_inner</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "recovery_action_group" : {
+    "name" : "name",
+    "id" : "id"
+  },
+  "does_set_recovery_context" : true,
+  "is_exportable" : true,
+  "authorized_consumers" : {
+    "alerts" : {
+      "all" : true,
+      "read" : true
+    },
+    "discover" : {
+      "all" : true,
+      "read" : true
+    },
+    "stackAlerts" : {
+      "all" : true,
+      "read" : true
+    },
+    "infrastructure" : {
+      "all" : true,
+      "read" : true
+    },
+    "siem" : {
+      "all" : true,
+      "read" : true
+    },
+    "monitoring" : {
+      "all" : true,
+      "read" : true
+    },
+    "logs" : {
+      "all" : true,
+      "read" : true
+    },
+    "apm" : {
+      "all" : true,
+      "read" : true
+    },
+    "ml" : {
+      "all" : true,
+      "read" : true
+    },
+    "uptime" : {
+      "all" : true,
+      "read" : true
+    }
+  },
+  "action_groups" : [ {
+    "name" : "name",
+    "id" : "id"
+  }, {
+    "name" : "name",
+    "id" : "id"
+  } ],
+  "minimum_license_required" : "basic",
+  "action_variables" : {
+    "context" : [ {
+      "name" : "name",
+      "description" : "description",
+      "useWithTripleBracesInTemplates" : true
+    }, {
+      "name" : "name",
+      "description" : "description",
+      "useWithTripleBracesInTemplates" : true
+    } ],
+    "state" : [ {
+      "name" : "name",
+      "description" : "description"
+    }, {
+      "name" : "name",
+      "description" : "description"
+    } ],
+    "params" : [ {
+      "name" : "name",
+      "description" : "description"
+    }, {
+      "name" : "name",
+      "description" : "description"
+    } ]
+  },
+  "rule_task_timeout" : "5m",
+  "name" : "name",
+  "enabled_in_license" : true,
+  "producer" : "stackAlerts",
+  "id" : "id",
+  "default_action_group_id" : "default_action_group_id"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="muteAlert"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute</code></pre></div>
+    <div class="method-summary">Mutes an alert. (<span class="nickname">muteAlert</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features. If the rule has actions, you must also have <code>read</code> privileges for the <strong>Management &gt; Actions and Connectors</strong> feature.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the alert. The identifier is generated by the rule and might be any arbitrary string. default: null </div><div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="muteAllAlerts"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all</code></pre></div>
+    <div class="method-summary">Mutes all alerts. (<span class="nickname">muteAllAlerts</span>)</div>
+    <div class="method-notes">This API snoozes the notifications for the rule indefinitely. The rule checks continue to occur but alerts will not trigger any actions. You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features. If the rule has actions, you must also have <code>read</code> privileges for the <strong>Management &gt; Actions and Connectors</strong> feature.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="unmuteAlert"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute</code></pre></div>
+    <div class="method-summary">Unmutes an alert. (<span class="nickname">unmuteAlert</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features. If the rule has actions, you must also have <code>read</code> privileges for the <strong>Management &gt; Actions and Connectors</strong> feature.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the alert. The identifier is generated by the rule and might be any arbitrary string. default: null </div><div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="unmuteAllAlerts"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all</code></pre></div>
+    <div class="method-summary">Unmutes all alerts. (<span class="nickname">unmuteAllAlerts</span>)</div>
+    <div class="method-notes">If the rule has its notifications snoozed indefinitely, this API cancels the snooze. You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong>, and <strong>Security</strong> features. If the rule has actions, you must also have <code>read</code> privileges for the <strong>Management &gt; Actions and Connectors</strong> feature.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateRule"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></pre></div>
+    <div class="method-summary">Updates the attributes for a rule. (<span class="nickname">updateRule</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule you're updating. For example, you must have privileges for the <strong>Management &gt; Stack rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong> features, or <strong>Security</strong> features.  If the rule has actions, you must also have <code>read</code> privileges for the <strong>Management &gt; Actions and Connectors</strong> feature. NOTE: This API supports only token-based authentication. When you update a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If you have different privileges than the user that created or most recently updated the rule, you might change its behavior. Though some properties are optional, when you update the rule the existing property values are overwritten with default values. Therefore, it is recommended to explicitly set all property values.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">update_rule_request <a href="#update_rule_request">update_rule_request</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#rule_response_properties">rule_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "throttle" : "10m",
+  "created_at" : "2022-12-05T23:36:58.284Z",
+  "last_run" : {
+    "alerts_count" : {
+      "ignored" : 6,
+      "new" : 1,
+      "recovered" : 5,
+      "active" : 0
+    },
+    "outcome_msg" : "outcome_msg",
+    "warning" : "warning",
+    "outcome" : "succeeded"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "created_by" : "elastic",
+  "enabled" : true,
+  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+  "rule_type_id" : "monitoring_alert_cluster_health",
+  "tags" : [ "tags", "tags" ],
+  "api_key_owner" : "elastic",
+  "schedule" : {
+    "interval" : "1m"
+  },
+  "notify_when" : "onActiveAlert",
+  "next_run" : "2022-12-06T00:14:43.818Z",
+  "updated_at" : "2022-12-05T23:36:58.284Z",
+  "execution_status" : {
+    "last_execution_date" : "2022-12-06T00:13:43.89Z",
+    "last_duration" : 55,
+    "status" : "ok"
+  },
+  "name" : "cluster_health_rule",
+  "updated_by" : "elastic",
+  "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "mute_all" : false,
+  "actions" : [ {
+    "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+    "params" : {
+      "key" : ""
+    },
+    "group" : "default"
+  }, {
+    "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+    "params" : {
+      "key" : ""
+    },
+    "group" : "default"
+  } ],
+  "consumer" : "alerts"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#rule_response_properties">rule_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+    <h4 class="field-label">404</h4>
+    Object is not found.
+        <a href="#404_response">404_response</a>
+  </div> <!-- method -->
+  <hr/>
+
+  <h2><a name="__Models">Models</a></h2>
+  [ Jump to <a href="#__Methods">Methods</a> ]
+
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#401_response"><code>401_response</code> - Unsuccessful rule API response</a></li>
+    <li><a href="#404_response"><code>404_response</code> - </a></li>
+    <li><a href="#actions_inner"><code>actions_inner</code> - </a></li>
+    <li><a href="#create_rule_request"><code>create_rule_request</code> - Create rule request</a></li>
+    <li><a href="#findRules_200_response"><code>findRules_200_response</code> - </a></li>
+    <li><a href="#findRules_has_reference_parameter"><code>findRules_has_reference_parameter</code> - </a></li>
+    <li><a href="#findRules_search_fields_parameter"><code>findRules_search_fields_parameter</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response"><code>getAlertingHealth_200_response</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_health"><code>getAlertingHealth_200_response_alerting_framework_health</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_health_decryption_health"><code>getAlertingHealth_200_response_alerting_framework_health_decryption_health</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_health_execution_health"><code>getAlertingHealth_200_response_alerting_framework_health_execution_health</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_health_read_health"><code>getAlertingHealth_200_response_alerting_framework_health_read_health</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_heath"><code>getAlertingHealth_200_response_alerting_framework_heath</code> - </a></li>
+    <li><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health"><code>getAlertingHealth_200_response_alerting_framework_heath_decryption_health</code> - </a></li>
+    <li><a href="#getRuleTypes_200_response_inner"><code>getRuleTypes_200_response_inner</code> - </a></li>
+    <li><a href="#getRuleTypes_200_response_inner_action_groups_inner"><code>getRuleTypes_200_response_inner_action_groups_inner</code> - </a></li>
+    <li><a href="#getRuleTypes_200_response_inner_action_variables"><code>getRuleTypes_200_response_inner_action_variables</code> - </a></li>
+    <li><a href="#getRuleTypes_200_response_inner_action_variables_context_inner"><code>getRuleTypes_200_response_inner_action_variables_context_inner</code> - </a></li>
+    <li><a href="#getRuleTypes_200_response_inner_action_variables_params_inner"><code>getRuleTypes_200_response_inner_action_variables_params_inner</code> - </a></li>
+    <li><a href="#getRuleTypes_200_response_inner_authorized_consumers"><code>getRuleTypes_200_response_inner_authorized_consumers</code> - </a></li>
+    <li><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts"><code>getRuleTypes_200_response_inner_authorized_consumers_alerts</code> - </a></li>
+    <li><a href="#getRuleTypes_200_response_inner_recovery_action_group"><code>getRuleTypes_200_response_inner_recovery_action_group</code> - </a></li>
+    <li><a href="#notify_when"><code>notify_when</code> - </a></li>
+    <li><a href="#rule_response_properties"><code>rule_response_properties</code> - Rule response properties</a></li>
+    <li><a href="#rule_response_properties_execution_status"><code>rule_response_properties_execution_status</code> - </a></li>
+    <li><a href="#rule_response_properties_last_run"><code>rule_response_properties_last_run</code> - </a></li>
+    <li><a href="#rule_response_properties_last_run_alerts_count"><code>rule_response_properties_last_run_alerts_count</code> - </a></li>
+    <li><a href="#schedule"><code>schedule</code> - </a></li>
+    <li><a href="#update_rule_request"><code>update_rule_request</code> - Update rule request</a></li>
+  </ol>
+
+  <div class="model">
+    <h3><a name="401_response"><code>401_response</code> - Unsuccessful rule API response</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">Unauthorized</div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">401</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="404_response"><code>404_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">Not Found</div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">404</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner"><code>actions_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name for the actions. If you don't need to group actions, set to <code>default</code>. </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
+<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. The <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_rule_request"><code>create_rule_request</code> - Create rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The create rule API request body varies depending on the type of rule and actions.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when </div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. For example, <code>.es-query</code>, <code>.index-threshold</code>, <code>logs.alert.document.count</code>, <code>monitoring_alert_cluster_health</code>, <code>siem.thresholdRule</code>, or <code>xpack.ml.anomaly_detection_alert</code>. </div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findRules_200_response"><code>findRules_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#rule_response_properties">array[rule_response_properties]</a></span>  </div>
+<div class="param">page (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">per_page (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">total (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findRules_has_reference_parameter"><code>findRules_has_reference_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findRules_search_fields_parameter"><code>findRules_search_fields_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response"><code>getAlertingHealth_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">alerting_framework_heath (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath">getAlertingHealth_200_response_alerting_framework_heath</a></span>  </div>
+<div class="param">alerting_framework_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_health">getAlertingHealth_200_response_alerting_framework_health</a></span>  </div>
+<div class="param">has_permanent_encryption_key (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> If <code>false</code>, the encrypted saved object plugin does not have a permanent encryption key. </div>
+<div class="param">is_sufficiently_secure (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> If <code>false</code>, security is enabled but TLS is not. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_health"><code>getAlertingHealth_200_response_alerting_framework_health</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Three substates identify the health of the alerting framework: <code>decryption_health</code>, <code>execution_health</code>, and <code>read_health</code>.</div>
+    <div class="field-items">
+      <div class="param">decryption_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_health_decryption_health">getAlertingHealth_200_response_alerting_framework_health_decryption_health</a></span>  </div>
+<div class="param">execution_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_health_execution_health">getAlertingHealth_200_response_alerting_framework_health_execution_health</a></span>  </div>
+<div class="param">read_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_health_read_health">getAlertingHealth_200_response_alerting_framework_health_read_health</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_health_decryption_health"><code>getAlertingHealth_200_response_alerting_framework_health_decryption_health</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The timestamp and status of the rule decryption.</div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">error</div><div class="param-enum">ok</div><div class="param-enum">warn</div>
+<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_health_execution_health"><code>getAlertingHealth_200_response_alerting_framework_health_execution_health</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The timestamp and status of the rule run.</div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">error</div><div class="param-enum">ok</div><div class="param-enum">warn</div>
+<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_health_read_health"><code>getAlertingHealth_200_response_alerting_framework_health_read_health</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The timestamp and status of the rule reading events.</div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">error</div><div class="param-enum">ok</div><div class="param-enum">warn</div>
+<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_heath"><code>getAlertingHealth_200_response_alerting_framework_heath</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>This property has a typo. Use <code>alerting_framework_health</code> instead.</div>
+    <div class="field-items">
+      <div class="param">_deprecated (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">decryption_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health">getAlertingHealth_200_response_alerting_framework_heath_decryption_health</a></span>  </div>
+<div class="param">execution_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health">getAlertingHealth_200_response_alerting_framework_heath_decryption_health</a></span>  </div>
+<div class="param">read_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health">getAlertingHealth_200_response_alerting_framework_heath_decryption_health</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getAlertingHealth_200_response_alerting_framework_heath_decryption_health"><code>getAlertingHealth_200_response_alerting_framework_heath_decryption_health</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getRuleTypes_200_response_inner"><code>getRuleTypes_200_response_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">action_groups (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_action_groups_inner">array[getRuleTypes_200_response_inner_action_groups_inner]</a></span> An explicit list of groups for which the rule type can schedule actions, each with the action group's unique ID and human readable name. Rule actions validation uses this configuration to ensure that groups are valid. </div>
+<div class="param">action_variables (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_action_variables">getRuleTypes_200_response_inner_action_variables</a></span>  </div>
+<div class="param">authorized_consumers (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_authorized_consumers">getRuleTypes_200_response_inner_authorized_consumers</a></span>  </div>
+<div class="param">default_action_group_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The default identifier for the rule type group. </div>
+<div class="param">does_set_recovery_context (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the rule passes context variables to its recovery action. </div>
+<div class="param">enabled_in_license (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the rule type is enabled or disabled based on the subscription. </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The unique identifier for the rule type. </div>
+<div class="param">is_exportable (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the rule type is exportable in <strong>Stack Management &gt; Saved Objects</strong>. </div>
+<div class="param">minimum_license_required (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The subscriptions required to use the rule type. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The descriptive name of the rule type. </div>
+<div class="param">producer (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An identifier for the application that produces this rule type. </div>
+<div class="param">recovery_action_group (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_recovery_action_group">getRuleTypes_200_response_inner_recovery_action_group</a></span>  </div>
+<div class="param">rule_task_timeout (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getRuleTypes_200_response_inner_action_groups_inner"><code>getRuleTypes_200_response_inner_action_groups_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getRuleTypes_200_response_inner_action_variables"><code>getRuleTypes_200_response_inner_action_variables</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A list of action variables that the rule type makes available via context and state in action parameter templates, and a short human readable description. When you create a rule in Kibana, it uses this information to prompt you for these variables in action parameter editors.</div>
+    <div class="field-items">
+      <div class="param">context (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_action_variables_context_inner">array[getRuleTypes_200_response_inner_action_variables_context_inner]</a></span>  </div>
+<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_action_variables_params_inner">array[getRuleTypes_200_response_inner_action_variables_params_inner]</a></span>  </div>
+<div class="param">state (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_action_variables_params_inner">array[getRuleTypes_200_response_inner_action_variables_params_inner]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getRuleTypes_200_response_inner_action_variables_context_inner"><code>getRuleTypes_200_response_inner_action_variables_context_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">useWithTripleBracesInTemplates (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getRuleTypes_200_response_inner_action_variables_params_inner"><code>getRuleTypes_200_response_inner_action_variables_params_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getRuleTypes_200_response_inner_authorized_consumers"><code>getRuleTypes_200_response_inner_authorized_consumers</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The list of the plugins IDs that have access to the rule type.</div>
+    <div class="field-items">
+      <div class="param">alerts (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts">getRuleTypes_200_response_inner_authorized_consumers_alerts</a></span>  </div>
+<div class="param">apm (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts">getRuleTypes_200_response_inner_authorized_consumers_alerts</a></span>  </div>
+<div class="param">discover (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts">getRuleTypes_200_response_inner_authorized_consumers_alerts</a></span>  </div>
+<div class="param">infrastructure (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts">getRuleTypes_200_response_inner_authorized_consumers_alerts</a></span>  </div>
+<div class="param">logs (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts">getRuleTypes_200_response_inner_authorized_consumers_alerts</a></span>  </div>
+<div class="param">ml (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts">getRuleTypes_200_response_inner_authorized_consumers_alerts</a></span>  </div>
+<div class="param">monitoring (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts">getRuleTypes_200_response_inner_authorized_consumers_alerts</a></span>  </div>
+<div class="param">siem (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts">getRuleTypes_200_response_inner_authorized_consumers_alerts</a></span>  </div>
+<div class="param">stackAlerts (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts">getRuleTypes_200_response_inner_authorized_consumers_alerts</a></span>  </div>
+<div class="param">uptime (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts">getRuleTypes_200_response_inner_authorized_consumers_alerts</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getRuleTypes_200_response_inner_authorized_consumers_alerts"><code>getRuleTypes_200_response_inner_authorized_consumers_alerts</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">all (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">read (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="getRuleTypes_200_response_inner_recovery_action_group"><code>getRuleTypes_200_response_inner_recovery_action_group</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An action group to use when an alert goes from an active state to an inactive one.</div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="notify_when"><code>notify_when</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Indicates how often alerts generate actions. Valid values include: <code>onActionGroupChange</code>: Actions run when the alert status changes; <code>onActiveAlert</code>: Actions run when the alert becomes active and at each check interval while the rule conditions are met; <code>onThrottleInterval</code>: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="rule_response_properties"><code>rule_response_properties</code> - Rule response properties</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actions </div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">api_key_owner </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The application or feature that owns the rule. For example, <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">created_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> The date and time that the rule was created. format: date-time</div>
+<div class="param">created_by </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the user that created the rule. </div>
+<div class="param">enabled </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the rule is currently enabled. </div>
+<div class="param">execution_status </div><div class="param-desc"><span class="param-type"><a href="#rule_response_properties_execution_status">rule_response_properties_execution_status</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the rule. </div>
+<div class="param">last_run (optional)</div><div class="param-desc"><span class="param-type"><a href="#rule_response_properties_last_run">rule_response_properties_last_run</a></span>  </div>
+<div class="param">muted_alert_ids </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+<div class="param">mute_all </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. </div>
+<div class="param">next_run (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">notify_when </div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the type of rule. For example, <code>.es-query</code>, <code>.index-threshold</code>, <code>logs.alert.document.count</code>, <code>monitoring_alert_cluster_health</code>, <code>siem.thresholdRule</code>, or <code>xpack.ml.anomaly_detection_alert</code>. </div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">scheduled_task_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+<div class="param">updated_at </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The date and time that the rule was updated most recently. </div>
+<div class="param">updated_by </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the user that updated this rule most recently. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="rule_response_properties_execution_status"><code>rule_response_properties_execution_status</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">last_duration (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">last_execution_date (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="rule_response_properties_last_run"><code>rule_response_properties_last_run</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">alerts_count (optional)</div><div class="param-desc"><span class="param-type"><a href="#rule_response_properties_last_run_alerts_count">rule_response_properties_last_run_alerts_count</a></span>  </div>
+<div class="param">outcome (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">outcome_msg (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">warning (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="rule_response_properties_last_run_alerts_count"><code>rule_response_properties_last_run_alerts_count</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">active (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">ignored (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">new (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">recovered (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="schedule"><code>schedule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.</div>
+    <div class="field-items">
+      <div class="param">interval (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_rule_request"><code>update_rule_request</code> - Update rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The update rule API request body varies depending on the type of rule and actions.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. </div>
+<div class="param">notify_when </div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+</div>
+++++

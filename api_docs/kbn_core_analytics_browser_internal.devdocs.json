@@ -133,7 +133,7 @@
             "label": "stop",
             "description": [],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
             "deprecated": false,

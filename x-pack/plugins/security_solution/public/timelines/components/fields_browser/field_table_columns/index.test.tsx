@@ -12,8 +12,8 @@ import { useFieldTableColumns } from '.';
 
 import { TestProviders } from '../../../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
-import type { BrowserFieldItem } from '@kbn/timelines-plugin/common/types';
 import { EuiInMemoryTable } from '@elastic/eui';
+import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 const mockOnHide = jest.fn();
 const mockOpenFieldEditor = jest.fn();

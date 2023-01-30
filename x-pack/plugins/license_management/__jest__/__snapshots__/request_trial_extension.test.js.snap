@@ -2,71 +2,75 @@
 
 exports[`RequestTrialExtension component should display when enterprise license is not active and trial has been used 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
   >
     <div
-      class="euiCard__content emotion-euiCard__content-vertical"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
-      <p
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <span
-          class="emotion-euiCard__text-center"
-        >
-          Extend your trial
-        </span>
-      </p>
       <div
-        class="euiText emotion-euiText-s-euiCard__description"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span>
-            If you’d like to continue using machine learning, advanced security, and our other awesome 
-            <a
-              class="euiLink emotion-euiLink-primary"
-              href="https://www.elastic.co/subscriptions"
-              rel="noopener"
-              target="_blank"
-            >
-              subscription features
-              <span
-                class="emotion-euiLink__externalIcon"
-                data-euiicon-type="popout"
-              >
-                External link
-              </span>
-              <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-              >
-                (opens in a new tab or window)
-              </span>
-            </a>
-            , request an extension now.
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <span
+            class="emotion-euiCard__text-center"
+          >
+            Extend your trial
           </span>
         </p>
-      </div>
-    </div>
-    <div
-      class="emotion-euiCard__footer"
-    >
-      <a
-        class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
-        data-test-subj="extendTrialButton"
-        href="https://www.elastic.co/trialextension"
-        rel="noopener"
-        target="_blank"
-      >
-        <span
-          class="emotion-euiButtonDisplayContent"
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
         >
-          Extend trial
-        </span>
-      </a>
+          <p>
+            <span>
+              If you’d like to continue using machine learning, advanced security, and our other awesome 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://www.elastic.co/subscriptions"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                subscription features
+                <span
+                  class="emotion-euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                >
+                  External link
+                </span>
+                <span
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+              , request an extension now.
+            </span>
+          </p>
+        </div>
+      </div>
+      <div
+        class="emotion-euiCard__footer"
+      >
+        <a
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+          data-test-subj="extendTrialButton"
+          href="https://www.elastic.co/trialextension"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Extend trial
+          </span>
+        </a>
+      </div>
     </div>
   </div>
 </div>
@@ -74,71 +78,75 @@ exports[`RequestTrialExtension component should display when enterprise license 
 
 exports[`RequestTrialExtension component should display when license is active and trial has been used 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
   >
     <div
-      class="euiCard__content emotion-euiCard__content-vertical"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
-      <p
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <span
-          class="emotion-euiCard__text-center"
-        >
-          Extend your trial
-        </span>
-      </p>
       <div
-        class="euiText emotion-euiText-s-euiCard__description"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span>
-            If you’d like to continue using machine learning, advanced security, and our other awesome 
-            <a
-              class="euiLink emotion-euiLink-primary"
-              href="https://www.elastic.co/subscriptions"
-              rel="noopener"
-              target="_blank"
-            >
-              subscription features
-              <span
-                class="emotion-euiLink__externalIcon"
-                data-euiicon-type="popout"
-              >
-                External link
-              </span>
-              <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-              >
-                (opens in a new tab or window)
-              </span>
-            </a>
-            , request an extension now.
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <span
+            class="emotion-euiCard__text-center"
+          >
+            Extend your trial
           </span>
         </p>
-      </div>
-    </div>
-    <div
-      class="emotion-euiCard__footer"
-    >
-      <a
-        class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
-        data-test-subj="extendTrialButton"
-        href="https://www.elastic.co/trialextension"
-        rel="noopener"
-        target="_blank"
-      >
-        <span
-          class="emotion-euiButtonDisplayContent"
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
         >
-          Extend trial
-        </span>
-      </a>
+          <p>
+            <span>
+              If you’d like to continue using machine learning, advanced security, and our other awesome 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://www.elastic.co/subscriptions"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                subscription features
+                <span
+                  class="emotion-euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                >
+                  External link
+                </span>
+                <span
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+              , request an extension now.
+            </span>
+          </p>
+        </div>
+      </div>
+      <div
+        class="emotion-euiCard__footer"
+      >
+        <a
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+          data-test-subj="extendTrialButton"
+          href="https://www.elastic.co/trialextension"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Extend trial
+          </span>
+        </a>
+      </div>
     </div>
   </div>
 </div>
@@ -146,71 +154,75 @@ exports[`RequestTrialExtension component should display when license is active a
 
 exports[`RequestTrialExtension component should display when license is not active and trial has been used 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
   >
     <div
-      class="euiCard__content emotion-euiCard__content-vertical"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
-      <p
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <span
-          class="emotion-euiCard__text-center"
-        >
-          Extend your trial
-        </span>
-      </p>
       <div
-        class="euiText emotion-euiText-s-euiCard__description"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span>
-            If you’d like to continue using machine learning, advanced security, and our other awesome 
-            <a
-              class="euiLink emotion-euiLink-primary"
-              href="https://www.elastic.co/subscriptions"
-              rel="noopener"
-              target="_blank"
-            >
-              subscription features
-              <span
-                class="emotion-euiLink__externalIcon"
-                data-euiicon-type="popout"
-              >
-                External link
-              </span>
-              <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-              >
-                (opens in a new tab or window)
-              </span>
-            </a>
-            , request an extension now.
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <span
+            class="emotion-euiCard__text-center"
+          >
+            Extend your trial
           </span>
         </p>
-      </div>
-    </div>
-    <div
-      class="emotion-euiCard__footer"
-    >
-      <a
-        class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
-        data-test-subj="extendTrialButton"
-        href="https://www.elastic.co/trialextension"
-        rel="noopener"
-        target="_blank"
-      >
-        <span
-          class="emotion-euiButtonDisplayContent"
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
         >
-          Extend trial
-        </span>
-      </a>
+          <p>
+            <span>
+              If you’d like to continue using machine learning, advanced security, and our other awesome 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://www.elastic.co/subscriptions"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                subscription features
+                <span
+                  class="emotion-euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                >
+                  External link
+                </span>
+                <span
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+              , request an extension now.
+            </span>
+          </p>
+        </div>
+      </div>
+      <div
+        class="emotion-euiCard__footer"
+      >
+        <a
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+          data-test-subj="extendTrialButton"
+          href="https://www.elastic.co/trialextension"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Extend trial
+          </span>
+        </a>
+      </div>
     </div>
   </div>
 </div>
@@ -218,71 +230,75 @@ exports[`RequestTrialExtension component should display when license is not acti
 
 exports[`RequestTrialExtension component should display when platinum license is not active and trial has been used 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center"
   >
     <div
-      class="euiCard__content emotion-euiCard__content-vertical"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
-      <p
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <span
-          class="emotion-euiCard__text-center"
-        >
-          Extend your trial
-        </span>
-      </p>
       <div
-        class="euiText emotion-euiText-s-euiCard__description"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span>
-            If you’d like to continue using machine learning, advanced security, and our other awesome 
-            <a
-              class="euiLink emotion-euiLink-primary"
-              href="https://www.elastic.co/subscriptions"
-              rel="noopener"
-              target="_blank"
-            >
-              subscription features
-              <span
-                class="emotion-euiLink__externalIcon"
-                data-euiicon-type="popout"
-              >
-                External link
-              </span>
-              <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-              >
-                (opens in a new tab or window)
-              </span>
-            </a>
-            , request an extension now.
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <span
+            class="emotion-euiCard__text-center"
+          >
+            Extend your trial
           </span>
         </p>
-      </div>
-    </div>
-    <div
-      class="emotion-euiCard__footer"
-    >
-      <a
-        class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
-        data-test-subj="extendTrialButton"
-        href="https://www.elastic.co/trialextension"
-        rel="noopener"
-        target="_blank"
-      >
-        <span
-          class="emotion-euiButtonDisplayContent"
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
         >
-          Extend trial
-        </span>
-      </a>
+          <p>
+            <span>
+              If you’d like to continue using machine learning, advanced security, and our other awesome 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://www.elastic.co/subscriptions"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                subscription features
+                <span
+                  class="emotion-euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                >
+                  External link
+                </span>
+                <span
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+              , request an extension now.
+            </span>
+          </p>
+        </div>
+      </div>
+      <div
+        class="emotion-euiCard__footer"
+      >
+        <a
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+          data-test-subj="extendTrialButton"
+          href="https://www.elastic.co/trialextension"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Extend trial
+          </span>
+        </a>
+      </div>
     </div>
   </div>
 </div>

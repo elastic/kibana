@@ -146,7 +146,7 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
         isInvalid={hasError}
         selectedOptions={selectedOptions}
         fullWidth
-        data-test-subj="input"
+        data-test-subj="policyIdsComboBox"
         isClearable
         options={options}
         renderOption={renderOption}

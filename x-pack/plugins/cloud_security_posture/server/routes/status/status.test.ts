@@ -24,6 +24,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createCspRequestHandlerContextMock } from '../../mocks';
+import { errors } from '@elastic/elasticsearch';
 
 const mockCspPackageInfo: Installation = {
   verification_status: 'verified',
@@ -85,6 +86,77 @@ describe('CspSetupStatus route', () => {
     expect(config.path).toEqual('/internal/cloud_security_posture/status');
   });
 
+  const indices = [
+    {
+      index: 'logs-cloud_security_posture.findings-default*',
+      expected_status: 'not-installed',
+    },
+    {
+      index: 'logs-cloud_security_posture.findings_latest-default',
+      expected_status: 'unprivileged',
+    },
+    {
+      index: 'logs-cloud_security_posture.scores-default',
+      expected_status: 'unprivileged',
+    },
+  ];
+
+  indices.forEach((idxTestCase) => {
+    it(
+      'Verify the API result when there are no permissions to index: ' + idxTestCase.index,
+      async () => {
+        mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseImplementation(
+          (req) => {
+            if (req?.index === idxTestCase.index) {
+              throw new errors.ResponseError({
+                body: {
+                  error: {
+                    type: 'security_exception',
+                  },
+                },
+                statusCode: 503,
+                headers: {},
+                warnings: [],
+                meta: {} as any,
+              });
+            }
+
+            return {
+              hits: {
+                hits: [{}],
+              },
+            } as any;
+          }
+        );
+        mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
+
+        mockPackagePolicyService.list.mockResolvedValueOnce({
+          items: [],
+          total: 0,
+          page: 1,
+          perPage: 100,
+        });
+
+        // Act
+        defineGetCspStatusRoute(router);
+        const [_, handler] = router.get.mock.calls[0];
+
+        const mockResponse = httpServerMock.createResponseFactory();
+        const mockRequest = httpServerMock.createKibanaRequest();
+        await handler(mockContext, mockRequest, mockResponse);
+
+        // Assert
+        const [call] = mockResponse.ok.mock.calls;
+        const body = call[0]?.body;
+        expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+
+        await expect(body).toMatchObject({
+          status: idxTestCase.expected_status,
+        });
+      }
+    );
+  });
+
   it('Verify the API result when there are findings and no installed policies', async () => {
     mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
@@ -113,12 +185,13 @@ describe('CspSetupStatus route', () => {
     const body = call[0]?.body;
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
-    await expect(body).toEqual({
+    await expect(body).toMatchObject({
       status: 'indexed',
       latestPackageVersion: '0.0.14',
       installedPackagePolicies: 0,
       healthyAgents: 0,
       installedPackageVersion: undefined,
+      isPluginInitialized: false,
     });
   });
 
@@ -153,12 +226,13 @@ describe('CspSetupStatus route', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
-    await expect(body).toEqual({
+    await expect(body).toMatchObject({
       status: 'indexed',
       latestPackageVersion: '0.0.14',
       installedPackagePolicies: 3,
       healthyAgents: 0,
       installedPackageVersion: '0.0.14',
+      isPluginInitialized: false,
     });
   });
 
@@ -202,12 +276,13 @@ describe('CspSetupStatus route', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
-    await expect(body).toEqual({
+    await expect(body).toMatchObject({
       status: 'indexed',
       latestPackageVersion: '0.0.14',
       installedPackagePolicies: 3,
       healthyAgents: 1,
       installedPackageVersion: '0.0.14',
+      isPluginInitialized: false,
     });
   });
 
@@ -245,6 +320,7 @@ describe('CspSetupStatus route', () => {
       latestPackageVersion: '0.0.14',
       installedPackagePolicies: 0,
       healthyAgents: 0,
+      isPluginInitialized: false,
     });
   });
 
@@ -295,6 +371,7 @@ describe('CspSetupStatus route', () => {
       installedPackagePolicies: 1,
       healthyAgents: 0,
       installedPackageVersion: '0.0.14',
+      isPluginInitialized: false,
     });
   });
 
@@ -352,6 +429,7 @@ describe('CspSetupStatus route', () => {
       installedPackagePolicies: 1,
       healthyAgents: 1,
       installedPackageVersion: '0.0.14',
+      isPluginInitialized: false,
     });
   });
 
@@ -408,6 +486,7 @@ describe('CspSetupStatus route', () => {
       installedPackagePolicies: 1,
       healthyAgents: 1,
       installedPackageVersion: '0.0.14',
+      isPluginInitialized: false,
     });
   });
 });

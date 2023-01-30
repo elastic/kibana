@@ -6,13 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { of } from 'rxjs';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
-import type { UnifiedHistogramChartContext, UnifiedHistogramHitsContext } from '../types';
+import {
+  UnifiedHistogramChartContext,
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramHitsContext,
+} from '../types';
+import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from './layout';
 
@@ -30,19 +37,13 @@ jest.mock('@elastic/eui', () => {
 
 describe('Layout', () => {
   const createHits = (): UnifiedHistogramHitsContext => ({
-    status: 'complete',
+    status: UnifiedHistogramFetchStatus.complete,
     total: 10,
   });
 
   const createChart = (): UnifiedHistogramChartContext => ({
-    status: 'complete',
     hidden: false,
     timeInterval: 'auto',
-    bucketInterval: {
-      scaled: true,
-      description: 'test',
-      scale: 2,
-    },
   });
 
   const mountComponent = async ({
@@ -55,9 +56,9 @@ describe('Layout', () => {
     hits?: UnifiedHistogramHitsContext | null;
     chart?: UnifiedHistogramChartContext | null;
   } = {}) => {
-    services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
-      return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-    };
+    (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
+      jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
+    );
 
     const component = mountWithIntl(
       <UnifiedHistogramLayout
@@ -65,6 +66,16 @@ describe('Layout', () => {
         hits={hits ?? undefined}
         chart={chart ?? undefined}
         resizeRef={resizeRef}
+        dataView={dataViewWithTimefieldMock}
+        query={{
+          language: 'kuery',
+          query: '',
+        }}
+        filters={[]}
+        timeRange={{
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        }}
         {...rest}
       />
     );
@@ -118,7 +129,7 @@ describe('Layout', () => {
       const component = await mountComponent();
       setBreakpoint(component, 's');
       const expectedHeight = component.find(Panels).prop('topPanelHeight');
-      expect(component.find(Chart).childAt(0).getDOMNode()).toHaveStyle({
+      expect(component.find(Chart).find('div.euiFlexGroup').first().getDOMNode()).toHaveStyle({
         height: `${expectedHeight}px`,
       });
     });
@@ -127,7 +138,7 @@ describe('Layout', () => {
       const component = await mountComponent({ chart: { ...createChart(), hidden: true } });
       setBreakpoint(component, 's');
       const expectedHeight = component.find(Panels).prop('topPanelHeight');
-      expect(component.find(Chart).childAt(0).getDOMNode()).not.toHaveStyle({
+      expect(component.find(Chart).find('div.euiFlexGroup').first().getDOMNode()).not.toHaveStyle({
         height: `${expectedHeight}px`,
       });
     });
@@ -136,7 +147,7 @@ describe('Layout', () => {
       const component = await mountComponent({ chart: null });
       setBreakpoint(component, 's');
       const expectedHeight = component.find(Panels).prop('topPanelHeight');
-      expect(component.find(Chart).childAt(0).getDOMNode()).not.toHaveStyle({
+      expect(component.find(Chart).find('div.euiFlexGroup').first().getDOMNode()).not.toHaveStyle({
         height: `${expectedHeight}px`,
       });
     });

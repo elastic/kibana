@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import {
   AlertsCasesTourSteps,
@@ -25,7 +26,6 @@ import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_i
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { getFieldValue } from '../host_isolation/helpers';
-import type { Ecs } from '../../../../common/ecs';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -75,12 +75,12 @@ export const TakeActionDropdown = React.memo(
     scopeId,
   }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
-    const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
+    const { loading: endpointPrivilegesLoading, canWriteEventFilters } =
       useUserPrivileges().endpointPrivileges;
 
     const canCreateEndpointEventFilters = useMemo(
-      () => !canAccessEndpointManagementLoading && canAccessEndpointManagement,
-      [canAccessEndpointManagement, canAccessEndpointManagementLoading]
+      () => !endpointPrivilegesLoading && canWriteEventFilters,
+      [canWriteEventFilters, endpointPrivilegesLoading]
     );
     const { osquery } = useKibana().services;
 
@@ -168,7 +168,6 @@ export const TakeActionDropdown = React.memo(
 
     const { eventFilterActionItems } = useEventFilterAction({
       onAddEventFilterClick: handleOnAddEventFilterClick,
-      disabled: !isEndpointEvent || !canCreateEndpointEventFilters,
     });
 
     const onMenuItemClick = useCallback(() => {
@@ -210,12 +209,13 @@ export const TakeActionDropdown = React.memo(
       () =>
         !isEvent && actionsData.ruleId
           ? [...statusActionItems, ...exceptionActionItems]
-          : isEndpointEvent
+          : isEndpointEvent && canCreateEndpointEventFilters
           ? eventFilterActionItems
           : [],
       [
         eventFilterActionItems,
         isEndpointEvent,
+        canCreateEndpointEventFilters,
         exceptionActionItems,
         statusActionItems,
         isEvent,

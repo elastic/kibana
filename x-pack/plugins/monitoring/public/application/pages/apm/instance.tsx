@@ -15,7 +15,6 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { PageTemplate } from '../page_template';
-// @ts-ignore
 import { ApmServerInstance } from '../../../components/apm/instance';
 
 export const ApmInstancePage: React.FC<ComponentProps> = ({ clusters }) => {

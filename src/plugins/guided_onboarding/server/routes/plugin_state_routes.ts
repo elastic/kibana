@@ -10,7 +10,7 @@ import { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { GuideState } from '@kbn/guided-onboarding';
 import { getPluginState, updatePluginStatus } from '../helpers/plugin_state_utils';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH } from '../../common';
 import { updateGuideState } from '../helpers';
 
 export const registerGetPluginStateRoute = (router: IRouter) => {

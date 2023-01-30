@@ -11,7 +11,7 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { BATCH_SIZE } from './constants';
 

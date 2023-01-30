@@ -16,12 +16,23 @@ import {
   ADD_FILTER_FORM_OPERATOR_FIELD,
   ADD_FILTER_FORM_FIELD_OPTION,
   ADD_FILTER_FORM_FILTER_VALUE_INPUT,
+  GLOBAL_KQL_INPUT,
 } from '../screens/search_bar';
 
 export const openAddFilterPopover = () => {
   cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.enabled');
   cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).should('be.visible');
   cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).click();
+};
+
+export const openKqlQueryBar = () => {
+  cy.get(GLOBAL_KQL_INPUT).should('be.visible');
+  cy.get(GLOBAL_KQL_INPUT).click();
+};
+
+export const fillKqlQueryBar = (query: string) => {
+  cy.get(GLOBAL_KQL_INPUT).should('be.visible');
+  cy.get(GLOBAL_KQL_INPUT).type(query);
 };
 
 export const fillAddFilterForm = ({ key, value, operator }: SearchBarFilter) => {

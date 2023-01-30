@@ -24,3 +24,7 @@ export const initComponent = () => {
     return <CommentChildren id={indicatorId} metadata={metadata} />;
   };
 };
+
+// Note: This is for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default initComponent();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TableId } from '../../../common/types';
 import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
@@ -28,12 +29,11 @@ import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
-import { networkModel } from '../../network/store';
+import { networkModel } from '../../explore/network/store';
 import {
   TimelineType,
   TimelineStatus,
   TimelineTabs,
-  TableId,
   TimelineId,
 } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
@@ -42,7 +42,7 @@ import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/mo
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../store/sourcerer/helpers';
 import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
-import { usersModel } from '../../users/store';
+import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 
 export const mockSourcererState = {
@@ -349,6 +349,7 @@ export const mockGlobalState: State = {
         resolveTimelineConfig: undefined,
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
+        selectAll: false,
         sessionViewConfig: null,
         show: false,
         sort: [

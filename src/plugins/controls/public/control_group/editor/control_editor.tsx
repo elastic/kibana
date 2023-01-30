@@ -243,34 +243,41 @@ export const ControlEditor = ({
             />
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
-            <EuiButtonGroup
-              color="primary"
-              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-              options={CONTROL_WIDTH_OPTIONS}
-              idSelected={currentWidth}
-              onChange={(newWidth: string) => {
-                setCurrentWidth(newWidth as ControlWidth);
-                updateWidth(newWidth as ControlWidth);
-              }}
-            />
-          </EuiFormRow>
-          {updateGrow ? (
-            <EuiFormRow>
-              <EuiSwitch
-                label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
+            <>
+              <EuiButtonGroup
                 color="primary"
-                checked={currentGrow}
-                onChange={() => {
-                  setCurrentGrow(!currentGrow);
-                  updateGrow(!currentGrow);
+                legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+                options={CONTROL_WIDTH_OPTIONS}
+                idSelected={currentWidth}
+                onChange={(newWidth: string) => {
+                  setCurrentWidth(newWidth as ControlWidth);
+                  updateWidth(newWidth as ControlWidth);
                 }}
-                data-test-subj="control-editor-grow-switch"
               />
-            </EuiFormRow>
-          ) : null}
+              {updateGrow && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiSwitch
+                    label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
+                    color="primary"
+                    checked={currentGrow}
+                    onChange={() => {
+                      setCurrentGrow(!currentGrow);
+                      updateGrow(!currentGrow);
+                    }}
+                    data-test-subj="control-editor-grow-switch"
+                  />
+                </>
+              )}
+            </>
+          </EuiFormRow>
           {CustomSettings && (factory as IEditableControlFactory).controlEditorOptionsComponent && (
             <EuiFormRow label={ControlGroupStrings.manageControl.getControlSettingsTitle()}>
-              <CustomSettings onChange={onTypeEditorChange} initialInput={embeddable?.getInput()} />
+              <CustomSettings
+                onChange={onTypeEditorChange}
+                initialInput={embeddable?.getInput()}
+                fieldType={fieldRegistry[selectedField].field.type}
+              />
             </EuiFormRow>
           )}
           {removeControl && (

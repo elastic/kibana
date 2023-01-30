@@ -5,253 +5,6 @@
     "functions": [
       {
         "parentPluginId": "unifiedHistogram",
-        "id": "def-public.buildChartData",
-        "type": "Function",
-        "tags": [],
-        "label": "buildChartData",
-        "description": [
-          "\nConvert the response from the chart request into a format that can be used\nby the unified histogram chart. The returned object should be used to update\n{@link UnifiedHistogramChartContext.bucketInterval} and {@link UnifiedHistogramChartContext.data}."
-        ],
-        "signature": [
-          "({ data, dataView, timeInterval, response, }: { data: ",
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataPluginApi",
-            "section": "def-public.DataPublicPluginStart",
-            "text": "DataPublicPluginStart"
-          },
-          "; dataView: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "; timeInterval?: string | undefined; response?: ",
-          "SearchResponse",
-          "<unknown, Record<string, ",
-          "AggregationsAggregate",
-          ">> | undefined; }) => { bucketInterval?: undefined; chartData?: undefined; } | { bucketInterval: ",
-          {
-            "pluginId": "unifiedHistogram",
-            "scope": "public",
-            "docId": "kibUnifiedHistogramPluginApi",
-            "section": "def-public.UnifiedHistogramBucketInterval",
-            "text": "UnifiedHistogramBucketInterval"
-          },
-          " | undefined; chartData: ",
-          {
-            "pluginId": "unifiedHistogram",
-            "scope": "public",
-            "docId": "kibUnifiedHistogramPluginApi",
-            "section": "def-public.UnifiedHistogramChartData",
-            "text": "UnifiedHistogramChartData"
-          },
-          "; }"
-        ],
-        "path": "src/plugins/unified_histogram/public/chart/build_chart_data.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.buildChartData.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  data,\n  dataView,\n  timeInterval,\n  response,\n}",
-            "description": [],
-            "path": "src/plugins/unified_histogram/public/chart/build_chart_data.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedHistogram",
-                "id": "def-public.buildChartData.$1.data",
-                "type": "Object",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "public",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-public.DataPublicPluginStart",
-                    "text": "DataPublicPluginStart"
-                  }
-                ],
-                "path": "src/plugins/unified_histogram/public/chart/build_chart_data.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "unifiedHistogram",
-                "id": "def-public.buildChartData.$1.dataView",
-                "type": "Object",
-                "tags": [],
-                "label": "dataView",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataView",
-                    "text": "DataView"
-                  }
-                ],
-                "path": "src/plugins/unified_histogram/public/chart/build_chart_data.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "unifiedHistogram",
-                "id": "def-public.buildChartData.$1.timeInterval",
-                "type": "string",
-                "tags": [],
-                "label": "timeInterval",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/plugins/unified_histogram/public/chart/build_chart_data.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "unifiedHistogram",
-                "id": "def-public.buildChartData.$1.response",
-                "type": "Object",
-                "tags": [],
-                "label": "response",
-                "description": [],
-                "signature": [
-                  "SearchResponse",
-                  "<unknown, Record<string, ",
-                  "AggregationsAggregate",
-                  ">> | undefined"
-                ],
-                "path": "src/plugins/unified_histogram/public/chart/build_chart_data.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedHistogram",
-        "id": "def-public.getChartAggConfigs",
-        "type": "Function",
-        "tags": [],
-        "label": "getChartAggConfigs",
-        "description": [
-          "\nHelper function to get the agg configs required for the unified histogram chart request"
-        ],
-        "signature": [
-          "({\n  dataView,\n  timeInterval,\n  data,\n}: { dataView: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "; timeInterval: string; data: ",
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataPluginApi",
-            "section": "def-public.DataPublicPluginStart",
-            "text": "DataPublicPluginStart"
-          },
-          "; }) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.AggConfigs",
-            "text": "AggConfigs"
-          }
-        ],
-        "path": "src/plugins/unified_histogram/public/chart/get_chart_agg_configs.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.getChartAggConfigs.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  dataView,\n  timeInterval,\n  data,\n}",
-            "description": [],
-            "path": "src/plugins/unified_histogram/public/chart/get_chart_agg_configs.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedHistogram",
-                "id": "def-public.getChartAggConfigs.$1.dataView",
-                "type": "Object",
-                "tags": [],
-                "label": "dataView",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataView",
-                    "text": "DataView"
-                  }
-                ],
-                "path": "src/plugins/unified_histogram/public/chart/get_chart_agg_configs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "unifiedHistogram",
-                "id": "def-public.getChartAggConfigs.$1.timeInterval",
-                "type": "string",
-                "tags": [],
-                "label": "timeInterval",
-                "description": [],
-                "path": "src/plugins/unified_histogram/public/chart/get_chart_agg_configs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "unifiedHistogram",
-                "id": "def-public.getChartAggConfigs.$1.data",
-                "type": "Object",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "public",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-public.DataPublicPluginStart",
-                    "text": "DataPublicPluginStart"
-                  }
-                ],
-                "path": "src/plugins/unified_histogram/public/chart/get_chart_agg_configs.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedHistogram",
         "id": "def-public.UnifiedHistogramLayout",
         "type": "Function",
         "tags": [],
@@ -296,12 +49,12 @@
     "interfaces": [
       {
         "parentPluginId": "unifiedHistogram",
-        "id": "def-public.UnifiedHistogramBucketInterval",
+        "id": "def-public.UnifiedHistogramBreakdownContext",
         "type": "Interface",
         "tags": [],
-        "label": "UnifiedHistogramBucketInterval",
+        "label": "UnifiedHistogramBreakdownContext",
         "description": [
-          "\nThe bucketInterval object returned by {@link buildChartData} that\nshould be used to set {@link UnifiedHistogramChartContext.bucketInterval}"
+          "\nContext object for the histogram breakdown"
         ],
         "path": "src/plugins/unified_histogram/public/types.ts",
         "deprecated": false,
@@ -309,41 +62,22 @@
         "children": [
           {
             "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramBucketInterval.scaled",
-            "type": "CompoundType",
+            "id": "def-public.UnifiedHistogramBreakdownContext.field",
+            "type": "Object",
             "tags": [],
-            "label": "scaled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
+            "label": "field",
+            "description": [
+              "\nThe field used for the breakdown"
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramBucketInterval.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
             "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramBucketInterval.scale",
-            "type": "number",
-            "tags": [],
-            "label": "scale",
-            "description": [],
-            "signature": [
-              "number | undefined"
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
@@ -365,22 +99,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartContext.status",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "status",
-            "description": [
-              "\nThe fetch status of the chart request"
-            ],
-            "signature": [
-              "\"loading\" | \"error\" | \"complete\" | \"partial\" | \"uninitialized\""
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "unifiedHistogram",
             "id": "def-public.UnifiedHistogramChartContext.hidden",
@@ -415,61 +133,15 @@
           },
           {
             "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartContext.bucketInterval",
-            "type": "Object",
+            "id": "def-public.UnifiedHistogramChartContext.title",
+            "type": "string",
             "tags": [],
-            "label": "bucketInterval",
+            "label": "title",
             "description": [
-              "\nThe bucketInterval object returned by {@link buildChartData}"
+              "\nThe chart title -- sets the title property on the Lens chart input"
             ],
             "signature": [
-              {
-                "pluginId": "unifiedHistogram",
-                "scope": "public",
-                "docId": "kibUnifiedHistogramPluginApi",
-                "section": "def-public.UnifiedHistogramBucketInterval",
-                "text": "UnifiedHistogramBucketInterval"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartContext.data",
-            "type": "Object",
-            "tags": [],
-            "label": "data",
-            "description": [
-              "\nThe chartData object returned by {@link buildChartData}"
-            ],
-            "signature": [
-              {
-                "pluginId": "unifiedHistogram",
-                "scope": "public",
-                "docId": "kibUnifiedHistogramPluginApi",
-                "section": "def-public.UnifiedHistogramChartData",
-                "text": "UnifiedHistogramChartData"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartContext.error",
-            "type": "Object",
-            "tags": [],
-            "label": "error",
-            "description": [
-              "\nError from failed chart request"
-            ],
-            "signature": [
-              "Error | undefined"
+              "string | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
@@ -480,12 +152,12 @@
       },
       {
         "parentPluginId": "unifiedHistogram",
-        "id": "def-public.UnifiedHistogramChartData",
+        "id": "def-public.UnifiedHistogramChartLoadEvent",
         "type": "Interface",
         "tags": [],
-        "label": "UnifiedHistogramChartData",
+        "label": "UnifiedHistogramChartLoadEvent",
         "description": [
-          "\nThe chartData object returned by {@link buildChartData} that\nshould be used to set {@link UnifiedHistogramChartContext.data}"
+          "\nEmitted when the histogram loading status changes"
         ],
         "path": "src/plugins/unified_histogram/public/types.ts",
         "deprecated": false,
@@ -493,110 +165,39 @@
         "children": [
           {
             "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartData.values",
-            "type": "Array",
-            "tags": [],
-            "label": "values",
-            "description": [],
-            "signature": [
-              "{ x: number; y: number; }[]"
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartData.xAxisOrderedValues",
-            "type": "Array",
-            "tags": [],
-            "label": "xAxisOrderedValues",
-            "description": [],
-            "signature": [
-              "number[]"
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartData.xAxisFormat",
+            "id": "def-public.UnifiedHistogramChartLoadEvent.adapters",
             "type": "Object",
             "tags": [],
-            "label": "xAxisFormat",
-            "description": [],
+            "label": "adapters",
+            "description": [
+              "\nInspector adapters for the request"
+            ],
             "signature": [
-              "{ id?: string | undefined; params?: ",
+              "{ requests?: ",
               {
-                "pluginId": "fieldFormats",
+                "pluginId": "inspector",
                 "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestAdapter",
+                "text": "RequestAdapter"
               },
-              "<{ pattern: string; }> | undefined; }"
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartData.yAxisFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "yAxisFormat",
-            "description": [],
-            "signature": [
-              "{ id?: string | undefined; params?: ",
+              " | undefined; tables?: ",
               {
-                "pluginId": "fieldFormats",
+                "pluginId": "expressions",
                 "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.TablesAdapter",
+                "text": "TablesAdapter"
               },
-              "<{ pattern: string; }> | undefined; }"
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartData.xAxisLabel",
-            "type": "string",
-            "tags": [],
-            "label": "xAxisLabel",
-            "description": [],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartData.yAxisLabel",
-            "type": "string",
-            "tags": [],
-            "label": "yAxisLabel",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramChartData.ordered",
-            "type": "Object",
-            "tags": [],
-            "label": "ordered",
-            "description": [],
-            "signature": [
-              "Ordered"
+              " | undefined; expression?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionsInspectorAdapter",
+                "text": "ExpressionsInspectorAdapter"
+              },
+              " | undefined; }"
             ],
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
@@ -628,7 +229,14 @@
               "\nThe fetch status of the hits count request"
             ],
             "signature": [
-              "\"loading\" | \"error\" | \"complete\" | \"partial\" | \"uninitialized\""
+              {
+                "pluginId": "unifiedHistogram",
+                "scope": "public",
+                "docId": "kibUnifiedHistogramPluginApi",
+                "section": "def-public.UnifiedHistogramFetchStatus",
+                "text": "UnifiedHistogramFetchStatus"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
@@ -680,7 +288,9 @@
             "type": "string",
             "tags": [],
             "label": "className",
-            "description": [],
+            "description": [
+              "\nOptional class name to add to the layout container"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -694,7 +304,9 @@
             "type": "Object",
             "tags": [],
             "label": "services",
-            "description": [],
+            "description": [
+              "\nRequired services"
+            ],
             "signature": [
               {
                 "pluginId": "unifiedHistogram",
@@ -703,6 +315,128 @@
                 "section": "def-public.UnifiedHistogramServices",
                 "text": "UnifiedHistogramServices"
               }
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "\nThe current data view"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.query",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "\nThe current query"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "\nThe current filters"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [
+              "\nThe current time range"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nContext object for requests made by unified histogram components -- optional"
+            ],
+            "signature": [
+              {
+                "pluginId": "unifiedHistogram",
+                "scope": "public",
+                "docId": "kibUnifiedHistogramPluginApi",
+                "section": "def-public.UnifiedHistogramRequestContext",
+                "text": "UnifiedHistogramRequestContext"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
             "deprecated": false,
@@ -747,6 +481,29 @@
                 "docId": "kibUnifiedHistogramPluginApi",
                 "section": "def-public.UnifiedHistogramChartContext",
                 "text": "UnifiedHistogramChartContext"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.breakdown",
+            "type": "Object",
+            "tags": [],
+            "label": "breakdown",
+            "description": [
+              "\nContext object for the breakdown -- leave undefined to hide the breakdown"
+            ],
+            "signature": [
+              {
+                "pluginId": "unifiedHistogram",
+                "scope": "public",
+                "docId": "kibUnifiedHistogramPluginApi",
+                "section": "def-public.UnifiedHistogramBreakdownContext",
+                "text": "UnifiedHistogramBreakdownContext"
               },
               " | undefined"
             ],
@@ -804,6 +561,71 @@
           },
           {
             "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.disableAutoFetching",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableAutoFetching",
+            "description": [
+              "\nDisable automatic refetching based on props changes, and instead wait for a `refetch` message"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.disableTriggers",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableTriggers",
+            "description": [
+              "\nDisable triggers for the Lens embeddable"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.disabledActions",
+            "type": "Array",
+            "tags": [],
+            "label": "disabledActions",
+            "description": [
+              "\nDisabled action IDs for the Lens embeddable"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.input$",
+            "type": "Object",
+            "tags": [],
+            "label": "input$",
+            "description": [
+              "\nInput observable"
+            ],
+            "signature": [
+              "UnifiedHistogramInput",
+              "$ | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
             "id": "def-public.UnifiedHistogramLayoutProps.onTopPanelHeightChange",
             "type": "Function",
             "tags": [],
@@ -846,12 +668,128 @@
               "\nCallback to invoke when the user clicks the edit visualization button -- leave undefined to hide the button"
             ],
             "signature": [
-              "(() => void) | undefined"
+              "((lensAttributes: LensAttributes<\"lnsXY\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.XYState",
+                "text": "XYState"
+              },
+              "> | LensAttributes<\"lnsPie\", ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.PieVisualizationState",
+                "text": "PieVisualizationState"
+              },
+              "> | LensAttributes<\"lnsDatatable\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DatatableVisualizationState",
+                "text": "DatatableVisualizationState"
+              },
+              "> | LensAttributes<\"lnsLegacyMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.LegacyMetricState",
+                "text": "LegacyMetricState"
+              },
+              "> | LensAttributes<\"lnsMetric\", ",
+              "MetricVisualizationState",
+              "> | LensAttributes<\"lnsHeatmap\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.HeatmapVisualizationState",
+                "text": "HeatmapVisualizationState"
+              },
+              "> | LensAttributes<\"lnsGauge\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.GaugeVisualizationState",
+                "text": "GaugeVisualizationState"
+              },
+              "> | LensAttributes<string, unknown>) => void) | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "unifiedHistogram",
+                "id": "def-public.UnifiedHistogramLayoutProps.onEditVisualization.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "lensAttributes",
+                "description": [],
+                "signature": [
+                  "LensAttributes<\"lnsXY\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.XYState",
+                    "text": "XYState"
+                  },
+                  "> | LensAttributes<\"lnsPie\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "common",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-common.PieVisualizationState",
+                    "text": "PieVisualizationState"
+                  },
+                  "> | LensAttributes<\"lnsDatatable\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.DatatableVisualizationState",
+                    "text": "DatatableVisualizationState"
+                  },
+                  "> | LensAttributes<\"lnsLegacyMetric\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "common",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-common.LegacyMetricState",
+                    "text": "LegacyMetricState"
+                  },
+                  "> | LensAttributes<\"lnsMetric\", ",
+                  "MetricVisualizationState",
+                  "> | LensAttributes<\"lnsHeatmap\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.HeatmapVisualizationState",
+                    "text": "HeatmapVisualizationState"
+                  },
+                  "> | LensAttributes<\"lnsGauge\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.GaugeVisualizationState",
+                    "text": "GaugeVisualizationState"
+                  },
+                  "> | LensAttributes<string, unknown>"
+                ],
+                "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -921,6 +859,307 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.onBreakdownFieldChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onBreakdownFieldChange",
+            "description": [
+              "\nCallback to update the breakdown field -- should set {@link UnifiedHistogramBreakdownContext.field} to breakdownField"
+            ],
+            "signature": [
+              "((breakdownField: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined) => void) | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedHistogram",
+                "id": "def-public.UnifiedHistogramLayoutProps.onBreakdownFieldChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "breakdownField",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.onTotalHitsChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onTotalHitsChange",
+            "description": [
+              "\nCallback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status\nand {@link UnifiedHistogramHitsContext.total} to result"
+            ],
+            "signature": [
+              "((status: ",
+              {
+                "pluginId": "unifiedHistogram",
+                "scope": "public",
+                "docId": "kibUnifiedHistogramPluginApi",
+                "section": "def-public.UnifiedHistogramFetchStatus",
+                "text": "UnifiedHistogramFetchStatus"
+              },
+              ", result?: number | Error | undefined) => void) | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedHistogram",
+                "id": "def-public.UnifiedHistogramLayoutProps.onTotalHitsChange.$1",
+                "type": "Enum",
+                "tags": [],
+                "label": "status",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "unifiedHistogram",
+                    "scope": "public",
+                    "docId": "kibUnifiedHistogramPluginApi",
+                    "section": "def-public.UnifiedHistogramFetchStatus",
+                    "text": "UnifiedHistogramFetchStatus"
+                  }
+                ],
+                "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "unifiedHistogram",
+                "id": "def-public.UnifiedHistogramLayoutProps.onTotalHitsChange.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "result",
+                "description": [],
+                "signature": [
+                  "number | Error | undefined"
+                ],
+                "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.onChartLoad",
+            "type": "Function",
+            "tags": [],
+            "label": "onChartLoad",
+            "description": [
+              "\nCalled when the histogram loading status changes"
+            ],
+            "signature": [
+              "((event: ",
+              {
+                "pluginId": "unifiedHistogram",
+                "scope": "public",
+                "docId": "kibUnifiedHistogramPluginApi",
+                "section": "def-public.UnifiedHistogramChartLoadEvent",
+                "text": "UnifiedHistogramChartLoadEvent"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedHistogram",
+                "id": "def-public.UnifiedHistogramLayoutProps.onChartLoad.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "unifiedHistogram",
+                    "scope": "public",
+                    "docId": "kibUnifiedHistogramPluginApi",
+                    "section": "def-public.UnifiedHistogramChartLoadEvent",
+                    "text": "UnifiedHistogramChartLoadEvent"
+                  }
+                ],
+                "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.onFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "onFilter",
+            "description": [
+              "\nCallback to pass to the Lens embeddable to handle filter changes"
+            ],
+            "signature": [
+              "((data: { data: { table: Pick<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; } | { data: { table: Pick<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", \"rows\" | \"columns\">; column: number; value: any[]; }; timeFieldName?: string | undefined; negate?: boolean | undefined; }) => void) | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramLayoutProps.onBrushEnd",
+            "type": "Function",
+            "tags": [],
+            "label": "onBrushEnd",
+            "description": [
+              "\nCallback to pass to the Lens embeddable to handle brush events"
+            ],
+            "signature": [
+              "((data: { table: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              "; column: number; range: number[]; timeFieldName?: string | undefined; }) => void) | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/layout/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramRefetchMessage",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedHistogramRefetchMessage",
+        "description": [
+          "\nMessage to refetch the chart and total hits"
+        ],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramRefetchMessage.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"refetch\""
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramRequestContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedHistogramRequestContext",
+        "description": [
+          "\nContext object for requests made by unified histogram components"
+        ],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramRequestContext.searchSessionId",
+            "type": "string",
+            "tags": [],
+            "label": "searchSessionId",
+            "description": [
+              "\nCurrent search session ID"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramRequestContext.adapter",
+            "type": "Object",
+            "tags": [],
+            "label": "adapter",
+            "description": [
+              "\nThe adapter to use for requests (does not apply to Lens requests)"
+            ],
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestAdapter",
+                "text": "RequestAdapter"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1045,24 +1284,130 @@
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramServices.lens",
+            "type": "Object",
+            "tags": [],
+            "label": "lens",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensPublicStart",
+                "text": "LensPublicStart"
+              }
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [
+    "enums": [
       {
         "parentPluginId": "unifiedHistogram",
         "id": "def-public.UnifiedHistogramFetchStatus",
-        "type": "Type",
+        "type": "Enum",
         "tags": [],
         "label": "UnifiedHistogramFetchStatus",
         "description": [
           "\nThe fetch status of a unified histogram request"
         ],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramAdapters",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedHistogramAdapters",
+        "description": [],
         "signature": [
-          "\"loading\" | \"error\" | \"complete\" | \"partial\" | \"uninitialized\""
+          "{ requests?: ",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.RequestAdapter",
+            "text": "RequestAdapter"
+          },
+          " | undefined; tables?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.TablesAdapter",
+            "text": "TablesAdapter"
+          },
+          " | undefined; expression?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionsInspectorAdapter",
+            "text": "ExpressionsInspectorAdapter"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramInput$",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedHistogramInput$",
+        "description": [
+          "\nUnified histogram input observable"
+        ],
+        "signature": [
+          "Subject",
+          "<",
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramRefetchMessage",
+            "text": "UnifiedHistogramRefetchMessage"
+          },
+          ">"
+        ],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramInputMessage",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedHistogramInputMessage",
+        "description": [
+          "\nUnified histogram input message"
+        ],
+        "signature": [
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramRefetchMessage",
+            "text": "UnifiedHistogramRefetchMessage"
+          }
         ],
         "path": "src/plugins/unified_histogram/public/types.ts",
         "deprecated": false,

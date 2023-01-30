@@ -9,12 +9,13 @@ import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { AlertStatusFilter } from '../../../../common/typings';
+import { ALERT_STATUS_ALL } from '../../../../common/constants';
 
 export const DEFAULT_QUERIES: Query[] = [];
 export const DEFAULT_QUERY_STRING = '';
 
 export const ALL_ALERTS: AlertStatusFilter = {
-  status: '',
+  status: ALERT_STATUS_ALL,
   query: '',
   label: i18n.translate('xpack.observability.alerts.alertStatusFilter.showAll', {
     defaultMessage: 'Show all',

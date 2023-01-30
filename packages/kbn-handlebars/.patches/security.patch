@@ -1,12 +1,8 @@
-1,10c1,15
+1,6c1,6
 < describe('security issues', function() {
 <   describe('GH-1495: Prevent Remote Code Execution via constructor', function() {
 <     it('should not allow constructors to be accessed', function() {
 <       expectTemplate('{{lookup (lookup this "constructor") "name"}}')
-<         .withInput({})
-<         .toCompileTo('');
-< 
-<       expectTemplate('{{constructor.name}}')
 <         .withInput({})
 <         .toCompileTo('');
 ---
@@ -16,7 +12,11 @@
 >  * Elasticsearch B.V. licenses this file to you under the MIT License.
 >  * See `packages/kbn-handlebars/LICENSE` for more information.
 >  */
-> 
+8,10c8,15
+<       expectTemplate('{{constructor.name}}')
+<         .withInput({})
+<         .toCompileTo('');
+---
 > import Handlebars from '../..';
 > import { expectTemplate } from '../__jest__/test_bench';
 > 
@@ -150,7 +150,7 @@
 <       '{{lookup this "__proto__"}}'
 ---
 >       '{{lookup this "__proto__"}}',
-144,257c111,114
+144,382c111,114
 <     templates.forEach(function(template) {
 <       describe('access should be denied to ' + template, function() {
 <         it('by default', function() {
@@ -265,12 +265,7 @@
 <             .toCompileTo('');
 < 
 <           expect(spy.callCount).to.equal(0);
----
->     templates.forEach((template) => {
->       describe('access should be denied to ' + template, () => {
->         it('by default', () => {
->           expectTemplate(template).withInput({}).toCompileTo('');
-259,399d115
+<         });
 < 
 <         it('can be turned off, if turned on by default', function() {
 <           expectTemplate('{{aMethod}}')
@@ -395,8 +390,12 @@
 <         sinon.replace(handlebarsEnv, 'template', function(templateSpec) {
 <           templateSpec.main = wrapToAdjustContainer(templateSpec.main);
 <           return oldTemplateMethod.call(this, templateSpec);
-<         });
-<       });
+---
+>     templates.forEach((template) => {
+>       describe('access should be denied to ' + template, () => {
+>         it('by default', () => {
+>           expectTemplate(template).withInput({}).toCompileTo('');
+385,400d116
 < 
 <       afterEach(function() {
 <         sinon.restore();
@@ -412,6 +411,7 @@
 <         expectTemplate('{{anArray.length}}')
 <           .withInput({ anArray: ['a', 'b', 'c'] })
 <           .toCompileTo('3');
+<       });
 404,409c120,122
 <   describe('escapes template variables', function() {
 <     it('in compat mode', function() {

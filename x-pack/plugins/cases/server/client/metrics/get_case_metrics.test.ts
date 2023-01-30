@@ -45,7 +45,7 @@ describe('getCaseMetrics', () => {
     ({ mockServices, clientArgs } = createMockClientArgs());
 
     jest.clearAllMocks();
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(currentTime);
   });
 
@@ -181,9 +181,6 @@ function createMockClientArgs() {
   });
 
   const authorization = createAuthorizationMock();
-  authorization.getAuthorizationFilter.mockImplementation(async () => {
-    return { filter: undefined, ensureSavedObjectsAreAuthorized: () => {} };
-  });
 
   const soClient = savedObjectsClientMock.create();
 
@@ -202,7 +199,7 @@ function createMockClientArgs() {
   const logger = loggingSystemMock.createLogger();
 
   const userActionService = createUserActionServiceMock();
-  userActionService.findStatusChanges.mockImplementation(async () => {
+  userActionService.finder.findStatusChanges.mockImplementation(async () => {
     return [
       createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date('2021-11-23T20:00:43Z')),
     ];

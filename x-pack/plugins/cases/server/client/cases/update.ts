@@ -305,7 +305,6 @@ export const update = async (
   clientArgs: CasesClientArgs
 ): Promise<CasesResponse> => {
   const {
-    unsecuredSavedObjectsClient,
     services: {
       caseService,
       userActionService,
@@ -445,8 +444,7 @@ export const update = async (
       ];
     }, [] as CaseResponse[]);
 
-    await userActionService.bulkCreateUpdateCase({
-      unsecuredSavedObjectsClient,
+    await userActionService.creator.bulkCreateUpdateCase({
       originalCases: myCases.saved_objects,
       updatedCases: updatedCases.saved_objects,
       user,

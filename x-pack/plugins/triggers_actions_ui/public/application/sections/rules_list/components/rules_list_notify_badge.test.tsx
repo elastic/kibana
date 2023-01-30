@@ -62,7 +62,7 @@ describe('RulesListNotifyBadge', () => {
   });
 
   it('renders the notify badge correctly', async () => {
-    jest.useFakeTimers('modern').setSystemTime(moment('1990-01-01').toDate());
+    jest.useFakeTimers().setSystemTime(moment('1990-01-01').toDate());
 
     const wrapper = mountWithIntl(
       <RulesListNotifyBadge
@@ -109,7 +109,7 @@ describe('RulesListNotifyBadge', () => {
   });
 
   it('should allow the user to snooze rules', async () => {
-    jest.useFakeTimers('modern').setSystemTime(moment('1990-01-01').toDate());
+    jest.useFakeTimers().setSystemTime(moment('1990-01-01').toDate());
     const wrapper = mountWithIntl(
       <RulesListNotifyBadge
         rule={getRule({
@@ -150,7 +150,7 @@ describe('RulesListNotifyBadge', () => {
   });
 
   it('should allow the user to unsnooze rules', async () => {
-    jest.useFakeTimers('modern').setSystemTime(moment('1990-01-01').toDate());
+    jest.useFakeTimers().setSystemTime(moment('1990-01-01').toDate());
     const wrapper = mountWithIntl(
       <RulesListNotifyBadge
         rule={getRule({

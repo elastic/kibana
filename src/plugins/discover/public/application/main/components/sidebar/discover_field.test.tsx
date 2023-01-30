@@ -9,18 +9,22 @@
 import { act } from 'react-dom/test-utils';
 import { EuiPopover, EuiProgress, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DiscoverField, DiscoverFieldProps } from './discover_field';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { FetchStatus } from '../../../types';
+import { DataDocuments$ } from '../../services/discover_data_state_container';
+import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
+import * as DetailsUtil from './deprecated_stats/get_details';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+
+jest.spyOn(DetailsUtil, 'getDetails');
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -41,8 +45,6 @@ jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
     },
   }),
 }));
-
-const dataServiceMock = dataPluginMock.createStartContract();
 
 jest.mock('../../../../kibana_services', () => ({
   getUiActions: jest.fn(() => {
@@ -80,10 +82,16 @@ async function getComponent({
   const dataView = stubDataView;
   dataView.toSpec = () => ({});
 
+  const hits = getDataTableRecords(dataView);
+  const documents$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: hits,
+  }) as DataDocuments$;
+
   const props: DiscoverFieldProps = {
+    documents$,
     dataView: stubDataView,
     field: finalField,
-    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2 })),
     ...(onAddFilterExists && { onAddFilter: jest.fn() }),
     onAddField: jest.fn(),
     onEditField: jest.fn(),
@@ -93,11 +101,7 @@ async function getComponent({
     contextualFields: [],
   };
   const services = {
-    history: () => ({
-      location: {
-        search: '',
-      },
-    }),
+    ...createDiscoverServicesMock(),
     capabilities: {
       visualize: {
         show: true,
@@ -113,27 +117,8 @@ async function getComponent({
         }
       },
     },
-    data: {
-      ...dataServiceMock,
-      query: {
-        ...dataServiceMock.query,
-        timefilter: {
-          ...dataServiceMock.query.timefilter,
-          timefilter: {
-            ...dataServiceMock.query.timefilter.timefilter,
-            getAbsoluteTime: () => ({
-              from: '2021-08-31T22:00:00.000Z',
-              to: '2022-09-01T09:16:29.553Z',
-            }),
-          },
-        },
-      },
-    },
-    dataViews: dataViewPluginMocks.createStartContract(),
-    fieldFormats: fieldFormatsServiceMock.createStartContract(),
-    charts: chartPluginMock.createSetupContract(),
   };
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
   appStateContainer.set({
     query: { query: '', language: 'lucene' },
     filters: [],
@@ -152,6 +137,10 @@ async function getComponent({
 }
 
 describe('discover sidebar field', function () {
+  beforeEach(() => {
+    (DetailsUtil.getDetails as jest.Mock).mockClear();
+  });
+
   it('should allow selecting fields', async function () {
     const { comp, props } = await getComponent({});
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
@@ -162,14 +151,15 @@ describe('discover sidebar field', function () {
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
   });
-  it('should trigger getDetails', async function () {
+  it('should trigger getDetails for showing the deprecated field stats', async function () {
     const { comp, props } = await getComponent({
       selected: true,
       showFieldStats: true,
       showLegacyFieldTopValues: true,
     });
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
-    expect(props.getDetails).toHaveBeenCalledWith(props.field);
+    expect(DetailsUtil.getDetails).toHaveBeenCalledTimes(1);
+    expect(findTestSubject(comp, `discoverFieldDetails-${props.field.name}`).exists()).toBeTruthy();
   });
   it('should not allow clicking on _source', async function () {
     const field = new DataViewField({
@@ -180,13 +170,13 @@ describe('discover sidebar field', function () {
       aggregatable: true,
       readFromDocValues: true,
     });
-    const { comp, props } = await getComponent({
+    const { comp } = await getComponent({
       selected: true,
       field,
       showLegacyFieldTopValues: true,
     });
     findTestSubject(comp, 'field-_source-showDetails').simulate('click');
-    expect(props.getDetails).not.toHaveBeenCalled();
+    expect(DetailsUtil.getDetails).not.toHaveBeenCalledWith();
   });
   it('displays warning for conflicting fields', async function () {
     const field = new DataViewField({
@@ -205,16 +195,16 @@ describe('discover sidebar field', function () {
     expect(dscField.find('.kbnFieldButton__infoIcon').length).toEqual(1);
   });
   it('should not execute getDetails when rendered, since it can be expensive', async function () {
-    const { props } = await getComponent({});
-    expect(props.getDetails).toHaveBeenCalledTimes(0);
+    await getComponent({});
+    expect(DetailsUtil.getDetails).toHaveBeenCalledTimes(0);
   });
   it('should execute getDetails when show details is requested', async function () {
-    const { props, comp } = await getComponent({
+    const { comp } = await getComponent({
       showFieldStats: true,
       showLegacyFieldTopValues: true,
     });
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
-    expect(props.getDetails).toHaveBeenCalledTimes(1);
+    expect(DetailsUtil.getDetails).toHaveBeenCalledTimes(1);
   });
   it('should not return the popover if onAddFilter is not provided', async function () {
     const field = new DataViewField({

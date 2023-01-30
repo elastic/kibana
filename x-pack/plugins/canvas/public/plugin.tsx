@@ -29,6 +29,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { CanvasAppLocatorDefinition } from '../common/locator';
 import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
@@ -62,6 +63,7 @@ export interface CanvasStartDeps {
   uiActions: UiActionsStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   visualizations: VisualizationsStart;
   spaces?: SpacesPluginStart;
