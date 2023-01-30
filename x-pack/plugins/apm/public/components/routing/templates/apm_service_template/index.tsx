@@ -23,6 +23,8 @@ import { useHistory } from 'react-router-dom';
 import {
   isMobileAgentName,
   isRumAgentName,
+  isAWSLambdaAgent,
+  isAzureFunctionsAgent,
   isServerlessAgent,
 } from '../../../../../common/agent_name';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -42,6 +44,7 @@ import { ServiceIcons } from '../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { ServerlessType } from '../../../../../common/serverless';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -167,33 +170,37 @@ function TemplateWithContext({
 
 export function isMetricsTabHidden({
   agentName,
-  runtimeName,
+  serverlessType,
   isAwsLambdaEnabled,
 }: {
   agentName?: string;
-  runtimeName?: string;
+  serverlessType?: ServerlessType;
   isAwsLambdaEnabled?: boolean;
 }) {
-  if (isServerlessAgent(runtimeName)) {
+  if (isAWSLambdaAgent(serverlessType)) {
     return !isAwsLambdaEnabled;
   }
-  return !agentName || isRumAgentName(agentName);
+  return (
+    !agentName ||
+    isRumAgentName(agentName) ||
+    isAzureFunctionsAgent(serverlessType)
+  );
 }
 
 export function isInfraTabHidden({
   agentName,
-  runtimeName,
+  serverlessType,
 }: {
   agentName?: string;
-  runtimeName?: string;
+  serverlessType?: ServerlessType;
 }) {
   return (
-    !agentName || isRumAgentName(agentName) || isServerlessAgent(runtimeName)
+    !agentName || isRumAgentName(agentName) || isServerlessAgent(serverlessType)
   );
 }
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
-  const { agentName, runtimeName } = useApmServiceContext();
+  const { agentName, serverlessType } = useApmServiceContext();
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
@@ -213,6 +220,9 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     query: queryFromUrl,
   } = useApmParams(`/services/{serviceName}/${selectedTab}` as const);
 
+  const { rangeFrom, rangeTo, environment } = queryFromUrl;
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { data: serviceAlertsCount = { alertsCount: 0 } } = useFetcher(
     (callApmApi) => {
       return callApmApi(
@@ -222,11 +232,16 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
             path: {
               serviceName,
             },
+            query: {
+              start,
+              end,
+              environment,
+            },
           },
         }
       );
     },
-    [serviceName]
+    [serviceName, start, end, environment]
   );
 
   const query = omit(
@@ -288,12 +303,12 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      append: isServerlessAgent(runtimeName) && (
+      append: isServerlessAgent(serverlessType) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
       hidden: isMetricsTabHidden({
         agentName,
-        runtimeName,
+        serverlessType,
         isAwsLambdaEnabled,
       }),
     },
@@ -307,7 +322,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
-      hidden: isInfraTabHidden({ agentName, runtimeName }),
+      hidden: isInfraTabHidden({ agentName, serverlessType }),
     },
     {
       key: 'service-map',
@@ -328,10 +343,13 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: isServerlessAgent(runtimeName) && (
+      append: isServerlessAgent(serverlessType) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
-      hidden: !agentName || isRumAgentName(agentName),
+      hidden:
+        !agentName ||
+        isRumAgentName(agentName) ||
+        isAzureFunctionsAgent(serverlessType),
     },
     {
       key: 'alerts',

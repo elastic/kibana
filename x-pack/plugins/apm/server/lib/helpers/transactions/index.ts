@@ -13,6 +13,8 @@ import {
   TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_ROOT,
   PARENT_ID,
+  METRICSET_INTERVAL,
+  METRICSET_NAME,
 } from '../../../../common/es_fields/apm';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
@@ -98,7 +100,17 @@ export function getDocumentTypeFilterForTransactions(
   searchAggregatedTransactions: boolean
 ) {
   return searchAggregatedTransactions
-    ? [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }]
+    ? [
+        {
+          bool: {
+            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
+            must_not: [
+              { terms: { [METRICSET_INTERVAL]: ['10m', '60m'] } },
+              { term: { [METRICSET_NAME]: 'service_transaction' } },
+            ],
+          },
+        },
+      ]
     : [];
 }
 
