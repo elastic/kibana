@@ -55,6 +55,37 @@ const pathCollector = function () {
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
+/**
+ * @param {string} repoRel
+ * @param {string[]} configs
+ * @param {'push' | 'unshift'} method
+ */
+function maybeAddConfig(repoRel, configs, method) {
+  const path = fromRoot(repoRel)
+  try {
+    if (statSync(path).isFile()) {
+      configs[method](path)
+    }
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return;
+    }
+
+    throw err
+  }
+}
+
+/**
+ * @returns {string[]}
+ */
+function getEnvConfigs() {
+  const val = process.env.KBN_CONFIG_PATHS
+  if (typeof val === 'string') {
+    return val.split(',').map(p => p.trim())
+  }
+  return []
+}
+
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
@@ -177,7 +208,8 @@ export default function (program) {
       .option(
         '--run-examples',
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
-      );
+      )
+      .option('--serverless', 'Start Kibana with serverless configuration overrides');
   }
 
   if (DEV_MODE_SUPPORTED) {
@@ -200,19 +232,22 @@ export default function (program) {
   }
 
   command.action(async function (opts) {
+    const unknownOptions = this.getUnknownOptions();
+    const configs = [].concat(getEnvConfigs(), opts.config || []);
+
+    // we "unshift" .serverless. config so that it only overrides defaults
+    if (opts.serverless) {
+      maybeAddConfig('config/kibana.serverless.yml', configs, 'unshift');
+    }
+
+    // .dev. configs are "pushed" so that they override all other config files
     if (opts.dev && opts.devConfig !== false) {
-      try {
-        const kbnDevConfig = fromRoot('config/kibana.dev.yml');
-        if (statSync(kbnDevConfig).isFile()) {
-          opts.config.push(kbnDevConfig);
-        }
-      } catch (err) {
-        // ignore, kibana.dev.yml does not exist
+      maybeAddConfig('config/kibana.dev.yml', configs, 'push');
+      if (opts.serverless) {
+        maybeAddConfig('config/kibana.serverless.dev.yml', configs, 'push');
       }
     }
 
-    const unknownOptions = this.getUnknownOptions();
-    const configs = [].concat(opts.config || []);
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,
@@ -231,6 +266,7 @@ export default function (program) {
       oss: !!opts.oss,
       cache: !!opts.cache,
       dist: !!opts.dist,
+      serverless: !!opts.serverless,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode

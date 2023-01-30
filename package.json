@@ -56,6 +56,7 @@
     "makelogs": "node scripts/makelogs",
     "spec_to_console": "node scripts/spec_to_console",
     "start": "node scripts/kibana --dev",
+    "start-serverless": "node scripts/kibana --dev --serverless",
     "storybook": "node scripts/storybook",
     "test:ftr": "node scripts/functional_tests",
     "test:ftr:runner": "node scripts/functional_test_runner",
