@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
-  const PageObjects = getPageObjects(['discover']);
+  const pageObjects = getPageObjects(['discover']);
 
   describe('creation_index_pattern', function () {
     before(async () => {
@@ -486,6 +486,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.testExecution.logTestStep('has correct transform function selected');
           await transform.wizard.assertSelectedTransformFunction('pivot');
 
+          await transform.testExecution.logTestStep(
+            `sets the date picker to the default '15 minutes ago'`
+          );
+          await transform.datePicker.openSuperDatePicker();
+          await transform.datePicker.quickSelect(15, 'm');
+
+          await transform.testExecution.logTestStep('displays an empty index preview');
+          await transform.wizard.assertIndexPreviewEmpty();
+
+          await transform.testExecution.logTestStep(`sets the date picker to '10 Years ago'`);
+          await transform.datePicker.openSuperDatePicker();
+          await transform.datePicker.quickSelect();
+
           await transform.testExecution.logTestStep('loads the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
 
@@ -699,16 +712,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should navigate to discover');
           await transform.table.clickTransformRowAction(testData.transformId, 'Discover');
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
 
           if (testData.discoverAdjustSuperDatePicker) {
+            await transform.testExecution.logTestStep(
+              `sets the date picker to the default '15 minutes ago'`
+            );
+            await transform.datePicker.openSuperDatePicker();
+            await transform.datePicker.quickSelect(15, 'm');
             await transform.discover.assertNoResults(testData.destinationIndex);
             await transform.testExecution.logTestStep(
               'should switch quick select lookback to years'
             );
-            await transform.discover.assertSuperDatePickerToggleQuickMenuButtonExists();
-            await transform.discover.openSuperDatePicker();
-            await transform.discover.quickSelectYears();
+            await transform.datePicker.assertSuperDatePickerToggleQuickMenuButtonExists();
+            await transform.datePicker.openSuperDatePicker();
+            await transform.datePicker.quickSelect();
           }
 
           await transform.discover.assertDiscoverQueryHits(testData.expected.discoverQueryHits);

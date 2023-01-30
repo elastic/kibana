@@ -6,21 +6,24 @@
  */
 
 import React, { type FC, useRef, useState, createContext, useMemo } from 'react';
-
-import { i18n } from '@kbn/i18n';
+import { pick } from 'lodash';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { useAppDependencies } from '../../../../app_dependencies';
+import { i18n } from '@kbn/i18n';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
+import { UrlStateProvider } from '@kbn/ml-url-state';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
+import { useAppDependencies } from '../../../../app_dependencies';
 
 import {
   applyTransformConfigToDefineState,
@@ -38,6 +41,10 @@ import {
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
 import type { RuntimeMappings } from '../step_define/common/types';
+
+import { TRANSFORM_STORAGE_KEYS } from './storage';
+
+const localStorage = new Storage(window.localStorage);
 
 enum WIZARD_STEPS {
   DEFINE,
@@ -99,23 +106,10 @@ export const CreateTransformWizardContext = createContext<{
 });
 
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
+  const appDependencies = useAppDependencies();
   const {
     ml: { FieldStatsFlyoutProvider },
-    uiSettings,
-    dataViews,
-    data,
-    charts,
-    fieldFormats,
-  } = useAppDependencies();
-
-  const fieldStatsServices: {
-    uiSettings: IUiSettingsClient;
-    dataViews: DataViewsContract;
-    data: DataPublicPluginStart;
-    fieldFormats: FieldFormatsStart;
-    charts: ChartsPluginSetup;
-  } = { uiSettings, dataViews, data, charts, fieldFormats };
-
+  } = appDependencies;
   const { dataView } = searchItems;
 
   // The current WIZARD_STEP
@@ -135,7 +129,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
 
   const transformConfig = getCreateTransformRequestBody(
-    dataView.getIndexPattern(),
+    dataView,
     stepDefineState,
     stepDetailsState
   );
@@ -228,12 +222,33 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
 
   const stepsConfig = [stepDefine, stepDetails, stepCreate];
 
+  const datePickerDeps = {
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
+  };
+
+  const fieldStatsServices = pick(appDependencies, [
+    'uiSettings',
+    'dataViews',
+    'data',
+    'charts',
+    'fieldFormats',
+  ]);
+
   return (
     <FieldStatsFlyoutProvider dataView={dataView} fieldStatsServices={fieldStatsServices}>
       <CreateTransformWizardContext.Provider
         value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
       >
-        <EuiSteps className="transform__steps" steps={stepsConfig} />
+        <UrlStateProvider>
+          <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
+            <DatePickerContextProvider {...datePickerDeps}>
+              <EuiSteps className="transform__steps" steps={stepsConfig} />
+            </DatePickerContextProvider>
+          </StorageContextProvider>
+        </UrlStateProvider>
       </CreateTransformWizardContext.Provider>
     </FieldStatsFlyoutProvider>
   );

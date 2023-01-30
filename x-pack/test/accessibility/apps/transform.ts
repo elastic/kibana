@@ -112,6 +112,19 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await transform.sourceSelection.selectSource(ecIndexPattern);
 
+          await transform.testExecution.logTestStep(
+            `sets the date picker to the default '15 minutes ago'`
+          );
+          await transform.datePicker.openSuperDatePicker();
+          await transform.datePicker.quickSelect(15, 'm');
+
+          await transform.testExecution.logTestStep('displays an empty index preview');
+          await transform.wizard.assertIndexPreviewEmpty();
+
+          await transform.testExecution.logTestStep(`sets the date picker to '10 Years ago'`);
+          await transform.datePicker.openSuperDatePicker();
+          await transform.datePicker.quickSelect();
+
           await transform.testExecution.logTestStep('loads the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
           await transform.testExecution.logTestStep('displays an empty transform preview');
@@ -191,6 +204,20 @@ export default function ({ getService }: FtrProviderContext) {
             'selects the source data and loads the Transform wizard page'
           );
           await transform.sourceSelection.selectSource(ecIndexPattern);
+
+          await transform.testExecution.logTestStep(
+            `sets the date picker to the default '15 minutes ago'`
+          );
+          await transform.datePicker.openSuperDatePicker();
+          await transform.datePicker.quickSelect(15, 'm');
+
+          await transform.testExecution.logTestStep('displays an empty index preview');
+          await transform.wizard.assertIndexPreviewEmpty();
+
+          await transform.testExecution.logTestStep(`sets the date picker to '10 Years ago'`);
+          await transform.datePicker.openSuperDatePicker();
+          await transform.datePicker.quickSelect();
+
           await transform.wizard.assertIndexPreviewLoaded();
           await transform.wizard.assertTransformPreviewEmpty();
 

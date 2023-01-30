@@ -36,7 +36,7 @@ export const Description: FC<Props> = memo(({ children, isOptional }) => {
         </>
       }
     >
-      <EuiFormRow label={title}>
+      <EuiFormRow>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
