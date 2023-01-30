@@ -255,7 +255,7 @@ Array [
         </div>
       </div>
       <table
-        class="euiTable euiTable--responsive"
+        class="euiTable css-0 euiTable--responsive"
         id="__table_generated-id"
         tabindex="-1"
       >
@@ -290,7 +290,9 @@ Array [
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody
+          class="css-0"
+        >
           <tr
             class="euiTableRow"
           >
@@ -595,7 +597,7 @@ Array [
         </div>
       </div>
       <table
-        class="euiTable euiTable--responsive"
+        class="euiTable css-0 euiTable--responsive"
         id="__table_generated-id"
         tabindex="-1"
       >
@@ -631,7 +633,9 @@ Array [
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody
+          class="css-0"
+        >
           <tr
             class="euiTableRow"
           >

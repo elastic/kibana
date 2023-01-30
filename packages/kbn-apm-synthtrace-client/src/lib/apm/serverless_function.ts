@@ -27,14 +27,19 @@ export function serverlessFunction({
   environment,
   agentName,
   architecture = 'arm',
+  serverlessType = 'aws.lambda',
 }: {
   functionName: string;
   environment: string;
   agentName: string;
   serviceName?: string;
   architecture?: string;
+  serverlessType?: 'aws.lambda' | 'azure.functions';
 }) {
-  const faasId = `arn:aws:lambda:us-west-2:001:function:${functionName}`;
+  const faasId =
+    serverlessType === 'aws.lambda'
+      ? `arn:aws:lambda:us-west-2:001:function:${functionName}`
+      : `/subscriptions/abcd/resourceGroups/1234/providers/Microsoft.Web/sites/test-function-app/functions/${functionName}`;
   return new ServerlessFunction({
     'service.name': serviceName || faasId,
     'faas.id': faasId,
