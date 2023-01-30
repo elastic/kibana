@@ -12,16 +12,11 @@ import {
   BROWSER_TRACE_TYPE,
   useStepWaterfallMetrics,
 } from './use_step_waterfall_metrics';
-import * as reduxHooks from 'react-redux';
 import * as searchHooks from '@kbn/observability-plugin/public/hooks/use_es_search';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 describe('useStepWaterfallMetrics', () => {
-  jest
-    .spyOn(reduxHooks, 'useSelector')
-    .mockReturnValue({ settings: { heartbeatIndices: 'heartbeat-*' } });
-
   it('returns result as expected', () => {
-    // @ts-ignore
     const searchHook = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
       loading: false,
       data: {
@@ -85,7 +80,7 @@ describe('useStepWaterfallMetrics', () => {
           },
           size: 1000,
         },
-        index: 'synthetics-*',
+        index: SYNTHETICS_INDEX_PATTERN,
       },
       ['44D-444FFF-444-FFF-3333', true],
       { name: 'getWaterfallStepMetrics' }
