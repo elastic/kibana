@@ -1,9 +1,9 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0; you may not use this file except in compliance with the Elastic License
+* 2.0.
+*/
 
 export const elasticAgentStandaloneManifest = `---
 # For more information refer https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
@@ -73,6 +73,8 @@ spec:
               value: "/etc/elastic-agent"
           securityContext:
             runAsUser: 0
+            # Needed for 'Defend for containers' integration (cloud-defend)
+            #privileged: true
           resources:
             limits:
               memory: 700Mi
@@ -105,6 +107,17 @@ spec:
             - name: var-lib
               mountPath: /hostfs/var/lib
               readOnly: true
+            # Needed for 'Defend for containers' integration (cloud-defend)
+            #- name: boot
+            #  mountPath: /boot
+            #  readOnly: true
+            #- name: sys-kernel-debug
+            #  mountPath: /sys/kernel/debug
+            #- name: sys-fs-bpf
+            #  mountPath: /sys/fs/bpf
+            #- name: sys-kernel-security
+            #  mountPath: /sys/kernel/security
+            #  readOnly: true
       volumes:
         - name: datastreams
           configMap:
@@ -134,6 +147,19 @@ spec:
         - name: var-lib
           hostPath:
             path: /var/lib
+        # Needed for 'Defend for containers' integration (cloud-defend)
+        #- name: boot
+        #  hostPath:
+        #    path: /boot
+        #- name: sys-kernel-debug
+        #  hostPath:
+        #    path: /sys/kernel/debug
+        #- name: sys-fs-bpf
+        #  hostPath:
+        #    path: /sys/fs/bpf
+        #- name: sys-kernel-security
+        #  hostPath:
+        #    path: /sys/kernel/security
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -353,6 +379,8 @@ spec:
                   fieldPath: metadata.name
           securityContext:
             runAsUser: 0
+            # Needed for 'Defend for containers' integration (cloud-defend)
+            #privileged: true
           resources:
             limits:
               memory: 500Mi
@@ -381,6 +409,17 @@ spec:
             - name: etc-mid
               mountPath: /etc/machine-id
               readOnly: true
+            # Needed for 'Defend for containers' integration (cloud-defend)
+            #- name: boot
+            #  mountPath: /boot
+            #  readOnly: true
+            #- name: sys-kernel-debug
+            #  mountPath: /sys/kernel/debug
+            #- name: sys-fs-bpf
+            #  mountPath: /sys/fs/bpf
+            #- name: sys-kernel-security
+            #  mountPath: /sys/kernel/security
+            #  readOnly: true
       volumes:
         - name: proc
           hostPath:
@@ -409,6 +448,19 @@ spec:
           hostPath:
             path: /etc/machine-id
             type: File
+        # Needed for 'Defend for containers' integration (cloud-defend)
+        #- name: boot
+        #  hostPath:
+        #    path: /boot
+        #- name: sys-kernel-debug
+        #  hostPath:
+        #    path: /sys/kernel/debug
+        #- name: sys-fs-bpf
+        #  hostPath:
+        #    path: /sys/fs/bpf
+        #- name: sys-kernel-security
+        #  hostPath:
+        #    path: /sys/kernel/security
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
