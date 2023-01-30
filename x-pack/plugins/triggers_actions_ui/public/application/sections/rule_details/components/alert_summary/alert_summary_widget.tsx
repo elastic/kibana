@@ -35,16 +35,18 @@ export const AlertSummaryWidget = ({
 
   if (isLoading) return <EuiLoadingSpinner data-test-subj="alertSummaryWidgetLoading" />;
   if (error) return <AlertSummaryWidgetError />;
-  if (!activeAlertCount && !recoveredAlertCount) return null;
 
   return fullSize ? (
-    <AlertsSummaryWidgetFullSize
-      activeAlertCount={activeAlertCount}
-      activeAlerts={activeAlerts}
-      recoveredAlertCount={recoveredAlertCount}
-      dateFormat={timeRange.dateFormat}
-      chartThemes={chartThemes}
-    />
+    // Only show full size version if there is data
+    !activeAlertCount && !recoveredAlertCount ? (
+      <AlertsSummaryWidgetFullSize
+        activeAlertCount={activeAlertCount}
+        activeAlerts={activeAlerts}
+        recoveredAlertCount={recoveredAlertCount}
+        dateFormat={timeRange.dateFormat}
+        chartThemes={chartThemes}
+      />
+    ) : null
   ) : (
     <AlertsSummaryWidgetCompact
       activeAlertCount={activeAlertCount}
