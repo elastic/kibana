@@ -15,13 +15,11 @@ const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
 // can cause the browser to hang.
 
 const getMappings = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
-  if (settings.fields) {
+  if (settings.fields && settings.fieldsIndices) {
     const mappings = await esClient.asInternalUser.indices.getMapping(
-      settings.fieldsIndices
-        ? {
-            index: settings.fieldsIndices,
-          }
-        : undefined,
+      {
+        index: settings.fieldsIndices,
+      },
       {
         maxResponseSize: MAX_RESPONSE_SIZE,
         maxCompressedResponseSize: MAX_RESPONSE_SIZE,

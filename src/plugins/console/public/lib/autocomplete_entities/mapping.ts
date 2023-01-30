@@ -10,6 +10,7 @@ import _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { HttpSetup } from '@kbn/core-http-browser';
+import { type Settings } from '../../services';
 import { API_BASE_PATH } from '../../../common/constants';
 import type { ResultTerm, AutoCompleteContext } from '../autocomplete/types';
 import { expandAliases } from './expand_aliases';
@@ -100,6 +101,8 @@ export interface BaseMapping {
 export class Mapping implements BaseMapping {
   private http!: HttpSetup;
 
+  private settings!: Settings;
+
   /**
    * Map of the mappings of actual ES indices.
    */
@@ -118,8 +121,9 @@ export class Mapping implements BaseMapping {
    */
   private loadingState: Record<string, boolean> = {};
 
-  public setup(http: HttpSetup) {
+  public setup(http: HttpSetup, settings: Settings) {
     this.http = http;
+    this.settings = settings;
   }
 
   /**
@@ -144,6 +148,9 @@ export class Mapping implements BaseMapping {
   ) => {
     // get fields for indices and types. Both can be a list, a string or null (meaning all).
     let ret: Field[] = [];
+
+    if (!this.settings.getAutocomplete().fields) return ret;
+
     indices = expandAliases(indices);
 
     if (typeof indices === 'string') {

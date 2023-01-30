@@ -41,7 +41,6 @@ export class AutocompleteInfo {
 
   public setup(http: HttpSetup) {
     this.http = http;
-    this.mapping.setup(http);
   }
 
   public getEntityProvider(

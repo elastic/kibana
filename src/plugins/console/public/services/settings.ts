@@ -15,8 +15,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   tripleQuotes: true,
   wrapMode: true,
   autocomplete: Object.freeze({
-    // Disable fields (mapping) fetching by default.
-    fields: false,
+    fields: true,
     indices: true,
     templates: true,
     dataStreams: true,
