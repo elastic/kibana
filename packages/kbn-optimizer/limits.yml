@@ -53,7 +53,7 @@ pageLoadAssetSize:
   expressions: 140958
   expressionShape: 34008
   expressionTagcloud: 27505
-  expressionXY: 38500
+  expressionXY: 39500
   features: 21723
   fieldFormats: 65209
   files: 22673
@@ -124,7 +124,7 @@ pageLoadAssetSize:
   threatIntelligence: 44299
   timelines: 327300
   transform: 41007
-  triggersActionsUi: 119000
+  triggersActionsUi: 120000
   uiActions: 35121
   uiActionsEnhanced: 38494
   unifiedFieldList: 65500
