@@ -78,7 +78,6 @@ export async function inspectSearchParams(
           case 'ui':
             return {
               enabled: true,
-              transactionGroupBucketSize: 1000,
               maxTraceItems: 5000,
             };
           case 'metricsInterval':
