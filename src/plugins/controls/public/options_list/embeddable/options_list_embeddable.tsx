@@ -74,6 +74,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private dataViewsService: ControlsDataViewsService;
   private optionsListService: ControlsOptionsListService;
 
+  // TODO: MAKE THIS OPTIONAL SINCE UNDEFINED SHOULD BE THE SAME AS TRUE
   private allowExpensiveQueries: boolean = false; // default to false, since wrongly assuming true will break stuff
 
   // Internal data fetching state for this input control.

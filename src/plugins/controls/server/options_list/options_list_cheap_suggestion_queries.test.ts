@@ -12,7 +12,7 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getCheapSuggestionAggregationBuilder } from './options_list_cheap_suggestion_queries';
 import { OptionsListRequestBody } from '../../common/options_list/types';
 
-describe('options list queries', () => {
+describe('options list cheap queries', () => {
   let rawSearchResponseMock: SearchResponse = {} as SearchResponse;
 
   beforeEach(() => {
@@ -367,7 +367,9 @@ describe('options list queries', () => {
           ],
         },
       };
-      expect(suggestionAggBuilder.parse(rawSearchResponseMock).suggestions).toMatchInlineSnapshot(`
+      expect(
+        suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock).suggestions
+      ).toMatchInlineSnapshot(`
         Object {
           "cool1": Object {
             "doc_count": 5,
@@ -398,7 +400,9 @@ describe('options list queries', () => {
           ],
         },
       };
-      expect(suggestionAggBuilder.parse(rawSearchResponseMock).suggestions).toMatchInlineSnapshot(`
+      expect(
+        suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock).suggestions
+      ).toMatchInlineSnapshot(`
         Object {
           "false": Object {
             "doc_count": 55,
@@ -430,7 +434,9 @@ describe('options list queries', () => {
           },
         },
       };
-      expect(suggestionAggBuilder.parse(rawSearchResponseMock).suggestions).toMatchInlineSnapshot(`
+      expect(
+        suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock).suggestions
+      ).toMatchInlineSnapshot(`
         Object {
           "cool1": Object {
             "doc_count": 5,
@@ -463,7 +469,9 @@ describe('options list queries', () => {
           ],
         },
       };
-      expect(suggestionAggBuilder.parse(rawSearchResponseMock).suggestions).toMatchInlineSnapshot(`
+      expect(
+        suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock).suggestions
+      ).toMatchInlineSnapshot(`
         Object {
           "cool1": Object {
             "doc_count": 5,
@@ -522,7 +530,10 @@ describe('options list queries', () => {
       },
     };
 
-    const parsed = suggestionAggBuilder.parse(rawSearchResponseMock).suggestions;
+    const parsed = suggestionAggBuilder.parse(
+      rawSearchResponseMock,
+      optionsListRequestBodyMock
+    ).suggestions;
     /** first, verify that the sorting worked as expected */
     expect(Object.keys(parsed)).toMatchInlineSnapshot(`
       Array [

@@ -102,12 +102,7 @@ export const setupOptionsListSuggestionsRoute = (
     }
     const validationBuilder = getValidationAggregationBuilder();
 
-    const builtSuggestionAggregation = suggestionBuilder.buildAggregation(request);
-    const suggestionAggregation = builtSuggestionAggregation
-      ? {
-          suggestions: builtSuggestionAggregation,
-        }
-      : {};
+    const suggestionAggregation: any = suggestionBuilder.buildAggregation(request) ?? {};
     const builtValidationAggregation = validationBuilder.buildAggregation(request);
     const validationAggregations = builtValidationAggregation
       ? {
@@ -134,13 +129,12 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Run ES query
      */
-
     const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
 
     /**
      * Parse ES response into Options List Response
      */
-    const results = suggestionBuilder.parse(rawEsResult);
+    const results = suggestionBuilder.parse(rawEsResult, request);
     const totalCardinality = results.totalCardinality;
     const invalidSelections = validationBuilder.parse(rawEsResult);
     return {

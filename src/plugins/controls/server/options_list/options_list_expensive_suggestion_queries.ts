@@ -41,48 +41,55 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       size,
     }: OptionsListRequestBody) => {
       const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
-      const textOrKeywordQuery = {
-        filter: {
-          prefix: {
-            [fieldName]: {
-              value: searchString,
-              case_insensitive: true,
-            },
+      let textOrKeywordQuery: any = {
+        suggestions: {
+          terms: {
+            size,
+            field: fieldName,
+            shard_size: 10,
+            order: getSortType(sort),
           },
         },
-        aggs: {
-          suggestions: {
-            terms: {
-              size,
-              field: fieldName,
-              shard_size: 10,
-              order: getSortType(sort),
-            },
-          },
-          unique_terms: {
-            cardinality: {
-              field: fieldName,
-            },
+        unique_terms: {
+          cardinality: {
+            field: fieldName,
           },
         },
       };
-      if (subTypeNested) {
-        return {
-          nested: {
-            path: subTypeNested.nested.path,
+      if (searchString) {
+        textOrKeywordQuery = {
+          filteredSuggestions: {
+            filter: {
+              prefix: {
+                [fieldName]: {
+                  value: searchString,
+                  case_insensitive: true,
+                },
+              },
+            },
+            aggs: { ...textOrKeywordQuery },
           },
-          aggs: {
-            nestedSuggestions: textOrKeywordQuery,
+        };
+      }
+      if (subTypeNested) {
+        textOrKeywordQuery = {
+          nestedSuggestions: {
+            nested: {
+              path: subTypeNested.nested.path,
+            },
+            aggs: {
+              ...textOrKeywordQuery,
+            },
           },
         };
       }
       return textOrKeywordQuery;
     },
-    parse: (rawEsResult) => {
-      const isNested = Boolean(get(rawEsResult, 'aggregations.suggestions.nestedSuggestions'));
-      const basePath = isNested
-        ? 'aggregations.suggestions.nestedSuggestions'
-        : 'aggregations.suggestions';
+    parse: (rawEsResult, request) => {
+      let basePath = 'aggregations';
+      const isNested = request.fieldSpec && getFieldSubtypeNested(request.fieldSpec);
+      basePath += isNested ? '.nestedSuggestions' : '';
+      basePath += request.searchString ? '.filteredSuggestions' : '';
 
       const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
@@ -102,10 +109,12 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
    */
   boolean: {
     buildAggregation: ({ fieldName, sort }: OptionsListRequestBody) => ({
-      terms: {
-        field: fieldName,
-        shard_size: 10,
-        order: getSortType(sort),
+      suggestions: {
+        terms: {
+          field: fieldName,
+          shard_size: 10,
+          order: getSortType(sort),
+        },
       },
     }),
     parse: (rawEsResult) => {
@@ -118,7 +127,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         },
         {}
       );
-      return { suggestions, totalCardinality: suggestions.length }; // cardinality is only ever 0, 1, or 2 so safe to use length here
+      return { suggestions, totalCardinality: Object.keys(suggestions).length }; // cardinality is only ever 0, 1, or 2 so safe to use length here
     },
   },
 
@@ -148,40 +157,51 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       }
 
       return {
-        ip_range: {
-          field: fieldName,
-          ranges: ipRangeQuery.rangeQuery,
-          keyed: true,
-        },
-        aggs: {
-          filteredSuggestions: {
-            terms: {
-              size,
-              field: fieldName,
-              shard_size: 10,
-              order: getSortType(sort),
-            },
+        suggestions: {
+          ip_range: {
+            field: fieldName,
+            ranges: ipRangeQuery.rangeQuery,
+            keyed: true,
           },
-          unique_terms: {
-            cardinality: {
-              field: fieldName,
+          aggs: {
+            filteredSuggestions: {
+              terms: {
+                size,
+                field: fieldName,
+                shard_size: 10,
+                order: getSortType(sort),
+              },
+            },
+            unique_terms: {
+              cardinality: {
+                field: fieldName,
+              },
             },
           },
         },
       };
     },
-    parse: (rawEsResult) => {
+    parse: (rawEsResult, request) => {
       if (!Boolean(rawEsResult.aggregations?.suggestions)) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
         return { suggestions: {}, totalCardinality: 0 };
       }
-
       const buckets: EsBucket[] = [];
       getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
       getIpBuckets(rawEsResult, buckets, 'ipv6');
-      const suggestions: OptionsListSuggestions = buckets
-        .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
+
+      const sortedSuggestions =
+        request.sort?.direction === 'asc'
+          ? buckets.sort(
+              (bucketA: EsBucket, bucketB: EsBucket) => bucketA.doc_count - bucketB.doc_count
+            )
+          : buckets.sort(
+              (bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count
+            );
+
+      const suggestions: OptionsListSuggestions = sortedSuggestions
+        .slice(0, request.size)
         .reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
           return { ...acc, [suggestion.key]: { doc_count: suggestion.doc_count } };
         }, {});
