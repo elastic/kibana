@@ -15,6 +15,7 @@ import type {
   CasesMetrics,
   ExternalReferenceComment,
   PersistableComment,
+  FindCaseUserActions,
 } from '../../common/ui/types';
 import type {
   CaseConnector,
@@ -597,7 +598,8 @@ export const getUserAction = (
 ): CaseUserActions => {
   const commonProperties = {
     ...basicAction,
-    actionId: `${type}-${action}`,
+    id: `${type}-${action}`,
+    version: 'WzQ3LDFc',
     action,
   };
 
@@ -742,24 +744,24 @@ export const caseUserActionsWithRegisteredAttachmentsSnake: CaseUserActionsRespo
   {
     created_at: basicCreatedAt,
     created_by: elasticUserSnake,
-    case_id: 'case-with-registered-attachment',
     comment_id: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',
     action: 'create',
-    action_id: 'create-comment-id',
+    id: 'create-comment-id',
     payload: { comment: externalReferenceAttachmentSnake },
+    version: 'WzQ3LDFc',
   },
   {
     created_at: basicCreatedAt,
     created_by: elasticUserSnake,
-    case_id: 'case-with-registered-attachment',
     comment_id: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',
     action: 'create',
-    action_id: 'create-comment-id',
+    id: 'create-comment-id',
     payload: { comment: persistableStateAttachmentSnake },
+    version: 'WzQ3LDFc',
   },
 ];
 
@@ -779,7 +781,7 @@ export const getAlertUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
-  actionId: 'alert-action-id',
+  id: 'alert-action-id',
   commentId: 'alert-comment-id',
   type: ActionTypes.comment,
   payload: {
@@ -801,7 +803,7 @@ export const getMultipleAlertsUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
-  actionId: 'alert-action-id',
+  id: 'alert-action-id',
   commentId: 'alert-comment-id',
   type: ActionTypes.comment,
   payload: {
@@ -823,7 +825,7 @@ export const getHostIsolationUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
-  actionId: 'isolate-action-id',
+  id: 'isolate-action-id',
   type: ActionTypes.comment,
   commentId: 'isolate-comment-id',
   payload: {
@@ -848,26 +850,33 @@ export const caseUserActionsWithRegisteredAttachments: CaseUserActions[] = [
   {
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
-    caseId: 'case-with-registered-attachment',
     commentId: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',
     action: 'create',
-    actionId: 'create-comment-id',
+    id: 'create-comment-id',
     payload: { comment: externalReferenceAttachment },
+    version: 'WzQ3LDFc',
   },
   {
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
-    caseId: 'case-with-registered-attachment',
     commentId: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',
     action: 'create',
-    actionId: 'create-comment-id',
+    id: 'create-comment-id',
     payload: { comment: persistableStateAttachment },
+    version: 'WzQ3LDFc',
   },
 ];
+
+export const findCaseUserActionsResponse: FindCaseUserActions = {
+  page: 1,
+  perPage: 1000,
+  total: 20,
+  userActions: [...caseUserActionsWithRegisteredAttachments],
+};
 
 // components tests
 export const useGetCasesMockState = {
@@ -887,7 +896,7 @@ export const getExternalReferenceUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
-  actionId: 'external-reference-action-id',
+  id: 'external-reference-action-id',
   type: ActionTypes.comment,
   commentId: 'external-reference-comment-id',
   payload: {
@@ -920,7 +929,7 @@ export const getPersistableStateUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
-  actionId: 'persistable-state-action-id',
+  id: 'persistable-state-action-id',
   type: ActionTypes.comment,
   commentId: 'persistable-state-comment-id',
   payload: {
