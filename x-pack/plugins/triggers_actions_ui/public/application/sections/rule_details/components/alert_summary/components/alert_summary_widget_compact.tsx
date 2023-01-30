@@ -6,44 +6,43 @@
  */
 
 import React, { MouseEvent } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
-import { AlertStateInfo } from './alert_state_info';
-import { ACTIVE_ALERT_LABEL, ALL_ALERT_LABEL, RECOVERED_ALERT_LABEL } from './constants';
-import { Alert } from '../../../../../hooks/use_load_alert_summary';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
+import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
+import { AlertStatus } from '@kbn/rule-data-utils';
+import { AlertCounts } from './alert_counts';
+import { ALL_ALERT_COLOR, WIDGET_TITLE } from './constants';
+import { Alert, ChartThemes } from '../types';
 
 export interface AlertsSummaryWidgetCompactProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
+  chartThemes: ChartThemes;
   recoveredAlertCount: number;
-  recoveredAlerts: Alert[];
-  timeRangeTitle: JSX.Element | string;
+  timeRangeTitle?: JSX.Element | string;
   onClick: (status?: AlertStatus) => void;
 }
 
 export const AlertsSummaryWidgetCompact = ({
   activeAlertCount,
   activeAlerts,
+  chartThemes: { theme, baseTheme },
   recoveredAlertCount,
-  recoveredAlerts,
   timeRangeTitle,
   onClick,
 }: AlertsSummaryWidgetCompactProps) => {
-  const domain = {
-    min: 0,
-    max: Math.max(
-      ...activeAlerts.map((alert) => alert.doc_count),
-      ...recoveredAlerts.map((alert) => alert.doc_count)
-    ),
-  };
+  const chartTheme = [
+    theme,
+    EUI_SPARKLINE_THEME_PARTIAL,
+    {
+      chartMargins: {
+        left: 10,
+        right: 10,
+        top: 10,
+        bottom: 10,
+      },
+    },
+  ];
 
   const handleClick = (
     event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
@@ -64,59 +63,48 @@ export const AlertsSummaryWidgetCompact = ({
       onClick={handleClick}
     >
       <EuiFlexGroup direction="column">
+        {!!timeRangeTitle && (
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h5>{WIDGET_TITLE}</h5>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued" data-test-subj="timeRangeTitle">
+              {timeRangeTitle}
+            </EuiText>
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h5 data-test-subj="totalAlertsCount">
-              {ALL_ALERT_LABEL}&nbsp;({activeAlertCount + recoveredAlertCount})
-            </h5>
-          </EuiTitle>
-          {!!timeRangeTitle && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued" data-test-subj="timeRangeTitle">
-                {timeRangeTitle}
-              </EuiText>
-            </>
-          )}
+          <AlertCounts
+            activeAlertCount={activeAlertCount}
+            recoveredAlertCount={recoveredAlertCount}
+            onActiveClick={handleClick}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiFlexGroup wrap>
-            {/* Active */}
             <EuiFlexItem style={{ minWidth: '200px' }}>
-              <EuiLink
-                onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
-                  handleClick(event, ALERT_STATUS_ACTIVE)
-                }
-              >
-                <AlertStateInfo
-                  count={activeAlertCount}
+              <Chart size={{ height: 50 }}>
+                <Settings theme={chartTheme} baseTheme={baseTheme} tooltip={{ type: 'none' }} />
+                <Axis hide id={'activeAlertsAxis'} position={Position.Left} showGridLines={false} />
+                <LineSeries
+                  id={'activeAlertsChart'}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor="key"
+                  yAccessors={['doc_count']}
                   data={activeAlerts}
-                  dataTestSubj="activeAlertsCount"
-                  domain={domain}
-                  id="active"
-                  stroke="#E7664C"
-                  title={ACTIVE_ALERT_LABEL}
+                  lineSeriesStyle={{
+                    line: {
+                      strokeWidth: 2,
+                      stroke: ALL_ALERT_COLOR,
+                    },
+                  }}
+                  curve={CurveType.CURVE_MONOTONE_X}
                 />
-              </EuiLink>
-            </EuiFlexItem>
-            {/* Recovered */}
-            <EuiFlexItem style={{ minWidth: '200px' }}>
-              <EuiLink
-                onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
-                  handleClick(event, ALERT_STATUS_RECOVERED)
-                }
-              >
-                <AlertStateInfo
-                  count={recoveredAlertCount}
-                  data={recoveredAlerts}
-                  dataTestSubj="recoveredAlertsCount"
-                  domain={domain}
-                  id="recovered"
-                  stroke="#54B399"
-                  title={RECOVERED_ALERT_LABEL}
-                />
-              </EuiLink>
+              </Chart>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

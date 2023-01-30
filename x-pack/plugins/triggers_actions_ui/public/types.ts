@@ -68,6 +68,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
+import { AlertSummaryTimeRange } from './application/sections/rule_details/components/alert_summary/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
@@ -129,6 +130,7 @@ export type {
   GetFieldTableColumns,
   BrowserFieldItem,
   RulesListVisibleColumns,
+  AlertSummaryTimeRange,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -324,6 +326,7 @@ export interface RuleType<
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
+  hasGetSummarizedAlerts?: boolean;
 }
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
@@ -509,8 +512,24 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (selectedIds: TimelineItem[], isAllSelected: boolean) => void;
+  onClick: (
+    selectedIds: TimelineItem[],
+    isAllSelected: boolean,
+    setIsBulkActionsLoading: (isLoading: boolean) => void
+  ) => void;
 }
+
+export interface RenderCustomActionsRowArgs {
+  alert: EcsFieldsResponse;
+  setFlyoutAlert: (data: unknown) => void;
+  id?: string;
+  setIsActionLoading?: (isLoading: boolean) => void;
+}
+
+export type UseActionsColumnRegistry = () => {
+  renderCustomActionsRow: (args: RenderCustomActionsRowArgs) => JSX.Element;
+  width?: number;
+};
 
 export type UseBulkActionsRegistry = () => BulkActionsConfig[];
 
@@ -525,14 +544,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
-  useActionsColumn?: () => {
-    renderCustomActionsRow: (
-      alert: EcsFieldsResponse,
-      setFlyoutAlert: (data: unknown) => void,
-      id?: string
-    ) => JSX.Element;
-    width?: number;
-  };
+  useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
   usePersistentControls?: () => {
     right?: ReactNode;
@@ -546,19 +558,28 @@ export enum BulkActionsVerbs {
   selectCurrentPage = 'selectCurrentPage',
   selectAll = 'selectAll',
   rowCountUpdate = 'rowCountUpdate',
+  updateRowLoadingState = 'updateRowLoadingState',
+  updateAllLoadingState = 'updateAllLoadingState',
 }
 
 export interface BulkActionsReducerAction {
   action: BulkActionsVerbs;
   rowIndex?: number;
   rowCount?: number;
+  isLoading?: boolean;
 }
 
 export interface BulkActionsState {
-  rowSelection: Set<number>;
+  rowSelection: Map<number, RowSelectionState>;
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
+}
+
+export type RowSelection = Map<number, RowSelectionState>;
+
+export interface RowSelectionState {
+  isLoading: boolean;
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

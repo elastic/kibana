@@ -95,7 +95,7 @@ export default function (providerContext: FtrProviderContext) {
                   paths: { type: 'text', value: ['/tmp/test.log'] },
                   tags: { type: 'text', value: ['tag1'] },
                   ignore_older: { value: '72h', type: 'text' },
-                  'data_stream.dataset': { type: 'text', value: 'generic' },
+                  'data_stream.dataset': { type: 'text', value: 'input_package_test' },
                 },
               },
             ],
