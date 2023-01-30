@@ -58,6 +58,7 @@ import { createExploratoryViewUrl } from './components/shared/exploratory_view/c
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 export interface ConfigSchema {
   unsafe: {
@@ -107,6 +108,7 @@ export interface ObservabilityPublicPluginsStart {
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
 }
 
