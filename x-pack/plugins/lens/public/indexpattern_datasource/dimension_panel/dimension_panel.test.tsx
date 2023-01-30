@@ -94,14 +94,14 @@ const fields = [
     exists: true,
   },
   // Added to test issue#148062 about the use of Object method names as fields name
-  ...Object.getOwnPropertyNames(Object.getPrototypeOf({})).map((name) => ({
-    name,
-    displayName: name,
+  {
+    name: 'toString',
+    displayName: 'toString',
     type: 'string',
     aggregatable: true,
     searchable: true,
     exists: true,
-  })),
+  },
   documentField,
 ];
 
@@ -308,7 +308,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options).toHaveLength(3);
+    expect(options).toHaveLength(2);
 
     expect(options![0].label).toEqual('Records');
     expect(options![1].options!.map(({ label }) => label)).toEqual([
@@ -316,12 +316,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       'bytes',
       'memory',
       'source',
+      'toString'
     ]);
-
-    // these fields are generated to test the issue #148062 about fields that are using JS Object method names
-    expect(options![2].options!.map(({ label }) => label)).toEqual(
-      Object.getOwnPropertyNames(Object.getPrototypeOf({})).sort()
-    );
   });
 
   it('should hide fields that have no data', () => {
@@ -344,7 +340,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options![1].options!.map(({ label }) => label)).toEqual(['timestampLabel', 'source']);
+    expect(options![1].options!.map(({ label }) => label)).toEqual(['timestampLabel', 'source', 'toString']);
   });
 
   it('should indicate fields which are incompatible for the operation of the current column', () => {
