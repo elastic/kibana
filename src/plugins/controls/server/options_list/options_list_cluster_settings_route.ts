@@ -15,7 +15,7 @@ export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
   const router = http.createRouter();
   router.get(
     {
-      path: '/api/kibana/controls/getClusterSettings',
+      path: '/api/kibana/controls/optionsList/getClusterSettings',
       validate: false,
     },
     async (context, _, response) => {

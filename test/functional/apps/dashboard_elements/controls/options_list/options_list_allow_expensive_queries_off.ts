@@ -15,11 +15,10 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
 
-  const { dashboardControls, console, common, dashboard, header } = getPageObjects([
+  const { dashboardControls, timePicker, console, common, dashboard, header } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
-    'settings',
     'console',
     'common',
     'header',
@@ -38,29 +37,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Allow expensive queries setting is off', () => {
-    let dashboardId: string;
     let controlId: string;
 
     before(async () => {
-      dashboardId = await dashboard.getDashboardIdFromCurrentUrl();
       await setAllowExpensiveQueries(false);
 
-      // can't use the dashboard landing page when allow expensive queries is `false` so need to navigate via url instead
-      await dashboard.gotoDashboardURL({ id: dashboardId, editMode: true });
+      await common.navigateToApp('dashboard');
+      await dashboard.clickNewDashboard();
+      await dashboard.ensureDashboardIsInEditMode();
+      await timePicker.setDefaultDataRange();
+      await header.waitUntilLoadingHasFinished();
+
       await dashboardControls.createControl({
         controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',
         fieldName: 'sound.keyword',
       });
       controlId = (await dashboardControls.getAllControlIds())[0];
-      await dashboard.clickQuickSave();
-      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await dashboardControls.deleteAllControls();
-      await dashboard.clickQuickSave();
-
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickUnsavedChangesDiscard(`discard-unsaved-New-Dashboard`);
       await setAllowExpensiveQueries(true);
     });
 

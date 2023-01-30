@@ -505,102 +505,102 @@ describe('options list cheap queries', () => {
     });
   });
 
-  // test('parses mixed IPv4 and IPv6 result', () => {
-  //   const optionsListRequestBodyMock: OptionsListRequestBody = {
-  //     size: 10,
-  //     fieldName: 'clientip',
-  //     allowExpensiveQueries: false,
-  //     fieldSpec: { type: 'ip' } as unknown as FieldSpec,
-  //   };
-  //   const suggestionAggBuilder = getCheapSuggestionAggregationBuilder(optionsListRequestBodyMock);
-  //   rawSearchResponseMock.aggregations = {
-  //     suggestions: {
-  //       buckets: {
-  //         ipv4: {
-  //           from: '0.0.0.0',
-  //           to: '255.255.255.255',
-  //           filteredSuggestions: {
-  //             buckets: [
-  //               { doc_count: 8, key: '21.35.91.62' },
-  //               { doc_count: 8, key: '21.35.91.61' },
-  //               { doc_count: 11, key: '111.52.174.2' },
-  //               { doc_count: 1, key: '56.73.58.63' },
-  //               { doc_count: 9, key: '23.216.241.120' },
-  //               { doc_count: 10, key: '196.162.13.39' },
-  //               { doc_count: 7, key: '203.88.33.151' },
-  //             ],
-  //           },
-  //         },
-  //         ipv6: {
-  //           from: '::',
-  //           to: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
-  //           filteredSuggestions: {
-  //             buckets: [
-  //               { doc_count: 12, key: '52:ae76:5947:5e2a:551:fe6a:712a:c72' },
-  //               { doc_count: 1, key: 'fd:4aa0:c27c:b04:997f:2de1:51b4:8418' },
-  //               { doc_count: 9, key: '28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172' },
-  //               { doc_count: 6, key: '1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8' },
-  //               { doc_count: 10, key: 'f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63' },
-  //             ],
-  //           },
-  //         },
-  //       },
-  //     },
-  //   };
+  test('parses mixed IPv4 and IPv6 result', () => {
+    const optionsListRequestBodyMock: OptionsListRequestBody = {
+      size: 10,
+      fieldName: 'clientip',
+      allowExpensiveQueries: false,
+      fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+    };
+    const suggestionAggBuilder = getCheapSuggestionAggregationBuilder(optionsListRequestBodyMock);
+    rawSearchResponseMock.aggregations = {
+      suggestions: {
+        buckets: {
+          ipv4: {
+            from: '0.0.0.0',
+            to: '255.255.255.255',
+            filteredSuggestions: {
+              buckets: [
+                { doc_count: 8, key: '21.35.91.62' },
+                { doc_count: 8, key: '21.35.91.61' },
+                { doc_count: 11, key: '111.52.174.2' },
+                { doc_count: 1, key: '56.73.58.63' },
+                { doc_count: 9, key: '23.216.241.120' },
+                { doc_count: 10, key: '196.162.13.39' },
+                { doc_count: 7, key: '203.88.33.151' },
+              ],
+            },
+          },
+          ipv6: {
+            from: '::',
+            to: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+            filteredSuggestions: {
+              buckets: [
+                { doc_count: 12, key: '52:ae76:5947:5e2a:551:fe6a:712a:c72' },
+                { doc_count: 1, key: 'fd:4aa0:c27c:b04:997f:2de1:51b4:8418' },
+                { doc_count: 9, key: '28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172' },
+                { doc_count: 6, key: '1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8' },
+                { doc_count: 10, key: 'f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63' },
+              ],
+            },
+          },
+        },
+      },
+    };
 
-  //   const parsed = suggestionAggBuilder.parse(
-  //     rawSearchResponseMock,
-  //     optionsListRequestBodyMock
-  //   ).suggestions;
-  //   /** first, verify that the sorting worked as expected */
-  //   expect(Object.keys(parsed)).toMatchInlineSnapshot(`
-  //     Array [
-  //       "52:ae76:5947:5e2a:551:fe6a:712a:c72",
-  //       "111.52.174.2",
-  //       "196.162.13.39",
-  //       "f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63",
-  //       "23.216.241.120",
-  //       "28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172",
-  //       "21.35.91.62",
-  //       "21.35.91.61",
-  //       "203.88.33.151",
-  //       "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8",
-  //     ]
-  //   `);
-  //   /** then, make sure the object is structured properly */
-  //   expect(parsed).toMatchInlineSnapshot(`
-  //     Object {
-  //       "111.52.174.2": Object {
-  //         "doc_count": 11,
-  //       },
-  //       "196.162.13.39": Object {
-  //         "doc_count": 10,
-  //       },
-  //       "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8": Object {
-  //         "doc_count": 6,
-  //       },
-  //       "203.88.33.151": Object {
-  //         "doc_count": 7,
-  //       },
-  //       "21.35.91.61": Object {
-  //         "doc_count": 8,
-  //       },
-  //       "21.35.91.62": Object {
-  //         "doc_count": 8,
-  //       },
-  //       "23.216.241.120": Object {
-  //         "doc_count": 9,
-  //       },
-  //       "28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172": Object {
-  //         "doc_count": 9,
-  //       },
-  //       "52:ae76:5947:5e2a:551:fe6a:712a:c72": Object {
-  //         "doc_count": 12,
-  //       },
-  //       "f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63": Object {
-  //         "doc_count": 10,
-  //       },
-  //     }
-  //   `);
-  // });
+    const parsed = suggestionAggBuilder.parse(
+      rawSearchResponseMock,
+      optionsListRequestBodyMock
+    ).suggestions;
+    /** first, verify that the sorting worked as expected */
+    expect(Object.keys(parsed)).toMatchInlineSnapshot(`
+      Array [
+        "52:ae76:5947:5e2a:551:fe6a:712a:c72",
+        "111.52.174.2",
+        "196.162.13.39",
+        "f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63",
+        "23.216.241.120",
+        "28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172",
+        "21.35.91.62",
+        "21.35.91.61",
+        "203.88.33.151",
+        "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8",
+      ]
+    `);
+    /** then, make sure the object is structured properly */
+    expect(parsed).toMatchInlineSnapshot(`
+      Object {
+        "111.52.174.2": Object {
+          "doc_count": 11,
+        },
+        "196.162.13.39": Object {
+          "doc_count": 10,
+        },
+        "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8": Object {
+          "doc_count": 6,
+        },
+        "203.88.33.151": Object {
+          "doc_count": 7,
+        },
+        "21.35.91.61": Object {
+          "doc_count": 8,
+        },
+        "21.35.91.62": Object {
+          "doc_count": 8,
+        },
+        "23.216.241.120": Object {
+          "doc_count": 9,
+        },
+        "28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172": Object {
+          "doc_count": 9,
+        },
+        "52:ae76:5947:5e2a:551:fe6a:712a:c72": Object {
+          "doc_count": 12,
+        },
+        "f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63": Object {
+          "doc_count": 10,
+        },
+      }
+    `);
+  });
 });

@@ -99,14 +99,12 @@ class OptionsListService implements ControlsOptionsListService {
   private cachedAllowExpensiveQueries = memoize(async () => {
     const { allowExpensiveQueries } = await this.http.get<{
       allowExpensiveQueries: boolean;
-    }>('/api/kibana/controls/getClusterSettings');
-    console.log(['cached allow expensive queries']);
+    }>('/api/kibana/controls/optionsList/getClusterSettings');
     return allowExpensiveQueries;
   });
 
   public getAllowExpensiveQueries = async (): Promise<boolean> => {
     try {
-      console.log('get allow expensive queries');
       return await this.cachedAllowExpensiveQueries();
     } catch (error) {
       return false;

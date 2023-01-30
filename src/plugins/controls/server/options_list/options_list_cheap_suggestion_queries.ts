@@ -129,7 +129,7 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
         },
       };
     },
-    parse: (rawEsResult) => {
+    parse: (rawEsResult, { sort }) => {
       if (!Boolean(rawEsResult.aggregations?.suggestions)) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
@@ -139,9 +139,18 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       const buckets: EsBucket[] = [];
       getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
       getIpBuckets(rawEsResult, buckets, 'ipv6');
+
+      const sortedSuggestions =
+        sort?.direction === 'asc'
+          ? buckets.sort(
+              (bucketA: EsBucket, bucketB: EsBucket) => bucketA.doc_count - bucketB.doc_count
+            )
+          : buckets.sort(
+              (bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count
+            );
+
       return {
-        suggestions: buckets
-          .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
+        suggestions: sortedSuggestions
           .slice(0, 10) // only return top 10 results
           .reduce((suggestions, suggestion: EsBucket) => {
             return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };

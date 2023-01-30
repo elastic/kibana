@@ -40,7 +40,6 @@ export const OptionsListPopover = ({
   >();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
-  const allowExpensiveQueries = select((state) => state.componentState.allowExpensiveQueries);
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const availableOptions = select((state) => state.componentState.availableOptions);
   const field = select((state) => state.componentState.field);

@@ -15,6 +15,7 @@ import {
   OptionsListEmbeddableInput,
 } from '../../common/options_list/types';
 
+export const MIN_OPTIONS_LIST_REQUEST_SIZE = 10;
 export const MAX_OPTIONS_LIST_REQUEST_SIZE = 1000;
 
 interface SearchString {

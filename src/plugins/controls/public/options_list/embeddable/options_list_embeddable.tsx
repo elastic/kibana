@@ -29,7 +29,7 @@ import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { OptionsListReduxState } from '../types';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
 import { pluginServices } from '../../services';
 import {
   ControlInput,
@@ -272,7 +272,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     return { dataView: this.dataView, field: this.field! };
   };
 
-  private runOptionsListQuery = async (size: number = 10) => {
+  private runOptionsListQuery = async (size: number = MIN_OPTIONS_LIST_REQUEST_SIZE) => {
     const {
       dispatch,
       getState,
