@@ -7,7 +7,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { dnsTopDomainsLensAttributes } from './lens_attributes/network/dns_top_domains';
-import { VisualizationActions } from '.';
+import { VisualizationActions } from './actions';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,

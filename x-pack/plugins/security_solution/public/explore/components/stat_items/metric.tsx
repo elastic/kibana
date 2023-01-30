@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import type { StatItem } from './types';
 import { HoverVisibilityContainer } from '../../../common/components/hover_visibility_container';
-import { VisualizationActions } from '../../../common/components/visualization_actions';
+import { VisualizationActions } from '../../../common/components/visualization_actions/actions';
 import { FlexItem, StatValue } from './utils';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../../../common/components/visualization_actions/utils';

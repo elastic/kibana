@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -23,6 +23,7 @@ import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
 import { getRequestsAndResponses } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { VisualizationActions } from './actions';
 
 const LensComponentWrapper = styled.div<{ height?: string; width?: string }>`
   height: ${({ height }) => height ?? 'auto'};
@@ -177,14 +178,32 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     (visualizationData?.responses != null && visualizationData?.responses?.length === 0)
   ) {
     return (
-      <EuiEmptyPrompt
-        body={
-          <FormattedMessage
-            id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
-            defaultMessage="No data to display"
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <EuiEmptyPrompt
+            body={
+              <FormattedMessage
+                id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
+                defaultMessage="No data to display"
+              />
+            }
           />
-        }
-      />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <VisualizationActions
+            extraActions={extraActions}
+            getLensAttributes={getLensAttributes}
+            inputId={inputsModelId}
+            isInspectButtonDisabled={true}
+            lensAttributes={attributes}
+            queryId={id}
+            stackByField={stackByField}
+            timerange={timerange}
+            title={inspectTitle}
+            widthDefaultActions={false}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
