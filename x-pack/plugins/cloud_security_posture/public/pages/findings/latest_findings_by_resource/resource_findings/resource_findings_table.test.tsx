@@ -125,9 +125,9 @@ describe('<ResourceFindingsTable />', () => {
 
       expect(row).toBeInTheDocument();
       expect(within(row).queryByText(item.rule.name)).toBeInTheDocument();
-      expect(within(row).queryByText(item.rule.benchmark.name)).toBeInTheDocument();
       expect(within(row).queryByText(evaluationStatusText)).toBeInTheDocument();
       expect(within(row).queryByText(moment(item['@timestamp']).fromNow())).toBeInTheDocument();
+      expect(within(row).queryByText(item.rule.section)).toBeInTheDocument();
     });
   });
 });
