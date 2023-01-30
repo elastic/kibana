@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { AlertWithSuppressionFields860 } from '@kbn/rule-registry-plugin/common/schemas/8.6.0';
+import type { AlertWithSuppressionFields870 } from '@kbn/rule-registry-plugin/common/schemas/8.7.0';
+import type { BaseFields840 } from '../8.4.0';
 
-import type { BaseFields840, DetectionAlert840 } from '../8.4.0';
+import type { DetectionAlert860 } from '../8.6.0';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.6.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.6.0.
@@ -17,4 +18,4 @@ Then, update `../index.ts` to import from the new folder that has the latest sch
 new schemas to the union of all alert schemas, and re-export the new schemas as the `*Latest` schemas.
 */
 
-export type DetectionAlert860 = DetectionAlert840 | AlertWithSuppressionFields860<BaseFields840>;
+export type DetectionAlert870 = DetectionAlert860 | AlertWithSuppressionFields870<BaseFields840>;
