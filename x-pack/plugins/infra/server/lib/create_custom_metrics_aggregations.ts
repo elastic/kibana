@@ -6,35 +6,29 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { isEmpty, omit } from 'lodash';
+import { isEmpty } from 'lodash';
 import { MetricExpressionCustomMetric } from '../../common/alerting/metrics';
 import { MetricsExplorerCustomMetric } from '../../common/http_api';
 
-export const convertToMetricExplorerCustomMetric = (
-  customMetrics: MetricExpressionCustomMetric[]
-) =>
-  customMetrics.map((metric) => {
-    return { ...omit(metric, 'aggType'), aggregation: metric.aggType };
-  });
-
 const isMetricExpressionCustomMetric = (
-  subject: any[]
-): subject is MetricExpressionCustomMetric[] => {
-  return subject.every((m) => m.aggType != null);
+  subject: MetricsExplorerCustomMetric | MetricExpressionCustomMetric
+): subject is MetricExpressionCustomMetric => {
+  return (subject as MetricExpressionCustomMetric).aggType != null;
 };
 
 export const createCustomMetricsAggregations = (
   id: string,
-  customMetrics: MetricsExplorerCustomMetric[] | MetricExpressionCustomMetric[],
+  customMetrics: Array<MetricsExplorerCustomMetric | MetricExpressionCustomMetric>,
   equation?: string
 ) => {
-  const metrics = isMetricExpressionCustomMetric(customMetrics)
-    ? convertToMetricExplorerCustomMetric(customMetrics)
-    : customMetrics;
   const bucketsPath: { [id: string]: string } = {};
-  const metricAggregations = metrics.reduce((acc, metric) => {
+  const metricAggregations = customMetrics.reduce((acc, metric) => {
     const key = `${id}_${metric.name}`;
-    if (metric.aggregation === 'count') {
+    const aggregation = isMetricExpressionCustomMetric(metric)
+      ? metric.aggType
+      : metric.aggregation;
+
+    if (aggregation === 'count') {
       bucketsPath[metric.name] = `${key}>_count`;
       return {
         ...acc,
@@ -46,12 +40,12 @@ export const createCustomMetricsAggregations = (
       };
     }
 
-    if (metric.aggregation && metric.field) {
+    if (aggregation && metric.field) {
       bucketsPath[metric.name] = key;
       return {
         ...acc,
         [key]: {
-          [metric.aggregation]: { field: metric.field },
+          [aggregation]: { field: metric.field },
         },
       };
     }
