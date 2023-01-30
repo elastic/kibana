@@ -1531,10 +1531,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@73.0.0":
-  version "73.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-73.0.0.tgz#e1340997e2807ef9416daeb3bff71aad14549d19"
-  integrity sha512-vOdZH5FE9iBRHpSpHnVOH/L8AMX2VJDXlpOQpSprE6kK32k5a0C8PtjHWVntRwWbN9t/pcdqC4oHcZsABIv9GA==
+"@elastic/eui@74.0.1":
+  version "74.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-74.0.1.tgz#4397d9d5308f9da7abcf66a376bf87fd6f33af7f"
+  integrity sha512-vaaysWN/CzzMXvt8bGnwHXLPbMgeN7qNUo+mYdqda7aHo2BPvlapmtZmf3L3cIX1m9bxQW/dcuSLLQ5Wcx3fTA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -11339,10 +11339,10 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.4, core-js@^3.27.1, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
-  version "3.27.1"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.27.1.tgz#23cc909b315a6bb4e418bf40a52758af2103ba46"
-  integrity sha512-GutwJLBChfGCpwwhbYoqfv03LAfmiz7e7D/BNxzeMxwQf10GRSzqiOjx7AmtEk+heiD/JWmBuyBPgFtx0Sg1ww==
+core-js@^3.0.4, core-js@^3.27.2, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+  version "3.27.2"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.27.2.tgz#85b35453a424abdcacb97474797815f4d62ebbf7"
+  integrity sha512-9ashVQskuh5AZEZ1JdQWp1GqSoC1e1G87MzRqg2gIfVAQ7Qn9K+uFj8EcniUFA4P2NLZfV+TOlX1SzoKfo+s7w==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -13061,22 +13061,7 @@ ejs@^3.1.8:
   dependencies:
     jake "^10.8.5"
 
-elastic-apm-http-client@11.0.4, elastic-apm-http-client@^11.0.1:
-  version "11.0.4"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.0.4.tgz#3e44e56fa42235b1b16a33c6a7656cfde595f9ff"
-  integrity sha512-449Qj/STi9hgnIk2KQ7719E7lpM3/i4Afs7NUhSOX8wV3sxn/+ItIHx9kKJthzhDDezxIfQcH83v83AF67GspQ==
-  dependencies:
-    agentkeepalive "^4.2.1"
-    breadth-filter "^2.0.0"
-    end-of-stream "^1.4.4"
-    fast-safe-stringify "^2.0.7"
-    fast-stream-to-buffer "^1.0.0"
-    object-filter-sequence "^1.0.0"
-    readable-stream "^3.4.0"
-    semver "^6.3.0"
-    stream-chopper "^3.0.1"
-
-elastic-apm-http-client@11.2.0:
+elastic-apm-http-client@11.2.0, elastic-apm-http-client@^11.0.1:
   version "11.2.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.2.0.tgz#4da8b975ca326c1e5beb59746ab1124c4feddad3"
   integrity sha512-XHXK+gQmd34eRN/ffrml7AN4h1VwujB79WEO2C/J59ufvEk+mT1OGBhl6pntHPUWn4Um52C5m84O6jIXzaQwfw==
@@ -13091,45 +13076,7 @@ elastic-apm-http-client@11.2.0:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.38.0:
-  version "3.41.1"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.41.1.tgz#e0829d69d5e8a6062ef567d0a8db0ec0e3736ea8"
-  integrity sha512-bLCVIyAgQC+ZfY5fd/UaAId+8dh3vusaxZF2A0YtHBAwx1YGpIA3dqOt5zc1UuYmbjCdsEAiUjaUEAHOWdjTzA==
-  dependencies:
-    "@elastic/ecs-pino-format" "^1.2.0"
-    "@opentelemetry/api" "^1.1.0"
-    after-all-results "^2.0.0"
-    async-cache "^1.1.0"
-    async-value-promise "^1.1.1"
-    basic-auth "^2.0.1"
-    cookie "^0.5.0"
-    core-util-is "^1.0.2"
-    elastic-apm-http-client "11.0.4"
-    end-of-stream "^1.4.4"
-    error-callsites "^2.0.4"
-    error-stack-parser "^2.0.6"
-    escape-string-regexp "^4.0.0"
-    fast-safe-stringify "^2.0.7"
-    http-headers "^3.0.2"
-    is-native "^1.0.1"
-    lru-cache "^6.0.0"
-    measured-reporting "^1.51.1"
-    monitor-event-loop-delay "^1.0.0"
-    object-filter-sequence "^1.0.0"
-    object-identity-map "^1.0.2"
-    original-url "^1.2.3"
-    pino "^6.11.2"
-    relative-microtime "^2.0.0"
-    require-in-the-middle "^5.2.0"
-    semver "^6.3.0"
-    set-cookie-serde "^1.0.0"
-    shallow-clone-shim "^2.0.0"
-    source-map "^0.8.0-beta.0"
-    sql-summary "^1.0.1"
-    traverse "^0.6.6"
-    unicode-byte-truncate "^1.0.0"
-
-elastic-apm-node@^3.42.0:
+elastic-apm-node@^3.38.0, elastic-apm-node@^3.42.0:
   version "3.42.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.42.0.tgz#22c11e98708a0df7a7de8c8fb195929b4fc90c00"
   integrity sha512-Q9sugfpaw6jQ8xDeP09LlyF0MwE5k0hphQmUiap+qQKE2jrLvY00zk4WierDQ2GF/AguE6BtRZmXpUELDbHFyA==
@@ -24060,15 +24007,6 @@ require-from-string@^2.0.2:
   resolved "https://registry.yarnpkg.com/require-from-string/-/require-from-string-2.0.2.tgz#89a7fdd938261267318eafe14f9c32e598c36909"
   integrity sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==
 
-require-in-the-middle@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/require-in-the-middle/-/require-in-the-middle-5.2.0.tgz#4b71e3cc7f59977100af9beb76bf2d056a5a6de2"
-  integrity sha512-efCx3b+0Z69/LGJmm9Yvi4cqEdxnoGnxYxGxBghkkTTFeXRtTCmmhO0AnAfHz59k957uTSuy8WaHqOs8wbYUWg==
-  dependencies:
-    debug "^4.1.1"
-    module-details-from-path "^1.0.3"
-    resolve "^1.22.1"
-
 require-in-the-middle@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/require-in-the-middle/-/require-in-the-middle-6.0.0.tgz#01cc6416286fb5e672d0fe031d996f8bc202509d"
@@ -26660,12 +26598,7 @@ tslib@^1.10.0, tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.13.0.tgz#c881e13cc7015894ed914862d276436fa9a47043"
   integrity sha512-i/6DQjL8Xf3be4K/E6Wgpekn5Qasl1usyw++dAA35Ue5orEn65VIxOA+YvNNl9HV3qv70T7CNwjODHZrLwvd1Q==
 
-tslib@^2.0.0, tslib@^2.0.1, tslib@^2.0.3, tslib@^2.1.0, tslib@^2.2.0, tslib@^2.3.1, tslib@~2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
-  integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
-
-tslib@^2.4.0:
+tslib@^2.0.0, tslib@^2.0.1, tslib@^2.0.3, tslib@^2.1.0, tslib@^2.2.0, tslib@^2.3.1, tslib@^2.4.0, tslib@~2.4.0:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.1.tgz#0d0bfbaac2880b91e22df0768e55be9753a5b17e"
   integrity sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==
@@ -26840,14 +26773,7 @@ unc-path-regex@^0.1.2:
   resolved "https://registry.yarnpkg.com/unc-path-regex/-/unc-path-regex-0.1.2.tgz#e73dd3d7b0d7c5ed86fbac6b0ae7d8c6a69d50fa"
   integrity sha1-5z3T17DXxe2G+6xrCufYxqadUPo=
 
-undici@^5.11.0:
-  version "5.11.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.11.0.tgz#1db25f285821828fc09d3804b9e2e934ae86fc13"
-  integrity sha512-oWjWJHzFet0Ow4YZBkyiJwiK5vWqEYoH7BINzJAJOLedZ++JpAlCbUktW2GQ2DS2FpKmxD/JMtWUUWl1BtghGw==
-  dependencies:
-    busboy "^1.6.0"
-
-undici@^5.5.1:
+undici@^5.11.0, undici@^5.5.1:
   version "5.14.0"
   resolved "https://registry.yarnpkg.com/undici/-/undici-5.14.0.tgz#1169d0cdee06a4ffdd30810f6228d57998884d00"
   integrity sha512-yJlHYw6yXPPsuOH0x2Ib1Km61vu4hLiRRQoafs+WUgX1vO64vgnxiCEN9dpIrhZyHFsai3F0AEj4P9zy19enEQ==
