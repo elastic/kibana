@@ -14,12 +14,18 @@ import { getDefaultDatafeedQuery } from '../../jobs/new_job/utils/new_job_utils'
 import { JobCreatorContext } from '../../jobs/new_job/pages/components/job_creator_context';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 
+export interface TimeRangeMs {
+  from: number;
+  to: number;
+}
+
 const defaultDatafeedQuery = getDefaultDatafeedQuery();
 
 export const FieldStatsContent: FC<{
   dataView: DataView;
   fieldStatsServices: FieldStatsServices;
-}> = ({ dataView: currentDataView, fieldStatsServices }) => {
+  timeRangeMs?: TimeRangeMs;
+}> = ({ dataView: currentDataView, fieldStatsServices, timeRangeMs }) => {
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { fieldName } = useFieldStatsFlyoutContext();
 
@@ -37,11 +43,21 @@ export const FieldStatsContent: FC<{
 
   // Format timestamp to ISO formatted date strings
   const timeRange = useMemo(() => {
+    // Use the provided timeRange if available
+    if (timeRangeMs) {
+      return {
+        from: moment(timeRangeMs.from).toISOString(),
+        to: moment(timeRangeMs.to).toISOString(),
+      };
+    }
+
+    // If time range is available via jobCreator, use that
+    // else mimic Discover and set timeRange to be now for data view without time field
     const now = moment();
     return start && end
       ? { from: moment(start).toISOString(), to: moment(end).toISOString() }
       : { from: now.toISOString(), to: now.toISOString() };
-  }, [start, end]);
+  }, [timeRangeMs, start, end]);
 
   const fieldForStats = useMemo(
     () => (isDefined(fieldName) ? currentDataView.getFieldByName(fieldName) : undefined),

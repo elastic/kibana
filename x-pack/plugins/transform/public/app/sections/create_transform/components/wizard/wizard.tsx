@@ -238,7 +238,11 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   ]);
 
   return (
-    <FieldStatsFlyoutProvider dataView={dataView} fieldStatsServices={fieldStatsServices}>
+    <FieldStatsFlyoutProvider
+      dataView={dataView}
+      fieldStatsServices={fieldStatsServices}
+      timeRangeMs={stepDefineState.timeRangeMs}
+    >
       <CreateTransformWizardContext.Provider
         value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
       >
