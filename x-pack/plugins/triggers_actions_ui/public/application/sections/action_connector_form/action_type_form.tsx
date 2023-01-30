@@ -29,7 +29,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
-import { ActionVariable, RuleActionParam, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -133,11 +133,11 @@ export const ActionTypeForm = ({
   const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
     actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
   );
-  const [selectedNotifyWhen, setSelectedNotifyWhen] = useState<string>();
   const [minimumActionThrottle = -1, minimumActionThrottleUnit] = minimumThrottleInterval ?? [
     -1,
     's',
   ];
+  const isSummaryAction = actionItem.frequency?.summary;
 
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
@@ -175,7 +175,9 @@ export const ActionTypeForm = ({
   useEffect(() => {
     (async () => {
       setAvailableActionVariables(
-        messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
+        messageVariables
+          ? getAvailableActionVariables(messageVariables, selectedActionGroup, isSummaryAction)
+          : []
       );
 
       const defaultParams = await getDefaultParams();
@@ -244,7 +246,6 @@ export const ActionTypeForm = ({
       hasSummary={hasSummary}
       onNotifyWhenChange={useCallback(
         (notifyWhen) => {
-          setSelectedNotifyWhen(notifyWhen);
           setActionFrequencyProperty('notifyWhen', notifyWhen, index);
         },
         [setActionFrequencyProperty, index]
@@ -290,8 +291,6 @@ export const ActionTypeForm = ({
     selectedActionGroup &&
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
-
-  const showDefaultSummaryMessage = selectedNotifyWhen === RuleNotifyWhen.THROTTLE;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -383,7 +382,8 @@ export const ActionTypeForm = ({
                 editAction={setActionParamsProperty}
                 messageVariables={availableActionVariables}
                 defaultMessage={
-                  showDefaultSummaryMessage
+                  // if action is a summary action, show the default summary message
+                  isSummaryAction
                     ? defaultSummaryMessage
                     : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage
                 }
@@ -528,11 +528,13 @@ export const ActionTypeForm = ({
 
 function getAvailableActionVariables(
   actionVariables: ActionVariables,
-  actionGroup?: ActionGroupWithMessageVariables
+  actionGroup?: ActionGroupWithMessageVariables,
+  isSummaryAction?: boolean
 ) {
   const transformedActionVariables: ActionVariable[] = transformActionVariables(
     actionVariables,
-    actionGroup?.omitMessageVariables
+    actionGroup?.omitMessageVariables,
+    isSummaryAction
   );
 
   // partition deprecated items so they show up last

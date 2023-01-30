@@ -55,13 +55,13 @@ const expectedTransformResult = [
     name: 'alert.actionGroup',
   },
   {
-    description: 'The action subgroup of the alert that scheduled actions for the rule.',
-    name: 'alert.actionSubgroup',
-  },
-  {
     description:
       'The human readable name of the action group of the alert that scheduled actions for the rule.',
     name: 'alert.actionGroupName',
+  },
+  {
+    description: 'The action subgroup of the alert that scheduled actions for the rule.',
+    name: 'alert.actionSubgroup',
   },
   {
     description:
@@ -104,13 +104,13 @@ const expectedTransformResult = [
   },
   {
     deprecated: true,
-    description: 'This has been deprecated in favor of rule.spaceId.',
-    name: 'spaceId',
+    description: 'This has been deprecated in favor of rule.tags.',
+    name: 'tags',
   },
   {
     deprecated: true,
-    description: 'This has been deprecated in favor of rule.tags.',
-    name: 'tags',
+    description: 'This has been deprecated in favor of rule.spaceId.',
+    name: 'spaceId',
   },
 ];
 
@@ -140,6 +140,70 @@ const expectedParamsTransformResult = (withBraces: boolean = false) => [
     description: 'fooP-description',
     name: 'params.fooP',
     ...(withBraces && { useWithTripleBracesInTemplates: true }),
+  },
+];
+
+const expectedSummaryTransformResult = [
+  {
+    description: 'The configured server.publicBaseUrl value or empty string if not configured.',
+    name: 'kibanaBaseUrl',
+  },
+  {
+    description: 'The date the rule scheduled the action.',
+    name: 'date',
+  },
+  {
+    description: 'The params of the rule.',
+    name: 'rule.params',
+  },
+  {
+    description: 'The ID of the rule.',
+    name: 'rule.id',
+  },
+  {
+    description: 'The name of the rule.',
+    name: 'rule.name',
+  },
+  {
+    description: 'The type of rule.',
+    name: 'rule.type',
+  },
+  {
+    description:
+      'The URL to the Stack Management rule page that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
+    name: 'rule.url',
+  },
+  {
+    description: 'The tags of the rule.',
+    name: 'rule.tags',
+  },
+  {
+    description: 'The space ID of the rule.',
+    name: 'rule.spaceId',
+  },
+  {
+    description: 'The number of new alerts.',
+    name: 'alerts.new.count',
+  },
+  {
+    description: 'The data for new alerts.',
+    name: 'alerts.new.data',
+  },
+  {
+    description: 'The number of ongoing alerts..',
+    name: 'alerts.ongoing.count',
+  },
+  {
+    description: 'The data for ongoing alerts.',
+    name: 'alerts.ongoing.data',
+  },
+  {
+    description: 'The number of recovered alerts..',
+    name: 'alerts.recovered.count',
+  },
+  {
+    description: 'The data for recovered alerts.',
+    name: 'alerts.recovered.data',
   },
 ];
 
@@ -224,6 +288,12 @@ describe('transformActionVariables', () => {
       ...expectedContextTransformResult(),
       ...expectedParamsTransformResult(),
     ]);
+  });
+  test('should return correct variables when isAlertSummary = true', async () => {
+    const alertType = getAlertType({ context: [], state: [], params: [] });
+    expect(transformActionVariables(alertType.actionVariables, undefined, true)).toEqual(
+      expectedSummaryTransformResult
+    );
   });
 });
 
