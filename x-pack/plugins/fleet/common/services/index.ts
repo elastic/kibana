@@ -56,3 +56,5 @@ export {
   isPackagePrerelease,
   mapPackageReleaseToIntegrationCardRelease,
 } from './package_prerelease';
+
+export { getAllowedOutputTypeForPolicy } from './output_helpers';
