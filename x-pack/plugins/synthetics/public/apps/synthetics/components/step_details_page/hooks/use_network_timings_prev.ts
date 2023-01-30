@@ -243,7 +243,7 @@ export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number, timestam
   };
 };
 
-const median = (arr: number[]): number => {
+export const median = (arr: number[]): number => {
   if (!arr.length) return 0;
   const s = [...arr].sort((a, b) => a - b);
   const mid = Math.floor(s.length / 2);

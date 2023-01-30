@@ -6,7 +6,9 @@
  */
 
 import { useEsSearch } from '@kbn/observability-plugin/public';
-import { useStepFilters } from './use_step_filters';
+import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { CLS_HELP_LABEL, DCL_TOOLTIP, FCP_TOOLTIP, LCP_HELP_LABEL } from '../step_metrics/labels';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
@@ -20,12 +22,12 @@ export const SYNTHETICS_STEP_DURATION = 'synthetics.step.duration.us';
 
 export type StepMetrics = ReturnType<typeof useStepMetrics>;
 
-export const useStepMetrics = (loadData = true, prevCheckGroupId?: string) => {
-  const esIndex = loadData ? SYNTHETICS_INDEX_PATTERN : '';
+export const useStepMetrics = () => {
+  const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
 
   const { data } = useEsSearch(
     {
-      index: esIndex,
+      index: SYNTHETICS_INDEX_PATTERN,
       body: {
         size: 0,
         query: {
@@ -36,7 +38,16 @@ export const useStepMetrics = (loadData = true, prevCheckGroupId?: string) => {
                   'synthetics.type': ['step/metrics', 'step/end'],
                 },
               },
-              ...useStepFilters(prevCheckGroupId),
+              {
+                term: {
+                  'monitor.check_group': checkGroupId,
+                },
+              },
+              {
+                term: {
+                  'synthetics.step.index': Number(stepIndex),
+                },
+              },
             ],
           },
         },
@@ -69,13 +80,13 @@ export const useStepMetrics = (loadData = true, prevCheckGroupId?: string) => {
         },
       },
     },
-    [esIndex],
-    { name: prevCheckGroupId ? 'previousStepMetrics' : 'stepMetrics' }
+    [stepIndex, checkGroupId],
+    { name: 'stepMetrics' }
   );
 
   const { data: transferData } = useEsSearch(
     {
-      index: esIndex,
+      index: SYNTHETICS_INDEX_PATTERN,
       body: {
         size: 0,
         runtime_mappings: {
@@ -94,7 +105,16 @@ export const useStepMetrics = (loadData = true, prevCheckGroupId?: string) => {
                   'synthetics.type': 'journey/network_info',
                 },
               },
-              ...useStepFilters(prevCheckGroupId),
+              {
+                term: {
+                  'monitor.check_group': checkGroupId,
+                },
+              },
+              {
+                term: {
+                  'synthetics.step.index': Number(stepIndex),
+                },
+              },
             ],
           },
         },
@@ -112,17 +132,80 @@ export const useStepMetrics = (loadData = true, prevCheckGroupId?: string) => {
         },
       },
     },
-    [esIndex],
+    [stepIndex, checkGroupId],
     {
-      name: prevCheckGroupId
-        ? 'previousStepMetricsFromNetworkInfos'
-        : 'stepMetricsFromNetworkInfos',
+      name: 'stepMetricsFromNetworkInfos',
     }
   );
 
+  const metrics = data?.aggregations;
+  const transferDataVal = transferData?.aggregations?.transferSize?.value ?? 0;
+
   return {
     ...(data?.aggregations ?? {}),
-    transferData: ((transferData?.aggregations?.transferSize?.value ?? 0) / 1e6).toFixed(0),
-    resourceSize: ((transferData?.aggregations?.resourceSize?.value ?? 0) / 1e6).toFixed(0),
+    transferData: transferData?.aggregations?.transferSize?.value ?? 0,
+    resourceSize: transferData?.aggregations?.resourceSize?.value ?? 0,
+
+    metrics: [
+      {
+        label: STEP_DURATION_LABEL,
+        value: metrics?.totalDuration.value,
+        unit: 'milli',
+      },
+      {
+        value: metrics?.lcp.value,
+        label: LCP_LABEL,
+        helpText: LCP_HELP_LABEL,
+        unit: 'milli',
+      },
+      {
+        value: metrics?.fcp.value,
+        label: FCP_LABEL,
+        helpText: FCP_TOOLTIP,
+        unit: 'milli',
+      },
+      {
+        value: metrics?.cls.value,
+        label: CLS_LABEL,
+        helpText: CLS_HELP_LABEL,
+        unit: 'milli',
+      },
+      {
+        value: metrics?.dcl.value,
+        label: DCL_LABEL,
+        helpText: DCL_TOOLTIP,
+        unit: 'milli',
+      },
+      {
+        value: transferDataVal,
+        label: TRANSFER_SIZE,
+        helpText: '',
+        unit: 'bytes',
+      },
+    ],
   };
 };
+
+export const LCP_LABEL = i18n.translate('xpack.synthetics.lcp.label', {
+  defaultMessage: 'LCP',
+});
+
+export const FCP_LABEL = i18n.translate('xpack.synthetics.fcp.label', {
+  defaultMessage: 'FCP',
+});
+
+export const CLS_LABEL = i18n.translate('xpack.synthetics.cls.label', {
+  defaultMessage: 'CLS',
+});
+
+export const DCL_LABEL = i18n.translate('xpack.synthetics.dcl.label', {
+  defaultMessage: 'DCL',
+});
+
+export const STEP_DURATION_LABEL = i18n.translate('xpack.synthetics.totalDuration.metrics', {
+  defaultMessage: 'Step duration',
+});
+
+export const TRANSFER_SIZE = i18n.translate('xpack.synthetics.totalDuration.transferSize', {
+  defaultMessage: 'Transfer size',
+});
