@@ -38,7 +38,7 @@ export function IndexSelection({ control }: Props) {
     }
 
     const searchPattern = search.endsWith('*') ? search.substring(0, search.length - 1) : search;
-    const matchingIndices = indices.filter(({ name }) => name.includes(searchPattern));
+    const matchingIndices = indices.filter(({ name }) => name.startsWith(searchPattern));
 
     if (matchingIndices.length === 0) {
       return setIndexOptions([]);
@@ -73,10 +73,7 @@ export function IndexSelection({ control }: Props) {
       <Controller
         name="indicator.params.index"
         control={control}
-        rules={{
-          required: true,
-          validate: (value) => !!value,
-        }}
+        rules={{ required: true }}
         render={({ field, fieldState }) => (
           <EuiComboBox
             {...field}
