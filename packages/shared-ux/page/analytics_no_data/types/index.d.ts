@@ -16,7 +16,7 @@ import { Observable } from 'rxjs';
  */
 export interface Services {
   kibanaGuideDocLink: string;
-  customBranding: { showPlainSpinner?: boolean; hasCustomBranding$: Observable<boolean> };
+  customBranding: { hasCustomBranding$: Observable<boolean> };
 }
 
 /**

@@ -105,7 +105,7 @@ describe('Kibana No Data Page', () => {
     expect(component.find(NoDataConfigPage).length).toBe(0);
   });
 
-  test('shows EuiLoadingSpinner vs EuiLoadingSpinner for custom branding', () => {
+  test('shows EuiLoadingSpinner vs EuiLoadingElastic for custom branding', () => {
     const services = getKibanaNoDataPageServicesMock(config);
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
@@ -113,5 +113,6 @@ describe('Kibana No Data Page', () => {
       </KibanaNoDataPageProvider>
     );
     expect(component.find(EuiLoadingSpinner).length).toBe(1);
+    expect(component.find(EuiLoadingElastic).length).toBe(0);
   });
 });

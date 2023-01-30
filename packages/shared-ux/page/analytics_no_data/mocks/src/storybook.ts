@@ -49,7 +49,6 @@ export class StorybookMock extends AbstractStorybookMock<
     return {
       kibanaGuideDocLink: 'Kibana guide',
       customBranding: {
-        showPlainSpinner: false,
         hasCustomBranding$: of(false),
       },
       ...kibanaNoDataMock.getServices(params),
