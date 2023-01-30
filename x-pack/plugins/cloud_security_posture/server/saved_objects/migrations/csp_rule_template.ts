@@ -28,7 +28,7 @@ function migrateCspRuleTemplatesToV840(
       muted,
       metadata: {
         ...metadata,
-        benchmark: { ...benchmark, id: 'cis_k8s', posture_type: 'kspm' },
+        benchmark: { ...benchmark, id: 'cis_k8s' },
         impact: metadata.impact || undefined,
         default_value: metadata.default_value || undefined,
         references: metadata.references || undefined,
@@ -43,9 +43,19 @@ function migrateCspRuleTemplatesToV870(
 ): SavedObjectUnsanitizedDoc<CspRuleTemplateV870> {
   // Keeps only metadata, deprecated state
   const { muted, enabled, ...attributes } = doc.attributes;
+
   return {
     ...doc,
-    attributes,
+    attributes: {
+      metadata: {
+        ...attributes.metadata,
+        benchmark: {
+          ...attributes.metadata.benchmark,
+          // CSPM introduced in 8.7, so we can assume all docs from 8.4.0 are KSPM
+          posture_type: 'kspm',
+        },
+      },
+    },
   };
 }
 
