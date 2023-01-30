@@ -1155,7 +1155,7 @@
     "resolve": "^1.22.0",
     "rxjs-marbles": "^7.0.1",
     "sass-loader": "^10.4.1",
-    "selenium-webdriver": "^4.7.1",
+    "selenium-webdriver": "^4.8.0",
     "simple-git": "^3.16.0",
     "sinon": "^7.4.2",
     "sort-package-json": "^1.53.1",
