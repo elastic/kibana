@@ -38,9 +38,9 @@ export const AddToBlockListContextMenu: VFC<AddToBlockListProps> = ({
   'data-test-subj': dataTestSub,
   onClick,
 }) => {
-  const { blockList } = useSecurityContext();
-  const canWriteBlocklist = blockList.canWriteBlocklist;
-
+  const {
+    blockList: { canWriteBlocklist },
+  } = useSecurityContext();
   const { setBlockListIndicatorValue } = useBlockListContext();
   const { setUrlParams } = useSetUrlParams();
 
@@ -50,14 +50,14 @@ export const AddToBlockListContextMenu: VFC<AddToBlockListProps> = ({
     setUrlParams({ show: 'create' });
   };
 
-  const disabled: boolean = !canWriteBlocklist;
+  const disabled = !canWriteBlocklist || data === null;
 
   return (
     <EuiContextMenuItem
       key="addToBlocklist"
       onClick={() => menuItemClicked()}
       data-test-subj={dataTestSub}
-      disabled={disabled || data == null}
+      disabled={disabled}
     >
       <FormattedMessage
         defaultMessage="Add blocklist entry"
