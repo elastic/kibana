@@ -10,8 +10,17 @@ import { AGENT_API_ROUTES, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { AgentStatus, GetAgentsResponse, Agent } from '@kbn/fleet-plugin/common';
 import { pick } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { GetAgentsRequest } from '@kbn/fleet-plugin/common/types';
 import type { KbnClient } from '@kbn/test';
+import type { GetFleetServerHostsResponse } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
+import {
+  enrollmentAPIKeyRouteService,
+  fleetServerHostsRoutesService,
+} from '@kbn/fleet-plugin/common/services';
+import type {
+  GetAgentsRequest,
+  EnrollmentAPIKey,
+  GetEnrollmentAPIKeysResponse,
+} from '@kbn/fleet-plugin/common/types';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
@@ -123,4 +132,60 @@ export const waitForHostToEnroll = async (
   }
 
   return found;
+};
+
+/**
+ * Returns the URL for the default Fleet Server connected to the stack
+ * @param kbnClient
+ */
+export const fetchFleetServerUrl = async (kbnClient: KbnClient): Promise<string | undefined> => {
+  const fleetServerListResponse = await kbnClient
+    .request<GetFleetServerHostsResponse>({
+      method: 'GET',
+      path: fleetServerHostsRoutesService.getListPath(),
+      query: {
+        perPage: 100,
+      },
+    })
+    .then((response) => response.data);
+
+  // TODO:PT need to also pull in the Proxies and use that instead if defiend for url
+
+  let url: string | undefined;
+
+  for (const fleetServer of fleetServerListResponse.items) {
+    if (!url || fleetServer.is_default) {
+      url = fleetServer.host_urls[0];
+
+      if (fleetServer.is_default) {
+        break;
+      }
+    }
+  }
+
+  return url;
+};
+
+/**
+ * Retrieve the API enrollment key for a given FLeet Agent Policy
+ * @param kbnClient
+ * @param agentPolicyId
+ */
+export const fetchAgentPolicyEnrollmentKey = async (
+  kbnClient: KbnClient,
+  agentPolicyId: string
+): Promise<string | undefined> => {
+  const apiKey: EnrollmentAPIKey | undefined = await kbnClient
+    .request<GetEnrollmentAPIKeysResponse>({
+      method: 'GET',
+      path: enrollmentAPIKeyRouteService.getListPath(),
+      query: { kuery: `policy_id: "${agentPolicyId}"` },
+    })
+    .then((response) => response.data.items[0]);
+
+  if (!apiKey) {
+    return;
+  }
+
+  return apiKey.api_key;
 };
