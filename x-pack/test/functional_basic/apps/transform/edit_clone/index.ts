@@ -12,6 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['skipFirefox', 'transform']);
 
     // The transform UI should work the same as with a trial license
-    loadTestFile(require.resolve('../../../../functional/apps/transform/group3'));
+    loadTestFile(require.resolve('../../../../functional/apps/transform/edit_clone'));
   });
 }

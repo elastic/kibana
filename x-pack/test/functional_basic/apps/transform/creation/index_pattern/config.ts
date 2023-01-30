@@ -8,13 +8,16 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
+  const transformConfig = await readConfigFile(require.resolve('../../config.base.ts'));
 
   return {
-    ...functionalConfig.getAll(),
+    // default to the  transform/config.base.ts
+    ...transformConfig.getAll(),
     testFiles: [require.resolve('.')],
     junit: {
-      reportName: 'Chrome X-Pack UI Functional Tests - transform - group4',
+      ...transformConfig.get('junit'),
+      reportName:
+        'Chrome X-Pack UI Functional Tests Basic License - transform - creation - index_pattern',
     },
   };
 }

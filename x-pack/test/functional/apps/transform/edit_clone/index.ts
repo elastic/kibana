@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('transform  - group 1', function () {
+  describe('transform - edit & clone', function () {
     this.tags('transform');
 
     before(async () => {
@@ -32,6 +32,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./creation_index_pattern'));
+    loadTestFile(require.resolve('./cloning'));
+    loadTestFile(require.resolve('./editing'));
   });
 }

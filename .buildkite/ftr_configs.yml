@@ -167,10 +167,10 @@ enabled:
   - x-pack/test/functional_basic/apps/ml/data_visualizer/group1/config.ts
   - x-pack/test/functional_basic/apps/ml/data_visualizer/group2/config.ts
   - x-pack/test/functional_basic/apps/ml/data_visualizer/group3/config.ts
-  - x-pack/test/functional_basic/apps/transform/group1/config.ts
-  - x-pack/test/functional_basic/apps/transform/group2/config.ts
-  - x-pack/test/functional_basic/apps/transform/group3/config.ts
-  - x-pack/test/functional_basic/apps/transform/group4/config.ts
+  - x-pack/test/functional_basic/apps/transform/creation/index_pattern/config.ts
+  - x-pack/test/functional_basic/apps/transform/start_reset_delete/config.ts
+  - x-pack/test/functional_basic/apps/transform/edit_clone/config.ts
+  - x-pack/test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts
   - x-pack/test/functional_basic/apps/transform/permissions/config.ts
   - x-pack/test/functional_basic/apps/transform/feature_controls/config.ts
   - x-pack/test/functional_cors/config.ts
@@ -227,10 +227,10 @@ enabled:
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
-  - x-pack/test/functional/apps/transform/group1/config.ts
-  - x-pack/test/functional/apps/transform/group2/config.ts
-  - x-pack/test/functional/apps/transform/group3/config.ts
-  - x-pack/test/functional/apps/transform/group4/config.ts
+  - x-pack/test/functional/apps/transform/creation/index_pattern/config.ts
+  - x-pack/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
+  - x-pack/test/functional/apps/transform/start_reset_delete/config.ts
+  - x-pack/test/functional/apps/transform/edit_clone/config.ts
   - x-pack/test/functional/apps/transform/permissions/config.ts
   - x-pack/test/functional/apps/transform/feature_controls/config.ts
   - x-pack/test/functional/apps/upgrade_assistant/config.ts

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('transform - group 2', function () {
+  describe('transform  - group 4', function () {
     this.tags('transform');
 
     before(async () => {
@@ -32,8 +32,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./deleting'));
-    loadTestFile(require.resolve('./resetting'));
-    loadTestFile(require.resolve('./starting'));
+    loadTestFile(require.resolve('./creation_saved_search'));
+    loadTestFile(require.resolve('./creation_runtime_mappings'));
   });
 }

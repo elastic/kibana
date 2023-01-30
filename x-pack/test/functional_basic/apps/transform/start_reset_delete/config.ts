@@ -16,7 +16,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     junit: {
       ...transformConfig.get('junit'),
-      reportName: 'Chrome X-Pack UI Functional Tests Basic License - transform - group2',
+      reportName:
+        'Chrome X-Pack UI Functional Tests Basic License - transform - start reset & delete',
     },
   };
 }
