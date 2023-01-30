@@ -9,7 +9,7 @@ import path from 'path';
 
 const PACKAGES = [
   { name: 'beat', version: '0.0.1' },
-  { name: 'elasticsearch', version: '1.1.0-preview1' },
+  { name: 'elasticsearch', version: '1.2.0' },
 ];
 
 export const getPackagesArgs = (): string[] => {
