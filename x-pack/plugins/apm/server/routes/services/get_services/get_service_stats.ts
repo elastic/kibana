@@ -92,7 +92,7 @@ export async function getServiceStats({
         sample: {
           random_sampler: randomSampler,
           aggs: {
-            overflowCount: {
+            service_overflow_count: {
               sum: {
                 field: SERVICE_OVERFLOW_COUNT,
               },
@@ -162,6 +162,6 @@ export async function getServiceStats({
         };
       }) ?? [],
     serviceOverflowCount:
-      response.aggregations?.sample?.overflowCount.value || 0,
+      response.aggregations?.sample?.service_overflow_count.value || 0,
   };
 }
