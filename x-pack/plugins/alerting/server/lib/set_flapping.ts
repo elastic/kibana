@@ -23,13 +23,13 @@ export function setFlapping<
 ) {
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
-    const flapping = flappingSettings.enabled ? isAlertFlapping(flappingSettings, alert) : false;
+    const flapping = isAlertFlapping(flappingSettings, alert);
     alert.setFlapping(flapping);
   }
 
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    const flapping = flappingSettings.enabled ? isAlertFlapping(flappingSettings, alert) : false;
+    const flapping = isAlertFlapping(flappingSettings, alert);
     alert.setFlapping(flapping);
   }
 }
@@ -45,5 +45,7 @@ export function isAlertFlapping<
 ): boolean {
   const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
   const isCurrentlyFlapping = alert.getFlapping();
-  return isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
+  return flappingSettings.enabled
+    ? isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping)
+    : false;
 }

@@ -8,9 +8,14 @@
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../common/lib';
+import {
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  getEventLog,
+  resetRulesSettings,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -20,28 +25,19 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  const resetRulesSettings = (space: string) => {
-    return supertest
-      .post(`${getUrlPrefix(space)}/internal/alerting/rules/settings/_flapping`)
-      .set('kbn-xsrf', 'foo')
-      .auth('superuser', 'superuser')
-      .send(DEFAULT_FLAPPING_SETTINGS)
-      .expect(200);
-  };
-
   describe('eventLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
-      await resetRulesSettings(Spaces.default.id);
-      await resetRulesSettings(Spaces.space1.id);
+      await resetRulesSettings(supertest, Spaces.default.id);
+      await resetRulesSettings(supertest, Spaces.space1.id);
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
     });
 
     after(async () => {
-      await resetRulesSettings(Spaces.default.id);
-      await resetRulesSettings(Spaces.space1.id);
+      await resetRulesSettings(supertest, Spaces.default.id);
+      await resetRulesSettings(supertest, Spaces.space1.id);
     });
 
     afterEach(async () => {

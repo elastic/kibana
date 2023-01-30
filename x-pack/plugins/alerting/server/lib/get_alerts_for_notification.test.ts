@@ -150,9 +150,15 @@ describe('getAlertsForNotification', () => {
   });
 
   test('should reset counts and not modify alerts if flapping is disabled', () => {
-    const alert1 = new Alert('1', { meta: { flapping: true, pendingRecoveredCount: 3 } });
-    const alert2 = new Alert('2', { meta: { flapping: false } });
-    const alert3 = new Alert('3', { meta: { flapping: true } });
+    const alert1 = new Alert('1', {
+      meta: { flapping: true, flappingHistory: [true, false, true], pendingRecoveredCount: 3 },
+    });
+    const alert2 = new Alert('2', {
+      meta: { flapping: false, flappingHistory: [true, false, true] },
+    });
+    const alert3 = new Alert('3', {
+      meta: { flapping: true, flappingHistory: [true, false, true] },
+    });
 
     const { newAlerts, activeAlerts, recoveredAlerts, currentRecoveredAlerts } =
       getAlertsForNotification(
@@ -179,7 +185,11 @@ describe('getAlertsForNotification', () => {
         "1": Object {
           "meta": Object {
             "flapping": true,
-            "flappingHistory": Array [],
+            "flappingHistory": Array [
+              true,
+              false,
+              true,
+            ],
             "pendingRecoveredCount": 0,
           },
           "state": Object {},
@@ -187,7 +197,11 @@ describe('getAlertsForNotification', () => {
         "2": Object {
           "meta": Object {
             "flapping": false,
-            "flappingHistory": Array [],
+            "flappingHistory": Array [
+              true,
+              false,
+              true,
+            ],
             "pendingRecoveredCount": 0,
           },
           "state": Object {},
@@ -195,7 +209,11 @@ describe('getAlertsForNotification', () => {
         "3": Object {
           "meta": Object {
             "flapping": true,
-            "flappingHistory": Array [],
+            "flappingHistory": Array [
+              true,
+              false,
+              true,
+            ],
             "pendingRecoveredCount": 0,
           },
           "state": Object {},
@@ -207,7 +225,11 @@ describe('getAlertsForNotification', () => {
         "1": Object {
           "meta": Object {
             "flapping": true,
-            "flappingHistory": Array [],
+            "flappingHistory": Array [
+              true,
+              false,
+              true,
+            ],
             "pendingRecoveredCount": 0,
           },
           "state": Object {},
@@ -215,7 +237,11 @@ describe('getAlertsForNotification', () => {
         "2": Object {
           "meta": Object {
             "flapping": false,
-            "flappingHistory": Array [],
+            "flappingHistory": Array [
+              true,
+              false,
+              true,
+            ],
             "pendingRecoveredCount": 0,
           },
           "state": Object {},
@@ -223,7 +249,11 @@ describe('getAlertsForNotification', () => {
         "3": Object {
           "meta": Object {
             "flapping": true,
-            "flappingHistory": Array [],
+            "flappingHistory": Array [
+              true,
+              false,
+              true,
+            ],
             "pendingRecoveredCount": 0,
           },
           "state": Object {},
