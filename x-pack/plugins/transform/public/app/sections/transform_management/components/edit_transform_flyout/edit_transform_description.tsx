@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
   useEditTransformFlyoutStateFormFieldDescription,
-  useEditTransformFlyoutDispatch,
+  useEditTransformFlyoutActions,
 } from './use_edit_transform_flyout';
 
 export const EditTransformDescription: FC = () => {
   const { errorMessages, value } = useEditTransformFlyoutStateFormFieldDescription();
-  const dispatch = useEditTransformFlyoutDispatch();
+  const { formField } = useEditTransformFlyoutActions();
 
   return (
     <EditTransformFlyoutFormTextInput
@@ -26,7 +26,7 @@ export const EditTransformDescription: FC = () => {
       label={i18n.translate('xpack.transform.transformList.editFlyoutFormDescriptionLabel', {
         defaultMessage: 'Description',
       })}
-      onChange={(valueUpdate) => dispatch({ field: 'description', value: valueUpdate })}
+      onChange={(valueUpdate) => formField({ field: 'description', value: valueUpdate })}
       value={value}
     />
   );

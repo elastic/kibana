@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
@@ -23,13 +22,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { isPostTransformsUpdateResponseSchema } from '../../../../../../common/api_schemas/type_guards';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
-import { getErrorMessage } from '../../../../../../common/utils/errors';
 
-import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
-import { useToastNotifications } from '../../../../app_dependencies';
-import { useApi } from '../../../../hooks/use_api';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
@@ -37,11 +31,11 @@ import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/m
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
 import {
-  applyFormStateToTransformConfig,
   useEditTransformFlyoutConfig,
-  useEditTransformFlyoutState,
+  useEditTransformApiErrorMessage,
   EditTransformFlyoutProvider,
 } from './use_edit_transform_flyout';
+import { EditTransformUpdateButton } from './edit_transform_update_button';
 
 interface EditTransformFlyoutProps {
   closeFlyout: () => void;
@@ -68,37 +62,8 @@ interface EditTransformFlyoutConsumerProps {
 export const EditTransformFlyoutConsumer: FC<EditTransformFlyoutConsumerProps> = ({
   closeFlyout,
 }) => {
-  const api = useApi();
-  const toastNotifications = useToastNotifications();
-
   const config = useEditTransformFlyoutConfig();
-  const state = useEditTransformFlyoutState();
-
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-
-  async function submitFormHandler() {
-    setErrorMessage(undefined);
-    const requestConfig = applyFormStateToTransformConfig(config, state);
-    const transformId = config.id;
-
-    const resp = await api.updateTransform(transformId, requestConfig);
-
-    if (!isPostTransformsUpdateResponseSchema(resp)) {
-      setErrorMessage(getErrorMessage(resp));
-      return;
-    }
-
-    toastNotifications.addSuccess(
-      i18n.translate('xpack.transform.transformList.editTransformSuccessMessage', {
-        defaultMessage: 'Transform {transformId} updated.',
-        values: { transformId },
-      })
-    );
-    closeFlyout();
-    refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
-  }
-
-  const isUpdateButtonDisabled = !state.isFormValid || !state.isFormTouched;
+  const errorMessage = useEditTransformApiErrorMessage();
 
   return (
     <EuiFlyout
@@ -158,16 +123,7 @@ export const EditTransformFlyoutConsumer: FC<EditTransformFlyoutConsumerProps> =
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="transformEditFlyoutUpdateButton"
-              onClick={submitFormHandler}
-              fill
-              isDisabled={isUpdateButtonDisabled}
-            >
-              {i18n.translate('xpack.transform.transformList.editFlyoutUpdateButtonText', {
-                defaultMessage: 'Update',
-              })}
-            </EuiButton>
+            <EditTransformUpdateButton closeFlyout={closeFlyout} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

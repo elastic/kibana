@@ -12,7 +12,6 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
 import {
@@ -279,28 +278,33 @@ export const initializeSection = (
 };
 
 export interface EditTransformFlyoutState {
+  apiErrorMessage?: string;
   formFields: EditTransformFlyoutFieldsState;
   formSections: EditTransformFlyoutSectionsState;
   isFormTouched: boolean;
   isFormValid: boolean;
 }
 
-// Actions for fields and sections
-interface FormFieldAction {
-  field: EditTransformFormFields;
-  value: string;
+// Actions
+interface ApiErrorAction {
+  name: 'api_error';
+  payload: string | undefined;
 }
-function isFormFieldAction(action: unknown): action is FormFieldAction {
-  return isPopulatedObject(action, ['field']);
+interface FormFieldAction {
+  name: 'form_field';
+  payload: {
+    field: EditTransformFormFields;
+    value: string;
+  };
 }
 interface FormSectionAction {
-  section: EditTransformFormSections;
-  enabled: boolean;
+  name: 'form_section';
+  payload: {
+    section: EditTransformFormSections;
+    enabled: boolean;
+  };
 }
-function isFormSectionAction(action: unknown): action is FormSectionAction {
-  return isPopulatedObject(action, ['section']);
-}
-type Action = FormFieldAction | FormSectionAction;
+type Action = ApiErrorAction | FormFieldAction | FormSectionAction;
 
 // Takes a value from form state and applies it to the structure
 // of the expected final configuration request object.
@@ -513,22 +517,31 @@ export const formReducerFactory = (config: TransformConfigUnion) => {
   const defaultSectionValues = getSectionValues(defaultState.formSections);
 
   return (state: EditTransformFlyoutState, action: Action): EditTransformFlyoutState => {
-    const formFields = isFormFieldAction(action)
-      ? {
-          ...state.formFields,
-          [action.field]: formFieldReducer(state.formFields[action.field], action.value),
-        }
-      : state.formFields;
+    const formFields =
+      action.name === 'form_field'
+        ? {
+            ...state.formFields,
+            [action.payload.field]: formFieldReducer(
+              state.formFields[action.payload.field],
+              action.payload.value
+            ),
+          }
+        : state.formFields;
 
-    const formSections = isFormSectionAction(action)
-      ? {
-          ...state.formSections,
-          [action.section]: formSectionReducer(state.formSections[action.section], action.enabled),
-        }
-      : state.formSections;
+    const formSections =
+      action.name === 'form_section'
+        ? {
+            ...state.formSections,
+            [action.payload.section]: formSectionReducer(
+              state.formSections[action.payload.section],
+              action.payload.enabled
+            ),
+          }
+        : state.formSections;
 
     return {
       ...state,
+      apiErrorMessage: action.name === 'api_error' ? action.payload : state.apiErrorMessage,
       formFields,
       formSections,
       isFormTouched:
@@ -556,8 +569,7 @@ const [
   EditTransformFlyoutProvider,
   useEditTransformFlyoutConfig,
   useEditTransformFlyoutDataViewId,
-  useEditTransformFlyoutDispatch,
-  useEditTransformFlyoutState,
+  useEditTransformFlyoutActions,
   useEditTransformFlyoutStateFormSections,
   useEditTransformFlyoutStateFormFieldDescription,
   useEditTransformFlyoutStateFormFieldDestinationIndex,
@@ -567,32 +579,44 @@ const [
   useEditTransformFlyoutStateFormFieldMaxPageSearchSize,
   useEditTransformFlyoutStateFormFieldNumFailureRetries,
   useEditTransformFlyoutStateFormFieldRetentionPolicy,
+  useEditTransformFlyoutRequestConfig,
+  useEditTransformUpdateButtonDisabled,
+  useEditTransformApiErrorMessage,
 ] = constate(
   useEditTransformFlyout,
-  (value) => value.config,
-  (value) => value.dataViewId,
-  (value) => value.dispatch,
-  (value) => value.state,
-  (value) => value.state.formSections,
-  (value) => value.state.formFields.description,
-  (value) => value.state.formFields.destinationIndex,
-  (value) => value.state.formFields.docsPerSecond,
-  (value) => value.state.formFields.frequency,
-  (value) => value.state.formFields.destinationIngestPipeline,
-  (value) => value.state.formFields.maxPageSearchSize,
-  (value) => value.state.formFields.numFailureRetries,
-  (value) => ({
-    retentionPolicyField: value.state.formFields.retentionPolicyField,
-    retentionPolicyMaxAge: value.state.formFields.retentionPolicyMaxAge,
-  })
+  (d) => d.config,
+  (d) => d.dataViewId,
+  (d) => ({
+    apiError: (payload: ApiErrorAction['payload']) => d.dispatch({ name: 'api_error', payload }),
+    formField: (payload: FormFieldAction['payload']) =>
+      d.dispatch({
+        name: 'form_field',
+        payload,
+      }),
+    formSection: (payload: FormSectionAction['payload']) => ({ name: 'form_section', payload }),
+  }),
+  (d) => d.state.formSections,
+  (d) => d.state.formFields.description,
+  (d) => d.state.formFields.destinationIndex,
+  (d) => d.state.formFields.docsPerSecond,
+  (d) => d.state.formFields.frequency,
+  (d) => d.state.formFields.destinationIngestPipeline,
+  (d) => d.state.formFields.maxPageSearchSize,
+  (d) => d.state.formFields.numFailureRetries,
+  (d) => ({
+    retentionPolicyField: d.state.formFields.retentionPolicyField,
+    retentionPolicyMaxAge: d.state.formFields.retentionPolicyMaxAge,
+  }),
+  (d) => applyFormStateToTransformConfig(d.config, d.state),
+  (d) => !d.state.isFormValid || !d.state.isFormTouched,
+  (d) => d.state.apiErrorMessage
 );
 
 export {
   EditTransformFlyoutProvider,
   useEditTransformFlyoutConfig,
   useEditTransformFlyoutDataViewId,
-  useEditTransformFlyoutDispatch,
-  useEditTransformFlyoutState,
+  useEditTransformFlyoutActions,
   useEditTransformFlyoutStateFormSections,
   useEditTransformFlyoutStateFormFieldDescription,
   useEditTransformFlyoutStateFormFieldDestinationIndex,
@@ -602,4 +626,7 @@ export {
   useEditTransformFlyoutStateFormFieldMaxPageSearchSize,
   useEditTransformFlyoutStateFormFieldNumFailureRetries,
   useEditTransformFlyoutStateFormFieldRetentionPolicy,
+  useEditTransformFlyoutRequestConfig,
+  useEditTransformUpdateButtonDisabled,
+  useEditTransformApiErrorMessage,
 };

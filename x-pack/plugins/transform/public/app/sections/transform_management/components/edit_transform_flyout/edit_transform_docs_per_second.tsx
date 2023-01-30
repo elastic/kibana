@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
   useEditTransformFlyoutStateFormFieldDocsPerSecond,
-  useEditTransformFlyoutDispatch,
+  useEditTransformFlyoutActions,
 } from './use_edit_transform_flyout';
 
 export const EditTransformDocsPerSecond: FC = () => {
   const { errorMessages, value } = useEditTransformFlyoutStateFormFieldDocsPerSecond();
-  const dispatch = useEditTransformFlyoutDispatch();
+  const { formField } = useEditTransformFlyoutActions();
 
   return (
     <EditTransformFlyoutFormTextInput
@@ -32,7 +32,7 @@ export const EditTransformDocsPerSecond: FC = () => {
       label={i18n.translate('xpack.transform.transformList.editFlyoutFormDocsPerSecondLabel', {
         defaultMessage: 'Documents per second',
       })}
-      onChange={(valueUpdate) => dispatch({ field: 'docsPerSecond', value: valueUpdate })}
+      onChange={(valueUpdate) => formField({ field: 'docsPerSecond', value: valueUpdate })}
       value={value}
     />
   );

@@ -20,7 +20,7 @@ import {
   useEditTransformFlyoutDataViewId,
   useEditTransformFlyoutStateFormFieldRetentionPolicy,
   useEditTransformFlyoutStateFormSections,
-  useEditTransformFlyoutDispatch,
+  useEditTransformFlyoutActions,
 } from './use_edit_transform_flyout';
 
 export const EditTransformRetentionPolicy: FC = () => {
@@ -31,7 +31,7 @@ export const EditTransformRetentionPolicy: FC = () => {
   const formSections = useEditTransformFlyoutStateFormSections();
   const { retentionPolicyField, retentionPolicyMaxAge } =
     useEditTransformFlyoutStateFormFieldRetentionPolicy();
-  const dispatch = useEditTransformFlyoutDispatch();
+  const { formField, formSection } = useEditTransformFlyoutActions();
 
   const [dateFieldNames, setDateFieldNames] = useState<string[]>([]);
 
@@ -77,7 +77,7 @@ export const EditTransformRetentionPolicy: FC = () => {
         )}
         checked={formSections.retentionPolicy.enabled}
         onChange={(e) =>
-          dispatch({
+          formSection({
             section: 'retentionPolicy',
             enabled: e.target.checked,
           })
@@ -120,7 +120,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                   options={retentionDateFieldOptions}
                   value={retentionPolicyField.value}
                   onChange={(e) =>
-                    dispatch({ field: 'retentionPolicyField', value: e.target.value })
+                    formField({ field: 'retentionPolicyField', value: e.target.value })
                   }
                   hasNoInitialSelection={
                     !retentionDateFieldOptions
@@ -140,7 +140,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                   }
                 )}
                 onChange={(valueUpdate) =>
-                  dispatch({ field: 'retentionPolicyField', value: valueUpdate })
+                  formField({ field: 'retentionPolicyField', value: valueUpdate })
                 }
                 value={retentionPolicyField.value}
               />
@@ -156,7 +156,7 @@ export const EditTransformRetentionPolicy: FC = () => {
               }
             )}
             onChange={(valueUpdate) =>
-              dispatch({ field: 'retentionPolicyMaxAge', value: valueUpdate })
+              formField({ field: 'retentionPolicyMaxAge', value: valueUpdate })
             }
             value={retentionPolicyMaxAge.value}
           />

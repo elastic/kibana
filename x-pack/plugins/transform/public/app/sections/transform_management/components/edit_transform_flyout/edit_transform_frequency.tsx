@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
   useEditTransformFlyoutStateFormFieldFrequency,
-  useEditTransformFlyoutDispatch,
+  useEditTransformFlyoutActions,
 } from './use_edit_transform_flyout';
 
 export const EditTransformFrequency: FC = () => {
   const { defaultValue, errorMessages, value } = useEditTransformFlyoutStateFormFieldFrequency();
-  const dispatch = useEditTransformFlyoutDispatch();
+  const { formField } = useEditTransformFlyoutActions();
 
   return (
     <EditTransformFlyoutFormTextInput
@@ -30,7 +30,7 @@ export const EditTransformFrequency: FC = () => {
       label={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyLabel', {
         defaultMessage: 'Frequency',
       })}
-      onChange={(valueUpdate) => dispatch({ field: 'frequency', value: valueUpdate })}
+      onChange={(valueUpdate) => formField({ field: 'frequency', value: valueUpdate })}
       placeholder={i18n.translate(
         'xpack.transform.transformList.editFlyoutFormFrequencyPlaceholderText',
         {

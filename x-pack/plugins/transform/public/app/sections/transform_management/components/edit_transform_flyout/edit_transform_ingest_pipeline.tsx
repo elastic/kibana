@@ -18,12 +18,12 @@ import { useApi } from '../../../../hooks/use_api';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
   useEditTransformFlyoutStateFormFieldDestinationIngestPipeline,
-  useEditTransformFlyoutDispatch,
+  useEditTransformFlyoutActions,
 } from './use_edit_transform_flyout';
 
 export const EditTransformIngestPipeline: FC = () => {
   const { errorMessages, value } = useEditTransformFlyoutStateFormFieldDestinationIngestPipeline();
-  const dispatch = useEditTransformFlyoutDispatch();
+  const { formField } = useEditTransformFlyoutActions();
 
   const api = useApi();
 
@@ -82,7 +82,7 @@ export const EditTransformIngestPipeline: FC = () => {
               options={ingestPipelineNames.map((label: string) => ({ label }))}
               selectedOptions={[{ label: value }]}
               onChange={(o) =>
-                dispatch({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
+                formField({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
               }
             />
           </EuiFormRow>
@@ -97,7 +97,7 @@ export const EditTransformIngestPipeline: FC = () => {
               }
             )}
             onChange={(valueUpdate) =>
-              dispatch({ field: 'destinationIngestPipeline', value: valueUpdate })
+              formField({ field: 'destinationIngestPipeline', value: valueUpdate })
             }
             value={value}
           />
