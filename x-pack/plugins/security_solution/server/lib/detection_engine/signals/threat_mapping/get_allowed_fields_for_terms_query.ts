@@ -15,12 +15,21 @@ export const getAllowedFieldForTermQueryFromMapping = (
   indexMapping: IndicesGetFieldMappingResponse
 ): { [key: string]: boolean } => {
   const result: { [key: string]: boolean } = {};
+  const notAllowedTypes: string[] = [];
+
   const indicies = Object.values(indexMapping);
   indicies.forEach((index) => {
     Object.entries(index.mappings).forEach(([field, fieldValue]) => {
       Object.values(fieldValue.mapping).forEach((mapping) => {
-        if (mapping?.type && allowedFieldTypes.includes(mapping?.type)) {
+        const fieldType = mapping?.type;
+        if (!fieldType) return;
+
+        if (allowedFieldTypes.includes(fieldType) && !notAllowedTypes.includes(fieldType)) {
           result[field] = true;
+        } else {
+          notAllowedTypes.push(fieldType);
+          // if we the field allowed in one index, but not allowed in another, we should delete it from result
+          delete result[field];
         }
       });
     });
