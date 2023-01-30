@@ -119,14 +119,13 @@ export async function getActionStatuses(
       ...action,
       nbAgentsAck: nbAgentsAck - errorCount,
       nbAgentsFailed: errorCount,
-      status:
-        errorCount > 0 && complete
-          ? 'FAILED'
-          : complete
-          ? 'COMPLETE'
-          : cancelledAction
-          ? 'CANCELLED'
-          : action.status,
+      status: cancelledAction
+        ? 'CANCELLED'
+        : errorCount > 0 && complete
+        ? 'FAILED'
+        : complete
+        ? 'COMPLETE'
+        : action.status,
       nbAgentsActioned,
       cancellationTime: cancelledAction?.timestamp,
       completionTime,
