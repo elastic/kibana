@@ -134,7 +134,7 @@ const accuracyModeDisabledWarning = (
     'xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled.shortMessage',
     {
       defaultMessage:
-        'This might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster.',
+        'This might be an approximation. For more precise results, you can enable accuracy mode, but it increases the load on the Elasticsearch cluster.',
     }
   ),
   longMessage: (
@@ -176,7 +176,7 @@ const accuracyModeEnabledWarning = (
     'xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled.shortMessage',
     {
       defaultMessage:
-        'This might be an approximation. For more precise results, try increasing the number of top values or using filters instead.',
+        'might be an approximation. For more precise results, use Filters or increase the number of Top Values.',
     }
   ),
   longMessage: (
@@ -189,7 +189,7 @@ const accuracyModeEnabledWarning = (
           <strong>
             <FormattedMessage
               id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
-              defaultMessage="top values"
+              defaultMessage="Top Values"
             />
           </strong>
         ),
@@ -197,7 +197,7 @@ const accuracyModeEnabledWarning = (
           <strong>
             <FormattedMessage
               id="xpack.lens.indexPattern.precisionErrorWarning.filters"
-              defaultMessage="filters"
+              defaultMessage="Filters"
             />
           </strong>
         ),
@@ -383,7 +383,7 @@ export function getPrecisionErrorWarningMessages(
                 'xpack.lens.indexPattern.precisionErrorWarning.ascendingCountPrecisionErrorWarning.shortMessage',
                 {
                   defaultMessage:
-                    'This may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records.',
+                    'This may be approximate depending on how the data is indexed. For more precise results, sort by rarity.',
                 }
               ),
               longMessage: (
