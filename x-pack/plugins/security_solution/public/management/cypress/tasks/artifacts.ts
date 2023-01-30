@@ -14,6 +14,8 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 
+const API_HEADER = { 'kbn-xsrf': 'kibana' };
+
 export const removeAllArtifacts = () => {
   for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
     removeArtifactsFromLists(listId);
@@ -24,7 +26,7 @@ export const removeArtifactsFromLists = (listId: string) => {
   cy.request({
     method: 'DELETE',
     url: `${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`,
-    headers: { 'kbn-xsrf': 'kibana' },
+    headers: API_HEADER,
     failOnStatusCode: false,
   });
 };
@@ -41,7 +43,7 @@ export const createArtifactList = (listId: string) => {
   cy.request({
     method: 'POST',
     url: EXCEPTION_LIST_URL,
-    headers: { 'kbn-xsrf': 'kibana' },
+    headers: API_HEADER,
     body: {
       name: listId,
       description: 'This is a test list',
@@ -61,7 +63,7 @@ export const createPerPolicyArtifact = (name: string, body: object, policyId?: '
     method: 'POST',
     url: EXCEPTION_LIST_ITEM_URL,
 
-    headers: { 'kbn-xsrf': 'kibana' },
+    headers: API_HEADER,
     body: {
       name,
       description: '',

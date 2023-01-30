@@ -79,6 +79,13 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
  */
 const LOGIN_API_ENDPOINT = '/internal/security/login';
 
+const API_AUTH = {
+  user: Cypress.env(ELASTICSEARCH_USERNAME),
+  pass: Cypress.env(ELASTICSEARCH_PASSWORD),
+};
+
+const API_HEADERS = { 'kbn-xsrf': 'cypress' };
+
 /**
  * cy.visit will default to the baseUrl which uses the default kibana test user
  * This function will override that functionality in cy.visit by building the baseUrl
@@ -151,31 +158,21 @@ export const createCustomRoleAndUser = (role: string, rolePrivileges: Omit<Role,
     method: 'PUT',
     url: `${env.KIBANA_URL}/api/security/role/${role}`,
     body: rolePrivileges,
-    headers: {
-      'kbn-xsrf': 'cypress',
-    },
-    auth: {
-      user: Cypress.env(ELASTICSEARCH_USERNAME),
-      pass: Cypress.env(ELASTICSEARCH_PASSWORD),
-    },
+    headers: API_HEADERS,
+    auth: API_AUTH,
   });
 
   // post the user associated with the role to elasticsearch
   cy.request({
     method: 'POST',
     url: `${env.KIBANA_URL}/internal/security/users/${role}`,
-    headers: {
-      'kbn-xsrf': 'cypress',
-    },
+    headers: API_HEADERS,
     body: {
       username: role,
       password: Cypress.env(ELASTICSEARCH_PASSWORD),
       roles: [role],
     },
-    auth: {
-      user: Cypress.env(ELASTICSEARCH_USERNAME),
-      pass: Cypress.env(ELASTICSEARCH_PASSWORD),
-    },
+    auth: API_AUTH,
   });
 };
 
@@ -184,24 +181,14 @@ export const deleteRoleAndUser = (role: ROLE) => {
 
   cy.request({
     method: 'DELETE',
-    auth: {
-      user: Cypress.env(ELASTICSEARCH_USERNAME),
-      pass: Cypress.env(ELASTICSEARCH_PASSWORD),
-    },
-    headers: {
-      'kbn-xsrf': 'cypress',
-    },
+    auth: API_AUTH,
+    headers: API_HEADERS,
     url: `${env.KIBANA_URL}/internal/security/users/${role}`,
   });
   cy.request({
     method: 'DELETE',
-    auth: {
-      user: Cypress.env(ELASTICSEARCH_USERNAME),
-      pass: Cypress.env(ELASTICSEARCH_PASSWORD),
-    },
-    headers: {
-      'kbn-xsrf': 'cypress',
-    },
+    auth: API_AUTH,
+    headers: API_HEADERS,
     url: `${env.KIBANA_URL}/api/security/role/${role}`,
   });
 };
