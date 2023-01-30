@@ -963,7 +963,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.TLS_VERSION]: {
     fieldKey: ConfigKey.TLS_VERSION,
-    component: ComboBox as React.ComponentType<EuiComboBoxProps<string>>,
+    component: ComboBox as React.ComponentType<EuiComboBoxProps<TLSVersion>>,
     label: i18n.translate('xpack.synthetics.monitorConfig.tlsVersion.label', {
       defaultMessage: 'Supported TLS protocols',
     }),
@@ -1206,7 +1206,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.SYNTHETICS_ARGS]: {
     fieldKey: ConfigKey.SYNTHETICS_ARGS,
-    component: FieldText,
+    component: ComboBox as React.ComponentType<EuiComboBoxProps<string>>,
     controlled: true,
     label: i18n.translate('xpack.synthetics.monitorConfig.syntheticsArgs.label', {
       defaultMessage: 'Synthetics args',
@@ -1219,12 +1219,21 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         })}
       </span>
     ),
-    props: ({ setValue }) => ({
+    props: ({ setValue, field }): EuiComboBoxProps<string> => ({
       id: 'syntheticsMontiorConfigSyntheticsArgs',
-      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-        setValue(ConfigKey.SYNTHETICS_ARGS, event.target.value);
+      selectedOptions: Object.values(field?.value || []).map((arg) => ({
+        label: arg,
+      })),
+      onChange: (updatedValues: Array<EuiComboBoxOptionOption<string>>) => {
+        setValue(
+          ConfigKey.SYNTHETICS_ARGS,
+          updatedValues.map((option) => option.label)
+        );
       },
-      readOnly,
+      onCreateOption: (newValue: string) => {
+        setValue(ConfigKey.SYNTHETICS_ARGS, [...(field?.value || []), newValue]);
+      },
+      isDisabled: readOnly,
     }),
   },
 });
