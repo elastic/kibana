@@ -210,7 +210,7 @@ export const computeChartMargins = (
   }
   if (
     referenceLinePaddings.left &&
-    (isHorizontal || (!labelVisibility?.yLeft && !titleVisibility?.yLeft))
+    (isHorizontal || !axesMap.left || (!labelVisibility?.yLeft && !titleVisibility?.yLeft))
   ) {
     const placement = isHorizontal ? mapVerticalToHorizontalPlacement('left') : 'left';
     result[placement] = referenceLinePaddings.left;
