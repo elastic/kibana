@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
     junit: {
-      reportName: 'Chrome X-Pack UI Functional Tests - Transform',
+      reportName: 'Chrome X-Pack UI Functional Tests - transform - group3',
     },
   };
 }

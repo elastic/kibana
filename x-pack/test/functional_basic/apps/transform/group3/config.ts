@@ -8,26 +8,15 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../../../../functional/config.base.js')
-  );
+  const transformConfig = await readConfigFile(require.resolve('../config.base.ts'));
 
   return {
-    // default to the xpack functional config
-    ...xpackFunctionalConfig.getAll(),
-    esTestCluster: {
-      ...xpackFunctionalConfig.get('esTestCluster'),
-      license: 'basic',
-      serverArgs: [
-        'xpack.license.self_generated.type=basic',
-        'xpack.security.enabled=true',
-        'xpack.security.authc.api_key.enabled=true',
-      ],
-    },
+    // default to the  transform/config.base.ts
+    ...transformConfig.getAll(),
     testFiles: [require.resolve('.')],
     junit: {
-      ...xpackFunctionalConfig.get('junit'),
-      reportName: 'Chrome X-Pack UI Functional Tests Basic License - transform',
+      ...transformConfig.get('junit'),
+      reportName: 'Chrome X-Pack UI Functional Tests Basic License - transform - group3',
     },
   };
 }
