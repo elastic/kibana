@@ -135,7 +135,7 @@ export const getRulesFromObjects = async (
     ) {
       return {
         statusCode: 200,
-        rule: internalRuleToAPIResponse(matchingRule, null, legacyActions[matchingRule.id]),
+        rule: internalRuleToAPIResponse(matchingRule, legacyActions[matchingRule.id]),
       };
     } else {
       return {

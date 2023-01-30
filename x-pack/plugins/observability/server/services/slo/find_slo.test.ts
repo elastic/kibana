@@ -81,6 +81,7 @@ describe('FindSLO', () => {
             },
             createdAt: slo.createdAt.toISOString(),
             updatedAt: slo.updatedAt.toISOString(),
+            enabled: slo.enabled,
             revision: slo.revision,
           },
         ],
