@@ -373,51 +373,35 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should return an authorization error when a security solution user is attempting to retrieve an observability attachment', async () => {
-          const { attachments, errors } = await bulkGetAttachments({
+          await bulkGetAttachments({
             supertest: supertestWithoutAuth,
             attachmentIds: [obsAttachmentId],
             caseId: obsCase.id,
             auth: { user: secOnlyRead, space: 'space1' },
-          });
-
-          expect(attachments.length).to.be(0);
-          expect(errors.length).to.be(1);
-          expect(errors[0]).to.eql({
-            attachmentId: obsAttachmentId,
-            error: 'Forbidden',
-            message: 'Unauthorized to access attachment with owner: "observabilityFixture"',
-            status: 403,
+            expectedHttpCode: 403,
           });
         });
 
         it('should return authorization error when a observability user requests a security attachment for a security case', async () => {
-          const { attachments, errors } = await bulkGetAttachments({
+          await bulkGetAttachments({
             supertest: supertestWithoutAuth,
             attachmentIds: [secAttachmentId],
             caseId: secCase.id,
             auth: { user: obsOnlyRead, space: 'space1' },
-          });
-
-          expect(attachments.length).to.be(0);
-          expect(errors.length).to.be(1);
-          expect(errors[0]).to.eql({
-            attachmentId: secAttachmentId,
-            error: 'Forbidden',
-            message: 'Unauthorized to access attachment with owner: "securitySolutionFixture"',
-            status: 403,
+            expectedHttpCode: 403,
           });
         });
 
-        it('should return an error for the unauthorized security attachment, an error for the observability attachment that is not associated to the case, and an error for an unknown attachment', async () => {
+        it('should return an error for the observability attachment that is not associated to the case, and an error for an unknown attachment', async () => {
           const { attachments, errors } = await bulkGetAttachments({
             supertest: supertestWithoutAuth,
-            attachmentIds: [obsAttachmentId, secAttachmentId, 'does-not-exist'],
+            attachmentIds: [obsAttachmentId, 'does-not-exist'],
             caseId: secCase.id,
-            auth: { user: obsOnlyRead, space: 'space1' },
+            auth: { user: secOnly, space: 'space1' },
           });
 
           expect(attachments.length).to.be(0);
-          expect(errors.length).to.be(3);
+          expect(errors.length).to.be(2);
           expect(errors[0]).to.eql({
             error: 'Not Found',
             message: 'Saved object [cases-comments/does-not-exist] not found',
@@ -429,12 +413,6 @@ export default ({ getService }: FtrProviderContext): void => {
             error: 'Bad Request',
             message: `Attachment is not attached to case id=${secCase.id}`,
             status: 400,
-          });
-          expect(errors[2]).to.eql({
-            attachmentId: secAttachmentId,
-            error: 'Forbidden',
-            message: 'Unauthorized to access attachment with owner: "securitySolutionFixture"',
-            status: 403,
           });
         });
       });
@@ -476,44 +454,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
-
-      it('should get an empty array when the user does not have access to owner', async () => {
-        const newCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-          200,
-          {
-            user: superUser,
-            space: 'space1',
-          }
-        );
-
-        const patchedCase = await createComment({
-          supertest: supertestWithoutAuth,
-          caseId: newCase.id,
-          params: postCommentUserReq,
-          auth: { user: superUser, space: 'space1' },
-        });
-
-        for (const user of [obsOnly, obsOnlyRead]) {
-          const { attachments, errors } = await bulkGetAttachments({
-            supertest: supertestWithoutAuth,
-            caseId: patchedCase.id,
-            attachmentIds: [patchedCase.comments![0].id],
-            auth: { user, space: 'space1' },
-          });
-
-          expect(attachments.length).to.be(0);
-          expect(errors.length).to.be(1);
-
-          expect(errors[0]).to.eql({
-            error: 'Forbidden',
-            message: 'Unauthorized to access attachment with owner: "securitySolutionFixture"',
-            status: 403,
-            attachmentId: patchedCase.comments![0].id,
-          });
-        }
-      });
     });
   });
 };
