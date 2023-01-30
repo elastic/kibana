@@ -7,7 +7,7 @@
  */
 
 import type { Collector } from '@kbn/usage-collection-plugin/server';
-import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
+import type { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 const collectorSet = createUsageCollectionSetupMock();
 
