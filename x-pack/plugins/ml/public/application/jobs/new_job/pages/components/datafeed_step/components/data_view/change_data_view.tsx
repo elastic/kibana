@@ -129,12 +129,10 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
       <EuiModal onClose={onClose} data-test-subj="mlJobMgmtImportJobsFlyout">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h1>
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.title"
-                defaultMessage="Change data view"
-              />
-            </h1>
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.title"
+              defaultMessage="Change data view"
+            />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
