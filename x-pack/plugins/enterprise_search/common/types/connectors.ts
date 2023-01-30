@@ -17,6 +17,8 @@ export interface ConnectorScheduling {
   interval: string;
 }
 
+export type ConnectorCustomScheduling = Record<string, KeyValuePair | null>;
+
 export enum ConnectorStatus {
   CREATED = 'created',
   NEEDS_CONFIGURATION = 'needs_configuration',
@@ -125,6 +127,7 @@ export type ConnectorFeatures = Partial<{
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
+  custom_scheduling: ConnectorCustomScheduling;
   description: string | null;
   error: string | null;
   features: ConnectorFeatures;
