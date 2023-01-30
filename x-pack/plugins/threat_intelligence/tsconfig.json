@@ -31,7 +31,9 @@
     "@kbn/kibana-react-plugin",
     "@kbn/utility-types",
     "@kbn/ui-theme",
-    "@kbn/securitysolution-io-ts-list-types"
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/discover-plugin",
+    "@kbn/config-schema"
   ],
   "exclude": [
     "target/**/*",
