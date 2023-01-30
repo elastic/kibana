@@ -40,8 +40,8 @@ as uiSettings within the code.
 |Console provides the user with tools for storing and executing requests against Elasticsearch.
 
 
-|{kib-repo}blob/{branch}/src/plugins/content_management[contentManagement]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/content_management/README.md[contentManagement]
+|The content management plugin provides functionality to manage content in Kibana.
 
 
 |{kib-repo}blob/{branch}/src/plugins/controls/README.mdx[controls]
