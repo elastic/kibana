@@ -102,17 +102,15 @@ describe('Artifact tabs in Policy Details page', () => {
     });
 
     describe(`${testData.title} tab`, () => {
-      context('NONE privilege', () => {
-        it(`User cannot see the tab for ${testData.title}`, () => {
-          loginWithPrivilegeNone(testData.privilegePrefix);
-          visitPolicyDetailsPage();
+      it(`[NONE] User cannot see the tab for ${testData.title}`, () => {
+        loginWithPrivilegeNone(testData.privilegePrefix);
+        visitPolicyDetailsPage();
 
-          cy.get(`#${testData.tabId}`).should('not.exist');
-        });
+        cy.get(`#${testData.tabId}`).should('not.exist');
       });
 
-      context('READ privilege', () => {
-        it(`Given there are no ${testData.title} entries, user CANNOT add artifact`, () => {
+      context(`Given there are no ${testData.title} entries`, () => {
+        it(`[READ] User CANNOT add ${testData.title} artifact`, () => {
           loginWithPrivilegeRead(testData.privilegePrefix);
           visitArtifactTab(testData.tabId);
 
@@ -121,56 +119,16 @@ describe('Artifact tabs in Policy Details page', () => {
           cy.getBySel('unexisting-manage-artifacts-button').should('not.exist');
         });
 
-        it(`Given there are no assigned ${testData.title} entries, user CANNOT Manage or Assign artifacts`, () => {
-          login();
-          createArtifactList(testData.createRequestBody.list_id);
-          createPerPolicyArtifact(testData.artifactName, testData.createRequestBody);
-
-          loginWithPrivilegeRead(testData.privilegePrefix);
-          visitArtifactTab(testData.tabId);
-
-          cy.getBySel('policy-artifacts-empty-unassigned').should('exist');
-
-          cy.getBySel('unassigned-manage-artifacts-button').should('not.exist');
-          cy.getBySel('unassigned-assign-artifacts-button').should('not.exist');
-        });
-
-        it(`Given there are assigned ${testData.title} entries, user can see the artifacts but CANNOT assign or remove from policy`, () => {
-          login();
-          createArtifactList(testData.createRequestBody.list_id);
-          yieldFirstPolicyID().then((policyID) => {
-            createPerPolicyArtifact(testData.artifactName, testData.createRequestBody, policyID);
-          });
-
-          loginWithPrivilegeRead(testData.privilegePrefix);
-          visitArtifactTab(testData.tabId);
-
-          // List of artifacts
-          cy.getBySel('artifacts-collapsed-list-card').should('have.length', 1);
-          cy.getBySel('artifacts-collapsed-list-card-header-titleHolder').contains(
-            testData.artifactName
-          );
-
-          // Cannot assign artifacts
-          cy.getBySel('artifacts-assign-button').should('not.exist');
-
-          // Cannot remove from policy
-          cy.getBySel('artifacts-collapsed-list-card-header-actions-button').click();
-          cy.getBySel('remove-from-policy-action').should('not.exist');
-        });
-      });
-
-      context('ALL privilege', () => {
-        it(`User journey for ${testData.title}: user can add, manage, assign, remove from policy`, () => {
+        it(`[ALL] User can add ${testData.title} artifact`, () => {
           loginWithPrivilegeAll();
           visitArtifactTab(testData.tabId);
 
-          // 1) There are no existing artifacts - let's add one
           cy.getBySel('policy-artifacts-empty-unexisting').should('exist');
 
           cy.getBySel('unexisting-manage-artifacts-button').should('exist').click();
 
           const { formActions, checkResults } = testData.create;
+
           performUserActions(formActions);
 
           // Add a per policy artifact - but not assign it to any policy
@@ -187,8 +145,30 @@ describe('Artifact tabs in Policy Details page', () => {
 
           cy.getBySel('backToOrigin').click();
           cy.getBySel('policyDetailsPage').should('exist');
+        });
+      });
 
-          // 2) There are no assigned artifacts - let's assign one
+      context(`Given there are no assigned ${testData.title} entries`, () => {
+        beforeEach(() => {
+          login();
+          createArtifactList(testData.createRequestBody.list_id);
+          createPerPolicyArtifact(testData.artifactName, testData.createRequestBody);
+        });
+
+        it(`[READ] User CANNOT Manage or Assign ${testData.title} artifacts`, () => {
+          loginWithPrivilegeRead(testData.privilegePrefix);
+          visitArtifactTab(testData.tabId);
+
+          cy.getBySel('policy-artifacts-empty-unassigned').should('exist');
+
+          cy.getBySel('unassigned-manage-artifacts-button').should('not.exist');
+          cy.getBySel('unassigned-assign-artifacts-button').should('not.exist');
+        });
+
+        it(`[ALL] User can Manage and Assign ${testData.title} artifacts`, () => {
+          loginWithPrivilegeAll();
+          visitArtifactTab(testData.tabId);
+
           cy.getBySel('policy-artifacts-empty-unassigned').should('exist');
 
           // Manage artifacts
@@ -207,8 +187,39 @@ describe('Artifact tabs in Policy Details page', () => {
 
           cy.getBySel(`${testData.artifactName}_checkbox`).click();
           cy.getBySel('artifacts-assign-confirm-button').click();
+        });
+      });
 
-          // 3) There are assigned artifacts - user can see the artifacts and can assign or remove artifacts from policy
+      context(`Given there are assigned ${testData.title} entries`, () => {
+        beforeEach(() => {
+          login();
+          createArtifactList(testData.createRequestBody.list_id);
+          yieldFirstPolicyID().then((policyID) => {
+            createPerPolicyArtifact(testData.artifactName, testData.createRequestBody, policyID);
+          });
+        });
+
+        it(`[READ] User can see ${testData.title} artifacts but CANNOT assign or remove from policy`, () => {
+          loginWithPrivilegeRead(testData.privilegePrefix);
+          visitArtifactTab(testData.tabId);
+
+          // List of artifacts
+          cy.getBySel('artifacts-collapsed-list-card').should('have.length', 1);
+          cy.getBySel('artifacts-collapsed-list-card-header-titleHolder').contains(
+            testData.artifactName
+          );
+
+          // Cannot assign artifacts
+          cy.getBySel('artifacts-assign-button').should('not.exist');
+
+          // Cannot remove from policy
+          cy.getBySel('artifacts-collapsed-list-card-header-actions-button').click();
+          cy.getBySel('remove-from-policy-action').should('not.exist');
+        });
+
+        it(`[ALL] User can see ${testData.title} artifacts and can assign or remove artifacts from policy`, () => {
+          loginWithPrivilegeAll();
+          visitArtifactTab(testData.tabId);
 
           // List of artifacts
           cy.getBySel('artifacts-collapsed-list-card').should('have.length', 1);
