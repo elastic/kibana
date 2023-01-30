@@ -26,6 +26,8 @@ import type { CasesClientArgs, SOWithErrors } from '../types';
 import { Operations } from '../../authorization';
 import type { BulkGetArgs } from './types';
 import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/attachments/types';
+import { CASE_REF_NAME } from '../../common/constants';
+import type { CasesClient } from '../client';
 
 type AttachmentSavedObjectWithErrors = SOWithErrors<CommentAttributes>;
 
@@ -36,7 +38,8 @@ type AttachmentSavedObject = SavedObject<CommentAttributes>;
  */
 export async function bulkGet(
   { attachmentIDs, caseID }: BulkGetArgs,
-  clientArgs: CasesClientArgs
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
 ): Promise<BulkGetAttachmentsResponse> {
   const {
     services: { attachmentService },
@@ -51,6 +54,9 @@ export async function bulkGet(
     );
 
     throwErrorIfIdsExceedTheLimit(request.ids);
+
+    // perform an authorization check for the case
+    await casesClient.cases.resolve({ id: caseID });
 
     const attachments = await attachmentService.getter.bulkGet(request.ids);
 
@@ -128,9 +134,7 @@ const partitionByCaseAssociation = (caseId: string, attachments: AttachmentSaved
   });
 
 const getCaseReference = (references: SavedObjectReference[]): SavedObjectReference | undefined => {
-  return references.find(
-    (ref) => ref.name === `associated-${CASE_SAVED_OBJECT}` && ref.type === CASE_SAVED_OBJECT
-  );
+  return references.find((ref) => ref.name === CASE_REF_NAME && ref.type === CASE_SAVED_OBJECT);
 };
 
 const constructErrors = ({

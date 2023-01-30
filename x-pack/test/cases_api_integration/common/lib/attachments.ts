@@ -6,8 +6,10 @@
  */
 
 import type SuperTest from 'supertest';
-import { CASES_INTERNAL_URL } from '@kbn/cases-plugin/common/constants';
-import { BulkGetAttachmentsResponse } from '@kbn/cases-plugin/common/api';
+import {
+  BulkGetAttachmentsResponse,
+  getCaseBulkGetAttachmentsUrl,
+} from '@kbn/cases-plugin/common/api';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { getSpaceUrlPrefix } from './utils';
@@ -26,7 +28,7 @@ export const bulkGetAttachments = async ({
   expectedHttpCode?: number;
 }): Promise<BulkGetAttachmentsResponse> => {
   const { body: comments } = await supertest
-    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_get`)
+    .post(`${getSpaceUrlPrefix(auth.space)}${getCaseBulkGetAttachmentsUrl(caseId)}`)
     .send({ ids: attachmentIds })
     .set('kbn-xsrf', 'abc')
     .auth(auth.user.username, auth.user.password)
