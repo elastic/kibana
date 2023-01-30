@@ -98,7 +98,7 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(body.items[0]).to.eql({
         actionId: 'action1',
-        createTime: '2022-10-07T12:00:00.000Z',
+        createTime: '2022-10-07T11:00:00.000Z',
         filePath:
           '/api/fleet/agents/files/file1/elastic-agent-diagnostics-2022-10-07T12-00-00Z-00.zip',
         id: 'file1',
