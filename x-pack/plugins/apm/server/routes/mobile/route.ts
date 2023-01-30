@@ -11,12 +11,12 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { offsetRt } from '../../../common/comparison_rt';
 import {
-  getHttpRequestsChart,
+  getMobileHttpRequests,
   HttpRequestsTimeseries,
-} from './get_http_requests_chart';
+} from './get_mobile_http_requests';
 import { getMobileFilters } from './get_mobile_filters';
-import { getSessionsChart, SessionsTimeseries } from './get_sessions_chart';
-import { getMobileStats, MobileStats } from './get_mobile_stats';
+import { getMobileSessions, SessionsTimeseries } from './get_mobile_sessions';
+import { getMobileStatsPeriods, MobilePeriodStats } from './get_mobile_stats';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -67,25 +67,27 @@ const mobileStatsRoute = createApmServerRoute({
       kueryRt,
       rangeRt,
       environmentRt,
+      offsetRt,
       t.partial({
         transactionType: t.string,
       }),
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<MobileStats> => {
+  handler: async (resources): Promise<MobilePeriodStats> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end } = params.query;
+    const { kuery, environment, start, end, offset } = params.query;
 
-    const stats = await getMobileStats({
+    const stats = await getMobileStatsPeriods({
       kuery,
       environment,
       start,
       end,
       serviceName,
       apmEventClient,
+      offset,
     });
 
     return stats;
@@ -118,7 +120,7 @@ const sessionsChartRoute = createApmServerRoute({
     const { kuery, environment, start, end, transactionName, offset } =
       params.query;
 
-    const { currentPeriod, previousPeriod } = await getSessionsChart({
+    const { currentPeriod, previousPeriod } = await getMobileSessions({
       kuery,
       environment,
       transactionName,
@@ -159,7 +161,7 @@ const httpRequestsChartRoute = createApmServerRoute({
     const { kuery, environment, start, end, transactionName, offset } =
       params.query;
 
-    const { currentPeriod, previousPeriod } = await getHttpRequestsChart({
+    const { currentPeriod, previousPeriod } = await getMobileHttpRequests({
       kuery,
       environment,
       transactionName,

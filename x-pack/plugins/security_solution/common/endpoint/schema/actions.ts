@@ -132,7 +132,7 @@ export type ResponseActionGetFileRequestBody = TypeOf<typeof EndpointActionGetFi
 export const EndpointActionFileDownloadSchema = {
   params: schema.object({
     action_id: schema.string({ minLength: 1 }),
-    agent_id: schema.string({ minLength: 1 }),
+    file_id: schema.string({ minLength: 1 }),
   }),
 };
 
@@ -144,7 +144,7 @@ export type EndpointActionFileDownloadParams = TypeOf<
 export const EndpointActionFileInfoSchema = {
   params: schema.object({
     action_id: schema.string({ minLength: 1 }),
-    agent_id: schema.string({ minLength: 1 }),
+    file_id: schema.string({ minLength: 1 }),
   }),
 };
 

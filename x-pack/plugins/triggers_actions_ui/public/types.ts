@@ -326,6 +326,7 @@ export interface RuleType<
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
+  hasGetSummarizedAlerts?: boolean;
 }
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
@@ -518,13 +519,15 @@ export interface BulkActionsConfig {
   ) => void;
 }
 
+export interface RenderCustomActionsRowArgs {
+  alert: EcsFieldsResponse;
+  setFlyoutAlert: (data: unknown) => void;
+  id?: string;
+  setIsActionLoading?: (isLoading: boolean) => void;
+}
+
 export type UseActionsColumnRegistry = () => {
-  renderCustomActionsRow: (
-    alert: EcsFieldsResponse,
-    setFlyoutAlert: (data: unknown) => void,
-    id?: string,
-    setIsActionLoading?: (isLoading: boolean) => void
-  ) => JSX.Element;
+  renderCustomActionsRow: (args: RenderCustomActionsRowArgs) => JSX.Element;
   width?: number;
 };
 

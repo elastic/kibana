@@ -13,10 +13,13 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import {
+  BrushTriggerEvent,
+  ClickTriggerEvent,
+  MultiClickTriggerEvent,
+} from '@kbn/charts-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
-import React from 'react';
 import type { Document } from './persistence/saved_object_store';
 import {
   Datasource,
@@ -27,6 +30,7 @@ import {
   DraggedField,
   DragDropOperation,
   isOperation,
+  UserMessage,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
@@ -209,7 +213,7 @@ export function getRemoveOperation(
 
 export function inferTimeField(
   datatableUtilities: DatatableUtilitiesService,
-  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data']
+  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
 ) {
   const tablesAndColumns =
     'table' in context
@@ -218,17 +222,19 @@ export function inferTimeField(
       ? context.data
       : // if it's a negated filter, never respect bound time field
         [];
-  return tablesAndColumns
-    .map(({ table, column }) => {
-      const tableColumn = table.columns[column];
-      const hasTimeRange = Boolean(
-        tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
-      );
-      if (hasTimeRange) {
-        return tableColumn.meta.field;
-      }
-    })
-    .find(Boolean);
+  return !Array.isArray(tablesAndColumns)
+    ? [tablesAndColumns]
+    : tablesAndColumns
+        .map(({ table, column }) => {
+          const tableColumn = table.columns[column];
+          const hasTimeRange = Boolean(
+            tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
+          );
+          if (hasTimeRange) {
+            return tableColumn.meta.field;
+          }
+        })
+        .find(Boolean);
 }
 
 export function renewIDs<T = unknown>(
@@ -329,8 +335,8 @@ export const getSearchWarningMessages = (
   deps: {
     searchService: ISearchStart;
   }
-) => {
-  const warningsMap: Map<string, Array<string | React.ReactNode>> = new Map();
+): UserMessage[] => {
+  const warningsMap: Map<string, UserMessage[]> = new Map();
 
   deps.searchService.showWarnings(adapter, (warning, meta) => {
     const { request, response, requestId } = meta;

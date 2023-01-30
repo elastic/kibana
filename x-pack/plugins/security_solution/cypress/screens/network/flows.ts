@@ -9,19 +9,19 @@ export const IPS_TABLE_LOADED = '[data-test-subj="table-topNFlowSource-loading-f
 
 export const EXPAND_OVERFLOW_ITEMS = '[data-test-subj="overflow-button"]';
 
-export const FILTER_IN = '[data-test-subj="hover-actions-filter-for"]';
+export const FILTER_IN = '[data-test-subj="actionItem-security_filterIn"]';
 
-export const FILTER_OUT = '[data-test-subj="hover-actions-filter-out"]';
+export const FILTER_OUT = '[data-test-subj="actionItem-security_filterOut"]';
 
-export const ADD_TO_TIMELINE = '[data-test-subj="add-to-timeline"]';
+export const ADD_TO_TIMELINE = '[data-test-subj="actionItem-security_addToTimeline"]';
 
-export const SHOW_TOP_FIELD = '[data-test-subj="show-top-field"]';
+export const SHOW_TOP_FIELD = '[data-test-subj="actionItem-security_showTopN"]';
 
-export const COPY = '[data-test-subj="clipboard"]';
+export const COPY = '[data-test-subj="actionItem-security_copyToClipboard"]';
 
 export const TOP_N_CONTAINER = '[data-test-subj="topN-container"]';
 
-export const DESTINATION_DOMAIN = `[data-test-subj="more-container"] [data-test-subj="render-content-destination.domain"]`;
+export const DESTINATION_DOMAIN = `[data-test-subj="more-container"] [data-test-subj="cellActions-renderContent-destination.domain"]`;
 
 export const OVERFLOW_ITEM =
-  '[data-test-subj="more-container"] [data-test-subj="render-content-destination.domain"]';
+  '[data-test-subj="more-container"] [data-test-subj="cellActions-renderContent-destination.domain"]';
