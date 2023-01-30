@@ -16,8 +16,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   CaseUserActionAttributesWithoutConnectorId,
-  CaseUserActionInjectedAttributesWithoutActionId,
-  CaseUserActionResponse,
+  CaseUserActionDeprecatedResponse,
+  CaseUserActionInjectedAttributes,
 } from '../../../common/api';
 import { ActionTypes } from '../../../common/api';
 import {
@@ -270,7 +270,7 @@ export class CaseUserActionService {
 
   public async getMostRecentUserAction(
     caseId: string
-  ): Promise<SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined> {
+  ): Promise<SavedObject<CaseUserActionInjectedAttributes> | undefined> {
     try {
       this.context.log.debug(
         `Attempting to retrieve the most recent user action for case id: ${caseId}`
@@ -377,7 +377,7 @@ export class CaseUserActionService {
         rawFieldsDoc = createCase.mostRecent.hits.hits[0];
       }
 
-      let fieldsDoc: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined;
+      let fieldsDoc: SavedObject<CaseUserActionInjectedAttributes> | undefined;
       if (rawFieldsDoc != null) {
         const doc =
           this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
@@ -420,7 +420,7 @@ export class CaseUserActionService {
 
   private getTopHitsDoc(
     topHits: TopHits
-  ): SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined {
+  ): SavedObject<CaseUserActionInjectedAttributes> | undefined {
     if (topHits.hits.hits.length > 0) {
       const rawPushDoc = topHits.hits.hits[0];
 
@@ -526,7 +526,9 @@ export class CaseUserActionService {
     };
   }
 
-  public async getAll(caseId: string): Promise<SavedObjectsFindResponse<CaseUserActionResponse>> {
+  public async getAll(
+    caseId: string
+  ): Promise<SavedObjectsFindResponse<CaseUserActionDeprecatedResponse>> {
     try {
       const id = caseId;
       const type = CASE_SAVED_OBJECT;

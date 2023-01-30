@@ -12,7 +12,7 @@ import { Redirect } from 'react-router-dom';
 import { NavigateToPath } from '../../../contexts/kibana';
 
 import { basicResolvers } from '../../resolvers';
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { Page } from '../../../jobs/new_job/pages/new_job';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
@@ -110,7 +110,7 @@ export const singleMetricRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/jobs/new_job/single_metric',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SINGLE_METRIC),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.SINGLE_METRIC} deps={deps} />,
   breadcrumbs: getSingleMetricBreadcrumbs(navigateToPath, basePath),
 });
@@ -119,15 +119,23 @@ export const multiMetricRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/jobs/new_job/multi_metric',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_MULTI_METRIC),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.MULTI_METRIC} deps={deps} />,
   breadcrumbs: getMultiMetricBreadcrumbs(navigateToPath, basePath),
 });
 
 // redirect route to reset the job wizard when converting to multi metric job
 export const multiMetricRouteFactoryRedirect = (): MlRoute => ({
-  path: '/jobs/new_job/convert_to_multi_metric',
-  render: (props) => <Redirect to={`/jobs/new_job/multi_metric${props.location.search}`} />,
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC),
+  render: (props) => (
+    <Redirect
+      to={createPath(
+        ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC,
+        props.location.search
+      )}
+    />
+  ),
+
   breadcrumbs: [],
 });
 
@@ -135,7 +143,7 @@ export const populationRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/jobs/new_job/population',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_POPULATION),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.POPULATION} deps={deps} />,
   breadcrumbs: getPopulationBreadcrumbs(navigateToPath, basePath),
 });
@@ -144,15 +152,19 @@ export const advancedRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/jobs/new_job/advanced',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.ADVANCED} deps={deps} />,
   breadcrumbs: getAdvancedBreadcrumbs(navigateToPath, basePath),
 });
 
 // redirect route to reset the job wizard when converting to advanced job
 export const advancedRouteFactoryRedirect = (): MlRoute => ({
-  path: '/jobs/new_job/convert_to_advanced',
-  render: (props) => <Redirect to={`/jobs/new_job/advanced${props.location.search}`} />,
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED),
+  render: (props) => (
+    <Redirect
+      to={createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED, props.location.search)}
+    />
+  ),
   breadcrumbs: [],
 });
 
@@ -160,19 +172,19 @@ export const categorizationRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/jobs/new_job/categorization',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CATEGORIZATION),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.CATEGORIZATION} deps={deps} />,
   breadcrumbs: getCategorizationBreadcrumbs(navigateToPath, basePath),
 });
 
 export const rareRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
-  path: '/jobs/new_job/rare',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RARE),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.RARE} deps={deps} />,
   breadcrumbs: getRareBreadcrumbs(navigateToPath, basePath),
 });
 
 export const geoRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
-  path: '/jobs/new_job/geo',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_GEO),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.GEO} deps={deps} />,
   breadcrumbs: getGeoBreadcrumbs(navigateToPath, basePath),
 });
