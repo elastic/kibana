@@ -33,7 +33,9 @@ export interface Services {
     timeTo: number;
     kuery: string;
   }) => Promise<ElasticFlameGraph>;
-  fetchHasSetup: (params: { http: AutoAbortedHttpService }) => Promise<{ has_setup: boolean }>;
+  fetchHasSetup: (params: {
+    http: AutoAbortedHttpService;
+  }) => Promise<{ has_setup: boolean; has_data: boolean }>;
   postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
 }
 
