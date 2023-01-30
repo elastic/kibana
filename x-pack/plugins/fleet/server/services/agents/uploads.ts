@@ -70,7 +70,11 @@ export async function getAgentUploads(
   const results: AgentDiagnostics[] = [];
   for (const action of actions) {
     const file = await getFile(action.actionId);
-    const fileName = file?.name ?? `${moment(action.timestamp!).format('YYYY-MM-DD HH:mm:ss')}.zip`;
+    const fileName =
+      file?.name ??
+      `elastic-agent-diagnostics-${moment(action.timestamp!).format(
+        'YYYY-MM-DDTHH:mm:ss'
+      )}Z-00.zip`;
     const filePath = file ? agentRouteService.getAgentFileDownloadLink(file.id, file.name) : '';
     const result = {
       actionId: action.actionId,
