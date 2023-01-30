@@ -40,9 +40,29 @@ export function registerSetupRoute({
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
         });
 
-        const stepCompletionResults = await Promise.all(
+        const hasDataPromise = hasProfilingData(esClient);
+
+        const stepCompletionResultsPromises = Promise.all(
           steps.map(async (step) => ({ name: step.name, completed: await step.hasCompleted() }))
         );
+
+        stepCompletionResultsPromises.catch((error) => {
+          logger.error(error);
+        });
+
+        const hasData = await hasDataPromise;
+
+        if (hasData) {
+          return response.ok({
+            body: {
+              has_data: true,
+              has_setup: true,
+              steps: [],
+            },
+          });
+        }
+
+        const stepCompletionResults = await stepCompletionResultsPromises;
 
         // Reply to clients if we have already created all 12 events template indices.
         // This is kind of simplistic but can be a good first step to ensure
@@ -50,6 +70,7 @@ export function registerSetupRoute({
         return response.ok({
           body: {
             has_setup: stepCompletionResults.every((step) => step.completed),
+            has_data: false,
             steps: stepCompletionResults,
           },
         });
@@ -86,23 +107,6 @@ export function registerSetupRoute({
         });
 
         return response.ok();
-      } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
-      }
-    }
-  );
-  // Detect if data collection is already in place
-  router.get(
-    {
-      path: paths.HasSetupDataCollection,
-      validate: false,
-    },
-    async (context, request, response) => {
-      try {
-        const esClient = await getClient(context);
-        logger.info('checking if profiling data is already ingested');
-        const hasData = await hasProfilingData(esClient);
-        return response.ok({ body: { has_data: hasData } });
       } catch (error) {
         return handleRouteHandlerError({ error, logger, response });
       }
