@@ -172,6 +172,8 @@ exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Error METRICSET_INTERVAL 1`] = `undefined`;
+
 exports[`Error METRICSET_NAME 1`] = `undefined`;
 
 exports[`Error NETWORK_CONNECTION_TYPE 1`] = `undefined`;
@@ -271,6 +273,8 @@ exports[`Error TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
+
+exports[`Error TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_PAGE_URL 1`] = `undefined`;
 
@@ -451,6 +455,8 @@ exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Span METRICSET_INTERVAL 1`] = `undefined`;
+
 exports[`Span METRICSET_NAME 1`] = `undefined`;
 
 exports[`Span NETWORK_CONNECTION_TYPE 1`] = `undefined`;
@@ -546,6 +552,8 @@ exports[`Span TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
+
+exports[`Span TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_PAGE_URL 1`] = `undefined`;
 
@@ -740,6 +748,8 @@ exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Transaction METRICSET_INTERVAL 1`] = `undefined`;
+
 exports[`Transaction METRICSET_NAME 1`] = `undefined`;
 
 exports[`Transaction NETWORK_CONNECTION_TYPE 1`] = `undefined`;
@@ -839,6 +849,8 @@ exports[`Transaction TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
+
+exports[`Transaction TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_PAGE_URL 1`] = `undefined`;
 
