@@ -135,6 +135,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "siem-detection-engine-rule-execution-info",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "siem-detection-engine-rule-status",
                 },
               },

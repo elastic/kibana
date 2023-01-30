@@ -19,7 +19,7 @@ import { CaseViewActivity } from './case_view_activity';
 import { ConnectorTypes } from '../../../../common/api/connectors';
 import type { Case } from '../../../../common';
 import type { CaseViewProps } from '../types';
-import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
+import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
 import { useGetTags } from '../../../containers/use_get_tags';
@@ -27,7 +27,7 @@ import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bu
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
 
-jest.mock('../../../containers/use_get_case_user_actions');
+jest.mock('../../../containers/use_find_case_user_actions');
 jest.mock('../../../containers/configure/use_connectors');
 jest.mock('../../../containers/use_post_push_to_service');
 jest.mock('../../user_actions/timestamp', () => ({
@@ -73,7 +73,7 @@ const caseViewProps: CaseViewProps = {
 const fetchCaseUserActions = jest.fn();
 const pushCaseToExternalService = jest.fn();
 
-const defaultUseGetCaseUserActions = {
+const defaultUseFindCaseUserActions = {
   data: {
     caseUserActions: [...caseUserActions, getAlertUserAction()],
     caseServices: {},
@@ -91,14 +91,14 @@ export const caseProps = {
   fetchCaseMetrics: jest.fn(),
 };
 
-const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
+const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
 describe('Case View Page activity tab', () => {
   beforeAll(() => {
-    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useBulkGetUserProfilesMock.mockReturnValue({ isLoading: false, data: new Map() });
@@ -126,7 +126,7 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.getByTestId('case-view-status-action-button')).toBeTruthy();
-    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
 
     await waitForComponentToUpdate();
   });
@@ -143,7 +143,7 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
-    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
 
     await waitForComponentToUpdate();
   });
@@ -160,21 +160,21 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.getByTestId('case-severity-selection')).toBeDisabled();
-    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
 
     await waitForComponentToUpdate();
   });
 
   it('should show a loading when is fetching data is true and hide the user actions activity', () => {
-    useGetCaseUserActionsMock.mockReturnValue({
-      ...defaultUseGetCaseUserActions,
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
       isFetching: true,
       isLoading: true,
     });
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(result.getByTestId('case-view-loading-content')).toBeTruthy();
     expect(result.queryByTestId('case-view-activity')).toBeFalsy();
-    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
   });
 
   it('should not render the assignees on basic license', () => {

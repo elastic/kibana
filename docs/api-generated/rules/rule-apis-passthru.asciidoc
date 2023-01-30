@@ -18,6 +18,7 @@ Any modifications made to this file will be overwritten.
   <div class="method-summary"></div>
   <h4><a href="#Alerting">Alerting</a></h4>
   <ul>
+  <li><a href="#createRule"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
   <li><a href="#deleteRule"><code><span class="http-method">delete</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
   <li><a href="#disableRule"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_disable</code></a></li>
   <li><a href="#enableRule"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_enable</code></a></li>
@@ -33,6 +34,130 @@ Any modifications made to this file will be overwritten.
   </ul>
 
   <h1><a name="Alerting">Alerting</a></h1>
+  <div class="method"><a name="createRule"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></pre></div>
+    <div class="method-summary">Creates a rule. (<span class="nickname">createRule</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule you're creating. For example, you must have privileges for the <strong>Management &gt; Stack rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong> features, or <strong>Security</strong> features.  If the rule has actions, you must also have <code>read</code> privileges for the <strong>Management &gt; Actions and Connectors</strong> feature. NOTE: This API supports only token-based authentication. When you create a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If a user with different privileges updates the rule, its behavior might change.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An UUID v1 or v4 identifier for the rule. If you omit this parameter, an identifier is randomly generated. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">create_rule_request <a href="#create_rule_request">create_rule_request</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#rule_response_properties">rule_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "throttle" : "10m",
+  "created_at" : "2022-12-05T23:36:58.284Z",
+  "last_run" : {
+    "alerts_count" : {
+      "ignored" : 6,
+      "new" : 1,
+      "recovered" : 5,
+      "active" : 0
+    },
+    "outcome_msg" : "outcome_msg",
+    "warning" : "warning",
+    "outcome" : "succeeded"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "created_by" : "elastic",
+  "enabled" : true,
+  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+  "rule_type_id" : "monitoring_alert_cluster_health",
+  "tags" : [ "tags", "tags" ],
+  "api_key_owner" : "elastic",
+  "schedule" : {
+    "interval" : "1m"
+  },
+  "notify_when" : "onActiveAlert",
+  "next_run" : "2022-12-06T00:14:43.818Z",
+  "updated_at" : "2022-12-05T23:36:58.284Z",
+  "execution_status" : {
+    "last_execution_date" : "2022-12-06T00:13:43.89Z",
+    "last_duration" : 55,
+    "status" : "ok"
+  },
+  "name" : "cluster_health_rule",
+  "updated_by" : "elastic",
+  "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "mute_all" : false,
+  "actions" : [ {
+    "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+    "params" : {
+      "key" : ""
+    },
+    "group" : "default"
+  }, {
+    "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+    "params" : {
+      "key" : ""
+    },
+    "group" : "default"
+  } ],
+  "consumer" : "alerts"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#rule_response_properties">rule_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+    <h4 class="field-label">404</h4>
+    Object is not found.
+        <a href="#404_response">404_response</a>
+  </div> <!-- method -->
+  <hr/>
   <div class="method"><a name="deleteRule"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
@@ -55,7 +180,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -106,7 +231,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -157,7 +282,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -711,7 +836,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -759,7 +884,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -809,7 +934,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -857,7 +982,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -917,7 +1042,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -1016,6 +1141,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#401_response"><code>401_response</code> - Unsuccessful rule API response</a></li>
     <li><a href="#404_response"><code>404_response</code> - </a></li>
     <li><a href="#actions_inner"><code>actions_inner</code> - </a></li>
+    <li><a href="#create_rule_request"><code>create_rule_request</code> - Create rule request</a></li>
     <li><a href="#findRules_200_response"><code>findRules_200_response</code> - </a></li>
     <li><a href="#findRules_has_reference_parameter"><code>findRules_has_reference_parameter</code> - </a></li>
     <li><a href="#findRules_search_fields_parameter"><code>findRules_search_fields_parameter</code> - </a></li>
@@ -1076,6 +1202,22 @@ Any modifications made to this file will be overwritten.
       <div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name for the actions. If you don't need to group actions, set to <code>default</code>. </div>
 <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
 <div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. The <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_rule_request"><code>create_rule_request</code> - Create rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The create rule API request body varies depending on the type of rule and actions.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when </div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. For example, <code>.es-query</code>, <code>.index-threshold</code>, <code>logs.alert.document.count</code>, <code>monitoring_alert_cluster_health</code>, <code>siem.thresholdRule</code>, or <code>xpack.ml.anomaly_detection_alert</code>. </div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
