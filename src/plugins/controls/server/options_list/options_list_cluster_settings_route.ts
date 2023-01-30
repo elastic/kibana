@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { CoreSetup } from '@kbn/core/server';
 
-export const setupControlGroupClusterSettingsRoute = ({ http }: CoreSetup) => {
+export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
   const router = http.createRouter();
   router.get(
     {
@@ -33,7 +33,7 @@ export const setupControlGroupClusterSettingsRoute = ({ http }: CoreSetup) => {
             // by default, the allowExpensiveQueries cluster setting is undefined; so, we need to assume
             // it's true in that case, since that's the way other applications (such as the dashboard listing
             // page) handle this.
-            allowExpensiveQueries: allowExpensiveQueries ? allowExpensiveQueries === true : true,
+            allowExpensiveQueries: allowExpensiveQueries ? allowExpensiveQueries === 'true' : true,
           },
         });
       } catch (e) {

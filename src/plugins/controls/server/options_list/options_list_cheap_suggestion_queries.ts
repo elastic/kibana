@@ -40,11 +40,13 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
    */
   keywordOrText: {
     buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => ({
-      terms: {
-        field: fieldName,
-        include: `${getEscapedQuery(searchString)}.*`,
-        shard_size: 10,
-        order: getSortType(sort),
+      suggestions: {
+        terms: {
+          field: fieldName,
+          include: `${getEscapedQuery(searchString)}.*`,
+          shard_size: 10,
+          order: getSortType(sort),
+        },
       },
     }),
     parse: (rawEsResult) => ({
@@ -62,10 +64,12 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
    */
   boolean: {
     buildAggregation: ({ fieldName, sort }: OptionsListRequestBody) => ({
-      terms: {
-        field: fieldName,
-        shard_size: 10,
-        order: getSortType(sort),
+      suggestions: {
+        terms: {
+          field: fieldName,
+          shard_size: 10,
+          order: getSortType(sort),
+        },
       },
     }),
     parse: (rawEsResult) => ({
@@ -107,17 +111,19 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       }
 
       return {
-        ip_range: {
-          field: fieldName,
-          ranges: ipRangeQuery.rangeQuery,
-          keyed: true,
-        },
-        aggs: {
-          filteredSuggestions: {
-            terms: {
-              field: fieldName,
-              shard_size: 10,
-              order: getSortType(sort),
+        suggestions: {
+          ip_range: {
+            field: fieldName,
+            ranges: ipRangeQuery.rangeQuery,
+            keyed: true,
+          },
+          aggs: {
+            filteredSuggestions: {
+              terms: {
+                field: fieldName,
+                shard_size: 10,
+                order: getSortType(sort),
+              },
             },
           },
         },
@@ -156,23 +162,25 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
         return cheapSuggestionAggSubtypes.keywordOnly.buildAggregation(req);
       }
       return {
-        nested: {
-          path: subTypeNested.nested.path,
-        },
-        aggs: {
-          nestedSuggestions: {
-            terms: {
-              field: fieldName,
-              include: `${getEscapedQuery(searchString)}.*`,
-              shard_size: 10,
-              order: getSortType(sort),
+        nestedSuggestions: {
+          nested: {
+            path: subTypeNested.nested.path,
+          },
+          aggs: {
+            suggestions: {
+              terms: {
+                field: fieldName,
+                include: `${getEscapedQuery(searchString)}.*`,
+                shard_size: 10,
+                order: getSortType(sort),
+              },
             },
           },
         },
       };
     },
     parse: (rawEsResult) => ({
-      suggestions: get(rawEsResult, 'aggregations.suggestions.nestedSuggestions.buckets').reduce(
+      suggestions: get(rawEsResult, 'aggregations.nestedSuggestions.suggestions.buckets').reduce(
         (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
           return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
         },

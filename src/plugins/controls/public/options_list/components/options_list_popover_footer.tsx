@@ -53,6 +53,7 @@ export const OptionsListPopoverFooter = ({
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
 
+  // Select current state from Redux using multiple selectors to avoid rerenders.
   const hideExclude = select((state) => state.explicitInput.hideExclude);
   const exclude = select((state) => state.explicitInput.exclude);
 

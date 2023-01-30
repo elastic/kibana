@@ -76,7 +76,7 @@ export const OptionsListPopoverActionBar = ({
               >
                 <EuiBadge
                   data-test-subj="optionsList-cardinality-badge"
-                  className="optionsList__cardinalityBadge"
+                  className="optionsList__actionBarFirstBadge"
                 >
                   {totalCardinality.toLocaleString()}
                 </EuiBadge>
@@ -90,7 +90,12 @@ export const OptionsListPopoverActionBar = ({
                   invalidSelections?.length ?? 0
                 )}
               >
-                <EuiBadge color="warning">{invalidSelections?.length}</EuiBadge>
+                <EuiBadge
+                  color="warning"
+                  className={allowExpensiveQueries ? undefined : 'optionsList__actionBarFirstBadge'}
+                >
+                  {invalidSelections?.length}
+                </EuiBadge>
               </EuiToolTip>
             )}
           </EuiFlexItem>
