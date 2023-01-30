@@ -196,7 +196,7 @@ function renderPopoverContent({
         className="dscDiscoverGrid__cellPopover"
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
