@@ -38,11 +38,15 @@ export const useStepFilters = (checkGroupId: string, stepIndex: number) => {
   ];
 };
 
-export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number, timestampArg?: string) => {
+export const useNetworkTimingsPrevious24Hours = (
+  stepIndexArg?: number,
+  timestampArg?: string,
+  checkGroupIdArg?: string
+) => {
   const params = useParams<{ checkGroupId: string; stepIndex: string; monitorId: string }>();
 
   const configId = params.monitorId;
-  const checkGroupId = params.checkGroupId;
+  const checkGroupId = checkGroupIdArg ?? params.checkGroupId;
   const stepIndex = stepIndexArg ?? Number(params.stepIndex);
 
   const { currentStep } = useJourneySteps();

@@ -24,6 +24,7 @@ import { StepDetailsLinkIcon } from '../links/step_details_link';
 
 import { parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
 import { StepDurationText } from './step_duration_text';
+import { ResultDetailsSuccessful } from './result_details_successful';
 
 interface Props {
   steps: JourneyStep[];
@@ -63,6 +64,8 @@ export const BrowserStepsList = ({
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
+
+  const showLastSuccessful = true;
 
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
     ...(showExpand
@@ -146,17 +149,32 @@ export const BrowserStepsList = ({
         />
       ),
     },
-    {
-      align: 'left',
-      name: STEP_DURATION,
-      render: (item: JourneyStep) => {
-        return <StepDurationText step={item} />;
-      },
-      mobileOptions: {
-        header: STEP_DURATION,
-        show: true,
-      },
-    },
+    ...(showLastSuccessful
+      ? [
+          {
+            field: 'synthetics.step.status',
+            name: LAST_SUCCESSFUL,
+            render: (pingStatus: string, item: JourneyStep) => (
+              <ResultDetailsSuccessful
+                step={item}
+                isExpanded={Boolean(itemIdToExpandedRowMap[item._id])}
+              />
+            ),
+          },
+        ]
+      : [
+          {
+            align: 'left' as const,
+            name: STEP_DURATION,
+            render: (item: JourneyStep) => {
+              return <StepDurationText step={item} />;
+            },
+            mobileOptions: {
+              header: STEP_DURATION,
+              show: true,
+            },
+          },
+        ]),
     {
       align: 'right',
       field: 'timestamp',
@@ -232,6 +250,9 @@ const RESULT_LABEL = i18n.translate('xpack.synthetics.monitor.result.label', {
   defaultMessage: 'Result',
 });
 
+const LAST_SUCCESSFUL = i18n.translate('xpack.synthetics.monitor.result.lastSuccessful', {
+  defaultMessage: 'Last successful',
+});
 const SCREENSHOT_LABEL = i18n.translate('xpack.synthetics.monitor.screenshot.label', {
   defaultMessage: 'Screenshot',
 });
