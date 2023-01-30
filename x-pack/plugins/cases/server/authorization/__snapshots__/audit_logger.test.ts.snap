@@ -1,5 +1,89 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" with an error and entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_comment_bulk_create",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "creation",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases-comments",
+    },
+  },
+  "message": "Failed attempt to create cases-comments [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" with an error but no entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_comment_bulk_create",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "creation",
+    ],
+  },
+  "message": "Failed attempt to create a comments as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" without an error but with an entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_comment_bulk_create",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "unknown",
+    "type": Array [
+      "creation",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases-comments",
+    },
+  },
+  "message": "User is creating cases-comments [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" without an error or entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_comment_bulk_create",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "unknown",
+    "type": Array [
+      "creation",
+    ],
+  },
+  "message": "User is creating a comments as any owners",
+}
+`;
+
 exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" with an error and entity 1`] = `
 Object {
   "error": Object {

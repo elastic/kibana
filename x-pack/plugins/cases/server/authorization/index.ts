@@ -262,6 +262,14 @@ const AttachmentOperations = {
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
+  [WriteOperations.BulkCreateAttachments]: {
+    ecsType: EVENT_TYPES.creation,
+    name: WriteOperations.CreateComment as const,
+    action: 'case_comment_bulk_create',
+    verbs: createVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
   [WriteOperations.DeleteAllComments]: {
     ecsType: EVENT_TYPES.deletion,
     name: DELETE_COMMENT_OPERATION,

@@ -69,7 +69,9 @@ function getPkgDirMap() {
 }
 
 /**
- * Find the package which contains this path, if one exists
+ * Find the package which contains this path, if one exists, and return
+ * basic info about that package.
+ *
  * @param {string} repoRoot
  * @param {string} path absolute path to a file
  */

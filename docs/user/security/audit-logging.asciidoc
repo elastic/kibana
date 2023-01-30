@@ -102,6 +102,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is creating a case comment.
 | `failure` | User is not authorized to create a case comment.
 
+.2+| `case_comment_bulk_create`
+| `unknown` | User is creating multiple case comments.
+| `failure` | User is not authorized to create multiple case comments.
+
 .1+| `case_user_action_create_comment`
 | `success` | User has created a case comment.
 
