@@ -2274,7 +2274,6 @@
     "discover.fieldList.flyoutBackIcon": "返回",
     "discover.fieldList.flyoutHeading": "字段列表",
     "discover.grid.closePopover": "关闭弹出框",
-    "discover.grid.copyClipboardButton": "复制到剪贴板",
     "discover.grid.copyColumnNameToClipboard.toastTitle": "已复制到剪贴板",
     "discover.grid.copyColumnNameToClipBoardButton": "复制名称",
     "discover.grid.copyColumnValuesToClipBoardButton": "复制列",
