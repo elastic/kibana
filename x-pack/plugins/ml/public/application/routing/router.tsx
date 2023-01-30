@@ -23,6 +23,7 @@ import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_
 import { MlContext, MlContextValue } from '../contexts/ml';
 
 import { MlPage } from '../components/ml_page';
+import { MlPages } from '../../locator';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -91,3 +92,7 @@ export const MlRouter: FC<{
     </UrlStateProvider>
   </Router>
 );
+
+export function createPath(page: MlPages, additionalPrefix?: string) {
+  return `/${page}${additionalPrefix ? `${additionalPrefix}` : ''}`;
+}
