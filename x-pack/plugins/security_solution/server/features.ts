@@ -120,8 +120,7 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     description: i18n.translate(
       'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory.description',
       {
-        defaultMessage:
-          'Controls access to the response actions history, the log of response actions performed on endpoints.',
+        defaultMessage: 'Access the history of response actions performed on endpoints.',
       }
     ),
     privilegeGroups: [
@@ -167,7 +166,7 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     }),
     description: i18n.translate(
       'xpack.securitySolution.featureRegistry.subFeatures.hostIsolation.description',
-      { defaultMessage: 'Allows a user to perform the "isolate" and "release" response actions.' }
+      { defaultMessage: 'Perform the "isolate" and "release" response actions.' }
     ),
     privilegeGroups: [
       {
@@ -202,8 +201,7 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     description: i18n.translate(
       'xpack.securitySolution.featureRegistry.subFeatures.processOperations.description',
       {
-        defaultMessage:
-          'Allows a user to perform process-related response actions in the response console.',
+        defaultMessage: 'Perform process-related response actions in the response console.',
       }
     ),
     privilegeGroups: [
@@ -273,7 +271,7 @@ const subFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.endpointList.description',
       {
         defaultMessage:
-          'The endpoints list displays all hosts running Elastic Defend and their relevant integration details.',
+          'Displays all hosts running Elastic Defend and their relevant integration details.',
       }
     ),
     privilegeGroups: [
@@ -321,7 +319,7 @@ const subFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.trustedApplications.description',
       {
         defaultMessage:
-          'The trusted applications feature is used to help mitigate conflicts with other software, usually other antivirus or endpoint security applications.',
+          'Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.',
       }
     ),
     privilegeGroups: [
@@ -378,7 +376,7 @@ const subFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions.description',
       {
         defaultMessage:
-          'Host isolation exceptions allow you to add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.',
+          'Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.',
       }
     ),
     privilegeGroups: [
@@ -432,7 +430,7 @@ const subFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.blockList.description',
       {
         defaultMessage:
-          'The blocklist feature allows you to extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.',
+          'Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.',
       }
     ),
     privilegeGroups: [
@@ -486,7 +484,7 @@ const subFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.eventFilters.description',
       {
         defaultMessage:
-          'Event filters allow you to filter out endpoint events that you do not need or want stored in Elasticsearch.',
+          'Filter out endpoint events that you do not need or want stored in Elasticsearch.',
       }
     ),
     privilegeGroups: [
@@ -540,7 +538,7 @@ const subFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.policyManagement.description',
       {
         defaultMessage:
-          'Controls access to the Elastic Defend integration policy. The policy includes configuration of protections as well as event collection and advanced policy features.',
+          'Access the Elastic Defend integration policy to configure protections, event collection, and advanced policy features.',
       }
     ),
     privilegeGroups: [
