@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { EuiIconProps } from '@elastic/eui';
@@ -30,7 +30,6 @@ import {
 } from '../../findings/test_subjects';
 
 const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
-const CLUSTER_SORT_BUTTON_CLASS = 'cspDashboard__sortButton';
 
 export const BenchmarksSection = ({
   complianceData,
@@ -51,39 +50,30 @@ export const BenchmarksSection = ({
 
   const clusterSortingIcon: EuiIconProps['type'] = isClusterSortingAsc ? 'sortUp' : 'sortDown';
 
-  const navToFindingsByClusterAndEvaluation = useCallback(
-    (clusterId: string, evaluation: Evaluation) => {
-      navToFindings({
-        ...getPolicyTemplateQuery(dashboardType),
-        cluster_id: clusterId,
-        'result.evaluation': evaluation,
-      });
-    },
-    [dashboardType, navToFindings]
-  );
+  const navToFindingsByClusterAndEvaluation = (clusterId: string, evaluation: Evaluation) => {
+    navToFindings({
+      ...getPolicyTemplateQuery(dashboardType),
+      cluster_id: clusterId,
+      'result.evaluation': evaluation,
+    });
+  };
 
-  const navToFailedFindingsByClusterAndSection = useCallback(
-    (clusterId: string, ruleSection: string) => {
-      navToFindings({
-        ...getPolicyTemplateQuery(dashboardType),
-        cluster_id: clusterId,
-        'rule.section': ruleSection,
-        'result.evaluation': RULE_FAILED,
-      });
-    },
-    [dashboardType, navToFindings]
-  );
+  const navToFailedFindingsByClusterAndSection = (clusterId: string, ruleSection: string) => {
+    navToFindings({
+      ...getPolicyTemplateQuery(dashboardType),
+      cluster_id: clusterId,
+      'rule.section': ruleSection,
+      'result.evaluation': RULE_FAILED,
+    });
+  };
 
-  const navToFailedFindingsByCluster = useCallback(
-    (clusterId: string) => {
-      navToFindingsByClusterAndEvaluation(clusterId, RULE_FAILED);
-    },
-    [navToFindingsByClusterAndEvaluation]
-  );
+  const navToFailedFindingsByCluster = (clusterId: string) => {
+    navToFindingsByClusterAndEvaluation(clusterId, RULE_FAILED);
+  };
 
-  const clusterSortingToggle = useCallback(() => {
+  const toggleClustersSortingDirection = () => {
     setClusterSorting(isClusterSortingAsc ? 'desc' : 'asc');
-  }, [isClusterSortingAsc, setClusterSorting]);
+  };
 
   const clusters = useMemo(() => {
     return [...complianceData.clusters].sort((clusterA, clusterB) =>
@@ -100,10 +90,10 @@ export const BenchmarksSection = ({
         border-bottom: ${euiTheme.border.thick};
         border-bottom-color: ${euiTheme.colors.text};
         padding-bottom: ${euiTheme.size.s};
-        ${CLUSTER_SORT_BUTTON_CLASS}: {
+        .euiTitle {
           font-weight: ${euiTheme.font.weight.semiBold};
         };
-        button: {
+        button {
           text-align: left;
         },
       `}
@@ -128,8 +118,7 @@ export const BenchmarksSection = ({
         <EuiFlexItem grow={dashboardColumnsGrow.second}>
           <button
             data-test-subj={DASHBOARD_TABLE_HEADER_SCORE_TEST_ID}
-            className={CLUSTER_SORT_BUTTON_CLASS}
-            onClick={clusterSortingToggle}
+            onClick={toggleClustersSortingDirection}
           >
             <EuiTitle size="xxs">
               <div>
