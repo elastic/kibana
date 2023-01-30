@@ -11,11 +11,15 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SlackActionParams, SlackSecrets } from '../types';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
-import type { ActionParams } from '../../../common/slack/types';
+import type { ActionParams, SlackSecrets } from '../../../common/slack/types';
+import { WebhookParams, ExecutorPostMessageParams } from '../../../common/slack/types';
 
-export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, SlackActionParams> {
+export function getConnectorType(): ConnectorTypeModel<
+  unknown,
+  SlackSecrets,
+  WebhookParams | ExecutorPostMessageParams
+> {
   return {
     id: SLACK_CONNECTOR_ID,
     iconClass: 'logoSlack',

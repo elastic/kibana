@@ -60,10 +60,6 @@ export interface ServerLogActionParams {
   message: string;
 }
 
-export interface SlackActionParams {
-  message: string;
-}
-
 export interface TeamsActionParams {
   message: string;
 }
@@ -111,12 +107,6 @@ export type PagerDutyActionConnector = UserConfiguredActionConnector<
   PagerDutyConfig,
   PagerDutySecrets
 >;
-
-export interface SlackSecrets {
-  webhookUrl: string;
-}
-
-export type SlackActionConnector = UserConfiguredActionConnector<unknown, SlackSecrets>; // why do we need to export it here?
 
 export interface WebhookConfig {
   method: string;
