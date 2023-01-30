@@ -5,5 +5,13 @@
  * 2.0.
  */
 import React from 'react';
+import type { VisualizationActionsProps } from '../types';
 
-export const VisualizationActions = () => <div data-test-subj="visualizationActions" />;
+export const VisualizationActions = (props: VisualizationActionsProps) => {
+  const { title, ...testProps } = props;
+  return (
+    <div data-test-subj="visualizationActions" {...testProps}>
+      {title}
+    </div>
+  );
+};

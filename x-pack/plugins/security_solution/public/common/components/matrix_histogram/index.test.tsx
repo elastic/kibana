@@ -193,8 +193,8 @@ describe('Matrix Histogram Component', () => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
       });
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').prop('className')).toEqual(
+      expect(wrapper.find('[data-test-subj="visualizationActions"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="visualizationActions"]').prop('className')).toEqual(
         'histogram-viz-actions'
       );
     });
