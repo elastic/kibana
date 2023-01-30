@@ -32,9 +32,7 @@ jest.mock('react-router-dom', () => {
 
 jest.mock('../../lib/kibana');
 jest.mock('../link_to');
-jest.mock('../visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
-}));
+jest.mock('../visualization_actions/actions');
 
 jest.mock('uuid', () => {
   return {

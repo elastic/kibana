@@ -40,11 +40,7 @@ jest.mock('../../../common/components/charts/barchart', () => {
   return { BarChart: () => <div className="barchart" /> };
 });
 
-jest.mock('../../../common/components/visualization_actions', () => {
-  return {
-    VisualizationActions: () => <div className="visualizationActions" />,
-  };
-});
+jest.mock('../../../common/components/visualization_actions/actions');
 
 const mockSetToggle = jest.fn();
 
