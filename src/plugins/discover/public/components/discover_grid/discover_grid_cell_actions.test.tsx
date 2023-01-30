@@ -38,7 +38,21 @@ import { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('Discover cell actions ', function () {
   it('should not show cell actions for unfilterable fields', async () => {
-    expect(buildCellActions({ name: 'foo', filterable: false } as DataViewField)).toBeUndefined();
+    expect(buildCellActions({ name: 'foo', filterable: false } as DataViewField)).toEqual([
+      CopyBtn,
+    ]);
+  });
+
+  it('should show filter actions for filterable fields', async () => {
+    expect(buildCellActions({ name: 'foo', filterable: true } as DataViewField, jest.fn())).toEqual(
+      [FilterInBtn, FilterOutBtn, CopyBtn]
+    );
+  });
+
+  it('should show Copy action for _source field', async () => {
+    expect(
+      buildCellActions({ name: '_source', type: '_source', filterable: false } as DataViewField)
+    ).toEqual([CopyBtn]);
   });
 
   it('triggers filter function when FilterInBtn is clicked', async () => {
