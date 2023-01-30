@@ -9,7 +9,7 @@ import { keys } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 import { isFlapping } from './flapping_utils';
-import { RulesSettingsFlapping } from '../../common/rules_settings';
+import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 
 export function setFlapping<
   State extends AlertInstanceState,
@@ -17,7 +17,7 @@ export function setFlapping<
   ActionGroupIds extends string,
   RecoveryActionGroupIds extends string
 >(
-  flappingSettings: RulesSettingsFlapping,
+  flappingSettings: RulesSettingsFlappingProperties,
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {}
 ) {
@@ -40,7 +40,7 @@ export function isAlertFlapping<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(
-  flappingSettings: RulesSettingsFlapping,
+  flappingSettings: RulesSettingsFlappingProperties,
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>
 ): boolean {
   const flappingHistory: boolean[] = alert.getFlappingHistory() || [];

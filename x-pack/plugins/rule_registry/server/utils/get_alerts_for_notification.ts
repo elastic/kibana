@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common/rules_settings';
+import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common/rules_settings';
 import {
   ALERT_END,
   ALERT_STATUS,
@@ -15,7 +15,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 export function getAlertsForNotification(
-  flappingSettings: RulesSettingsFlapping,
+  flappingSettings: RulesSettingsFlappingProperties,
   trackedEventsToIndex: any[]
 ) {
   return trackedEventsToIndex.map((trackedEvent) => {

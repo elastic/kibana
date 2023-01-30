@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import {
-  RulesSettingsFlapping,
-  DEFAULT_FLAPPING_SETTINGS,
-} from '@kbn/alerting-plugin/common/rules_settings';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { getUpdatedFlappingHistory } from './get_updated_flapping_history';
 
 describe('getUpdatedFlappingHistory', () => {
-  const flappingSettings = DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping;
+  const flappingSettings = DEFAULT_FLAPPING_SETTINGS;
 
   type TestRuleState = Record<string, unknown> & {
     aRuleStateKey: string;

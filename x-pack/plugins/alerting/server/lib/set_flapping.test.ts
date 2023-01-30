@@ -9,12 +9,12 @@ import { pick } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { setFlapping, isAlertFlapping } from './set_flapping';
-import { RulesSettingsFlapping, DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 
 describe('setFlapping', () => {
   const flapping = new Array(16).fill(false).concat([true, true, true, true]);
   const notFlapping = new Array(20).fill(false);
-  const flappingSettings = DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping;
+  const flappingSettings = DEFAULT_FLAPPING_SETTINGS;
 
   test('should set flapping on alerts', () => {
     const activeAlerts = {

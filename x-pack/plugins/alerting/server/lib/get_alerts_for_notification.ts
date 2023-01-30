@@ -6,7 +6,7 @@
  */
 
 import { keys } from 'lodash';
-import { RulesSettingsFlapping } from '../../common/rules_settings';
+import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 
@@ -16,7 +16,7 @@ export function getAlertsForNotification<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(
-  flappingSettings: RulesSettingsFlapping,
+  flappingSettings: RulesSettingsFlappingProperties,
   actionGroupId: string,
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},

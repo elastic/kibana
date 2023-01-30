@@ -29,7 +29,7 @@ import {
   RawAlertInstance,
   WithoutReservedActionGroups,
 } from '../types';
-import { RulesSettingsFlapping } from '../../common/rules_settings';
+import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 
 interface ConstructorOpts {
   logger: Logger;
@@ -118,7 +118,7 @@ export class LegacyAlertsClient<
     ruleLabel: string;
     shouldLogAndScheduleActionsForAlerts: boolean;
     ruleRunMetricsStore: RuleRunMetricsStore;
-    flappingSettings: RulesSettingsFlapping;
+    flappingSettings: RulesSettingsFlappingProperties;
   }) {
     const {
       newAlerts: processedAlertsNew,

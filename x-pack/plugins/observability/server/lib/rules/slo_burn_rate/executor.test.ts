@@ -19,10 +19,7 @@ import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { Alert, RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import {
-  DEFAULT_FLAPPING_SETTINGS,
-  RulesSettingsFlapping,
-} from '@kbn/alerting-plugin/common/rules_settings';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -122,7 +119,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -147,7 +144,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -172,7 +169,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -202,7 +199,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertWithLifecycleMock).toBeCalledWith({
@@ -250,7 +247,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();

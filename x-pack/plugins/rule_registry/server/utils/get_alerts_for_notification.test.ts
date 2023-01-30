@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import {
-  RulesSettingsFlapping,
-  DEFAULT_FLAPPING_SETTINGS,
-} from '@kbn/alerting-plugin/common/rules_settings';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { cloneDeep } from 'lodash';
 import { getAlertsForNotification } from './get_alerts_for_notification';
 
 describe('getAlertsForNotification', () => {
-  const flappingSettings = DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping;
+  const flappingSettings = DEFAULT_FLAPPING_SETTINGS;
 
   const alert1 = {
     event: {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RulesSettingsFlapping } from '../../common/rules_settings';
+import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 
 export function updateFlappingHistory(
-  flappingSettings: RulesSettingsFlapping,
+  flappingSettings: RulesSettingsFlappingProperties,
   flappingHistory: boolean[],
   state: boolean
 ) {
@@ -22,7 +22,7 @@ export function updateFlappingHistory(
 }
 
 export function isFlapping(
-  flappingSettings: RulesSettingsFlapping,
+  flappingSettings: RulesSettingsFlappingProperties,
   flappingHistory: boolean[],
   isCurrentlyFlapping: boolean = false
 ): boolean {
@@ -43,7 +43,7 @@ export function isFlapping(
 }
 
 export function atCapacity(
-  flappingSettings: RulesSettingsFlapping,
+  flappingSettings: RulesSettingsFlappingProperties,
   flappingHistory: boolean[] = []
 ): boolean {
   return flappingHistory.length >= flappingSettings.lookBackWindow;

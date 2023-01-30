@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 import { updateFlappingHistory } from './flapping_utils';
-import { RulesSettingsFlapping } from '../../common/rules_settings';
+import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 
 interface ProcessAlertsOpts<
   State extends AlertInstanceState,
@@ -22,7 +22,7 @@ interface ProcessAlertsOpts<
   hasReachedAlertLimit: boolean;
   alertLimit: number;
   autoRecoverAlerts: boolean;
-  flappingSettings: RulesSettingsFlapping;
+  flappingSettings: RulesSettingsFlappingProperties;
 }
 interface ProcessAlertsResult<
   State extends AlertInstanceState,
@@ -83,7 +83,7 @@ function processAlertsHelper<
   existingAlerts: Record<string, Alert<State, Context>>,
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   autoRecoverAlerts: boolean,
-  flappingSettings: RulesSettingsFlapping
+  flappingSettings: RulesSettingsFlappingProperties
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
@@ -175,7 +175,7 @@ function processAlertsLimitReached<
   existingAlerts: Record<string, Alert<State, Context>>,
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   alertLimit: number,
-  flappingSettings: RulesSettingsFlapping
+  flappingSettings: RulesSettingsFlappingProperties
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
@@ -259,7 +259,7 @@ export function updateAlertFlappingHistory<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(
-  flappingSettings: RulesSettingsFlapping,
+  flappingSettings: RulesSettingsFlappingProperties,
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>,
   state: boolean
 ) {

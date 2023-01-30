@@ -44,7 +44,7 @@ export const RULES_SETTINGS_SAVED_OBJECT_ID = 'rules-settings';
 export const DEFAULT_LOOK_BACK_WINDOW = 20;
 export const DEFAULT_STATUS_CHANGE_THRESHOLD = 4;
 
-export const DEFAULT_FLAPPING_SETTINGS = {
+export const DEFAULT_FLAPPING_SETTINGS: RulesSettingsFlappingProperties = {
   enabled: true,
   lookBackWindow: 20,
   statusChangeThreshold: 4,

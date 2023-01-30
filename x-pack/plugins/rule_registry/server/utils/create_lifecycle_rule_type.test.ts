@@ -22,10 +22,7 @@ import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_fac
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import {
-  RulesSettingsFlapping,
-  DEFAULT_FLAPPING_SETTINGS,
-} from '@kbn/alerting-plugin/common/rules_settings';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -142,7 +139,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         spaceId: 'spaceId',
         startedAt,
         state,
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       })) ?? {}) as Record<string, any>);
 
       previousStartedAt = startedAt;
