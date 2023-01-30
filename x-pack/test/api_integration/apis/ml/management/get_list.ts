@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
           dest_index: `user-${dfaJobIdSpace3s2}`,
           job_type: 'classification',
           state: 'stopped',
-          spaces: [idSpace1],
+          spaces: [idSpace2],
         },
       ];
       expect(resp).to.eql(
