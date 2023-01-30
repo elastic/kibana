@@ -29,7 +29,9 @@ describe('parseUsageCollection', () => {
   });
 
   it('throws when mapping fields is not defined', () => {
-    const { program, sourceFile } = loadFixtureProgram('telemetry_collectors/unmapped_collector.ts');
+    const { program, sourceFile } = loadFixtureProgram(
+      'telemetry_collectors/unmapped_collector.ts'
+    );
     expect(() => [...parseUsageCollection(sourceFile, program)]).toThrowErrorMatchingSnapshot();
   });
 
@@ -40,7 +42,9 @@ describe('parseUsageCollection', () => {
   });
 
   it('parses collector with schema defined as union of spreads', () => {
-    const { program, sourceFile } = loadFixtureProgram('telemetry_collectors/schema_defined_with_spreads_collector.ts');
+    const { program, sourceFile } = loadFixtureProgram(
+      'telemetry_collectors/schema_defined_with_spreads_collector.ts'
+    );
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual([parsedSchemaDefinedWithSpreadsCollector]);
   });
@@ -58,13 +62,17 @@ describe('parseUsageCollection', () => {
   });
 
   it('parses externally defined collectors', () => {
-    const { program, sourceFile } = loadFixtureProgram('telemetry_collectors/externally_defined_collector.ts');
+    const { program, sourceFile } = loadFixtureProgram(
+      'telemetry_collectors/externally_defined_collector.ts'
+    );
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual(parsedExternallyDefinedCollector);
   });
 
   it('parses imported Usage interface', () => {
-    const { program, sourceFile } = loadFixtureProgram('telemetry_collectors/imported_usage_interface.ts');
+    const { program, sourceFile } = loadFixtureProgram(
+      'telemetry_collectors/imported_usage_interface.ts'
+    );
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual(parsedImportedUsageInterface);
   });
@@ -76,13 +84,17 @@ describe('parseUsageCollection', () => {
   });
 
   it('follows `export { Usage } from "./path"` expressions', () => {
-    const { program, sourceFile } = loadFixtureProgram('telemetry_collectors/imported_interface_from_export/index.ts');
+    const { program, sourceFile } = loadFixtureProgram(
+      'telemetry_collectors/imported_interface_from_export/index.ts'
+    );
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual(parsedImportedInterfaceFromExport);
   });
 
   it('skips files that do not define a collector', () => {
-    const { program, sourceFile } = loadFixtureProgram('telemetry_collectors/file_with_no_collector.ts');
+    const { program, sourceFile } = loadFixtureProgram(
+      'telemetry_collectors/file_with_no_collector.ts'
+    );
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual([]);
   });

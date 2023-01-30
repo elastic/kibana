@@ -68,12 +68,9 @@ export function getAllSourceFiles(fullPaths: string[], program: ts.Program): ts.
   });
 }
 
-export function createKibanaProgram(
-  fullPaths: string[],
-  tsConfig: any,
-): ts.Program {
+export function createKibanaProgram(fullPaths: string[], tsConfig: any): ts.Program {
   const program = ts.createProgram(fullPaths, tsConfig, compilerHost);
   program.getTypeChecker();
-  
-  return program; 
+
+  return program;
 }

@@ -7,8 +7,8 @@
  */
 
 import * as path from 'path';
-import { TELEMETRY_RC } from './constants';
 import { readFile } from 'fs/promises';
+import { TELEMETRY_RC } from './constants';
 
 export interface TelemetryRC {
   root: string;
