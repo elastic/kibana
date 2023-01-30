@@ -9,13 +9,13 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CustomFieldPanel } from './custom_field_panel';
 import { GROUP_BY, TECHNICAL_PREVIEW } from '../translations';
-import { StyledContextMenu } from '../styles';
+import { StyledContextMenu, StyledEuiButtonEmpty } from '../styles';
 
 const none = i18n.translate('xpack.securitySolution.groupsSelector.noneGroupByOptionName', {
   defaultMessage: 'None',
@@ -98,20 +98,20 @@ const GroupsSelectorComponent = ({
 
   const button = useMemo(
     () => (
-      <EuiButtonEmpty
+      <StyledEuiButtonEmpty
         data-test-subj="group-selector-dropdown"
         flush="both"
         iconSide="right"
         iconSize="s"
         iconType="arrowDown"
         onClick={onButtonClick}
+        title={groupSelected && selectedOption.length > 0 ? selectedOption[0].label : none}
         size="xs"
-        style={{ fontWeight: 'normal' }}
       >
         {`${title ?? GROUP_BY}: ${
           groupSelected && selectedOption.length > 0 ? selectedOption[0].label : none
         }`}
-      </EuiButtonEmpty>
+      </StyledEuiButtonEmpty>
     ),
     [groupSelected, onButtonClick, selectedOption, title]
   );

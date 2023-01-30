@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenu } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import styled from 'styled-components';
 
@@ -69,5 +69,16 @@ export const StyledContextMenu = euiStyled(EuiContextMenu)`
   }
   .euiContextMenuItem:last-child {
     border: none;
+  }
+`;
+
+export const StyledEuiButtonEmpty = euiStyled(EuiButtonEmpty)`
+  font-weight: 'normal';
+
+  .euiButtonEmpty__text {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;
