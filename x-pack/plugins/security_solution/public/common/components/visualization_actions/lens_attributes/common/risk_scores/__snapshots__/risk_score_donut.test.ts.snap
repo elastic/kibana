@@ -6,22 +6,22 @@ Object {
   "references": Array [],
   "state": Object {
     "adHocDataViews": Object {
-      "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+      "d594baeb-5eca-480c-8885-ba79eaf41372": Object {
         "allowNoIndex": false,
         "fieldAttrs": Object {},
         "fieldFormats": Object {},
-        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
-        "name": "ml_host_risk_score_latest_mockSpaceId",
+        "id": "d594baeb-5eca-480c-8885-ba79eaf41372",
+        "name": "ml_host_risk_score_latest_mockSpaceId_no_timestamp",
         "runtimeFieldMap": Object {},
         "sourceFilters": Array [],
-        "timeFieldName": "@timestamp",
+        "timeFieldName": "",
         "title": "ml_host_risk_score_latest_mockSpaceId",
       },
     },
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "d594baeb-5eca-480c-8885-ba79eaf41372": Object {
+          "2cc5663b-f062-43f8-8688-fc8166c2ca8e": Object {
             "columnOrder": Array [
               "a2e8541a-c22f-4e43-8a12-caa33edc5de0",
               "75179122-96fc-40e1-93b4-8e9310af5f06",
@@ -115,8 +115,8 @@ Object {
     ],
     "internalReferences": Array [
       Object {
-        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
-        "name": "indexpattern-datasource-layer-d594baeb-5eca-480c-8885-ba79eaf41372",
+        "id": "d594baeb-5eca-480c-8885-ba79eaf41372",
+        "name": "indexpattern-datasource-layer-2cc5663b-f062-43f8-8688-fc8166c2ca8e",
         "type": "index-pattern",
       },
     ],
@@ -128,12 +128,12 @@ Object {
       "layers": Array [
         Object {
           "categoryDisplay": "hide",
-          "emptySizeRatio": 0.8,
-          "layerId": "d594baeb-5eca-480c-8885-ba79eaf41372",
+          "emptySizeRatio": 0.82,
+          "layerId": "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
           "layerType": "data",
-          "legendDisplay": "hide",
-          "legendPosition": "right",
-          "legendSize": "small",
+          "legendDisplay": "show",
+          "legendPosition": "left",
+          "legendSize": "medium",
           "metrics": Array [
             "75179122-96fc-40e1-93b4-8e9310af5f06",
           ],

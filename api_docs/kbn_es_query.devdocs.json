@@ -130,7 +130,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[], indexPattern: ",
+          "[], indexPattern: Pick<",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -138,7 +138,7 @@
             "section": "def-common.DataViewBase",
             "text": "DataViewBase"
           },
-          ", disabled: boolean | undefined, negate: boolean | undefined, alias: string | null | undefined, store: ",
+          ", \"id\">, disabled: boolean | undefined, negate: boolean | undefined, alias: string | null | undefined, store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -214,13 +214,15 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
+              "Pick<",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
                 "section": "def-common.DataViewBase",
                 "text": "DataViewBase"
-              }
+              },
+              ", \"id\">"
             ],
             "path": "packages/kbn-es-query/src/filters/build_filters/combined_filter.ts",
             "deprecated": false,
@@ -4755,6 +4757,22 @@
             "label": "nestedIgnoreUnmapped",
             "description": [
               "\nthe Nested field type requires a special query syntax, which includes an optional ignore_unmapped parameter that indicates whether to ignore an unmapped path and not return any documents instead of an error.\nThe optional ignore_unmapped parameter defaults to false.\nThe `nestedIgnoreUnmapped` param allows creating queries with \"ignore_unmapped\": true"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/kuery/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.KueryQueryOptions.caseInsensitive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "caseInsensitive",
+            "description": [
+              "\nWhether term-level queries should be treated as case-insensitive or not. For example, `agent.keyword: foobar` won't\nmatch a value of \"FooBar\" unless this parameter is `true`.\n(See https://www.elastic.co/guide/en/elasticsearch/reference/8.6/query-dsl-term-query.html#term-field-params)"
             ],
             "signature": [
               "boolean | undefined"

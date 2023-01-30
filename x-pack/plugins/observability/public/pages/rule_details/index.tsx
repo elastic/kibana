@@ -39,10 +39,10 @@ import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { fromQuery, toQuery } from '../../utils/url';
+import { getDefaultAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { getDefaultAlertSummaryTimeRange } from './helpers';
 
 import {
   EXECUTION_TAB,
@@ -68,6 +68,7 @@ import { ObservabilityAppServices } from '../../application/types';
 
 export function RuleDetailsPage() {
   const {
+    charts,
     http,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
@@ -90,6 +91,11 @@ export function RuleDetailsPage() {
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const history = useHistory();
   const location = useLocation();
+
+  const chartThemes = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
 
   const filteredRuleTypes = useMemo(
     () => observabilityRuleTypeRegistry.list(),
@@ -390,6 +396,7 @@ export function RuleDetailsPage() {
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
+            chartThemes={chartThemes}
             featureIds={featureIds}
             onClick={onAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}

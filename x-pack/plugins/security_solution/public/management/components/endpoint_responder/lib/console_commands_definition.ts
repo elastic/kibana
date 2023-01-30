@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ParsedArgData } from '../../console/service/types';
+import { getUploadCommand } from './dev_only';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
   EndpointCapabilities,
@@ -19,7 +21,6 @@ import { KillProcessActionResult } from '../command_render_components/kill_proce
 import { SuspendProcessActionResult } from '../command_render_components/suspend_process_action';
 import { EndpointStatusActionResult } from '../command_render_components/status_action';
 import { GetProcessesActionResult } from '../command_render_components/get_processes_action';
-import type { ParsedArgData } from '../../console/service/parsed_command_input';
 import type { EndpointPrivileges, ImmutableArray } from '../../../../../common/endpoint/types';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
@@ -369,6 +370,14 @@ export const getEndpointConsoleCommands = ({
       helpHidden: !getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }),
     },
   ];
+
+  // FIXME: DELETE PRIOR TO MERGE
+  // for dev purposes only - command only shown if url has `show_upload=`
+  if (location.search.includes('show_upload=')) {
+    consoleCommands.push(
+      getUploadCommand({ endpointAgentId, endpointPrivileges, endpointCapabilities })
+    );
+  }
 
   // `get-file` is currently behind feature flag
   if (isGetFileEnabled) {
