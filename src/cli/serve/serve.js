@@ -81,7 +81,7 @@ function maybeAddConfig(name, configs, method) {
 function getEnvConfigs() {
   const val = process.env.KBN_CONFIG_PATHS
   if (typeof val === 'string') {
-    return val.split(',').map(p => resolve(p.trim()))
+    return val.split(',').filter(v => !!v).map(p => resolve(p.trim()))
   }
   return []
 }
@@ -234,7 +234,7 @@ export default function (program) {
   command.action(async function (opts) {
     const unknownOptions = this.getUnknownOptions();
     const configs = [
-      ...getConfigPath(),
+      getConfigPath(),
       ...getEnvConfigs(),
       ...(opts.config || [])
     ];
