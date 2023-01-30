@@ -33,8 +33,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/148092
-  describe.skip('alerts', () => {
+  describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
     const objectRemover = new ObjectRemover(supertest);
@@ -1431,9 +1430,12 @@ instanceStateValue: true
     expect(
       event?.kibana?.alert?.rule?.execution?.metrics?.rule_type_run_duration_ms
     ).to.be.greaterThan(0);
+    // Process alerts is fast enough that it will sometimes report 0ms
+    const procesAlertsDurationMs =
+      event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms;
     expect(
-      event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms
-    ).to.be.greaterThan(0);
+      (typeof procesAlertsDurationMs === 'number' ? procesAlertsDurationMs : -1) >= 0
+    ).to.be.ok();
     expect(
       event?.kibana?.alert?.rule?.execution?.metrics?.trigger_actions_duration_ms
     ).to.be.greaterThan(0);
