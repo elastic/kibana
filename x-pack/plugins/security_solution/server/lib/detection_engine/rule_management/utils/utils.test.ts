@@ -277,7 +277,7 @@ describe('utils', () => {
 
   describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, {}, {});
+      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, {});
       expect(output).toEqual({ data: [], page: 1, perPage: 0, total: 0 });
     });
 
@@ -289,7 +289,6 @@ describe('utils', () => {
           total: 0,
           data: [getRuleMock(getQueryRuleParams())],
         },
-        {},
         {}
       );
       const expected = getOutputRuleAlertForRest();
@@ -309,7 +308,6 @@ describe('utils', () => {
           total: 0,
           data: [getRuleMock(getQueryRuleParams())],
         },
-        {},
         {
           '123': undefined,
         }
@@ -348,7 +346,6 @@ describe('utils', () => {
           total: 0,
           data: [getRuleMock(getQueryRuleParams())],
         },
-        {},
         legacyRuleActions
       );
       const expected = {
