@@ -7,6 +7,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages } from '@kbn/repo-packages';
 import { Env, type RawPackageInfo, type EnvOptions } from '@kbn/config';
 
 type DeepPartial<T> = {
@@ -28,6 +29,7 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
       runExamples: false,
       ...(options.cliArgs || {}),
     },
+    repoPackages: getPackages(REPO_ROOT),
   };
 }
 

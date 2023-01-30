@@ -19,6 +19,8 @@ import type { PackageUsage } from './package_collectors';
 import { getFleetServerUsage, getFleetServerConfig } from './fleet_server_collector';
 import type { FleetServerUsage } from './fleet_server_collector';
 import { getAgentPoliciesUsage } from './agent_policies';
+import type { AgentPanicLogsData } from './agent_logs_panics';
+import { getPanicLogsLastHour } from './agent_logs_panics';
 
 export interface Usage {
   agents_enabled: boolean;
@@ -39,6 +41,7 @@ export interface FleetUsage extends Usage {
     degraded: number;
   };
   agents_per_policy: number[];
+  agent_logs_panics_last_hour: AgentPanicLogsData['agent_logs_panics_last_hour'];
   agent_logs_top_errors?: string[];
   fleet_server_logs_top_errors?: string[];
 }
@@ -47,7 +50,7 @@ export const fetchFleetUsage = async (
   core: CoreSetup,
   config: FleetConfigType,
   abortController: AbortController
-) => {
+): Promise<FleetUsage | undefined> => {
   const [soClient, esClient] = await getInternalClients(core);
   if (!soClient || !esClient) {
     return;
@@ -60,6 +63,7 @@ export const fetchFleetUsage = async (
     ...(await getAgentData(esClient, abortController)),
     fleet_server_config: await getFleetServerConfig(soClient),
     agent_policies: await getAgentPoliciesUsage(esClient, abortController),
+    ...(await getPanicLogsLastHour(esClient)),
     // TODO removed top errors telemetry as it causes this issue: https://github.com/elastic/kibana/issues/148976
     // ...(await getAgentLogsTopErrors(esClient)),
   };
