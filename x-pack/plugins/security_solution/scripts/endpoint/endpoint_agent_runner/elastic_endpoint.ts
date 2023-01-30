@@ -10,13 +10,17 @@ import execa from 'execa';
 import nodeFetch from 'node-fetch';
 import { getEndpointPackageInfo } from '../../../common/endpoint/index_data';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { fetchAgentPolicyEnrollmentKey, fetchFleetServerUrl } from '../common/fleet_services';
+import {
+  fetchAgentPolicyEnrollmentKey,
+  fetchFleetServerUrl,
+  waitForHostToEnroll,
+} from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
 export const enrollEndpointHost = async (agentPolicyId?: string) => {
   const { log, kbnClient } = getRuntimeServices();
 
-  log.info(`Creating VM and enrolling Elastic agent with Endpoint`);
+  log.info(`Creating VM and enrolling Elastic Agent`);
   log.indent(4);
 
   try {
@@ -135,12 +139,14 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
       }
     });
 
+    log.info(`Waiting for Agent to checkin with Fleet`);
+    await waitForHostToEnroll(kbnClient, vmName);
+
     log.info(`VM created using Multipass.
     VM Name: ${vmName}
 
     Shell access: multipass shell ${vmName}
     Delete VM:    multipass delete -p ${vmName}
-
 `);
     // FIXME:PT show count of VMs currently running (to remind developer to check list
   } catch (error) {
