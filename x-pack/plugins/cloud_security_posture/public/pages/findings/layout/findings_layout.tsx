@@ -79,7 +79,7 @@ const baseColumns = [
     ),
     truncateText: true,
     width: '150px',
-    sortable: true,
+    sortable: false,
     render: (filename: string) => (
       <EuiToolTip position="top" content={filename} anchorClassName="eui-textTruncate">
         <span>{filename}</span>
@@ -92,7 +92,7 @@ const baseColumns = [
       defaultMessage: 'Result',
     }),
     width: '120px',
-    sortable: true,
+    sortable: false,
     render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
       <CspEvaluationBadge type={type} />
     ),
@@ -103,7 +103,7 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.resourceTypeColumnLabel',
       { defaultMessage: 'Resource Type' }
     ),
-    sortable: true,
+    sortable: false,
     truncateText: true,
     width: '10%',
   },
@@ -113,7 +113,7 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.resourceNameColumnLabel',
       { defaultMessage: 'Resource Name' }
     ),
-    sortable: true,
+    sortable: false,
     truncateText: true,
     render: (name: string) => (
       <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
@@ -127,7 +127,7 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNameColumnLabel',
       { defaultMessage: 'Rule Name' }
     ),
-    sortable: true,
+    sortable: false,
     render: (name: string) => (
       <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
         <>{name}</>
@@ -158,7 +158,7 @@ const baseColumns = [
         )}
       />
     ),
-    sortable: true,
+    sortable: false,
     truncateText: true,
   },
   {
@@ -167,7 +167,7 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
       { defaultMessage: 'CIS Section' }
     ),
-    sortable: true,
+    sortable: false,
     truncateText: true,
     render: (section: string) => (
       <EuiToolTip content={section} anchorClassName="eui-textTruncate">
@@ -189,7 +189,7 @@ const baseColumns = [
         )}
       />
     ),
-    sortable: true,
+    sortable: false,
     truncateText: true,
     render: (section: string) => (
       <EuiToolTip content={section} anchorClassName="eui-textTruncate">
@@ -206,7 +206,7 @@ const baseColumns = [
       { defaultMessage: 'Last Checked' }
     ),
     truncateText: true,
-    sortable: true,
+    sortable: false,
     render: (timestamp: number) => <TimestampTableCell timestamp={timestamp} />,
   },
 ] as const;
