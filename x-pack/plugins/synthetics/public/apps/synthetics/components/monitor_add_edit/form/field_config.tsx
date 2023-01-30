@@ -52,7 +52,6 @@ import {
   ResponseBodyIndexFieldProps,
   ControlledFieldProp,
 } from './field_wrappers';
-import { formatLocation } from '../../../../../../common/utils/location_formatter';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
 import {
@@ -65,6 +64,7 @@ import {
   TLSVersion,
   VerificationMode,
   FieldMap,
+  FormLocation,
 } from '../types';
 import { AlertConfigKey, DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
 import { getDefaultFormFields } from './defaults';
@@ -398,12 +398,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'Where do you want to run this test from? Additional locations will increase your total cost.',
     }),
-    props: ({
-      field,
-      setValue,
-      locations,
-      formState,
-    }): EuiComboBoxProps<MonitorFields[ConfigKey.LOCATIONS]> => {
+    props: ({ field, setValue, locations, formState }) => {
       return {
         options: Object.values(locations).map((location) => ({
           label: locations?.find((loc) => location.id === loc.id)?.label || '',
@@ -417,12 +412,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           isServiceManaged: location.isServiceManaged || false,
         })),
         'data-test-subj': 'syntheticsMonitorConfigLocations',
-        onChange: (updatedValues) => {
-          setValue(
-            ConfigKey.LOCATIONS,
-            updatedValues.map((location) => formatLocation(location)),
-            { shouldValidate: Boolean(formState.submitCount > 0) }
-          );
+        onChange: (updatedValues: FormLocation[]) => {
+          setValue(ConfigKey.LOCATIONS, updatedValues, {
+            shouldValidate: Boolean(formState.submitCount > 0),
+          });
         },
         isDisabled: readOnly,
       };
@@ -963,7 +956,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.TLS_VERSION]: {
     fieldKey: ConfigKey.TLS_VERSION,
-    component: ComboBox as React.ComponentType<EuiComboBoxProps<TLSVersion>>,
+    component: ComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.tlsVersion.label', {
       defaultMessage: 'Supported TLS protocols',
     }),
@@ -1053,10 +1046,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Set this option to manage the screenshots captured by the synthetics agent.',
     }),
     controlled: true,
-    props: ({ field, setValue }): EuiButtonGroupProps => ({
-      type: 'single',
+    props: ({ field, setValue }): Omit<EuiButtonGroupProps, 'type'> => ({
       idSelected: field?.value,
-      onChange: (option) => setValue(ConfigKey.SCREENSHOTS, option),
+      onChange: (option: string) => setValue(ConfigKey.SCREENSHOTS, option),
       options: Object.values(ScreenshotOption).map((option) => ({
         id: option,
         label: option.replace(/-/g, ' '),
