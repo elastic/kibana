@@ -22,7 +22,11 @@ function readTsConfigFile(configPath: string) {
 }
 
 function loadTsConfigFile(configPath: string) {
-  return ts.parseJsonConfigFileContent(readTsConfigFile(configPath) ?? {}, ts.sys, path.dirname(configPath));
+  return ts.parseJsonConfigFileContent(
+    readTsConfigFile(configPath) ?? {},
+    ts.sys,
+    path.dirname(configPath)
+  );
 }
 
 const baseTsConfig = loadTsConfigFile(path.resolve(REPO_ROOT, 'tsconfig.base.json'));
