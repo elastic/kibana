@@ -73,6 +73,7 @@ export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_STATUS_URL = `${CASES_URL}/status` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const;
+export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as const;
 
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;

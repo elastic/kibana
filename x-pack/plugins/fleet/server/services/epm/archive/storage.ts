@@ -11,7 +11,7 @@ import { uniq } from 'lodash';
 import { safeLoad } from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
-import uuidv5 from 'uuid/v5';
+import { v5 as uuidv5 } from 'uuid';
 import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 

@@ -339,6 +339,20 @@
         },
         {
           "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.telemetry",
+          "type": "Object",
+          "tags": [],
+          "label": "telemetry",
+          "description": [],
+          "signature": [
+            "ITelemetryClient"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
           "id": "def-public.InfraClientStartExports.ContainerMetricsTable",
           "type": "Function",
           "tags": [],

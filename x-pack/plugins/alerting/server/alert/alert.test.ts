@@ -414,11 +414,12 @@ describe('toJSON', () => {
           },
           flappingHistory: [false, true],
           flapping: false,
+          pendingRecoveredCount: 2,
         },
       }
     );
     expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"},"flappingHistory":[false,true],"flapping":false}}'
+      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"},"flappingHistory":[false,true],"flapping":false,"pendingRecoveredCount":2}}'
     );
   });
 });
@@ -433,6 +434,7 @@ describe('toRaw', () => {
           group: 'default',
         },
         flappingHistory: [false, true, true],
+        pendingRecoveredCount: 2,
       },
     };
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
@@ -527,5 +529,45 @@ describe('getFlapping', () => {
       meta: { flapping: true },
     });
     expect(alert.getFlapping()).toEqual(true);
+  });
+});
+
+describe('incrementPendingRecoveredCount', () => {
+  test('correctly increments pendingRecoveredCount', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    alert.incrementPendingRecoveredCount();
+    expect(alert.getPendingRecoveredCount()).toEqual(4);
+  });
+
+  test('correctly increments pendingRecoveredCount when it is not already defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.incrementPendingRecoveredCount();
+    expect(alert.getPendingRecoveredCount()).toEqual(1);
+  });
+});
+
+describe('getPendingRecoveredCount', () => {
+  test('returns pendingRecoveredCount', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    expect(alert.getPendingRecoveredCount()).toEqual(3);
+  });
+
+  test('defines and returns pendingRecoveredCount when it is not already defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getPendingRecoveredCount()).toEqual(0);
+  });
+});
+
+describe('resetPendingRecoveredCount', () => {
+  test('resets pendingRecoveredCount to 0', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    alert.resetPendingRecoveredCount();
+    expect(alert.getPendingRecoveredCount()).toEqual(0);
   });
 });

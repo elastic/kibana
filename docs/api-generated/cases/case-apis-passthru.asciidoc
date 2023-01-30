@@ -23,6 +23,7 @@ Any modifications made to this file will be overwritten.
   <li><a href="#deleteCase"><code><span class="http-method">delete</span> /s/{spaceId}/api/cases</code></a></li>
   <li><a href="#deleteCaseComment"><code><span class="http-method">delete</span> /s/{spaceId}/api/cases/{caseId}/comments/{commentId}</code></a></li>
   <li><a href="#deleteCaseComments"><code><span class="http-method">delete</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
+  <li><a href="#findCaseActivity"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/user_actions/_find</code></a></li>
   <li><a href="#getAllCaseComments"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
   <li><a href="#getCase"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}</code></a></li>
   <li><a href="#getCaseActivity"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/user_actions</code></a></li>
@@ -430,6 +431,102 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">204</h4>
     Indicates a successful call.
         <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#4xx_response">4xx_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="findCaseActivity"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/user_actions/_find</code></pre></div>
+    <div class="method-summary">Finds user activity for a case. (<span class="nickname">findCaseActivity</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're seeking.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">caseId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of user actions to return per page. default: 20 </div><div class="param">sortOrder (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: asc </div><div class="param">types (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the types of user actions to return. default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#findCaseActivity_200_response">findCaseActivity_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "userActions" : [ {
+    "owner" : "cases",
+    "case_id" : "22df07d0-03b1-11ed-920c-974bfa104448",
+    "action" : "create",
+    "created_at" : "2022-05-13T09:16:17.416Z",
+    "id" : "22fd3e30-03b1-11ed-920c-974bfa104448",
+    "comment_id" : "578608d0-03b1-11ed-920c-974bfa104448",
+    "type" : "create_case",
+    "created_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "version" : "WzM1ODg4LDFd"
+  }, {
+    "owner" : "cases",
+    "case_id" : "22df07d0-03b1-11ed-920c-974bfa104448",
+    "action" : "create",
+    "created_at" : "2022-05-13T09:16:17.416Z",
+    "id" : "22fd3e30-03b1-11ed-920c-974bfa104448",
+    "comment_id" : "578608d0-03b1-11ed-920c-974bfa104448",
+    "type" : "create_case",
+    "created_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "version" : "WzM1ODg4LDFd"
+  } ],
+  "total" : 1,
+  "perPage" : 6,
+  "page" : 0
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#findCaseActivity_200_response">findCaseActivity_200_response</a>
     <h4 class="field-label">401</h4>
     Authorization information is missing or invalid.
         <a href="#4xx_response">4xx_response</a>
@@ -1162,7 +1259,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of rules to return per page. default: 20 </div><div class="param">reporters (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of cases to return per page. default: 20 </div><div class="param">reporters (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by the user name of the reporter. default: null </div><div class="param">search (optional)</div>
 
@@ -1998,6 +2095,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#create_case_request"><code>create_case_request</code> - Create case request</a></li>
     <li><a href="#create_case_request_connector"><code>create_case_request_connector</code> - </a></li>
     <li><a href="#external_service"><code>external_service</code> - </a></li>
+    <li><a href="#findCaseActivity_200_response"><code>findCaseActivity_200_response</code> - </a></li>
     <li><a href="#getCaseComment_200_response"><code>getCaseComment_200_response</code> - </a></li>
     <li><a href="#getCaseConfiguration_200_response_inner"><code>getCaseConfiguration_200_response_inner</code> - </a></li>
     <li><a href="#getCaseConfiguration_200_response_inner_connector"><code>getCaseConfiguration_200_response_inner_connector</code> - </a></li>
@@ -2043,6 +2141,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_case_request"><code>update_case_request</code> - Update case request</a></li>
     <li><a href="#update_case_request_cases_inner"><code>update_case_request_cases_inner</code> - </a></li>
     <li><a href="#update_user_comment_request_properties"><code>update_user_comment_request_properties</code> - Update case comment request properties for user comments</a></li>
+    <li><a href="#user_actions_find_response_properties"><code>user_actions_find_response_properties</code> - </a></li>
     <li><a href="#user_actions_response_properties"><code>user_actions_response_properties</code> - </a></li>
     <li><a href="#user_actions_response_properties_created_by"><code>user_actions_response_properties_created_by</code> - </a></li>
     <li><a href="#user_actions_response_properties_payload"><code>user_actions_response_properties_payload</code> - </a></li>
@@ -2448,6 +2547,16 @@ Any modifications made to this file will be overwritten.
 <div class="param">external_url (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">pushed_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
 <div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_updated_by">getCaseConfiguration_200_response_inner_updated_by</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findCaseActivity_200_response"><code>findCaseActivity_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">page (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">perPage (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">total (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">userActions (optional)</div><div class="param-desc"><span class="param-type"><a href="#user_actions_find_response_properties">array[user_actions_find_response_properties]</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2885,6 +2994,22 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">user</div>
 <div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current comment version. To retrieve version values, use the get comments API. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="user_actions_find_response_properties"><code>user_actions_find_response_properties</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">action </div><div class="param-desc"><span class="param-type"><a href="#actions">actions</a></span>  </div>
+<div class="param">case_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">comment_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">created_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">created_by </div><div class="param-desc"><span class="param-type"><a href="#user_actions_response_properties_created_by">user_actions_response_properties_created_by</a></span>  </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">payload </div><div class="param-desc"><span class="param-type"><a href="#user_actions_response_properties_payload">user_actions_response_properties_payload</a></span>  </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#action_types">action_types</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

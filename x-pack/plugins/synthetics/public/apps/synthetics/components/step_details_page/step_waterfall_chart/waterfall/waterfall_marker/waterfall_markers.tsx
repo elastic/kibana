@@ -13,6 +13,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import { MarkerItems, useWaterfallContext } from '../context/waterfall_context';
 import { WaterfallMarkerIcon } from './waterfall_marker_icon';
+import { formatMillisecond } from '../../../common/network_data/data_formatting';
 
 export const FIELD_SYNTHETICS_LCP = 'browser.experience.lcp.us';
 export const FIELD_SYNTHETICS_FCP = 'browser.experience.fcp.us';
@@ -98,10 +99,7 @@ export function WaterfallChartMarkers() {
               {
                 dataValue: offset,
                 details: label,
-                header: i18n.translate('xpack.synthetics.synthetics.waterfall.offsetUnit', {
-                  defaultMessage: '{offset} ms',
-                  values: { offset },
-                }),
+                header: formatMillisecond(offset, { maxMillis: 4000 }),
               },
             ]}
             marker={<WaterfallMarkerIcon field={field} label={label} />}

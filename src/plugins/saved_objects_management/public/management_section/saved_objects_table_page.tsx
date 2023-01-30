@@ -102,6 +102,7 @@ const SavedObjectsTablePage = ({
           if (!inAppUrl.uiCapabilitiesPath) return true;
           return Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath));
         }}
+        customBranding={coreStart.customBranding}
       />
     </ContextWrapper>
   );

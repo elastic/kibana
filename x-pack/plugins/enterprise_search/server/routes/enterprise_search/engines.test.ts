@@ -51,6 +51,66 @@ describe('engines routes', () => {
     });
   });
 
+  describe('POST /internal/enterprise_search/engines', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/enterprise_search/engines',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/engines',
+      });
+    });
+
+    it('validates correctly with engine_name', () => {
+      const request = {
+        body: {
+          indices: ['search-unit-test'],
+          name: 'some-engine',
+        },
+      };
+
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without body', () => {
+      const request = { params: {} };
+
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without name', () => {
+      const request = {
+        body: {
+          indices: ['search-unit-test'],
+        },
+      };
+
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without indices', () => {
+      const request = {
+        body: {
+          name: 'some-engine',
+        },
+      };
+
+      mockRouter.shouldThrow(request);
+    });
+  });
+
   describe('GET /internal/enterprise_search/engines/{engine_name}', () => {
     let mockRouter: MockRouter;
 
@@ -166,6 +226,73 @@ describe('engines routes', () => {
     });
 
     it('fails validation without name', () => {
+      const request = { params: {} };
+
+      mockRouter.shouldThrow(request);
+    });
+  });
+
+  describe('GET /internal/enterprise_search/engines/{engine_name}/search', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/internal/enterprise_search/engines/{engine_name}/search',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/engines/:engine_name/_search',
+      });
+    });
+
+    it('validates correctly with engine_name and pagination', () => {
+      const request = {
+        body: {
+          query: 'test-query',
+          fields: ['test-field-1', 'test-field-2'],
+        },
+        params: {
+          engine_name: 'some-engine',
+          from: 0,
+          size: 10,
+        },
+      };
+
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with default pagination and no body', () => {
+      const request = {
+        params: {
+          engine_name: 'my-test-engine',
+        },
+      };
+
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validation with query and without fields', () => {
+      const request = {
+        params: {
+          engine_name: 'my-test-engine',
+        },
+        body: {
+          query: 'sample-query',
+          fields: [],
+        },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without engine name', () => {
       const request = { params: {} };
 
       mockRouter.shouldThrow(request);

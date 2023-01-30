@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SummaryClient fetchSummary with calendar aligned and timeslices SLO returns the summary 1`] = `
+Object {
+  "errorBudget": Object {
+    "consumed": 0.198413,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.801587,
+  },
+  "sliValue": 0.9,
+  "status": "DEGRADING",
+}
+`;
+
+exports[`SummaryClient fetchSummary with rolling and occurrences SLO returns the summary 1`] = `
+Object {
+  "errorBudget": Object {
+    "consumed": 100,
+    "initial": 0.001,
+    "isEstimated": false,
+    "remaining": 0,
+  },
+  "sliValue": 0.9,
+  "status": "VIOLATED",
+}
+`;
+
+exports[`SummaryClient fetchSummary with rolling and timeslices SLO returns the summary 1`] = `
+Object {
+  "errorBudget": Object {
+    "consumed": 2,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0,
+  },
+  "sliValue": 0.9,
+  "status": "VIOLATED",
+}
+`;

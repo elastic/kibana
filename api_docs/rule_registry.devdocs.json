@@ -1803,7 +1803,9 @@
           },
           ") => Promise<{ new: { count: number; data: {}[]; }; ongoing: { count: number; data: {}[]; }; recovered: { count: number; data: {}[]; }; }>; name: string; validate?: { params?: ",
           "RuleTypeParamsValidator",
-          "<TParams> | undefined; } | undefined; id: string; cancelAlertsOnRuleTimeout?: boolean | undefined; actionGroups: ",
+          "<TParams> | undefined; } | undefined; id: string; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
+          "IRuleTypeAlerts",
+          " | undefined; actionGroups: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -1859,7 +1861,7 @@
             "section": "def-common.SavedObjectReference",
             "text": "SavedObjectReference"
           },
-          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; }"
+          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; autoRecoverAlerts?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
         "deprecated": false,
@@ -1936,19 +1938,12 @@
           {
             "parentPluginId": "ruleRegistry",
             "id": "def-server.AlertAuditEventParams.outcome",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "outcome",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/ecs",
-                "scope": "common",
-                "docId": "kibKbnEcsPluginApi",
-                "section": "def-common.EcsEventOutcome",
-                "text": "EcsEventOutcome"
-              },
-              " | undefined"
+              "string | undefined"
             ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
             "deprecated": false,
@@ -3174,7 +3169,7 @@
             "description": [],
             "signature": [
               "(T & ",
-              "CommonAlertFields800",
+              "CommonAlertFields870",
               " & { _id: string; _index: string; })[]"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",

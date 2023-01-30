@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Metricbeat CPU: Detect unusual increases in cpu time spent in iowait (ECS)",
   "groups": [
     "metricbeat"

@@ -1,0 +1,12 @@
+{
+  "id": "savedObjectsHiddenFromHttpApisType",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["saved_objects_hidden_from_http_apis_type"],
+  "server": true,
+  "ui": false
+}

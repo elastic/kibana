@@ -18,26 +18,16 @@ import {
   Datasource,
   DatasourceLayers,
   DatasourceMap,
-  FramePublicAPI,
   IndexPattern,
   IndexPatternMap,
   IndexPatternRef,
   InitializationOptions,
-  Visualization,
   VisualizationMap,
   VisualizeEditorContext,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
-import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
-import type { ErrorMessage } from '../types';
-import {
-  getMissingCurrentDatasource,
-  getMissingIndexPatterns,
-  getMissingVisualizationTypeError,
-  getUnknownVisualizationTypeError,
-} from '../error_helper';
 import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
@@ -325,7 +315,11 @@ export async function persistedStateToExpression(
     dataViews: DataViewsContract;
     timefilter: TimefilterContract;
   }
-): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
+): Promise<{
+  ast: Ast | null;
+  indexPatterns: IndexPatternMap;
+  indexPatternRefs: IndexPatternRef[];
+}> {
   const {
     state: {
       visualization: persistedVisualizationState,
@@ -339,16 +333,7 @@ export async function persistedStateToExpression(
     description,
   } = doc;
   if (!visualizationType) {
-    return {
-      ast: null,
-      errors: [{ shortMessage: '', longMessage: getMissingVisualizationTypeError() }],
-    };
-  }
-  if (!visualizations[visualizationType]) {
-    return {
-      ast: null,
-      errors: [getUnknownVisualizationTypeError(visualizationType)],
-    };
+    return { ast: null, indexPatterns: {}, indexPatternRefs: [] };
   }
   const visualization = visualizations[visualizationType!];
   const visualizationState = initializeVisualization({
@@ -391,30 +376,11 @@ export async function persistedStateToExpression(
   if (datasourceId == null) {
     return {
       ast: null,
-      errors: [{ shortMessage: '', longMessage: getMissingCurrentDatasource() }],
+      indexPatterns,
+      indexPatternRefs,
     };
   }
 
-  const indexPatternValidation = validateRequiredIndexPatterns(
-    datasourceMap[datasourceId],
-    datasourceStates[datasourceId],
-    indexPatterns
-  );
-
-  if (indexPatternValidation) {
-    return {
-      ast: null,
-      errors: indexPatternValidation,
-    };
-  }
-
-  const validationResult = validateDatasourceAndVisualization(
-    datasourceMap[datasourceId],
-    datasourceStates[datasourceId].state,
-    visualization,
-    visualizationState,
-    { datasourceLayers, dataViews: { indexPatterns } as DataViewsState }
-  );
   const currentTimeRange = services.timefilter.getAbsoluteTime();
 
   return {
@@ -429,7 +395,8 @@ export async function persistedStateToExpression(
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
     }),
-    errors: validationResult,
+    indexPatterns,
+    indexPatternRefs,
   };
 }
 
@@ -438,7 +405,7 @@ export function getMissingIndexPattern(
   currentDatasourceState: { state: unknown } | null,
   indexPatterns: IndexPatternMap
 ) {
-  if (currentDatasourceState == null || currentDatasource == null) {
+  if (currentDatasourceState?.state == null || currentDatasource == null) {
     return [];
   }
   const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state, indexPatterns);
@@ -447,55 +414,3 @@ export function getMissingIndexPattern(
   }
   return missingIds;
 }
-
-const validateRequiredIndexPatterns = (
-  currentDatasource: Datasource,
-  currentDatasourceState: { state: unknown } | null,
-  indexPatterns: IndexPatternMap
-): ErrorMessage[] | undefined => {
-  const missingIds = getMissingIndexPattern(
-    currentDatasource,
-    currentDatasourceState,
-    indexPatterns
-  );
-
-  if (!missingIds.length) {
-    return;
-  }
-
-  return [{ shortMessage: '', longMessage: getMissingIndexPatterns(missingIds), type: 'fixable' }];
-};
-
-export const validateDatasourceAndVisualization = (
-  currentDataSource: Datasource | null,
-  currentDatasourceState: unknown | null,
-  currentVisualization: Visualization | null,
-  currentVisualizationState: unknown | undefined,
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
-): ErrorMessage[] | undefined => {
-  try {
-    const datasourceValidationErrors = currentDatasourceState
-      ? currentDataSource?.getErrorMessages(currentDatasourceState, frame.dataViews.indexPatterns)
-      : undefined;
-
-    const visualizationValidationErrors = currentVisualizationState
-      ? currentVisualization?.getErrorMessages(currentVisualizationState, frame)
-      : undefined;
-
-    if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
-      return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
-    }
-  } catch (e) {
-    showMemoizedErrorNotification(e);
-    if (e.message) {
-      return [
-        {
-          shortMessage: e.message,
-          longMessage: e.message,
-          type: 'critical',
-        },
-      ];
-    }
-  }
-  return undefined;
-};

@@ -9,9 +9,10 @@
 import { HttpSetup } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { GuideState } from '@kbn/guided-onboarding';
+import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 import { firstValueFrom, Subscription } from 'rxjs';
 
-import { API_BASE_PATH, testGuideConfig, testGuideId } from '../../common';
+import { API_BASE_PATH } from '../../common';
 import { ApiService } from './api';
 import {
   testGuideFirstStep,

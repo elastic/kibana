@@ -7,7 +7,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TimeBuckets, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -22,7 +21,6 @@ import {
   Provider,
   useAlertSearchBarStateContainer,
 } from '../../../../components/shared/alert_search_bar/containers';
-import { getAlertSummaryTimeRange } from '../../../rule_details/helpers';
 import { ObservabilityAlertSearchBar } from '../../../../components/shared/alert_search_bar';
 import { observabilityAlertFeatureIds } from '../../../../config';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
@@ -30,7 +28,9 @@ import { observabilityFeatureId } from '../../../../../common';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
+import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
 import { LoadingObservability } from '../../../overview';
 import './styles.scss';
 import { renderRuleStats } from '../../components/rule_stats';
@@ -47,6 +47,7 @@ function InternalAlertsPage() {
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const {
     cases,
+    charts,
     data: {
       query: {
         timefilter: { timefilter: timeFilterService },
@@ -61,10 +62,13 @@ function InternalAlertsPage() {
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
     },
-    uiSettings,
   } = useKibana<ObservabilityAppServices>().services;
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY);
 
+  const chartThemes = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
     total: 0,
@@ -75,12 +79,7 @@ function InternalAlertsPage() {
   });
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const timeBuckets = new TimeBuckets({
-    'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-    'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-    dateFormat: uiSettings.get('dateFormat'),
-    'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-  });
+  const timeBuckets = useTimeBuckets();
   const alertSummaryTimeRange: AlertSummaryTimeRange = getAlertSummaryTimeRange(
     {
       from: alertSearchBarStateProps.rangeFrom,
@@ -182,6 +181,7 @@ function InternalAlertsPage() {
             filter={esQuery}
             fullSize
             timeRange={alertSummaryTimeRange}
+            chartThemes={chartThemes}
           />
         </EuiFlexItem>
         <EuiFlexItem>

@@ -12,12 +12,13 @@ import {
   fetchHistoricalSummaryParamsSchema,
   findSLOParamsSchema,
   getSLOParamsSchema,
+  manageSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import {
   CreateSLO,
   DefaultResourceInstaller,
-  DefaultSLIClient,
+  DefaultSummaryClient,
   DefaultTransformManager,
   DeleteSLO,
   FindSLO,
@@ -36,6 +37,7 @@ import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_su
 import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
 import type { IndicatorTypes } from '../../domain/models';
 import type { ObservabilityRequestHandlerContext } from '../../types';
+import { ManageSLO } from '../../services/slo/manage_slo';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -133,10 +135,58 @@ const getSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const sliClient = new DefaultSLIClient(esClient);
-    const getSLO = new GetSLO(repository, sliClient);
+    const summaryClient = new DefaultSummaryClient(esClient);
+    const getSLO = new GetSLO(repository, summaryClient);
 
     const response = await getSLO.execute(params.path.id);
+
+    return response;
+  },
+});
+
+const enableSLORoute = createObservabilityServerRoute({
+  endpoint: 'POST /api/observability/slos/{id}/enable',
+  options: {
+    tags: [],
+  },
+  params: manageSLOParamsSchema,
+  handler: async ({ context, params, logger }) => {
+    if (!isLicenseAtLeastPlatinum(context)) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const manageSLO = new ManageSLO(repository, transformManager);
+
+    const response = await manageSLO.enable(params.path.id);
+
+    return response;
+  },
+});
+
+const disableSLORoute = createObservabilityServerRoute({
+  endpoint: 'POST /api/observability/slos/{id}/disable',
+  options: {
+    tags: [],
+  },
+  params: manageSLOParamsSchema,
+  handler: async ({ context, params, logger }) => {
+    if (!isLicenseAtLeastPlatinum(context)) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const manageSLO = new ManageSLO(repository, transformManager);
+
+    const response = await manageSLO.disable(params.path.id);
 
     return response;
   },
@@ -156,8 +206,8 @@ const findSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const sliClient = new DefaultSLIClient(esClient);
-    const findSLO = new FindSLO(repository, sliClient);
+    const summaryClient = new DefaultSummaryClient(esClient);
+    const findSLO = new FindSLO(repository, summaryClient);
 
     const response = await findSLO.execute(params?.query ?? {});
 
@@ -191,8 +241,10 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
 export const slosRouteRepository = {
   ...createSLORoute,
   ...deleteSLORoute,
+  ...disableSLORoute,
+  ...enableSLORoute,
+  ...fetchHistoricalSummary,
   ...findSLORoute,
   ...getSLORoute,
-  ...fetchHistoricalSummary,
   ...updateSLORoute,
 };

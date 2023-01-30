@@ -63,9 +63,11 @@ export function ServiceField({
 export function EnvironmentField({
   currentValue,
   onChange,
+  serviceName,
 }: {
   currentValue: string;
   onChange: (value?: string) => void;
+  serviceName?: string;
 }) {
   return (
     <PopoverExpression
@@ -90,6 +92,7 @@ export function EnvironmentField({
         })}
         start={moment().subtract(24, 'h').toISOString()}
         end={moment().toISOString()}
+        serviceName={serviceName}
       />
     </PopoverExpression>
   );
@@ -98,9 +101,11 @@ export function EnvironmentField({
 export function TransactionTypeField({
   currentValue,
   onChange,
+  serviceName,
 }: {
   currentValue?: string;
   onChange: (value?: string) => void;
+  serviceName?: string;
 }) {
   const label = i18n.translate('xpack.apm.alerting.fields.type', {
     defaultMessage: 'Type',
@@ -126,6 +131,7 @@ export function TransactionTypeField({
         )}
         start={moment().subtract(24, 'h').toISOString()}
         end={moment().toISOString()}
+        serviceName={serviceName}
       />
     </PopoverExpression>
   );

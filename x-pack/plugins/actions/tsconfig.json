@@ -31,7 +31,7 @@
     "@kbn/std",
     "@kbn/logging",
     "@kbn/logging-mocks",
-    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks"
   ],
   "exclude": [
     "target/**/*",

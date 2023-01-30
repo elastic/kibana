@@ -127,6 +127,7 @@ export const LastTestRunComponent = ({
           steps={stepsData?.steps ?? []}
           loading={stepsLoading}
           showStepNumber={true}
+          showExpand={false}
         />
       ) : (
         <SinglePingResult ping={latestPing} loading={loading} />

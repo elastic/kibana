@@ -46,17 +46,26 @@ import type {
 } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
+import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
 
 export const getAgentHandler: RequestHandler<
-  TypeOf<typeof GetOneAgentRequestSchema.params>
+  TypeOf<typeof GetOneAgentRequestSchema.params>,
+  TypeOf<typeof GetOneAgentRequestSchema.query>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
   const soClient = coreContext.savedObjects.client;
 
   try {
+    let agent = await AgentService.getAgentById(esClient, soClient, request.params.agentId);
+
+    if (request.query.withMetrics) {
+      agent = (await fetchAndAssignAgentMetrics(esClientCurrentUser, [agent]))[0];
+    }
+
     const body: GetOneAgentResponse = {
-      item: await AgentService.getAgentById(esClient, soClient, request.params.agentId),
+      item: agent,
     };
 
     return response.ok({ body });
@@ -165,16 +174,11 @@ export const getAgentsHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
   const soClient = coreContext.savedObjects.client;
 
   try {
-    const {
-      agents,
-      total,
-      page,
-      perPage,
-      totalInactive = 0,
-    } = await AgentService.getAgentsByKuery(esClient, soClient, {
+    const agentRes = await AgentService.getAgentsByKuery(esClient, soClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
@@ -182,8 +186,16 @@ export const getAgentsHandler: RequestHandler<
       kuery: request.query.kuery,
       sortField: request.query.sortField,
       sortOrder: request.query.sortOrder,
-      getTotalInactive: true,
+      getTotalInactive: request.query.showInactive,
     });
+
+    const { total, page, perPage, totalInactive = 0 } = agentRes;
+    let { agents } = agentRes;
+
+    // Assign metrics
+    if (request.query.withMetrics) {
+      agents = await fetchAndAssignAgentMetrics(esClientCurrentUser, agents);
+    }
 
     const body: GetAgentsResponse = {
       list: agents, // deprecated

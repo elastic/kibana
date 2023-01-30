@@ -7,6 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { AlertStatus, ValidFeatureId } from '@kbn/rule-data-utils';
+import type { PartialTheme, Theme } from '@elastic/charts';
 
 export interface Alert {
   key: number;
@@ -22,10 +23,16 @@ export interface AlertSummaryTimeRange {
   dateFormat?: string;
 }
 
+export interface ChartThemes {
+  theme: PartialTheme;
+  baseTheme: Theme;
+}
+
 export interface AlertSummaryWidgetProps {
   featureIds?: ValidFeatureId[];
   filter?: estypes.QueryDslQueryContainer;
   fullSize?: boolean;
   onClick?: (status?: AlertStatus) => void;
   timeRange: AlertSummaryTimeRange;
+  chartThemes: ChartThemes;
 }

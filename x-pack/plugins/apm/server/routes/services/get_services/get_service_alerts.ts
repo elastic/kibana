@@ -9,7 +9,11 @@ import {
   AggregationsCardinalityAggregate,
   AggregationsFilterAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
-import { kqlQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  termQuery,
+  rangeQuery,
+} from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
@@ -19,6 +23,7 @@ import {
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { MAX_NUMBER_OF_SERVICES } from './get_services_items';
 
@@ -37,23 +42,31 @@ export async function getServicesAlerts({
   maxNumServices = MAX_NUMBER_OF_SERVICES,
   serviceGroup,
   serviceName,
+  start,
+  end,
+  environment,
 }: {
   apmAlertsClient: ApmAlertsClient;
   kuery?: string;
   maxNumServices?: number;
   serviceGroup?: ServiceGroup | null;
   serviceName?: string;
+  start: number;
+  end: number;
+  environment?: string;
 }) {
   const params = {
     size: 0,
     query: {
       bool: {
         filter: [
-          { term: { [ALERT_RULE_PRODUCER]: 'apm' } },
-          { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
+          ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
+          ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
+          ...rangeQuery(start, end),
           ...kqlQuery(kuery),
           ...serviceGroupQuery(serviceGroup),
-          ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...environmentQuery(environment),
         ],
       },
     },

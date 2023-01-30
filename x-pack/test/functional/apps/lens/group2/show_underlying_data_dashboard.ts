@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.save('Embedded Visualization', true, false, false, 'new');
 
-      await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuid()}`, {
+      await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {
         exitFromEditMode: true,
       });
 
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.createLayer('referenceLine');
       await PageObjects.lens.save('Embedded Visualization', false);
 
-      await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuid()}`, {
+      await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {
         exitFromEditMode: true,
       });
 

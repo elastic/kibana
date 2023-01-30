@@ -17,7 +17,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { safeLoad } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
@@ -164,7 +164,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
     // Add ids to stream
-    const packagePolicyId = options?.id || uuid.v4();
+    const packagePolicyId = options?.id || uuidv4();
     let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
       assignStreamIdToInput(packagePolicyId, input)
     );
@@ -276,7 +276,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
       await pMap(packagePolicies, async (packagePolicy) => {
-        const packagePolicyId = packagePolicy.id ?? uuid.v4();
+        const packagePolicyId = packagePolicy.id ?? uuidv4();
         const agentPolicyId = packagePolicy.policy_id;
 
         let inputs = packagePolicy.inputs.map((input) =>

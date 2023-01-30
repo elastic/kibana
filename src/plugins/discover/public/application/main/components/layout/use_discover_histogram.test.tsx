@@ -18,7 +18,7 @@ import {
   DataMain$,
   DataTotalHits$,
   RecordRawType,
-} from '../../hooks/use_saved_search';
+} from '../../services/discover_data_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';

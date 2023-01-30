@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { get } from 'lodash';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -55,7 +55,7 @@ export class TablePanelConfig extends Component<
   UNSAFE_componentWillMount() {
     const { model } = this.props;
     if (!model.bar_color_rules || !model.bar_color_rules.length) {
-      this.props.onChange({ bar_color_rules: [{ id: uuid.v1() }] });
+      this.props.onChange({ bar_color_rules: [{ id: uuidv1() }] });
     }
   }
 

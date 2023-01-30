@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Subject, BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
@@ -18,7 +18,7 @@ import {
   DataMain$,
   DataTotalHits$,
   RecordRawType,
-} from '../../hooks/use_saved_search';
+} from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -117,6 +117,7 @@ const mountComponent = ({
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
   const stateContainer = getStateContainer();
+  stateContainer.dataState.data$ = savedSearchData$;
 
   const props: DiscoverHistogramLayoutProps = {
     isPlainRecord,
@@ -124,9 +125,6 @@ const mountComponent = ({
     navigateTo: jest.fn(),
     setExpandedDoc: jest.fn(),
     savedSearch,
-    savedSearchData$,
-    savedSearchFetch$: new Subject(),
-    savedSearchRefetch$: new Subject(),
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],

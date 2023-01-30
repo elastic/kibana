@@ -14,9 +14,10 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 
 import type { PluginState } from '../../common';
-import { API_BASE_PATH, testGuideConfig, testGuideId } from '../../common';
+import { API_BASE_PATH } from '../../common';
 import { apiService } from '../services/api';
 import type { GuidedOnboardingApi } from '../types';
 import {
@@ -30,9 +31,14 @@ import {
   mockPluginStateInProgress,
 } from '../services/api.mocks';
 import { GuidePanel } from './guide_panel';
+import { IUiSettingsClient } from '@kbn/core/public';
 
 const applicationMock = applicationServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
+
+const uiSettingsMock = {
+  get: jest.fn(),
+} as unknown as IUiSettingsClient;
 
 const mockGetResponse = (path: string, pluginState: PluginState) => {
   if (path === `${API_BASE_PATH}/configs/${testGuideId}`) {
@@ -56,7 +62,12 @@ const setupComponentWithPluginStateMock = async (
 const setupGuidePanelComponent = async (api: GuidedOnboardingApi) => {
   let testBed: TestBed;
   const GuidePanelComponent = () => (
-    <GuidePanel application={applicationMock} api={api} notifications={notificationsMock} />
+    <GuidePanel
+      application={applicationMock}
+      api={api}
+      notifications={notificationsMock}
+      uiSettings={uiSettingsMock}
+    />
   );
   await act(async () => {
     testBed = registerTestBed(GuidePanelComponent)();
