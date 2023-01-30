@@ -32,7 +32,7 @@ import { getConnectorFieldsFromUserActions } from './helpers';
 import * as i18n from './translations';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
-import type { CaseServices } from '../../containers/use_get_case_user_actions';
+import type { CaseServices } from '../../containers/use_find_case_user_actions';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
