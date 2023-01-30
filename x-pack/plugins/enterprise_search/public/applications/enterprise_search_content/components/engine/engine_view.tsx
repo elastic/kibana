@@ -6,31 +6,35 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Route, Switch } from 'react-router-dom';
 
-import { useActions, useValues } from 'kea';
-
-import { EuiButtonEmpty } from '@elastic/eui';
+import { useValues, useActions } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
 
-import { docLinks } from '../../../shared/doc_links';
-import { EngineViewTabs } from '../../routes';
+import { KibanaLogic } from '../../../shared/kibana';
+import { ENGINE_PATH, EngineViewTabs } from '../../routes';
 
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
+import { EngineAPI } from './engine_api/engine_api';
 import { EngineError } from './engine_error';
+import { EngineIndices } from './engine_indices';
 import { EngineViewLogic } from './engine_view_logic';
+import { EngineHeaderDocsAction } from './header_docs_action';
 
 export const EngineView: React.FC = () => {
+  const { fetchEngine } = useActions(EngineViewLogic);
   const { engineName, fetchEngineApiError, fetchEngineApiStatus, isLoadingEngine } =
     useValues(EngineViewLogic);
-  const { fetchEngine } = useActions(EngineViewLogic);
   const { tabId = EngineViewTabs.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
+  const { renderHeaderActions } = useValues(KibanaLogic);
+
   useEffect(() => {
     fetchEngine({ engineName });
+    renderHeaderActions(EngineHeaderDocsAction);
   }, [engineName]);
 
   if (fetchEngineApiStatus === Status.ERROR) {
@@ -50,25 +54,23 @@ export const EngineView: React.FC = () => {
   }
 
   return (
-    <EnterpriseSearchEnginesPageTemplate
-      pageChrome={[engineName]}
-      pageViewTelemetry={tabId}
-      isLoading={isLoadingEngine}
-      pageHeader={{
-        pageTitle: engineName,
-        rightSideItems: [
-          <EuiButtonEmpty
-            href={docLinks.appSearchElasticsearchIndexedEngines} // TODO: replace with real docLinks when it's created
-            target="_blank"
-            iconType="documents"
-          >
-            Engine Docs
-          </EuiButtonEmpty>,
-        ],
-      }}
-      engineName={engineName}
-    >
-      <div />
-    </EnterpriseSearchEnginesPageTemplate>
+    <Switch>
+      <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.INDICES}`} component={EngineIndices} />
+      <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.API}`} component={EngineAPI} />
+      <Route // TODO: remove this route when all engine view routes are implemented, replace with a 404 route
+        render={() => (
+          <EnterpriseSearchEnginesPageTemplate
+            pageChrome={[engineName]}
+            pageViewTelemetry={tabId}
+            pageHeader={{
+              pageTitle: tabId,
+              rightSideItems: [],
+            }}
+            engineName={engineName}
+            isLoading={isLoadingEngine}
+          />
+        )}
+      />
+    </Switch>
   );
 };
