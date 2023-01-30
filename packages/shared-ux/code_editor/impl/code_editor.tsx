@@ -310,11 +310,19 @@ export const CodeEditor: React.FC<Props> = ({
           onClick={startEditing}
           onKeyDown={onKeyDownHint}
           aria-label={ariaLabel}
-          data-test-subj="codeEditorHint"
+          data-test-subj={isHintActive ? 'codeEditorHint' : 'codeEditor'}
         />
       </EuiToolTip>
     );
-  }, [onKeyDownHint, startEditing, ariaLabel, isReadOnly, promptClasses, defaultStyles]);
+  }, [
+    onKeyDownHint,
+    startEditing,
+    ariaLabel,
+    isReadOnly,
+    promptClasses,
+    defaultStyles,
+    isHintActive,
+  ]);
 
   const _editorWillMount = useCallback(
     (__monaco: unknown) => {

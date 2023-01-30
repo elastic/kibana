@@ -13,14 +13,9 @@ import { monaco } from '@kbn/monaco';
 
 import { keys } from '@elastic/eui';
 
-// This import needs to come before './code_editor' below as it sets the jest.mocks
 import { mockedEditorInstance } from './code_editor.test.helpers';
 
 import { CodeEditor } from './code_editor';
-
-// disabled because this is a test, but also it seems we shouldn't need this?
-/* eslint-disable-next-line @kbn/eslint/module_migration */
-import 'monaco-editor/esm/vs/basic-languages/html/html.contribution.js';
 
 // A sample language definition with a few example tokens
 const simpleLogLang: monaco.languages.IMonarchLanguage = {
@@ -138,16 +133,16 @@ describe('<CodeEditor />', () => {
 
     test('should be tabable', () => {
       const DOMnode = getHint().getDOMNode();
+      expect(getHint().find('[data-test-subj="codeEditorHint"]').exists()).toBeTruthy();
       expect(DOMnode.getAttribute('tabindex')).toBe('0');
       expect(DOMnode).toMatchSnapshot();
     });
 
     test('should be disabled when the ui monaco editor gains focus', async () => {
       // Initially it is visible and active
-      // test changed due to emotion JS refactoring no classnames for testing isInactive or isActive classes
-      // expect(getHint().props() as any).toContain('["style": "{ position: absolute; }]');
-      // getHint().simulate('keydown', { key: keys.ENTER });
-      // expect((getHint().props() as any).css).toContain('display: none');
+      expect(getHint().find('[data-test-subj="codeEditorHint"]').exists()).toBeTruthy();
+      getHint().simulate('keydown', { key: keys.ENTER });
+      expect(getHint().find('[data-test-subj="codeEditorHint"]').exists()).toBeFalsy();
     });
 
     test('should be enabled when hitting the ESC key', () => {
