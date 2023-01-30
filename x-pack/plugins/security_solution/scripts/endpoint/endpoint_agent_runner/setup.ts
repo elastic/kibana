@@ -6,9 +6,9 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import { runFleetServerIfNeeded } from './fleet_server';
 import { startRuntimeServices, stopRuntimeServices } from './runtime';
 import { checkDependencies } from './pre_check';
-import { runFleetServerIfNeeded } from './fleet_server';
 import { enrollEndpointHost } from './elastic_endpoint';
 
 interface SetupOptions {

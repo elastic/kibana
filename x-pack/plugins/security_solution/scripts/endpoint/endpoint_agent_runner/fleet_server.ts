@@ -24,11 +24,23 @@ import type {
   PutOutputRequest,
   GetOneOutputResponse,
   GenerateServiceTokenResponse,
+  FleetServerHost,
 } from '@kbn/fleet-plugin/common/types';
-import { outputRoutesService } from '@kbn/fleet-plugin/common/services';
+import {
+  fleetServerHostsRoutesService,
+  outputRoutesService,
+} from '@kbn/fleet-plugin/common/services';
 import execa from 'execa';
+import type {
+  PostFleetServerHostsRequest,
+  PostFleetServerHostsResponse,
+} from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import { isLocalhost } from '../common/localhost_services';
-import { fetchFleetAgents, waitForHostToEnroll } from '../common/fleet_services';
+import {
+  fetchFleetAgents,
+  fetchFleetServerUrl,
+  waitForHostToEnroll,
+} from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
 export const runFleetServerIfNeeded = async () => {
@@ -43,6 +55,8 @@ export const runFleetServerIfNeeded = async () => {
   const fleetServerAlreadyEnrolled = await isFleetServerEnrolled();
 
   if (fleetServerAlreadyEnrolled) {
+    // FIXME:PT If localhost, ensure fleet host info in Fleet has correct IP for this machine
+
     log.info(`Fleet server is already enrolled with Fleet. Nothing to do.`);
     log.indent(-4);
     return;
@@ -60,9 +74,10 @@ export const runFleetServerIfNeeded = async () => {
       policyId: fleetServerAgentPolicyId,
       serviceToken,
     });
-  } catch (e) {
+  } catch (error) {
+    log.error(error);
     log.indent(-4);
-    throw e;
+    throw error;
   }
 
   log.indent(-4);
@@ -209,6 +224,7 @@ const startFleetServerWithDocker = async ({
       '--name',
       containerName,
 
+      // The container's hostname will appear in Fleet when the agent enrolls
       '--hostname',
       containerName,
 
@@ -250,6 +266,8 @@ const startFleetServerWithDocker = async ({
 
     log.verbose(`Fleet server enrolled agent:\n${fleetServerAgent}`);
 
+    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:8220`);
+
     log.info(`Done. Fleet Server is running and connected to Fleet.
   Container Name: ${containerName}
   Container Id:   ${containerId}
@@ -258,6 +276,7 @@ const startFleetServerWithDocker = async ({
   Shell access:         docker exec -it ${containerName} /bin/bash
 `);
   } catch (error) {
+    log.error(error);
     log.indent(-4);
     throw error;
   }
@@ -340,9 +359,47 @@ const configureFleetIfNeeded = async () => {
       }
     }
   } catch (error) {
+    log.error(error);
     log.indent(-4);
     throw error;
   }
 
   log.indent(-4);
+};
+
+const addFleetServerHostToFleetSettings = async (
+  fleetServerHostUrl: string
+): Promise<FleetServerHost> => {
+  const { kbnClient, log } = getRuntimeServices();
+
+  log.info(`Updating Fleet with new fleet server host: ${fleetServerHostUrl}`);
+  log.indent(4);
+
+  try {
+    // Check if a fleet server entry needs to be added
+    const exitingFleetServerHostEntry = await fetchFleetServerUrl(kbnClient);
+
+    const newFleetHostEntry: PostFleetServerHostsRequest['body'] = {
+      name: `Dev fleet server running on localhost`,
+      host_urls: [fleetServerHostUrl],
+      is_default: !exitingFleetServerHostEntry,
+    };
+
+    const { item } = await kbnClient
+      .request<PostFleetServerHostsResponse>({
+        method: 'POST',
+        path: fleetServerHostsRoutesService.getCreatePath(),
+        body: newFleetHostEntry,
+      })
+      .then((response) => response.data);
+
+    log.verbose(item);
+    log.indent(-4);
+
+    return item;
+  } catch (error) {
+    log.error(error);
+    log.indent(-4);
+    throw error;
+  }
 };
