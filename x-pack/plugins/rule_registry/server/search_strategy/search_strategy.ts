@@ -148,7 +148,6 @@ export const ruleRegistrySearchStrategyProvider = (
           // ecs auditLogger requires that we log each alert independently
           //
           //
-          logger.debug(JSON.stringify({ RuleStrategy: response }));
           if (securityAuditLogger != null) {
             response.rawResponse.hits?.hits?.forEach((hit) => {
               securityAuditLogger.log(

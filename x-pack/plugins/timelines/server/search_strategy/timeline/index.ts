@@ -101,17 +101,6 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   const dsl = queryFactory.buildDsl(request);
   return es.search({ ...request, params: dsl }, options, deps).pipe(
     map((response) => {
-      logger.warn(
-        JSON.stringify({
-          timelineSearch: {
-            request,
-            dsl,
-            ...response,
-            rawResponse: shimHitsTotal(response.rawResponse, options),
-          },
-        })
-      );
-
       return {
         ...response,
         rawResponse: shimHitsTotal(response.rawResponse, options),
