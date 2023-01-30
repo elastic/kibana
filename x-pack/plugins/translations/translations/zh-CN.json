@@ -13737,7 +13737,6 @@
     "xpack.fleet.agentPolicyForm.nameSpaceFieldDescription.fleetUserGuideLabel": "了解详情",
     "xpack.fleet.agentPolicyForm.namespaceFieldLabel": "默认命名空间",
     "xpack.fleet.agentPolicyForm.newAgentPolicyFieldLabel": "新代理策略名称",
-    "xpack.fleet.agentPolicyForm.outputOptionDisabledAPMAndLogstashText": "APM 不支持代理集成的 Logstash 输出",
     "xpack.fleet.agentPolicyForm.systemMonitoringText": "收集系统日志和指标",
     "xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription": "可选超时（秒）。若提供，代理断开连接此段时间后，将自动注销。",
     "xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel": "注销超时",
