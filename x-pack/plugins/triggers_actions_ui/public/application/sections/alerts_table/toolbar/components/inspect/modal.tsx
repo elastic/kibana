@@ -111,7 +111,7 @@ const ModalInspectQueryComponent = ({ closeModal, getInspectQuery }: ModalInspec
       ),
       description: (
         <span data-test-subj="index-pattern-description">
-          <p>{parsedRequest.index ?? []}</p>
+          <p>{parsedRequest.index?.join(', ') ?? []}</p>
         </span>
       ),
     },
