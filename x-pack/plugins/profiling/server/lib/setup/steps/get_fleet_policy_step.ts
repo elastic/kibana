@@ -6,9 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { merge, omit } from 'lodash';
 import { ProfilingSetupStep, ProfilingSetupStepFactoryOptions } from '../types';
-
-const DEFAULT_CLOUD_APM_PACKAGE_POLICY_ID = 'elastic-cloud-apm';
 
 async function createIngestAPIKey(esClient: ElasticsearchClient) {
   const apiKeyResponse = await esClient.security.createApiKey({
@@ -49,8 +48,15 @@ export function getFleetPolicyStep({
     name: 'fleet_policy',
     hasCompleted: async () => {
       try {
-        const policy = await packagePolicyClient.get(soClient, DEFAULT_CLOUD_APM_PACKAGE_POLICY_ID);
-        return !!policy?.inputs[0].config?.['apm-server'].value.profiling;
+        const apmPolicies = await packagePolicyClient.list(soClient, {
+          kuery: 'ingest-package-policies.package.name:apm',
+        });
+        return (
+          apmPolicies.items.length > 0 &&
+          apmPolicies.items.every(
+            (policy) => !!policy?.inputs[0].config?.['apm-server'].value.profiling
+          )
+        );
       } catch (error) {
         logger.debug('Could not fetch fleet policy');
         logger.debug(error);
@@ -84,30 +90,30 @@ export function getFleetPolicyStep({
         },
       };
 
-      const policy = await packagePolicyClient.get(soClient, DEFAULT_CLOUD_APM_PACKAGE_POLICY_ID);
+      const apmPolicies = await packagePolicyClient.list(soClient, {
+        kuery: 'ingest-package-policies.package.name:apm',
+      });
 
-      if (!policy) {
-        throw new Error(`${DEFAULT_CLOUD_APM_PACKAGE_POLICY_ID} was not found`);
+      if (apmPolicies.total > apmPolicies.items.length) {
+        logger.warn(
+          `Updating ${apmPolicies.items.length} out of ${apmPolicies.total}, at least some will not be updated`
+        );
       }
 
-      const modifiedPolicyInputs =
-        policy.inputs
-          .filter((i) => i.type === 'apm')
-          .map((input) => {
-            return {
-              ...input,
-              config: {
-                'apm-server': {
-                  value: profilingApmConfig,
-                },
-              },
-            };
-          }) ?? [];
+      await Promise.all(
+        apmPolicies.items.map(async (policy) => {
+          const modifiedPolicyInputs = policy.inputs.map((input) => {
+            return input.type === 'apm'
+              ? merge({}, input, { config: { 'apm-server': { value: profilingApmConfig } } })
+              : input;
+          });
 
-      await packagePolicyClient.update(soClient, esClient, DEFAULT_CLOUD_APM_PACKAGE_POLICY_ID, {
-        ...policy,
-        inputs: modifiedPolicyInputs,
-      });
+          await packagePolicyClient.update(soClient, esClient, policy.id, {
+            ...omit(policy, 'id', 'revision', 'updated_at', 'updated_by'),
+            inputs: modifiedPolicyInputs,
+          });
+        })
+      );
     },
   };
 }

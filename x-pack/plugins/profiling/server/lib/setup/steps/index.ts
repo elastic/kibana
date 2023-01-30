@@ -28,6 +28,6 @@ export function getProfilingSetupSteps(
     getCreateEventsDataStreamsStep(options),
     getCreateIndicesStep(options),
     getSecurityStep(options),
-    ...(options.isCloudEnabled ? [getFleetPolicyStep(options)] : []),
+    getFleetPolicyStep(options),
   ];
 }
