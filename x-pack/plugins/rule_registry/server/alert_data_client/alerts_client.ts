@@ -98,6 +98,14 @@ interface GetAlertParams {
   index?: string;
 }
 
+interface GetAlertsCountParams {
+  id?: string;
+  gte: string;
+  lte: string;
+  featureIds: string[];
+  filter?: estypes.QueryDslQueryContainer[];
+}
+
 interface GetAlertSummaryParams {
   id?: string;
   gte: string;
@@ -150,6 +158,21 @@ export class AlertsClient {
     return {
       outcome: operation === WriteOperations.Update ? 'unknown' : 'success',
     };
+  }
+
+  private extractAlertsCount(countBuckets: estypes.AggregationsStringTermsBucketKeys[]) {
+    return countBuckets.reduce(
+      (counts, bucket) => {
+        if (bucket.key === ALERT_STATUS_ACTIVE) {
+          counts.activeAlertCount = bucket.doc_count;
+        } else if (bucket.key === ALERT_STATUS_RECOVERED) {
+          counts.recoveredAlertCount = bucket.doc_count;
+        }
+
+        return counts;
+      },
+      { activeAlertCount: 0, recoveredAlertCount: 0 }
+    );
   }
 
   private getAlertStatusFieldUpdate(
@@ -515,6 +538,53 @@ export class AlertsClient {
     }
   }
 
+  public async getAlertsCount({ gte, lte, featureIds, filter }: GetAlertsCountParams) {
+    try {
+      const indexToUse = await this.getAuthorizedAlertsIndices(featureIds);
+
+      if (isEmpty(indexToUse)) {
+        throw Boom.badRequest('No featureIds were provided for getting alerts count.');
+      }
+
+      // first search for the alert by id, then use the alert info to check if user has access to it
+      const responseAlertSum = await this.singleSearchAfterAndAudit({
+        index: (indexToUse ?? []).join(),
+        operation: ReadOperations.Get,
+        aggs: {
+          count: {
+            terms: { field: ALERT_STATUS },
+          },
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  [ALERT_TIME_RANGE]: {
+                    gt: gte,
+                    lt: lte,
+                  },
+                },
+              },
+              ...(filter ? filter : []),
+            ],
+          },
+        },
+        size: 0,
+      });
+
+      const countAggs = responseAlertSum.aggregations
+        ?.count as estypes.AggregationsMultiBucketAggregateBase;
+
+      return this.extractAlertsCount(
+        countAggs.buckets as estypes.AggregationsStringTermsBucketKeys[]
+      );
+    } catch (error) {
+      this.logger.error(`getAlertsCount threw an error: ${error}`);
+      throw error;
+    }
+  }
+
   public async getAlertSummary({
     gte,
     lte,
@@ -591,18 +661,12 @@ export class AlertsClient {
         size: 0,
       });
 
-      let activeAlertCount = 0;
-      let recoveredAlertCount = 0;
-      (
-        (responseAlertSum.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase)
-          .buckets as estypes.AggregationsStringTermsBucketKeys[]
-      ).forEach((b) => {
-        if (b.key === ALERT_STATUS_ACTIVE) {
-          activeAlertCount = b.doc_count;
-        } else if (b.key === ALERT_STATUS_RECOVERED) {
-          recoveredAlertCount = b.doc_count;
-        }
-      });
+      const countAggs = responseAlertSum.aggregations
+        ?.count as estypes.AggregationsMultiBucketAggregateBase;
+
+      const { activeAlertCount, recoveredAlertCount } = this.extractAlertsCount(
+        countAggs.buckets as estypes.AggregationsStringTermsBucketKeys[]
+      );
 
       return {
         activeAlertCount,

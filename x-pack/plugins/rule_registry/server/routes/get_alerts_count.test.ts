@@ -1,0 +1,89 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
+import { getAlertsCountRoute } from './get_alerts_count';
+import { requestContextMock } from './__mocks__/request_context';
+import { requestMock, serverMock } from './__mocks__/server';
+
+describe('getAlertsCountRoute', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let { clients, context } = requestContextMock.createTools();
+
+  beforeEach(async () => {
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
+
+    clients.rac.getAlertsCount.mockResolvedValue({
+      activeAlertCount: 0,
+      recoveredAlertCount: 0,
+    });
+
+    getAlertsCountRoute(server.router);
+  });
+
+  describe('request validation', () => {
+    test('rejects invalid query params', async () => {
+      await expect(
+        server.inject(
+          requestMock.create({
+            method: 'post',
+            path: `${BASE_RAC_ALERTS_API_PATH}/_alerts_count`,
+            body: { gte: 4, lte: 3, featureIds: ['logs'] },
+          }),
+          context
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Request was rejected with message: 'Invalid value \\"4\\" supplied to \\"gte\\",Invalid value \\"3\\" supplied to \\"lte\\"'"`
+      );
+    });
+
+    test('validate gte/lte format', async () => {
+      const resp = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: `${BASE_RAC_ALERTS_API_PATH}/_alerts_count`,
+          body: {
+            gte: '2020-12-16T15:00:00.000Z',
+            lte: '2020-12-16',
+            featureIds: ['logs'],
+          },
+        }),
+        context
+      );
+      expect(resp.status).toEqual(400);
+      expect(resp.body).toMatchInlineSnapshot(`
+        Object {
+          "attributes": Object {
+            "success": false,
+          },
+          "message": "gte and/or lte are not following the UTC format",
+        }
+      `);
+    });
+
+    test('rejects unknown query params', async () => {
+      await expect(
+        server.inject(
+          requestMock.create({
+            method: 'post',
+            path: `${BASE_RAC_ALERTS_API_PATH}/_alerts_count`,
+            body: {
+              gte: '2020-12-16T15:00:00.000Z',
+              lte: '2020-12-16T16:00:00.000Z',
+              featureIds: ['logs'],
+              boop: 'unknown',
+            },
+          }),
+          context
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Request was rejected with message: 'invalid keys \\"boop\\"'"`
+      );
+    });
+  });
+});
