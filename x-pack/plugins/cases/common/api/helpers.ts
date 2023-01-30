@@ -16,6 +16,7 @@ import {
   CASE_ALERTS_URL,
   CASE_COMMENT_DELETE_URL,
   CASE_FIND_USER_ACTIONS_URL,
+  INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -40,6 +41,10 @@ export const getCaseCommentDeleteUrl = (caseId: string, commentId: string): stri
 
 export const getCaseUserActionUrl = (id: string): string => {
   return CASE_USER_ACTIONS_URL.replace('{case_id}', id);
+};
+
+export const getCaseUserActionStatsUrl = (id: string): string => {
+  return INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL.replace('{case_id}', id);
 };
 
 export const getCaseFindUserActionsUrl = (id: string): string => {
