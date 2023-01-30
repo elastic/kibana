@@ -12,7 +12,7 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath } from '@kbn/utils';
+import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { fromRoot, isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 
@@ -56,12 +56,12 @@ const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 /**
- * @param {string} repoRel
+ * @param {string} name
  * @param {string[]} configs
  * @param {'push' | 'unshift'} method
  */
-function maybeAddConfig(repoRel, configs, method) {
-  const path = fromRoot(repoRel)
+function maybeAddConfig(name, configs, method) {
+  const path = resolve(getConfigDirectory(), name)
   try {
     if (statSync(path).isFile()) {
       configs[method](path)
@@ -81,7 +81,7 @@ function maybeAddConfig(repoRel, configs, method) {
 function getEnvConfigs() {
   const val = process.env.KBN_CONFIG_PATHS
   if (typeof val === 'string') {
-    return val.split(',').map(p => p.trim())
+    return val.split(',').map(p => resolve(p.trim()))
   }
   return []
 }
@@ -183,7 +183,7 @@ export default function (program) {
       '-c, --config <path>',
       'Path to the config file, use multiple --config args to include multiple config files',
       configPathCollector,
-      [getConfigPath()]
+      []
     )
     .option('-p, --port <port>', 'The port to bind to', parseInt)
     .option('-Q, --silent', 'Set the root logger level to off')
@@ -233,18 +233,22 @@ export default function (program) {
 
   command.action(async function (opts) {
     const unknownOptions = this.getUnknownOptions();
-    const configs = [].concat(getEnvConfigs(), opts.config || []);
+    const configs = [
+      ...getConfigPath(),
+      ...getEnvConfigs(),
+      ...(opts.config || [])
+    ];
 
     // we "unshift" .serverless. config so that it only overrides defaults
     if (opts.serverless) {
-      maybeAddConfig('config/kibana.serverless.yml', configs, 'unshift');
+      maybeAddConfig('kibana.serverless.yml', configs, 'unshift');
     }
 
     // .dev. configs are "pushed" so that they override all other config files
     if (opts.dev && opts.devConfig !== false) {
-      maybeAddConfig('config/kibana.dev.yml', configs, 'push');
+      maybeAddConfig('kibana.dev.yml', configs, 'push');
       if (opts.serverless) {
-        maybeAddConfig('config/kibana.serverless.dev.yml', configs, 'push');
+        maybeAddConfig('kibana.serverless.dev.yml', configs, 'push');
       }
     }
 
