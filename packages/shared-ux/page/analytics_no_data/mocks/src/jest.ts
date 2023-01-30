@@ -13,7 +13,7 @@ import { of } from 'rxjs';
 export const getServicesMock = () => {
   const services: AnalyticsNoDataPageServices = {
     ...getKibanaNoDataPageServicesMock(),
-    customBranding: { hasCustomBranding$: of(false), showPlainSpinner: false },
+    customBranding: { hasCustomBranding$: of(false) },
     kibanaGuideDocLink: 'Kibana guide',
   };
 
