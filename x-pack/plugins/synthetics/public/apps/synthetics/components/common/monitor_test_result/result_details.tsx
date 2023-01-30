@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiDescriptionList, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { EuiDescriptionList, EuiSpacer } from '@elastic/eui';
 import { formatBytes } from '../../step_details_page/hooks/use_object_metrics';
 import { ThresholdIndicator } from '../components/thershold_indicator';
 import { useNetworkTimings } from '../../step_details_page/hooks/use_network_timings';
@@ -46,17 +46,16 @@ export const TimingDetails = ({ step }: { step: JourneyStep }) => {
     timingsWithLabels: prevTimingsWithLabels,
     loading,
     transferSizePrev,
-  } = useNetworkTimingsPrevious24Hours(step.synthetics.step?.index);
+  } = useNetworkTimingsPrevious24Hours(step.synthetics.step?.index, step['@timestamp']);
 
   const items = timingsWithLabels?.map((item) => {
     const prevValueItem = prevTimingsWithLabels?.find((prev) => prev.label === item.label);
     const prevValue = prevValueItem?.value ?? 0;
     return {
       title: item.label,
-      description: loading ? (
-        <EuiLoadingContent lines={1} />
-      ) : (
+      description: (
         <ThresholdIndicator
+          loading={loading}
           currentFormatted={formatMillisecond(item.value, { digits: 1 })}
           current={Number(item.value.toFixed(1))}
           previous={Number(prevValue.toFixed(1))}
@@ -68,10 +67,9 @@ export const TimingDetails = ({ step }: { step: JourneyStep }) => {
 
   items.push({
     title: transferSize.label,
-    description: loading ? (
-      <EuiLoadingContent lines={1} />
-    ) : (
+    description: (
       <ThresholdIndicator
+        loading={loading}
         current={transferSize.value}
         previous={transferSizePrev.value}
         currentFormatted={formatBytes(transferSize.value ?? 0)}

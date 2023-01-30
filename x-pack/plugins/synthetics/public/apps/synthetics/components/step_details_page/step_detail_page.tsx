@@ -68,14 +68,14 @@ export const StepDetailPage = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={1}>
+            <EuiFlexGroup wrap>
+              <EuiFlexItem grow={1} style={{ minWidth: 150 }}>
                 <NetworkTimingsDonut />
               </EuiFlexItem>
-              <EuiFlexItem grow={1}>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
                 <BreakdownLegend />
               </EuiFlexItem>
-              <EuiFlexItem grow={2}>
+              <EuiFlexItem grow={2} style={{ minWidth: 200 }}>
                 <NetworkTimingsBreakdown monitorId={data?.details?.journey.monitor.id!} />
               </EuiFlexItem>
             </EuiFlexGroup>

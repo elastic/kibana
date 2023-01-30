@@ -34,7 +34,11 @@ export type {
   FatalErrorsStart,
   FatalErrorInfo,
 } from '@kbn/core-fatal-errors-browser';
-export type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+export type {
+  UiSettingsState,
+  IUiSettingsClient,
+  PublicUiSettingsParams,
+} from '@kbn/core-ui-settings-browser';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
@@ -76,7 +80,6 @@ export {
 } from '@kbn/core-application-common';
 export type {
   UiSettingsParams,
-  PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
 } from '@kbn/core-ui-settings-common';
