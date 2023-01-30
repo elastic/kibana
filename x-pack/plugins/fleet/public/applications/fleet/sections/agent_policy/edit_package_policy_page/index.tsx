@@ -360,7 +360,6 @@ export const EditPackagePolicyForm = memo<{
         newPolicy={packagePolicy}
         onChange={handleExtensionViewOnChange}
         validationResults={validationResults}
-        integrationInfo={integrationInfo}
         isEditPage={true}
       />
     </ExtensionWrapper>

@@ -287,7 +287,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         newPolicy={packagePolicy}
         onChange={handleExtensionViewOnChange}
         validationResults={validationResults}
-        integrationInfo={integrationInfo}
         isEditPage={false}
       />
     </ExtensionWrapper>
