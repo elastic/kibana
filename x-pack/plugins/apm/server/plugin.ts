@@ -225,6 +225,9 @@ export class APMPlugin
       coreStartPromise: getCoreStart(),
       plugins: resourcePlugins,
       config: currentConfig,
+    }).catch((e) => {
+      this.logger?.error('Failed to register APM Fleet policy callbacks');
+      this.logger?.error(e);
     });
 
     // This will add an API key to all existing APM package policies
@@ -232,6 +235,9 @@ export class APMPlugin
       coreStartPromise: getCoreStart(),
       pluginStartPromise: getPluginStart(),
       logger: this.logger,
+    }).catch((e) => {
+      this.logger?.error('Failed to add API keys to APM package policies');
+      this.logger?.error(e);
     });
 
     const taskManager = plugins.taskManager;
