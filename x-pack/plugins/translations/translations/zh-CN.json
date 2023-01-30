@@ -3975,7 +3975,6 @@
     "indexPatternFieldEditor.editor.form.advancedSettings.hideButtonLabel": "隐藏高级设置",
     "indexPatternFieldEditor.editor.form.advancedSettings.showButtonLabel": "显示高级设置",
     "indexPatternFieldEditor.editor.form.changeWarning": "更改名称或类型会中断依赖此字段的搜索和可视化。",
-    "indexPatternFieldEditor.editor.form.customLabelDescription": "创建要代替 Discover、Maps 和 Visualize 中的字段名称显示的标签。用于缩短长字段名称。 查询和筛选使用原始字段名称。",
     "indexPatternFieldEditor.editor.form.customLabelLabel": "定制标签",
     "indexPatternFieldEditor.editor.form.customLabelTitle": "设置定制标签",
     "indexPatternFieldEditor.editor.form.defineFieldLabel": "定义脚本",

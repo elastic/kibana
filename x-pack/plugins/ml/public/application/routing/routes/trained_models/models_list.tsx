@@ -17,7 +17,6 @@ import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { ModelsList } from '../../../model_management';
 import { MlPageHeader } from '../../../components/page_header';
-import { TechnicalPreviewBadge } from '../../../components/technical_preview_badge';
 
 export const modelsListRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -59,9 +58,6 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
               id="xpack.ml.modelManagement.trainedModelsHeader"
               defaultMessage="Trained Models"
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TechnicalPreviewBadge />
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
