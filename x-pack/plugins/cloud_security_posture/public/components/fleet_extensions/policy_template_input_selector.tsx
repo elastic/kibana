@@ -5,8 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { PostureInput } from '../../../common/types';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
@@ -27,48 +25,12 @@ export const PolicyInputSelector = ({ input, disabled, setInput }: Props) => {
   }));
 
   return (
-    <div>
-      <RadioGroup
-        disabled={disabled}
-        idSelected={input.type}
-        options={options}
-        onChange={(inputType) => setInput(inputType as PostureInput)}
-        size="m"
-      />
-      <PolicyInputInfo type={input.type} />
-    </div>
+    <RadioGroup
+      disabled={disabled}
+      idSelected={input.type}
+      options={options}
+      onChange={(inputType) => setInput(inputType as PostureInput)}
+      size="m"
+    />
   );
 };
-
-const PolicyInputInfo = ({ type }: { type: PostureInput }) => {
-  switch (type) {
-    case 'cloudbeat/cis_aws':
-    case 'cloudbeat/cis_eks':
-      return <AWSSetupInfoContent />;
-    default:
-      return null;
-  }
-};
-
-const AWSSetupInfoContent = () => (
-  <>
-    <EuiSpacer />
-    <EuiTitle size="xs">
-      <h2>
-        <FormattedMessage
-          id="xpack.csp.awsIntegration.setupInfoContentTitle"
-          defaultMessage="Setup Access"
-        />
-      </h2>
-    </EuiTitle>
-    <EuiSpacer />
-    <EuiText color={'subdued'} size="s">
-      <FormattedMessage
-        id="xpack.csp.awsIntegration.setupInfoContent"
-        defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
-    method of providing the AWS credentials this integration will use. You can follow these
-    step-by-step instructions to generate the necessary credentials."
-      />
-    </EuiText>
-  </>
-);

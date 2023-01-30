@@ -5,12 +5,12 @@
  * 2.0.
  */
 import React, { memo, useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import type {
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PostureInput } from '../../../common/types';
 import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA } from '../../../common/constants';
 import {
@@ -39,6 +39,21 @@ interface PolicyVarsFormProps {
   input: NewPackagePolicyPostureInput;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
 }
+
+const EditScreenStepTitle = () => (
+  <>
+    <EuiSpacer />
+    <EuiText>
+      <h4>
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.integrationSettingsTitle"
+          defaultMessage="Integration Settings"
+        />
+      </h4>
+    </EuiText>
+    <EuiSpacer />
+  </>
+);
 
 const PolicyVarsForm = ({ input, ...props }: PolicyVarsFormProps) => {
   switch (input.type) {
@@ -85,8 +100,11 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
 
   return (
     <div>
-      <IntegrationSettingsInfo type={input.policy_template} showStepTitle={!!edit} />
+      {!!edit && <EditScreenStepTitle />}
+      <IntegrationSettingsInfo postureType={input.policy_template} />
+      <EuiSpacer size="s" />
       <PolicyInputSelector input={input} setInput={setEnabledPolicyInput} disabled={!!edit} />
+      <EuiSpacer size="m" />
       <IntegrationSettings
         name={newPolicy.name}
         description={newPolicy.description || ''}

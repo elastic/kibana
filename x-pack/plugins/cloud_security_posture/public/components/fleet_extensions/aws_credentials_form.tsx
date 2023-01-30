@@ -12,13 +12,44 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
+import { PostureInput } from '../../../common/types';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
+
+export const isAwsPostureType = (
+  type: PostureInput
+): type is typeof CLOUDBEAT_EKS | typeof CLOUDBEAT_AWS =>
+  type === CLOUDBEAT_AWS || type === CLOUDBEAT_EKS;
+
+const AWSSetupInfoContent = () => (
+  <>
+    <EuiSpacer size="l" />
+    <EuiTitle size="xs">
+      <h2>
+        <FormattedMessage
+          id="xpack.csp.awsIntegration.setupInfoContentTitle"
+          defaultMessage="Setup Access"
+        />
+      </h2>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+    <EuiText color={'subdued'} size="s">
+      <FormattedMessage
+        id="xpack.csp.awsIntegration.setupInfoContent"
+        defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
+    method of providing the AWS credentials this integration will use. You can follow these
+    step-by-step instructions to generate the necessary credentials."
+      />
+    </EuiText>
+  </>
+);
 
 const DocsLink = (
   <EuiText color={'subdued'} size="s">
@@ -49,7 +80,6 @@ const AssumeRoleDescription = (
       standard long-term credentials such as passwords or access keys."
       />
     </EuiText>
-    <EuiSpacer />
   </div>
 );
 
@@ -61,7 +91,6 @@ const DirectAccessKeysDescription = (
         defaultMessage="Access keys are long-term credentials for an IAM user or the AWS account root user."
       />
     </EuiText>
-    <EuiSpacer />
   </div>
 );
 
@@ -75,7 +104,6 @@ const TemporaryKeysDescription = (
       found using GetSessionToken."
       />
     </EuiText>
-    <EuiSpacer />
   </div>
 );
 
@@ -88,7 +116,6 @@ const SharedCredentialsDescription = (
       to define multiple access keys in the same configuration file."
       />
     </EuiText>
-    <EuiSpacer />
   </div>
 );
 
@@ -209,6 +236,7 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
 
   return (
     <>
+      <AWSSetupInfoContent />
       <EuiSpacer size="l" />
       <AwsCredentialTypeSelector
         type={awsCredentialsType}
@@ -222,6 +250,7 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       />
       <EuiSpacer size="m" />
       {group.info}
+      <EuiSpacer size="s" />
       {DocsLink}
       <EuiSpacer />
       <AwsInputVarFields

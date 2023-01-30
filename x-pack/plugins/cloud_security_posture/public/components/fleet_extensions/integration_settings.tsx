@@ -7,45 +7,29 @@
 import React from 'react';
 import { EuiText, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
 import type { PosturePolicyTemplate } from '../../../common/types';
 
 interface IntegrationSettingsInfoProps {
-  type: PosturePolicyTemplate;
-  showStepTitle: boolean;
+  postureType: PosturePolicyTemplate;
 }
 
-export const IntegrationSettingsInfo = ({ type, showStepTitle }: IntegrationSettingsInfoProps) => (
+export const IntegrationSettingsInfo = ({ postureType }: IntegrationSettingsInfoProps) => (
   <div>
-    {/* We need to add the step title in integration edit screen */}
-    {showStepTitle && (
-      <>
-        <EuiSpacer />
-        <EuiText>
-          <h4>
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.integrationSettingsTitle"
-              defaultMessage="Integration Settings"
-            />
-          </h4>
-        </EuiText>
-        <EuiSpacer />
-      </>
-    )}
     <EuiText color={'subdued'} size="s">
-      {type === 'kspm' && (
+      {postureType === KSPM_POLICY_TEMPLATE && (
         <FormattedMessage
           id="xpack.csp.fleetIntegration.configureKspmIntegrationDescription"
-          defaultMessage="Select the Kuberentes cluster type you want to monitor and then fill in the name and description to help identify this integration"
+          defaultMessage="Select the Kubernetes cluster type you want to monitor and then fill in the name and description to help identify this integration"
         />
       )}
-      {type === 'cspm' && (
+      {postureType === CSPM_POLICY_TEMPLATE && (
         <FormattedMessage
           id="xpack.csp.fleetIntegration.configureCspmIntegrationDescription"
           defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
         />
       )}
     </EuiText>
-    <EuiSpacer />
   </div>
 );
 
@@ -61,7 +45,6 @@ export const IntegrationSettings = ({
   onChange,
 }: IntegrationInfoFieldsProps) => (
   <div>
-    <EuiSpacer />
     <Field
       value={name}
       id="name"
