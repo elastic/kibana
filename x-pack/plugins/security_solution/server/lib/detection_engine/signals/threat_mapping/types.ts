@@ -274,6 +274,8 @@ export interface BuildThreatEnrichmentOptions {
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   listClient: ListClient;
   exceptionFilter: Filter | undefined;
+  threatMapping: ThreatMapping;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface EventsOptions {
@@ -347,4 +349,17 @@ export interface SignalValuesMap {
   [field: string]: {
     [fieldValue: string]: string[];
   };
+}
+
+export interface GetAllowedFieldsForTermQuery {
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  inputIndex: string[];
+  threatIndex: ThreatIndex;
+  threatMatchedFields: ThreatMatchedFields;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+}
+
+export interface GetSignalValuesMap {
+  eventList: EventItem[];
+  threatMatchedFields: ThreatMatchedFields;
 }

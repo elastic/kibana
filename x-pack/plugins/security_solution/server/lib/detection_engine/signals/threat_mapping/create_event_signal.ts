@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { get } from 'lodash';
+
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
-import type { CreateEventSignalOptions, SignalValuesMap } from './types';
+import type { CreateEventSignalOptions } from './types';
 import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { getAllThreatListHits } from './get_threat_list';
 import {
   enrichSignalThreatMatches,
   getSignalMatchesFromThreatList,
 } from './enrich_signal_threat_matches';
+import { getSignalValueMap } from './utils';
 
 export const createEventSignal = async ({
   alertId,
@@ -53,31 +54,14 @@ export const createEventSignal = async ({
   allowedFieldsForTermsQuery,
   threatMatchedFields,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const signalValueMap: SignalValuesMap = currentEventList.reduce<SignalValuesMap>((acc, event) => {
-    threatMatchedFields.source.forEach((field) => {
-      const fieldValue = get(event.fields, field)?.[0];
-      if (!acc[field]) {
-        acc[field] = {};
-      }
-      if (!acc[field][fieldValue]) {
-        acc[field][fieldValue] = [];
-      }
-      acc[field][fieldValue].push(event._id);
-    });
-    return acc;
-  }, {});
-
-  // console.log('singnalValueMap', JSON.stringify(signalValueMap, null, 2));
-  const threatFilter = buildThreatMappingFilter({
+  const threatFiltersFromEvents = buildThreatMappingFilter({
     threatMapping,
     threatList: currentEventList,
     entryKey: 'field',
     allowedFieldsForTermsQuery,
   });
 
-  // console.log(JSON.stringify(threatFilter));
-
-  if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
+  if (!threatFiltersFromEvents.query || threatFiltersFromEvents.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
     // a hit so opt to return the existing result.
     ruleExecutionLogger.debug(
@@ -87,7 +71,7 @@ export const createEventSignal = async ({
   } else {
     const threatListHits = await getAllThreatListHits({
       esClient: services.scopedClusterClient.asCurrentUser,
-      threatFilters: [...threatFilters, threatFilter],
+      threatFilters: [...threatFilters, threatFiltersFromEvents],
       query: threatQuery,
       language: threatLanguage,
       index: threatIndex,
@@ -103,7 +87,10 @@ export const createEventSignal = async ({
       exceptionFilter,
     });
 
-    const signalMatches = getSignalMatchesFromThreatList(threatListHits, signalValueMap);
+    const signalMatches = getSignalMatchesFromThreatList(
+      threatListHits,
+      getSignalValueMap({ eventList: currentEventList, threatMatchedFields })
+    );
 
     const ids = signalMatches.map((item) => item.signalId);
 
@@ -163,7 +150,7 @@ export const createEventSignal = async ({
 
     ruleExecutionLogger.debug(
       `${
-        threatFilter.query?.bool.should.length
+        threatFiltersFromEvents.query?.bool.should.length
       } items have completed match checks and the total times to search were ${
         result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
       }ms`

@@ -6,18 +6,13 @@
  */
 
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
-import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
 import type { CreateThreatSignalOptions } from './types';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
-import {
-  enrichSignalThreatMatches,
-  getSignalMatchesFromThreatList,
-} from './enrich_signal_threat_matches';
-import { getAllThreatListHits } from './get_threat_list';
 
+import { buildThreatEnrichment } from './build_threat_enrichment';
 export const createThreatSignal = async ({
   alertId,
   bulkCreate,
@@ -95,55 +90,14 @@ export const createThreatSignal = async ({
       reassignPitId: reassignThreatPitId,
       listClient,
       exceptionFilter,
+      threatMapping,
+      runtimeMappings,
     });
-
-    const threatEnrichmentForTermQuery = async (
-      signals: SignalSourceHit[]
-    ): Promise<SignalSourceHit[]> => {
-      // console.log('signals');
-      // console.log(signals);
-      const threatFilter = buildThreatMappingFilter({
-        threatMapping,
-        threatList: signals,
-        entryKey: 'field',
-        allowedFieldsForTermsQuery: {
-          source: {},
-          threat: {},
-        },
-      });
-
-      const threatListHits = await getAllThreatListHits({
-        esClient: services.scopedClusterClient.asCurrentUser,
-        threatFilters: [...threatFilters, threatFilter],
-        query: threatQuery,
-        language: threatLanguage,
-        index: threatIndex,
-        ruleExecutionLogger,
-        threatListConfig: {
-          _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
-          fields: undefined,
-        },
-        pitId: threatPitId,
-        reassignPitId: reassignThreatPitId,
-        runtimeMappings,
-        listClient,
-        exceptionFilter,
-      });
-
-      const signalMatches = getSignalMatchesFromThreatList(threatListHits);
-
-      return enrichSignalThreatMatches(
-        signals,
-        () => Promise.resolve(threatListHits),
-        threatIndicatorPath,
-        signalMatches
-      );
-    };
 
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       bulkCreate,
-      enrichment: threatEnrichmentForTermQuery,
+      enrichment: threatEnrichment,
       eventsTelemetry,
       exceptionsList: unprocessedExceptions,
       filter: esFilter,

@@ -8,6 +8,7 @@
 import moment from 'moment';
 
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import { get } from 'lodash';
 import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { parseInterval } from '../utils';
 import type {
@@ -15,6 +16,8 @@ import type {
   ThreatListItem,
   ThreatMatchedFields,
   ThreatTermNamedQuery,
+  SignalValuesMap,
+  GetSignalValuesMap,
 } from './types';
 
 /**
@@ -199,3 +202,21 @@ export const getMatchedFields = (threatMapping: ThreatMapping): ThreatMatchedFie
     },
     { source: [], threat: [] }
   );
+
+export const getSignalValueMap = ({
+  eventList,
+  threatMatchedFields,
+}: GetSignalValuesMap): SignalValuesMap =>
+  eventList.reduce<SignalValuesMap>((acc, event) => {
+    threatMatchedFields.source.forEach((field) => {
+      const fieldValue = get(event.fields, field)?.[0];
+      if (!acc[field]) {
+        acc[field] = {};
+      }
+      if (!acc[field][fieldValue]) {
+        acc[field][fieldValue] = [];
+      }
+      acc[field][fieldValue].push(event._id);
+    });
+    return acc;
+  }, {});

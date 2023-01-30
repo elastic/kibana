@@ -171,7 +171,6 @@ export const buildEntriesMappingFilter = ({
         });
       } else {
         const threatMappingEntry = threatMap.entries[0];
-        // console.log(threatMappingEntry, entryKey, JSON.stringify(threatList))
         const threats: string[] = threatList
           .map((threatListItem) => get(threatMappingEntry[entryKey], threatListItem.fields))
           .filter((val) => val)
