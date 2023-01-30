@@ -20,7 +20,8 @@
     "security",
     "usageCollection",
     "spaces",
-    "alerting"
+    "alerting",
+    "charts"
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [

@@ -30,6 +30,8 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { GetMlSharedImportsReturnType } from '../shared_imports';
 
 export interface AppDependencies {
@@ -54,6 +56,8 @@ export interface AppDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionStart;
+  charts?: ChartsPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export const useAppDependencies = () => {

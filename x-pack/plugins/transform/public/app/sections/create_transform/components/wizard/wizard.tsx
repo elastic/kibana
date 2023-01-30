@@ -11,7 +11,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { useAppDependencies } from '../../../../app_dependencies';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
@@ -94,6 +99,23 @@ export const CreateTransformWizardContext = createContext<{
 });
 
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
+  const {
+    ml: { FieldStatsFlyoutProvider, useFieldStatsFlyoutContext },
+    uiSettings,
+    dataViews,
+    data,
+    charts,
+    fieldFormats,
+  } = useAppDependencies();
+
+  const fieldStatsServices: {
+    uiSettings: IUiSettingsClient;
+    dataViews: DataViewsContract;
+    data: DataPublicPluginStart;
+    fieldFormats: FieldFormatsStart;
+    charts: ChartsPluginSetup;
+  } = { uiSettings, dataViews, data, charts, fieldFormats };
+
   const { dataView } = searchItems;
 
   // The current WIZARD_STEP
@@ -207,10 +229,12 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   const stepsConfig = [stepDefine, stepDetails, stepCreate];
 
   return (
-    <CreateTransformWizardContext.Provider
-      value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
-    >
-      <EuiSteps className="transform__steps" steps={stepsConfig} />
-    </CreateTransformWizardContext.Provider>
+    <FieldStatsFlyoutProvider dataView={dataView} fieldStatsServices={fieldStatsServices}>
+      <CreateTransformWizardContext.Provider
+        value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
+      >
+        <EuiSteps className="transform__steps" steps={stepsConfig} />
+      </CreateTransformWizardContext.Provider>
+    </FieldStatsFlyoutProvider>
   );
 });

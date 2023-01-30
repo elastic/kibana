@@ -22,3 +22,7 @@ export * from '../common/util/date_utils';
 export * from './application/formatters/metric_change_description';
 export * from './application/components/data_grid';
 export * from './application/data_frame_analytics/common';
+
+export * from './application/components/field_stats_flyout';
+export * from './application/jobs/new_job/utils/use_field_stats_trigger';
+export * from './application/jobs/new_job/common/components/field_stats_info_button';

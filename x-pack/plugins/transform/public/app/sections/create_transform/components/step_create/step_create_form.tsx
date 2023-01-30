@@ -93,10 +93,15 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [discoverLink, setDiscoverLink] = useState<string>();
 
     const deps = useAppDependencies();
-    const { share } = deps;
+    const {
+      share,
+      ml: { useFieldStatsFlyoutContext },
+    } = deps;
     const dataViews = deps.data.dataViews;
     const toastNotifications = useToastNotifications();
     const isDiscoverAvailable = deps.application.capabilities.discover?.show ?? false;
+
+    const { setIsFlyoutVisible, setFieldName } = useFieldStatsFlyoutContext();
 
     useEffect(() => {
       let unmounted = false;

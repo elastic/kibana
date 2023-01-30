@@ -18,6 +18,8 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
 
@@ -32,6 +34,8 @@ export interface PluginsDependencies {
   spaces?: SpacesApi;
   alerting?: AlertingSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  charts?: ChartsPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export class TransformUiPlugin {

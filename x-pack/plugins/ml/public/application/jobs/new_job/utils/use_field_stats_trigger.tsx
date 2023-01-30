@@ -9,7 +9,7 @@ import React, { ReactNode, useCallback } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useFieldStatsFlyoutContext } from '../../../components/field_stats_flyout';
-import { FieldStatsInfoButton } from '../common/components/field_stats_info_button';
+import { FieldForStats, FieldStatsInfoButton } from '../common/components/field_stats_info_button';
 import { Field } from '../../../../../common/types/fields';
 
 interface Option extends EuiComboBoxOptionOption<string> {
@@ -29,8 +29,9 @@ const optionCss = css`
 
 export const useFieldStatsTrigger = () => {
   const { setIsFlyoutVisible, setFieldName } = useFieldStatsFlyoutContext();
+  const closeFlyout = useCallback(() => setIsFlyoutVisible(false), []);
   const handleFieldStatsButtonClick = useCallback(
-    (field: Field) => {
+    (field: FieldForStats) => {
       if (typeof field.id === 'string') {
         setFieldName(field.id);
         setIsFlyoutVisible(true);
@@ -54,5 +55,12 @@ export const useFieldStatsTrigger = () => {
     },
     [handleFieldStatsButtonClick]
   );
-  return { renderOption, setIsFlyoutVisible, setFieldName, handleFieldStatsButtonClick, optionCss };
+  return {
+    renderOption,
+    setIsFlyoutVisible,
+    setFieldName,
+    handleFieldStatsButtonClick,
+    closeFlyout,
+    optionCss,
+  };
 };

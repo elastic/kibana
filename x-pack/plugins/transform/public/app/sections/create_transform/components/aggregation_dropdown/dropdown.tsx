@@ -15,9 +15,11 @@ interface Props {
   changeHandler(d: EuiComboBoxOptionOption[]): void;
   testSubj?: string;
   isDisabled?: boolean;
+  renderOption?: EuiComboBox['renderOption'];
 }
 
 export const DropDown: React.FC<Props> = ({
+  renderOption,
   changeHandler,
   options,
   placeholder = 'Search ...',
@@ -35,6 +37,7 @@ export const DropDown: React.FC<Props> = ({
       isClearable={false}
       data-test-subj={testSubj}
       isDisabled={isDisabled}
+      renderOption={renderOption}
     />
   );
 };

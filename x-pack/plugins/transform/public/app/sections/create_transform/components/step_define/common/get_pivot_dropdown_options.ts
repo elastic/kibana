@@ -116,7 +116,7 @@ export function getPivotDropdownOptions(
     }
 
     // Aggregations
-    const aggOption: DropDownOption = { label: displayFieldName, options: [] };
+    const aggOption: DropDownOption = { label: displayFieldName, options: [], type: field.type };
     const availableAggs: [] = getNestedProperty(pivotAggsFieldSupport, field.type);
 
     if (availableAggs !== undefined) {

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, FC, createContext } from 'react';
+import React, { memo, FC, createContext, useMemo } from 'react';
 
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { DropDownOption } from '../../../../common';
+import { useAppDependencies } from '../../../../app_dependencies';
 import { AggListForm } from '../aggregation_list';
 import { DropDown } from '../aggregation_dropdown';
 import { GroupByListForm } from '../group_by_list';
@@ -23,6 +25,11 @@ export const PivotConfigurationContext = createContext<
 export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
   ({ actions, state }) => {
     const {
+      ml: { useFieldStatsTrigger, FieldStatsInfoButton },
+    } = useAppDependencies();
+    const { handleFieldStatsButtonClick, closeFlyout } = useFieldStatsTrigger();
+
+    const {
       addAggregation,
       addGroupBy,
       deleteAggregation,
@@ -34,6 +41,29 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
     const { aggList, aggOptions, aggOptionsData, groupByList, groupByOptions, groupByOptionsData } =
       state;
 
+    const options: EuiComboBoxOptionOption[] = useMemo(
+      () =>
+        aggOptions.map((opt) => {
+          const f = { id: opt.label, type: opt.type };
+          const aggOption: DropDownOption = {
+            isGroupLabelOption: true,
+            key: f.id,
+            // @ts-ignore Purposefully passing label as element instead of string
+            // for more robust rendering
+            label: (
+              <FieldStatsInfoButton
+                field={f}
+                label={f.id}
+                onButtonClick={handleFieldStatsButtonClick}
+              />
+            ),
+            options: opt.options ?? [],
+          };
+          return aggOption;
+        }),
+      [handleFieldStatsButtonClick]
+    );
+    console.log('aggOptions', aggOptions, options);
     return (
       <PivotConfigurationContext.Provider value={{ actions, state }}>
         <EuiFormRow
@@ -70,12 +100,18 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
             <AggListForm
               list={aggList}
               options={aggOptionsData}
-              onChange={updateAggregation}
+              onChange={(aggName, pivotAggsConfig) => {
+                updateAggregation(aggName, pivotAggsConfig);
+                closeFlyout();
+              }}
               deleteHandler={deleteAggregation}
             />
             <DropDown
-              changeHandler={addAggregation}
-              options={aggOptions}
+              changeHandler={(option) => {
+                addAggregation(option);
+                closeFlyout();
+              }}
+              options={options}
               placeholder={i18n.translate(
                 'xpack.transform.stepDefineForm.aggregationsPlaceholder',
                 {

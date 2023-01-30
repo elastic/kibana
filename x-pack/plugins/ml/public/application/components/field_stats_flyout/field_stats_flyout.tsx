@@ -19,10 +19,16 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { type DataView } from '@kbn/data-plugin/common';
+import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import { FieldStatsContent } from './field_stats_content';
 
-export const FieldStatsFlyout: FC = () => {
+export const FieldStatsFlyout: FC<{
+  dataView: DataView;
+  fieldStatsServices: FieldStatsServices;
+}> = ({ dataView, fieldStatsServices }) => {
+  console.log('fieldStatsServices', fieldStatsServices);
   const { setIsFlyoutVisible, isFlyoutVisible, fieldName } = useFieldStatsFlyoutContext();
 
   const closeFlyout = useCallback(() => setIsFlyoutVisible(false), []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -50,7 +56,7 @@ export const FieldStatsFlyout: FC = () => {
         >
           <b>{fieldName}</b>
           <EuiSpacer />
-          <FieldStatsContent />
+          <FieldStatsContent dataView={dataView} fieldStatsServices={fieldStatsServices} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiButton onClick={closeFlyout}>
