@@ -10,7 +10,7 @@ import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloStatusBadge as Component, SloStatusProps } from './slo_status_badge';
-import { anSLO } from '../../../../data/slo/slo';
+import { buildSlo } from '../../../../data/slo/slo';
 
 export default {
   component: Component,
@@ -23,7 +23,7 @@ const Template: ComponentStory<typeof Component> = (props: SloStatusProps) => (
 );
 
 const defaultProps = {
-  slo: anSLO,
+  slo: buildSlo(),
 };
 
 export const SloStatusBadge = Template.bind({});

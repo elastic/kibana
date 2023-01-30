@@ -95,7 +95,7 @@ export const WaterfallBarChart = ({
             boundary: document.getElementById('app-fixed-viewport') ?? undefined,
             customTooltip: Tooltip,
           }}
-          theme={theme}
+          theme={{ ...theme, tooltip: { maxWidth: 500 } }}
           onProjectionClick={handleProjectionClick}
           onElementClick={handleElementClick}
         />

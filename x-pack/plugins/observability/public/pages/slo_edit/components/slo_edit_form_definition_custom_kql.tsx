@@ -5,89 +5,23 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSuggest } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Control, Controller, UseFormTrigger } from 'react-hook-form';
+import { Control, Controller } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-import { useFetchIndices } from '../../../hooks/use_fetch_indices';
+import { IndexSelection } from './custom_kql/index_selection';
 
 export interface Props {
   control: Control<CreateSLOInput>;
-  trigger: UseFormTrigger<CreateSLOInput>;
 }
 
-export function SloEditFormDefinitionCustomKql({ control, trigger }: Props) {
-  const { loading, indices = [] } = useFetchIndices();
-
-  const indicesNames = indices.map(({ name }) => ({
-    type: { iconType: '', color: '' },
-    label: name,
-    description: '',
-  }));
-
-  // Indices are loading in asynchrously, so trigger field validation
-  // once results are returned from API
-  useEffect(() => {
-    if (!loading && indices.length) {
-      trigger();
-    }
-  }, [indices.length, loading, trigger]);
-
-  function valueMatchIndex(value: string | undefined, index: string): boolean {
-    if (value === undefined) {
-      return false;
-    }
-
-    if (value.length > 0 && value.substring(value.length - 1) === '*') {
-      return index.indexOf(value.substring(0, value.length - 1), 0) > -1;
-    }
-
-    return index === value;
-  }
-
+export function SloEditFormDefinitionCustomKql({ control }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
-        <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.sloDefinition.customKql.index', {
-            defaultMessage: 'Index',
-          })}
-        </EuiFormLabel>
-
-        <Controller
-          name="indicator.params.index"
-          control={control}
-          rules={{
-            required: true,
-            validate: (value) => indices.some((index) => valueMatchIndex(value, index.name)),
-          }}
-          render={({ field, fieldState }) => (
-            <EuiSuggest
-              fullWidth
-              isClearable
-              aria-label="Indices"
-              data-test-subj="sloFormCustomKqlIndexInput"
-              status={loading ? 'loading' : field.value ? 'unchanged' : 'unchanged'}
-              onItemClick={({ label }) => {
-                field.onChange(label);
-              }}
-              isInvalid={
-                fieldState.isDirty &&
-                !indicesNames.some((index) => valueMatchIndex(field.value, index.label))
-              }
-              placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.sloDefinition.customKql.index.selectIndex',
-                {
-                  defaultMessage: 'Select an index',
-                }
-              )}
-              suggestions={indicesNames}
-              {...field}
-            />
-          )}
-        />
+        <IndexSelection control={control} />
       </EuiFlexItem>
 
       <EuiFlexItem>
