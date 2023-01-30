@@ -12,7 +12,7 @@ import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
-import { ManualTestRunProgress } from './manual_run_progress';
+import { toggleErrorPopoverOpen } from '../../../../state';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
@@ -23,6 +23,7 @@ import {
   manualTestRunInProgressSelector,
   toggleTestNowFlyoutAction,
 } from '../../../../state/manual_test_runs';
+import { MetricItemIcon } from './metric_item_icon';
 
 export const getColor = (
   theme: ReturnType<typeof useTheme>,
@@ -61,7 +62,10 @@ export const MetricItem = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const locationName =
     useLocationName({ locationId: monitor.location?.id })?.label || monitor.location?.id;
-  const { status, timestamp } = useStatusByLocationOverview(monitor.configId, locationName);
+  const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview(
+    monitor.configId,
+    locationName
+  );
   const theme = useTheme();
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
@@ -87,6 +91,7 @@ export const MetricItem = ({
           style={{
             height: '100%',
             overflow: 'hidden',
+            position: 'relative',
           }}
           title={moment(timestamp).format('LLL')}
         >
@@ -95,8 +100,10 @@ export const MetricItem = ({
               onElementClick={() => {
                 if (testInProgress) {
                   dispatch(toggleTestNowFlyoutAction(monitor.configId));
+                  dispatch(toggleErrorPopoverOpen(null));
                 } else {
                   dispatch(hideTestNowFlyoutAction());
+                  dispatch(toggleErrorPopoverOpen(null));
                 }
                 if (!testInProgress && locationName) {
                   onClick({
@@ -114,7 +121,6 @@ export const MetricItem = ({
               data={[
                 [
                   {
-                    icon: () => <ManualTestRunProgress configId={monitor.configId} />,
                     title: monitor.name,
                     subtitle: locationName,
                     value: averageDuration,
@@ -140,6 +146,15 @@ export const MetricItem = ({
               isPopoverOpen={isPopoverOpen}
               setIsPopoverOpen={setIsPopoverOpen}
               position="relative"
+            />
+          )}
+          {configIdByLocation && (
+            <MetricItemIcon
+              monitor={monitor}
+              status={status}
+              ping={ping}
+              timestamp={timestamp}
+              configIdByLocation={configIdByLocation}
             />
           )}
         </EuiPanel>
