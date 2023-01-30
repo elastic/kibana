@@ -99,7 +99,7 @@ export const defaultUpdateCaseState = {
   updateCaseProperty: jest.fn(),
 };
 
-export const defaultUseGetCaseUserActions = {
+export const defaultUseFindCaseUserActions = {
   data: {
     caseUserActions: [...caseUserActions, getAlertUserAction()],
     caseServices: {},

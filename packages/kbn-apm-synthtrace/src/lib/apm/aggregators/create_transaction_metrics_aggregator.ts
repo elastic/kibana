@@ -67,15 +67,38 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
         return {
           ...set,
           'metricset.name': 'transaction',
+          'metricset.interval': flushInterval,
           'processor.event': 'metric',
           'processor.name': 'metric',
           'transaction.root': !event['parent.id'],
           'transaction.duration.histogram': createLosslessHistogram(),
+          'transaction.duration.summary': {
+            value_count: 0,
+            sum: 0,
+          },
+          'event.success_count': {
+            sum: 0,
+            value_count: 0,
+          },
         };
       },
     },
     (metric, event) => {
-      metric['transaction.duration.histogram'].record(event['transaction.duration.us']!);
+      const duration = event['transaction.duration.us']!;
+      metric['transaction.duration.histogram'].record(duration);
+
+      if (event['event.outcome'] === 'success' || event['event.outcome'] === 'failure') {
+        metric['event.success_count'].value_count += 1;
+      }
+
+      if (event['event.outcome'] === 'success') {
+        metric['event.success_count'].sum += 1;
+      }
+
+      const summary = metric['transaction.duration.summary'];
+
+      summary.sum += duration;
+      summary.value_count += 1;
     },
     (metric) => {
       const serialized = metric['transaction.duration.histogram'].serialize();
@@ -86,6 +109,7 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
       };
       // @ts-expect-error
       metric._doc_count = serialized.total;
+
       return metric;
     }
   );
