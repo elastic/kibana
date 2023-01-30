@@ -846,7 +846,7 @@ describe('utils', () => {
       expect(valueMap).toEqual({});
     });
     it('return value map for event list and coresponding fields', () => {
-      const createEvent = (id: string, fields: Record<string, any>) => ({
+      const createEvent = (id: string, fields: Record<string, unknown>) => ({
         _id: id,
         _index: `index`,
         fields,
