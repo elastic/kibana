@@ -7,18 +7,15 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
-import { FormProvider, useForm } from 'react-hook-form';
 
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import {
-  SloEditFormDefinitionCustomKql as Component,
-  Props,
-} from './slo_edit_form_definition_custom_kql';
-import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { FormProvider, useForm } from 'react-hook-form';
+import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
+import { IndexSelection as Component, Props } from './index_selection';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
 
 export default {
   component: Component,
-  title: 'app/SLO/EditPage/SloEditFormDefinitionCustomKql',
+  title: 'app/SLO/EditPage/CustomKQL/IndexSelection',
   decorators: [KibanaReactStorybookDecorator],
 };
 
@@ -33,5 +30,5 @@ const Template: ComponentStory<typeof Component> = (props: Props) => {
 
 const defaultProps = {};
 
-export const SloEditFormDefinitionCustomKql = Template.bind({});
-SloEditFormDefinitionCustomKql.args = defaultProps;
+export const IndexSelection = Template.bind({});
+IndexSelection.args = defaultProps;
