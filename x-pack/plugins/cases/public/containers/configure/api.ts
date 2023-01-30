@@ -24,7 +24,9 @@ import type { ApiProps } from '../types';
 import { decodeCaseConfigurationsResponse, decodeCaseConfigureResponse } from '../utils';
 import type { CaseConfigure } from './types';
 
-export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
+export const getSupportedActionConnectors = async ({
+  signal,
+}: ApiProps): Promise<ActionConnector[]> => {
   const response = await KibanaServices.get().http.fetch<ActionConnector[]>(
     `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
     { method: 'GET', signal }

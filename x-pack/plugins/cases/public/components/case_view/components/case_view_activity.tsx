@@ -14,7 +14,7 @@ import { useGetCaseConnectors } from '../../../containers/use_get_case_connector
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
-import { useGetConnectors } from '../../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import type { CaseSeverity } from '../../../../common/api';
 import { useCaseViewNavigation } from '../../../common/navigation';
 import type { UseFetchAlertData } from '../../../../common/ui/types';
@@ -128,8 +128,8 @@ export const CaseViewActivity = ({
     [assignees, onUpdateField]
   );
 
-  const { isLoading: isLoadingAllAvailableConnectors, data: allAvailableConnectors } =
-    useGetConnectors();
+  const { isLoading: isLoadingAllAvailableConnectors, data: supportedActionConnectors } =
+    useGetSupportedActionConnectors();
 
   const onSubmitConnector = useCallback(
     (connector, onError, onSuccess) => {
@@ -151,7 +151,7 @@ export const CaseViewActivity = ({
     userProfiles;
 
   const showConnectorSidebar =
-    pushToServiceAuthorized && userActionsData && caseConnectors && allAvailableConnectors;
+    pushToServiceAuthorized && userActionsData && caseConnectors && supportedActionConnectors;
 
   return (
     <>
@@ -235,7 +235,7 @@ export const CaseViewActivity = ({
             <EditConnector
               caseData={caseData}
               caseConnectors={caseConnectors}
-              allAvailableConnectors={allAvailableConnectors}
+              supportedActionConnectors={supportedActionConnectors}
               isLoading={
                 isLoadingAllAvailableConnectors || (isLoading && loadingKey === 'connector')
               }

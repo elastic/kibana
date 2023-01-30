@@ -39,7 +39,7 @@ import { normalizeActionConnector, getNoneConnector } from '../configure_cases/u
 export interface EditConnectorProps {
   caseData: Case;
   caseConnectors: CaseConnectors;
-  allAvailableConnectors: ActionConnector[];
+  supportedActionConnectors: ActionConnector[];
   isLoading: boolean;
   onSubmit: (connector: CaseConnector, onError: () => void, onSuccess: () => void) => void;
 }
@@ -87,13 +87,13 @@ export const EditConnector = React.memo(
   ({
     caseData,
     caseConnectors,
-    allAvailableConnectors,
+    supportedActionConnectors,
     isLoading,
     onSubmit,
   }: EditConnectorProps) => {
     const caseFields = caseData.connector.fields;
     const selectedConnector = caseData.connector.id;
-    const actionConnector = getConnectorById(caseData.connector.id, allAvailableConnectors);
+    const actionConnector = getConnectorById(caseData.connector.id, supportedActionConnectors);
     const isValidConnector = !!actionConnector;
 
     const { form } = useForm({
@@ -135,7 +135,7 @@ export const EditConnector = React.memo(
         if (currentConnector?.id !== newConnectorId) {
           dispatch({
             type: 'SET_CURRENT_CONNECTOR',
-            payload: getConnectorById(newConnectorId, allAvailableConnectors),
+            payload: getConnectorById(newConnectorId, supportedActionConnectors),
           });
           dispatch({
             type: 'SET_FIELDS',
@@ -143,7 +143,7 @@ export const EditConnector = React.memo(
           });
         }
       },
-      [currentConnector, caseConnectors, allAvailableConnectors]
+      [currentConnector, caseConnectors, supportedActionConnectors]
     );
 
     const onFieldsChange = useCallback(
@@ -189,7 +189,7 @@ export const EditConnector = React.memo(
       const { isValid, data: newData } = await submit();
 
       if (isValid && newData.connectorId) {
-        const connector = getConnectorById(newData.connectorId, allAvailableConnectors);
+        const connector = getConnectorById(newData.connectorId, supportedActionConnectors);
         const connectorToUpdate = connector
           ? normalizeActionConnector(connector)
           : getNoneConnector();
@@ -202,7 +202,7 @@ export const EditConnector = React.memo(
           payload: false,
         });
       }
-    }, [submit, allAvailableConnectors, fields, onSubmit, onError]);
+    }, [submit, supportedActionConnectors, fields, onSubmit, onError]);
 
     const onEditClick = useCallback(() => {
       dispatch({
@@ -213,7 +213,7 @@ export const EditConnector = React.memo(
 
     const connectorIdConfig = getConnectorsFormValidators({
       config: schema.connectorId as FieldConfig,
-      connectors: allAvailableConnectors,
+      connectors: supportedActionConnectors,
     });
 
     const connectorWithName = {
@@ -276,7 +276,7 @@ export const EditConnector = React.memo(
                 <PushCallouts
                   errorsMsg={errorsMsg}
                   hasLicenseError={hasLicenseError}
-                  hasConnectors={allAvailableConnectors.length > 0}
+                  hasConnectors={supportedActionConnectors.length > 0}
                   onEditClick={onEditClick}
                 />
               </EuiFlexItem>
@@ -290,7 +290,7 @@ export const EditConnector = React.memo(
                       config={connectorIdConfig}
                       component={ConnectorSelector}
                       componentProps={{
-                        connectors: allAvailableConnectors,
+                        connectors: supportedActionConnectors,
                         dataTestSubj: 'caseConnectors',
                         defaultValue: selectedConnector,
                         disabled: !hasPushPermissions,

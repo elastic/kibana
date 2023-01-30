@@ -28,7 +28,7 @@ const caseConnectors = getCaseConnectorsMockResponse();
 
 const defaultProps: EditConnectorProps = {
   caseData: basicCase,
-  allAvailableConnectors: connectorsMock,
+  supportedActionConnectors: connectorsMock,
   isLoading: false,
   caseConnectors,
   onSubmit,

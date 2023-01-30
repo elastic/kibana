@@ -6,13 +6,13 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchConnectors } from './api';
+import { getSupportedActionConnectors } from './api';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
 import * as i18n from './translations';
 import { casesQueriesKeys } from '../constants';
 import type { ServerError } from '../../types';
 
-export function useGetConnectors() {
+export function useGetSupportedActionConnectors() {
   const toasts = useToasts();
   const { actions } = useApplicationCapabilities();
   return useQuery(
@@ -22,7 +22,7 @@ export function useGetConnectors() {
         return [];
       }
       const abortCtrl = new AbortController();
-      return fetchConnectors({ signal: abortCtrl.signal });
+      return getSupportedActionConnectors({ signal: abortCtrl.signal });
     },
     {
       onError: (error: ServerError) => {

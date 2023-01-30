@@ -21,7 +21,7 @@ import type { Case } from '../../../../common';
 import type { CaseViewProps } from '../types';
 import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
-import { useGetConnectors } from '../../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
@@ -31,7 +31,7 @@ import { waitFor } from '@testing-library/dom';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 
 jest.mock('../../../containers/use_find_case_user_actions');
-jest.mock('../../../containers/configure/use_connectors');
+jest.mock('../../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../../containers/use_post_push_to_service');
 jest.mock('../../user_actions/timestamp', () => ({
   UserActionTimestamp: () => <></>,
@@ -94,7 +94,7 @@ export const caseProps = {
 };
 
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
-const useGetConnectorsMock = useGetConnectors as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;

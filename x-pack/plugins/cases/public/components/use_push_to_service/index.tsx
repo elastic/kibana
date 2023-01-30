@@ -87,7 +87,7 @@ export const usePushToService = ({
      * By priority of importance:
      * 1. Show license error.
      * 2. Show configuration error.
-     * 3. Show connector configuration error if the connector is set to none or no allAvailableConnectors have been created.
+     * 3. Show connector configuration error if the connector is set to none or no supportedActionConnectors have been created.
      * 4. Show an error message if the connector has been deleted or the user does not have access to it.
      * 5. Show case closed message.
      */
