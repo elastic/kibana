@@ -98,54 +98,51 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
   SearchBarInjectedDeps;
 
-function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
-  props: SearchBarProps<QT>
-) {
-  const {
-    customSubmitButton,
-    dateRangeFrom,
-    dateRangeTo,
-    dataTestSubj,
-    dataViewPickerComponentProps,
-    displayStyle,
-    fillSubmitButton = false,
-    filters,
-    hiddenFilterPanelOptions,
-    iconType,
-    indexPatterns,
-    indicateNoData,
-    isClearable,
-    isDisabled,
-    isLoading,
-    isRefreshPaused,
-    isScreenshotMode,
-    nonKqlMode,
-    placeholder,
-    query,
-    refreshInterval,
-    savedQuery,
-    screenTitle,
-    showAutoRefreshOnly = false,
-    showDatePicker = true,
-    showFilterBar = true,
-    showSaveQuery,
-    showSubmitButton = true,
-    showQueryInput,
-    showQueryMenu = true,
-    submitButtonStyle,
-    suggestionsSize,
-    textBasedLanguageModeErrors,
-    timeHistory,
-    onClearSavedQuery,
-    onFiltersUpdated,
-    onQueryChange,
-    onQuerySubmit,
-    onRefresh,
-    onRefreshChange,
-    onSaved,
-    onSavedQueryUpdated,
-    onTextBasedSavedAndExit,
-  } = props;
+function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
+  customSubmitButton,
+  dateRangeFrom,
+  dateRangeTo,
+  dataTestSubj,
+  dataViewPickerComponentProps,
+  displayStyle,
+  fillSubmitButton = false,
+  filters,
+  hiddenFilterPanelOptions,
+  iconType,
+  indexPatterns,
+  indicateNoData,
+  isClearable,
+  isDisabled,
+  isLoading,
+  isRefreshPaused,
+  isScreenshotMode,
+  nonKqlMode,
+  placeholder,
+  query,
+  refreshInterval,
+  savedQuery,
+  screenTitle,
+  showAutoRefreshOnly = false,
+  showDatePicker = true,
+  showFilterBar = true,
+  showSaveQuery,
+  showSubmitButton = true,
+  showQueryInput,
+  showQueryMenu = true,
+  submitButtonStyle,
+  suggestionsSize,
+  textBasedLanguageModeErrors,
+  timeHistory,
+  onClearSavedQuery,
+  onFiltersUpdated,
+  onQueryChange,
+  onQuerySubmit,
+  onRefresh,
+  onRefreshChange,
+  onSaved,
+  onSavedQueryUpdated,
+  onTextBasedSavedAndExit,
+}: SearchBarProps<QT>) {
   const {
     appName,
     data: {
@@ -178,7 +175,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
   );
   const [stateOpenQueryBarMenu, setStateOpenQueryBarMenu] = useState(false);
   // Needed to do lifecycle comparisons... See the useEffect for more info.
-  const [previousProps, setPreviousProps] = useState(props);
+  const [previousProps, setPreviousProps] = useState({ query, dateRangeFrom, dateRangeTo });
 
   useEffect(() => {
     // This component used to be a class component. It used getDerivedStateFromProps
@@ -187,35 +184,23 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
     // This useEffect is basically a refactor of that getDerivedStateFromProps.
     // The isEqual comparison of props *is* expensive, but if you remove it
     // lots of FTR tests will break. So optimize at your own peril.
-    if (!isEqual(previousProps, props)) {
-      if (!query) {
-        if (stateQuery) {
-          setStateQuery(undefined);
-        }
+    if (!isEqual({ query, dateRangeFrom, dateRangeTo }, previousProps)) {
+      // 'query' is a Query
+      if (isOfQueryType(stateQuery) && isOfQueryType(query)) {
+        const newQuery = query
+          ? {
+              query: stateQuery.language !== query.language ? '' : query.query,
+              language: query.language,
+            }
+          : undefined;
+
+        setStateQuery(newQuery);
       }
 
-      if (query) {
-        // 'query' is a Query
-        if (isOfQueryType(query)) {
-          if (isOfQueryType(stateQuery)) {
-            if (query.query !== stateQuery?.query) {
-              const newQueryString =
-                previousProps.query === props.query ? stateQuery.query : query.query;
-
-              setStateQuery({ query: newQueryString, language: query.language });
-            }
-
-            if (stateQuery?.language !== query?.language) {
-              setStateQuery({ query: '', language: query.language });
-            }
-          }
-        }
-
-        // 'query' is an AggregateQuery
-        if (!isOfQueryType(query)) {
-          if (!isEqual(query, stateQuery)) {
-            setStateQuery({ ...query });
-          }
+      // 'query' is an AggregateQuery
+      if (query && !isOfQueryType(query)) {
+        if (!isEqual(query, stateQuery)) {
+          setStateQuery(query);
         }
       }
 
@@ -227,13 +212,12 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
         setStateDateRangeTo(dateRangeTo);
       }
 
-      setPreviousProps(props);
+      setPreviousProps({ query, dateRangeFrom, dateRangeTo });
     }
   }, [
     dateRangeFrom,
     dateRangeTo,
     previousProps,
-    props,
     query,
     stateDateRangeFrom,
     stateDateRangeTo,
@@ -261,7 +245,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
   };
 
   const isDirty = () => {
-    if (!isEqual(stateQuery, query)) {
+    if (!isEqual(query, stateQuery)) {
       return true;
     }
 
@@ -405,7 +389,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
 
   const handleCloseQueryBarMenu = () => setStateOpenQueryBarMenu(false);
 
-  const toggleFilterBarMenuPopover = (open: boolean) => setStateOpenQueryBarMenu(open);
+  const handleToggleQueryBarMenu = (open: boolean) => setStateOpenQueryBarMenu(open);
 
   return (
     <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
@@ -484,7 +468,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
               showQueryInput={showQueryInput}
               showSaveQuery={showSaveQuery}
               timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-              toggleFilterBarMenuPopover={toggleFilterBarMenuPopover}
+              toggleFilterBarMenuPopover={handleToggleQueryBarMenu}
               saveAsNewQueryFormComponent={
                 <SaveQueryForm
                   savedQueryService={savedQueries}
