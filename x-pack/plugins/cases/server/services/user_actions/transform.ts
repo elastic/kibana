@@ -17,8 +17,8 @@ import {
 import type {
   CaseUserActionAttributes,
   CaseUserActionAttributesWithoutConnectorId,
-  CaseUserActionInjectedAttributesWithoutActionId,
-  CaseUserActionResponse,
+  CaseUserActionDeprecatedResponse,
+  CaseUserActionInjectedAttributes,
 } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
@@ -37,7 +37,7 @@ import { injectPersistableReferencesToSO } from '../../attachment_framework/so_r
 export function transformFindResponseToExternalModel(
   userActions: SavedObjectsFindResponse<CaseUserActionAttributesWithoutConnectorId>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObjectsFindResponse<CaseUserActionInjectedAttributesWithoutActionId> {
+): SavedObjectsFindResponse<CaseUserActionInjectedAttributes> {
   return {
     ...userActions,
     saved_objects: userActions.saved_objects.map((so) => ({
@@ -50,7 +50,7 @@ export function transformFindResponseToExternalModel(
 export function transformToExternalModel(
   userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObject<CaseUserActionInjectedAttributesWithoutActionId> {
+): SavedObject<CaseUserActionInjectedAttributes> {
   const { references } = userAction;
 
   const commentId =
@@ -63,7 +63,7 @@ export function transformToExternalModel(
       ...userAction.attributes,
       comment_id: commentId,
       payload,
-    } as CaseUserActionInjectedAttributesWithoutActionId,
+    } as CaseUserActionInjectedAttributes,
   };
 }
 
@@ -76,7 +76,7 @@ export function transformToExternalModel(
 export function legacyTransformFindResponseToExternalModel(
   userActions: SavedObjectsFindResponse<CaseUserActionAttributesWithoutConnectorId>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObjectsFindResponse<CaseUserActionResponse> {
+): SavedObjectsFindResponse<CaseUserActionDeprecatedResponse> {
   return {
     ...userActions,
     saved_objects: userActions.saved_objects.map((so) => ({
@@ -92,7 +92,7 @@ export function legacyTransformFindResponseToExternalModel(
 function legacyTransformToExternalModel(
   userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObject<CaseUserActionResponse> {
+): SavedObject<CaseUserActionDeprecatedResponse> {
   const { references } = userAction;
 
   const caseId = findReferenceId(CASE_REF_NAME, CASE_SAVED_OBJECT, references) ?? '';
@@ -108,7 +108,7 @@ function legacyTransformToExternalModel(
       case_id: caseId,
       comment_id: commentId,
       payload,
-    } as CaseUserActionResponse,
+    } as CaseUserActionDeprecatedResponse,
   };
 }
 

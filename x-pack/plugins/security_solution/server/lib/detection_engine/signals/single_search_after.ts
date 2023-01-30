@@ -91,6 +91,7 @@ export const singleSearchAfter = async <
           searchAfterQuery as estypes.SearchRequest,
           { meta: true }
         );
+
       const end = performance.now();
 
       const searchErrors = createErrorsFromShard({

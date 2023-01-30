@@ -111,4 +111,21 @@ export function registerEnginesRoutes({
       });
     })
   );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/engines/{engine_name}/search',
+      validate: {
+        body: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object({
+          engine_name: schema.string(),
+          from: schema.maybe(schema.number()),
+          size: schema.maybe(schema.number()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/engines/:engine_name/_search',
+    })
+  );
 }

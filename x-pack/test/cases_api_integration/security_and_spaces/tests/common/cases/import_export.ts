@@ -20,7 +20,6 @@ import {
   CommentsResponse,
   CaseAttributes,
   CasePostRequest,
-  CaseUserActionResponse,
   PushedUserAction,
   ConnectorUserAction,
   CommentUserAction,
@@ -163,11 +162,15 @@ const expectImportToHaveOneCase = async (supertestService: supertest.SuperTest<s
   expect(findResponse.cases[0].description).to.eql('super description');
 };
 
-const expectImportToHaveCreateCaseUserAction = (userAction: CaseUserActionResponse) => {
+const expectImportToHaveCreateCaseUserAction = (
+  userAction: CaseUserActionAttributesWithoutConnectorId
+) => {
   expect(userAction.action).to.eql('create');
 };
 
-const expectImportToHavePushUserAction = (userAction: CaseUserActionResponse) => {
+const expectImportToHavePushUserAction = (
+  userAction: CaseUserActionAttributesWithoutConnectorId
+) => {
   const pushedUserAction = userAction as PushedUserAction;
   expect(userAction.action).to.eql('push_to_service');
   expect(userAction.type).to.eql('pushed');
@@ -178,7 +181,9 @@ const expectImportToHavePushUserAction = (userAction: CaseUserActionResponse) =>
   );
 };
 
-const expectImportToHaveUpdateConnector = (userAction: CaseUserActionResponse) => {
+const expectImportToHaveUpdateConnector = (
+  userAction: CaseUserActionAttributesWithoutConnectorId
+) => {
   const connectorUserAction = userAction as ConnectorUserAction;
   expect(userAction.action).to.eql('update');
   expect(userAction.type).to.eql('connector');
