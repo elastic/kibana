@@ -6,8 +6,6 @@
  */
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { Spaces } from '../scenarios';
-
 // eslint-disable-next-line import/no-default-export
 export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('alerting api integration spaces only', function () {
@@ -15,22 +13,4 @@ export default function alertingApiIntegrationTests({ loadTestFile }: FtrProvide
     loadTestFile(require.resolve('./alerting'));
     loadTestFile(require.resolve('./action_task_params'));
   });
-}
-
-export async function buildUp(getService: FtrProviderContext['getService']) {
-  const spacesService = getService('spaces');
-  for (const space of Object.values(Spaces)) {
-    if (space.id === 'default') continue;
-
-    const { id, name, disabledFeatures } = space;
-    await spacesService.create({ id, name, disabledFeatures });
-  }
-}
-
-export async function tearDown(getService: FtrProviderContext['getService']) {
-  const kibanaServer = getService('kibanaServer');
-  await kibanaServer.savedObjects.cleanStandardList();
-
-  const spacesService = getService('spaces');
-  for (const space of Object.values(Spaces)) await spacesService.delete(space.id);
 }

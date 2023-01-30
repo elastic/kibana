@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../common/config';
+import { createTestConfig } from '../../../common/config';
 
 export const EmailDomainsAllowed = ['example.org', 'test.com'];
 
@@ -19,4 +19,6 @@ export default createTestConfig('spaces_only', {
   preconfiguredAlertHistoryEsIndex: true,
   emailDomainsAllowed: EmailDomainsAllowed,
   useDedicatedTaskRunner: true,
+  testFiles: ['.'],
+  reportName: 'X-Pack Alerting API Integration Tests - Actions',
 });
