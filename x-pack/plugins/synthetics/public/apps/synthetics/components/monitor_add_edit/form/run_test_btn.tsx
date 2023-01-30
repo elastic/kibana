@@ -130,7 +130,7 @@ export const TEST_SCHEDULED_LABEL = i18n.translate(
 export const PRIVATE_AVAILABLE_LABEL = i18n.translate(
   'xpack.synthetics.monitorList.testNow.available.private',
   {
-    defaultMessage: `You can't currently test monitors running on private locations on demand.`,
+    defaultMessage: `You can't manually start tests on a private location.`,
   }
 );
 
