@@ -99,7 +99,7 @@ Array [
       "aggs": Object {
         "sample": Object {
           "aggs": Object {
-            "overflowCount": Object {
+            "service_overflow_count": Object {
               "sum": Object {
                 "field": "service_transaction.aggregation.overflow_count",
               },
