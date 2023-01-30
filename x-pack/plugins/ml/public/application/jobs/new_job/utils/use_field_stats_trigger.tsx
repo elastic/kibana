@@ -29,7 +29,9 @@ const optionCss = css`
 
 export const useFieldStatsTrigger = () => {
   const { setIsFlyoutVisible, setFieldName } = useFieldStatsFlyoutContext();
-  const closeFlyout = useCallback(() => setIsFlyoutVisible(false), []);
+
+  const closeFlyout = useCallback(() => setIsFlyoutVisible(false), [setIsFlyoutVisible]);
+
   const handleFieldStatsButtonClick = useCallback(
     (field: FieldForStats) => {
       if (typeof field.id === 'string') {
