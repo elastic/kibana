@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiTextArea, EuiFormRow } from '@elastic/eui';
+import { EuiTextArea, EuiFormRow, EuiFlexGroup, EuiCallOut } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from './add_message_variables';
@@ -21,6 +21,7 @@ interface Props {
   editAction: (property: string, value: any, index: number) => void;
   label: string;
   errors?: string[];
+  warning?: string;
 }
 
 export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
@@ -32,6 +33,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
   editAction,
   label,
   errors,
+  warning,
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
 
@@ -65,23 +67,30 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
         />
       }
     >
-      <EuiTextArea
-        disabled={isDisabled}
-        fullWidth
-        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-        name={paramsProperty}
-        value={inputTargetValue || ''}
-        data-test-subj={`${paramsProperty}TextArea`}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
-        onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
-          setCurrentTextElement(e.target);
-        }}
-        onBlur={() => {
-          if (!inputTargetValue) {
-            editAction(paramsProperty, '', index);
-          }
-        }}
-      />
+      <EuiFlexGroup direction="column">
+        <EuiTextArea
+          disabled={isDisabled}
+          fullWidth
+          isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+          name={paramsProperty}
+          value={inputTargetValue || ''}
+          data-test-subj={`${paramsProperty}TextArea`}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
+          onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
+            setCurrentTextElement(e.target);
+          }}
+          onBlur={() => {
+            if (!inputTargetValue) {
+              editAction(paramsProperty, '', index);
+            }
+          }}
+        />
+        {warning ? (
+          <>
+            <EuiCallOut size="s" color="warning" title={warning} />
+          </>
+        ) : null}
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 };

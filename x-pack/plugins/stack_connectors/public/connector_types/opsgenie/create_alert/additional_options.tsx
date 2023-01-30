@@ -17,7 +17,7 @@ import { CreateAlertProps } from '.';
 
 type AdditionalOptionsProps = Pick<
   CreateAlertProps,
-  'subActionParams' | 'editOptionalSubAction' | 'messageVariables' | 'index'
+  'subActionParams' | 'editOptionalSubAction' | 'messageVariables' | 'index' | 'warnings'
 >;
 
 const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
@@ -25,6 +25,7 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
   editOptionalSubAction,
   messageVariables,
   index,
+  warnings,
 }) => {
   return (
     <>
@@ -85,6 +86,7 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
         paramsProperty={'note'}
         inputTargetValue={subActionParams?.note}
         label={i18n.NOTE_FIELD_LABEL}
+        warning={warnings.note}
       />
     </>
   );

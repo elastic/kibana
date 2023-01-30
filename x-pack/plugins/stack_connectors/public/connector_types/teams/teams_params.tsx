@@ -18,6 +18,7 @@ const TeamsParamsFields: React.FunctionComponent<ActionParamsProps<TeamsActionPa
   errors,
   messageVariables,
   defaultMessage,
+  warnings,
 }) => {
   const { message } = actionParams;
   useEffect(() => {
@@ -38,6 +39,7 @@ const TeamsParamsFields: React.FunctionComponent<ActionParamsProps<TeamsActionPa
         defaultMessage: 'Message',
       })}
       errors={(errors.message ?? []) as string[]}
+      warning={warnings.message}
     />
   );
 };

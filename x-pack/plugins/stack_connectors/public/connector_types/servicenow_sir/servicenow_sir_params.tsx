@@ -39,7 +39,7 @@ const defaultFields: Fields = {
 
 const ServiceNowSIRParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowSIRActionParams>
-> = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
+> = ({ actionConnector, actionParams, editAction, index, errors, messageVariables, warnings }) => {
   const {
     docLinks,
     http,
@@ -278,6 +278,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         paramsProperty={'description'}
         inputTargetValue={incident.description ?? undefined}
         label={i18n.DESCRIPTION_LABEL}
+        warning={warnings.description}
       />
       <TextAreaWithMessageVariables
         index={index}
@@ -286,6 +287,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         paramsProperty={'comments'}
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.COMMENTS_LABEL}
+        warning={warnings.comments}
       />
       <EuiSpacer size="m" />
     </>

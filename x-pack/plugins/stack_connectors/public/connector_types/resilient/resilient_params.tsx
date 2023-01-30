@@ -34,6 +34,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   errors,
   index,
   messageVariables,
+  warnings,
 }) => {
   const {
     http,
@@ -236,6 +237,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           'xpack.stackConnectors.components.resilient.descriptionTextAreaFieldLabel',
           { defaultMessage: 'Description' }
         )}
+        warning={warnings.description}
       />
       <TextAreaWithMessageVariables
         index={index}
@@ -247,6 +249,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           'xpack.stackConnectors.components.resilient.commentsTextAreaFieldLabel',
           { defaultMessage: 'Additional comments' }
         )}
+        warning={warnings.comments}
       />
     </>
   );

@@ -36,6 +36,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   errors,
   index,
   messageVariables,
+  warnings,
 }) => {
   const {
     http,
@@ -358,6 +359,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                 defaultMessage: 'Description',
               }
             )}
+            warning={warnings.description}
           />
         )}
         <TextAreaWithMessageVariables
@@ -372,6 +374,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               defaultMessage: 'Additional comments',
             }
           )}
+          warning={warnings.comments}
         />
       </>
     </>

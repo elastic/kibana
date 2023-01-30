@@ -76,7 +76,7 @@ AdditionalOptions.displayName = 'AdditionalOptions';
 
 type CloseAlertProps = Pick<
   ActionParamsProps<OpsgenieActionParams>,
-  'errors' | 'index' | 'messageVariables'
+  'errors' | 'index' | 'messageVariables' | 'warnings'
 > & {
   subActionParams?: RecursivePartial<OpsgenieCloseAlertParams>;
   editSubAction: EditActionCallback;
@@ -92,6 +92,7 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
   messageVariables,
   subActionParams,
   showSaveError,
+  warnings,
 }) => {
   const isAliasInvalid =
     (errors['subActionParams.alias'] !== undefined &&
@@ -131,6 +132,7 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
         paramsProperty={'note'}
         inputTargetValue={subActionParams?.note}
         label={i18n.NOTE_FIELD_LABEL}
+        warning={warnings.note}
       />
 
       {showingMoreOptions ? (

@@ -56,4 +56,13 @@ describe('TextAreaWithMessageVariables', () => {
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith(props.paramsProperty, '{{{myVar}}}', props.index);
   });
+
+  test('renders warnings if they are passed in', () => {
+    const wrapper = mountWithIntl(
+      <TextAreaWithMessageVariables {...props} warning={'This is a test warning.'} />
+    );
+
+    const callOut = wrapper.find('EuiCallOut');
+    expect(callOut.text()).toMatchInlineSnapshot(`"This is a test warning."`);
+  });
 });

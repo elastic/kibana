@@ -26,8 +26,8 @@ import {
   EuiToolTip,
   EuiBetaBadge,
 } from '@elastic/eui';
-import { isEmpty, partition, some } from 'lodash';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { intersection, isEmpty, partition, some } from 'lodash';
+import { ActionVariable, RuleActionParam, RuleActionParams } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -108,6 +108,7 @@ export const ActionTypeForm = ({
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
+    http: { basePath },
   } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
@@ -117,6 +118,11 @@ export const ActionTypeForm = ({
   const [actionGroup, setActionGroup] = useState<string>();
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
+  });
+  const [actionParamsWarnings, setActionParamsWarnings] = useState<{
+    warnings: { [key: string]: string };
+  }>({
+    warnings: {},
   });
   const [actionThrottle, setActionThrottle] = useState<number | null>(
     actionItem.frequency?.throttle
@@ -143,6 +149,41 @@ export const ActionTypeForm = ({
     }
 
     return defaultParams;
+  };
+
+  const publicUrlWarning = i18n.translate(
+    'xpack.triggersActionsUI.sections.actionTypeForm.warning.publicUrl',
+    {
+      defaultMessage:
+        'Kibana missing publicUrl environment variable. Action will use relative URLs.',
+    }
+  );
+  const validateParamsForWarnings = (
+    actionParams: RuleActionParams
+  ): {
+    warnings: Record<string, any>;
+  } => {
+    const setPublicUrl = basePath.publicBaseUrl;
+    const publicUrlFields = ['context.alertDetailsUrl', 'context.viewInAppUrl'];
+    const mustacheRegex = /[^{\}]+(?=}})/g;
+    const warnings: Record<string, any> = {
+      message: '',
+      comments: '',
+      description: '',
+      note: '',
+    };
+    const validationResult = { warnings };
+    if (!setPublicUrl && actionParams) {
+      for (const key of Object.keys(warnings)) {
+        if (actionParams[key]) {
+          const contextVariables = (actionParams[key] as string).match(mustacheRegex);
+          if (intersection(contextVariables, publicUrlFields).length > 0) {
+            warnings[key] = publicUrlWarning;
+          }
+        }
+      }
+    }
+    return validationResult;
   };
 
   const [showMinimumThrottleWarning, showMinimumThrottleUnitWarning] = useMemo(() => {
@@ -200,6 +241,7 @@ export const ActionTypeForm = ({
         .get(actionItem.actionTypeId)
         ?.validateParams(actionItem.params);
       setActionParamsErrors(res);
+      setActionParamsWarnings(validateParamsForWarnings(actionItem.params));
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem]);
@@ -351,6 +393,7 @@ export const ActionTypeForm = ({
               actionParams={actionItem.params as any}
               index={index}
               errors={actionParamsErrors.errors}
+              warnings={actionParamsWarnings.warnings}
               editAction={setActionParamsProperty}
               messageVariables={availableActionVariables}
               defaultMessage={selectedActionGroup?.defaultActionMessage ?? defaultActionMessage}

@@ -41,7 +41,7 @@ const defaultFields: Fields = {
 
 const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowITSMActionParams>
-> = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
+> = ({ actionConnector, actionParams, editAction, index, errors, messageVariables, warnings }) => {
   const {
     docLinks,
     http,
@@ -315,6 +315,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         paramsProperty={'description'}
         inputTargetValue={incident.description ?? undefined}
         label={i18n.DESCRIPTION_LABEL}
+        warning={warnings.description}
       />
       <TextAreaWithMessageVariables
         index={index}
@@ -323,6 +324,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         paramsProperty={'comments'}
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.COMMENTS_LABEL}
+        warning={warnings.comments}
       />
     </>
   );

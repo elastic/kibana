@@ -21,6 +21,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
   index,
   messageVariables,
   actionConnector,
+  warnings,
 }) => {
   const { incident, comments } = useMemo(
     () =>
@@ -143,6 +144,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
           paramsProperty={'comments'}
           inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
           label={i18n.SW_COMMENTS_FIELD_LABEL}
+          warning={warnings.comments}
         />
       )}
     </>
