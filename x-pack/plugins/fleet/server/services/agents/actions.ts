@@ -261,6 +261,7 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
       continue;
     }
     if (hit._source.type === 'UPGRADE') {
+      const errors = {};
       await bulkUpdateAgents(
         esClient,
         hit._source.agents.map((agentId) => ({
@@ -270,8 +271,13 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
             upgrade_started_at: null,
           },
         })),
-        {}
+        errors
       );
+      if (Object.keys(errors).length > 0) {
+        appContextService
+          .getLogger()
+          .debug(`Errors while bulk updating agents for cancel action: ${JSON.stringify(errors)}`);
+      }
     }
     await createAgentAction(esClient, {
       id: cancelActionId,
