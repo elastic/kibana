@@ -6,14 +6,13 @@
  */
 
 import { EnterpriseSearchEnginesResponse } from '../../../../../common/types/engines';
+import { Page } from '../../../../../common/types/pagination';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-import { Meta } from '../../components/engines/types';
-
 export interface EnginesListAPIArguments {
-  meta: Meta;
+  meta: Page;
   searchQuery?: string;
 }
 
