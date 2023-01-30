@@ -146,6 +146,150 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/cell-actions",
+        "id": "def-common.CellAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "CellAction",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/cell-actions",
+            "scope": "common",
+            "docId": "kibKbnCellActionsPluginApi",
+            "section": "def-common.CellAction",
+            "text": "CellAction"
+          },
+          "<C> extends Omit<",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.Action",
+            "text": "Action"
+          },
+          "<C>, \"isCompatible\">"
+        ],
+        "path": "packages/kbn-cell-actions/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cell-actions",
+            "id": "def-common.CellAction.isCompatible",
+            "type": "Function",
+            "tags": [],
+            "label": "isCompatible",
+            "description": [
+              "\nReturns a promise that resolves to true if this action is compatible given the context,\notherwise resolves to false."
+            ],
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "@kbn/cell-actions",
+                "scope": "common",
+                "docId": "kibKbnCellActionsPluginApi",
+                "section": "def-common.CellActionCompatibilityContext",
+                "text": "CellActionCompatibilityContext"
+              },
+              ") => Promise<boolean>"
+            ],
+            "path": "packages/kbn-cell-actions/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cell-actions",
+                "id": "def-common.CellAction.isCompatible.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/cell-actions",
+                    "scope": "common",
+                    "docId": "kibKbnCellActionsPluginApi",
+                    "section": "def-common.CellActionCompatibilityContext",
+                    "text": "CellActionCompatibilityContext"
+                  }
+                ],
+                "path": "packages/kbn-cell-actions/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cell-actions",
+        "id": "def-common.CellActionCompatibilityContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "CellActionCompatibilityContext",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/cell-actions",
+            "scope": "common",
+            "docId": "kibKbnCellActionsPluginApi",
+            "section": "def-common.CellActionCompatibilityContext",
+            "text": "CellActionCompatibilityContext"
+          },
+          " extends ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.ActionExecutionContext",
+            "text": "ActionExecutionContext"
+          },
+          "<object>"
+        ],
+        "path": "packages/kbn-cell-actions/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cell-actions",
+            "id": "def-common.CellActionCompatibilityContext.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "\nThe object containing the field name and type, needed for the compatibility check"
+            ],
+            "signature": [
+              "{ name: string; type: string; }"
+            ],
+            "path": "packages/kbn-cell-actions/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cell-actions",
+            "id": "def-common.CellActionCompatibilityContext.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [
+              "\nExtra configurations for actions."
+            ],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/kbn-cell-actions/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cell-actions",
         "id": "def-common.CellActionExecutionContext",
         "type": "Interface",
         "tags": [],
@@ -197,7 +341,7 @@
               "\nRef to a DOM node where the action can add custom HTML."
             ],
             "signature": [
-              "React.MutableRefObject<HTMLDivElement | null> | undefined"
+              "React.MutableRefObject<HTMLDivElement | null>"
             ],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
@@ -213,7 +357,7 @@
               "\nRef to the node where the cell action are rendered."
             ],
             "signature": [
-              "React.MutableRefObject<HTMLElement | null> | undefined"
+              "React.MutableRefObject<HTMLElement | null>"
             ],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
@@ -293,38 +437,7 @@
         "initialIsOpen": false
       }
     ],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/cell-actions",
-        "id": "def-common.CellAction",
-        "type": "Type",
-        "tags": [],
-        "label": "CellAction",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Action",
-            "text": "Action"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/cell-actions",
-            "scope": "common",
-            "docId": "kibKbnCellActionsPluginApi",
-            "section": "def-common.CellActionExecutionContext",
-            "text": "CellActionExecutionContext"
-          },
-          ">"
-        ],
-        "path": "packages/kbn-cell-actions/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }
