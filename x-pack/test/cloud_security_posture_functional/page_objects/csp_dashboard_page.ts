@@ -11,7 +11,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 // Defined in CSP plugin
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 
-export const CspDashboardPageProvider = ({ getService, getPageObjects }: FtrProviderContext) => {
+export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
   const retry = getService('retry');
@@ -47,122 +47,84 @@ export const CspDashboardPageProvider = ({ getService, getPageObjects }: FtrProv
     },
   };
 
-  const distributionBar = {
-    filterBy: async (type: 'passed' | 'failed') =>
-      testSubjects.click(type === 'failed' ? 'distribution_bar_failed' : 'distribution_bar_passed'),
-  };
-
   const dashboard = {
-    getDashboard: () => testSubjects.find('dashboard-container'),
+    getDashboardContainer: () => testSubjects.find('dashboard-container'),
 
-    getHeaders: async () => {
-      const dashboard = await table.getDashboard();
-      return await dashboard.findAllByCssSelector('thead tr :is(th,td)');
+    getIntegrationTabs: async () => {
+      const dashboardContainer = await dashboard.getDashboardContainer();
+      const tabs = await dashboardContainer.findByClassName('euiTabs');
+      return tabs;
     },
 
-    getColumnIndex: async (columnName: string) => {
-      const headers = await table.getHeaders();
-      const texts = await Promise.all(headers.map((header) => header.getVisibleText()));
-      const columnIndex = texts.findIndex((i) => i === columnName);
-      expect(columnIndex).to.be.greaterThan(-1);
-      return columnIndex + 1;
+    getCloudTab: async () => {
+      const tabs = await dashboard.getIntegrationTabs();
+      const cloudTab = await tabs.findByXpath(`span[text()="Cloud"]`);
+      return cloudTab;
     },
 
-    getColumnHeaderCell: async (columnName: string) => {
-      const headers = await table.getHeaders();
-      const headerIndexes = await Promise.all(headers.map((header) => header.getVisibleText()));
-      const columnIndex = headerIndexes.findIndex((i) => i === columnName);
-      return headers[columnIndex];
+    getKubernetesTab: async () => {
+      const tabs = await dashboard.getIntegrationTabs();
+      const kubernetesTab = await tabs.findByXpath(`span[text()="Kubernetes"]`);
+      return kubernetesTab;
     },
 
-    getRowsCount: async () => {
-      const element = await table.getElement();
-      const rows = await element.findAllByCssSelector('tbody tr');
-      return rows.length;
-    },
-
-    getFindingsCount: async (type: 'passed' | 'failed') => {
-      const element = await table.getElement();
-      const items = await element.findAllByCssSelector(`span[data-test-subj="${type}_finding"]`);
-      return items.length;
-    },
-
-    getRowIndexForValue: async (columnName: string, value: string) => {
-      const values = await table.getColumnValues(columnName);
-      const rowIndex = values.indexOf(value);
-      expect(rowIndex).to.be.greaterThan(-1);
-      return rowIndex + 1;
-    },
-
-    getFilterElementButton: async (rowIndex: number, columnIndex: number, negated = false) => {
-      const tableElement = await table.getElement();
-      const button = negated
-        ? 'findings_table_cell_add_negated_filter'
-        : 'findings_table_cell_add_filter';
-      const selector = `tbody tr:nth-child(${rowIndex}) td:nth-child(${columnIndex}) button[data-test-subj="${button}"]`;
-      return tableElement.findByCssSelector(selector);
-    },
-
-    addCellFilter: async (columnName: string, cellValue: string, negated = false) => {
-      const columnIndex = await table.getColumnIndex(columnName);
-      const rowIndex = await table.getRowIndexForValue(columnName, cellValue);
-      const filterElement = await table.getFilterElementButton(rowIndex, columnIndex, negated);
-      await filterElement.click();
-    },
-
-    getColumnValues: async (columnName: string) => {
-      const elementsWithNoFilterCell = ['CIS Section', '@timestamp'];
-      const tableElement = await table.getElement();
-      const columnIndex = await table.getColumnIndex(columnName);
-      const selector = elementsWithNoFilterCell.includes(columnName)
-        ? `tbody tr td:nth-child(${columnIndex})`
-        : `tbody tr td:nth-child(${columnIndex}) div[data-test-subj="filter_cell_value"]`;
-      const columnCells = await tableElement.findAllByCssSelector(selector);
-
-      return await Promise.all(columnCells.map((cell) => cell.getVisibleText()));
-    },
-
-    hasColumnValue: async (columnName: string, value: string) => {
-      const values = await table.getColumnValues(columnName);
-      return values.includes(value);
-    },
-
-    toggleColumnSort: async (columnName: string, direction: 'asc' | 'desc') => {
-      const element = await table.getColumnHeaderCell(columnName);
-      const currentSort = await element.getAttribute('aria-sort');
-      if (currentSort === 'none') {
-        // a click is needed to focus on Eui column header
-        await element.click();
-
-        // default is ascending
-        if (direction === 'desc') {
-          const nonStaleElement = await table.getColumnHeaderCell(columnName);
-          await nonStaleElement.click();
-        }
+    clickTab: async (tab: 'Cloud' | 'Kubernetes') => {
+      if (tab === 'Cloud') {
+        const cloudTab = await dashboard.getCloudTab();
+        await cloudTab.click();
       }
-      if (
-        (currentSort === 'ascending' && direction === 'desc') ||
-        (currentSort === 'descending' && direction === 'asc')
-      ) {
-        // Without getting the element again, the click throws an error (stale element reference)
-        const nonStaleElement = await table.getColumnHeaderCell(columnName);
-        await nonStaleElement.click();
+      if (tab === 'Kubernetes') {
+        const k8sTab = await dashboard.getKubernetesTab();
+        await k8sTab.click();
       }
+    },
+
+    // Cloud Dashboard
+
+    getCloudDashboard: async () => {
+      await dashboard.clickTab('Cloud');
+      return await testSubjects.find('cloud-dashboard-container');
+    },
+
+    getCloudSummarySection: async () => {
+      await dashboard.getCloudDashboard();
+      return await testSubjects.find('dashboard-summary-section');
+    },
+
+    getCloudComplianceScore: async () => {
+      await dashboard.getCloudSummarySection();
+      return await testSubjects.find('dashboard-summary-section-compliance-score');
+    },
+
+    // Kubernetes Dashboard
+
+    getKubernetesDashboard: async () => {
+      await dashboard.clickTab('Kubernetes');
+      return await testSubjects.find('kubernetes-dashboard-container');
+    },
+
+    getKubernetesSummarySection: async () => {
+      await dashboard.getKubernetesDashboard();
+      return await testSubjects.find('dashboard-summary-section');
+    },
+
+    getKubernetesComplianceScore: async () => {
+      await dashboard.getKubernetesSummarySection();
+      return await testSubjects.find('dashboard-summary-section-compliance-score');
     },
   };
 
-  const navigateToFindingsPage = async () => {
+  const navigateToComplianceDashboardPage = async () => {
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
-      'cloud_security_posture/findings',
+      'cloud_security_posture/dashboard',
       { shouldUseHashForSubUrl: false }
     );
   };
 
   return {
-    navigateToFindingsPage,
-    table,
+    navigateToComplianceDashboardPage,
+    dashboard,
     index,
-    distributionBar,
   };
-};
+}

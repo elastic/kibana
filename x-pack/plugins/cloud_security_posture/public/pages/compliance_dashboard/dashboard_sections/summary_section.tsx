@@ -9,11 +9,11 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { statusColors } from '../../../common/constants';
-import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
+import { DASHBOARD_COUNTER_CARDS, DASHBOARD_SUMMARY_CONTAINER } from '../test_subjects';
 import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import { ChartPanel } from '../../../components/chart_panel';
-import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
+import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
 import type {
   ComplianceDashboardData,
   Evaluation,
@@ -123,7 +123,7 @@ export const SummarySection = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="l">
+    <EuiFlexGroup gutterSize="l" data-test-subj={DASHBOARD_SUMMARY_CONTAINER}>
       <EuiFlexItem grow={dashboardColumnsGrow.first}>
         <EuiFlexGroup direction="column">
           {counters.map((counter) => (
@@ -135,12 +135,12 @@ export const SummarySection = ({
       </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.second}>
         <ChartPanel
-          title={i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
-            defaultMessage: 'Cloud Posture Score',
+          title={i18n.translate('xpack.csp.dashboard.summarySection.complianceScorePanelTitle', {
+            defaultMessage: 'Compliance Score',
           })}
         >
-          <CloudPostureScoreChart
-            id="cloud_posture_score_chart"
+          <ComplianceScoreChart
+            id="compliance_score_chart"
             data={complianceData.stats}
             trend={complianceData.trend}
             onEvalCounterClick={handleEvalCounterClick}

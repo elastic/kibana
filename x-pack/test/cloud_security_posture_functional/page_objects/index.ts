@@ -12,5 +12,5 @@ import { CspDashboardPageProvider } from './csp_dashboard_page';
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
   findings: FindingsPageProvider,
-  cspDashboard: CspDashboardPageProvider,
+  cloudPostureDashboard: CspDashboardPageProvider,
 };

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
+import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
 import type {
   ComplianceDashboardData,
   Evaluation,
@@ -128,7 +128,7 @@ export const BenchmarksSection = ({
                   height: '100%',
                 }}
               >
-                <CloudPostureScoreChart
+                <ComplianceScoreChart
                   compact
                   id={`${cluster.meta.clusterId}_score_chart`}
                   data={cluster.stats}

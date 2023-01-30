@@ -252,6 +252,7 @@ export const ComplianceDashboard = () => {
         label: i18n.translate('xpack.csp.dashboardTabs.kubernetesTab.tabTitle', {
           defaultMessage: 'Kubernetes',
         }),
+        'data-test-id': 'Kubernetes-tab',
         isSelected: selectedTab === KSPM_POLICY_TEMPLATE,
         onClick: () => setSelectedTab(KSPM_POLICY_TEMPLATE),
         content: (

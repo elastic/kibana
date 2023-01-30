@@ -29,13 +29,14 @@ import {
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { DASHBOARD_COMPLIANCE_SCORE_CHART } from '../test_subjects';
 import { statusColors } from '../../../common/constants';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import type { Evaluation, PostureTrend, Stats } from '../../../../common/types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
-interface CloudPostureScoreChartProps {
+interface ComplianceScoreChartProps {
   compact?: boolean;
   trend: PostureTrend[];
   data: Stats;
@@ -48,12 +49,15 @@ const getPostureScorePercentage = (postureScore: number): string => `${Math.roun
 const PercentageInfo = ({
   compact,
   postureScore,
-}: CloudPostureScoreChartProps['data'] & { compact?: CloudPostureScoreChartProps['compact'] }) => {
+}: ComplianceScoreChartProps['data'] & { compact?: ComplianceScoreChartProps['compact'] }) => {
   const { euiTheme } = useEuiTheme();
   const percentage = getPostureScorePercentage(postureScore);
 
   return (
-    <EuiTitle css={{ fontSize: compact ? euiTheme.size.l : euiTheme.size.xxl }}>
+    <EuiTitle
+      css={{ fontSize: compact ? euiTheme.size.l : euiTheme.size.xxl }}
+      data-test-subj={DASHBOARD_COMPLIANCE_SCORE_CHART.COMPLIANCE_SCORE}
+    >
       <h3>{percentage}</h3>
     </EuiTitle>
   );
@@ -134,12 +138,12 @@ const CounterLink = ({
   );
 };
 
-export const CloudPostureScoreChart = ({
+export const ComplianceScoreChart = ({
   data,
   trend,
   onEvalCounterClick,
   compact,
-}: CloudPostureScoreChartProps) => {
+}: ComplianceScoreChartProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -167,7 +171,7 @@ export const CloudPostureScoreChart = ({
                 color={statusColors.passed}
                 onClick={() => onEvalCounterClick(RULE_PASSED)}
                 tooltipContent={i18n.translate(
-                  'xpack.csp.cloudPostureScoreChart.counterLink.passedFindingsTooltip',
+                  'xpack.csp.complianceScoreChart.counterLink.passedFindingsTooltip',
                   { defaultMessage: 'Passed findings' }
                 )}
               />
@@ -178,7 +182,7 @@ export const CloudPostureScoreChart = ({
                 color={statusColors.failed}
                 onClick={() => onEvalCounterClick(RULE_FAILED)}
                 tooltipContent={i18n.translate(
-                  'xpack.csp.cloudPostureScoreChart.counterLink.failedFindingsTooltip',
+                  'xpack.csp.complianceScoreChart.counterLink.failedFindingsTooltip',
                   { defaultMessage: 'Failed findings' }
                 )}
               />

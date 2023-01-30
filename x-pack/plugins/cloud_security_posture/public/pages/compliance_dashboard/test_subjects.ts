@@ -7,10 +7,16 @@
 
 export const MISSING_FINDINGS_NO_DATA_CONFIG = 'missing-findings-no-data-config';
 export const DASHBOARD_CONTAINER = 'dashboard-container';
-export const KUBERNETES_DASHBOARD_CONTAINER = 'kubernetes-dashboard-container';
+export const DASHBOARD_SUMMARY_CONTAINER = 'dashboard-summary-section';
+export const KUBERNETES_DASHBOARD_CONTAINER = 'kubernetes-dashboard-section';
 export const CLOUD_DASHBOARD_CONTAINER = 'cloud-dashboard-container';
+
 export const DASHBOARD_COUNTER_CARDS = {
   CLUSTERS_EVALUATED: 'dashboard-counter-card-clusters-evaluated',
   RESOURCES_EVALUATED: 'dashboard-counter-card-resources-evaluated',
   FAILING_FINDINGS: 'dashboard-counter-card-failing-findings',
+};
+
+export const DASHBOARD_COMPLIANCE_SCORE_CHART = {
+  COMPLIANCE_SCORE: 'dashboard-summary-section-compliance-score',
 };
