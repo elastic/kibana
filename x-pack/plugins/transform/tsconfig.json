@@ -46,6 +46,9 @@
     "@kbn/field-types",
     "@kbn/ml-nested-property",
     "@kbn/ml-is-defined",
+    "@kbn/charts-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/core-ui-settings-browser",
   ],
   "exclude": [
     "target/**/*",
