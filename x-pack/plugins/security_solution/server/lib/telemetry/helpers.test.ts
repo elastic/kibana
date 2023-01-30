@@ -811,7 +811,7 @@ describe('test metrics response to value list meta data', () => {
     const stubMetricResponses = {
       listMetricsResponse: {
         aggregations: {
-          total_value_list_count: 5,
+          total_value_list_count: { value: 5},
           type_breakdown: {
             buckets: [
               {

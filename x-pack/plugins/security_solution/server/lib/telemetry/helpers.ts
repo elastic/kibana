@@ -248,7 +248,7 @@ export const formatValueListMetaData = (
   cluster_name: clusterInfo.cluster_name,
   license_id: licenseInfo?.uid,
   total_list_count:
-    valueListResponse.listMetricsResponse?.aggregations?.total_value_list_count ?? 0,
+    valueListResponse.listMetricsResponse?.aggregations?.total_value_list_count?.value ?? 0,
   types:
     valueListResponse.listMetricsResponse?.aggregations?.type_breakdown?.buckets.map(
       (breakdown) => ({

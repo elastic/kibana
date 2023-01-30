@@ -381,7 +381,7 @@ export interface ValueListMetaData {
 
 export interface ValueListResponseAggregation {
   aggregations: {
-    total_value_list_count: number;
+    total_value_list_count: { value: number };
     type_breakdown: {
       buckets: Array<{
         key: string;
