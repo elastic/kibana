@@ -46,14 +46,14 @@ export const ENVIRONMENT_NOT_DEFINED = {
 
 function isEnvironmentDefined(environment: string) {
   return (
-    !environment ||
-    environment === ENVIRONMENT_NOT_DEFINED_VALUE ||
-    environment === ENVIRONMENT_ALL_VALUE
+    environment &&
+    environment !== ENVIRONMENT_NOT_DEFINED_VALUE &&
+    environment !== ENVIRONMENT_ALL_VALUE
   );
 }
 
 export function getEnvironmentEsField(environment: string) {
-  if (isEnvironmentDefined(environment)) {
+  if (!isEnvironmentDefined(environment)) {
     return {};
   }
 
@@ -61,7 +61,7 @@ export function getEnvironmentEsField(environment: string) {
 }
 
 export function getEnvironmentKuery(environment: string) {
-  if (isEnvironmentDefined(environment)) {
+  if (!isEnvironmentDefined(environment)) {
     return null;
   }
 

@@ -12,6 +12,7 @@ import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
+import { getPackages } from '@kbn/repo-packages';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
@@ -71,6 +72,7 @@ export function createRootWithSettings(
         dist: false,
         ...cliArgs,
       },
+      repoPackages: getPackages(REPO_ROOT),
     },
     pkg
   );
