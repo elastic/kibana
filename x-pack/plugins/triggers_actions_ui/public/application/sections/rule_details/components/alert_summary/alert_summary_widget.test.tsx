@@ -74,6 +74,22 @@ describe('AlertSummaryWidget', () => {
     expect(alertSummaryWidget.queryByTestId(TITLE_DATA_TEST_SUBJ)).toBeTruthy();
   });
 
+  it('should not render AlertSummaryWidgetError when counts are zero', async () => {
+    useLoadAlertSummaryMock.mockImplementation(() => ({
+      alertSummary: {
+        activeAlertCount: 0,
+        activeAlerts: [],
+        recoveredAlertCount: 0,
+        recoveredAlerts: [],
+      },
+      isLoading: false,
+    }));
+    const alertSummaryWidget = renderComponent();
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeFalsy();
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSize')).toBeFalsy();
+  });
+
   it('should render AlertSummaryWidgetError when API call fails', async () => {
     useLoadAlertSummaryMock.mockImplementation(() => ({
       alertSummary: {

@@ -35,6 +35,7 @@ export const AlertSummaryWidget = ({
 
   if (isLoading) return <EuiLoadingSpinner data-test-subj="alertSummaryWidgetLoading" />;
   if (error) return <AlertSummaryWidgetError />;
+  if (!activeAlertCount && !recoveredAlertCount) return null;
 
   return fullSize ? (
     <AlertsSummaryWidgetFullSize
