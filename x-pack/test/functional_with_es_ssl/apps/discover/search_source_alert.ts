@@ -289,8 +289,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('indexPattern-manage-field');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
-    const titleElem = await testSubjects.find('currentIndexPatternTitle');
-    expect(await titleElem.getVisibleText()).to.equal(dataView);
+    const titleElem = await testSubjects.find('createIndexPatternTitleInput');
+    expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
   const checkUpdatedDataViewState = async (dataView: string) => {
@@ -302,8 +302,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('indexPattern-manage-field');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
-    const titleElem = await testSubjects.find('currentIndexPatternTitle');
-    expect(await titleElem.getVisibleText()).to.equal(dataView);
+    const titleElem = await testSubjects.find('createIndexPatternTitleInput');
+    expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
   describe('Search source Alert', () => {
@@ -410,6 +410,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
+      await retry.waitFor('filters modal to become hidden', async () => {
+        return !(await testSubjects.exists('saveFilter'));
+      });
 
       await testSubjects.click('thresholdPopover');
       await testSubjects.setValue('alertThresholdInput', '1');

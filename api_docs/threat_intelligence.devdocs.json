@@ -502,6 +502,24 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.blockList",
+            "type": "Object",
+            "tags": [],
+            "label": "blockList",
+            "description": [],
+            "signature": [
+              "{ exceptionListApiClient: unknown; useSetUrlParams: () => (params: Record<string, string | number | null | undefined>, replace?: boolean | undefined) => void; getFlyoutComponent: () => React.NamedExoticComponent<",
+              "BlockListFlyoutProps",
+              ">; getFormComponent: () => React.NamedExoticComponent<",
+              "BlockListFormProps",
+              ">; }"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

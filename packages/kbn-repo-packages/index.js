@@ -16,7 +16,7 @@
 /** @typedef {import('./modern/types').PluginTypeInfo} PluginTypeInfo */
 /** @typedef {Map<string, string>} PackageMap */
 
-const { getPackages, findPackageInfoForPath } = require('./modern/get_packages');
+const { getPackages, findPackageInfoForPath, getPkgMap } = require('./modern/get_packages');
 const {
   parsePackageManifest,
   readPackageManifest,
@@ -38,6 +38,7 @@ module.exports = {
   readPackageMap,
   getPackages,
   findPackageInfoForPath,
+  getPkgMap,
   parsePackageManifest,
   readPackageManifest,
   validatePackageManifest,

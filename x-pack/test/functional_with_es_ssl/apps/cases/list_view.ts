@@ -281,6 +281,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('filtering', () => {
       const caseTitle = 'matchme';
+      const caseIds: string[] = [];
 
       before(async () => {
         await createUsersAndRoles(getService, users, roles);
@@ -288,14 +289,26 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const profiles = await cases.api.suggestUserProfiles({ name: 'all', owners: ['cases'] });
 
-        await cases.api.createCase({
+        const case1 = await cases.api.createCase({
           title: caseTitle,
           tags: ['one'],
           description: 'lots of information about an incident',
         });
-        await cases.api.createCase({ title: 'test2', tags: ['two'] });
-        await cases.api.createCase({ title: 'test3', assignees: [{ uid: profiles[0].uid }] });
-        await cases.api.createCase({ title: 'test4', assignees: [{ uid: profiles[1].uid }] });
+        const case2 = await cases.api.createCase({ title: 'test2', tags: ['two'] });
+        const case3 = await cases.api.createCase({
+          title: case2.id,
+          assignees: [{ uid: profiles[0].uid }],
+        });
+        const case4 = await cases.api.createCase({
+          title: 'test4',
+          assignees: [{ uid: profiles[1].uid }],
+          description: case2.id,
+        });
+
+        caseIds.push(case1.id);
+        caseIds.push(case2.id);
+        caseIds.push(case3.id);
+        caseIds.push(case4.id);
 
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
@@ -306,6 +319,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
          * There is no easy way to clear the filtering.
          * Refreshing the page seems to be easier.
          */
+        await browser.clearLocalStorage();
         await cases.navigation.navigateToApp();
       });
 
@@ -328,6 +342,34 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.validateCasesTableHasNthRows(4);
       });
 
+      it('filters cases from the list using an id search', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type(caseIds[0]);
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.getCaseById(caseIds[0]);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('id search also matches title and description', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type(caseIds[1]);
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(3);
+        await cases.casesTable.getCaseById(caseIds[1]); // id match
+        await cases.casesTable.getCaseById(caseIds[2]); // title match
+        await cases.casesTable.getCaseById(caseIds[3]); // description match
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
       it('only shows cases with a wildcard query "test*" matching the title', async () => {
         await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
 
@@ -335,7 +377,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await input.type('test*');
         await input.pressKeys(browser.keys.ENTER);
 
-        await cases.casesTable.validateCasesTableHasNthRows(3);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
         await testSubjects.click('clearSearchButton');
         await cases.casesTable.validateCasesTableHasNthRows(4);
       });
@@ -380,7 +422,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.filterByTag('one');
         await cases.casesTable.refreshTable();
         await cases.casesTable.validateCasesTableHasNthRows(1);
-        const row = await cases.casesTable.getCaseFromTable(0);
+        const row = await cases.casesTable.getCaseByIndex(0);
         const tags = await row.findByTestSubject('case-table-column-tags-one');
         expect(await tags.getVisibleText()).to.be('one');
       });
@@ -390,6 +432,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
         await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
         await cases.casesTable.validateCasesTableHasNthRows(1);
+      });
+
+      it('persists status filters', async () => {
+        await cases.casesTable.changeStatus(CaseStatuses.closed, 0);
+        await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
+        await browser.refresh();
+        await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
+      });
+
+      it('persists severity filters', async () => {
+        await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
+        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        await browser.refresh();
+        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
       });
 
       describe('assignees filtering', () => {
@@ -411,11 +467,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.casesTable.validateCasesTableHasNthRows(2);
 
           const firstCaseTitle = await (
-            await cases.casesTable.getCaseFromTable(0)
+            await cases.casesTable.getCaseByIndex(0)
           ).findByTestSubject('case-details-link');
 
           const secondCaseTitle = await (
-            await cases.casesTable.getCaseFromTable(1)
+            await cases.casesTable.getCaseByIndex(1)
           ).findByTestSubject('case-details-link');
 
           expect(await firstCaseTitle.getVisibleText()).be('test2');

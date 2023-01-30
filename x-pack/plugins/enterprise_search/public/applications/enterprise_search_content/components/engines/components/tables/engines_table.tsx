@@ -7,57 +7,102 @@
 
 import React from 'react';
 
-import { CriteriaWithPagination, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { useValues } from 'kea';
+
+import {
+  CriteriaWithPagination,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
+import { MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
 
-import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
+import { generateEncodedPath } from '../../../../../shared/encode_path_params';
+import { FormattedDateTime } from '../../../../../shared/formatted_date_time';
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+
+import { ENGINE_PATH } from '../../../../routes';
 
 import { convertMetaToPagination, Meta } from '../../types';
 
-// add health status
 interface EnginesListTableProps {
   enginesList: EnterpriseSearchEngine[];
+  isLoading?: boolean;
   loading: boolean;
   meta: Meta;
-  isLoading?: boolean;
   onChange: (criteria: CriteriaWithPagination<EnterpriseSearchEngine>) => void;
+  onDelete: (engine: EnterpriseSearchEngine) => void;
+  viewEngineIndices: (engineName: string) => void;
 }
 export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   enginesList,
-  meta,
   isLoading,
+  meta,
   onChange,
+  onDelete,
+  viewEngineIndices,
 }) => {
+  const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngine>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.name', {
         defaultMessage: 'Engine Name',
       }),
-      width: '30%',
-      truncateText: true,
       mobileOptions: {
         header: true,
         enlarge: true,
         width: '100%',
       },
+      render: (name: string) => (
+        <EuiLinkTo
+          data-test-subj="engine-link"
+          data-telemetry-id="entSearchContent-engines-table-viewEngine"
+          to={generateEncodedPath(ENGINE_PATH, { engineName: name })}
+        >
+          {name}
+        </EuiLinkTo>
+      ),
+      truncateText: true,
+      width: '30%',
     },
     {
-      field: 'last_updated',
+      field: 'updated',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.lastUpdated', {
         defaultMessage: 'Last updated',
       }),
       dataType: 'string',
+      render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
     },
     {
-      field: 'indices.length',
-      datatype: 'number',
+      field: 'indices',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.indices', {
         defaultMessage: 'Indices',
       }),
+      align: 'right',
+
+      render: (indices: string[], engine) => (
+        <EuiButtonEmpty
+          size="s"
+          className="engineListTableFlyoutButton"
+          data-test-subj="engineListTableIndicesFlyoutButton"
+          onClick={() => viewEngineIndices(engine.name)}
+        >
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.enginesList.table.column.view.indices"
+            defaultMessage="{indicesLength} indices"
+            values={{
+              indicesLength: indices.length,
+            }}
+          />
+        </EuiButtonEmpty>
+      ),
     },
 
     {
@@ -68,17 +113,22 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
         {
           name: MANAGE_BUTTON_LABEL,
           description: i18n.translate(
-            'xpack.enterpriseSearch.content.enginesList.table.column.action.manage.buttonDescription',
+            'xpack.enterpriseSearch.content.enginesList.table.column.actions.view.buttonDescription',
             {
-              defaultMessage: 'Manage this engine',
+              defaultMessage: 'View this engine',
             }
           ),
           type: 'icon',
           icon: 'eye',
-          onClick: () => {},
+          onClick: (engine) =>
+            navigateToUrl(
+              generateEncodedPath(ENGINE_PATH, {
+                engineName: engine.name,
+              })
+            ),
         },
         {
-          name: DELETE_BUTTON_LABEL,
+          color: 'danger',
           description: i18n.translate(
             'xpack.enterpriseSearch.content.enginesList.table.column.action.delete.buttonDescription',
             {
@@ -87,8 +137,17 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
           ),
           type: 'icon',
           icon: 'trash',
-          color: 'danger',
-          onClick: () => {},
+          isPrimary: false,
+          name: () =>
+            i18n.translate(
+              'xpack.enterpriseSearch.content.engineList.table.column.actions.deleteEngineLabel',
+              {
+                defaultMessage: 'Delete this engine',
+              }
+            ),
+          onClick: (engine) => {
+            onDelete(engine);
+          },
         },
       ],
     },

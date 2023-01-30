@@ -11,11 +11,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
@@ -1453,9 +1452,12 @@ instanceStateValue: true
     expect(
       event?.kibana?.alert?.rule?.execution?.metrics?.rule_type_run_duration_ms
     ).to.be.greaterThan(0);
+    // Process alerts is fast enough that it will sometimes report 0ms
+    const procesAlertsDurationMs =
+      event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms;
     expect(
-      event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms
-    ).to.be.greaterThan(0);
+      (typeof procesAlertsDurationMs === 'number' ? procesAlertsDurationMs : -1) >= 0
+    ).to.be.ok();
     expect(
       event?.kibana?.alert?.rule?.execution?.metrics?.trigger_actions_duration_ms
     ).to.be.greaterThan(0);
