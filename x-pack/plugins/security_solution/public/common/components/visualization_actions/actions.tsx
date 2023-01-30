@@ -54,7 +54,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   timerange,
   title,
   stackByField,
-  widthDefaultActions = true,
+  withDefaultActions = true,
 }) => {
   const { lens } = useKibana().services;
 
@@ -160,7 +160,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
       }) ?? [];
     return [
       ...(extraActionsItems ? extraActionsItems : []),
-      ...(widthDefaultActions
+      ...(withDefaultActions
         ? [
             <EuiContextMenuItem
               icon="inspect"
@@ -211,7 +211,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     onAddToExistingCaseClicked,
     onAddToNewCaseClicked,
     onOpenInLens,
-    widthDefaultActions,
+    withDefaultActions,
   ]);
 
   const button = useMemo(
@@ -237,6 +237,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
           panelPaddingSize="none"
           anchorPosition="downLeft"
           panelClassName="withHoverActions__popover"
+          data-test-subj="viz-actions-popover"
         >
           <EuiContextMenuPanel data-test-subj="viz-actions-panel" size="s" items={items} />
         </EuiPopover>

@@ -6,6 +6,8 @@
  */
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+
 import { dnsTopDomainsLensAttributes } from './lens_attributes/network/dns_top_domains';
 import { VisualizationActions } from './actions';
 import {
@@ -246,5 +248,44 @@ describe('VisualizationActions', () => {
     fireEvent.click(screen.getByText('Add to existing case'));
 
     expect(mockGetAllCasesSelectorModalOpen).toBeCalled();
+  });
+
+  test('Should not render default actions when withDefaultActions = false', () => {
+    const testProps = { ...props, withDefaultActions: false };
+    render(
+      <TestProviders store={store}>
+        <VisualizationActions {...testProps} />
+      </TestProviders>
+    );
+
+    expect(
+      screen.queryByTestId(`[data-test-subj="stat-networkDnsHistogramQuery"]`)
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Inspect')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add to new case')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add to existing case')).not.toBeInTheDocument();
+    expect(screen.queryByText('Open in Lens')).not.toBeInTheDocument();
+  });
+
+  test('Should render extra actions when extraAction is provided', () => {
+    const testProps = {
+      ...props,
+      extraActions: [
+        {
+          getIconType: () => 'reset',
+          id: 'resetField',
+          execute: jest.fn(),
+          getDisplayName: () => 'Reset Field',
+        } as unknown as Action<object>,
+      ],
+    };
+    const { container } = render(
+      <TestProviders store={store}>
+        <VisualizationActions {...testProps} />
+      </TestProviders>
+    );
+
+    fireEvent.click(container.querySelector(`[data-test-subj="stat-networkDnsHistogramQuery"]`)!);
+    expect(screen.getByText('Reset Field')).toBeInTheDocument();
   });
 });

@@ -33,7 +33,7 @@ export interface VisualizationActionsProps {
   stackByField?: string;
   timerange: { from: string; to: string };
   title: React.ReactNode;
-  widthDefaultActions?: boolean;
+  withDefaultActions?: boolean;
 }
 
 export interface EmbeddableData {
