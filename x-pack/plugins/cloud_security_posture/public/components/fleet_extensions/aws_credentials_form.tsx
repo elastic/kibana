@@ -18,15 +18,8 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
-import { PostureInput } from '../../../common/types';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
-
-export const isAwsPostureType = (
-  type: PostureInput
-): type is typeof CLOUDBEAT_EKS | typeof CLOUDBEAT_AWS =>
-  type === CLOUDBEAT_AWS || type === CLOUDBEAT_EKS;
 
 const AWSSetupInfoContent = () => (
   <>
@@ -197,6 +190,7 @@ const options: AwsOptions = {
 };
 
 export type AwsCredentialsType = keyof typeof options;
+export const DEFAULT_AWS_VARS_GROUP: AwsCredentialsType = 'assume_role';
 const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
   id: value as AwsCredentialsType,
   label: options[value as keyof typeof options].label,
@@ -278,6 +272,7 @@ const AwsCredentialTypeSelector = ({
     onChange={(id) => onChange(id as AwsCredentialsType)}
   />
 );
+
 const AwsInputVarFields = ({
   fields,
   onChange,

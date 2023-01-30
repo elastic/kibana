@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo, useEffect } from 'react';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type {
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
@@ -13,55 +13,46 @@ import type {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PostureInput } from '../../../common/types';
 import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA } from '../../../common/constants';
+import { getPosturePolicy, getEnabledPostureInput } from './utils';
+import { DEFAULT_AWS_VARS_GROUP } from './aws_credentials_form';
 import {
-  getPosturePolicy,
-  INPUTS_WITH_AWS_VARS,
-  getEnabledPostureInput,
-  type NewPackagePolicyPostureInput,
-} from './utils';
-import { AwsCredentialsForm, type AwsCredentialsType } from './aws_credentials_form';
-import { PolicyInputSelector } from './policy_template_input_selector';
-import { IntegrationSettingsInfo, IntegrationSettings } from './integration_settings';
+  PolicyTemplateInfo,
+  PolicyTemplateInputSelector,
+  PolicyTemplateVarsForm,
+} from './policy_template_selectors';
+import { IntegrationSettings } from './integration_settings';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
   cspm: CLOUDBEAT_AWS,
 } as const;
 
-const DEFAULT_AWS_VARS_GROUP: AwsCredentialsType = 'assume_role';
-
 interface Props extends PackagePolicyCreateExtensionComponentProps {
   edit?: boolean;
 }
 
-interface PolicyVarsFormProps {
-  newPolicy: NewPackagePolicy;
-  input: NewPackagePolicyPostureInput;
-  updatePolicy(updatedPolicy: NewPackagePolicy): void;
-}
-
 const EditScreenStepTitle = () => (
   <>
-    <EuiSpacer />
-    <EuiText>
+    <EuiTitle size="xs">
       <h4>
         <FormattedMessage
           id="xpack.csp.fleetIntegration.integrationSettingsTitle"
           defaultMessage="Integration Settings"
         />
       </h4>
-    </EuiText>
+    </EuiTitle>
     <EuiSpacer />
   </>
 );
 
-const PolicyVarsForm = ({ input, ...props }: PolicyVarsFormProps) => {
-  switch (input.type) {
+// Required package vars that are hidden from the user
+const getPolicyHiddenVars = (inputType: PostureInput) => {
+  switch (inputType) {
     case 'cloudbeat/cis_aws':
     case 'cloudbeat/cis_eks':
-      return <AwsCredentialsForm {...props} input={input} />;
+      return { 'aws.credentials.type': { value: DEFAULT_AWS_VARS_GROUP } };
     default:
-      return null;
+      return undefined;
   }
 };
 
@@ -79,15 +70,7 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
    * - Updates hidden policy vars
    */
   const setEnabledPolicyInput = (inputType: PostureInput) =>
-    updatePolicy(
-      getPosturePolicy(
-        newPolicy,
-        inputType,
-        INPUTS_WITH_AWS_VARS.includes(inputType)
-          ? { 'aws.credentials.type': { value: DEFAULT_AWS_VARS_GROUP } }
-          : undefined
-      )
-    );
+    updatePolicy(getPosturePolicy(newPolicy, inputType, getPolicyHiddenVars(inputType)));
 
   useEffect(() => {
     // Pick default input type for policy template.
@@ -101,16 +84,27 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
   return (
     <div>
       {!!edit && <EditScreenStepTitle />}
-      <IntegrationSettingsInfo postureType={input.policy_template} />
+
+      {/* Shows info on the active policy template */}
+      <PolicyTemplateInfo postureType={input.policy_template} />
       <EuiSpacer size="s" />
-      <PolicyInputSelector input={input} setInput={setEnabledPolicyInput} disabled={!!edit} />
+
+      {/* Defines the single enabled input of the active policy template */}
+      <PolicyTemplateInputSelector
+        input={input}
+        setInput={setEnabledPolicyInput}
+        disabled={!!edit}
+      />
       <EuiSpacer size="m" />
+
+      {/* Defines the name/description */}
       <IntegrationSettings
         name={newPolicy.name}
         description={newPolicy.description || ''}
         onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
       />
-      <PolicyVarsForm input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
+      {/* Defines the vars of the enabled input of the active policy template */}
+      <PolicyTemplateVarsForm input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
       <EuiSpacer />
     </div>
   );
