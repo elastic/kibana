@@ -100,7 +100,7 @@ export const CreateTransformWizardContext = createContext<{
 
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
   const {
-    ml: { FieldStatsFlyoutProvider, useFieldStatsFlyoutContext },
+    ml: { FieldStatsFlyoutProvider },
     uiSettings,
     dataViews,
     data,

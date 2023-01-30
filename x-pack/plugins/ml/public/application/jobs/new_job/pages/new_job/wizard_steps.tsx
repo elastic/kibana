@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { Fragment, FC, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { type FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import { useMlKibana } from '../../../../contexts/kibana';
 import { FieldStatsFlyoutProvider } from '../../../../components/field_stats_flyout';
 import { WIZARD_STEPS } from '../components/step_types';
 
@@ -30,6 +32,18 @@ interface Props {
 
 export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   const mlContext = useMlContext();
+  const { services } = useMlKibana();
+  const fieldStatsServices: FieldStatsServices = useMemo(() => {
+    const { uiSettings, data, fieldFormats, charts } = services;
+    return {
+      uiSettings,
+      dataViews: data.dataViews,
+      data,
+      fieldFormats,
+      charts,
+    };
+  }, [services]);
+
   // store whether the advanced and additional sections have been expanded.
   // has to be stored at this level to ensure it's remembered on wizard step change
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
@@ -81,7 +95,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
       )}
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
         <Fragment>
-          <FieldStatsFlyoutProvider>
+          <FieldStatsFlyoutProvider
+            dataView={mlContext.currentDataView}
+            fieldStatsServices={fieldStatsServices}
+          >
             <>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
