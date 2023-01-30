@@ -21,8 +21,8 @@ experimental[] Get packs.
 `space_id`::
 (Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
 
-
-=== Query parameters
+[[osquery-manager-packs-api-get-all-query-params]]
+==== Query parameters
 
 `page`::
 (Optional, integer) The page number to return. The default is `1`.
