@@ -174,8 +174,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     if (column?.operationType === operationType) {
       return;
     }
-    const possibleFieldNames =
-      operationSupportMatrix.fieldByOperation.get(operationType);
+    const possibleFieldNames = operationSupportMatrix.fieldByOperation.get(operationType);
     if (column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)) {
       // Reuse the current field if possible
       updateLayer(

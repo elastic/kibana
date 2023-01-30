@@ -316,7 +316,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       'bytes',
       'memory',
       'source',
-      'toString'
+      'toString',
     ]);
   });
 
@@ -340,7 +340,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options![1].options!.map(({ label }) => label)).toEqual(['timestampLabel', 'source', 'toString']);
+    expect(options![1].options!.map(({ label }) => label)).toEqual([
+      'timestampLabel',
+      'source',
+      'toString',
+    ]);
   });
 
   it('should indicate fields which are incompatible for the operation of the current column', () => {
