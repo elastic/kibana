@@ -32,15 +32,15 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
         endpointPackageVersion
       )
         .then((response) => {
-          log.verbose(
-            `Created new Agent Policy with Endpoint integration:\n${JSON.stringify(
-              response,
-              null,
-              2
-            )}`
-          );
+          const agentPolicy = response.agentPolicies[0];
 
-          return response.agentPolicies[0].id ?? '';
+          log.info(`New agent policy with Endpoint integration created in fleet:
+    Name: ${agentPolicy.name}
+    Id:   ${agentPolicy.id}`);
+
+          log.verbose(JSON.stringify(response, null, 2));
+
+          return agentPolicy.id ?? '';
         })
         .catch((error) => {
           log.verbose(error);
@@ -66,7 +66,7 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
 
     const vmName = `${username}-dev-${uniqueId}`;
 
-    log.verbose(`Creating VM named: ${vmName}`);
+    log.info(`Creating VM named: ${vmName}`);
 
     await execa.command(`multipass launch --name ${vmName}`);
 
@@ -77,10 +77,11 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
     const agentFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
     const vmDirName = agentFile.replace(/\.tar\.gz$/, '');
 
-    log.verbose(`Downloading and installing agent from:\n    ${agentDownloadUrl}`);
+    log.info(`Downloading and installing agent from:\n    ${agentDownloadUrl}`);
 
     await execa.command(`multipass exec ${vmName} -- curl -L ${agentDownloadUrl} -o ${agentFile}`);
     await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentFile}`);
+    await execa.command(`multipass exec ${vmName} -- rm -f ${agentFile}`);
 
     const agentEnrollArgs = [
       'exec',
@@ -109,22 +110,26 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
       enrollmentToken,
     ];
 
-    log.verbose(`Enrolling elastic agent:\nmultipass ${agentEnrollArgs.join(' ')}`);
+    log.info(`Enrolling elastic agent with Fleet`);
+    log.verbose(`Command: multipass ${agentEnrollArgs.join(' ')}`);
 
     await execa(`multipass`, agentEnrollArgs);
 
     const runAgentCommand = `multipass exec ${vmName} --working-directory /home/ubuntu/${vmDirName} -- sudo ./elastic-agent \&>/dev/null`;
 
-    log.verbose(`Creating a start script...`);
-    const response = await execa.command(
-      `multipass exec ${vmName} --working-directory /home/ubuntu/${vmDirName} -- echo "sudo ./elastic-agent &>/dev/null &" > dev_start`
-    );
-    log.verbose(response);
+    log.info(`Running elastic agent`);
+    log.verbose(`Command: ${runAgentCommand}`);
 
-    log.verbose(`Running elastic agent:\n${runAgentCommand}`);
-
-    // FIXME:PT command below is not exiting - it hangs due to the `&` in the command (see: https://github.com/canonical/multipass/issues/667)
-    await execa.command(runAgentCommand);
+    // About `timeout` option below
+    // The `multipass exec` command seems to have some issues when a command pass to it redirects output,
+    // as is with the command that runs endpoint. See https://github.com/canonical/multipass/issues/667
+    // To get around it, `timeout` is set to 5s, which should be enough time for the command to be executed
+    // in the VM.
+    await execa.command(runAgentCommand, { timeout: 5000 }).catch((error) => {
+      if (error.originalMessage !== 'Timed out') {
+        throw error;
+      }
+    });
 
     log.info(`VM created using Multipass.
     VM Name: ${vmName}
@@ -133,6 +138,7 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
     Delete VM:    multipass delete -p ${vmName}
 
 `);
+    // FIXME:PT show count of VMs currently running (to remind developer to check list
   } catch (error) {
     log.error(error);
     log.indent(-4);
