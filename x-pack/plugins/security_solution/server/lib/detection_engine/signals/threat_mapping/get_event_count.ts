@@ -30,7 +30,7 @@ export const getEventList = async ({
   eventListConfig,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
-  if (calculatedPerPage > 100000) {
+  if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
 

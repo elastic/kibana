@@ -93,8 +93,7 @@ export const getSignalMatchesFromThreatList = (
     signalId: key,
     queries: value,
   }));
-  // console.log('signalMatches');
-  // console.log(signalMatches);
+
   return signalMatches;
 };
 

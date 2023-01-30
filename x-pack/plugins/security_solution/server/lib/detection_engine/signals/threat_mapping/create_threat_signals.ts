@@ -71,7 +71,7 @@ export const createThreatSignals = async ({
 
   const params = completeRule.ruleParams;
   ruleExecutionLogger.debug('Indicator matching rule starting');
-  const perPage = 9000 ?? concurrentSearches * itemsPerSearch;
+  const perPage = concurrentSearches * itemsPerSearch;
   const verifyExecutionCanProceed = buildExecutionIntervalValidator(
     completeRule.ruleConfig.schedule.interval
   );

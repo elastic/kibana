@@ -155,11 +155,6 @@ export const decodeThreatMatchNamedQuery = (
   const [id, index, field, value, queryType] = queryValues;
   const query = { id, index, field, value, queryType };
 
-  // if (queryValues.length !== 4 || !queryValues.every(Boolean)) {
-  //   const queryString = JSON.stringify(query);
-  //   throw new Error(`Decoded query is invalid. Decoded value: ${queryString}`);
-  // }
-
   return query;
 };
 
