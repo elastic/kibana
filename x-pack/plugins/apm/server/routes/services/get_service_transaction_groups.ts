@@ -10,6 +10,7 @@ import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
+  TRANSACTION_OVERFLOW,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
@@ -28,6 +29,8 @@ import {
 import { calculateFailedTransactionRate } from '../../lib/helpers/transaction_error_rate';
 import { APMConfig } from '../..';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+
+const txGroupsDroppedBucketName = '_other';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -79,11 +82,7 @@ export async function getServiceTransactionGroups({
               {
                 bool: {
                   should: [
-                    {
-                      match: {
-                        'transaction.name': '_other',
-                      },
-                    },
+                    { term: { [TRANSACTION_NAME]: txGroupsDroppedBucketName } },
                     { term: { [TRANSACTION_TYPE]: transactionType } },
                   ],
                 },
@@ -100,8 +99,8 @@ export async function getServiceTransactionGroups({
         aggs: {
           total_duration: { sum: { field } },
           overflow_count: {
-            max: {
-              field: 'transaction.aggregation.overflow_count',
+            sum: {
+              field: TRANSACTION_OVERFLOW,
             },
           },
           transaction_groups: {
