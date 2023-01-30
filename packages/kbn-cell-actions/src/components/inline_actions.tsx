@@ -11,7 +11,7 @@ import { ActionItem } from './cell_action_item';
 import { usePartitionActions } from '../hooks/actions';
 import { ExtraActionsPopOver } from './extra_actions_popover';
 import { ExtraActionsButton } from './extra_actions_button';
-import type { CellActionExecutionContext } from '../types';
+import { CellActionExecutionContext } from '../types';
 import { useLoadActions } from '../hooks/use_load_actions';
 
 interface InlineActionsProps {

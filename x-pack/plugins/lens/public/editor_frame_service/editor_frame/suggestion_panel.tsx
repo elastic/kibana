@@ -38,15 +38,13 @@ import {
   DatasourceMap,
   VisualizationMap,
   DatasourceLayers,
+  UserMessagesGetter,
+  FrameDatasourceAPI,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
-import {
-  getMissingIndexPattern,
-  validateDatasourceAndVisualization,
-  getDatasourceLayers,
-} from './state_helpers';
+import { getMissingIndexPattern } from './state_helpers';
 import {
   rollbackSuggestion,
   selectExecutionContextSearch,
@@ -63,16 +61,45 @@ import {
   selectChangesApplied,
   applyChanges,
   selectStagedActiveData,
+  selectFrameDatasourceAPI,
 } from '../../state_management';
+import { filterUserMessages } from '../../app_plugin/get_application_user_messages';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
+
+const configurationsValid = (
+  currentDataSource: Datasource | null,
+  currentDatasourceState: unknown,
+  currentVisualization: Visualization,
+  currentVisualizationState: unknown,
+  frame: FrameDatasourceAPI
+): boolean => {
+  try {
+    return (
+      filterUserMessages(
+        [
+          ...(currentDataSource?.getUserMessages?.(currentDatasourceState, {
+            frame,
+            setState: () => {},
+          }) ?? []),
+          ...(currentVisualization?.getUserMessages?.(currentVisualizationState, { frame }) ?? []),
+        ],
+        undefined,
+        { severity: 'error' }
+      ).length === 0
+    );
+  } catch (e) {
+    return false;
+  }
+};
 
 export interface SuggestionPanelProps {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
+  getUserMessages: UserMessagesGetter;
 }
 
 const PreviewRenderer = ({
@@ -189,6 +216,7 @@ export function SuggestionPanel({
   visualizationMap,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
+  getUserMessages,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -197,6 +225,10 @@ export function SuggestionPanel({
   const existsStagedPreview = useLensSelector((state) => Boolean(state.lens.stagedPreview));
   const currentVisualization = useLensSelector(selectCurrentVisualization);
   const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
+
+  const frameDatasourceAPI = useLensSelector((state) =>
+    selectFrameDatasourceAPI(state, datasourceMap)
+  );
   const changesApplied = useLensSelector(selectChangesApplied);
   // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
   const [hideSuggestions, setHideSuggestions] = useLocalStorage(
@@ -237,28 +269,13 @@ export function SuggestionPanel({
             }) => {
               return (
                 !hide &&
-                validateDatasourceAndVisualization(
+                configurationsValid(
                   suggestionDatasourceId ? datasourceMap[suggestionDatasourceId] : null,
                   suggestionDatasourceState,
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
-                  {
-                    ...frame,
-                    dataViews: frame.dataViews,
-                    datasourceLayers: getDatasourceLayers(
-                      suggestionDatasourceId
-                        ? {
-                            [suggestionDatasourceId]: {
-                              isLoading: true,
-                              state: suggestionDatasourceState,
-                            },
-                          }
-                        : {},
-                      datasourceMap,
-                      frame.dataViews.indexPatterns
-                    ),
-                  }
-                ) == null
+                  frameDatasourceAPI
+                )
               );
             }
           )
@@ -274,16 +291,11 @@ export function SuggestionPanel({
             ),
           }));
 
-    const validationErrors = validateDatasourceAndVisualization(
-      activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-      activeDatasourceId && currentDatasourceStates[activeDatasourceId]?.state,
-      currentVisualization.activeId ? visualizationMap[currentVisualization.activeId] : null,
-      currentVisualization.state,
-      frame
-    );
+    const hasErrors =
+      getUserMessages(['visualization', 'visualizationInEditor'], { severity: 'error' }).length > 0;
 
     const newStateExpression =
-      currentVisualization.state && currentVisualization.activeId && !validationErrors
+      currentVisualization.state && currentVisualization.activeId && !hasErrors
         ? preparePreviewExpression(
             { visualizationState: currentVisualization.state },
             visualizationMap[currentVisualization.activeId],
@@ -296,7 +308,7 @@ export function SuggestionPanel({
     return {
       suggestions: newSuggestions,
       currentStateExpression: newStateExpression,
-      currentStateError: validationErrors,
+      currentStateError: hasErrors,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -387,7 +399,7 @@ export function SuggestionPanel({
       {currentVisualization.activeId && !hideSuggestions && (
         <SuggestionPreview
           preview={{
-            error: currentStateError != null,
+            error: currentStateError,
             expression: currentStateExpression,
             icon:
               visualizationMap[currentVisualization.activeId].getDescription(
