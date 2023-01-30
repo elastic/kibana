@@ -1144,9 +1144,10 @@ const formatFields = (
     if (key in availableFields && !excludeField(key)) {
       const fieldType = (Object.keys(availableFields[key]) as ES_FIELD_TYPES[])?.[0];
       if (
-        fieldType === ES_FIELD_TYPES.KEYWORD ||
-        fieldType === ES_FIELD_TYPES.OBJECT ||
-        fieldType === ES_FIELD_TYPES.TEXT
+        (fieldType === ES_FIELD_TYPES.KEYWORD ||
+          fieldType === ES_FIELD_TYPES.TEXT ||
+          fieldType === ES_FIELD_TYPES.OBJECT) &&
+        value.length === 1
       ) {
         formattedContextFields[key] = value?.[0];
       } else {
