@@ -10,8 +10,8 @@ import { getAbsoluteTimeRange, TimeBuckets } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AlertSummaryTimeRange } from '@kbn/triggers-actions-ui-plugin/public';
-import { getAbsoluteTime } from '../../../utils/date';
-import { getBucketSize } from '../../../utils/get_bucket_size';
+import { getAbsoluteTime } from '../date';
+import { getBucketSize } from '../get_bucket_size';
 
 export const getDefaultAlertSummaryTimeRange = (): AlertSummaryTimeRange => {
   const { to, from } = getAbsoluteTimeRange({
@@ -48,7 +48,7 @@ export const getAlertSummaryTimeRange = (
   };
 };
 
-const getFixedInterval = ({ to, from }: TimeRange) => {
+const getFixedInterval = ({ from, to }: TimeRange) => {
   const start = getAbsoluteTime(from);
   const end = getAbsoluteTime(to, { roundUp: true });
 

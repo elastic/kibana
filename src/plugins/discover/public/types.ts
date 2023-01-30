@@ -12,7 +12,7 @@ import { type DatatableColumn } from '@kbn/expressions-plugin/common';
 export type ValueToStringConverter = (
   rowIndex: number,
   columnId: string,
-  options?: { disableMultiline?: boolean }
+  options?: { compatibleWithCSV?: boolean }
 ) => { formattedString: string; withFormula: boolean };
 
 export interface EsHitRecord extends Omit<estypes.SearchHit, '_source'> {
