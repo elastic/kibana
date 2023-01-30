@@ -228,7 +228,7 @@ describe('ImportDataModal', () => {
     expect(wrapper).toMatchSnapshot();
     expect(queryByTestId('actionConnectorsWarningsCallOut')).not.toBeInTheDocument();
     expect(importWithWarning).toHaveBeenCalled();
-    expect(closeModal).toHaveBeenCalled();
+    expect(closeModal).not.toHaveBeenCalled();
     expect(importComplete).toHaveBeenCalled();
   });
   test('should import file, with warnings', async () => {
