@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { getDescriptor, TelemetryKinds } from './serializer';
 import { traverseNodes } from './ts_parser';
 import { loadFixtureProgram } from './test_utils';

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { parseUsageCollection } from './ts_parser';
-import { loadFixtureProgram } from './test_utils';
+import { parseUsageCollection } from '../ts_parser';
+import { loadFixtureProgram } from '../test_utils';
 
 describe('createKibanaProgram', () => {
   it('parses files with @kbn/* imports', () => {
-    const { program, sourceFile } = loadFixtureProgram('compile_files/with_kbn_package_import.ts');
+    const { program, sourceFile } = loadFixtureProgram('with_kbn_package_import.ts', __dirname);
     expect([...parseUsageCollection(sourceFile, program)]).toMatchInlineSnapshot(`
       Array [
         Array [
-          "packages/kbn-telemetry-tools/src/tools/__fixture__/compile_files/with_kbn_package_import.ts",
+          "packages/kbn-telemetry-tools/src/tools/ts_program/__fixture__/with_kbn_package_import.ts",
           Object {
             "collectorName": "with_kbn_package_import",
             "fetch": Object {

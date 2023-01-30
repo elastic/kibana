@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as ts from 'typescript';
+import ts from 'typescript';
 import * as path from 'path';
 import { extractCollectors, getProgramPaths } from './extract_collectors';
 import { parseTelemetryRC } from './config';

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as ts from 'typescript';
+import ts from 'typescript';
 import * as path from 'path';
-import { createKibanaProgram } from './compiler_host';
+import { createKibanaProgram } from './ts_program';
 
-export function loadFixtureProgram(fixtureFile: string) {
-  const fixturePath = path.resolve(__dirname, '__fixture__', fixtureFile);
+export function loadFixtureProgram(fixtureFile: string, basepath = __dirname) {
+  const fixturePath = path.resolve(basepath, '__fixture__', fixtureFile);
 
   const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
   if (!tsConfig) {
