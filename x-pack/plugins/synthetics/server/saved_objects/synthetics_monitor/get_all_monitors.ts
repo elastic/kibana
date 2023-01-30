@@ -76,6 +76,7 @@ export const processMonitors = async (
   const allIds: string[] = [];
   let listOfLocationsSet = new Set<string>();
   const monitorLocationMap: Record<string, string[]> = {};
+  const monitorQueryIdToConfigIdMap: Record<string, string> = {};
 
   let allLocations: ServiceLocation[] | null = null;
 
@@ -99,6 +100,8 @@ export const processMonitors = async (
     allIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
 
     projectMonitorsCount += attrs?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT ? 1 : 0;
+
+    monitorQueryIdToConfigIdMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = attrs[ConfigKey.CONFIG_ID];
 
     if (attrs[ConfigKey.ENABLED] === false) {
       disabledCount += attrs[ConfigKey.LOCATIONS].length;
@@ -141,5 +144,6 @@ export const processMonitors = async (
     disabledMonitorsCount,
     projectMonitorsCount,
     listOfLocations: [...listOfLocationsSet],
+    monitorQueryIdToConfigIdMap,
   };
 };

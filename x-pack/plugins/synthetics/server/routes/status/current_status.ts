@@ -61,6 +61,7 @@ export async function getStatus(
       ConfigKey.ENABLED,
       ConfigKey.LOCATIONS,
       ConfigKey.MONITOR_QUERY_ID,
+      ConfigKey.CONFIG_ID,
       ConfigKey.SCHEDULE,
       ConfigKey.MONITOR_SOURCE_TYPE,
     ],
@@ -74,14 +75,16 @@ export async function getStatus(
     monitorLocationMap,
     disabledMonitorsCount,
     projectMonitorsCount,
+    monitorQueryIdToConfigIdMap,
   } = await processMonitors(allMonitors, server, soClient, syntheticsMonitorClient);
 
-  const { up, down, pending, upConfigs, downConfigs } = await queryMonitorStatus(
+  const { up, down, pending, upConfigs, downConfigs, pendingConfigs } = await queryMonitorStatus(
     uptimeEsClient,
     listOfLocations,
     { from: maxPeriod, to: 'now' },
     enabledIds,
-    monitorLocationMap
+    monitorLocationMap,
+    monitorQueryIdToConfigIdMap
   );
 
   return {
@@ -95,6 +98,7 @@ export async function getStatus(
     pending,
     upConfigs,
     downConfigs,
+    pendingConfigs,
   };
 }
 

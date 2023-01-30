@@ -8,14 +8,18 @@
 import * as t from 'io-ts';
 import { PingType } from '..';
 
-export const OverviewStatusMetaDataCodec = t.interface({
-  monitorQueryId: t.string,
-  configId: t.string,
-  location: t.string,
-  timestamp: t.string,
-  status: t.string,
-  ping: PingType,
-});
+export const OverviewStatusMetaDataCodec = t.intersection([
+  t.interface({
+    monitorQueryId: t.string,
+    configId: t.string,
+    status: t.string,
+    location: t.string,
+  }),
+  t.partial({
+    timestamp: t.string,
+    ping: PingType,
+  }),
+]);
 
 export const OverviewStatusCodec = t.interface({
   allMonitorsCount: t.number,
@@ -27,6 +31,7 @@ export const OverviewStatusCodec = t.interface({
   disabledCount: t.number,
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  pendingConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   enabledIds: t.array(t.string),
 });
 
