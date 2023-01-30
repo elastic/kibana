@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { inspect } from 'util';
-import * as Rx from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
-import { isAxiosResponseError } from '@kbn/dev-utils';
-import { createFailError } from '@kbn/dev-cli-errors';
-import { ToolingLog } from '@kbn/tooling-log';
+import { chunk } from 'lodash';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { SavedObjectsBulkDeleteResponse } from '@kbn/core-saved-objects-api-server';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
@@ -57,20 +54,13 @@ interface MigrateResponse {
   result: Array<{ status: string }>;
 }
 
-interface FindApiResponse {
-  saved_objects: Array<{
-    type: string;
-    id: string;
-    [key: string]: unknown;
-  }>;
-  total: number;
-  per_page: number;
-  page: number;
-}
-
 interface CleanOptions {
   space?: string;
   types: string[];
+}
+
+interface CleanApiResponse {
+  deleted: number;
 }
 
 interface DeleteObjectsOptions {
@@ -81,13 +71,43 @@ interface DeleteObjectsOptions {
   }>;
 }
 
-async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) => Promise<void>) {
-  if (arr.length) {
-    await Rx.lastValueFrom(
-      Rx.from(arr).pipe(mergeMap(async (item) => await fn(item), maxConcurrency))
-    );
-  }
-}
+const DELETE_CHUNK_SIZE = 50;
+
+// add types here
+const STANDARD_LIST_TYPES = [
+  'url',
+  'index-pattern',
+  'action',
+  'query',
+  'alert',
+  'graph-workspace',
+  'tag',
+  'visualization',
+  'canvas-element',
+  'canvas-workpad',
+  'dashboard',
+  'search',
+  'lens',
+  'map',
+  'cases',
+  'uptime-dynamic-settings',
+  'osquery-saved-query',
+  'osquery-pack',
+  'infrastructure-ui-source',
+  'metrics-explorer-view',
+  'inventory-view',
+  'infrastructure-monitoring-log-view',
+  'apm-indices',
+  // Fleet saved object types
+  'ingest-outputs',
+  'ingest-download-sources',
+  'ingest-agent-policies',
+  'ingest-package-policies',
+  'epm-packages',
+  'epm-packages-assets',
+  'fleet-preconfiguration-deletion-record',
+  'fleet-fleet-server-host',
+];
 
 /**
  * SO client for FTR.
@@ -194,74 +214,22 @@ export class KbnClientSavedObjects {
   public async clean(options: CleanOptions) {
     this.log.debug('Cleaning all saved objects', { space: options.space });
 
-    let deleted = 0;
-
-    while (true) {
-      const resp = await this.requester.request<FindApiResponse>({
-        method: 'GET',
-        path: options.space
-          ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/_find`
-          : `/internal/ftr/kbn_client_so/_find`,
-        query: {
-          per_page: 1000,
-          type: options.types,
-          fields: 'none',
-        },
-      });
-
-      this.log.info('deleting batch of', resp.data.saved_objects.length, 'objects');
-      const deletion = await this.bulkDelete({
-        space: options.space,
-        objects: resp.data.saved_objects,
-      });
-      deleted += deletion.deleted;
-
-      if (resp.data.total <= resp.data.per_page) {
-        break;
-      }
-    }
+    const resp = await this.requester.request<CleanApiResponse>({
+      method: 'POST',
+      path: options.space
+        ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/_clean`
+        : `/internal/ftr/kbn_client_so/_clean`,
+      body: {
+        types: options.types,
+      },
+    });
+    const deleted = resp.data.deleted;
 
     this.log.success('deleted', deleted, 'objects');
   }
 
   public async cleanStandardList(options?: { space?: string }) {
-    // add types here
-    const types = [
-      'url',
-      'index-pattern',
-      'action',
-      'query',
-      'alert',
-      'graph-workspace',
-      'tag',
-      'visualization',
-      'canvas-element',
-      'canvas-workpad',
-      'dashboard',
-      'search',
-      'lens',
-      'map',
-      'cases',
-      'uptime-dynamic-settings',
-      'osquery-saved-query',
-      'osquery-pack',
-      'infrastructure-ui-source',
-      'metrics-explorer-view',
-      'inventory-view',
-      'infrastructure-monitoring-log-view',
-      'apm-indices',
-      // Fleet saved object types
-      'ingest-outputs',
-      'ingest-download-sources',
-      'ingest-agent-policies',
-      'ingest-package-policies',
-      'epm-packages',
-      'epm-packages-assets',
-      'fleet-preconfiguration-deletion-record',
-      'fleet-fleet-server-host',
-    ];
-
-    const newOptions = { types, space: options?.space };
+    const newOptions = { types: STANDARD_LIST_TYPES, space: options?.space };
     await this.clean(newOptions);
   }
 
@@ -269,28 +237,25 @@ export class KbnClientSavedObjects {
     let deleted = 0;
     let missing = 0;
 
-    await concurrently(20, options.objects, async (obj) => {
-      try {
-        await this.requester.request({
-          method: 'DELETE',
-          path: options.space
-            ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${obj.type}/${obj.id}`
-            : uriencode`/internal/ftr/kbn_client_so/${obj.type}/${obj.id}`,
-        });
-        deleted++;
-      } catch (error) {
-        if (isAxiosResponseError(error)) {
-          if (error.response.status === 404) {
-            missing++;
-            return;
-          }
+    const chunks = chunk(options.objects, DELETE_CHUNK_SIZE);
 
-          throw createFailError(`${error.response.status} resp: ${inspect(error.response.data)}`);
+    for (let i = 0; i < chunks.length; i++) {
+      const objects = chunks[i];
+      const { data: response } = await this.requester.request<SavedObjectsBulkDeleteResponse>({
+        method: 'POST',
+        path: options.space
+          ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/_bulk_delete`
+          : uriencode`/internal/ftr/kbn_client_so/_bulk_delete`,
+        body: objects.map(({ type, id }) => ({ type, id })),
+      });
+      response.statuses.forEach((status) => {
+        if (status.success) {
+          deleted++;
+        } else if (status.error?.statusCode === 404) {
+          missing++;
         }
-
-        throw error;
-      }
-    });
+      });
+    }
 
     return { deleted, missing };
   }

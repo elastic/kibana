@@ -62,6 +62,7 @@ export class CreateSLO {
         frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
       },
       revision: 1,
+      enabled: true,
       createdAt: now,
       updatedAt: now,
     };

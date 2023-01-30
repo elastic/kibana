@@ -99,15 +99,23 @@ export function TransactionErrorRateRuleType(props: Props) {
   const fields = [
     <ServiceField
       currentValue={params.serviceName}
-      onChange={(value) => setRuleParams('serviceName', value)}
+      onChange={(value) => {
+        if (value !== params.serviceName) {
+          setRuleParams('serviceName', value);
+          setRuleParams('transactionType', '');
+          setRuleParams('environment', ENVIRONMENT_ALL.value);
+        }
+      }}
     />,
     <TransactionTypeField
       currentValue={params.transactionType}
       onChange={(value) => setRuleParams('transactionType', value)}
+      serviceName={params.serviceName}
     />,
     <EnvironmentField
       currentValue={params.environment}
       onChange={(value) => setRuleParams('environment', value)}
+      serviceName={params.serviceName}
     />,
     <IsAboveField
       value={params.threshold}

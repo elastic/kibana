@@ -19,7 +19,8 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/plugin-discovery",
-    "@kbn/doc-links"
+    "@kbn/doc-links",
+    "@kbn/repo-packages"
   ],
   "exclude": [
     "target/**/*",
