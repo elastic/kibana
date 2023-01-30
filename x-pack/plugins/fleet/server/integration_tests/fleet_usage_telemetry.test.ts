@@ -327,11 +327,11 @@ describe('fleet usage telemetry', () => {
         agent_policies: { count: 3, output_types: ['elasticsearch'] },
         agent_logs_panics_last_hour: [
           {
-            '@timestamp': expect.any(String),
+            timestamp: expect.any(String),
             message: 'stderr panic close of closed channel',
           },
           {
-            '@timestamp': expect.any(String),
+            timestamp: expect.any(String),
             message: 'stderr panic some other panic',
           },
         ],

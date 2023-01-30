@@ -11,7 +11,7 @@ const AGENT_LOGS_INDEX_PATTERN = 'logs-elastic_agent-*';
 const MAX_MESSAGE_COUNT = 100;
 
 export interface AgentPanicLogsData {
-  agent_logs_panics_last_hour: Array<{ message: string; '@timestamp': string }>;
+  agent_logs_panics_last_hour: Array<{ message: string; timestamp: string }>;
 }
 
 interface MaybeLogsDoc {
@@ -56,7 +56,7 @@ export async function getPanicLogsLastHour(
 
   const panicLogsLastHour = res.hits.hits.map((hit) => ({
     message: hit._source?.message || '',
-    '@timestamp': hit._source?.['@timestamp'] || '',
+    timestamp: hit._source?.['@timestamp'] || '',
   }));
 
   return {

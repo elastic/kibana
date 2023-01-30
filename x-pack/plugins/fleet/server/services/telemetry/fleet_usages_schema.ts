@@ -196,7 +196,7 @@ export const fleetUsagesSchema: RootSchema<any> = {
     },
     items: {
       properties: {
-        '@timestamp': {
+        timestamp: {
           type: 'date',
           _meta: {
             description: 'Timestamp of the log message containing the word panic',
