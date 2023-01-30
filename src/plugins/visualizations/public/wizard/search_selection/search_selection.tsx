@@ -33,18 +33,16 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
       <React.Fragment>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h1>
-              <FormattedMessage
-                id="visualizations.newVisWizard.newVisTypeTitle"
-                defaultMessage="New {visTypeName}"
-                values={{ visTypeName: this.props.visType.title }}
-              />{' '}
-              /{' '}
-              <FormattedMessage
-                id="visualizations.newVisWizard.chooseSourceTitle"
-                defaultMessage="Choose a source"
-              />
-            </h1>
+            <FormattedMessage
+              id="visualizations.newVisWizard.newVisTypeTitle"
+              defaultMessage="New {visTypeName}"
+              values={{ visTypeName: this.props.visType.title }}
+            />{' '}
+            /{' '}
+            <FormattedMessage
+              id="visualizations.newVisWizard.chooseSourceTitle"
+              defaultMessage="Choose a source"
+            />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>

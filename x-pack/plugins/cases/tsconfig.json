@@ -52,7 +52,9 @@
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
     "@kbn/ecs",
+    "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-base-server-mocks",
+    "@kbn/core-saved-objects-utils-server",
   ],
   "exclude": [
     "target/**/*",

@@ -34,6 +34,14 @@ export interface SavedObjectsType<Attributes = any> {
    */
   hidden: boolean;
   /**
+   * Is the type hidden from the http APIs. If `hiddenFromHttpApis:true`, repositories will have access to the type but the type is not exposed via the HTTP APIs.
+   * It is recommended to hide types registered with 'hidden=false' from the httpApis for backward compatibility in the HTTP layer.
+   *
+   * @remarks Setting this property for hidden types is not recommended and will fail validation if set to `false`.
+   * @internalRemarks Using 'hiddenFromHttpApis' is an alternative to registering types as `hidden:true` to hide a type from the HTTP APIs without effecting repositories access.
+   */
+  hiddenFromHttpApis?: boolean;
+  /**
    * The {@link SavedObjectsNamespaceType | namespace type} for the type.
    */
   namespaceType: SavedObjectsNamespaceType;
