@@ -9,8 +9,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { isEqual } from 'lodash';
-import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices } from '../../types';
 import {
@@ -101,8 +100,8 @@ export interface UnifiedHistogramStateOptions {
 export class UnifiedHistogramStateService {
   private localStorageKeyPrefix?: string;
   private services: UnifiedHistogramServices;
-  private state: UnifiedHistogramState;
-  private state$: BehaviorSubject<UnifiedHistogramState>;
+
+  state$: BehaviorSubject<UnifiedHistogramState>;
 
   constructor(options: UnifiedHistogramStateOptions) {
     const { services, localStorageKeyPrefix, initialState } = options;
@@ -119,7 +118,7 @@ export class UnifiedHistogramStateService {
     }
 
     this.services = services;
-    this.state = {
+    this.state$ = new BehaviorSubject({
       breakdownField,
       chartHidden,
       filters: [],
@@ -133,18 +132,7 @@ export class UnifiedHistogramStateService {
       totalHitsResult: undefined,
       totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
       ...initialState,
-    };
-    this.state$ = new BehaviorSubject(this.state);
-  }
-
-  public getState$<T = UnifiedHistogramState>(
-    selector?: (state: UnifiedHistogramState) => T
-  ): Observable<T> {
-    if (selector) {
-      return this.state$.pipe(map(selector), distinctUntilChanged(isEqual));
-    }
-
-    return this.state$.pipe(distinctUntilChanged(isEqual));
+    });
   }
 
   public updateState(stateUpdate: Partial<UnifiedHistogramState>) {
@@ -170,11 +158,9 @@ export class UnifiedHistogramStateService {
       }
     }
 
-    this.state = {
-      ...this.state,
+    this.state$.next({
+      ...this.state$.getValue(),
       ...stateUpdate,
-    };
-
-    this.state$.next(this.state);
+    });
   }
 }

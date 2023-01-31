@@ -10,78 +10,81 @@ import { DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
 import { useCallback, useEffect, useMemo } from 'react';
 import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
-import type {
-  UnifiedHistogramState,
-  UnifiedHistogramStateService,
-} from '../services/state_service';
+import type { UnifiedHistogramStateService } from '../services/state_service';
+import {
+  breakdownFieldSelector,
+  chartHiddenSelector,
+  dataViewSelector,
+  querySelector,
+  requestAdapterSelector,
+  searchSessionIdSelector,
+  timeIntervalSelector,
+  totalHitsResultSelector,
+  totalHitsStatusSelector,
+} from '../utils/state_selectors';
+import { useStateSelector } from '../utils/use_state_selector';
 
-export const useStateProps = ({
-  state,
-  stateService,
-}: {
-  state: UnifiedHistogramState | undefined;
-  stateService: UnifiedHistogramStateService | undefined;
-}) => {
+export const useStateProps = (stateService: UnifiedHistogramStateService | undefined) => {
+  const breakdownField = useStateSelector(stateService?.state$, breakdownFieldSelector);
+  const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
+  const dataView = useStateSelector(stateService?.state$, dataViewSelector);
+  const query = useStateSelector(stateService?.state$, querySelector);
+  const requestAdapter = useStateSelector(stateService?.state$, requestAdapterSelector);
+  const searchSessionId = useStateSelector(stateService?.state$, searchSessionIdSelector);
+  const timeInterval = useStateSelector(stateService?.state$, timeIntervalSelector);
+  const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
+  const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
+
   /**
    * Contexts
    */
 
   const isPlainRecord = useMemo(() => {
-    return (
-      state?.query &&
-      isOfAggregateQueryType(state.query) &&
-      getAggregateQueryMode(state.query) === 'sql'
-    );
-  }, [state?.query]);
+    return query && isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'sql';
+  }, [query]);
 
   const isTimeBased = useMemo(() => {
-    return (
-      state?.dataView && state.dataView.type !== DataViewType.ROLLUP && state.dataView.isTimeBased()
-    );
-  }, [state?.dataView]);
+    return dataView && dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
+  }, [dataView]);
 
   const hits = useMemo(() => {
-    if (!state || isPlainRecord || state.totalHitsResult instanceof Error) {
+    if (isPlainRecord || totalHitsResult instanceof Error) {
       return undefined;
     }
 
     return {
-      status: state.totalHitsStatus,
-      total: state.totalHitsResult,
+      status: totalHitsStatus,
+      total: totalHitsResult,
     };
-  }, [isPlainRecord, state]);
+  }, [isPlainRecord, totalHitsResult, totalHitsStatus]);
 
   const chart = useMemo(() => {
-    if (!state || isPlainRecord || !isTimeBased) {
+    if (isPlainRecord || !isTimeBased) {
       return undefined;
     }
 
     return {
-      hidden: state.chartHidden,
-      timeInterval: state.timeInterval,
+      hidden: chartHidden,
+      timeInterval,
     };
-  }, [isPlainRecord, isTimeBased, state]);
+  }, [chartHidden, isPlainRecord, isTimeBased, timeInterval]);
 
   const breakdown = useMemo(() => {
-    if (!state || isPlainRecord || !isTimeBased) {
+    if (isPlainRecord || !isTimeBased) {
       return undefined;
     }
 
     return {
-      field: state.breakdownField ? state.dataView.getFieldByName(state.breakdownField) : undefined,
+      field: breakdownField ? dataView?.getFieldByName(breakdownField) : undefined,
     };
-  }, [isPlainRecord, isTimeBased, state]);
+  }, [breakdownField, dataView, isPlainRecord, isTimeBased]);
 
   const request = useMemo(() => {
-    if (!state) {
-      return undefined;
-    }
-
     return {
-      searchSessionId: state.searchSessionId,
-      adapter: state.requestAdapter,
+      searchSessionId,
+      adapter: requestAdapter,
     };
-  }, [state]);
+  }, [requestAdapter, searchSessionId]);
 
   /**
    * Callbacks
@@ -95,31 +98,34 @@ export const useStateProps = ({
   );
 
   const onTimeIntervalChange = useCallback(
-    (timeInterval: string) => {
-      stateService?.updateState({ timeInterval });
+    (newTimeInterval: string) => {
+      stateService?.updateState({ timeInterval: newTimeInterval });
     },
     [stateService]
   );
 
   const onTotalHitsChange = useCallback(
-    (totalHitsStatus: UnifiedHistogramFetchStatus, totalHitsResult?: number | Error) => {
+    (newTotalHitsStatus: UnifiedHistogramFetchStatus, newTotalHitsResult?: number | Error) => {
       // If we have a partial result already, we don't
       // want to update the total hits back to loading
       if (
-        state?.totalHitsStatus === UnifiedHistogramFetchStatus.partial &&
-        totalHitsStatus === UnifiedHistogramFetchStatus.loading
+        totalHitsStatus === UnifiedHistogramFetchStatus.partial &&
+        newTotalHitsStatus === UnifiedHistogramFetchStatus.loading
       ) {
         return;
       }
 
-      stateService?.updateState({ totalHitsStatus, totalHitsResult });
+      stateService?.updateState({
+        totalHitsStatus: newTotalHitsStatus,
+        totalHitsResult: newTotalHitsResult,
+      });
     },
-    [state?.totalHitsStatus, stateService]
+    [totalHitsStatus, stateService]
   );
 
   const onChartHiddenChange = useCallback(
-    (chartHidden: boolean) => {
-      stateService?.updateState({ chartHidden });
+    (newChartHidden: boolean) => {
+      stateService?.updateState({ chartHidden: newChartHidden });
     },
     [stateService]
   );
@@ -133,8 +139,8 @@ export const useStateProps = ({
   );
 
   const onBreakdownFieldChange = useCallback(
-    (breakdownField: DataViewField | undefined) => {
-      stateService?.updateState({ breakdownField: breakdownField?.name });
+    (newBreakdownField: DataViewField | undefined) => {
+      stateService?.updateState({ breakdownField: newBreakdownField?.name });
     },
     [stateService]
   );
@@ -145,10 +151,10 @@ export const useStateProps = ({
 
   // Clear the Lens request adapter when the chart is hidden
   useEffect(() => {
-    if (state?.chartHidden || !chart) {
+    if (chartHidden || !chart) {
       stateService?.updateState({ lensRequestAdapter: undefined });
     }
-  }, [chart, state?.chartHidden, stateService]);
+  }, [chart, chartHidden, stateService]);
 
   return {
     hits,

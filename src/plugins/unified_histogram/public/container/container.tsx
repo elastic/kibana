@@ -6,16 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
 import type { UnifiedHistogramInputMessage } from '../types';
 import {
-  UnifiedHistogramState,
   UnifiedHistogramStateOptions,
   UnifiedHistogramStateService,
 } from './services/state_service';
 import { useStateProps } from './hooks/use_state_props';
+import { useStateSelector } from './utils/use_state_selector';
+import {
+  dataViewSelector,
+  filtersSelector,
+  querySelector,
+  timeRangeSelector,
+  topPanelHeightSelector,
+} from './utils/state_selectors';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
@@ -66,7 +73,7 @@ export interface UnifiedHistogramInitializedApi {
    * Get an observable to watch the container state, optionally providing a
    * selector function which only gets triggered when the selected state changes
    */
-  getState$: UnifiedHistogramStateService['getState$'];
+  getState$: () => UnifiedHistogramStateService['state$'];
   /**
    * Update the container state my providing a partial state object
    */
@@ -88,9 +95,7 @@ export const UnifiedHistogramContainer = forwardRef<
 >((containerProps, ref) => {
   const [initialized, setInitialized] = useState(false);
   const [layoutProps, setLayoutProps] = useState<LayoutProps>();
-  const [state, setState] = useState<UnifiedHistogramState>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
-  const stateProps = useStateProps({ state, stateService });
   const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
   const api = useMemo<UnifiedHistogramApi>(
     () => ({
@@ -114,8 +119,8 @@ export const UnifiedHistogramContainer = forwardRef<
         setStateService(new UnifiedHistogramStateService(options));
         setInitialized(true);
       },
-      getState$: (selector) => {
-        return stateService!.getState$(selector);
+      getState$: () => {
+        return stateService!.state$;
       },
       updateState: (stateUpdate) => {
         stateService!.updateState(stateUpdate);
@@ -127,23 +132,18 @@ export const UnifiedHistogramContainer = forwardRef<
     [initialized, input$, stateService]
   );
 
+  // Expose the API to the parent component
   useImperativeHandle(ref, () => api, [api]);
 
-  // Subscribe to state changes
-  useEffect(() => {
-    if (!stateService) {
-      return;
-    }
-
-    const subscription = stateService.getState$().subscribe(setState);
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [stateService]);
+  const stateProps = useStateProps(stateService);
+  const dataView = useStateSelector(stateService?.state$, dataViewSelector);
+  const query = useStateSelector(stateService?.state$, querySelector);
+  const filters = useStateSelector(stateService?.state$, filtersSelector);
+  const timeRange = useStateSelector(stateService?.state$, timeRangeSelector);
+  const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
 
   // Don't render anything until the container is initialized
-  if (!layoutProps || !state) {
+  if (!layoutProps || !dataView) {
     return null;
   }
 
@@ -152,11 +152,11 @@ export const UnifiedHistogramContainer = forwardRef<
       {...containerProps}
       {...layoutProps}
       {...stateProps}
-      dataView={state.dataView}
-      query={state.query}
-      filters={state.filters}
-      timeRange={state.timeRange}
-      topPanelHeight={state.topPanelHeight}
+      dataView={dataView}
+      query={query}
+      filters={filters}
+      timeRange={timeRange}
+      topPanelHeight={topPanelHeight}
       input$={input$}
     />
   );
