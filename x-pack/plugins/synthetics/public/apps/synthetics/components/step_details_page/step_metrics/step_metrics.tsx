@@ -12,7 +12,6 @@ import { ThresholdIndicator } from '../../common/components/thershold_indicator'
 import { DefinitionsPopover } from './definitions_popover';
 import { useStepMetrics } from '../hooks/use_step_metrics';
 import { useStepPrevMetrics } from '../hooks/use_step_prev_metrics';
-import { formatBytes } from '../hooks/use_object_metrics';
 
 export const formatMillisecond = (ms: number) => {
   if (ms < 0) {
