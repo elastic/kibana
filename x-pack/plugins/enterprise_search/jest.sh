@@ -25,4 +25,4 @@ fi
 # @see https://jestjs.io/docs/en/cli#options
 ARGS="${*:2}"
 
-yarn test:jest $TARGET $ARGS
+TZ="Etc/UTC" yarn test:jest $TARGET $ARGS
