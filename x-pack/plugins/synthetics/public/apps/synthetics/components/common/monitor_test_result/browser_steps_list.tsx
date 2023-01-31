@@ -193,12 +193,13 @@ export const BrowserStepsList = ({
   return (
     <>
       <EuiBasicTable
-        rowProps={() => ({
-          style: { verticalAlign: 'initial' },
-        })}
-        cellProps={() => ({
-          style: { verticalAlign: 'initial' },
-        })}
+        cellProps={(row) => {
+          if (itemIdToExpandedRowMap[row._id]) {
+            return {
+              style: { verticalAlign: 'top' },
+            };
+          }
+        }}
         compressed={compressed}
         loading={loading}
         columns={columns}
