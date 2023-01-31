@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JobMemorySize } from '../../../../common/types/trained_models';
+import { MemoryUsageInfo } from '../../../../common/types/trained_models';
 import { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { LoadingWrapper } from '../../jobs/new_job/pages/components/charts/loading_wrapper';
@@ -33,6 +33,30 @@ interface Props {
 
 const DEFAULT_CHART_HEIGHT = '400px';
 
+const TYPE_OPTIONS: TreeMapOptions[] = [
+  {
+    label: i18n.translate('xpack.ml.memoryUsage.treeMap.adLabel', {
+      defaultMessage: 'Anomaly detection jobs',
+    }),
+    objectType: 'anomaly-detector',
+    color: getMemoryItemColor('anomaly-detector'),
+  },
+  {
+    label: i18n.translate('xpack.ml.memoryUsage.treeMap.dfaLabel', {
+      defaultMessage: 'Data frame analytics jobs',
+    }),
+    objectType: 'data-frame-analytics',
+    color: getMemoryItemColor('data-frame-analytics'),
+  },
+  {
+    label: i18n.translate('xpack.ml.memoryUsage.treeMap.modelsLabel', {
+      defaultMessage: 'Trained models',
+    }),
+    objectType: 'trained-model',
+    color: getMemoryItemColor('trained-model'),
+  },
+];
+
 type TreeMapOptions = EuiComboBoxOptionOption & { objectType: MlSavedObjectType };
 
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
@@ -41,37 +65,13 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   const chartHeight = height ?? DEFAULT_CHART_HEIGHT;
 
   const trainedModelsApiService = useTrainedModelsApiService();
-  const [allData, setAllData] = useState<JobMemorySize[]>([]);
-  const [data, setData] = useState<JobMemorySize[]>([]);
+  const [allData, setAllData] = useState<MemoryUsageInfo[]>([]);
+  const [data, setData] = useState<MemoryUsageInfo[]>([]);
   const [loading, setLoading] = useState(false);
-
-  const TYPE_OPTIONS: TreeMapOptions[] = [
-    {
-      label: i18n.translate('xpack.ml.memoryUsage.treeMap.adLabel', {
-        defaultMessage: 'Anomaly detection jobs',
-      }),
-      objectType: 'anomaly-detector',
-      color: getMemoryItemColor('anomaly-detector'),
-    },
-    {
-      label: i18n.translate('xpack.ml.memoryUsage.treeMap.dfaLabel', {
-        defaultMessage: 'Data frame analytics jobs',
-      }),
-      objectType: 'data-frame-analytics',
-      color: getMemoryItemColor('data-frame-analytics'),
-    },
-    {
-      label: i18n.translate('xpack.ml.memoryUsage.treeMap.modelsLabel', {
-        defaultMessage: 'Trained models',
-      }),
-      objectType: 'trained-model',
-      color: getMemoryItemColor('trained-model'),
-    },
-  ];
   const [selectedOptions, setSelectedOptions] = useState<TreeMapOptions[]>(TYPE_OPTIONS);
 
   const filterData = useCallback(
-    (dataIn: JobMemorySize[]) => {
+    (dataIn: MemoryUsageInfo[]) => {
       const labels = selectedOptions.map((o) => o.objectType);
       return dataIn.filter((d) => labels.includes(d.type));
     },
@@ -129,26 +129,24 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
             }}
           />
           <Partition
-            id="spec_1"
+            id="memoryUsageTreeMap"
             data={data}
             layout={PartitionLayout.treemap}
-            valueAccessor={(d: JobMemorySize) => d.size}
+            valueAccessor={(d: MemoryUsageInfo) => d.size}
             valueFormatter={(size: number) => bytesFormatter(size)}
             layers={[
               {
-                groupByRollup: (d: JobMemorySize) => d.type,
+                groupByRollup: (d: MemoryUsageInfo) => d.type,
                 nodeLabel: (d) => `${d}`,
                 fillLabel: {
                   valueFormatter: (size: number) => bytesFormatter(size),
                 },
                 shape: {
-                  fillColor: (d: ShapeTreeNode) => {
-                    return getMemoryItemColor(d.dataName as JobType);
-                  },
+                  fillColor: (d: ShapeTreeNode) => getMemoryItemColor(d.dataName as JobType),
                 },
               },
               {
-                groupByRollup: (d: JobMemorySize) => d.id,
+                groupByRollup: (d: MemoryUsageInfo) => d.id,
                 nodeLabel: (d) => `${d}`,
                 fillLabel: {
                   valueFont: {
@@ -157,6 +155,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
                 },
                 shape: {
                   fillColor: (d: ShapeTreeNode) => {
+                    // color the shape the same as its parent.
                     const parentId = d.parent.path[d.parent.path.length - 1].value as JobType;
                     return getMemoryItemColor(parentId);
                   },

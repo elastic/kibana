@@ -18,7 +18,7 @@ import type {
   ModelPipelines,
   TrainedModelStat,
   NodesOverviewResponse,
-  JobMemorySize,
+  MemoryUsageInfo,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -189,7 +189,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     },
 
     memoryUsage(type?: MlSavedObjectType, node?: string, showClosedJobs = false) {
-      return httpService.http<JobMemorySize[]>({
+      return httpService.http<MemoryUsageInfo[]>({
         path: `${apiBasePath}/model_management/memory_usage`,
         method: 'GET',
         query: { type, node, showClosedJobs },

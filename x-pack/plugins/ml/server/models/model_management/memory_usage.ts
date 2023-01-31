@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
 import { pick } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
-import {
-  JobMemorySize,
-  TrainedModelDeploymentStatsResponse,
-  TrainedModelModelSizeStats,
+import type {
+  MemoryUsageInfo,
+  TrainedModelStatsResponse,
+  MemoryStatsResponse,
 } from '../../../common/types/trained_models';
 
-import { JobStats } from '../../../common/types/anomaly_detection_jobs';
-import { MlSavedObjectType } from '../../../common/types/saved_objects';
-import { MlClient } from '../../lib/ml_client';
+import type { JobStats } from '../../../common/types/anomaly_detection_jobs';
+import type { MlSavedObjectType } from '../../../common/types/saved_objects';
+import type { MlClient } from '../../lib/ml_client';
 import type {
   NodeDeploymentStatsResponse,
   NodesOverviewResponse,
@@ -28,45 +28,6 @@ const AD_EXTRA_MEMORY = numeral('10MB').value();
 // @ts-expect-error numeral missing value
 const DFA_EXTRA_MEMORY = numeral('5MB').value();
 
-export interface MemoryStatsResponse {
-  // !!!!!!!!!!!! move to common !!!!!!!!!!!!!!!!!!!!!!!!!!
-  _nodes: { total: number; failed: number; successful: number };
-  cluster_name: string;
-  nodes: Record<
-    string,
-    {
-      jvm: {
-        heap_max_in_bytes: number;
-        java_inference_in_bytes: number;
-        java_inference_max_in_bytes: number;
-      };
-      mem: {
-        adjusted_total_in_bytes: number;
-        total_in_bytes: number;
-        ml: {
-          data_frame_analytics_in_bytes: number;
-          native_code_overhead_in_bytes: number;
-          max_in_bytes: number;
-          anomaly_detectors_in_bytes: number;
-          native_inference_in_bytes: number;
-        };
-      };
-      transport_address: string;
-      roles: string[];
-      name: string;
-      attributes: Record<`${'ml.'}${string}`, string>;
-      ephemeral_id: string;
-    }
-  >;
-}
-
-// @ts-expect-error TrainedModelDeploymentStatsResponse missing properties from MlTrainedModelDeploymentStats
-interface TrainedModelStatsResponse extends estypes.MlTrainedModelStats {
-  // !!!!!!!!!!!!!!! move to common!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
-  model_size_stats?: TrainedModelModelSizeStats;
-}
-
 const NODE_FIELDS = ['attributes', 'name', 'roles'] as const;
 
 export type RequiredNodeFields = Pick<estypes.NodesInfoNodeInfo, typeof NODE_FIELDS[number]>;
@@ -75,7 +36,7 @@ export class MemoryUsageService {
   constructor(private readonly mlClient: MlClient) {}
 
   public async getMemorySizes(itemType?: MlSavedObjectType, node?: string, showClosedJobs = false) {
-    let memories: JobMemorySize[] = [];
+    let memories: MemoryUsageInfo[] = [];
 
     switch (itemType) {
       case 'anomaly-detector':
@@ -136,7 +97,7 @@ export class MemoryUsageService {
     return jobs.data_frame_analytics.map((j) => this.getDFAJobMemorySize(j, statsMap[j.id]));
   }
 
-  private getADJobMemorySize(jobStats: JobStats): JobMemorySize {
+  private getADJobMemorySize(jobStats: JobStats): MemoryUsageInfo {
     let memory = 0;
     switch (jobStats.model_size_stats.assignment_memory_basis) {
       case 'model_memory_limit':
@@ -165,7 +126,7 @@ export class MemoryUsageService {
   private getDFAJobMemorySize(
     job: estypes.MlDataframeAnalyticsSummary,
     jobStats: estypes.MlDataframeAnalytics
-  ): JobMemorySize {
+  ): MemoryUsageInfo {
     const mml = job.model_memory_limit ?? '0mb';
     // @ts-expect-error numeral missing value
     const memory = numeral(mml.toUpperCase()).value();
@@ -184,7 +145,7 @@ export class MemoryUsageService {
   private getTrainedModelMemorySize(
     trainedModel: estypes.MlTrainedModelConfig,
     trainedModelStats: estypes.MlTrainedModelStats
-  ): JobMemorySize {
+  ): MemoryUsageInfo {
     const memory = trainedModelStats.model_size_stats.required_native_memory_bytes;
 
     const size = memory + AD_EXTRA_MEMORY;
@@ -309,7 +270,7 @@ export class MemoryUsageService {
   }
 }
 
-function nodeFilter(m: JobMemorySize, node?: string, showClosedJobs = false) {
+function nodeFilter(m: MemoryUsageInfo, node?: string, showClosedJobs = false) {
   if (m.nodeNames.length === 0) {
     return showClosedJobs;
   }
