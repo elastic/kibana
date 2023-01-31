@@ -19,9 +19,9 @@ interface GetSignalsMatchesFromThreatIndexOptions {
 }
 
 /**
- * fetch threats and creates signals matches map form them
+ * fetches threats and creates signals map from results, that matches signal is with list of threat queries
  */
-export const getSignalsMatchesFromThreatIndex = async ({
+export const getSignalsMapFromThreatIndex = async ({
   threatSearchParams,
   eventsCount,
 }: GetSignalsMatchesFromThreatIndexOptions): Promise<SignalsMap> => {

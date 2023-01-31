@@ -11,7 +11,7 @@ import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
 import type { CreateEventSignalOptions } from './types';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
-import { getSignalsMatchesFromThreatIndex } from './get_signal_matches_from_threat_index';
+import { getSignalsMapFromThreatIndex } from './get_signals_map_from_threat_index';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 
@@ -78,7 +78,7 @@ export const createEventSignal = async ({
       exceptionFilter,
     };
 
-    const signalsMap = await getSignalsMatchesFromThreatIndex({
+    const signalsMap = await getSignalsMapFromThreatIndex({
       threatSearchParams,
       eventsCount: currentEventList.length,
     });

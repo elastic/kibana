@@ -203,24 +203,23 @@ const enrichSignalWithThreatMatches = (
  */
 export const enrichSignalThreatMatchesFromSignalsMap = async (
   signals: SignalSourceHit[],
-  getMatchedThreats: GetMatchedThreats,
+  getMatchedThreats: () => Promise<ThreatListItem[]>,
   indicatorPath: string,
   signalsMap: Map<string, ThreatMatchNamedQuery[]>
 ): Promise<SignalSourceHit[]> => {
   if (signals.length === 0) {
-    return signals;
+    return [];
   }
 
   const uniqueHits = groupAndMergeSignalMatches(signals);
+  const matchedThreats = await getMatchedThreats();
 
-  // retrieved by ES query
-  const matchedThreats = await getMatchedThreats([]);
+  const enrichmentsWithoutAtomic: Record<string, ThreatEnrichment[]> = {};
 
-  const enrichmentsWithoutAtomic: { [key: string]: ThreatEnrichment[] } = {};
   uniqueHits.forEach((hit) => {
     enrichmentsWithoutAtomic[hit._id] = buildEnrichments({
       indicatorPath,
-      queries: (signalsMap.get(hit._id) ?? []).map((query) => query),
+      queries: signalsMap.get(hit._id) ?? [],
       threats: matchedThreats,
     });
   });
