@@ -68,6 +68,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onSupportedFieldFilter,
   onSelectedFieldFilter,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
+  // console.log('##### useGroupedFields', allFields);
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
     allFields,
@@ -336,6 +337,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     ) as FieldListGroups<T>;
   }, [unfilteredFieldGroups, onFilterFieldList, fieldListFilters.fieldSearchHighlight]);
 
+  // console.log('useGroupedFields', allFields, dataViewId);
   const hasDataLoaded = Boolean(allFields);
   const allFieldsLength = allFields?.length;
 

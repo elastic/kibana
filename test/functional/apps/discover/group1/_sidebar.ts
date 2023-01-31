@@ -657,6 +657,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('discoverNoResultsError');
       });
 
+      // run this test only
       it('should work correctly when time range is updated', async function () {
         await esArchiver.loadIfNeeded(
           'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
@@ -676,6 +677,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 15));
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
           '0 available fields. 7 empty fields. 3 meta fields.'

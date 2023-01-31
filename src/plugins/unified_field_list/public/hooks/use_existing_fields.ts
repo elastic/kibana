@@ -77,7 +77,6 @@ let lastFetchId: string = ''; // persist last fetch id to skip older requests/re
 export const useExistingFieldsFetcher = (
   params: ExistingFieldsFetcherParams
 ): ExistingFieldsFetcher => {
-  console.log('*** useExistingFieldsFetcher - loads fields');
   const mountedRef = useRef<boolean>(true);
   const [activeRequests, setActiveRequests] = useState<number>(0);
   const isProcessing = activeRequests > 0;
@@ -99,6 +98,7 @@ export const useExistingFieldsFetcher = (
       if (!dataViewId || !query || !fromDate || !toDate) {
         return;
       }
+      console.log('##### fetchFieldsExistenceInfo', dataViewId);
 
       const currentInfo = globalMap$.getValue()?.[dataViewId];
 
@@ -246,6 +246,7 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
 
   useEffect(() => {
     const subscription = globalMap$.subscribe((data) => {
+      console.log('##### useExistingFieldsReader - new globalMap$ data', data);
       if (mountedRef.current && Object.keys(data).length > 0) {
         setExistingFieldsByDataViewMap((savedData) => ({
           ...savedData,
@@ -276,6 +277,7 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
 
   const getFieldsExistenceInfo = useCallback(
     (dataViewId: string) => {
+      // console.log('#### getFieldsExistenceInfo', dataViewId);
       return dataViewId ? existingFieldsByDataViewMap[dataViewId] : unknownInfo;
     },
     [existingFieldsByDataViewMap]

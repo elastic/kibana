@@ -52,7 +52,7 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
  */
 export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 
-const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
+const SidebarMemoized = DiscoverSidebarResponsive;
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function DiscoverLayout({

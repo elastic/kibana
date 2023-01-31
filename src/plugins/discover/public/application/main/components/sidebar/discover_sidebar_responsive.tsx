@@ -142,50 +142,81 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const querySubscriberResult = useQuerySubscriber({ data });
 
-  const fetchFields = useCallback(async () => {
-    console.log('*** fetchFields is firing');
-    const existingFieldList = await loadFieldExisting({
-      data,
-      dataView: sidebarState.dataView!,
-      fromDate: querySubscriberResult.fromDate || '',
-      toDate: querySubscriberResult.toDate || '',
-      // dslQuery: querySubscriberResult.query || {},
-      dslQuery: await buildSafeEsQuery(
-        sidebarState.dataView!,
-        querySubscriberResult.query!,
-        querySubscriberResult.filters || [],
-        getEsQueryConfig(core.uiSettings)
-      ),
-      timeFieldName: sidebarState.dataView?.timeFieldName,
-      dataViewsService: dataViews,
-      uiSettingsClient: core.uiSettings,
-    });
+  console.log(
+    '*** DiscoverSidebarResponsive 2 - param:',
+    selectedDataView?.getName(),
+    'ref:',
+    selectedDataViewRef.current?.getName()
+  );
 
+  const fetchFields = useCallback(
+    async (dataView: DataView) => {
+      console.log('*** fetchFields is firing', dataView.getName());
+      const existingFieldList = await loadFieldExisting({
+        data,
+        // dataView: selectedDataViewRef.current!,
+        dataView,
+        fromDate: querySubscriberResult.fromDate || '',
+        toDate: querySubscriberResult.toDate || '',
+        // dslQuery: querySubscriberResult.query || {},
+        dslQuery: await buildSafeEsQuery(
+          // selectedDataViewRef.current!,
+          dataView,
+          querySubscriberResult.query!,
+          querySubscriberResult.filters || [],
+          getEsQueryConfig(core.uiSettings)
+        ),
+        // timeFieldName: selectedDataViewRef.current?.timeFieldName,
+        timeFieldName: dataView.timeFieldName,
+        dataViewsService: dataViews,
+        uiSettingsClient: core.uiSettings,
+      });
+
+      /*
+      console.log(
+        '***** existingFieldList',
+        // selectedDataViewRef.current!.title,
+        dataView.title,
+        JSON.stringify(existingFieldList)
+      );
+      */
+
+      dispatchSidebarStateAction({
+        type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+        payload: {
+          // dataView: selectedDataViewRef.current,
+          dataView,
+          fieldCounts: existingFieldList.existingFieldNames.reduce((collector, fieldName) => {
+            collector[fieldName] = 1;
+            return collector;
+          }, {} as Record<string, number>),
+          isPlainRecord: false,
+        },
+      });
+    },
+    [
+      core.uiSettings,
+      data,
+      dataViews,
+      querySubscriberResult.fromDate,
+      querySubscriberResult.query,
+      querySubscriberResult.toDate,
+      querySubscriberResult.filters,
+    ]
+  );
+
+  useEffect(() => {
+    selectedDataViewRef.current = selectedDataView;
     dispatchSidebarStateAction({
-      type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+      type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
       payload: {
-        dataView: selectedDataViewRef.current,
-        fieldCounts: existingFieldList.existingFieldNames.reduce((collector, fieldName) => {
-          collector[fieldName] = 1;
-          return collector;
-        }, {} as Record<string, number>),
-        isPlainRecord: false,
+        dataView: selectedDataView,
       },
     });
-  }, [
-    core.uiSettings,
-    data,
-    dataViews,
-    querySubscriberResult.fromDate,
-    querySubscriberResult.query,
-    querySubscriberResult.toDate,
-    sidebarState.dataView,
-    querySubscriberResult.filters,
-  ]);
+  }, [selectedDataView, dispatchSidebarStateAction]);
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
-      console.log('*** documents$ is firing', documentState.recordRawType);
       const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
 
       // todo - make this parallel to fetch - what triggers new docs?
@@ -199,9 +230,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           });
           break;
         case FetchStatus.LOADING:
-          console.log('*** fetchStatus.LOADING is firing ', isPlainRecordType);
-          if (isPlainRecordType || !props.useNewFieldsApi) {
-            console.log('*** BOO OLDDDD');
+          if (isPlainRecordType) {
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
               payload: {
@@ -209,22 +238,13 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
             });
           } else {
-            console.log('*** YES NEEEWWW');
-            fetchFields();
+            console.log('*** 3 - fetchFields', selectedDataViewRef.current);
+            fetchFields(selectedDataViewRef.current!);
+            // fetchFields(selectedDataViewR!);
           }
           break;
         case FetchStatus.COMPLETE:
-          if (!isPlainRecordType || !props.useNewFieldsApi) {
-            dispatchSidebarStateAction({
-              type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
-              payload: {
-                dataView: selectedDataViewRef.current,
-                // might simplify this in another PR
-                fieldCounts: calcFieldCounts(documentState.result),
-                isPlainRecord: isPlainRecordType,
-              },
-            });
-          } else {
+          if (isPlainRecordType) {
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
               payload: {
@@ -257,7 +277,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [
     props.documents$,
     dispatchSidebarStateAction,
-    selectedDataViewRef,
+    // selectedDataViewRef,
     fetchFields,
     props.useNewFieldsApi,
   ]);
@@ -278,7 +298,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   // this is doing the work
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
     disableAutoFetching: true,
-    dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
+    dataViews: !isPlainRecord && selectedDataViewRef.current ? [selectedDataViewRef.current] : [],
     query: querySubscriberResult.query,
     filters: querySubscriberResult.filters,
     fromDate: querySubscriberResult.fromDate,

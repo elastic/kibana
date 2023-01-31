@@ -38,10 +38,11 @@ export const loadFieldExisting: LoadFieldExistingHandler = async ({
   uiSettingsClient,
   dataView,
 }) => {
+  // console.log('loadFieldExisting', dataView.getName());
   const includeFrozen = uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
   const metaFields = uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
 
-  return await fetchFieldExistence({
+  const result = await fetchFieldExistence({
     dslQuery,
     fromDate,
     toDate,
@@ -55,4 +56,7 @@ export const loadFieldExisting: LoadFieldExistingHandler = async ({
       return response.rawResponse;
     },
   });
+  // console.log('end loadFieldExisting', dataView.getName(), result);
+
+  return result;
 };

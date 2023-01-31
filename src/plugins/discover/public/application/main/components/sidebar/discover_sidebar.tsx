@@ -226,6 +226,7 @@ export function DiscoverSidebarComponent({
         };
       }
     }, []);
+  // console.log('#### allFields', allFields);
   // todo
   const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields({
     dataViewId: (!isPlainRecord && selectedDataView?.id) || null, // passing `null` for text-based queries
@@ -286,8 +287,6 @@ export function DiscoverSidebarComponent({
   if (!selectedDataView) {
     return null;
   }
-
-  console.log('*** discover sidebar', fieldListFiltersProps);
 
   return (
     <EuiPageSideBar

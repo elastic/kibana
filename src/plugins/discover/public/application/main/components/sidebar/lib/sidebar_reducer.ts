@@ -72,7 +72,6 @@ export function discoverSidebarReducer(
   state: DiscoverSidebarReducerState,
   action: DiscoverSidebarReducerAction
 ): DiscoverSidebarReducerState {
-  console.log('*** discoverSidebarReducer');
   switch (action.type) {
     case DiscoverSidebarReducerActionType.RESET:
       // empties field info
@@ -105,6 +104,7 @@ export function discoverSidebarReducer(
       const mappedAndUnmappedFields = action.payload.isPlainRecord
         ? getTextBasedQueryFieldList(action.payload.textBasedQueryColumns)
         : getDataViewFieldList(action.payload.dataView, action.payload.fieldCounts);
+      // console.log('*** mappedAndUnmappedFields', mappedAndUnmappedFields);
       return {
         ...state,
         dataView: action.payload.dataView,

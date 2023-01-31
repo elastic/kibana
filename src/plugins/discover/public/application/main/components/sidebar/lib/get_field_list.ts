@@ -22,7 +22,7 @@ export function getDataViewFieldList(
     return null;
   }
 
-  console.log('*** getDataViewFieldList', fieldCounts);
+  // console.log('*** getDataViewFieldList', fieldCounts);
 
   const sourceFiltersValues = dataView?.getSourceFiltering?.()?.excludes;
   let dataViewFields: DataViewField[] = dataView?.fields.getAll() || [];
