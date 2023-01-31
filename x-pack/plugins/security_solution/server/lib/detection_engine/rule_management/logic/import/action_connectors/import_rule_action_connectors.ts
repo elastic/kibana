@@ -63,7 +63,9 @@ export const importRuleActionConnectors = async ({
         );
         const missingActionRules = pick(actionConnectorRules, [...missingActionConnector]);
 
-        const missingRuleIds: string = [...new Set(...Object.values(missingActionRules))].join();
+        const missingRuleIds: string = [
+          ...new Set(Object.values(missingActionRules).flat()),
+        ].join();
 
         return handleActionsHaveNoConnectors(missingActionConnector, missingRuleIds);
       }

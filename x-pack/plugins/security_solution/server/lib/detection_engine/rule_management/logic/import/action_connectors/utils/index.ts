@@ -60,7 +60,12 @@ export const handleActionConnectorsErrors = (error: ErrorType, id?: string): Bul
     case null:
       return createBulkErrorObject({
         statusCode: 500,
-        message: (error as ConflictError)?.type === 'conflict' ? 'There is a conflict' : '', // TODO : choose a message when conflict happen
+        message:
+          (error as ConflictError)?.type === 'conflict'
+            ? 'There is a conflict' // TODO : choose a message when conflict happen
+            : (error as Error).message
+            ? (error as Error).message
+            : '',
       });
 
     case 403:
