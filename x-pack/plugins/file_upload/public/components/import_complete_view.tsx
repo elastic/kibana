@@ -169,7 +169,7 @@ export class ImportCompleteView extends Component<Props, {}> {
         >
           <p>
             {getPartialImportMessage(
-              this.props.importResults.failures.length,
+              this.props.importResults.failures!.length,
               this.props.importResults.docCount
             )}
           </p>

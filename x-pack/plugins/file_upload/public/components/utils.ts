@@ -7,12 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 
-export function getPartialImportMessage(failedFeaturesCount: number, totalFeaturesCount: number) {
+export function getPartialImportMessage(failedFeaturesCount: number, totalFeaturesCount?: number) {
+  const outOfTotalMsg =
+    typeof totalFeaturesCount === 'number'
+      ? i18n.translate('xpack.fileUpload.geoUploadWizard.outOfTotalMsg', {
+          defaultMessage: 'of {totalFeaturesCount}',
+          values: {
+            totalFeaturesCount,
+          },
+        })
+      : '';
   return i18n.translate('xpack.fileUpload.geoUploadWizard.partialImportMsg', {
-    defaultMessage: 'Unable to index {failedFeaturesCount} of {totalFeaturesCount} features.',
+    defaultMessage: 'Unable to index {failedFeaturesCount} {outOfTotalMsg} features.',
     values: {
       failedFeaturesCount,
-      totalFeaturesCount,
+      outOfTotalMsg,
     },
   });
 }
