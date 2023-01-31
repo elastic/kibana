@@ -36,14 +36,34 @@ describe('helpers', () => {
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual({
-        displayLocations: [
-          { id: 'toolbar' },
-          { id: 'dimensionButton', dimensionId: columnId },
-          { id: 'embeddableBadge' },
-        ],
-        message: 'Field NoBytes was not found',
-      });
+      expect(messages![0]).toMatchInlineSnapshot(`
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "toolbar",
+            },
+            Object {
+              "dimensionId": "column_id",
+              "id": "dimensionButton",
+            },
+            Object {
+              "id": "embeddableBadge",
+            },
+          ],
+          "message": <FormattedMessage
+            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found"
+            id="xpack.lens.indexPattern.fieldsNotFound"
+            values={
+              Object {
+                "count": 1,
+                "missingFields": <strong>
+                  NoBytes
+                </strong>,
+              }
+            }
+          />,
+        }
+      `);
     });
 
     it('returns an error if a field is the wrong type', () => {
@@ -78,14 +98,34 @@ describe('helpers', () => {
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual({
-        displayLocations: [
-          { id: 'toolbar' },
-          { id: 'dimensionButton', dimensionId: columnId },
-          { id: 'embeddableBadge' },
-        ],
-        message: 'Field NoBytes was not found',
-      });
+      expect(messages![0]).toMatchInlineSnapshot(`
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "toolbar",
+            },
+            Object {
+              "dimensionId": "column_id",
+              "id": "dimensionButton",
+            },
+            Object {
+              "id": "embeddableBadge",
+            },
+          ],
+          "message": <FormattedMessage
+            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found"
+            id="xpack.lens.indexPattern.fieldsNotFound"
+            values={
+              Object {
+                "count": 1,
+                "missingFields": <strong>
+                  NoBytes
+                </strong>,
+              }
+            }
+          />,
+        }
+      `);
     });
 
     it('returns an error if multiple fields do not exist', () => {
@@ -104,14 +144,34 @@ describe('helpers', () => {
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual({
-        displayLocations: [
-          { id: 'toolbar' },
-          { id: 'dimensionButton', dimensionId: columnId },
-          { id: 'embeddableBadge' },
-        ],
-        message: 'Fields NotExisting, NoBytes were not found',
-      });
+      expect(messages![0]).toMatchInlineSnapshot(`
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "toolbar",
+            },
+            Object {
+              "dimensionId": "column_id",
+              "id": "dimensionButton",
+            },
+            Object {
+              "id": "embeddableBadge",
+            },
+          ],
+          "message": <FormattedMessage
+            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found"
+            id="xpack.lens.indexPattern.fieldsNotFound"
+            values={
+              Object {
+                "count": 2,
+                "missingFields": <strong>
+                  NotExisting, NoBytes
+                </strong>,
+              }
+            }
+          />,
+        }
+      `);
     });
 
     it('returns an error if one field amongst multiples has the wrong type', () => {

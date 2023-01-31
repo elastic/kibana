@@ -917,16 +917,37 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
-        {
-          displayLocations: [
-            { id: 'toolbar' },
-            { id: 'dimensionButton', dimensionId: 'col1' },
-            { id: 'embeddableBadge' },
-          ],
-          message: 'Field notExisting was not found',
-        },
-      ]);
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "toolbar",
+              },
+              Object {
+                "dimensionId": "col1",
+                "id": "dimensionButton",
+              },
+              Object {
+                "id": "embeddableBadge",
+              },
+            ],
+            "message": <FormattedMessage
+              defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found"
+              id="xpack.lens.indexPattern.fieldsNotFound"
+              values={
+                Object {
+                  "count": 1,
+                  "missingFields": <strong>
+                    notExisting
+                  </strong>,
+                }
+              }
+            />,
+          },
+        ]
+      `);
     });
 
     it('shows error message if the sortField does not exist in index pattern', () => {

@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
@@ -66,14 +68,16 @@ export function getInvalidFieldMessage(
     if (missingFields.length) {
       return [
         {
-          message: i18n.translate('xpack.lens.indexPattern.fieldsNotFound', {
-            defaultMessage:
-              '{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found',
-            values: {
-              count: missingFields.length,
-              missingFields: missingFields.join(', '),
-            },
-          }),
+          message: (
+            <FormattedMessage
+              id="xpack.lens.indexPattern.fieldsNotFound"
+              defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found"
+              values={{
+                count: missingFields.length,
+                missingFields: <strong>{missingFields.join(', ')}</strong>,
+              }}
+            />
+          ),
           displayLocations: [
             { id: 'toolbar' },
             { id: 'dimensionButton', dimensionId: columnId },

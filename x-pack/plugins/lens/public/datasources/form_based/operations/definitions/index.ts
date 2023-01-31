@@ -455,7 +455,7 @@ interface FilterParams {
 
 export type FieldBasedOperationErrorMessage =
   | {
-      message: string;
+      message: string | React.ReactNode;
       displayLocations?: UserMessage['displayLocations'];
       fixAction?: {
         label: string;
