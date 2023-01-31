@@ -12,6 +12,7 @@ import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe
 import { EmptyMessage } from '../empty_message';
 import { LibraryStacktrace } from './library_stacktrace';
 import { Stackframe as StackframeComponent } from './stackframe';
+import { EuiCodeBlock } from '@elastic/eui';
 
 interface Props {
   stackframes?: Stackframe[];
@@ -36,34 +37,36 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
   const groups = getGroupedStackframes(stackframes);
 
   return (
-    <Fragment>
-      {groups.map((group, i) => {
-        // library frame
-        if (group.isLibraryFrame && groups.length > 1) {
-          return (
-            <Fragment key={i}>
-              <LibraryStacktrace
-                id={i.toString()}
-                stackframes={group.stackframes}
+    <EuiCodeBlock whiteSpace="pre-wrap" language="javastacktrace" isCopyable>
+      <Fragment>
+        {groups.map((group, i) => {
+          // library frame
+          if (group.isLibraryFrame && groups.length > 1) {
+            return (
+              <Fragment key={i}>
+                <LibraryStacktrace
+                  id={i.toString()}
+                  stackframes={group.stackframes}
+                  codeLanguage={codeLanguage}
+                />
+              </Fragment>
+            );
+          }
+
+          // non-library frame
+          return group.stackframes.map((stackframe, idx) => (
+            <Fragment key={`${i}-${idx}`}>
+              <StackframeComponent
                 codeLanguage={codeLanguage}
+                id={`${i}-${idx}`}
+                initialIsOpen={i === 0 && groups.length > 1}
+                stackframe={stackframe}
               />
             </Fragment>
-          );
-        }
-
-        // non-library frame
-        return group.stackframes.map((stackframe, idx) => (
-          <Fragment key={`${i}-${idx}`}>
-            <StackframeComponent
-              codeLanguage={codeLanguage}
-              id={`${i}-${idx}`}
-              initialIsOpen={i === 0 && groups.length > 1}
-              stackframe={stackframe}
-            />
-          </Fragment>
-        ));
-      })}
-    </Fragment>
+          ));
+        })}
+      </Fragment>
+    </EuiCodeBlock>
   );
 }
 

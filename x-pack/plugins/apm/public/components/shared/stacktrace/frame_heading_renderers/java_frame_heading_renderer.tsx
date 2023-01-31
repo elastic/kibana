@@ -17,7 +17,7 @@ export function JavaFrameHeadingRenderer({
 
   return (
     <>
-      at <FileDetail>{[classname, fn].join('.')}</FileDetail>(
+      at <FileDetail>{[classname, fn].join('.')}</FileDetail> (
       <FileDetail>
         {filename}
         {lineNumber > 0 && `:${lineNumber}`}
