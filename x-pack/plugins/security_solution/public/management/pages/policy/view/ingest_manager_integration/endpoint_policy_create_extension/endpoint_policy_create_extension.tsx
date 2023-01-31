@@ -32,6 +32,7 @@ import {
   INTERACTIVE_ONLY,
   NGAV_NOTE,
   EDR_NOTE,
+  DATA_COLLECTION,
 } from './translations';
 
 const PREFIX = 'endpoint_policy_create_extension';
@@ -55,6 +56,10 @@ const endpointPresetsMapping = {
   EDRComplete: {
     label: EDR_COMPLETE,
     note: EDR_NOTE,
+  },
+  DataCollection: {
+    label: DATA_COLLECTION,
+    note: null,
   },
 };
 
@@ -85,16 +90,15 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEnterprise = useLicense().isEnterprise();
 
-    // / Endpoint Radio Options (NGAV and EDRs)
-    const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('NGAV');
+    const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('EDRComplete');
     const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('INTERACTIVE_ONLY');
     const [selectedEnvironment, setSelectedEnvironment] = useState<Environment>('endpoint');
 
     // Show NGAV license note when Gold and below
-    // Show other licenses note when Platinum and Below
+    // Show EDR licenses note when Platinum and Below
     const showNote =
       (endpointPreset === 'NGAV' && !isPlatinumPlus) ||
-      (endpointPreset !== 'NGAV' && !isEnterprise);
+      (['EDREssential', 'EDRComplete'].includes(endpointPreset) && !isEnterprise);
 
     // Fleet will initialize the create form with a default name for the integrating policy, however,
     // for endpoint security, we want the user to explicitly type in a name, so we blank it out
@@ -247,6 +251,20 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               helpText={
                 <HelpTextWithPadding>
                   <FormattedMessage
+                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointDataCollection"
+                    defaultMessage="Augment your existing anti-virus solution with advanced data collection and detection"
+                  />
+                </HelpTextWithPadding>
+              }
+            >
+              <EuiRadio {...getEndpointPresetsProps('DataCollection')} />
+            </EuiFormRow>
+            <EuiSpacer size="s" />
+            <EuiFormRow
+              fullWidth
+              helpText={
+                <HelpTextWithPadding>
+                  <FormattedMessage
                     id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointNGAV"
                     defaultMessage="Machine learning malware, ransomware, memory threat, malicious behavior, and credential theft preventions, plus process telemetry"
                   />
@@ -287,7 +305,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               <>
                 <EuiSpacer size="m" />
                 <EuiCallOut iconType="iInCircle">
-                  <EuiText size="s">
+                  <EuiText size="s" data-test-subj="create-ensdpoint-policy-license-note">
                     <p>
                       {endpointPresetsMapping[endpointPreset].note}{' '}
                       <FormattedMessage
