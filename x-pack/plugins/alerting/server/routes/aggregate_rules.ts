@@ -10,6 +10,11 @@ import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../lib';
 import { AggregateResult, AggregateOptions } from '../rules_client';
+import {
+  getDefaultRuleAggregation,
+  formateDefaultAggregationResult,
+  RuleAggregation,
+} from '../rules_client/lib';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
@@ -86,9 +91,12 @@ export const aggregateRulesRoute = (
           [req.query.search, req.query.search_fields].filter(Boolean) as string[],
           usageCounter
         );
-        const aggregateResult = await rulesClient.aggregate({ options });
+        const aggregateResult = await rulesClient.aggregate<RuleAggregation>({
+          options,
+          aggs: getDefaultRuleAggregation(options.maxTags),
+        });
         return res.ok({
-          body: rewriteBodyRes(aggregateResult),
+          body: rewriteBodyRes(formateDefaultAggregationResult(aggregateResult)),
         });
       })
     )
@@ -111,9 +119,12 @@ export const aggregateRulesRoute = (
           [req.body.search, req.body.search_fields].filter(Boolean) as string[],
           usageCounter
         );
-        const aggregateResult = await rulesClient.aggregate({ options });
+        const aggregateResult = await rulesClient.aggregate<RuleAggregation>({
+          options,
+          aggs: getDefaultRuleAggregation(options.maxTags),
+        });
         return res.ok({
-          body: rewriteBodyRes(aggregateResult),
+          body: rewriteBodyRes(formateDefaultAggregationResult(aggregateResult)),
         });
       })
     )

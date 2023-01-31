@@ -33,7 +33,7 @@ import {
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
 import { find, FindParams } from './methods/find';
-import { aggregate, AggregateOptions } from './methods/aggregate';
+import { aggregate, AggregateParams } from './methods/aggregate';
 import { deleteRule } from './methods/delete';
 import { update, UpdateOptions } from './methods/update';
 import { bulkDeleteRules } from './methods/bulk_delete';
@@ -77,7 +77,9 @@ export class RulesClient {
     };
   }
 
-  public aggregate = (params?: { options?: AggregateOptions }) => aggregate(this.context, params);
+  public aggregate = <T extends Record<string, unknown>>(
+    params: AggregateParams<T>
+  ): Promise<T | undefined> => aggregate<T>(this.context, params);
   public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
     clone<Params>(this.context, ...args);
   public create = <Params extends RuleTypeParams = never>(params: CreateOptions<Params>) =>
