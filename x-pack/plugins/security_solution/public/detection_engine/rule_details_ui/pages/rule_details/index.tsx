@@ -31,7 +31,7 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import { useDataTableFilters } from '../../../../detections/pages/detection_engine/use_alert_table_filters';
+import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';

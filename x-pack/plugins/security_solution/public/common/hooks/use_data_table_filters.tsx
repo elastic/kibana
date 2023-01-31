@@ -7,14 +7,14 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import type { TableId } from '../../../common/types';
+import { dataTableSelectors } from '../store/data_table';
 import {
-  updateShowThreatIndicatorAlertsFilter,
   updateShowBuildingBlockAlertsFilter,
-} from '../../../common/store/data_table/actions';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
-import type { TableId } from '../../../../common/types';
-import { dataTableSelectors } from '../../../common/store/data_table';
+  updateShowThreatIndicatorAlertsFilter,
+} from '../store/data_table/actions';
+import { tableDefaults } from '../store/data_table/defaults';
+import { useShallowEqualSelector } from './use_selector';
 
 export const useDataTableFilters = (tableId: TableId) => {
   const dispatch = useDispatch();

@@ -7,12 +7,12 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { dataTableSelectors } from '../../../common/store/data_table';
 import { changeViewMode } from '../../../common/store/data_table/actions';
 import type { ViewSelection, TableId } from '../../../../common/types';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { RightTopMenu } from '../../../common/components/events_viewer/right_top_menu';
-import { useDataTableFilters } from '../../pages/detection_engine/use_alert_table_filters';
 import { AdditionalFiltersAction } from '../../components/alerts_table/additional_filters_action';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 
