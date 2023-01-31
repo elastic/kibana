@@ -16,7 +16,7 @@ jest.mock('../kibana_services', () => ({
     return {
       links: {
         maps: {
-          importGeospatialPrivileges: 'linkToPrvilegesDocs'
+          importGeospatialPrivileges: 'linkToPrvilegesDocs',
         },
       },
     };
@@ -45,7 +45,8 @@ test('Should render success', () => {
       }}
       dataViewResp={{}}
       indexName="myIndex"
-    />);
+    />
+  );
 
   expect(component).toMatchSnapshot();
 });
@@ -67,7 +68,8 @@ test('Should render warning when some features failed import', () => {
       }}
       dataViewResp={{}}
       indexName="myIndex"
-    />);
+    />
+  );
 
   expect(component).toMatchSnapshot();
 });
@@ -86,7 +88,8 @@ test('Should render error when upload fails from http request timeout', () => {
         },
       }}
       indexName="myIndex"
-    />);
+    />
+  );
 
   expect(component).toMatchSnapshot();
 });
@@ -105,7 +108,8 @@ test('Should render error when upload fails from elasticsearch request failure',
         },
       }}
       indexName="myIndex"
-    />);
+    />
+  );
 
   expect(component).toMatchSnapshot();
 });

@@ -164,12 +164,15 @@ export class ImportCompleteView extends Component<Props, {}> {
     });
 
     if (this.props.importResults.failures?.length) {
-      const failedFeaturesMsg = i18n.translate('xpack.fileUpload.importComplete.failedFeaturesMsg', {
-        defaultMessage: 'Unable to index {numFailures} features.',
-        values: {
-          numFailures: this.props.importResults.failures.length,
-        },
-      });
+      const failedFeaturesMsg = i18n.translate(
+        'xpack.fileUpload.importComplete.failedFeaturesMsg',
+        {
+          defaultMessage: 'Unable to index {numFailures} features.',
+          values: {
+            numFailures: this.props.importResults.failures.length,
+          },
+        }
+      );
       return (
         <EuiCallOut
           title={i18n.translate('xpack.fileUpload.importComplete.uploadSuccessWithFailuresTitle', {

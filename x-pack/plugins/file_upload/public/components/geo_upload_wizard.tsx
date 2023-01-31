@@ -189,9 +189,9 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
                   featureCount: importResults.docCount,
                   numFailures: importResults.failures.length,
                 },
-              })
-            }
-          }
+              }),
+            },
+          },
         },
         phase: PHASE.COMPLETE,
       });
