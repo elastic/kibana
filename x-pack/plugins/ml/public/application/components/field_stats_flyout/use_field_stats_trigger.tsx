@@ -41,7 +41,6 @@ export const useFieldStatsTrigger = () => {
     },
     [setFieldName, setIsFlyoutVisible]
   );
-
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption, searchValue: string): ReactNode => {
       const field = (option as Option).field;

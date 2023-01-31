@@ -8,7 +8,6 @@
 import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
-  EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
   EuiPanel,
@@ -21,8 +20,11 @@ import { debounce, cloneDeep } from 'lodash';
 
 import { Query } from '@kbn/data-plugin/common/query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import { ConfigurationStepDependentVariableRow } from './configuration_step_dependent_variables';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { FieldStatsFlyoutProvider } from '../../../../../components/field_stats_flyout';
 import { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
-import { useFieldStatsTrigger } from '../../../../../components/field_stats_flyout/use_field_stats_trigger';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
@@ -170,7 +172,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   });
 
   const toastNotifications = getToastNotifications();
-  const { renderOption } = useFieldStatsTrigger();
 
   const setJobConfigQuery: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
     if (update.query) {
@@ -550,6 +551,17 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dependentVariableEmpty, jobType, scatterplotMatrixProps.fields.length]
   );
+  const { services } = useMlKibana();
+  const fieldStatsServices: FieldStatsServices = useMemo(() => {
+    const { uiSettings, data, fieldFormats, charts } = services;
+    return {
+      uiSettings,
+      dataViews: data.dataViews,
+      data,
+      fieldFormats,
+      charts,
+    };
+  }, [services]);
 
   // Don't render until `savedSearchQuery` has been initialized.
   // `undefined` means uninitialized, `null` means initialized but not used.
@@ -561,50 +573,53 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       : indexPatternFieldsTableItems;
 
   return (
-    <Fragment>
-      <Messages messages={requestMessages} />
-      <SupportedFieldsMessage jobType={jobType} />
-      <JobType type={jobType} setFormState={setFormState} />
-      {savedSearchQuery === null && (
+    <FieldStatsFlyoutProvider
+      dataView={currentDataView}
+      fieldStatsServices={fieldStatsServices}
+      timeRangeMs={indexData.timeRangeMs}
+    >
+      <Fragment>
+        <Messages messages={requestMessages} />
+        <SupportedFieldsMessage jobType={jobType} />
+        <JobType type={jobType} setFormState={setFormState} />
+        {savedSearchQuery === null && (
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceQueryLabel', {
+              defaultMessage: 'Query',
+            })}
+            fullWidth
+          >
+            <ExplorationQueryBar
+              indexPattern={currentDataView}
+              setSearchQuery={setJobConfigQuery}
+              query={query}
+            />
+          </EuiFormRow>
+        )}
+        {((isClone && cloneJob) || !isClone) && <RuntimeMappings actions={actions} state={state} />}
         <EuiFormRow
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceQueryLabel', {
-            defaultMessage: 'Query',
-          })}
+          label={
+            <Fragment>
+              {savedSearchQuery !== null && (
+                <EuiText>
+                  {i18n.translate('xpack.ml.dataframe.analytics.create.savedSearchLabel', {
+                    defaultMessage: 'Saved search',
+                  })}
+                </EuiText>
+              )}
+              <EuiBadge color="hollow">
+                {savedSearchQuery !== null
+                  ? currentSavedSearch?.attributes.title
+                  : currentDataView.title}
+              </EuiBadge>
+            </Fragment>
+          }
           fullWidth
         >
-          <ExplorationQueryBar
-            indexPattern={currentDataView}
-            setSearchQuery={setJobConfigQuery}
-            query={query}
-          />
+          <DataGrid {...indexPreviewProps} />
         </EuiFormRow>
-      )}
-      {((isClone && cloneJob) || !isClone) && <RuntimeMappings actions={actions} state={state} />}
-      <EuiFormRow
-        label={
-          <Fragment>
-            {savedSearchQuery !== null && (
-              <EuiText>
-                {i18n.translate('xpack.ml.dataframe.analytics.create.savedSearchLabel', {
-                  defaultMessage: 'Saved search',
-                })}
-              </EuiText>
-            )}
-            <EuiBadge color="hollow">
-              {savedSearchQuery !== null
-                ? currentSavedSearch?.attributes.title
-                : currentDataView.title}
-            </EuiBadge>
-          </Fragment>
-        }
-        fullWidth
-      >
-        <DataGrid {...indexPreviewProps} />
-      </EuiFormRow>
-      {isJobTypeWithDepVar && (
-        <Fragment>
-          <EuiFormRow
-            fullWidth
+        {isJobTypeWithDepVar && (
+          <ConfigurationStepDependentVariableRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
               defaultMessage: 'Dependent variable',
             })}
@@ -648,133 +663,212 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
                   ]
                 : []),
             ]}
-          >
-            <EuiComboBox
-              fullWidth
-              aria-label={i18n.translate(
-                'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
-                {
-                  defaultMessage: 'Enter field to be used as dependent variable.',
-                }
-              )}
-              placeholder={
-                jobType === ANALYSIS_CONFIG_TYPE.REGRESSION
-                  ? i18n.translate(
-                      'xpack.ml.dataframe.analytics.create.dependentVariableRegressionPlaceholder',
-                      {
-                        defaultMessage: 'Select the numeric field that you want to predict.',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.ml.dataframe.analytics.create.dependentVariableClassificationPlaceholder',
-                      {
-                        defaultMessage:
-                          'Select the numeric, categorical, or boolean field that you want to predict.',
-                      }
-                    )
-              }
-              isDisabled={isJobCreated}
-              isLoading={loadingDepVarOptions}
-              singleSelection={true}
-              options={dependentVariableOptions}
-              selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
-              onChange={(selectedOptions) => {
-                setFormState({
-                  dependentVariable: selectedOptions[0].label || '',
-                });
-              }}
-              isClearable={false}
-              isInvalid={dependentVariable === ''}
-              data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
-                loadingDepVarOptions ? ' loading' : ' loaded'
-              }`}
-              renderOption={renderOption}
-            />
-          </EuiFormRow>
-        </Fragment>
-      )}
-      <AnalysisFieldsTable
-        dependentVariable={dependentVariable}
-        includes={includes}
-        isJobTypeWithDepVar={isJobTypeWithDepVar}
-        minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
-        setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
-        tableItems={firstUpdate.current ? includesTableItems : tableItems}
-        unsupportedFieldsError={unsupportedFieldsError}
-        setUnsupportedFieldsError={setUnsupportedFieldsError}
-        setFormState={setFormState}
-      />
-      <EuiFormRow
-        fullWidth
-        isInvalid={requiredFieldsError !== undefined}
-        error={i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
-          defaultMessage: 'Invalid. {message}',
-          values: { message: requiredFieldsError },
-        })}
-      >
-        <Fragment />
-      </EuiFormRow>
-      <EuiSpacer />
-      {showScatterplotMatrix && (
-        <>
-          <EuiFormRow
-            data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixFormRow"
-            label={i18n.translate('xpack.ml.dataframe.analytics.create.scatterplotMatrixLabel', {
-              defaultMessage: 'Scatterplot matrix',
-            })}
-            helpText={i18n.translate(
-              'xpack.ml.dataframe.analytics.create.scatterplotMatrixLabelHelpText',
-              {
-                defaultMessage:
-                  'Visualizes the relationships between pairs of selected included fields.',
-              }
-            )}
-            fullWidth
-          >
-            <Fragment />
-          </EuiFormRow>
-          <EuiPanel
-            paddingSize="m"
-            data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixPanel"
-          >
-            <ScatterplotMatrix {...scatterplotMatrixProps} />
-          </EuiPanel>
-          <EuiSpacer />
-        </>
-      )}
-      {isJobTypeWithDepVar && (
+            placeholder={
+              jobType === ANALYSIS_CONFIG_TYPE.REGRESSION
+                ? i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.dependentVariableRegressionPlaceholder',
+                    {
+                      defaultMessage: 'Select the numeric field that you want to predict.',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.dependentVariableClassificationPlaceholder',
+                    {
+                      defaultMessage:
+                        'Select the numeric, categorical, or boolean field that you want to predict.',
+                    }
+                  )
+            }
+            isDisabled={isJobCreated}
+            isLoading={loadingDepVarOptions}
+            dependentVariableOptions={dependentVariableOptions}
+            selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
+            onChange={(selectedOptions) => {
+              setFormState({
+                dependentVariable: selectedOptions[0].label || '',
+              });
+            }}
+            data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
+              loadingDepVarOptions ? ' loading' : ' loaded'
+            }`}
+          />
+          // <Fragment>
+          //   <EuiFormRow
+          //     fullWidth
+          //     label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
+          //       defaultMessage: 'Dependent variable',
+          //     })}
+          //     helpText={
+          //       dependentVariableOptions.length === 0 &&
+          //       dependentVariableFetchFail === false &&
+          //       currentDataView &&
+          //       i18n.translate(
+          //         'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
+          //         {
+          //           defaultMessage: 'No numeric type fields were found for this data view.',
+          //         }
+          //       )
+          //     }
+          //     isInvalid={maxDistinctValuesError !== undefined}
+          //     error={[
+          //       ...(dependentVariableFetchFail === true
+          //         ? [
+          //             <Fragment>
+          //               {i18n.translate(
+          //                 'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
+          //                 {
+          //                   defaultMessage:
+          //                     'There was a problem fetching fields. Please refresh the page and try again.',
+          //                 }
+          //               )}
+          //             </Fragment>,
+          //           ]
+          //         : []),
+          //       ...(fieldOptionsFetchFail === true && maxDistinctValuesError !== undefined
+          //         ? [
+          //             <Fragment>
+          //               {i18n.translate(
+          //                 'xpack.ml.dataframe.analytics.create.dependentVariableMaxDistictValuesError',
+          //                 {
+          //                   defaultMessage: 'Invalid. {message}',
+          //                   values: { message: maxDistinctValuesError },
+          //                 }
+          //               )}
+          //             </Fragment>,
+          //           ]
+          //         : []),
+          //     ]}
+          //   >
+          //     <EuiComboBox
+          //       fullWidth
+          //       aria-label={i18n.translate(
+          //         'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
+          //         {
+          //           defaultMessage: 'Enter field to be used as dependent variable.',
+          //         }
+          //       )}
+          //       placeholder={
+          //         jobType === ANALYSIS_CONFIG_TYPE.REGRESSION
+          //           ? i18n.translate(
+          //               'xpack.ml.dataframe.analytics.create.dependentVariableRegressionPlaceholder',
+          //               {
+          //                 defaultMessage: 'Select the numeric field that you want to predict.',
+          //               }
+          //             )
+          //           : i18n.translate(
+          //               'xpack.ml.dataframe.analytics.create.dependentVariableClassificationPlaceholder',
+          //               {
+          //                 defaultMessage:
+          //                   'Select the numeric, categorical, or boolean field that you want to predict.',
+          //               }
+          //             )
+          //       }
+          //       isDisabled={isJobCreated}
+          //       isLoading={loadingDepVarOptions}
+          //       singleSelection={true}
+          //       options={dependentVariableOptions}
+          //       selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
+          //       onChange={(selectedOptions) => {
+          //         setFormState({
+          //           dependentVariable: selectedOptions[0].label || '',
+          //         });
+          //       }}
+          //       isClearable={false}
+          //       isInvalid={dependentVariable === ''}
+          //       data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
+          //         loadingDepVarOptions ? ' loading' : ' loaded'
+          //       }`}
+          //       renderOption={renderOption}
+          //     />
+          //   </EuiFormRow>
+          // </Fragment>
+        )}
+        <AnalysisFieldsTable
+          dependentVariable={dependentVariable}
+          includes={includes}
+          isJobTypeWithDepVar={isJobTypeWithDepVar}
+          minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
+          setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
+          tableItems={firstUpdate.current ? includesTableItems : tableItems}
+          unsupportedFieldsError={unsupportedFieldsError}
+          setUnsupportedFieldsError={setUnsupportedFieldsError}
+          setFormState={setFormState}
+        />
         <EuiFormRow
           fullWidth
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.trainingPercentLabel', {
-            defaultMessage: 'Training percent',
-          })}
-          helpText={i18n.translate('xpack.ml.dataframe.analytics.create.trainingPercentHelpText', {
-            defaultMessage:
-              'Defines the percentage of eligible documents that will be used for training.',
+          isInvalid={requiredFieldsError !== undefined}
+          error={i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
+            defaultMessage: 'Invalid. {message}',
+            values: { message: requiredFieldsError },
           })}
         >
-          <EuiRange
-            fullWidth
-            min={TRAINING_PERCENT_MIN}
-            max={TRAINING_PERCENT_MAX}
-            step={1}
-            showLabels
-            showRange
-            showValue
-            value={trainingPercent}
-            // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
-            onChange={(e) => setFormState({ trainingPercent: +e.target.value })}
-            data-test-subj="mlAnalyticsCreateJobWizardTrainingPercentSlider"
-          />
+          <Fragment />
         </EuiFormRow>
-      )}
-      <EuiSpacer />
-      <ContinueButton
-        isDisabled={isStepInvalid}
-        onClick={() => {
-          setCurrentStep(ANALYTICS_STEPS.ADVANCED);
-        }}
-      />
-    </Fragment>
+        <EuiSpacer />
+        {showScatterplotMatrix && (
+          <>
+            <EuiFormRow
+              data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixFormRow"
+              label={i18n.translate('xpack.ml.dataframe.analytics.create.scatterplotMatrixLabel', {
+                defaultMessage: 'Scatterplot matrix',
+              })}
+              helpText={i18n.translate(
+                'xpack.ml.dataframe.analytics.create.scatterplotMatrixLabelHelpText',
+                {
+                  defaultMessage:
+                    'Visualizes the relationships between pairs of selected included fields.',
+                }
+              )}
+              fullWidth
+            >
+              <Fragment />
+            </EuiFormRow>
+            <EuiPanel
+              paddingSize="m"
+              data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixPanel"
+            >
+              <ScatterplotMatrix {...scatterplotMatrixProps} />
+            </EuiPanel>
+            <EuiSpacer />
+          </>
+        )}
+        {isJobTypeWithDepVar && (
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.trainingPercentLabel', {
+              defaultMessage: 'Training percent',
+            })}
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.trainingPercentHelpText',
+              {
+                defaultMessage:
+                  'Defines the percentage of eligible documents that will be used for training.',
+              }
+            )}
+          >
+            <EuiRange
+              fullWidth
+              min={TRAINING_PERCENT_MIN}
+              max={TRAINING_PERCENT_MAX}
+              step={1}
+              showLabels
+              showRange
+              showValue
+              value={trainingPercent}
+              // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
+              onChange={(e) => setFormState({ trainingPercent: +e.target.value })}
+              data-test-subj="mlAnalyticsCreateJobWizardTrainingPercentSlider"
+            />
+          </EuiFormRow>
+        )}
+        <EuiSpacer />
+        <ContinueButton
+          isDisabled={isStepInvalid}
+          onClick={() => {
+            setCurrentStep(ANALYTICS_STEPS.ADVANCED);
+          }}
+        />
+      </Fragment>
+    </FieldStatsFlyoutProvider>
   );
 };

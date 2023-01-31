@@ -15,6 +15,7 @@ import {
   EuiDataGridColumn,
 } from '@elastic/eui';
 
+import { TimeRangeMs } from '../field_stats_flyout/field_stats_content';
 import { Dictionary } from '../../../../common/types/common';
 import { ChartData } from '../../../../common/types/field_histograms';
 
@@ -88,6 +89,7 @@ export interface UseIndexDataReturnType
   > {
   renderCellValue: RenderCellValue;
   indexPatternFields?: string[];
+  timeRangeMs?: TimeRangeMs;
 }
 
 export interface UseDataGridReturnType {
