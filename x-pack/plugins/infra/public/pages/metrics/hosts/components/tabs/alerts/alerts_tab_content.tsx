@@ -79,7 +79,6 @@ export const AlertsTabContent = () => {
           chartThemes={chartThemes}
         />
       </EuiFlexItem>
-      <EuiFlexItem>here goes the filter group button</EuiFlexItem>
       {esQuery && (
         <EuiFlexItem>
           <CasesContext

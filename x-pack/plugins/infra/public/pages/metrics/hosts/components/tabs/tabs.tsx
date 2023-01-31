@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiTabbedContent,
   EuiSpacer,
   type EuiTabbedContentTab,
   EuiNotificationBadge,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useAlertsCount } from '../../../../../hooks/use_alerts_count';
 import { MetricsGrid } from './metrics/metrics_grid';
 import { AlertsTabContent } from './alerts';
+import { infraAlertFeatureIds } from './alerts/config';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 interface WrapperProps {
   children: React.ReactElement;
@@ -26,6 +30,33 @@ const Wrapper = ({ children }: WrapperProps) => {
       <EuiSpacer />
       {children}
     </>
+  );
+};
+
+const AlertsTabBadge = () => {
+  const { dateRangeTimestamp } = useUnifiedSearchContext();
+
+  const timeRange = useMemo(
+    () => ({
+      utcFrom: new Date(dateRangeTimestamp.from).toISOString(),
+      utcTo: new Date(dateRangeTimestamp.to).toISOString(),
+    }),
+    [dateRangeTimestamp.from, dateRangeTimestamp.to]
+  );
+
+  const { alertsCount, loading } = useAlertsCount({
+    featureIds: infraAlertFeatureIds,
+    timeRange,
+  });
+
+  if (loading) {
+    return <EuiLoadingSpinner />;
+  }
+
+  return (
+    <EuiNotificationBadge className="eui-alignCenter" size="m">
+      {alertsCount?.activeAlertCount}
+    </EuiNotificationBadge>
   );
 };
 
@@ -47,12 +78,7 @@ const tabs: EuiTabbedContentTab[] = [
     name: i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.title', {
       defaultMessage: 'Alerts',
     }),
-    append: (
-      <EuiNotificationBadge className="eui-alignCenter" size="m">
-        {/* TODO: replace with number of real alerts */}
-        10
-      </EuiNotificationBadge>
-    ),
+    append: <AlertsTabBadge />,
     'data-test-subj': 'hostsView_tab_alerts',
     content: (
       <Wrapper>
