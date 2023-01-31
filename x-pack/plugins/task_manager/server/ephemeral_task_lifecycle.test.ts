@@ -14,13 +14,13 @@ import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { EphemeralTaskLifecycle, EphemeralTaskLifecycleOpts } from './ephemeral_task_lifecycle';
-import { ConcreteTaskInstance, TaskStatus } from './task';
 import { v4 as uuidv4 } from 'uuid';
 import { asTaskPollingCycleEvent, asTaskRunEvent, TaskPersistence } from './task_events';
 import { TaskRunResult } from './task_running';
 import { TaskPoolRunResult } from './task_pool';
 import { TaskPoolMock } from './task_pool.mock';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from './mocks';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 
@@ -107,7 +107,7 @@ describe('EphemeralTaskLifecycle', () => {
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
-      const task = mockTask();
+      const task = taskManagerMock.createTask();
       expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asErr(task));
     });
 
@@ -116,7 +116,7 @@ describe('EphemeralTaskLifecycle', () => {
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
-      const task = mockTask();
+      const task = taskManagerMock.createTask();
       expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asOk(task));
     });
 
@@ -127,12 +127,12 @@ describe('EphemeralTaskLifecycle', () => {
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
-      const task = mockTask();
+      const task = taskManagerMock.createTask();
       expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asOk(task));
-      const task2 = mockTask();
+      const task2 = taskManagerMock.createTask();
       expect(ephemeralTaskLifecycle.attemptToRun(task2)).toMatchObject(asOk(task2));
 
-      const rejectedTask = mockTask();
+      const rejectedTask = taskManagerMock.createTask();
       expect(ephemeralTaskLifecycle.attemptToRun(rejectedTask)).toMatchObject(asErr(rejectedTask));
     });
 
@@ -141,7 +141,7 @@ describe('EphemeralTaskLifecycle', () => {
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
-      const task = mockTask({ id: `my-phemeral-task` });
+      const task = taskManagerMock.createTask({ id: `my-phemeral-task` });
       expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asOk(task));
 
       poolCapacity.mockReturnValue({
@@ -164,7 +164,7 @@ describe('EphemeralTaskLifecycle', () => {
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
-      const task = mockTask({ id: `my-phemeral-task` });
+      const task = taskManagerMock.createTask({ id: `my-phemeral-task` });
       expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asOk(task));
 
       poolCapacity.mockReturnValue({
@@ -175,7 +175,7 @@ describe('EphemeralTaskLifecycle', () => {
         asTaskRunEvent(
           uuidv4(),
           asOk({
-            task: mockTask(),
+            task: taskManagerMock.createTask(),
             result: TaskRunResult.Success,
             persistence: TaskPersistence.Ephemeral,
           })
@@ -194,7 +194,11 @@ describe('EphemeralTaskLifecycle', () => {
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
-      const tasks = [mockTask(), mockTask(), mockTask()];
+      const tasks = [
+        taskManagerMock.createTask(),
+        taskManagerMock.createTask(),
+        taskManagerMock.createTask(),
+      ];
       expect(ephemeralTaskLifecycle.attemptToRun(tasks[0])).toMatchObject(asOk(tasks[0]));
       expect(ephemeralTaskLifecycle.attemptToRun(tasks[1])).toMatchObject(asOk(tasks[1]));
       expect(ephemeralTaskLifecycle.attemptToRun(tasks[2])).toMatchObject(asOk(tasks[2]));
@@ -228,8 +232,8 @@ describe('EphemeralTaskLifecycle', () => {
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
-      const firstLimitedTask = mockTask({ taskType: 'report' });
-      const secondLimitedTask = mockTask({ taskType: 'report' });
+      const firstLimitedTask = taskManagerMock.createTask({ taskType: 'report' });
+      const secondLimitedTask = taskManagerMock.createTask({ taskType: 'report' });
       // both are queued
       expect(ephemeralTaskLifecycle.attemptToRun(firstLimitedTask)).toMatchObject(
         asOk(firstLimitedTask)
@@ -268,8 +272,8 @@ describe('EphemeralTaskLifecycle', () => {
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
-      const firstLimitedTask = mockTask({ taskType: 'report' });
-      const secondLimitedTask = mockTask({ taskType: 'report' });
+      const firstLimitedTask = taskManagerMock.createTask({ taskType: 'report' });
+      const secondLimitedTask = taskManagerMock.createTask({ taskType: 'report' });
       // both are queued
       expect(ephemeralTaskLifecycle.attemptToRun(firstLimitedTask)).toMatchObject(
         asOk(firstLimitedTask)
@@ -317,17 +321,21 @@ describe('EphemeralTaskLifecycle', () => {
 
     const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
-    const fooTasks = [mockTask(), mockTask(), mockTask()];
+    const fooTasks = [
+      taskManagerMock.createTask(),
+      taskManagerMock.createTask(),
+      taskManagerMock.createTask(),
+    ];
     expect(ephemeralTaskLifecycle.attemptToRun(fooTasks[0])).toMatchObject(asOk(fooTasks[0]));
 
-    const firstLimitedTask = mockTask({ taskType: 'report' });
+    const firstLimitedTask = taskManagerMock.createTask({ taskType: 'report' });
     expect(ephemeralTaskLifecycle.attemptToRun(firstLimitedTask)).toMatchObject(
       asOk(firstLimitedTask)
     );
 
     expect(ephemeralTaskLifecycle.attemptToRun(fooTasks[1])).toMatchObject(asOk(fooTasks[1]));
 
-    const secondLimitedTask = mockTask({ taskType: 'report' });
+    const secondLimitedTask = taskManagerMock.createTask({ taskType: 'report' });
     expect(ephemeralTaskLifecycle.attemptToRun(secondLimitedTask)).toMatchObject(
       asOk(secondLimitedTask)
     );
@@ -358,7 +366,11 @@ describe('EphemeralTaskLifecycle', () => {
 
     const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
-    const tasks = [mockTask(), mockTask(), mockTask()];
+    const tasks = [
+      taskManagerMock.createTask(),
+      taskManagerMock.createTask(),
+      taskManagerMock.createTask(),
+    ];
     expect(ephemeralTaskLifecycle.attemptToRun(tasks[0])).toMatchObject(asOk(tasks[0]));
     expect(ephemeralTaskLifecycle.attemptToRun(tasks[1])).toMatchObject(asOk(tasks[1]));
     expect(ephemeralTaskLifecycle.attemptToRun(tasks[2])).toMatchObject(asOk(tasks[2]));
@@ -383,23 +395,3 @@ describe('EphemeralTaskLifecycle', () => {
     expect(ephemeralTaskLifecycle.queuedTasks).toBe(0);
   });
 });
-
-function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance {
-  return {
-    id: uuidv4(),
-    runAt: new Date(),
-    taskType: 'foo',
-    schedule: undefined,
-    attempts: 0,
-    status: TaskStatus.Idle,
-    params: { hello: 'world' },
-    state: { baby: 'Henhen' },
-    user: 'jimbo',
-    scope: ['reporting'],
-    ownerId: '',
-    startedAt: null,
-    retryAt: null,
-    scheduledAt: new Date(),
-    ...overrides,
-  };
-}

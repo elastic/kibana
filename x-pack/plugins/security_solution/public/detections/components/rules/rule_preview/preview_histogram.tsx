@@ -210,6 +210,7 @@ export const PreviewHistogram = ({
                 scopeId={SourcererScopeName.detections}
                 stackByField={ruleType === 'machine_learning' ? 'host.name' : 'event.category'}
                 timerange={timerange}
+                withActions={false}
               />
             ) : (
               <BarChart

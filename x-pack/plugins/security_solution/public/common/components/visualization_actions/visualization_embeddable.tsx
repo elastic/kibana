@@ -39,7 +39,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   const visualizationData = inspect?.response
     ? parseVisualizationData<VisualizationAlertsByStatusResponse>(inspect?.response)
     : null;
-  const dataExists = visualizationData != null && visualizationData[0]?.hits.total !== 0;
+  const dataExists = visualizationData != null && visualizationData[0]?.hits?.total !== 0;
   const donutTextWrapperStyles = dataExists
     ? css`
         top: 40%;
@@ -94,7 +94,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         isChartEmbeddablesEnabled={true}
         dataExists={dataExists}
         label={label}
-        title={dataExists ? <ChartLabel count={visualizationData[0]?.hits.total} /> : null}
+        title={dataExists ? <ChartLabel count={visualizationData[0]?.hits?.total} /> : null}
         donutTextWrapperClassName={donutTextWrapperClassName}
         donutTextWrapperStyles={donutTextWrapperStyles}
       >

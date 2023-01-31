@@ -6,12 +6,12 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
+const layerId = uuidv4();
 
 export const getAlertsByStatusAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.workflow_status',
   extraOptions
 ) => {
-  const layerId = uuidv4();
   return {
     title: 'Alerts',
     description: '',

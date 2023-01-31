@@ -66,10 +66,10 @@ export interface DonutChartWrapperProps {
 /* Make this position absolute in order to overlap the text onto the donut */
 export const DonutTextWrapper = styled(EuiFlexGroup)<
   EuiFlexGroupProps & {
-    $isChartEmbeddablesEnabled?: boolean;
     $dataExists?: boolean;
+    $donutTextWrapperStyles?: FlattenSimpleInterpolation;
+    $isChartEmbeddablesEnabled?: boolean;
     className?: string;
-    donutTextWrapperStyles?: FlattenSimpleInterpolation;
   }
 >`
   top: ${({ $isChartEmbeddablesEnabled, $dataExists }) =>
@@ -79,8 +79,8 @@ export const DonutTextWrapper = styled(EuiFlexGroup)<
   position: absolute;
   z-index: 1;
 
-  ${({ className, donutTextWrapperStyles }) =>
-    className && donutTextWrapperStyles ? `&.${className} {${donutTextWrapperStyles}}` : ''}
+  ${({ className, $donutTextWrapperStyles }) =>
+    className && $donutTextWrapperStyles ? `&.${className} {${$donutTextWrapperStyles}}` : ''}
 `;
 
 export const StyledEuiFlexItem = styled(EuiFlexItem)`
@@ -116,11 +116,11 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
       <StyledEuiFlexItem grow={isChartEmbeddablesEnabled}>
         <DonutTextWrapper
           $dataExists={dataExists}
+          $donutTextWrapperStyles={donutTextWrapperStyles}
           $isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
           alignItems="center"
           className={donutTextWrapperClassName}
           direction="column"
-          donutTextWrapperStyles={donutTextWrapperStyles}
           gutterSize="none"
           justifyContent="center"
         >

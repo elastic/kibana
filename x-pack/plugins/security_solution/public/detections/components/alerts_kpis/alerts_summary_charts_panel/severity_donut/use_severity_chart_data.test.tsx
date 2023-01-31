@@ -15,10 +15,7 @@ import { useSeverityChartData } from './use_severity_chart_data';
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
 Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
-const timerange = {
-  from: '2022-04-05T12:00:00.000Z',
-  to: '2022-04-08T12:00:00.000Z',
-};
+
 const defaultUseQueryAlertsReturn = {
   loading: false,
   data: null,
@@ -71,7 +68,6 @@ describe('useSeverityChartData', () => {
       items: null,
       isLoading: false,
       updatedAt: dateNow,
-      timerange,
     });
 
     expect(mockUseQueryAlerts).toBeCalledWith({
@@ -93,7 +89,6 @@ describe('useSeverityChartData', () => {
       items: parsedAlerts,
       isLoading: false,
       updatedAt: dateNow,
-      timerange,
     });
   });
 
@@ -114,7 +109,6 @@ describe('useSeverityChartData', () => {
       items: parsedAlerts,
       isLoading: false,
       updatedAt: newDateNow,
-      timerange,
     });
   });
 
@@ -132,7 +126,6 @@ describe('useSeverityChartData', () => {
       items: null,
       isLoading: false,
       updatedAt: dateNow,
-      timerange,
     });
   });
 });

@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   AddAuditEventParams,
   AuthorizationTypeEntry,
@@ -17,6 +16,7 @@ import type {
   ISavedObjectsSecurityExtension,
   PerformAuthorizationParams,
   RedactNamespacesParams,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';

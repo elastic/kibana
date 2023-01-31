@@ -19,7 +19,7 @@ import type {
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
-  CaseUserActionInjectedAttributesWithoutActionId,
+  CaseUserActionInjectedAttributes,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
@@ -143,16 +143,18 @@ export interface ServiceContext {
   auditLogger: AuditLogger;
 }
 
-export interface CaseConnectorActivity {
-  connectorId: string;
-  fields: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
-  push?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+export interface PushTimeFrameInfo {
+  mostRecent: SavedObject<CaseUserActionInjectedAttributes>;
+  oldest: SavedObject<CaseUserActionInjectedAttributes>;
 }
 
-export type CaseConnectorFields = Map<
-  string,
-  SavedObject<CaseUserActionInjectedAttributesWithoutActionId>
->;
+export interface CaseConnectorActivity {
+  connectorId: string;
+  fields: SavedObject<CaseUserActionInjectedAttributes>;
+  push?: PushTimeFrameInfo;
+}
+
+export type CaseConnectorFields = Map<string, SavedObject<CaseUserActionInjectedAttributes>>;
 
 export interface PushInfo {
   date: Date;

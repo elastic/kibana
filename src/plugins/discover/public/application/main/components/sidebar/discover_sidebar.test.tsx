@@ -17,7 +17,6 @@ import {
   DiscoverSidebarProps,
 } from './discover_sidebar';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { getDefaultFieldFilter } from './lib/field_filter';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -29,7 +28,7 @@ import { VIEW_MODE } from '../../../../../common/constants';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import * as ExistingFieldsHookApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { ExistenceFetchStatus } from '@kbn/unified-field-list-plugin/public';
-import { getDataViewFieldList } from './lib/get_data_view_field_list';
+import { getDataViewFieldList } from './lib/get_field_list';
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])
@@ -66,7 +65,7 @@ function getCompProps(): DiscoverSidebarProps {
     }
   }
 
-  const allFields = getDataViewFieldList(dataView, fieldCounts, false);
+  const allFields = getDataViewFieldList(dataView, fieldCounts);
 
   (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockClear();
   (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockImplementation(() => ({
@@ -100,8 +99,6 @@ function getCompProps(): DiscoverSidebarProps {
     onRemoveField: jest.fn(),
     selectedDataView: dataView,
     trackUiMetric: jest.fn(),
-    fieldFilter: getDefaultFieldFilter(),
-    setFieldFilter: jest.fn(),
     onFieldEdited: jest.fn(),
     editField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -112,6 +109,7 @@ function getCompProps(): DiscoverSidebarProps {
     useNewFieldsApi: true,
     showFieldList: true,
     isAffectedByGlobalFilter: false,
+    isProcessing: false,
   };
 }
 

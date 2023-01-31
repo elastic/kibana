@@ -180,7 +180,7 @@ export const getErrorDetailsUrl = ({
   stateId: string;
   basePath: string;
   configId: string;
-  locationId: string;
+  locationId?: string;
 }) => {
   return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}?locationId=${locationId}`;
 };

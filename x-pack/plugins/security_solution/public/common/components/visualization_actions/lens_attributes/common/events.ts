@@ -7,11 +7,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../types';
 
+const layerId = uuidv4();
+
 export const getEventsHistogramLensAttributes: GetLensAttributes = (
   stackByField = 'event.action'
 ) => {
-  const layerId = uuidv4();
-
   return {
     title: 'Events',
     description: '',
@@ -21,7 +21,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
         title: 'Empty XY chart',
         legend: {
           isVisible: true,
-          position: 'right',
+          position: 'left',
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',

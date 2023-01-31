@@ -63,7 +63,7 @@ export function getAggregatableFields(fields: {
 }): EuiComboBoxOptionOption[] {
   const result = [];
   for (const [key, field] of Object.entries(fields)) {
-    if (field.aggregatable === true) {
+    if (field.aggregatable === true && field.esTypes && field.esTypes?.indexOf('keyword') >= 0) {
       result.push({ label: key, value: key });
     }
   }

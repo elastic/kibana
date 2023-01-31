@@ -21,21 +21,9 @@ export const ErrorDetailsLink = ({
   stateId: string;
   label: string;
 }) => {
-  const { basePath } = useSyntheticsSettingsContext();
-  const selectedLocation = useSelectedLocation();
+  const link = useErrorDetailsLink({ configId, stateId });
 
-  return (
-    <EuiLink
-      href={getErrorDetailsUrl({
-        basePath,
-        configId,
-        stateId,
-        locationId: selectedLocation!.id,
-      })}
-    >
-      {label ?? VIEW_DETAILS}
-    </EuiLink>
-  );
+  return <EuiLink href={link}>{label ?? VIEW_DETAILS}</EuiLink>;
 };
 
 export const ErrorDetailsButton = ({
@@ -47,26 +35,31 @@ export const ErrorDetailsButton = ({
   stateId: string;
   label?: string;
 }) => {
-  const { basePath } = useSyntheticsSettingsContext();
-  const selectedLocation = useSelectedLocation();
-
-  if (!selectedLocation) return null;
+  const link = useErrorDetailsLink({ configId, stateId });
 
   return (
-    <EuiButtonEmpty
-      flush="left"
-      iconType="alert"
-      color="danger"
-      href={getErrorDetailsUrl({
-        basePath,
-        configId,
-        stateId,
-        locationId: selectedLocation.id,
-      })}
-    >
+    <EuiButtonEmpty flush="left" iconType="alert" color="danger" href={link}>
       {label ?? VIEW_DETAILS}
     </EuiButtonEmpty>
   );
+};
+
+export const useErrorDetailsLink = ({
+  stateId,
+  configId,
+}: {
+  configId: string;
+  stateId: string;
+}) => {
+  const { basePath } = useSyntheticsSettingsContext();
+  const selectedLocation = useSelectedLocation();
+
+  return getErrorDetailsUrl({
+    basePath,
+    configId,
+    stateId,
+    locationId: selectedLocation?.id,
+  });
 };
 
 const VIEW_DETAILS = i18n.translate('xpack.synthetics.monitor.step.viewErrorDetails', {

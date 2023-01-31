@@ -12,9 +12,7 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import * as i18n from './translations';
-import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
-import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
@@ -37,6 +35,7 @@ import { useQueryToggle } from '../../containers/query_toggle';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
+import { MatrixHistogramChartContent } from './chart_content';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -73,7 +72,6 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 
 const CHART_HEIGHT = '150px';
 
-// eslint-disable-next-line complexity
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
@@ -312,10 +310,9 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                 stackByField={selectedStackByOption.value}
                 timerange={timerange}
               />
-            ) : isInitialLoading ? (
-              <MatrixLoader />
             ) : (
-              <BarChart
+              <MatrixHistogramChartContent
+                isInitialLoading={isInitialLoading}
                 barChart={barChartData}
                 configs={barchartConfigs}
                 stackByField={selectedStackByOption.value}
