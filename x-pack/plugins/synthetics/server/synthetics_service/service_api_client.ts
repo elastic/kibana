@@ -25,7 +25,7 @@ export interface ServiceData {
     hosts: string[];
     api_key: string;
   };
-  runOnce?: boolean;
+  endpoint?: 'monitors' | 'run' | 'sync';
   isEdit?: boolean;
 }
 
@@ -92,7 +92,7 @@ export class ServiceAPIClient {
   }
 
   async runOnce(data: ServiceData) {
-    return this.callAPI('POST', { ...data, runOnce: true });
+    return this.callAPI('POST', { ...data, endpoint: 'run' });
   }
 
   addVersionHeader(req: AxiosRequestConfig) {
@@ -137,7 +137,7 @@ export class ServiceAPIClient {
 
   async callAPI(
     method: 'POST' | 'PUT' | 'DELETE',
-    { monitors: allMonitors, output, runOnce, isEdit }: ServiceData
+    { monitors: allMonitors, output, isEdit, endpoint }: ServiceData
   ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
@@ -156,7 +156,7 @@ export class ServiceAPIClient {
         promises.push(
           rxjsFrom(
             this.callServiceEndpoint(
-              { monitors: locMonitors, isEdit, runOnce, output },
+              { monitors: locMonitors, isEdit, output, endpoint },
               method,
               url
             )
@@ -196,19 +196,28 @@ export class ServiceAPIClient {
   }
 
   async callServiceEndpoint(
-    { monitors, output, runOnce, isEdit }: ServiceData,
+    { monitors, output, endpoint = 'monitors', isEdit }: ServiceData,
     method: 'POST' | 'PUT' | 'DELETE',
-    url: string
+    baseUrl: string
   ) {
     // don't need to pass locations to heartbeat
     const monitorsStreams = monitors.map(({ locations, ...rest }) =>
       convertToDataStreamFormat(rest)
     );
 
+    let url = baseUrl;
+    switch (endpoint) {
+      case 'monitors':
+        url += '/monitors';
+        break;
+      case 'run':
+        url += '/run';
+    }
+
     return axios(
       this.addVersionHeader({
         method,
-        url: url + (runOnce ? '/run' : '/monitors'),
+        url,
         data: {
           monitors: monitorsStreams,
           output,
@@ -220,7 +229,7 @@ export class ServiceAPIClient {
               Authorization: this.authorization,
             }
           : undefined,
-        httpsAgent: this.getHttpsAgent(url),
+        httpsAgent: this.getHttpsAgent(baseUrl),
       })
     );
   }
