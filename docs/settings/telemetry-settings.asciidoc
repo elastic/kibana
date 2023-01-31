@@ -25,8 +25,7 @@ See our https://www.elastic.co/legal/privacy-statement[Privacy Statement] to lea
 
 [[telemetry-optIn]] `telemetry.optIn`::
   Set to `true` to send cluster statistics to Elastic. Reporting your
-  cluster statistics helps us improve your user experience. Your data is never
-  shared with anyone. Set to `false` to stop sending any telemetry data to Elastic. +
+  cluster statistics helps us improve your user experience. Set to `false` to stop sending any telemetry data to Elastic. +
 +
 This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
 To prevent users from changing it,
