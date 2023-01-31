@@ -18,7 +18,7 @@ const indexTemplate: IndicesPutIndexTemplateRequest = {
     template: {
       settings: {
         index: {
-          number_of_shards: 2,
+          number_of_shards: 1,
           auto_expand_replicas: '0-2',
           hidden: true,
         },
