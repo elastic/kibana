@@ -31,13 +31,14 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   const [areFloatingActionsVisible, setFloatingActionsVisible] = useState<boolean>(false);
 
   const showFloatingActions = useCallback(
-    () => setFloatingActionsVisible(true),
-    [setFloatingActionsVisible]
+    () => isEnabled && setFloatingActionsVisible(true),
+    [isEnabled, setFloatingActionsVisible]
   );
   const hideFloatingActions = useCallback(
     () => setFloatingActionsVisible(false),
     [setFloatingActionsVisible]
   );
+
   const anchorBoundingRect = anchorRef.current?.getBoundingClientRect();
   const actionsBoundingRect = actionsRef.current?.getBoundingClientRect();
 
