@@ -24,7 +24,7 @@ describe('AddExtractionRuleApiLogic', () => {
     it('calls correct api', async () => {
       const domainId = 'domain-id';
       const indexName = 'elastic-crawler';
-      const rule = { fakeRule: 'fake' } as any;
+      const rule = { rules: 'fake' } as any;
       http.post.mockReturnValue(Promise.resolve('result'));
 
       const result = addExtractionRule({
