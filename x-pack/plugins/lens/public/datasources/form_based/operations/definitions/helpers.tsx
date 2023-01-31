@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCode } from '@elastic/eui';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
@@ -74,7 +75,7 @@ export function getInvalidFieldMessage(
               defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found"
               values={{
                 count: missingFields.length,
-                missingFields: <strong>{missingFields.join(', ')}</strong>,
+                missingFields: <EuiCode>{missingFields.join(', ')}</EuiCode>,
               }}
             />
           ),

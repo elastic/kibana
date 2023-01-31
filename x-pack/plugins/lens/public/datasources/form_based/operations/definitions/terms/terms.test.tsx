@@ -2657,9 +2657,9 @@ describe('terms', () => {
               values={
                 Object {
                   "count": 1,
-                  "missingFields": <strong>
+                  "missingFields": <EuiCode>
                     notExisting
-                  </strong>,
+                  </EuiCode>,
                 }
               }
             />,

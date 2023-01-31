@@ -56,9 +56,9 @@ describe('helpers', () => {
             values={
               Object {
                 "count": 1,
-                "missingFields": <strong>
+                "missingFields": <EuiCode>
                   NoBytes
-                </strong>,
+                </EuiCode>,
               }
             }
           />,
@@ -118,9 +118,9 @@ describe('helpers', () => {
             values={
               Object {
                 "count": 1,
-                "missingFields": <strong>
+                "missingFields": <EuiCode>
                   NoBytes
-                </strong>,
+                </EuiCode>,
               }
             }
           />,
@@ -164,9 +164,9 @@ describe('helpers', () => {
             values={
               Object {
                 "count": 2,
-                "missingFields": <strong>
+                "missingFields": <EuiCode>
                   NotExisting, NoBytes
-                </strong>,
+                </EuiCode>,
               }
             }
           />,

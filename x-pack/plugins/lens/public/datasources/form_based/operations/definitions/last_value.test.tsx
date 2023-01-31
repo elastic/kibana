@@ -939,9 +939,9 @@ describe('last_value', () => {
               values={
                 Object {
                   "count": 1,
-                  "missingFields": <strong>
+                  "missingFields": <EuiCode>
                     notExisting
-                  </strong>,
+                  </EuiCode>,
                 }
               }
             />,
