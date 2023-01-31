@@ -1,0 +1,9 @@
+# as work on serverless picks up we will add config values to this file that
+# define how Kibana will run in "serverless" mode. To start Kibana locally with
+# this configuration, pass `--serverless` or run `yarn start-serverless`
+
+# configuration is applied in the following order, later values override
+#  1. kibana.yml
+#  2. kibana.serverless.yml (when --serverless is passed)
+#  3. kibana.dev.yml
+#  4. kibana.serverless.dev.yml (when --serverless is passed)
