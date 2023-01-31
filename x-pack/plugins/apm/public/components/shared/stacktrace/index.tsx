@@ -37,7 +37,7 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
   const groups = getGroupedStackframes(stackframes);
 
   return (
-    <EuiCodeBlock whiteSpace="pre-wrap" language="javastacktrace" isCopyable>
+    <EuiCodeBlock whiteSpace="pre" isCopyable>
       <Fragment>
         {groups.map((group, i) => {
           // library frame
