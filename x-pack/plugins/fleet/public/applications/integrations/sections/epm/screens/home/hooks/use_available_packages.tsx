@@ -228,15 +228,15 @@ export const useAvailablePackages = () => {
 
   // Subcategories
   const subCategories = useMemo(() => {
-    return eprCategories?.data?.items.filter((item) => item.parent_id !== undefined);
-  }, [eprCategories?.data?.items]);
+    return eprCategories?.items.filter((item) => item.parent_id !== undefined);
+  }, [eprCategories?.items]);
 
   const allCategories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
       ? []
       : mergeCategoriesAndCount(
           eprCategories
-            ? (eprCategories.data?.items as Array<{ id: string; title: string; count: number }>)
+            ? (eprCategories.items as Array<{ id: string; title: string; count: number }>)
             : [],
           cards
         );
