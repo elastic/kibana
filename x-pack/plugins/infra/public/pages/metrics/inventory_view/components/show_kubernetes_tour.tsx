@@ -5,17 +5,26 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTourStep, EuiText, EuiButtonEmpty } from '@elastic/eui';
 
 interface Props {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
   children: ReactElement;
 }
 
-export const ShowKubernetesTour = ({ children, isOpen, setIsOpen }: Props) => {
+const STORAGE_KEY = 'showKubernetesTour';
+
+export const ShowKubernetesTour = ({ children }: Props) => {
+  const [isTourOpen, setIsTourOpen] = useState(() => {
+    const initialState = localStorage.getItem(STORAGE_KEY);
+    return initialState !== 'false' ? true : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, isTourOpen ? 'true' : 'false');
+  }, [isTourOpen]);
+
   return (
     <div>
       <EuiTourStep
@@ -29,9 +38,9 @@ export const ShowKubernetesTour = ({ children, isOpen, setIsOpen }: Props) => {
             </p>
           </EuiText>
         }
-        isStepOpen={isOpen}
+        isStepOpen={isTourOpen}
         maxWidth={260}
-        onFinish={() => setIsOpen(false)}
+        onFinish={() => setIsTourOpen(false)}
         step={1}
         stepsTotal={1}
         title={i18n.translate('xpack.infra.homePage.kubernetesTour.title', {
@@ -43,7 +52,7 @@ export const ShowKubernetesTour = ({ children, isOpen, setIsOpen }: Props) => {
             data-test-subj="infra-kubernetesTour-dismiss"
             size="s"
             color="text"
-            onClick={() => setIsOpen(false)}
+            onClick={() => setIsTourOpen(false)}
           >
             {i18n.translate('xpack.infra.homePage.kubernetesTour.dismiss', {
               defaultMessage: 'Dismiss',
