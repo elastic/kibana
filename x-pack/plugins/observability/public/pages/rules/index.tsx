@@ -103,7 +103,6 @@ function RulesPage() {
           <RuleList
             filteredRuleTypes={filteredRuleTypes}
             showActionFilter={false}
-            showCreateRuleButton={false}
             ruleDetailsRoute="alerts/rules/:ruleId"
             statusFilter={status}
             onStatusFilterChange={setStatus}
