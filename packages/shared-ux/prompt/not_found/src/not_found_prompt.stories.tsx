@@ -51,14 +51,18 @@ export const CustomActions: Story = (args) => {
     <EuiPageTemplate>
       <EuiPageTemplate.Section alignment="center">
         <NotFoundPrompt
-          actions={[
-            <EuiButton fill color="primary" onClick={args.onClick}>
-              Go home
-            </EuiButton>,
-            <EuiButtonEmpty iconType="search" onClick={args.onClick}>
-              Go to discover
-            </EuiButtonEmpty>,
-          ]}
+          actions={
+            <>
+              <EuiButton fill color="primary" onClick={args.onClick}>
+                Go home
+              </EuiButton>
+              <EuiButtonEmpty iconType="search" onClick={args.onClick}>
+                Go to discover
+              </EuiButtonEmpty>
+            </>
+          }
+          title="Test"
+          body="Test Body"
         />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
