@@ -141,6 +141,9 @@ image::images/connector-select-type.png[Connector select type]
 After you create a connector, it is available for use any time you set up an
 action in the current space.
 
+For out-of-the-box and standardized connectors, refer to
+<<pre-configured-connectors,preconfigured connectors>>.
+
 [float]
 [[importing-and-exporting-connectors]]
 === Importing and exporting connectors
@@ -156,13 +159,6 @@ button appears in *{connectors-ui}*.
 
 [role="screenshot"]
 image::images/connectors-with-missing-secrets.png[Connectors with missing secrets]
-
-[float]
-[[create-connectors]]
-=== Preconfigured connectors
-
-For out-of-the-box and standardized connectors, refer to
-<pre-configured-connectors,preconfigured connectors>>.
 
 [float]
 [[montoring-connectors]]
