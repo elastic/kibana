@@ -96,6 +96,20 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
 
+    it('should error on invalid `timeout` parameter', async () => {
+      await supertestWithoutAuth
+        .post(EXECUTE_ROUTE)
+        .auth(ROLE.response_actions_role, 'changeme')
+        .set('kbn-xsrf', 'true')
+        .send({ endpoint_ids: [agentId], parameters: { command: 'ls -la', timeout: 'too' } })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message:
+            '[request body.parameters.timeout]: expected value of type [number] but got [string]',
+        });
+    });
+
     it('should succeed with valid endpoint id and command', async () => {
       const {
         body: { data },
@@ -109,6 +123,22 @@ export default function ({ getService }: FtrProviderContext) {
       expect(data.agents[0]).to.eql(agentId);
       expect(data.command).to.eql('execute');
       expect(data.parameters.command).to.eql('ls -la');
+    });
+
+    it('should succeed with valid endpoint id, command and an optional timeout', async () => {
+      const {
+        body: { data },
+      } = await supertestWithoutAuth
+        .post(EXECUTE_ROUTE)
+        .auth(ROLE.response_actions_role, 'changeme')
+        .set('kbn-xsrf', 'true')
+        .send({ endpoint_ids: [agentId], parameters: { command: 'ls -la', timeout: 2000 } })
+        .expect(200);
+
+      expect(data.agents[0]).to.eql(agentId);
+      expect(data.command).to.eql('execute');
+      expect(data.parameters.command).to.eql('ls -la');
+      expect(data.parameters.timeout).to.eql(2000);
     });
   });
 }
