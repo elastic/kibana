@@ -12,7 +12,7 @@ import type { Agent } from '../../types';
 
 import { ActionRunner } from './action_runner';
 import { createAgentAction } from './actions';
-import { BulkActionTaskType } from './bulk_actions_resolver';
+import { BulkActionTaskType } from './bulk_action_types';
 
 export class RequestDiagnosticsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {

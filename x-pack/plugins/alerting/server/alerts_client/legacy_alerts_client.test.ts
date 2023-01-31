@@ -12,7 +12,7 @@ import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert
 import { Alert } from '../alert/alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { processAlerts, setFlapping } from '../lib';
+import { getAlertsForNotification, processAlerts, setFlapping } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
 
 const scheduleActions = jest.fn();
@@ -58,6 +58,12 @@ jest.mock('../lib', () => {
     ...original,
     processAlerts: jest.fn(),
     setFlapping: jest.fn(),
+  };
+});
+
+jest.mock('../lib/get_alerts_for_notification', () => {
+  return {
+    getAlertsForNotification: jest.fn(),
   };
 });
 
@@ -124,6 +130,7 @@ describe('Legacy Alerts Client', () => {
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: false,
+      autoRecoverAlerts: true,
     });
   });
 
@@ -194,6 +201,15 @@ describe('Legacy Alerts Client', () => {
       currentRecoveredAlerts: {},
       recoveredAlerts: {},
     });
+    (getAlertsForNotification as jest.Mock).mockReturnValue({
+      newAlerts: {},
+      activeAlerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
+      currentRecoveredAlerts: {},
+      recoveredAlerts: {},
+    });
     const alertsClient = new LegacyAlertsClient({
       logger,
       maxAlerts: 1000,
@@ -227,6 +243,7 @@ describe('Legacy Alerts Client', () => {
       previouslyRecoveredAlerts: {},
       hasReachedAlertLimit: false,
       alertLimit: 1000,
+      autoRecoverAlerts: true,
       setFlapping: true,
     });
 
@@ -235,6 +252,17 @@ describe('Legacy Alerts Client', () => {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
+      {}
+    );
+
+    expect(getAlertsForNotification).toHaveBeenCalledWith(
+      'default',
+      {},
+      {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
+      {},
       {}
     );
 

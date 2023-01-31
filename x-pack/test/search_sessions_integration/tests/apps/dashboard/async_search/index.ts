@@ -13,7 +13,8 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const PageObjects = getPageObjects(['common']);
   const searchSessions = getService('searchSessions');
 
-  describe('Dashboard', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/103043
+  describe.skip('Dashboard', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();

@@ -23,7 +23,6 @@ export async function callAsyncWithDebug<T>({
   getDebugMessage,
   debug,
   request,
-  requestType,
   requestParams,
   operationName,
   isCalledWithInternalUser,
@@ -31,8 +30,7 @@ export async function callAsyncWithDebug<T>({
   cb: () => Promise<T>;
   getDebugMessage: () => { body: string; title: string };
   debug: boolean;
-  request: KibanaRequest;
-  requestType: string;
+  request?: KibanaRequest;
   requestParams: Record<string, any>;
   operationName: string;
   isCalledWithInternalUser: boolean; // only allow inspection of queries that were retrieved with credentials of the end user
@@ -70,19 +68,21 @@ export async function callAsyncWithDebug<T>({
     console.log(body);
     console.log(`\n`);
 
-    const inspectableEsQueries = inspectableEsQueriesMap.get(request);
-    if (!isCalledWithInternalUser && inspectableEsQueries) {
-      inspectableEsQueries.push(
-        getInspectResponse({
-          esError,
-          esRequestParams: requestParams,
-          esRequestStatus,
-          esResponse: res,
-          kibanaRequest: request,
-          operationName,
-          startTime,
-        })
-      );
+    if (request) {
+      const inspectableEsQueries = inspectableEsQueriesMap.get(request);
+      if (!isCalledWithInternalUser && inspectableEsQueries) {
+        inspectableEsQueries.push(
+          getInspectResponse({
+            esError,
+            esRequestParams: requestParams,
+            esRequestStatus,
+            esResponse: res,
+            kibanaRequest: request,
+            operationName,
+            startTime,
+          })
+        );
+      }
     }
   }
 

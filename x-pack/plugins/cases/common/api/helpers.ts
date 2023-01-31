@@ -15,6 +15,7 @@ import {
   CASE_CONFIGURE_DETAILS_URL,
   CASE_ALERTS_URL,
   CASE_COMMENT_DELETE_URL,
+  CASE_FIND_USER_ACTIONS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -39,6 +40,10 @@ export const getCaseCommentDeleteUrl = (caseId: string, commentId: string): stri
 
 export const getCaseUserActionUrl = (id: string): string => {
   return CASE_USER_ACTIONS_URL.replace('{case_id}', id);
+};
+
+export const getCaseFindUserActionsUrl = (id: string): string => {
+  return CASE_FIND_USER_ACTIONS_URL.replace('{case_id}', id);
 };
 
 export const getCasePushUrl = (caseId: string, connectorId: string): string => {

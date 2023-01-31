@@ -14,7 +14,13 @@ export function useStatusByLocationOverview(configId: string, locationName?: str
     return { status: 'unknown' };
   }
   const allConfigs = status.allConfigs;
-  const config = allConfigs[`${configId}-${locationName}`];
+  const configIdByLocation = `${configId}-${locationName}`;
+  const config = allConfigs[configIdByLocation];
 
-  return { status: config?.status || 'unknown', timestamp: config?.timestamp };
+  return {
+    configIdByLocation,
+    status: config?.status || 'unknown',
+    timestamp: config?.timestamp,
+    ping: config?.ping,
+  };
 }

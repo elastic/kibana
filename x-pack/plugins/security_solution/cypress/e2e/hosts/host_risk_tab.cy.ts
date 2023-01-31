@@ -10,7 +10,7 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import {
   navigateToHostRiskDetailTab,
   openRiskTableFilterAndSelectTheCriticalOption,
-  removeCritialFilter,
+  removeCriticalFilter,
   selectFiveItemsPerPageOption,
 } from '../../tasks/host_risk';
 import {
@@ -51,7 +51,7 @@ describe('risk tab', () => {
 
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('not.have.text', 'siem-kibana');
 
-    removeCritialFilter();
+    removeCriticalFilter();
   });
 
   it('should be able to change items count per page', () => {

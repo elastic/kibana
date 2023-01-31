@@ -23,6 +23,7 @@ import {
   getOptionalArrayField,
   getUnsupportedKeysError,
   getInvalidUrlsOrHostsError,
+  getHasTLSFields,
 } from './common_fields';
 
 export const getNormalizeHTTPFields = ({
@@ -69,7 +70,12 @@ export const getNormalizeHTTPFields = ({
     [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],
+    [ConfigKey.METADATA]: {
+      ...DEFAULT_FIELDS[DataStream.HTTP][ConfigKey.METADATA],
+      is_tls_enabled: getHasTLSFields(monitor),
+    },
   };
+
   return {
     normalizedFields: {
       ...defaultFields,

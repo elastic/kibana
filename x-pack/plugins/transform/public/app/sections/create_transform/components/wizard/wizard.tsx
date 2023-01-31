@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useRef, useState, createContext, useMemo } from 'react';
+import React, { type FC, useRef, useState, createContext, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -58,10 +58,10 @@ const StepDefine: FC<DefinePivotStepProps> = ({
   const definePivotRef = useRef(null);
 
   return (
-    <Fragment>
+    <>
       <div ref={definePivotRef} />
       {isCurrentStep && (
-        <Fragment>
+        <>
           <StepDefineForm
             onChange={setStepDefineState}
             overrides={{ ...stepDefineState }}
@@ -71,12 +71,12 @@ const StepDefine: FC<DefinePivotStepProps> = ({
             next={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
             nextActive={stepDefineState.valid}
           />
-        </Fragment>
+        </>
       )}
       {!isCurrentStep && (
         <StepDefineSummary formState={{ ...stepDefineState }} searchItems={searchItems} />
       )}
-    </Fragment>
+    </>
   );
 };
 
@@ -141,7 +141,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         defaultMessage: 'Transform details',
       }),
       children: (
-        <Fragment>
+        <>
           {currentStep === WIZARD_STEPS.DETAILS ? (
             <StepDetailsForm
               onChange={setStepDetailsState}
@@ -161,7 +161,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
               nextActive={stepDetailsState.valid}
             />
           )}
-        </Fragment>
+        </>
       ),
       status: currentStep >= WIZARD_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
     };
@@ -173,7 +173,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         defaultMessage: 'Create',
       }),
       children: (
-        <Fragment>
+        <>
           {currentStep === WIZARD_STEPS.CREATE ? (
             <StepCreateForm
               createDataView={stepDetailsState.createDataView}
@@ -189,7 +189,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
           {currentStep === WIZARD_STEPS.CREATE && !stepCreateState.created && (
             <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.DETAILS)} />
           )}
-        </Fragment>
+        </>
       ),
       status: currentStep >= WIZARD_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
     };

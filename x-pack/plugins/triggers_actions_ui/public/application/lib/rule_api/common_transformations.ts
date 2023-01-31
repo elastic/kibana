@@ -19,7 +19,15 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   id,
   params,
   actionTypeId,
-  frequency,
+  ...(frequency
+    ? {
+        frequency: {
+          summary: frequency.summary,
+          notifyWhen: frequency.notify_when,
+          throttle: frequency.throttle,
+        },
+      }
+    : {}),
 });
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({

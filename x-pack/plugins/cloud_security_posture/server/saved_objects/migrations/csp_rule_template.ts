@@ -16,7 +16,7 @@ import {
   CspRuleTemplateV870,
 } from '../../../common/schemas/csp_rule_template';
 
-function migrateCspRuleMetadata(
+function migrateCspRuleTemplatesToV840(
   doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV830>,
   context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<CspRuleTemplateV840> {
@@ -37,7 +37,7 @@ function migrateCspRuleMetadata(
   };
 }
 
-function migrateCspRuleTemplateDeprecateState(
+function migrateCspRuleTemplatesToV870(
   doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV840>,
   context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<CspRuleTemplateV870> {
@@ -50,6 +50,6 @@ function migrateCspRuleTemplateDeprecateState(
 }
 
 export const cspRuleTemplateMigrations: SavedObjectMigrationMap = {
-  '8.4.0': migrateCspRuleMetadata,
-  '8.7.0': migrateCspRuleTemplateDeprecateState,
+  '8.4.0': migrateCspRuleTemplatesToV840,
+  '8.7.0': migrateCspRuleTemplatesToV870,
 };

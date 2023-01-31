@@ -198,7 +198,8 @@ export class MlServerPlugin
         plugins.spaces,
         plugins.security?.authz,
         () => this.isMlReady,
-        () => this.dataViews
+        () => this.dataViews,
+        coreSetup.getStartServices
       ),
       mlLicense: this.mlLicense,
     };

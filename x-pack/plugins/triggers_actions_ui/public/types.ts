@@ -81,7 +81,6 @@ import type {
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
-
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
@@ -326,6 +325,7 @@ export interface RuleType<
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
+  hasGetSummarizedAlerts?: boolean;
 }
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
@@ -480,6 +480,7 @@ export interface AlertsTableProps {
   id?: string;
   leadingControlColumns: EuiDataGridControlColumn[];
   showExpandToDetails: boolean;
+  showAlertStatusWithFlapping?: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
   visibleColumns: string[];
@@ -491,6 +492,7 @@ export interface AlertsTableProps {
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  showInspectButton?: boolean;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -524,13 +526,15 @@ export interface BulkActionsConfig {
   ) => void;
 }
 
+export interface RenderCustomActionsRowArgs {
+  alert: EcsFieldsResponse;
+  setFlyoutAlert: (data: unknown) => void;
+  id?: string;
+  setIsActionLoading?: (isLoading: boolean) => void;
+}
+
 export type UseActionsColumnRegistry = () => {
-  renderCustomActionsRow: (
-    alert: EcsFieldsResponse,
-    setFlyoutAlert: (data: unknown) => void,
-    id?: string,
-    setIsActionLoading?: (isLoading: boolean) => void
-  ) => JSX.Element;
+  renderCustomActionsRow: (args: RenderCustomActionsRowArgs) => JSX.Element;
   width?: number;
 };
 

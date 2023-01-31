@@ -84,7 +84,13 @@ export default ({ getService }: FtrProviderContext) => {
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
         });
+      });
 
+      const thresholdIndexTestCases = [
+        ['host_alias', 'auditbeat-8.0.0'],
+        ['host_alias*', 'auditbeat-*'],
+      ];
+      thresholdIndexTestCases.forEach((index) => {
         it(`for threshold rule with index param: ${index}`, async () => {
           const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(index),

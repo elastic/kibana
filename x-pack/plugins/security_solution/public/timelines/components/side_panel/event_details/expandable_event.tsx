@@ -18,13 +18,13 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertDetailsUrl } from '../../../../common/components/link_to';
 import {
   SecuritySolutionLinkAnchor,
   useGetSecuritySolutionLinkProps,
 } from '../../../../common/components/links';
-import type { Ecs } from '../../../../../common/ecs';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';

@@ -5,30 +5,29 @@
  * 2.0.
  */
 
-import { IndicatorData, SLO, SLOId } from '../../domain/models';
-import { toDateRange } from '../../domain/services';
+import { SLO, SLOId, Summary } from '../../domain/models';
 import { FindSLO } from './find_slo';
 import { createSLO, createPaginatedSLO } from './fixtures/slo';
-import { createSLIClientMock, createSLORepositoryMock } from './mocks';
-import { SLIClient } from './sli_client';
+import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
 import { SLORepository, SortField, SortDirection } from './slo_repository';
+import { SummaryClient } from './summary_client';
 
 describe('FindSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
-  let mockSLIClient: jest.Mocked<SLIClient>;
+  let mockSummaryClient: jest.Mocked<SummaryClient>;
   let findSLO: FindSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
-    mockSLIClient = createSLIClientMock();
-    findSLO = new FindSLO(mockRepository, mockSLIClient);
+    mockSummaryClient = createSummaryClientMock();
+    findSLO = new FindSLO(mockRepository, mockSummaryClient);
   });
 
   describe('happy path', () => {
     it('returns the results with pagination', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce(someSummary(slo));
 
       const result = await findSLO.execute({});
 
@@ -82,6 +81,7 @@ describe('FindSLO', () => {
             },
             createdAt: slo.createdAt.toISOString(),
             updatedAt: slo.updatedAt.toISOString(),
+            enabled: slo.enabled,
             revision: slo.revision,
           },
         ],
@@ -91,7 +91,7 @@ describe('FindSLO', () => {
     it('calls the repository with the default criteria and pagination', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce(someSummary(slo));
 
       await findSLO.execute({});
 
@@ -105,7 +105,7 @@ describe('FindSLO', () => {
     it('calls the repository with the name filter criteria', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce(someSummary(slo));
 
       await findSLO.execute({ name: 'Availability' });
 
@@ -119,7 +119,7 @@ describe('FindSLO', () => {
     it('calls the repository with the indicatorType filter criteria', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce(someSummary(slo));
 
       await findSLO.execute({ indicatorTypes: ['sli.kql.custom'] });
 
@@ -133,7 +133,7 @@ describe('FindSLO', () => {
     it('calls the repository with the pagination', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce(someSummary(slo));
 
       await findSLO.execute({ name: 'My SLO*', page: '2', perPage: '100' });
 
@@ -147,7 +147,7 @@ describe('FindSLO', () => {
     it('uses default pagination values when invalid', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce(someSummary(slo));
 
       await findSLO.execute({ page: '-1', perPage: '0' });
 
@@ -161,7 +161,7 @@ describe('FindSLO', () => {
     it('sorts by name by default when not specified', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce(someSummary(slo));
 
       await findSLO.execute({ sortBy: undefined });
 
@@ -175,7 +175,7 @@ describe('FindSLO', () => {
     it('sorts by indicator type', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce(someSummary(slo));
 
       await findSLO.execute({ sortBy: 'indicatorType' });
 
@@ -189,7 +189,7 @@ describe('FindSLO', () => {
     it('sorts by indicator type in descending order', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce(someSummary(slo));
 
       await findSLO.execute({ sortBy: 'indicatorType', sortDirection: 'desc' });
 
@@ -202,12 +202,17 @@ describe('FindSLO', () => {
   });
 });
 
-function someIndicatorData(slo: SLO): Record<SLOId, IndicatorData> {
+function someSummary(slo: SLO): Record<SLOId, Summary> {
   return {
     [slo.id]: {
-      good: 9999,
-      total: 10000,
-      dateRange: toDateRange(slo.timeWindow),
+      status: 'HEALTHY',
+      sliValue: 0.9999,
+      errorBudget: {
+        initial: 0.001,
+        consumed: 0.1,
+        remaining: 0.9,
+        isEstimated: false,
+      },
     },
   };
 }
