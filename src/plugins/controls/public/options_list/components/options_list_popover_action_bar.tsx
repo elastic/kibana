@@ -74,6 +74,7 @@ export const OptionsListPopoverActionBar = ({
                 content={OptionsListStrings.popover.getCardinalityTooltip(totalCardinality)}
               >
                 <EuiBadge
+                  tabIndex={0}
                   data-test-subj="optionsList-cardinality-badge"
                   className="optionsList__actionBarFirstBadge"
                 >
@@ -90,6 +91,7 @@ export const OptionsListPopoverActionBar = ({
                 )}
               >
                 <EuiBadge
+                  tabIndex={0}
                   color="warning"
                   className={allowExpensiveQueries ? undefined : 'optionsList__actionBarFirstBadge'}
                 >

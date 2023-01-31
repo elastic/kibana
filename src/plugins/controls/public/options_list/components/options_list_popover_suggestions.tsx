@@ -135,7 +135,8 @@ export const OptionsListPopoverSuggestions = ({
 
     const { scrollTop, scrollHeight, clientHeight } = listbox;
     if (scrollTop + clientHeight >= scrollHeight - parseInt(euiThemeVars.euiSizeXXL, 10)) {
-      // reached the bottom of the list
+      // reached the "bottom" of the list, where euiSizeXXL acts as a "margin of error" so that the user doesn't
+      // have to scroll **all the way** to the bottom in order to load more options
       loadMoreSuggestions(totalCardinality ?? MAX_OPTIONS_LIST_REQUEST_SIZE);
     }
   }, [loadMoreSuggestions, totalCardinality]);
