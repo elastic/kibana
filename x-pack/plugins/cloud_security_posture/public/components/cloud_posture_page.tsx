@@ -84,6 +84,9 @@ export const CspNoDataPage = ({
           display: block;
           margin: auto;
           width: 450px;
+          div[class*='euiCard__footer'] {
+            display: contents;
+          }
           button {
             margin: 0 auto;
             margin-top: ${euiTheme.size.base};
