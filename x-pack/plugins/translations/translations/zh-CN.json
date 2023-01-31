@@ -13293,7 +13293,7 @@
     "xpack.fleet.addIntegration.installAgentStepTitle": "这些步骤将在 Fleet 中配置和注册 Elastic 代理，以便自动部署更新并集中管理该代理。作为 Fleet 的替代方案，高级用户可以在 {standaloneLink} 中运行代理。",
     "xpack.fleet.addIntegration.standaloneWarning": "通过在独立模式下运行 Elastic 代理来设置集成为高级选项。如果可能，我们建议改用 {link}。",
     "xpack.fleet.agentActivity.completedTitle": "{nbAgents} {agents} {completedText}{offlineText}",
-    "xpack.fleet.agentActivity.inProgressTitle": "{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}",
+    "xpack.fleet.agentActivity.inProgressTitle": "{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}{failuresText}",
     "xpack.fleet.agentActivityFlyout.cancelledDescription": "已于 {date}取消",
     "xpack.fleet.agentActivityFlyout.cancelledTitle": "代理 {cancelledText} 已取消",
     "xpack.fleet.agentActivityFlyout.completedDescription": "完成于 {date}",
