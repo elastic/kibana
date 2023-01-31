@@ -11,6 +11,7 @@ import { ApmDocumentType } from '../../../common/document_type';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
+  TRANSACTION_OVERFLOW_COUNT,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
@@ -30,6 +31,8 @@ import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../lib/helpers/transaction_error_rate';
+
+const txGroupsDroppedBucketName = '_other';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -61,8 +64,6 @@ export async function getServiceTransactionGroups({
   start: number;
   end: number;
 }) {
-  const bucketSize = config.ui.transactionGroupBucketSize;
-
   const field = getDurationFieldForTransactions(searchAggregatedTransactions);
 
   const response = await apmEventClient.search(
@@ -80,7 +81,14 @@ export async function getServiceTransactionGroups({
           bool: {
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
-              { term: { [TRANSACTION_TYPE]: transactionType } },
+              {
+                bool: {
+                  should: [
+                    { term: { [TRANSACTION_NAME]: txGroupsDroppedBucketName } },
+                    { term: { [TRANSACTION_TYPE]: transactionType } },
+                  ],
+                },
+              },
               ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
@@ -92,10 +100,15 @@ export async function getServiceTransactionGroups({
         },
         aggs: {
           total_duration: { sum: { field } },
+          transaction_overflow_count: {
+            sum: {
+              field: TRANSACTION_OVERFLOW_COUNT,
+            },
+          },
           transaction_groups: {
             terms: {
               field: TRANSACTION_NAME,
-              size: bucketSize,
+              size: 1000,
               order: { _count: 'desc' },
             },
             aggs: {
@@ -147,9 +160,9 @@ export async function getServiceTransactionGroups({
       ...transactionGroup,
       transactionType,
     })),
-    isAggregationAccurate:
-      (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
-      0,
-    bucketSize,
+    maxTransactionGroupsExceeded:
+      (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
+    transactionOverflowCount:
+      response.aggregations?.transaction_overflow_count.value ?? 0,
   };
 }

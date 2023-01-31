@@ -42,22 +42,25 @@ export async function getServices({
   documentType: ApmDocumentType;
   rollupInterval: RollupInterval;
 }) {
-  const items = await getServicesItems({
-    environment,
-    kuery,
-    mlClient,
-    apmEventClient,
-    apmAlertsClient,
-    logger,
-    start,
-    end,
-    serviceGroup,
-    randomSampler,
-    documentType,
-    rollupInterval,
-  });
+  const { items, maxServiceCountExceeded, serviceOverflowCount } =
+    await getServicesItems({
+      environment,
+      kuery,
+      mlClient,
+      apmEventClient,
+      apmAlertsClient,
+      logger,
+      start,
+      end,
+      serviceGroup,
+      randomSampler,
+      documentType,
+      rollupInterval,
+    });
 
   return {
     items,
+    maxServiceCountExceeded,
+    serviceOverflowCount,
   };
 }

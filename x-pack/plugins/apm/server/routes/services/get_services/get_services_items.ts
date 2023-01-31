@@ -20,7 +20,7 @@ import { getServicesAlerts } from './get_service_alerts';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
-export const MAX_NUMBER_OF_SERVICES = 500;
+export const MAX_NUMBER_OF_SERVICES = 1_000;
 
 export async function getServicesItems({
   environment,
@@ -63,8 +63,8 @@ export async function getServicesItems({
     };
 
     const [
-      transactionStats,
-      servicesFromErrorAndMetricDocuments,
+      { serviceStats, serviceOverflowCount },
+      { services, maxServiceCountExceeded },
       healthStatuses,
       alertCounts,
     ] = await Promise.all([
@@ -86,11 +86,16 @@ export async function getServicesItems({
       }),
     ]);
 
-    return mergeServiceStats({
-      transactionStats,
-      servicesFromErrorAndMetricDocuments,
-      healthStatuses,
-      alertCounts,
-    });
+    return {
+      items:
+        mergeServiceStats({
+          serviceStats,
+          servicesFromErrorAndMetricDocuments: services,
+          healthStatuses,
+          alertCounts,
+        }) ?? [],
+      maxServiceCountExceeded,
+      serviceOverflowCount,
+    };
   });
 }

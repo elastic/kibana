@@ -12,6 +12,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  SERVICE_OVERFLOW_COUNT,
 } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import { ServiceGroup } from '../../../../common/service_groups';
@@ -95,6 +96,11 @@ export async function getServiceTransactionStats({
           sample: {
             random_sampler: randomSampler,
             aggs: {
+              service_overflow_count: {
+                sum: {
+                  field: SERVICE_OVERFLOW_COUNT,
+                },
+              },
               services: {
                 terms: {
                   field: SERVICE_NAME,
@@ -131,33 +137,36 @@ export async function getServiceTransactionStats({
     }
   );
 
-  return (
-    response.aggregations?.sample.services.buckets.map((bucket) => {
-      const topTransactionTypeBucket =
-        bucket.transactionType.buckets.find(
-          ({ key }) =>
-            key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
-        ) ?? bucket.transactionType.buckets[0];
+  return {
+    serviceStats:
+      response.aggregations?.sample.services.buckets.map((bucket) => {
+        const topTransactionTypeBucket =
+          bucket.transactionType.buckets.find(
+            ({ key }) =>
+              key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
+          ) ?? bucket.transactionType.buckets[0];
 
-      return {
-        serviceName: bucket.key as string,
-        transactionType: topTransactionTypeBucket.key as string,
-        environments: topTransactionTypeBucket.environments.buckets.map(
-          (environmentBucket) => environmentBucket.key as string
-        ),
-        agentName: topTransactionTypeBucket.sample.top[0].metrics[
-          AGENT_NAME
-        ] as AgentName,
-        latency: topTransactionTypeBucket.avg_duration.value,
-        transactionErrorRate: calculateFailedTransactionRate(
-          topTransactionTypeBucket
-        ),
-        throughput: calculateThroughputWithRange({
-          start,
-          end,
-          value: topTransactionTypeBucket.doc_count,
-        }),
-      };
-    }) ?? []
-  );
+        return {
+          serviceName: bucket.key as string,
+          transactionType: topTransactionTypeBucket.key as string,
+          environments: topTransactionTypeBucket.environments.buckets.map(
+            (environmentBucket) => environmentBucket.key as string
+          ),
+          agentName: topTransactionTypeBucket.sample.top[0].metrics[
+            AGENT_NAME
+          ] as AgentName,
+          latency: topTransactionTypeBucket.avg_duration.value,
+          transactionErrorRate: calculateFailedTransactionRate(
+            topTransactionTypeBucket
+          ),
+          throughput: calculateThroughputWithRange({
+            start,
+            end,
+            value: topTransactionTypeBucket.doc_count,
+          }),
+        };
+      }) ?? [],
+    serviceOverflowCount:
+      response.aggregations?.sample?.service_overflow_count.value || 0,
+  };
 }
