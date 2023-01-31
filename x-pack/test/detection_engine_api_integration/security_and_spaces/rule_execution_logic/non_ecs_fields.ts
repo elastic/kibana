@@ -39,6 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
   const indexDocuments = indexDocumentsFactory({
     es,
     index: 'ecs_non_compliant',
+    log,
   });
 
   /**
@@ -50,17 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
   const indexAndCreatePreviewAlert = async (document: Record<string, unknown>) => {
     const documentId = uuidv4();
 
-    const { items } = await indexDocuments([getDocument(documentId, document)]);
-
-    // throw error if document wasn't indexed, so test will be terminated earlier and no false positives can happen
-    items.some(({ index } = {}) => {
-      if (index?.error) {
-        log.error(
-          `Failed to index document in non_ecs_fields test suits: "${index.error?.reason}"`
-        );
-        throw Error(index.error.message);
-      }
-    });
+    await indexDocuments([getDocument(documentId, document)]);
 
     const { previewId, logs } = await previewRule({
       supertest,
