@@ -857,6 +857,23 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
           <RuleTypeEuiFormRow
+            $isVisible={isThreatMatchRule(ruleType)}
+            data-test-subj="threatMatchInput"
+            fullWidth
+          >
+            <>
+              <UseMultiFields
+                fields={{
+                  threatMapping: {
+                    path: 'threatMapping',
+                  },
+                }}
+              >
+                {ThreatMatchInputChildren}
+              </UseMultiFields>
+            </>
+          </RuleTypeEuiFormRow>
+          <RuleTypeEuiFormRow
             $isVisible={isNewTermsRule(ruleType)}
             data-test-subj="newTermsInput"
             fullWidth
