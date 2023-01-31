@@ -12,16 +12,19 @@ import { EuiDescriptionList, EuiDescriptionListDescription, EuiCode } from '@ela
 import { useInternalStateSelector } from '../../../services/discover_internal_state_container';
 
 export function NoResultsSuggestionDefault() {
-  const dataViewPattern = useInternalStateSelector((state) => state.dataView?.getIndexPattern?.());
+  const dataView = useInternalStateSelector((state) => state.dataView);
+  const dataViewName = dataView?.getName();
+  const dataViewPattern = dataView?.getIndexPattern();
 
   return (
     <EuiDescriptionList compressed>
       <EuiDescriptionListDescription data-test-subj="discoverNoResultsCheckIndices">
-        {dataViewPattern ? (
+        {dataViewName && dataViewPattern ? (
           <FormattedMessage
             id="discover.noResults.noDocumentsOrCheckIndicesAndPermissionsDescription"
-            defaultMessage="Make sure the indices matching {dataViewPattern} exist, that you have permission to view them and that they contain documents."
+            defaultMessage="Make sure data view {dataViewName} with index pattern {dataViewPattern} has matching indices and documents and that you have permission to view them."
             values={{
+              dataViewName: <strong>{dataViewName}</strong>,
               dataViewPattern: <EuiCode>{dataViewPattern}</EuiCode>,
             }}
           />
