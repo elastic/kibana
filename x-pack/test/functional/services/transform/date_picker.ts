@@ -38,6 +38,7 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
       expect(actualApplyButtonText).to.be('Apply');
 
       await applyButton.click();
+      await testSubjects.missingOrFail('superDatePickerQuickMenu');
     },
 
     async setTimeRange(fromTime: string, toTime: string) {
