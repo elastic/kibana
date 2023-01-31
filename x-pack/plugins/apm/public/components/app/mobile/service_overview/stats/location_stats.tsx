@@ -59,7 +59,7 @@ export function MobileLocationStats({
 
   const {
     path: { serviceName },
-    query: { environment, offset, comparisonEnabled, transactionType },
+    query: { environment, offset, comparisonEnabled },
   } = useAnyOfApmParams('/mobile-services/{serviceName}/overview');
 
   const previousPeriodLabel = usePreviousPeriodLabel();
@@ -80,22 +80,12 @@ export function MobileLocationStats({
               kuery,
               locationField,
               offset,
-              transactionType,
             },
           },
         }
       );
     },
-    [
-      start,
-      end,
-      environment,
-      kuery,
-      serviceName,
-      locationField,
-      offset,
-      transactionType,
-    ]
+    [start, end, environment, kuery, serviceName, locationField, offset]
   );
 
   const loadingLocationStats = isPending(locationStatsStatus);

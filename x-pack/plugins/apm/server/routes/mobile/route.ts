@@ -111,7 +111,6 @@ const mobileLocationStatsRoute = createApmServerRoute({
       offsetRt,
       t.partial({
         locationField: t.string,
-        transactionType: t.string,
       }),
     ]),
   }),
