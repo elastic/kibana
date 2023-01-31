@@ -11,7 +11,7 @@ import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { debounce } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import moment from 'moment';
+import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
@@ -23,9 +23,7 @@ const buildQuerySubmittedPayload = (hostState: HostsState) => {
   return {
     control_filters: panelFilters.map((filter) => JSON.stringify(filter)),
     filters: filters.map((filter) => JSON.stringify(filter)),
-    interval: moment
-      .duration(moment(dateRangeTimestamp.to).diff(moment(dateRangeTimestamp.from)))
-      .humanize(),
+    interval: telemetryTimeRangeFormatter(dateRangeTimestamp.to - dateRangeTimestamp.from),
     query: queryObj.query,
   };
 };
