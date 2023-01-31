@@ -203,7 +203,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               title={i18n.DATA_QUALITY_TYPE_TITLE}
               titleSize="xs"
               description={i18n.DATA_QUALITY_TYPE_DESCRIPTION}
-              icon={<EuiIcon size="l" type="magnifyWithPlus" />}
+              icon={<EuiIcon size="l" type="inspect" />}
               selectable={dataQualitySelectableConfig}
               layout="horizontal"
             />
