@@ -351,6 +351,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <UnifiedFieldList<IndexPatternField>
+        searchMode="default"
         allFields={allFields}
         dataView={currentDataView}
         allActiveDataViews={activeIndexPatterns as unknown as DataView[]}

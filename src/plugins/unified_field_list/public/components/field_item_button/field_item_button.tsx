@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
 import { EuiHighlight } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldListItem } from '../../types';
+import { type FieldListItem, type GetCustomFieldType } from '../../types';
 import { wrapFieldNameOnDot } from '../../utils/wrap_field_name_on_dot';
 import { FieldIcon, getFieldIconProps } from '../field_icon';
 
@@ -21,6 +21,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
   isActive?: FieldButtonProps['isActive'];
   className?: FieldButtonProps['className'];
   fieldInfoIcon?: FieldButtonProps['fieldInfoIcon'];
+  getCustomFieldType?: GetCustomFieldType<T>;
   onClick: FieldButtonProps['onClick'];
 }
 
@@ -30,6 +31,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   isActive,
   className,
   fieldInfoIcon,
+  getCustomFieldType,
   onClick,
 }: FieldItemButtonProps<T>) {
   return (
@@ -46,7 +48,13 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
           },
         }),
       }}
-      fieldIcon={<FieldIcon {...getFieldIconProps(field)} />}
+      fieldIcon={
+        getCustomFieldType ? (
+          <FieldIcon type={getCustomFieldType(field)} />
+        ) : (
+          <FieldIcon {...getFieldIconProps(field)} />
+        )
+      }
       fieldName={
         <EuiHighlight search={wrapFieldNameOnDot(fieldSearchHighlight)}>
           {wrapFieldNameOnDot(field.displayName)}

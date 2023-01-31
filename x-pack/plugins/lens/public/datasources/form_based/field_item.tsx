@@ -169,6 +169,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     />
   );
 
+  // TODO: Lens has a lot of customization. Does it need to be a part of UnifiedFieldList wrapper component?
   return (
     <li>
       <FieldPopover
@@ -183,6 +184,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         }}
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
+          // TODO: find a way how to unify field items rendering considering nesting like the following:
+          // FieldPopover > Draggable element > FieldItemButton
           <DragDrop
             draggable
             order={order}

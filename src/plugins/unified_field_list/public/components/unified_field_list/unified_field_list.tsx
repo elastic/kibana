@@ -31,27 +31,15 @@ import {
 } from '../field_popover';
 import { FieldStats } from '../field_stats';
 
-export interface UnifiedFieldListServices {
+interface UnifiedFieldListServicesBase {
   dataViews: DataViewsContract;
   data: DataPublicPluginStart;
-  dataViewFieldEditor: IndexPatternFieldEditorStart;
   core: Pick<CoreStart, 'docLinks' | 'uiSettings'>;
 }
 
-export interface UnifiedFieldListProps<T extends FieldListItem> {
-  services: UnifiedFieldListServices;
-
-  // TODO: should we also encapsulate getting the query/filters/range?
-  query: ExistingFieldsFetcherParams['query'];
-  filters: ExistingFieldsFetcherParams['filters'];
-  fromDate: ExistingFieldsFetcherParams['fromDate'];
-  toDate: ExistingFieldsFetcherParams['toDate'];
-
+export interface UnifiedFieldListPropsBase<T extends FieldListItem> {
   // TODO: is it okay to ask for fields via props?
   allFields: T[] | null; // `null` is for indicating loading state
-
-  dataView: DataView;
-  allActiveDataViews?: DataView[]; // leave it simply `undefined` unless you have multiple active data views at once for all of which fields existence should be always fetched
 
   'data-test-subj'?: string;
   className?: string;
@@ -65,11 +53,7 @@ export interface UnifiedFieldListProps<T extends FieldListItem> {
     }
   ) => JSX.Element;
 
-  onFieldEdited?: (fieldName: string, dataView: DataView) => unknown;
-  onFieldRemoved?: (fieldName: string, dataView: DataView) => unknown;
-
-  onNoData?: ExistingFieldsFetcherParams['onNoData'];
-
+  getCustomFieldType?: GroupedFieldsParams<T>['getCustomFieldType'];
   onSupportedFieldFilter?: GroupedFieldsParams<T>['onSupportedFieldFilter'];
   onSelectedFieldFilter?: GroupedFieldsParams<T>['onSelectedFieldFilter'];
   onOverrideFieldGroupDetails?: GroupedFieldsParams<T>['onOverrideFieldGroupDetails'];
@@ -77,6 +61,53 @@ export interface UnifiedFieldListProps<T extends FieldListItem> {
   onAddFieldToWorkspace?: FieldPopoverHeaderProps['onAddFieldToWorkspace'];
   onAddFilter?: FieldPopoverHeaderProps['onAddFilter'];
 }
+
+export interface UnifiedFieldListForDataViewProps<T extends FieldListItem> {
+  searchMode?: 'default';
+
+  services: UnifiedFieldListServicesBase & {
+    dataViewFieldEditor: IndexPatternFieldEditorStart;
+  };
+
+  dataView: DataView;
+  allActiveDataViews?: DataView[]; // leave it simply `undefined` unless you have multiple active data views at once for all of which fields existence should be always fetched
+
+  // TODO: should we also encapsulate getting the query/filters/range?
+  query: ExistingFieldsFetcherParams['query'];
+  filters: ExistingFieldsFetcherParams['filters'];
+  fromDate: ExistingFieldsFetcherParams['fromDate'];
+  toDate: ExistingFieldsFetcherParams['toDate'];
+
+  onFieldEdited?: (fieldName: string, dataView: DataView) => unknown;
+  onFieldRemoved?: (fieldName: string, dataView: DataView) => unknown;
+
+  onNoData?: ExistingFieldsFetcherParams['onNoData'];
+}
+
+export interface UnifiedFieldListForTextBasedProps<T extends FieldListItem> {
+  searchMode: 'textBased';
+
+  services: UnifiedFieldListServicesBase & {
+    dataViewFieldEditor?: IndexPatternFieldEditorStart;
+  };
+
+  dataView?: never;
+  allActiveDataViews?: never;
+  query?: never;
+  filters?: never;
+  fromDate?: never;
+  toDate?: never;
+  onFieldEdited?: never;
+  onFieldRemoved?: never;
+  onNoData?: never;
+}
+
+export type UnifiedFieldListConditionalProps<T extends FieldListItem> =
+  | UnifiedFieldListForDataViewProps<T>
+  | UnifiedFieldListForTextBasedProps<T>;
+
+export type UnifiedFieldListProps<T extends FieldListItem> = UnifiedFieldListConditionalProps<T> &
+  UnifiedFieldListPropsBase<T>;
 
 export function UnifiedFieldList<T extends FieldListItem = DataViewField>({
   services,
@@ -95,6 +126,7 @@ export function UnifiedFieldList<T extends FieldListItem = DataViewField>({
   onFieldEdited,
   onFieldRemoved,
   onNoData,
+  getCustomFieldType,
   onSupportedFieldFilter,
   onSelectedFieldFilter,
   onOverrideFieldGroupDetails,
@@ -102,12 +134,14 @@ export function UnifiedFieldList<T extends FieldListItem = DataViewField>({
   onAddFilter,
 }: UnifiedFieldListProps<T>) {
   const { dataViewFieldEditor, dataViews } = services;
-  const currentDataViewId = dataView.id!;
+  const currentDataViewId = dataView?.id ?? null;
   const hasEditPermission =
-    dataViewFieldEditor.userPermissions.editIndexPattern() || !dataView.isPersisted();
+    dataView && dataViewFieldEditor
+      ? dataViewFieldEditor.userPermissions.editIndexPattern() || !dataView.isPersisted()
+      : false;
   const closeFieldEditor = useRef<() => void | undefined>();
   const activeDataViews = useMemo(
-    () => allActiveDataViews || [dataView],
+    () => allActiveDataViews || (dataView ? [dataView] : []),
     [dataView, allActiveDataViews]
   );
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -144,6 +178,7 @@ export function UnifiedFieldList<T extends FieldListItem = DataViewField>({
     allFields,
     services,
     isAffectedByGlobalFilter: Boolean(filters?.length),
+    getCustomFieldType,
     onSupportedFieldFilter,
     onSelectedFieldFilter,
     onOverrideFieldGroupDetails,
@@ -151,10 +186,10 @@ export function UnifiedFieldList<T extends FieldListItem = DataViewField>({
 
   const editField = useMemo(
     () =>
-      hasEditPermission
+      currentDataViewId && hasEditPermission
         ? async (fieldName: string) => {
             const dataViewInstance = await dataViews.get(currentDataViewId);
-            closeFieldEditor.current = dataViewFieldEditor.openEditor({
+            closeFieldEditor.current = dataViewFieldEditor?.openEditor({
               ctx: {
                 dataView: dataViewInstance,
               },
@@ -182,10 +217,10 @@ export function UnifiedFieldList<T extends FieldListItem = DataViewField>({
 
   const removeField = useMemo(
     () =>
-      hasEditPermission
+      currentDataViewId && hasEditPermission
         ? async (fieldName: string) => {
             const dataViewInstance = await dataViews.get(currentDataViewId);
-            closeFieldEditor.current = dataViewFieldEditor.openDeleteModal({
+            closeFieldEditor.current = dataViewFieldEditor?.openDeleteModal({
               ctx: {
                 dataView: dataViewInstance,
               },
@@ -224,41 +259,43 @@ export function UnifiedFieldList<T extends FieldListItem = DataViewField>({
           ({ field, fieldSearchHighlight }) => {
             // TODO: do we need another component which would wrap FieldItemButton with FieldPopover?
             return (
-              <FieldPopover
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                button={
-                  <FieldItemButton
-                    field={field}
-                    fieldSearchHighlight={fieldSearchHighlight}
-                    onClick={togglePopover}
-                  />
-                }
-                renderHeader={() => (
-                  <FieldPopoverHeader
-                    field={field} // TODO: fix types or change logic to work with T instead of DataViewField strictly
-                    closePopover={closePopover}
-                    onAddFieldToWorkspace={onAddFieldToWorkspace}
-                    onAddFilter={onAddFilter}
-                    onEditField={editField}
-                    onDeleteField={removeField}
-                  />
-                )}
-                renderContent={() => (
-                  <>
-                    <FieldStats
+              <li>
+                <FieldPopover
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  button={
+                    <FieldItemButton
+                      field={field}
+                      fieldSearchHighlight={fieldSearchHighlight}
+                      onClick={togglePopover}
+                    />
+                  }
+                  renderHeader={() => (
+                    <FieldPopoverHeader
                       field={field} // TODO: fix types or change logic to work with T instead of DataViewField strictly
-                      dataViewOrDataViewId={dataView}
+                      closePopover={closePopover}
+                      onAddFieldToWorkspace={onAddFieldToWorkspace}
                       onAddFilter={onAddFilter}
+                      onEditField={editField}
+                      onDeleteField={removeField}
                     />
-                    <FieldPopoverVisualize
-                      field={field} // TODO: fix types or change logic to work with T instead of DataViewField strictly
-                      dataView={dataView}
-                      originatingApp={originatingApp}
-                    />
-                  </>
-                )}
-              />
+                  )}
+                  renderContent={() => (
+                    <>
+                      <FieldStats
+                        field={field} // TODO: fix types or change logic to work with T instead of DataViewField strictly
+                        dataViewOrDataViewId={dataView}
+                        onAddFilter={onAddFilter}
+                      />
+                      <FieldPopoverVisualize
+                        field={field} // TODO: fix types or change logic to work with T instead of DataViewField strictly
+                        dataView={dataView}
+                        originatingApp={originatingApp}
+                      />
+                    </>
+                  )}
+                />
+              </li>
             );
           },
     [

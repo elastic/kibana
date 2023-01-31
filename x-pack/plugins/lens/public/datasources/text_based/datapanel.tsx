@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiHighlight } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
@@ -17,17 +16,12 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
-  FieldList,
-  FieldListFilters,
-  FieldIcon,
   GetCustomFieldType,
-  wrapFieldNameOnDot,
-  FieldListGrouped,
-  FieldListGroupedProps,
   FieldsGroupNames,
-  useGroupedFields,
+  FieldItemButton,
+  UnifiedFieldList,
+  type UnifiedFieldListProps,
 } from '@kbn/unified-field-list-plugin/public';
-import { FieldButton } from '@kbn/react-field';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
@@ -98,20 +92,8 @@ export function TextBasedDataPanel({
     }
   }, []);
 
-  const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<DatatableColumn>({
-    dataViewId: null,
-    allFields: dataHasLoaded ? fieldList : null,
-    services: {
-      dataViews,
-      core,
-    },
-    getCustomFieldType,
-    onSelectedFieldFilter,
-    onOverrideFieldGroupDetails,
-  });
-
-  const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex, fieldSearchHighlight }) => {
+  const onRenderFieldItem: UnifiedFieldListProps<DatatableColumn>['onRenderFieldItem'] =
+    useCallback(({ field, itemIndex, fieldSearchHighlight }) => {
       if (!field) {
         return <></>;
       }
@@ -126,21 +108,25 @@ export function TextBasedDataPanel({
           }}
           dataTestSubj={`lnsFieldListPanelField-${field.name}`}
         >
-          <FieldButton
+          <FieldItemButton<DatatableColumn>
+            field={field}
+            fieldSearchHighlight={fieldSearchHighlight}
             className={`lnsFieldItem lnsFieldItem--${field.meta.type}`}
             isActive={false}
+            getCustomFieldType={getCustomFieldType}
             onClick={() => {}}
-            fieldIcon={<FieldIcon type={getCustomFieldType(field)} />}
-            fieldName={
-              <EuiHighlight search={wrapFieldNameOnDot(fieldSearchHighlight)}>
-                {wrapFieldNameOnDot(field.name)}
-              </EuiHighlight>
-            }
           />
         </DragDrop>
       );
-    },
-    []
+    }, []);
+
+  const listServices = useMemo(
+    () => ({
+      data,
+      dataViews,
+      core,
+    }),
+    [data, dataViews, core]
   );
 
   return (
@@ -150,20 +136,19 @@ export function TextBasedDataPanel({
       }}
     >
       <ChildDragDropProvider {...dragDropContext}>
-        <FieldList
+        <UnifiedFieldList<DatatableColumn>
+          searchMode="textBased"
+          allFields={dataHasLoaded ? fieldList : null}
+          services={listServices}
           className="lnsInnerIndexPatternDataPanel"
-          isProcessing={!dataHasLoaded}
-          prepend={
-            <FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsTextBasedLanguages" />
-          }
-        >
-          <FieldListGrouped<DatatableColumn>
-            {...fieldListGroupedProps}
-            renderFieldItem={renderFieldItem}
-            data-test-subj="lnsTextBasedLanguages"
-            localStorageKeyPrefix="lens"
-          />
-        </FieldList>
+          data-test-subj="lnsTextBasedLanguages"
+          localStorageKeyPrefix="lens"
+          originatingApp="lens"
+          onRenderFieldItem={onRenderFieldItem}
+          onSelectedFieldFilter={onSelectedFieldFilter}
+          onOverrideFieldGroupDetails={onOverrideFieldGroupDetails}
+          getCustomFieldType={getCustomFieldType}
+        />
       </ChildDragDropProvider>
     </KibanaContextProvider>
   );
