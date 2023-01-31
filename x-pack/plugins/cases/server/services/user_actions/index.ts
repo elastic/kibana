@@ -672,7 +672,7 @@ export class CaseUserActionService {
     };
   }
 
-  public async getCaseUserActionStats({ caseId, filter }: { caseId: string; filter?: KueryNode }) {
+  public async getCaseUserActionStats({ caseId }: { caseId: string }) {
     const response = await this.context.unsecuredSavedObjectsClient.find<
       CaseUserActionAttributesWithoutConnectorId,
       UserActionsStatsAggsResult
@@ -683,7 +683,6 @@ export class CaseUserActionService {
       perPage: 1,
       sortField: defaultSortField,
       aggs: CaseUserActionService.buildUserActionStatsAgg(),
-      filter,
     });
 
     const result = {
@@ -693,7 +692,7 @@ export class CaseUserActionService {
     };
 
     response.aggregations?.totals.buckets.forEach(({ key, doc_count: docCount }) => {
-      if (key === 'comment') {
+      if (key === 'user') {
         result.total_comments = docCount;
       }
     });
@@ -710,7 +709,7 @@ export class CaseUserActionService {
     return {
       totals: {
         terms: {
-          field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`,
+          field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
         },
       },
     };

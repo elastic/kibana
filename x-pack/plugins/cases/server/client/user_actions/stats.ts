@@ -5,35 +5,33 @@
  * 2.0.
  */
 
-import { Operations } from '../../authorization';
 import type { CaseUserActionStatsResponse } from '../../../common/api';
 import { CaseUserActionStatsResponseRt } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import type { UserActionGet } from './types';
+import type { CasesClient } from '../client';
 
 export const getStats = async (
   { caseId }: UserActionGet,
+  casesClient: CasesClient,
   clientArgs: CasesClientArgs
 ): Promise<CaseUserActionStatsResponse> => {
   const {
     services: { userActionService },
     logger,
-    authorization,
   } = clientArgs;
 
-  const { filter } = await authorization.getAuthorizationFilter(Operations.getUserActionStats);
-
   try {
+    await casesClient.cases.resolve({ id: caseId, includeComments: false });
     const totals = await userActionService.getCaseUserActionStats({
       caseId,
-      filter,
     });
 
     return CaseUserActionStatsResponseRt.encode(totals);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to retrieve user actions case id: ${caseId}: ${error}`,
+      message: `Failed to retrieve user action stats for case id: ${caseId}: ${error}`,
       error,
       logger,
     });

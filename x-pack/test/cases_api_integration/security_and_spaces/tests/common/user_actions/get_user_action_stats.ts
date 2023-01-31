@@ -23,9 +23,18 @@ import {
   superUser,
 } from '../../../../common/lib/authentication/users';
 import { getCaseUserActionStats } from '../../../../common/lib/user_actions';
-import { getPostCaseRequest, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
+import {
+  getPostCaseRequest,
+  persistableStateAttachment,
+  postCaseReq,
+  postCommentActionsReq,
+  postCommentAlertReq,
+  postCommentUserReq,
+  postExternalReferenceESReq,
+} from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
+  bulkCreateAttachments,
   createCase,
   createComment,
   deleteAllCaseItems,
@@ -33,7 +42,7 @@ import {
   superUserSpace1Auth,
 } from '../../../../common/lib/utils';
 
-const CASE_UPDATE_DATA = (id: string, version: string) => ({
+const getCaseUpdateData = (id: string, version: string) => ({
   status: CaseStatuses.open,
   severity: CaseSeverity.MEDIUM,
   title: 'new title',
@@ -67,76 +76,65 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it('all "other" user action types are included', async () => {
-      const theCase = await createCase(supertest, postCaseReq);
-      await updateCase({
-        supertest,
-        params: {
-          cases: [CASE_UPDATE_DATA(theCase.id, theCase.version)],
-        },
-      });
-
-      const userActionTotals = await getCaseUserActionStats({ supertest, caseID: theCase.id });
-
-      expect(userActionTotals.total).to.equal(9);
-      expect(userActionTotals.total_comments).to.equal(0);
-      expect(userActionTotals.total_other_actions).to.equal(9);
-      expect(userActionTotals.total).to.equal(
-        userActionTotals.total_comments + userActionTotals.total_other_actions
-      );
-    });
-
     it('returns correct total for comments', async () => {
+      // 1 creation action
       const theCase = await createCase(supertest, postCaseReq);
 
-      await createComment({
+      await bulkCreateAttachments({
         supertest,
         caseId: theCase.id,
-        params: postCommentUserReq,
-      });
-
-      await createComment({
-        supertest,
-        caseId: theCase.id,
-        params: postCommentUserReq,
+        params: [
+          // Only this one should show up in total_comments
+          postCommentUserReq,
+          // The ones below count as total_other_actions
+          postExternalReferenceESReq,
+          persistableStateAttachment,
+          postCommentActionsReq,
+          postCommentAlertReq,
+        ],
       });
 
       const userActionTotals = await getCaseUserActionStats({ supertest, caseID: theCase.id });
 
-      expect(userActionTotals.total).to.equal(3);
-      expect(userActionTotals.total_comments).to.equal(2);
-      expect(userActionTotals.total_other_actions).to.equal(1);
+      expect(userActionTotals.total).to.equal(6);
+      expect(userActionTotals.total_comments).to.equal(1);
+      expect(userActionTotals.total_other_actions).to.equal(5);
       expect(userActionTotals.total).to.equal(
         userActionTotals.total_comments + userActionTotals.total_other_actions
       );
     });
 
-    it('total user actions matches the expected total', async () => {
+    it('all "other" user action types are included', async () => {
+      // 1 creation action
       const theCase = await createCase(supertest, postCaseReq);
+
+      // this update should account for 8 "other actions"
       await updateCase({
         supertest,
         params: {
-          cases: [CASE_UPDATE_DATA(theCase.id, theCase.version)],
+          cases: [getCaseUpdateData(theCase.id, theCase.version)],
         },
       });
 
-      await createComment({
+      await bulkCreateAttachments({
         supertest,
         caseId: theCase.id,
-        params: postCommentUserReq,
-      });
-
-      await createComment({
-        supertest,
-        caseId: theCase.id,
-        params: postCommentUserReq,
+        params: [
+          // only this one should show up in total_comments
+          postCommentUserReq,
+          // the ones below count as total_other_actions
+          postExternalReferenceESReq,
+          persistableStateAttachment,
+          postCommentActionsReq,
+          postCommentAlertReq,
+        ],
       });
 
       const userActionTotals = await getCaseUserActionStats({ supertest, caseID: theCase.id });
 
-      expect(userActionTotals.total).to.equal(11);
-      expect(userActionTotals.total_comments).to.equal(2);
-      expect(userActionTotals.total_other_actions).to.equal(9);
+      expect(userActionTotals.total).to.equal(14);
+      expect(userActionTotals.total_comments).to.equal(1);
+      expect(userActionTotals.total_other_actions).to.equal(13);
       expect(userActionTotals.total).to.equal(
         userActionTotals.total_comments + userActionTotals.total_other_actions
       );
@@ -146,7 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
       let theCase: CaseResponse;
-      before(async () => {
+      beforeEach(async () => {
         theCase = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
           user: superUser,
           space: 'space1',
@@ -155,7 +153,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await updateCase({
           supertest: supertestWithoutAuth,
           params: {
-            cases: [CASE_UPDATE_DATA(theCase.id, theCase.version)],
+            cases: [getCaseUpdateData(theCase.id, theCase.version)],
           },
           auth: superUserSpace1Auth,
         });
@@ -168,7 +166,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      after(async () => {
+      afterEach(async () => {
         await deleteAllCaseItems(es);
       });
 

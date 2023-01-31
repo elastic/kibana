@@ -50,7 +50,7 @@ export const createUserActionsSubClient = (
     find: (params) => find(params, casesClient, clientArgs),
     getAll: (params) => get(params, clientArgs),
     getConnectors: (params) => getConnectors(params, clientArgs),
-    stats: (params) => getStats(params, clientArgs),
+    stats: (params) => getStats(params, casesClient, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);
