@@ -33,26 +33,25 @@ const CODE_GENERAL_ERROR = 'SavedObjectsClient/generalError';
 
 const code = Symbol('SavedObjectsClientErrorCode');
 
+/**
+ * The DecoratedError interface extends the Boom error object
+ * and augments it with the 'SavedObjectsClientErrorCode' symbol
+ * property.
+ */
 export interface DecoratedError extends Boom.Boom {
+  /** the 'SavedObjectsClientErrorCode' symbol */
   [code]?: string;
 }
 
 /**
- * Error result for the internal bulkResolve function.
- *
+ * Error result for the internal bulk resolve method.
  */
 export interface BulkResolveError {
-  /**
-   * The type of the saved object
-   */
+  /** The type of the saved object */
   type: string;
-  /**
-   * The id of the saved object
-   */
+  /** The id of the saved object */
   id: string;
-  /**
-   * The decorated resolve error
-   */
+  /** The decorated resolve error */
   error: DecoratedError;
 }
 
@@ -82,6 +81,9 @@ function decorate(
   return boom;
 }
 
+/**
+ * Determines if an error is a saved objects client error
+ */
 function isSavedObjectsClientError(error: any): error is DecoratedError {
   return Boolean(error && error[code]);
 }
@@ -90,7 +92,6 @@ function isSavedObjectsClientError(error: any): error is DecoratedError {
  * Decorates an bad request error to add information or additional explaination of an error to
  * provide more context. Bad requests come in a few flavors: unsupported type, invalid version,
  * elastic search cannot execute script, or plain vanilla bad request.
- *
  */
 function decorateBadRequestError(error: Error, reason?: string) {
   return decorate(error, CODE_BAD_REQUEST, 400, reason);

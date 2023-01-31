@@ -82,6 +82,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
 
+    // This comment block is a quick reference for the action map, which maps authorization actions
+    // and audit actions to a "security action" as used by the authorization methods.
     // Security Action                    ES AUTH ACTION          AUDIT ACTION
     // -----------------------------------------------------------------------------------------
     // Check Conflicts                    'bulk_create'           N/A
@@ -291,12 +293,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
   }
 
+  /**
+   * The enforce method uses the result of an authoriation check authorization map) and a map
+   * of types to spaces (type map) to determinthe if the action is authorized for all types and spaces
+   * within the type map. If unauthorized for any type this method will throw.
+   */
   private enforceAuthorization<A extends string>(params: EnforceAuthorizationParams<A>): void {
     const { typesAndSpaces, action, typeMap, auditOptions } = params;
     const {
       objects: auditObjects,
-      bypassOnSuccess: bypassAuditOnSuccess,
-      bypassOnFailure: bypassAuditOnFailure,
+      bypass = 'never', // default for bypass
       useSuccessOutcome,
       addToSpaces,
       deleteFromSpaces,
@@ -319,7 +325,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       const targetTypes = [...unauthorizedTypes].sort().join(',');
       const msg = `Unable to ${authzAction} ${targetTypes}`;
       const error = this.errors.decorateForbiddenError(new Error(msg));
-      if (auditAction && !bypassAuditOnFailure) {
+      if (auditAction && bypass !== 'always' && bypass !== 'on_failure') {
         this.auditHelper({
           action: auditAction,
           objects: auditObjects,
@@ -332,13 +338,24 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       throw error;
     }
 
-    if (auditAction && !bypassAuditOnSuccess) {
+    if (auditAction && bypass !== 'always' && bypass !== 'on_success') {
       this.auditHelper({ action: auditAction, objects: auditObjects, useSuccessOutcome });
     }
   }
 
-  // This method not marked as private, but not exposed via the interface
-  // This allows us to test it thoroughly in the unit test suite, but keep it from being exposed to consumers.
+  /**
+   * The authorize method is the central method for authorization within the extention. It handles
+   * checking and enforcing authorization, and passing audit parameters down to the enforce method.
+   *
+   * If an enforce map is not privided, this method will NOT enforce authorization nor audit the action.
+   * If an enforce map is provided and the action is unauthorized for any type in any space mapped for
+   * that type, this method will throw (because the enforce method will throw).
+   *
+   * This method not marked as private, but not exposed via the interface
+   * This allows us to test it thoroughly in the unit test suite, but keep it from being exposed to consumers.
+   * @param params actions, types, and spaces to check, the enforce map (types to enforce in which spaces), options, and audit options
+   * @returns CheckAuthorizationResult - the result from the authorizations check
+   */
   async authorize<A extends string>(
     params: InternalAuthorizeParams<A>
   ): Promise<CheckAuthorizationResult<string>> {
@@ -366,10 +383,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const typesAndSpaces = params.enforceMap;
     if (typesAndSpaces !== undefined && checkResult) {
       params.actions.forEach((action) => {
-        // console.log(`ENFORCING...`);
-        // Array.from(typesAndSpaces.keys()).forEach((key) => {
-        //   console.log(`TYPE: ${key}, SPACES: ${Array.from(typesAndSpaces.get(key)!).toString()}`);
-        // });
         this.enforceAuthorization({
           typesAndSpaces,
           action,
@@ -615,7 +628,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       types: new Set([object.type]),
       spaces: new Set([...spacesToEnforce, ...existingNamespaces]), // existing namespaces are included so we can later redact if necessary
       enforceMap: new Map([[object.type, spacesToEnforce]]),
-      auditOptions: { objects: [object], bypassOnSuccess: objectNotFound }, // Do not audit on success if the object was not found
+      auditOptions: { objects: [object], bypass: objectNotFound ? 'on_success' : 'never' }, // Do not audit on success if the object was not found
     });
   }
 
@@ -668,7 +681,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       auditOptions: {
         objects,
         useSuccessOutcome: true,
-        bypassOnSuccess: true, // We will override the success case below
+        bypass: 'on_success', // We will override the success case below
       },
     });
 
@@ -712,7 +725,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       // auditing is intentionally bypassed, this function in the previous Security SOC wrapper implementation
       // did not have audit logging. This is primarily because it is only used by Kibana and is not exposed in a
       // public HTTP API
-      auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
+      auditOptions: { bypass: 'always' },
     });
   }
 
@@ -811,7 +824,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       types: typesToAuthorize,
       spaces: spacesToAuthorize,
       enforceMap: typesAndSpaces,
-      auditOptions: { bypassOnSuccess: true }, // We will audit success results below, after redaction
+      auditOptions: { bypass: 'on_success' }, // We will audit success results below, after redaction
     })) ?? { typeMap: new Map() };
 
     // Now, filter/redact the results. Most SOR functions just redact the `namespaces` field from each returned object. However, this function
@@ -846,7 +859,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           typesAndSpaces: new Map([[type, new Set([namespaceString])]]),
           action,
           typeMap,
-          auditOptions: { bypassOnSuccess: true, bypassOnFailure: true }, // never audit here
+          auditOptions: { bypass: 'always' }, // never audit here
         });
       } catch (err) {
         isAuthorizedForObject = false;

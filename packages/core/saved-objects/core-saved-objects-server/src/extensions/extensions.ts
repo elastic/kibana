@@ -17,8 +17,11 @@ import type { ISavedObjectsSpacesExtension } from './spaces';
  * security, and spaces features.
  */
 export interface SavedObjectsExtensions {
+  /** The encryption extension - handles encrypting and decrypting attributes of saved objects */
   encryptionExtension?: ISavedObjectsEncryptionExtension;
+  /** The security extension - handles action authorization and space redaction */
   securityExtension?: ISavedObjectsSecurityExtension;
+  /** The spaces extension - handles retriving the current space and retriving available spaces */
   spacesExtension?: ISavedObjectsSpacesExtension;
 }
 

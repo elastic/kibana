@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { always } from '@elastic/eui/src/services/predicate';
+
 import type { BulkResolveError, LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { AuthorizeCreateObject, AuthorizeUpdateObject } from '@kbn/core-saved-objects-server';
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
@@ -681,7 +683,7 @@ describe('#authorize (unpublished by interface)', () => {
           ]),
           auditOptions: {
             objects: auditObjects,
-            bypassOnSuccess: true,
+            bypass: 'on_success',
           },
         });
 
@@ -703,7 +705,7 @@ describe('#authorize (unpublished by interface)', () => {
             ['b', new Set(['x', 'y'])],
             ['c', new Set(['y'])],
           ]),
-          auditOptions: { bypassOnFailure: true },
+          auditOptions: { bypass: 'on_failure' },
         });
 
         expect(auditLogger.log).toHaveBeenCalledTimes(actions.size);
@@ -855,7 +857,7 @@ describe('#authorize (unpublished by interface)', () => {
               ['b', new Set(['x', 'y'])],
               ['c', new Set(['x', 'y'])],
             ]),
-            auditOptions: { objects: auditObjects, bypassOnFailure: true },
+            auditOptions: { objects: auditObjects, bypass: 'on_failure' },
           })
         ).rejects.toThrowError('Unable to bulk_update b,c');
 
@@ -878,7 +880,7 @@ describe('#authorize (unpublished by interface)', () => {
               ['b', new Set(['x', 'y'])],
               ['c', new Set(['x', 'y'])],
             ]),
-            auditOptions: { bypassOnSuccess: true },
+            auditOptions: { bypass: 'on_success' },
           })
         ).rejects.toThrowError('Unable to bulk_update b,c');
 
@@ -1019,7 +1021,7 @@ describe('#authorize (unpublished by interface)', () => {
               ['b', new Set(['x', 'y'])],
               ['c', new Set(['x', 'y'])],
             ]),
-            auditOptions: { objects: auditObjects, bypassOnFailure: true },
+            auditOptions: { objects: auditObjects, bypass: 'on_failure' },
           })
         ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
@@ -1042,7 +1044,7 @@ describe('#authorize (unpublished by interface)', () => {
               ['b', new Set(['x', 'z'])],
               ['c', new Set(['x', 'y'])],
             ]),
-            auditOptions: { bypassOnSuccess: true },
+            auditOptions: { bypass: 'on_success' },
           })
         ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
@@ -2752,7 +2754,7 @@ describe('get', () => {
         spaces: expectedSpaces,
         enforceMap: expectedEnforceMap,
         auditOptions: {
-          bypassOnSuccess: undefined,
+          bypass: 'never',
           objects: [obj3],
         },
       });
@@ -2779,7 +2781,7 @@ describe('get', () => {
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
         auditOptions: {
-          bypassOnSuccess: undefined,
+          bypass: 'never',
           objects: [obj3],
         },
       });
@@ -3052,7 +3054,7 @@ describe('get', () => {
         types: expectedTypes,
         spaces: expectedSpaces,
         enforceMap: expectedEnforceMap,
-        auditOptions: { bypassOnSuccess: true, objects, useSuccessOutcome: true },
+        auditOptions: { bypass: 'on_success', objects, useSuccessOutcome: true },
       });
 
       expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
@@ -3078,7 +3080,7 @@ describe('get', () => {
         action: SecurityAction.BULK_GET,
         typesAndSpaces: expectedEnforceMap,
         typeMap: expectedTypeMap,
-        auditOptions: { bypassOnSuccess: true, objects, useSuccessOutcome: true },
+        auditOptions: { bypass: 'on_success', objects, useSuccessOutcome: true },
       });
     });
 
@@ -3360,10 +3362,7 @@ describe(`#authorizeCheckConflicts`, () => {
       types: expectedTypes,
       spaces: expectedSpaces,
       enforceMap: expectedEnforceMap,
-      auditOptions: {
-        bypassOnFailure: true,
-        bypassOnSuccess: true,
-      },
+      auditOptions: { bypass: 'always' },
     });
 
     expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
@@ -3391,7 +3390,7 @@ describe(`#authorizeCheckConflicts`, () => {
       action: SecurityAction.CHECK_CONFLICTS,
       typesAndSpaces: expectedEnforceMap,
       typeMap: expectedTypeMap,
-      auditOptions: { bypassOnFailure: true, bypassOnSuccess: true },
+      auditOptions: { bypass: 'always' },
     });
   });
 
@@ -4212,7 +4211,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
         spaces: expectedSpaces,
         enforceMap: expectedEnforceMap,
         auditOptions: {
-          bypassOnSuccess: true,
+          bypass: 'on_success',
         },
       });
 
@@ -4241,7 +4240,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
         action: SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES,
         typesAndSpaces: expectedEnforceMap,
         typeMap: partiallyAuthorizedTypeMap,
-        auditOptions: { bypassOnSuccess: true },
+        auditOptions: { bypass: 'on_success' },
       });
       // Called once per object afterward
       let i = 2;
@@ -4250,7 +4249,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
           action: SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES,
           typesAndSpaces: new Map([[obj.type, new Set([namespace])]]),
           typeMap: partiallyAuthorizedTypeMap,
-          auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
+          auditOptions: { bypass: 'always' },
         });
       }
     });
@@ -4269,7 +4268,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
         action: SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES,
         typesAndSpaces: expectedEnforceMap,
         typeMap: fullyAuthorizedTypeMap,
-        auditOptions: { bypassOnSuccess: true },
+        auditOptions: { bypass: 'on_success' },
       });
       let i = 2;
       for (const obj of objects) {
@@ -4277,7 +4276,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
           action: SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES,
           typesAndSpaces: new Map([[obj.type, new Set([namespace])]]),
           typeMap: fullyAuthorizedTypeMap,
-          auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
+          auditOptions: { bypass: 'always' },
         });
       }
       expect(result).toEqual(objects);
@@ -4474,7 +4473,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
         spaces: expectedSpaces,
         enforceMap: expectedEnforceMap,
         auditOptions: {
-          bypassOnSuccess: true,
+          bypass: 'on_success',
         },
       });
 
@@ -4503,7 +4502,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
         action: SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES_UPDATE_SPACES,
         typesAndSpaces: expectedEnforceMap,
         typeMap: fullyAuthorizedTypeMap,
-        auditOptions: { bypassOnSuccess: true },
+        auditOptions: { bypass: 'on_success' },
       });
       // Called once per object afterward
       let i = 2;
@@ -4512,7 +4511,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
           action: SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES_UPDATE_SPACES,
           typesAndSpaces: new Map([[obj.type, new Set([namespace])]]),
           typeMap: fullyAuthorizedTypeMap,
-          auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
+          auditOptions: { bypass: 'always' },
         });
       }
     });
