@@ -28,8 +28,6 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
   try {
     const uniqueId = Math.random().toString(32).substring(2).substring(0, 4);
     const username = userInfo().username.toLowerCase();
-
-    // FIXME:PT try to limit how many policies are created
     const policyId: string = agentPolicyId || (await getOrCreateAgentPolicyId());
 
     if (!policyId) {
@@ -126,9 +124,8 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
     VM Name: ${vmName}
 
     Shell access: multipass shell ${vmName}
-    Delete VM:    multipass delete -p ${vmName}
+    Delete VM:    multipass delete -p ${vmName}${await getVmCountNotice()}
 `);
-    // FIXME:PT show count of VMs currently running (to remind developer to check list
   } catch (error) {
     log.error(error);
     log.indent(-4);
@@ -201,4 +198,24 @@ const getOrCreateAgentPolicyId = async (): Promise<string> => {
   log.verbose(JSON.stringify(response, null, 2));
 
   return agentPolicy.id ?? '';
+};
+
+const getVmCountNotice = async (threshold: number = 1): Promise<string> => {
+  const response = await execa.command(`multipass list --format=json`);
+
+  const output: { list: Array<{ ipv4: string; name: string; release: string; state: string }> } =
+    JSON.parse(response.stdout);
+
+  if (output.list.length > threshold) {
+    return `
+
+-----------------------------------------------------------------
+NOTE: You currently have ${output.list.length} VMs running. Remember to delete those
+      no longer being used.
+      View running VMs: multipass list
+  -----------------------------------------------------------------
+`;
+  }
+
+  return '';
 };
