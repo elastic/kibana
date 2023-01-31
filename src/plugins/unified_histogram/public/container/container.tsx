@@ -23,7 +23,7 @@ type LayoutProps = Pick<
   | 'disableAutoFetching'
   | 'disableTriggers'
   | 'disabledActions'
-  | 'getEditVisualizationTimeRange'
+  | 'getRelativeTimeRange'
 >;
 
 /**
@@ -103,7 +103,7 @@ export const UnifiedHistogramContainer = forwardRef<
           disableAutoFetching,
           disableTriggers,
           disabledActions,
-          getEditVisualizationTimeRange,
+          getRelativeTimeRange,
         } = options;
 
         setLayoutProps({
@@ -111,7 +111,7 @@ export const UnifiedHistogramContainer = forwardRef<
           disableAutoFetching,
           disableTriggers,
           disabledActions,
-          getEditVisualizationTimeRange,
+          getRelativeTimeRange,
         });
         setStateService(new UnifiedHistogramStateService(options));
         setInitialized(true);

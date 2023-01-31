@@ -61,7 +61,7 @@ export interface ChartProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
-  getEditVisualizationTimeRange?: () => TimeRange;
+  getRelativeTimeRange?: () => TimeRange;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -91,7 +91,7 @@ export function Chart({
   disableTriggers,
   disabledActions,
   input$: originalInput$,
-  getEditVisualizationTimeRange,
+  getRelativeTimeRange: originalGetRelativeTimeRange,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -192,15 +192,15 @@ export function Chart({
     [breakdown?.field, chart?.timeInterval, chart?.title, dataView, filters, query]
   );
 
-  const getVisualizationTimeRange = useMemo(
-    () => getEditVisualizationTimeRange ?? (() => relativeTimeRange),
-    [getEditVisualizationTimeRange, relativeTimeRange]
+  const getRelativeTimeRange = useMemo(
+    () => originalGetRelativeTimeRange ?? (() => relativeTimeRange),
+    [originalGetRelativeTimeRange, relativeTimeRange]
   );
 
   const onEditVisualization = useEditVisualization({
     services,
     dataView,
-    getTimeRange: getVisualizationTimeRange,
+    getRelativeTimeRange,
     lensAttributes,
   });
 

@@ -80,7 +80,7 @@ export const useDiscoverHistogram = ({
         services: { ...services, uiActions: getUiActions() },
         localStorageKeyPrefix: 'discover',
         disableAutoFetching: true,
-        getEditVisualizationTimeRange: services.timefilter.getTime,
+        getRelativeTimeRange: services.timefilter.getTime,
         initialState: {
           dataView,
           query,
