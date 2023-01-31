@@ -215,7 +215,7 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
         defaultMessage: 'All Spaces is required for File Operations access.',
       }
     ),
-    name: i18n.translate('xpack.securitySolution.featureRegister.subFeatures.fileOperations', {
+    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.fileOperations', {
       defaultMessage: 'File Operations',
     }),
     privilegeGroups: [
@@ -245,9 +245,16 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
         defaultMessage: 'All Spaces is required for Execute Operations access.',
       }
     ),
-    name: i18n.translate('xpack.securitySolution.featureRegister.subFeatures.executeOperations', {
+    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.executeOperations', {
       defaultMessage: 'Execute Operations',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.description',
+      {
+        // TODO: Update this description before 8.8 FF
+        defaultMessage: 'Perform script execution on the endpoint.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
