@@ -55,6 +55,7 @@ export const slo: SavedObjectsType = {
         },
       },
       revision: { type: 'short' },
+      enabled: { type: 'boolean' },
       createdAt: { type: 'date' },
       updatedAt: { type: 'date' },
     },

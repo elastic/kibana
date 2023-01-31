@@ -498,5 +498,5 @@ export const formatMillisecond = (
   if (ms < maxMillis) {
     return `${ms.toFixed(digits ?? 0)} ms`;
   }
-  return `${(ms / 1000).toFixed(digits ?? 1)} s`;
+  return `${(ms / 1000).toFixed(digits ?? 2)} s`;
 };

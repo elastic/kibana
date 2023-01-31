@@ -102,3 +102,10 @@ export const logViewStatusRT = rt.strict({
   index: logViewIndexStatusRT,
 });
 export type LogViewStatus = rt.TypeOf<typeof logViewStatusRT>;
+
+export const logViewReferenceRT = rt.type({
+  logViewId: rt.string,
+  type: rt.literal('log-view-reference'),
+});
+
+export type LogViewReference = rt.TypeOf<typeof logViewReferenceRT>;
