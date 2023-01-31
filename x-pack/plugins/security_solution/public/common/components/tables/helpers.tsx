@@ -27,6 +27,7 @@ interface GetRowItemsWithActionsParams {
   render?: (item: string) => JSX.Element;
   displayCount?: number;
   maxOverflow?: number;
+  aggregatable: boolean;
 }
 
 export const getRowItemsWithActions = ({
@@ -37,6 +38,7 @@ export const getRowItemsWithActions = ({
   render,
   displayCount = 5,
   maxOverflow = 5,
+  aggregatable,
 }: GetRowItemsWithActionsParams): JSX.Element => {
   if (values != null && values.length > 0) {
     const visibleItems = values.slice(0, displayCount).map((value, index) => {
@@ -52,6 +54,7 @@ export const getRowItemsWithActions = ({
             name: fieldName,
             value,
             type: fieldType,
+            aggregatable,
           }}
         >
           <>{render ? render(value) : defaultToEmptyTag(value)}</>

@@ -46,6 +46,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
             name: data.field,
             value: values && values.length > 0 ? values[0] : '',
             type: data.type,
+            aggregatable: fieldFromBrowserField?.aggregatable,
           }}
           triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
           mode={CellActionsMode.INLINE}

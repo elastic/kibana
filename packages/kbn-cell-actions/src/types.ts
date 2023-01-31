@@ -36,6 +36,14 @@ export interface CellActionField {
    * Example: 'My-Laptop'
    */
   value: string | string[] | null | undefined;
+  /**
+   * When true the field supports aggregations.
+   *
+   * It defaults to false.
+   *
+   * You can verify if a field is aggregatable on kibana/management/kibana/dataViews.
+   */
+  aggregatable?: boolean;
 }
 
 export enum CellActionsMode {
@@ -105,7 +113,7 @@ export interface CellActionCompatibilityContext extends ActionExecutionContext {
   /**
    * The object containing the field name and type, needed for the compatibility check
    */
-  field: Pick<CellActionField, 'name' | 'type'>;
+  field: Pick<CellActionField, 'name' | 'type' | 'aggregatable'>;
   /**
    * Extra configurations for actions.
    */

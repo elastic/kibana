@@ -93,6 +93,7 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
             name: enrichedFieldInfo.data.field,
             value: enrichedFieldInfo?.values ? enrichedFieldInfo?.values[0] : '',
             type: enrichedFieldInfo.data.type,
+            aggregatable: enrichedFieldInfo.fieldFromBrowserField?.aggregatable,
           }}
           triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
           mode={CellActionsMode.INLINE}

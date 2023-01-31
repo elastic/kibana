@@ -65,7 +65,8 @@ export const createShowTopNAction = ({
     isCompatible: async ({ field }) =>
       isInSecurityApp(currentAppId) &&
       fieldHasCellActions(field.name) &&
-      !UNSUPPORTED_FIELD_TYPES.includes(field.type),
+      !UNSUPPORTED_FIELD_TYPES.includes(field.type) &&
+      !field.aggregatable,
     execute: async (context) => {
       const node = context.extraContentNodeRef?.current;
       if (!node) return;
