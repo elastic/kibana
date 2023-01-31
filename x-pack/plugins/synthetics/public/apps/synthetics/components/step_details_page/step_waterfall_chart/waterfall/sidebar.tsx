@@ -30,7 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
       >
         <EuiPanel css={{ height: '100%' }} hasBorder={false} hasShadow={false} paddingSize="none">
           <EuiFlexGroup
-            css={{ height: '100%' }}
+            css={{ height: '100%', paddingTop: 1.5 }}
             direction="column"
             gutterSize="none"
             responsive={false}

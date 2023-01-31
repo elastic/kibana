@@ -64,7 +64,7 @@ export const bulkCreate = async (
       );
 
     await authorization.ensureAuthorized({
-      operation: Operations.createComment,
+      operation: Operations.bulkCreateAttachments,
       entities,
     });
 

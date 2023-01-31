@@ -64,6 +64,11 @@ export const Sidebar = () => {
                 name: 'Alert Table',
                 onClick: () => history.push('/alerts_table'),
               },
+              {
+                id: 'rules settings link',
+                name: 'Rules Settings Link',
+                onClick: () => history.push('/rules_settings_link'),
+              },
             ],
           },
         ]}

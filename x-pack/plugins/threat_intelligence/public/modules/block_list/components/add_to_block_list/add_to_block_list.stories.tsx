@@ -35,3 +35,22 @@ export const ContextMenu: Story<void> = () => {
     </SecuritySolutionContext.Provider>
   );
 };
+
+export const Disabled: Story<void> = () => {
+  const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();
+  mockSecurityContext.blockList.canWriteBlocklist = false;
+
+  const mockIndicatorFileHashValue: string = 'abc';
+  const mockOnClick: () => void = () => window.alert('clicked!');
+  const items = [
+    <AddToBlockListContextMenu data={mockIndicatorFileHashValue} onClick={mockOnClick} />,
+  ];
+
+  return (
+    <SecuritySolutionContext.Provider value={mockSecurityContext}>
+      <BlockListProvider>
+        <EuiContextMenuPanel items={items} />
+      </BlockListProvider>
+    </SecuritySolutionContext.Provider>
+  );
+};
