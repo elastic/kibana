@@ -14,11 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { useEditTransformFlyout } from './use_edit_transform_flyout';
 
 export const EditTransformApiErrorCallout: FC = () => {
-  const errorMessage = useEditTransformFlyout('apiErrorMessage');
+  const apiErrorMessage = useEditTransformFlyout('apiErrorMessage');
 
   return (
     <>
-      {errorMessage !== undefined && (
+      {apiErrorMessage !== undefined && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
@@ -31,7 +31,7 @@ export const EditTransformApiErrorCallout: FC = () => {
             color="danger"
             iconType="alert"
           >
-            <p>{errorMessage}</p>
+            <p>{apiErrorMessage}</p>
           </EuiCallOut>
         </>
       )}
