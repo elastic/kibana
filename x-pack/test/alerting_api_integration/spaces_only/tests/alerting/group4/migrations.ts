@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RawRule, RawRuleAction } from '@kbn/alerting-plugin/server/types';
 import { FILEBEAT_7X_INDICATOR_PATH } from '@kbn/alerting-plugin/server/saved_objects/migrations';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { getUrlPrefix } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import type { SavedObjectReference } from '@kbn/core/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
