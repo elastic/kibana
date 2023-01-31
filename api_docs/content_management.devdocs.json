@@ -1,0 +1,100 @@
+{
+  "id": "contentManagement",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "contentManagement",
+      "id": "def-public.ContentManagementPublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ContentManagementPublicStart",
+      "description": [],
+      "path": "src/plugins/content_management/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "contentManagement",
+      "id": "def-server.ContentManagementServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ContentManagementServerSetup",
+      "description": [],
+      "path": "src/plugins/content_management/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "contentManagement",
+      "id": "def-server.ContentManagementServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ContentManagementServerStart",
+      "description": [],
+      "path": "src/plugins/content_management/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.API_ENDPOINT",
+        "type": "string",
+        "tags": [],
+        "label": "API_ENDPOINT",
+        "description": [],
+        "signature": [
+          "\"/api/content_management\""
+        ],
+        "path": "src/plugins/content_management/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"contentManagement\""
+        ],
+        "path": "src/plugins/content_management/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

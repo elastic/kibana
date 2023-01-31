@@ -520,7 +520,7 @@
         "label": "FindSLOResponse",
         "description": [],
         "signature": [
-          "{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }"
+          "{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }"
         ],
         "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -535,7 +535,7 @@
         "label": "GetSLOResponse",
         "description": [],
         "signature": [
-          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }"
+          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }"
         ],
         "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -559,13 +559,28 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.ManageSLOParams",
+        "type": "Type",
+        "tags": [],
+        "label": "ManageSLOParams",
+        "description": [],
+        "signature": [
+          "{ id: string; }"
+        ],
+        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.SLOResponse",
         "type": "Type",
         "tags": [],
         "label": "SLOResponse",
         "description": [],
         "signature": [
-          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; }"
+          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; createdAt: string; updatedAt: string; }"
         ],
         "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -580,7 +595,7 @@
         "label": "SLOWithSummaryResponse",
         "description": [],
         "signature": [
-          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }"
+          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; createdAt: string; updatedAt: string; } & { summary: { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }"
         ],
         "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -665,7 +680,7 @@
         "label": "UpdateSLOResponse",
         "description": [],
         "signature": [
-          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; createdAt: string; updatedAt: string; }"
+          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; 'threshold.us': number; } & { index?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; createdAt: string; updatedAt: string; }"
         ],
         "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -1527,7 +1542,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; }>; createdAt: ",
+          ", string, unknown>; }>; enabled: ",
+          "BooleanC",
+          "; createdAt: ",
           "Type",
           "<Date, string, unknown>; updatedAt: ",
           "Type",
@@ -1787,7 +1804,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; }>; createdAt: ",
+          ", string, unknown>; }>; enabled: ",
+          "BooleanC",
+          "; createdAt: ",
           "Type",
           "<Date, string, unknown>; updatedAt: ",
           "Type",
@@ -2088,6 +2107,26 @@
           "<\"sli.kql.custom\">"
         ],
         "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.manageSLOParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "manageSLOParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>"
+        ],
+        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2447,7 +2486,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; }>; createdAt: ",
+          ", string, unknown>; }>; enabled: ",
+          "BooleanC",
+          "; createdAt: ",
           "Type",
           "<Date, string, unknown>; updatedAt: ",
           "Type",
@@ -2659,6 +2700,8 @@
           },
           ", string, unknown>; }>; revision: ",
           "NumberC",
+          "; enabled: ",
+          "BooleanC",
           "; createdAt: ",
           "Type",
           "<Date, string, unknown>; updatedAt: ",
@@ -2873,7 +2916,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; }>; createdAt: ",
+          ", string, unknown>; }>; enabled: ",
+          "BooleanC",
+          "; createdAt: ",
           "Type",
           "<Date, string, unknown>; updatedAt: ",
           "Type",
@@ -3113,6 +3158,8 @@
           },
           ", string, unknown>; }>; revision: ",
           "NumberC",
+          "; enabled: ",
+          "BooleanC",
           "; createdAt: ",
           "Type",
           "<Date, string, unknown>; updatedAt: ",
@@ -3685,7 +3732,9 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; }>; createdAt: ",
+          ", string, unknown>; }>; enabled: ",
+          "BooleanC",
+          "; createdAt: ",
           "Type",
           "<Date, string, unknown>; updatedAt: ",
           "Type",
