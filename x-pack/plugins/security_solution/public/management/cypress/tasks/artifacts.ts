@@ -28,6 +28,8 @@ export const removeExceptionsList = (listId: string) => {
     url: `${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`,
     headers: API_HEADER,
     failOnStatusCode: false,
+  }).then(({ status }) => {
+    expect(status).to.be.oneOf([200, 404]); // should either be success or not found
   });
 };
 
@@ -72,6 +74,9 @@ export const createPerPolicyArtifact = (name: string, body: object, policyId?: '
       ...body,
       ...(policyId ? { tags: [`policy:${policyId}`] } : {}),
     },
+  }).then((response) => {
+    expect(response.status).to.eql(200);
+    expect(response.body.name).to.eql(name);
   });
 };
 
