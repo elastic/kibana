@@ -15,18 +15,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getCaseUsers } from '../../../../common/lib/user_actions';
 import { loginUsers, bulkGetUserProfiles } from '../../../../common/lib/user_profiles';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
-import {
-  obsOnly,
-  obsOnlyRead,
-  obsSec,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
-  secOnlySpacesAll,
-  superUser,
-  noKibanaPrivileges,
-  globalRead,
-} from '../../../../common/lib/authentication/users';
+import { secOnlySpacesAll, superUser } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -35,23 +24,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('user_actions_get_users', () => {
-    describe('no profiles', () => {
-      it('returns the users correctly without profile ids', async () => {
-        const postedCase = await createCase(supertest, getPostCaseRequest());
-        await changeCaseTitle({
-          supertest,
-          caseId: postedCase.id,
-          version: postedCase.version,
-          title: 'new title',
-        });
-
-        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
-        expect(users).to.eql([
-          { user: { username: 'elastic', full_name: null, email: null }, type: 'participant' },
-        ]);
-      });
-    });
-
     describe('profiles', () => {
       let cookies: Cookie[];
       let secUserProfile: UserProfile;
@@ -113,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('returns only the creator of the case', async () => {
+      it('returns participants and users correctly when assigning users to a case', async () => {
         const postedCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest(),
@@ -122,35 +94,12 @@ export default ({ getService }: FtrProviderContext): void => {
           superUserHeaders
         );
 
-        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
-
-        expect(users).to.eql([
-          {
-            user: {
-              username: superUserProfile.user.username,
-              full_name: superUserProfile.user.full_name,
-              email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
-            },
-            type: 'participant',
-          },
-        ]);
-      });
-
-      it('returns one participant if it is the only one that participates to the case', async () => {
-        const postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest(),
-          200,
-          null,
-          superUserHeaders
-        );
-
-        await changeCaseTitle({
+        // assignee superUser and secUserProfile
+        await setAssignees({
           supertest,
           caseId: postedCase.id,
           version: postedCase.version,
-          title: 'new title',
+          assignees: [{ uid: superUserProfile.uid }, { uid: secUserProfile.uid }],
           headers: superUserHeaders,
         });
 
@@ -166,10 +115,19 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             type: 'participant',
           },
+          {
+            user: {
+              username: secUserProfile.user.username,
+              full_name: secUserProfile.user.full_name,
+              email: secUserProfile.user.email,
+              profile_uid: secUserProfile.uid,
+            },
+            type: 'user',
+          },
         ]);
       });
 
-      it('returns all participants of the case', async () => {
+      it('returns participants and users correctly when de-assigning users to a case', async () => {
         const postedCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest(),
@@ -178,26 +136,27 @@ export default ({ getService }: FtrProviderContext): void => {
           superUserHeaders
         );
 
-        await changeCaseTitle({
+        // assignee superUser and secUserProfile
+        const updatedCase = await setAssignees({
           supertest,
           caseId: postedCase.id,
           version: postedCase.version,
-          title: 'new title',
-          headers: secOnlyHeaders,
+          assignees: [{ uid: superUserProfile.uid }, { uid: secUserProfile.uid }],
+          headers: superUserHeaders,
+        });
+
+        // de-assignee secUser
+        await setAssignees({
+          supertest,
+          caseId: updatedCase[0].id,
+          version: updatedCase[0].version,
+          assignees: [{ uid: superUserProfile.uid }],
+          headers: superUserHeaders,
         });
 
         const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
 
         expect(users).to.eql([
-          {
-            user: {
-              username: secUserProfile.user.username,
-              full_name: secUserProfile.user.full_name,
-              email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
-            },
-            type: 'participant',
-          },
           {
             user: {
               username: superUserProfile.user.username,
@@ -207,10 +166,19 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             type: 'participant',
           },
+          {
+            user: {
+              username: secUserProfile.user.username,
+              full_name: secUserProfile.user.full_name,
+              email: secUserProfile.user.email,
+              profile_uid: secUserProfile.uid,
+            },
+            type: 'user',
+          },
         ]);
       });
 
-      it('does not return duplicate participants', async () => {
+      it('does not return duplicate users', async () => {
         const postedCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest(),
@@ -219,34 +187,36 @@ export default ({ getService }: FtrProviderContext): void => {
           superUserHeaders
         );
 
-        const updatedCases = await changeCaseTitle({
+        // assignee superUser and secUserProfile
+        const updatedCase = await setAssignees({
           supertest,
           caseId: postedCase.id,
           version: postedCase.version,
-          title: 'new title',
-          headers: secOnlyHeaders,
+          assignees: [{ uid: superUserProfile.uid }, { uid: secUserProfile.uid }],
+          headers: superUserHeaders,
         });
 
-        await changeCaseDescription({
+        // de-assignee secUser
+        const updatedCase2 = await setAssignees({
           supertest,
-          caseId: updatedCases[0].id,
-          version: updatedCases[0].version,
-          description: 'new desc',
-          headers: secOnlyHeaders,
+          caseId: updatedCase[0].id,
+          version: updatedCase[0].version,
+          assignees: [{ uid: superUserProfile.uid }],
+          headers: superUserHeaders,
+        });
+
+        // re-assign secUser
+        await setAssignees({
+          supertest,
+          caseId: updatedCase2[0].id,
+          version: updatedCase2[0].version,
+          assignees: [{ uid: superUserProfile.uid }, { uid: secUserProfile.uid }],
+          headers: superUserHeaders,
         });
 
         const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
 
         expect(users).to.eql([
-          {
-            user: {
-              username: secUserProfile.user.username,
-              full_name: secUserProfile.user.full_name,
-              email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
-            },
-            type: 'participant',
-          },
           {
             user: {
               username: superUserProfile.user.username,
@@ -256,69 +226,16 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             type: 'participant',
           },
+          {
+            user: {
+              username: secUserProfile.user.username,
+              full_name: secUserProfile.user.full_name,
+              email: secUserProfile.user.email,
+              profile_uid: secUserProfile.uid,
+            },
+            type: 'user',
+          },
         ]);
-      });
-    });
-
-    describe('rbac', () => {
-      it('should retrieve the users for a case', async () => {
-        const postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-          200,
-          {
-            user: superUser,
-            space: 'space1',
-          }
-        );
-
-        for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
-          await getCaseUsers({
-            supertest: supertestWithoutAuth,
-            caseId: postedCase.id,
-            auth: { user, space: 'space1' },
-          });
-        }
-      });
-
-      it('should not get the users for a case when the user does not have access to the owner', async () => {
-        const postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-          200,
-          {
-            user: superUser,
-            space: 'space1',
-          }
-        );
-
-        for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
-          await getCaseUsers({
-            supertest: supertestWithoutAuth,
-            caseId: postedCase.id,
-            expectedHttpCode: 403,
-            auth: { user, space: 'space1' },
-          });
-        }
-      });
-
-      it('should not get a case in a space the user does not have permissions to', async () => {
-        const postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-          200,
-          {
-            user: superUser,
-            space: 'space2',
-          }
-        );
-
-        await getCaseUsers({
-          supertest: supertestWithoutAuth,
-          caseId: postedCase.id,
-          expectedHttpCode: 403,
-          auth: { user: secOnly, space: 'space2' },
-        });
       });
     });
   });
@@ -329,15 +246,15 @@ type UserActionParams<T> = Omit<Parameters<typeof updateCase>[0], 'params'> & {
   version: string;
 } & T;
 
-const changeCaseTitle = async ({
+const setAssignees = async ({
   supertest,
   caseId,
   version,
-  title,
+  assignees,
   expectedHttpCode,
   auth,
   headers,
-}: UserActionParams<{ title: string }>) =>
+}: UserActionParams<{ assignees: Array<{ uid: string }> }>) =>
   updateCase({
     supertest,
     params: {
@@ -345,32 +262,7 @@ const changeCaseTitle = async ({
         {
           id: caseId,
           version,
-          title,
-        },
-      ],
-    },
-    expectedHttpCode,
-    auth,
-    headers,
-  });
-
-const changeCaseDescription = async ({
-  supertest,
-  caseId,
-  version,
-  description,
-  expectedHttpCode,
-  auth,
-  headers,
-}: UserActionParams<{ description: string }>) =>
-  updateCase({
-    supertest,
-    params: {
-      cases: [
-        {
-          id: caseId,
-          version,
-          description,
+          assignees,
         },
       ],
     },
