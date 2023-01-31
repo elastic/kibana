@@ -39,12 +39,12 @@ export type EditTransformFormFields =
   | 'description'
   | 'destinationIndex'
   | 'destinationIngestPipeline'
-  | 'frequency'
   | 'docsPerSecond'
+  | 'frequency'
   | 'maxPageSearchSize'
+  | 'numFailureRetries'
   | 'retentionPolicyField'
-  | 'retentionPolicyMaxAge'
-  | 'numFailureRetries';
+  | 'retentionPolicyMaxAge';
 
 type EditTransformFlyoutFieldsState = Record<EditTransformFormFields, FormField>;
 
@@ -573,7 +573,18 @@ const useEditTransformFlyoutInternal = ({ config, dataViewId }: EditTransformFly
     }),
     []
   );
-  return { config, dataViewId, state, actions };
+
+  const requestConfig = useMemo(
+    () => applyFormStateToTransformConfig(config, state),
+    [config, state]
+  );
+
+  const updateButtonDisabled = useMemo(
+    () => !state.isFormValid || !state.isFormTouched,
+    [state.isFormValid, state.isFormTouched]
+  );
+
+  return { config, dataViewId, state, actions, requestConfig, updateButtonDisabled };
 };
 
 export enum TRANSFORM_HOOK {
@@ -611,8 +622,8 @@ const [EditTransformFlyoutProvider, ...editTransformHooks] = constate(
   (d) => d.state.formFields.numFailureRetries,
   (d) => d.state.formFields.retentionPolicyField,
   (d) => d.state.formFields.retentionPolicyMaxAge,
-  (d) => applyFormStateToTransformConfig(d.config, d.state),
-  (d) => !d.state.isFormValid || !d.state.isFormTouched,
+  (d) => d.requestConfig,
+  (d) => d.updateButtonDisabled,
   (d) => d.state.apiErrorMessage
 );
 

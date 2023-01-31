@@ -11,25 +11,18 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useEditTransformFlyout, TRANSFORM_HOOK } from './use_edit_transform_flyout';
+import {
+  useEditTransformFlyout,
+  TRANSFORM_HOOK,
+  type EditTransformFormFields,
+} from './use_edit_transform_flyout';
 
 function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 interface EditTransformFlyoutFormTextInputProps {
-  field: Extract<
-    keyof typeof TRANSFORM_HOOK,
-    | 'description'
-    | 'destinationIndex'
-    | 'destinationIngestPipeline'
-    | 'docsPerSecond'
-    | 'frequency'
-    | 'maxPageSearchSize'
-    | 'numFailureRetries'
-    | 'retentionPolicyField'
-    | 'retentionPolicyMaxAge'
-  >;
+  field: Extract<keyof typeof TRANSFORM_HOOK, EditTransformFormFields>;
   label: string;
   helpText?: string;
   placeHolder?: boolean;
