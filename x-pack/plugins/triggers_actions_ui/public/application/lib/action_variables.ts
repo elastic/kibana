@@ -342,7 +342,7 @@ function getSummaryAlertActionVariables(): ActionVariable[] {
   result.push({
     name: SummaryAlertProvidedActionVariables.ongoingAlertsCount,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.ongoingAlertsCountLabel', {
-      defaultMessage: 'The number of ongoing alerts..',
+      defaultMessage: 'The number of ongoing alerts.',
     }),
   });
   result.push({
@@ -356,7 +356,7 @@ function getSummaryAlertActionVariables(): ActionVariable[] {
     description: i18n.translate(
       'xpack.triggersActionsUI.actionVariables.recoveredAlertsCountLabel',
       {
-        defaultMessage: 'The number of recovered alerts..',
+        defaultMessage: 'The number of recovered alerts.',
       }
     ),
   });

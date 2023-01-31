@@ -190,7 +190,7 @@ const expectedSummaryTransformResult = [
     name: 'alerts.new.data',
   },
   {
-    description: 'The number of ongoing alerts..',
+    description: 'The number of ongoing alerts.',
     name: 'alerts.ongoing.count',
   },
   {
@@ -198,7 +198,7 @@ const expectedSummaryTransformResult = [
     name: 'alerts.ongoing.data',
   },
   {
-    description: 'The number of recovered alerts..',
+    description: 'The number of recovered alerts.',
     name: 'alerts.recovered.count',
   },
   {
