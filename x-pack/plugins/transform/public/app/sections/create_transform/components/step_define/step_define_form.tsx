@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiIconTip,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -273,9 +274,22 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
         {hasValidTimeField && (
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.transform.stepDefineForm.datePickerLabel', {
-              defaultMessage: 'Time range',
-            })}
+            label={
+              <>
+                {i18n.translate('xpack.transform.stepDefineForm.datePickerLabel', {
+                  defaultMessage: 'Time range',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.transform.stepDefineForm.datePickerIconTipContent',
+                    {
+                      defaultMessage:
+                        'The time range will be applied to previews only, it will not be part of the final transform configuration.',
+                    }
+                  )}
+                />
+              </>
+            }
           >
             <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween">
               {/* Flex Column #1: Date Picker */}
