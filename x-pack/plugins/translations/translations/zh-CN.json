@@ -34066,7 +34066,6 @@
     "xpack.synthetics.sourceConfiguration.heartbeatIndicesTitle": "Uptime 索引",
     "xpack.synthetics.sourceConfiguration.indicesSectionTitle": "索引",
     "xpack.synthetics.sourceConfiguration.warningStateLabel": "使用时间限制",
-    "xpack.synthetics.ssl": "SSL",
     "xpack.synthetics.stackManagement": "Stack Management",
     "xpack.synthetics.stepDetails.expected": "预期",
     "xpack.synthetics.stepDetails.objectCount": "对象计数",
