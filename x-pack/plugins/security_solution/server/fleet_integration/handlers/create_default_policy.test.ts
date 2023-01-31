@@ -116,6 +116,28 @@ describe('Create Default Policy tests ', () => {
     });
     const OSTypes = ['linux', 'mac', 'windows'] as const;
 
+    it('Should return PolicyConfig for events only when preset is DataCollection', () => {
+      const defaultPolicy = policyFactory();
+      const config = createEndpointConfig({ preset: 'DataCollection' });
+      const policy = createDefaultPolicyCallback(config);
+
+      // events are the same
+      expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
+      expect(policy.linux.events).toEqual(defaultPolicy.linux.events);
+      expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
+
+      // check some of the protections to be disabled
+      const disabledButSupported = { mode: ProtectionModes.off, supported: true };
+      expect(policy.windows.behavior_protection).toEqual(disabledButSupported);
+      expect(policy.mac.memory_protection).toEqual(disabledButSupported);
+      expect(policy.linux.behavior_protection).toEqual(disabledButSupported);
+
+      // malware popups should be disabled
+      expect(policy.windows.popup.malware.enabled).toBeFalsy();
+      expect(policy.mac.popup.malware.enabled).toBeFalsy();
+      expect(policy.linux.popup.malware.enabled).toBeFalsy();
+    });
+
     it('Should return only process event enabled on policy when preset is NGAV', () => {
       const config = createEndpointConfig({ preset: 'NGAV' });
       const policy = createDefaultPolicyCallback(config);
