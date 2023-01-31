@@ -48,12 +48,12 @@ export function SloList() {
     }
   }, [shouldReload]);
 
-  const handleCloning = (bla: boolean) => {
-    setIsCloning(bla);
+  const handleCloning = (cloning: boolean) => {
+    setIsCloning(cloning);
   };
 
-  const handleDeleting = (bla: boolean) => {
-    setIsDeleting(bla);
+  const handleDeleting = (deleting: boolean) => {
+    setIsDeleting(deleting);
   };
 
   const handleClonedOrDeleted = () => {
