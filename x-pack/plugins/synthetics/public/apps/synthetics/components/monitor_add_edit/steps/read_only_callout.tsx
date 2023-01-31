@@ -13,7 +13,7 @@ export const ReadOnlyCallout = ({ projectId }: { projectId?: string }) => {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.synthetics.browser.project.readOnly.callout.title"
+          id="xpack.synthetics.project.readOnly.callout.title"
           defaultMessage="This configuration is read-only"
         />
       }
