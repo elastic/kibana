@@ -36,16 +36,16 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.testResources.resetKibanaTimeZone();
     });
 
-    // loadTestFile(require.resolve('./permissions'));
+    loadTestFile(require.resolve('./permissions'));
     loadTestFile(require.resolve('./creation_index_pattern'));
-    // loadTestFile(require.resolve('./creation_saved_search'));
-    // loadTestFile(require.resolve('./creation_runtime_mappings'));
-    // loadTestFile(require.resolve('./cloning'));
-    // loadTestFile(require.resolve('./editing'));
-    // loadTestFile(require.resolve('./feature_controls'));
-    // loadTestFile(require.resolve('./deleting'));
-    // loadTestFile(require.resolve('./resetting'));
-    // loadTestFile(require.resolve('./starting'));
+    loadTestFile(require.resolve('./creation_saved_search'));
+    loadTestFile(require.resolve('./creation_runtime_mappings'));
+    loadTestFile(require.resolve('./cloning'));
+    loadTestFile(require.resolve('./editing'));
+    loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./deleting'));
+    loadTestFile(require.resolve('./resetting'));
+    loadTestFile(require.resolve('./starting'));
   });
 }
 export interface ComboboxOption {
