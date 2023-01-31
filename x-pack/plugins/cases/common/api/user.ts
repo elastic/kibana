@@ -24,7 +24,7 @@ export const GetCaseUsersResponseRt = rt.type({
   users: rt.array(
     rt.type({
       user: UserRt,
-      type: rt.union([rt.literal('participant'), rt.literal('assignee')]),
+      type: rt.union([rt.literal('participant'), rt.literal('user')]),
     })
   ),
 });

@@ -50,17 +50,17 @@ export default ({ getService }: FtrProviderContext): void => {
           title: 'new title',
         });
 
-        const { participants, users } = await getCaseUsers({ caseId: postedCase.id, supertest });
-
-        expect(participants).to.eql([{ username: 'elastic', full_name: null, email: null }]);
-        expect(users).to.eql([]);
+        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        expect(users).to.eql([
+          { user: { username: 'elastic', full_name: null, email: null }, type: 'participant' },
+        ]);
       });
     });
 
     describe('profiles', () => {
       const secOnlyInfo: User = getUserInfo(secOnlySpacesAll);
       let cookies: Cookie[];
-      let seUserProfile: UserProfile;
+      let secUserProfile: UserProfile;
       let superUserProfile: UserProfile;
       let superUserHeaders: { Cookie: string };
       let secOnlyHeaders: { Cookie: string };
@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: superUser, space: 'space1' },
         });
 
-        seUserProfile = suggestedSecUsers[0];
+        secUserProfile = suggestedSecUsers[0];
 
         const suggestedSuperUser = await suggestUserProfiles({
           supertest: supertestWithoutAuth,
@@ -133,17 +133,19 @@ export default ({ getService }: FtrProviderContext): void => {
           superUserHeaders
         );
 
-        const { participants, users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
 
-        expect(participants).to.eql([
+        expect(users).to.eql([
           {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+            type: 'participant',
           },
         ]);
-        expect(users).to.eql([{ uid: superUserProfile.uid }]);
       });
 
       it('returns one participant if it is the only one that participates to the case', async () => {
@@ -163,17 +165,19 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: superUserHeaders,
         });
 
-        const { participants, users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
 
-        expect(participants).to.eql([
+        expect(users).to.eql([
           {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+            type: 'participant',
           },
         ]);
-        expect(users).to.eql([{ uid: superUserProfile.uid }]);
       });
 
       it('returns all participants of the case', async () => {
@@ -193,27 +197,31 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: secOnlyHeaders,
         });
 
-        const { participants, users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
 
-        expect(participants).to.eql([
+        expect(users).to.eql([
           {
-            username: seUserProfile.user.username,
-            full_name: seUserProfile.user.full_name,
-            email: seUserProfile.user.email,
-            profile_uid: seUserProfile.uid,
+            user: {
+              username: secUserProfile.user.username,
+              full_name: secUserProfile.user.full_name,
+              email: secUserProfile.user.email,
+              profile_uid: secUserProfile.uid,
+            },
+            type: 'participant',
           },
           {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+            type: 'participant',
           },
         ]);
-
-        expect(users).to.eql([{ uid: seUserProfile.uid }, { uid: superUserProfile.uid }]);
       });
 
-      it('returns participants and user ids correctly when assigning users to a case', async () => {
+      it('returns participants and users correctly when assigning users to a case', async () => {
         const postedCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest(),
@@ -222,30 +230,40 @@ export default ({ getService }: FtrProviderContext): void => {
           superUserHeaders
         );
 
-        // assignee superUser and seUserProfile
+        // assignee superUser and secUserProfile
         await setAssignees({
           supertest,
           caseId: postedCase.id,
           version: postedCase.version,
-          assignees: [{ uid: superUserProfile.uid }, { uid: seUserProfile.uid }],
+          assignees: [{ uid: superUserProfile.uid }, { uid: secUserProfile.uid }],
           headers: superUserHeaders,
         });
 
-        const { participants, users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
 
-        expect(participants).to.eql([
+        expect(users).to.eql([
           {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+            type: 'participant',
+          },
+          {
+            user: {
+              username: secUserProfile.user.username,
+              full_name: secUserProfile.user.full_name,
+              email: secUserProfile.user.email,
+              profile_uid: secUserProfile.uid,
+            },
+            type: 'user',
           },
         ]);
-
-        expect(users).to.eql([{ uid: superUserProfile.uid }, { uid: seUserProfile.uid }]);
       });
 
-      it('returns participants and user ids correctly when de-assigning users to a case', async () => {
+      it('returns participants and users correctly when de-assigning users to a case', async () => {
         const postedCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest(),
@@ -254,12 +272,12 @@ export default ({ getService }: FtrProviderContext): void => {
           superUserHeaders
         );
 
-        // assignee superUser and seUserProfile
+        // assignee superUser and secUserProfile
         const updatedCase = await setAssignees({
           supertest,
           caseId: postedCase.id,
           version: postedCase.version,
-          assignees: [{ uid: superUserProfile.uid }, { uid: seUserProfile.uid }],
+          assignees: [{ uid: superUserProfile.uid }, { uid: secUserProfile.uid }],
           headers: superUserHeaders,
         });
 
@@ -272,19 +290,28 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: superUserHeaders,
         });
 
-        const { participants, users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
 
-        expect(participants).to.eql([
+        expect(users).to.eql([
           {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+            type: 'participant',
+          },
+          {
+            user: {
+              username: secUserProfile.user.username,
+              full_name: secUserProfile.user.full_name,
+              email: secUserProfile.user.email,
+              profile_uid: secUserProfile.uid,
+            },
+            type: 'user',
           },
         ]);
-
-        // both user should be returned as both where in a user action at some point
-        expect(users).to.eql([{ uid: superUserProfile.uid }, { uid: seUserProfile.uid }]);
       });
     });
 

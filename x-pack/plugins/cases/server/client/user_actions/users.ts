@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { GetCaseUsersResponse } from '../../../common/api';
 import { GetCaseUsersResponseRt } from '../../../common/api';
@@ -15,7 +14,7 @@ import { createCaseError } from '../../common/error';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import type { GetUsersRequest } from './types';
-import type { GetUsersResponse as UserActionsServiceGetUsersResponse } from '../../services/user_actions';
+import { getUserProfiles } from '../cases/utils';
 
 type User = GetCaseUsersResponse['users'][number];
 
@@ -36,11 +35,12 @@ export const getUsers = async (
 
     // ensure that we have authorization for reading the case
     await casesClient.cases.resolve({ id: caseId, includeComments: false });
-    const { participants: participantsInfo, userProfileUids } = await userActionService.getUsers({
+
+    const { participants, assignees } = await userActionService.getUsers({
       caseId,
     });
 
-    const entities: OwnerEntity[] = participantsInfo.map((participant) => ({
+    const entities: OwnerEntity[] = participants.map((participant) => ({
       id: participant.id,
       owner: participant.owner,
     }));
@@ -50,32 +50,44 @@ export const getUsers = async (
       operation: Operations.getUserActionUsers,
     });
 
-    const userProfiles = await getProfiles(securityStartPlugin, userProfileUids);
+    const participantsUids = participants
+      .filter((participant) => participant.user.profile_uid != null)
+      .map((participant) => participant.user.profile_uid) as string[];
 
-    for (const participant of participantsInfo) {
+    const userProfileUids = new Set([...assignees, ...participantsUids]);
+    const userProfiles = await getUserProfiles(securityStartPlugin, userProfileUids);
+
+    for (const participant of participants) {
+      const user =
+        participant.user.profile_uid != null
+          ? getUserInformation(userProfiles, participant.user.profile_uid)
+          : {
+              email: participant.user.email,
+              full_name: participant.user.full_name,
+              username: participant.user.username,
+            };
+
       users.push({
-        user: { ...getUserInformation(userProfiles, participant.user) },
+        user,
         type: 'participant',
       });
 
+      /**
+       * To avoid duplicates, a user that is
+       * a participant should not be also added
+       * as a user. For that reason, we remove
+       * its profile_uid from the assignees Set
+       */
       if (participant.user.profile_uid) {
-        userProfileUids.delete(participant.user.profile_uid);
+        assignees.delete(participant.user.profile_uid);
       }
     }
 
-    for (const uid of userProfileUids) {
-      const userProfile = userProfiles.get(uid);
-      if (userProfile) {
-        users.push({
-          user: {
-            email: userProfile.user.email,
-            full_name: userProfile.user.full_name,
-            username: userProfile.user.username,
-            profile_uid: userProfile.uid,
-          },
-          type: 'assignee',
-        });
-      }
+    for (const uid of assignees.values()) {
+      users.push({
+        user: getUserInformation(userProfiles, uid),
+        type: 'user',
+      });
     }
 
     const results = { users };
@@ -90,37 +102,13 @@ export const getUsers = async (
   }
 };
 
-const getProfiles = async (
-  securityStartPlugin: SecurityPluginStart,
-  uids: Set<string>
-): Promise<Map<string, UserProfile>> => {
-  if (uids.size <= 0) {
-    return new Map();
-  }
-
-  const userProfiles =
-    (await securityStartPlugin.userProfiles.bulkGet({
-      uids,
-    })) ?? [];
-
-  return userProfiles.reduce<Map<string, UserProfile>>((acc, profile) => {
-    acc.set(profile.uid, profile);
-    return acc;
-  }, new Map());
-};
-
-const getUserInformation = (
-  userProfiles: Map<string, UserProfile>,
-  participant: UserActionsServiceGetUsersResponse['participants'][0]['user'] | undefined
-): User['user'] => {
-  const profileUid = participant?.profile_uid;
-  const userProfile =
-    profileUid != null ? userProfiles.get(profileUid) : { uid: profileUid, user: participant };
+const getUserInformation = (userProfiles: Map<string, UserProfile>, uid: string): User['user'] => {
+  const userProfile = userProfiles.get(uid);
 
   return {
-    email: userProfile?.user?.email,
-    full_name: userProfile?.user?.full_name,
-    username: userProfile?.user?.username,
-    profile_uid: userProfile?.uid,
+    email: userProfile?.user.email,
+    full_name: userProfile?.user.full_name,
+    username: userProfile?.user.username,
+    profile_uid: userProfile?.uid ?? uid,
   };
 };
