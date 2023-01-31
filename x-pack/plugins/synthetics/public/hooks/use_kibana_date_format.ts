@@ -57,12 +57,16 @@ export function useKibanaDateFormat(timestamp?: AcceptedInputs): string {
     if (typeof value === 'string' && value !== formatString) {
       const newFormat = JSON.parse(value);
 
-      // array for simple sorting
+      /**
+       * Put bounds into an array for simpler sorting. In the event of user-defined
+       * values for scaled formatting being specified out of ascending order, the logic
+       * we use to pick the right format would break, so sort them here and then reduce
+       * to a Record<number, string> to update the values in the store.
+       */
       const bounds: Array<{ bound: number; format: string }> = [];
       for (const scale of newFormat) {
         if (!isExpectedFormat(scale)) throw Error(INVALID_FORMAT_MESSAGE);
-        const bound = moment.duration(scale[0]).asMilliseconds();
-        bounds.push({ bound, format: scale[1] });
+        bounds.push({ bound: moment.duration(scale[0]).asMilliseconds(), format: scale[1] });
       }
       bounds.sort(({ bound: a }, { bound: b }) => a - b);
       const action = setScaledDateAction({
