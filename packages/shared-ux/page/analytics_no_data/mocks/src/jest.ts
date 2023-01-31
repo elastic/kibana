@@ -8,12 +8,10 @@
 
 import type { AnalyticsNoDataPageServices } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { getKibanaNoDataPageServicesMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
-import { of } from 'rxjs';
 
 export const getServicesMock = () => {
   const services: AnalyticsNoDataPageServices = {
     ...getKibanaNoDataPageServicesMock(),
-    customBranding: { hasCustomBranding$: of(false) },
     kibanaGuideDocLink: 'Kibana guide',
   };
 
@@ -24,7 +22,6 @@ export const getServicesMockCustomBranding = () => {
   const services: AnalyticsNoDataPageServices = {
     ...getKibanaNoDataPageServicesMock(),
     // not specifying showPlainSpinner as true for testing the component
-    customBranding: { hasCustomBranding$: of(true) },
     kibanaGuideDocLink: 'Kibana guide',
   };
 
