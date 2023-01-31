@@ -11,7 +11,6 @@ import type {
   GetThreatListOptions,
   ThreatListCountOptions,
   ThreatListDoc,
-  ThreatListItem,
   GetSortForThreatList,
 } from './types';
 
@@ -19,8 +18,6 @@ import type {
  * This should not exceed 10000 (10k)
  */
 export const INDICATOR_PER_PAGE = 1000;
-
-const MAX_NUMBER_OF_THREATS = 10 * 1000;
 
 export const getThreatList = async ({
   esClient,

@@ -10,10 +10,10 @@ import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
 import type { CreateEventSignalOptions } from './types';
-import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
-import { getThreatList } from './get_threat_list';
-import { enrichSignalThreatMatchesFromSignalsMap } from './enrich_signal_threat_matches';
+import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import { getSignalsMatchesFromThreatIndex } from './get_signal_matches_from_threat_index';
+
+import { threatEnrichmentFactory } from './threat_enrichment_factory';
 
 export const createEventSignal = async ({
   bulkCreate,
@@ -107,54 +107,17 @@ export const createEventSignal = async ({
 
     ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
 
-    const threatEnrichment = (signals: SignalSourceHit[]): Promise<SignalSourceHit[]> => {
-      const buildThreatEnrichment = async () => {
-        const threatIds = signals
-          .map((s) => s._id)
-          .reduce<string[]>((acc, id) => {
-            return [
-              ...new Set([
-                ...acc,
-                ...(signalsMap.get(id) ?? []).map((threatQueryMatched) => threatQueryMatched.id),
-              ]),
-            ];
-          }, [])
-          .flat();
-
-        const matchedThreatsFilter = {
-          query: {
-            bool: {
-              filter: {
-                ids: { values: threatIds },
-              },
-            },
-          },
-        };
-
-        const threatResponse = await getThreatList({
-          ...threatSearchParams,
-          threatListConfig: {
-            _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
-            fields: undefined,
-          },
-          threatFilters: [...threatFilters, matchedThreatsFilter],
-          searchAfter: undefined,
-        });
-
-        return threatResponse.hits.hits;
-      };
-      return enrichSignalThreatMatchesFromSignalsMap(
-        signals,
-        buildThreatEnrichment,
-        threatIndicatorPath,
-        signalsMap
-      );
-    };
+    const enrichment = threatEnrichmentFactory({
+      signalsMap,
+      threatIndicatorPath,
+      threatFilters,
+      threatSearchParams,
+    });
 
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       bulkCreate,
-      enrichment: threatEnrichment,
+      enrichment,
       eventsTelemetry,
       exceptionsList: unprocessedExceptions,
       filter: esFilter,

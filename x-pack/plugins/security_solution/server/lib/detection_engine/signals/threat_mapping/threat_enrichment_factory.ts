@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { CreateEventSignalOptions, GetThreatListOptions } from './types';
+import type { SignalSourceHit } from '../types';
+import { getThreatList } from './get_threat_list';
+import { enrichSignalThreatMatchesFromSignalsMap } from './enrich_signal_threat_matches';
+import { type SignalsMap } from './get_signal_matches_from_threat_index';
+
+interface ThreatEnrichmentFactoryOptions {
+  threatIndicatorPath: CreateEventSignalOptions['threatIndicatorPath'];
+  signalsMap: SignalsMap;
+  threatFilters: CreateEventSignalOptions['threatFilters'];
+  threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
+}
+
+/**
+ * returns threatEnrichment method used events-first search
+ */
+export const threatEnrichmentFactory = ({
+  signalsMap,
+  threatIndicatorPath,
+  threatFilters,
+  threatSearchParams,
+}: ThreatEnrichmentFactoryOptions) => {
+  const threatEnrichment = (signals: SignalSourceHit[]): Promise<SignalSourceHit[]> => {
+    const buildThreatEnrichment = async () => {
+      const threatIds = signals
+        .map((s) => s._id)
+        .reduce<string[]>((acc, id) => {
+          return [
+            ...new Set([
+              ...acc,
+              ...(signalsMap.get(id) ?? []).map((threatQueryMatched) => threatQueryMatched.id),
+            ]),
+          ];
+        }, [])
+        .flat();
+
+      const matchedThreatsFilter = {
+        query: {
+          bool: {
+            filter: {
+              ids: { values: threatIds },
+            },
+          },
+        },
+      };
+
+      const threatResponse = await getThreatList({
+        ...threatSearchParams,
+        threatListConfig: {
+          _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
+          fields: undefined,
+        },
+        threatFilters: [...threatFilters, matchedThreatsFilter],
+        searchAfter: undefined,
+      });
+
+      return threatResponse.hits.hits;
+    };
+
+    return enrichSignalThreatMatchesFromSignalsMap(
+      signals,
+      buildThreatEnrichment,
+      threatIndicatorPath,
+      signalsMap
+    );
+  };
+
+  return threatEnrichment;
+};

@@ -10,6 +10,9 @@ import { getThreatList } from './get_threat_list';
 import { decodeThreatMatchNamedQuery } from './utils';
 
 import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';
+
+export type SignalsMap = Map<string, ThreatMatchNamedQuery[]>;
+
 interface GetSignalsMatchesFromThreatIndexOptions {
   threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
   eventsCount: number;
@@ -21,7 +24,7 @@ interface GetSignalsMatchesFromThreatIndexOptions {
 export const getSignalsMatchesFromThreatIndex = async ({
   threatSearchParams,
   eventsCount,
-}: GetSignalsMatchesFromThreatIndexOptions): Promise<Map<string, ThreatMatchNamedQuery[]>> => {
+}: GetSignalsMatchesFromThreatIndexOptions): Promise<SignalsMap> => {
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
   const signalsMap = new Map<string, ThreatMatchNamedQuery[]>();
   // number of threat matches per signal is limited by MAX_NUMBER_OF_SIGNAL_MATCHES. Once it hits this number, threats stop to be processed for a signal
