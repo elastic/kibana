@@ -17,7 +17,7 @@ import {
   getEventLog,
   TaskManagerDoc,
 } from '../../../../common/lib';
-import { validateEvent } from '../group2/event_log';
+import { validateEvent } from './event_log';
 
 // eslint-disable-next-line import/no-default-export
 export default function createDisableRuleTests({ getService }: FtrProviderContext) {

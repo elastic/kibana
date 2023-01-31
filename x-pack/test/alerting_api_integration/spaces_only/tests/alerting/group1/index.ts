@@ -22,7 +22,6 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./enable'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./get_alert_state'));
-    loadTestFile(require.resolve('./get_alert_summary'));
+    loadTestFile(require.resolve('./event_log'));
   });
 }

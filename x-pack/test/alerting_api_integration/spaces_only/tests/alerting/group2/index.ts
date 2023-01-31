@@ -14,10 +14,11 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     before(async () => await buildUp(getService));
     after(async () => await tearDown(getService));
 
+    loadTestFile(require.resolve('./get_alert_state'));
+    loadTestFile(require.resolve('./get_alert_summary'));
     loadTestFile(require.resolve('./get_execution_log'));
     loadTestFile(require.resolve('./get_action_error_log'));
     loadTestFile(require.resolve('./rule_types'));
-    loadTestFile(require.resolve('./event_log'));
     loadTestFile(require.resolve('./execution_status'));
     loadTestFile(require.resolve('./monitoring_collection'));
     loadTestFile(require.resolve('./monitoring'));

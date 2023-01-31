@@ -14,12 +14,8 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     before(async () => await buildUp(getService));
     after(async () => await tearDown(getService));
 
-    loadTestFile(require.resolve('./alerts_space1'));
-    loadTestFile(require.resolve('./alerts_default_space'));
     loadTestFile(require.resolve('./builtin_alert_types'));
     loadTestFile(require.resolve('./transform_rule_types'));
     loadTestFile(require.resolve('./ml_rule_types'));
-    loadTestFile(require.resolve('./mustache_templates.ts'));
-    loadTestFile(require.resolve('./notify_when'));
   });
 }

@@ -14,6 +14,10 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     before(async () => await buildUp(getService));
     after(async () => await tearDown(getService));
 
+    loadTestFile(require.resolve('./alerts_space1'));
+    loadTestFile(require.resolve('./alerts_default_space'));
+    loadTestFile(require.resolve('./mustache_templates.ts'));
+    loadTestFile(require.resolve('./notify_when'));
     loadTestFile(require.resolve('./ephemeral'));
     loadTestFile(require.resolve('./event_log_alerts'));
     loadTestFile(require.resolve('./snooze'));
