@@ -112,7 +112,7 @@ export const ExtractionRules: React.FC = () => {
       <EuiText size="s" color="subdued">
         <p>
           <FormattedMessage
-            id="'xpack.enterpriseSearch.content.crawler.extractionRules.title'"
+            id="xpack.enterpriseSearch.content.crawler.extractionRules.title"
             defaultMessage="Create a content extraction rule to change where the documents get their data during a sync. {learnMoreLink}"
             values={{
               learnMoreLink: (
