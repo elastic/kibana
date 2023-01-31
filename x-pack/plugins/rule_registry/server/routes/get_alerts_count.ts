@@ -10,7 +10,6 @@ import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import moment from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
@@ -60,7 +59,7 @@ export const getAlertsCountRoute = (router: IRouter<RacRequestHandlerContext>) =
           gte,
           lte,
           featureIds,
-          filter: filter as estypes.QueryDslQueryContainer[],
+          filter,
         });
         return response.ok({
           body: aggs,

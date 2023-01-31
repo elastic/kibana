@@ -160,7 +160,7 @@ export class AlertsClient {
     };
   }
 
-  private extractAlertsCount(countBuckets: estypes.AggregationsStringTermsBucketKeys[]) {
+  private extractAlertsCount(countBuckets: estypes.AggregationsStringTermsBucketKeys[] = []) {
     return countBuckets.reduce(
       (counts, bucket) => {
         if (bucket.key === ALERT_STATUS_ACTIVE) {
@@ -577,7 +577,7 @@ export class AlertsClient {
         ?.count as estypes.AggregationsMultiBucketAggregateBase;
 
       return this.extractAlertsCount(
-        countAggs.buckets as estypes.AggregationsStringTermsBucketKeys[]
+        countAggs?.buckets as estypes.AggregationsStringTermsBucketKeys[]
       );
     } catch (error) {
       this.logger.error(`getAlertsCount threw an error: ${error}`);
@@ -665,7 +665,7 @@ export class AlertsClient {
         ?.count as estypes.AggregationsMultiBucketAggregateBase;
 
       const { activeAlertCount, recoveredAlertCount } = this.extractAlertsCount(
-        countAggs.buckets as estypes.AggregationsStringTermsBucketKeys[]
+        countAggs?.buckets as estypes.AggregationsStringTermsBucketKeys[]
       );
 
       return {
