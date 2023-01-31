@@ -442,6 +442,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       onChange: (event) => {
         setValue(ConfigKey.ENABLED, !!event.target.checked);
       },
+      'data-test-subj': 'syntheticsEnableSwitch',
     }),
   },
   [AlertConfigKey.STATUS_ENABLED]: {

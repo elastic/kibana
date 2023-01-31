@@ -39,7 +39,7 @@ const MonitorEditPage: React.FC = () => {
   const projectId = data?.attributes[ConfigKey.PROJECT_ID];
 
   return data && !loading && !error ? (
-    <MonitorForm defaultValues={data?.attributes}>
+    <MonitorForm defaultValues={data?.attributes} readOnly={isReadOnly}>
       <MonitorSteps
         stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
         isEditFlow={true}

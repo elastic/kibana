@@ -17,7 +17,8 @@ import { Disclaimer } from './disclaimer';
 export const MonitorForm: React.FC<{
   defaultValues?: SyntheticsMonitor;
   space?: string;
-}> = ({ children, defaultValues, space }) => {
+  readOnly?: boolean;
+}> = ({ children, defaultValues, space, readOnly = false }) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
@@ -42,7 +43,7 @@ export const MonitorForm: React.FC<{
       >
         {children}
         <EuiSpacer />
-        <ActionBar />
+        <ActionBar readOnly={readOnly} />
       </EuiForm>
       <Disclaimer />
     </FormProvider>

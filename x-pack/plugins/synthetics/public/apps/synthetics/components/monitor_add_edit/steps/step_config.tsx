@@ -117,7 +117,7 @@ const MONITOR_SCRIPT_STEP_EDIT = (readOnly: boolean = false): Step => ({
             {readOnly ? (
               <FormattedMessage
                 id="xpack.synthetics.monitorConfig.monitorScriptEditStepReadOnly.description"
-                defaultMessage="The script for Project Monitors cannot be edited here. To see or update the script, go to where the Project was pushed from."
+                defaultMessage="You can only view and edit the script in the source file of the monitor."
               />
             ) : (
               <FormattedMessage

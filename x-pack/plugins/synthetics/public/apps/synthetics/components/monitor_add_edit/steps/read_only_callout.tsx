@@ -14,7 +14,7 @@ export const ReadOnlyCallout = ({ projectId }: { projectId?: string }) => {
       title={
         <FormattedMessage
           id="xpack.synthetics.browser.project.readOnly.callout.title"
-          defaultMessage="Read only"
+          defaultMessage="This configuration is read-only"
         />
       }
       iconType="document"
@@ -22,7 +22,7 @@ export const ReadOnlyCallout = ({ projectId }: { projectId?: string }) => {
       <p>
         <FormattedMessage
           id="xpack.synthetics.project.readOnly.callout.content"
-          defaultMessage="This monitor was added from an external project: {projectId}. Configuration is read only."
+          defaultMessage="This monitor was added from an external project: {projectId}. From this page, you can only enable, disable, or remove it. To make configuration changes, you have to edit its source file and push it again from that project."
           values={{ projectId: <strong>{projectId}</strong> }}
         />
       </p>
