@@ -2510,7 +2510,7 @@
             "label": "serverlessFunction",
             "description": [],
             "signature": [
-              "({ functionName, serviceName, environment, agentName, architecture, }: { functionName: string; environment: string; agentName: string; serviceName?: string | undefined; architecture?: string | undefined; }) => ",
+              "({ functionName, serviceName, environment, agentName, architecture, serverlessType, }: { functionName: string; environment: string; agentName: string; serviceName?: string | undefined; architecture?: string | undefined; serverlessType?: \"aws.lambda\" | \"azure.functions\" | undefined; }) => ",
               "ServerlessFunction"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/index.ts",
@@ -2526,7 +2526,7 @@
                 "label": "__0",
                 "description": [],
                 "signature": [
-                  "{ functionName: string; environment: string; agentName: string; serviceName?: string | undefined; architecture?: string | undefined; }"
+                  "{ functionName: string; environment: string; agentName: string; serviceName?: string | undefined; architecture?: string | undefined; serverlessType?: \"aws.lambda\" | \"azure.functions\" | undefined; }"
                 ],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/serverless_function.ts",
                 "deprecated": false,

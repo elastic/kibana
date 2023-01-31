@@ -14,7 +14,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/plugin-discovery",
-    "@kbn/ci-stats-reporter",
     "@kbn/repo-info",
   ],
   "exclude": [

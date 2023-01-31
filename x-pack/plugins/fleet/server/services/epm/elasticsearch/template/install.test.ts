@@ -201,6 +201,8 @@ describe('EPM index template install', () => {
         features: {
           synthetic_source: false,
           tsdb: false,
+          doc_value_only_numeric: false,
+          doc_value_only_other: false,
         },
       },
     });
@@ -241,6 +243,8 @@ describe('EPM index template install', () => {
         features: {
           synthetic_source: false,
           tsdb: false,
+          doc_value_only_numeric: false,
+          doc_value_only_other: false,
         },
       },
     });

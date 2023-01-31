@@ -30,6 +30,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           environment: ENVIRONMENT,
           agentName: 'python',
           functionName: 'fn-python-1',
+          serverlessType: 'aws.lambda',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 
@@ -39,6 +40,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           environment: ENVIRONMENT,
           agentName: 'nodejs',
           functionName: 'fn-node-1',
+          serverlessType: 'aws.lambda',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 
@@ -47,6 +49,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           environment: ENVIRONMENT,
           agentName: 'nodejs',
           functionName: 'fn-node-2',
+          serverlessType: 'aws.lambda',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 
