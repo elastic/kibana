@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return '線形';
       case 'Records':
       case 'records':
-        return '記録';
+        return 'レコ';
       case 'sum':
         return '合計';
       default:
