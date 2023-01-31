@@ -51,14 +51,19 @@ describe('helpers', () => {
             },
           ],
           "message": <FormattedMessage
-            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found"
+            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
             id="xpack.lens.indexPattern.fieldsNotFound"
             values={
               Object {
                 "count": 1,
-                "missingFields": <EuiCode>
-                  NoBytes
-                </EuiCode>,
+                "missingFields": <React.Fragment>
+                  <React.Fragment>
+                    <EuiCode>
+                      NoBytes
+                    </EuiCode>
+                    
+                  </React.Fragment>
+                </React.Fragment>,
               }
             }
           />,
@@ -113,14 +118,19 @@ describe('helpers', () => {
             },
           ],
           "message": <FormattedMessage
-            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found"
+            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
             id="xpack.lens.indexPattern.fieldsNotFound"
             values={
               Object {
                 "count": 1,
-                "missingFields": <EuiCode>
-                  NoBytes
-                </EuiCode>,
+                "missingFields": <React.Fragment>
+                  <React.Fragment>
+                    <EuiCode>
+                      NoBytes
+                    </EuiCode>
+                    
+                  </React.Fragment>
+                </React.Fragment>,
               }
             }
           />,
@@ -159,14 +169,25 @@ describe('helpers', () => {
             },
           ],
           "message": <FormattedMessage
-            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found"
+            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
             id="xpack.lens.indexPattern.fieldsNotFound"
             values={
               Object {
                 "count": 2,
-                "missingFields": <EuiCode>
-                  NotExisting, NoBytes
-                </EuiCode>,
+                "missingFields": <React.Fragment>
+                  <React.Fragment>
+                    <EuiCode>
+                      NotExisting
+                    </EuiCode>
+                    , 
+                  </React.Fragment>
+                  <React.Fragment>
+                    <EuiCode>
+                      NoBytes
+                    </EuiCode>
+                    
+                  </React.Fragment>
+                </React.Fragment>,
               }
             }
           />,

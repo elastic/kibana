@@ -85,7 +85,7 @@ Object {
   "fixableInEditor": true,
   "longMessage": "",
   "severity": "warning",
-  "shortMessage": "might be an approximation. For more precise results, use Filters or increase the number of Top Values.",
+  "shortMessage": "This might be an approximation. For more precise results, use Filters or increase the number of Top Values.",
 }
 `;
 

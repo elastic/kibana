@@ -72,10 +72,19 @@ export function getInvalidFieldMessage(
           message: (
             <FormattedMessage
               id="xpack.lens.indexPattern.fieldsNotFound"
-              defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found"
+              defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
               values={{
                 count: missingFields.length,
-                missingFields: <EuiCode>{missingFields.join(', ')}</EuiCode>,
+                missingFields: (
+                  <>
+                    {missingFields.map((field, index) => (
+                      <>
+                        <EuiCode>{field}</EuiCode>
+                        {index + 1 === missingFields.length ? '' : ', '}
+                      </>
+                    ))}
+                  </>
+                ),
               }}
             />
           ),

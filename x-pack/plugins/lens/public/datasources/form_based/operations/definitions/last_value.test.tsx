@@ -934,14 +934,19 @@ describe('last_value', () => {
               },
             ],
             "message": <FormattedMessage
-              defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found"
+              defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
               id="xpack.lens.indexPattern.fieldsNotFound"
               values={
                 Object {
                   "count": 1,
-                  "missingFields": <EuiCode>
-                    notExisting
-                  </EuiCode>,
+                  "missingFields": <React.Fragment>
+                    <React.Fragment>
+                      <EuiCode>
+                        notExisting
+                      </EuiCode>
+                      
+                    </React.Fragment>
+                  </React.Fragment>,
                 }
               }
             />,
