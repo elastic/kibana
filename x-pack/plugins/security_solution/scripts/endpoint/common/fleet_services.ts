@@ -6,14 +6,14 @@
  */
 
 import type { Client, estypes } from '@elastic/elasticsearch';
-import { AGENT_API_ROUTES, agentPolicyRouteService, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import type {
-  AgentStatus,
-  GetAgentsResponse,
   Agent,
+  AgentStatus,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
+  GetAgentsResponse,
 } from '@kbn/fleet-plugin/common';
+import { AGENT_API_ROUTES, agentPolicyRouteService, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { pick } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -23,8 +23,8 @@ import {
   fleetServerHostsRoutesService,
 } from '@kbn/fleet-plugin/common/services';
 import type {
-  GetAgentsRequest,
   EnrollmentAPIKey,
+  GetAgentsRequest,
   GetEnrollmentAPIKeysResponse,
 } from '@kbn/fleet-plugin/common/types';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
@@ -212,4 +212,27 @@ export const fetchAgentPolicyList = async (
       query: options,
     })
     .then((response) => response.data);
+};
+
+/**
+ * Returns the an Agent Version that matches the current stack version. Will use `SNAPSHOT` if
+ * appropriate too.
+ * @param kbnClient
+ */
+export const getAgentVersionMatchingCurrentStack = async (
+  kbnClient: KbnClient
+): Promise<string> => {
+  const kbnStatus = await kbnClient.status.get();
+  let version = kbnStatus.version.number;
+
+  // Add `-SNAPSHOT` if version indicates it was from a snapshot or the build hash starts
+  // with `xxxxxxxxx` (value that seems to be present when running kibana from source)
+  if (
+    kbnStatus.version.build_snapshot ||
+    kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX')
+  ) {
+    version += '-SNAPSHOT';
+  }
+
+  return version;
 };
