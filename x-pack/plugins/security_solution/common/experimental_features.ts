@@ -82,6 +82,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionGetFileEnabled: true,
 
   /**
+   * Enables the `execute` endpoint response action
+   */
+  responseActionExecuteEnabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: false,
@@ -95,6 +100,12 @@ export const allowedExperimentalValues = Object.freeze({
    */
   riskyHostsEnabled: false, // DEPRECATED
   riskyUsersEnabled: false, // DEPRECATED
+
+  /*
+   * Enables new Set of filters on the Alerts page.
+   *
+   **/
+  alertsPageFiltersEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
