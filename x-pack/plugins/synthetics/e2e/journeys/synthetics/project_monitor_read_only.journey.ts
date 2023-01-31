@@ -55,7 +55,7 @@ journey('Project Monitor Read-only', async ({ page, params }) => {
   });
 
   step('Monitor configuration is unchanged when saved', async () => {
-    await syntheticsApp.confirmAndSave();
+    await syntheticsApp.confirmAndSave(true);
     const newConfiguration = await getMonitor(params.kibanaUrl, monitorId);
 
     // hash is always reset to empty string when monitor is edited
@@ -71,7 +71,7 @@ journey('Project Monitor Read-only', async ({ page, params }) => {
   step('monitor can be enabled or disabled', async () => {
     await page.click('[data-test-subj="syntheticsEnableSwitch"]');
 
-    await syntheticsApp.confirmAndSave();
+    await syntheticsApp.confirmAndSave(true);
     const newConfiguration = await getMonitor(params.kibanaUrl, monitorId);
 
     // hash is always reset to empty string when monitor is edited

@@ -102,7 +102,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       await this.ensureIsOnMonitorConfigPage();
       await this.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
       return await this.findByText(
-        isUpdate ? 'Monitor added successfully.' : 'Monitor updated successfully.'
+        isUpdate ? 'Monitor updated successfully.' : 'Monitor added successfully.'
       );
     },
 
