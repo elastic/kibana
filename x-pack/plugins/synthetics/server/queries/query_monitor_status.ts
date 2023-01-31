@@ -169,5 +169,5 @@ export async function queryMonitorStatus(
       }
     );
   }
-  return { up, down, pending, upConfigs, downConfigs, enabledIds: ids };
+  return { up, down, pending, upConfigs, downConfigs, enabledIds: ids, allIds: ids };
 }

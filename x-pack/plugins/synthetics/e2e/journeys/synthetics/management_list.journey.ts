@@ -27,9 +27,6 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
   const searchBarInput = page.locator(
     '[placeholder="Search by name, url, host, tag, project or location"]'
   );
-  const monitorRows = page
-    .locator(`[aria-label="Synthetics monitors list"]`)
-    .locator('.euiTableRow');
 
   page.setDefaultTimeout(60 * 1000);
 
@@ -114,8 +111,8 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
     await fiveMinuteScheduleOption.click();
     await page.getByText('Apply').click();
 
-    // There only 1 monitor with schedule 5 minutes
-    expect(monitorRows.count()).resolves.toEqual(1);
+    // There should be only 1 monitor with schedule 5 minutes
+    await page.waitForSelector('text=1-1');
 
     // Clear the filter
     await frequencyFilter.click();
