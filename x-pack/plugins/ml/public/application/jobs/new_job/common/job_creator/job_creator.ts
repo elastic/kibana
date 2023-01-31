@@ -8,6 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
@@ -18,6 +19,7 @@ import {
   aggregations,
   mlOnlyAggregations,
 } from '../../../../../../common/constants/aggregation_types';
+import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import {
   Job,
   Datafeed,
@@ -105,9 +107,14 @@ export class JobCreator {
     return this._type;
   }
 
+  public get savedSearch(): SavedSearchSavedObject | null {
+    return this._savedSearch;
+  }
+
   public get dataView(): DataView {
     return this._indexPattern;
   }
+
   public get dataViewId(): string | undefined {
     return this._indexPattern.id;
   }
@@ -146,6 +153,10 @@ export class JobCreator {
     this._detectors.length = 0;
     this._aggs.length = 0;
     this._fields.length = 0;
+  }
+
+  public get savedSearchQuery(): { query: Query; filter: any[] } | null {
+    return this._savedSearch ? getQueryFromSavedSearchObject(this._savedSearch) : null;
   }
 
   public get detectors(): Detector[] {
