@@ -29,11 +29,7 @@ import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/m
 import { EditTransformApiErrorCallout } from './edit_transform_api_error_callout';
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
-import {
-  useEditTransformFlyout,
-  EditTransformFlyoutProvider,
-  TRANSFORM_HOOK,
-} from './use_edit_transform_flyout';
+import { useEditTransformFlyout, EditTransformFlyoutProvider } from './use_edit_transform_flyout';
 import { EditTransformUpdateButton } from './edit_transform_update_button';
 
 interface EditTransformFlyoutProps {
@@ -61,7 +57,7 @@ interface EditTransformFlyoutConsumerProps {
 export const EditTransformFlyoutConsumer: FC<EditTransformFlyoutConsumerProps> = ({
   closeFlyout,
 }) => {
-  const config = useEditTransformFlyout(TRANSFORM_HOOK.config);
+  const config = useEditTransformFlyout('config');
 
   return (
     <EuiFlyout

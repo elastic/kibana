@@ -16,16 +16,16 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import { useEditTransformFlyout, TRANSFORM_HOOK } from './use_edit_transform_flyout';
+import { useEditTransformFlyout } from './use_edit_transform_flyout';
 
 export const EditTransformRetentionPolicy: FC = () => {
   const appDeps = useAppDependencies();
   const dataViewsClient = appDeps.data.dataViews;
 
-  const dataViewId = useEditTransformFlyout(TRANSFORM_HOOK.dataViewId);
-  const formSections = useEditTransformFlyout(TRANSFORM_HOOK.stateFormSection);
-  const retentionPolicyField = useEditTransformFlyout(TRANSFORM_HOOK.retentionPolicyField);
-  const { formField, formSection } = useEditTransformFlyout(TRANSFORM_HOOK.actions);
+  const dataViewId = useEditTransformFlyout('dataViewId');
+  const formSections = useEditTransformFlyout('stateFormSection');
+  const retentionPolicyField = useEditTransformFlyout('retentionPolicyField');
+  const { formField, formSection } = useEditTransformFlyout('actions');
 
   const [dateFieldNames, setDateFieldNames] = useState<string[]>([]);
 

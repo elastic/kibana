@@ -558,7 +558,7 @@ interface EditTransformFlyoutOptions {
 }
 
 const useEditTransformFlyoutInternal = ({ config, dataViewId }: EditTransformFlyoutOptions) => {
-  const [state, dispatch] = useReducer(formReducerFactory(config), getDefaultState(config));
+  const [formState, dispatch] = useReducer(formReducerFactory(config), getDefaultState(config));
 
   const actions = useMemo(
     () => ({
@@ -575,22 +575,44 @@ const useEditTransformFlyoutInternal = ({ config, dataViewId }: EditTransformFly
   );
 
   const requestConfig = useMemo(
-    () => applyFormStateToTransformConfig(config, state),
-    [config, state]
+    () => applyFormStateToTransformConfig(config, formState),
+    [config, formState]
   );
 
-  const updateButtonDisabled = useMemo(
-    () => !state.isFormValid || !state.isFormTouched,
-    [state.isFormValid, state.isFormTouched]
+  const isUpdateButtonDisabled = useMemo(
+    () => !formState.isFormValid || !formState.isFormTouched,
+    [formState.isFormValid, formState.isFormTouched]
   );
 
-  return { config, dataViewId, state, actions, requestConfig, updateButtonDisabled };
+  return { config, dataViewId, formState, actions, requestConfig, isUpdateButtonDisabled };
 };
 
-export enum TRANSFORM_HOOK {
+// wrap hook with the constate factory to create context provider and custom hooks based on selectors
+const [EditTransformFlyoutProvider, ...editTransformHooks] = constate(
+  useEditTransformFlyoutInternal,
+  (d) => d.config,
+  (d) => d.dataViewId,
+  (d) => d.actions,
+  (d) => d.formState.apiErrorMessage,
+  (d) => d.formState.formSections,
+  (d) => d.formState.formFields.description,
+  (d) => d.formState.formFields.destinationIndex,
+  (d) => d.formState.formFields.docsPerSecond,
+  (d) => d.formState.formFields.frequency,
+  (d) => d.formState.formFields.destinationIngestPipeline,
+  (d) => d.formState.formFields.maxPageSearchSize,
+  (d) => d.formState.formFields.numFailureRetries,
+  (d) => d.formState.formFields.retentionPolicyField,
+  (d) => d.formState.formFields.retentionPolicyMaxAge,
+  (d) => d.requestConfig,
+  (d) => d.isUpdateButtonDisabled
+);
+
+export enum EDIT_TRANSFORM_HOOK_SELECTORS {
   config,
   dataViewId,
   actions,
+  apiErrorMessage,
   stateFormSection,
   description,
   destinationIndex,
@@ -602,39 +624,21 @@ export enum TRANSFORM_HOOK {
   retentionPolicyField,
   retentionPolicyMaxAge,
   requestConfig,
-  updateButtonDisabled,
-  apiErrorMessage,
+  isUpdateButtonDisabled,
 }
 
-// wrap hook with the constate factory to create context provider and custom hooks based on selectors
-const [EditTransformFlyoutProvider, ...editTransformHooks] = constate(
-  useEditTransformFlyoutInternal,
-  (d) => d.config,
-  (d) => d.dataViewId,
-  (d) => d.actions,
-  (d) => d.state.formSections,
-  (d) => d.state.formFields.description,
-  (d) => d.state.formFields.destinationIndex,
-  (d) => d.state.formFields.docsPerSecond,
-  (d) => d.state.formFields.frequency,
-  (d) => d.state.formFields.destinationIngestPipeline,
-  (d) => d.state.formFields.maxPageSearchSize,
-  (d) => d.state.formFields.numFailureRetries,
-  (d) => d.state.formFields.retentionPolicyField,
-  (d) => d.state.formFields.retentionPolicyMaxAge,
-  (d) => d.requestConfig,
-  (d) => d.updateButtonDisabled,
-  (d) => d.state.apiErrorMessage
-);
+export type EditTransformHookTextInputSelectors = Extract<
+  keyof typeof EDIT_TRANSFORM_HOOK_SELECTORS,
+  EditTransformFormFields
+>;
 
+type EditTransformHookSelectors = keyof typeof EDIT_TRANSFORM_HOOK_SELECTORS;
 type EditTransformHooks = typeof editTransformHooks;
-type Indices = Exclude<keyof EditTransformHooks, keyof any[]> & string;
-type EditTransformHooksIndex<I extends number> = Indices extends Exclude<Indices, `${I}`>
-  ? never
-  : I;
 
-export const useEditTransformFlyout = <I extends number>(hookIndex: EditTransformHooksIndex<I>) => {
-  return editTransformHooks[hookIndex]() as ReturnType<EditTransformHooks[I]>;
+export const useEditTransformFlyout = <K extends EditTransformHookSelectors>(hookKey: K) => {
+  return editTransformHooks[EDIT_TRANSFORM_HOOK_SELECTORS[hookKey]]() as ReturnType<
+    EditTransformHooks[typeof EDIT_TRANSFORM_HOOK_SELECTORS[K]]
+  >;
 };
 
 export { EditTransformFlyoutProvider };

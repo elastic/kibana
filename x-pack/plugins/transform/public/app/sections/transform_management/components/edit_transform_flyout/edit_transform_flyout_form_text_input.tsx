@@ -13,8 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   useEditTransformFlyout,
-  TRANSFORM_HOOK,
-  type EditTransformFormFields,
+  type EditTransformHookTextInputSelectors,
 } from './use_edit_transform_flyout';
 
 function capitalizeFirstLetter(str: string) {
@@ -22,7 +21,7 @@ function capitalizeFirstLetter(str: string) {
 }
 
 interface EditTransformFlyoutFormTextInputProps {
-  field: Extract<keyof typeof TRANSFORM_HOOK, EditTransformFormFields>;
+  field: EditTransformHookTextInputSelectors;
   label: string;
   helpText?: string;
   placeHolder?: boolean;
@@ -34,8 +33,8 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
   helpText,
   placeHolder = false,
 }) => {
-  const { defaultValue, errorMessages, value } = useEditTransformFlyout(TRANSFORM_HOOK[field]);
-  const { formField } = useEditTransformFlyout(TRANSFORM_HOOK.actions);
+  const { defaultValue, errorMessages, value } = useEditTransformFlyout(field);
+  const { formField } = useEditTransformFlyout('actions');
   const upperCaseField = capitalizeFirstLetter(field);
 
   return (

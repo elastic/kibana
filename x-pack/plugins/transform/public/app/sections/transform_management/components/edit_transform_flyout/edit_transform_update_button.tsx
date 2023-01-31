@@ -18,7 +18,7 @@ import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../..
 import { useToastNotifications } from '../../../../app_dependencies';
 import { useApi } from '../../../../hooks/use_api';
 
-import { useEditTransformFlyout, TRANSFORM_HOOK } from './use_edit_transform_flyout';
+import { useEditTransformFlyout } from './use_edit_transform_flyout';
 
 interface EditTransformUpdateButtonProps {
   closeFlyout: () => void;
@@ -28,10 +28,10 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
   const api = useApi();
   const toastNotifications = useToastNotifications();
 
-  const requestConfig = useEditTransformFlyout(TRANSFORM_HOOK.requestConfig);
-  const isUpdateButtonDisabled = useEditTransformFlyout(TRANSFORM_HOOK.updateButtonDisabled);
-  const config = useEditTransformFlyout(TRANSFORM_HOOK.config);
-  const { apiError } = useEditTransformFlyout(TRANSFORM_HOOK.actions);
+  const requestConfig = useEditTransformFlyout('requestConfig');
+  const isUpdateButtonDisabled = useEditTransformFlyout('isUpdateButtonDisabled');
+  const config = useEditTransformFlyout('config');
+  const { apiError } = useEditTransformFlyout('actions');
 
   async function submitFormHandler() {
     apiError(undefined);
