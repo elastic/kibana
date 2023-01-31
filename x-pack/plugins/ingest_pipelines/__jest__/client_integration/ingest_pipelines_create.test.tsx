@@ -70,6 +70,21 @@ describe('<PipelinesCreate />', () => {
       expect(exists('versionField')).toBe(true);
     });
 
+    test('should toggle the _meta field', async () => {
+      const { exists, component, actions } = testBed;
+
+      // Meta editor should be hidden by default
+      expect(exists('metaEditor')).toBe(false);
+
+      await act(async () => {
+        actions.toggleMetaSwitch();
+      });
+
+      component.update();
+
+      expect(exists('metaEditor')).toBe(true);
+    });
+
     test('should show the request flyout', async () => {
       const { actions, find, exists } = testBed;
 
