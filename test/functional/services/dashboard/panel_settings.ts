@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../../../x-pack/test/functional/ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { CommonlyUsed } from '../../page_objects/time_picker';
 
 export function DashboardCustomizePanelProvider({ getService }: FtrProviderContext) {
