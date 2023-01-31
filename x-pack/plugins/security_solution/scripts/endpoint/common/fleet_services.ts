@@ -6,8 +6,14 @@
  */
 
 import type { Client, estypes } from '@elastic/elasticsearch';
-import { AGENT_API_ROUTES, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import type { AgentStatus, GetAgentsResponse, Agent } from '@kbn/fleet-plugin/common';
+import { AGENT_API_ROUTES, agentPolicyRouteService, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import type {
+  AgentStatus,
+  GetAgentsResponse,
+  Agent,
+  GetAgentPoliciesRequest,
+  GetAgentPoliciesResponse,
+} from '@kbn/fleet-plugin/common';
 import { pick } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -188,4 +194,22 @@ export const fetchAgentPolicyEnrollmentKey = async (
   }
 
   return apiKey.api_key;
+};
+
+/**
+ * Retrieves a list of Fleet Agent policies
+ * @param kbnClient
+ * @param options
+ */
+export const fetchAgentPolicyList = async (
+  kbnClient: KbnClient,
+  options: GetAgentPoliciesRequest['query'] = {}
+) => {
+  return kbnClient
+    .request<GetAgentPoliciesResponse>({
+      method: 'GET',
+      path: agentPolicyRouteService.getListPath(),
+      query: options,
+    })
+    .then((response) => response.data);
 };
