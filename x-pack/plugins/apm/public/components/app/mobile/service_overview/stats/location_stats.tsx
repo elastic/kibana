@@ -43,7 +43,7 @@ const calculateDiffPercentageAndFormat = (
 
     return formatDifference(diffPercentageValue);
   }
-  return '0';
+  return 0;
 };
 
 export function MobileLocationStats({
@@ -126,7 +126,7 @@ export function MobileLocationStats({
       icon: getIcon('visBarHorizontal'),
       value: currentPeriod?.mostRequests.location ?? NOT_AVAILABLE_LABEL,
       valueFormatter: (value) => `${value}`,
-      trend: currentPeriod?.mostRequests.timeseries ?? [],
+      trend: currentPeriod?.mostRequests.timeseries,
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -155,7 +155,7 @@ export function MobileLocationStats({
       icon: getIcon('timeslider'),
       value: currentPeriod?.mostSessions.location ?? NOT_AVAILABLE_LABEL,
       valueFormatter: (value) => `${value}`,
-      trend: currentPeriod?.mostSessions.timeseries ?? [],
+      trend: currentPeriod?.mostSessions.timeseries,
       trendShape: MetricTrendShape.Area,
     },
     {

@@ -95,7 +95,7 @@ export async function getSessionsByLocation({
   });
 
   return {
-    location: response.aggregations?.sessions?.buckets[0]?.key,
+    location: response.aggregations?.sessions?.buckets[0]?.key as string,
     value: response.aggregations?.sessions?.buckets[0]?.sessions.value ?? 0,
     timeseries:
       response.aggregations?.timeseries?.buckets.map((bucket) => ({

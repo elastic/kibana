@@ -103,8 +103,8 @@ export async function getHttpRequestsByLocation({
   );
 
   return {
-    location:
-      response.aggregations?.requests?.requestsByLocation?.buckets[0]?.key,
+    location: response.aggregations?.requests?.requestsByLocation?.buckets[0]
+      ?.key as string,
     value:
       response.aggregations?.requests?.requestsByLocation?.buckets[0]
         ?.doc_count ?? 0,

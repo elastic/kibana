@@ -10,16 +10,16 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { getSessionsByLocation } from './get_mobile_sessions_by_location';
 import { getHttpRequestsByLocation } from './get_mobile_http_requests_by_location';
 
-type Timeseries = Array<{ x: number; y: number }>;
+export type Timeseries = Array<{ x: number; y: number }>;
 
 interface LocationStats {
   mostSessions: {
-    location?: string | number;
+    location?: string;
     value?: number;
     timeseries: Timeseries;
   };
   mostRequests: {
-    location?: string | number;
+    location?: string;
     value?: number;
     timeseries: Timeseries;
   };

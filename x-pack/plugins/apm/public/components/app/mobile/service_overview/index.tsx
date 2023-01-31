@@ -223,9 +223,7 @@ export function MobileServiceOverview() {
                     />
                   </EuiPanel>
                 </EuiFlexItem>
-                {/* </EuiFlexGroup> */}
                 <EuiSpacer size="s" />
-                {/* <EuiFlexGroup direction={rowDirection} gutterSize="s"> */}
                 {/* OS version */}
                 <EuiFlexItem>
                   <EuiPanel hasBorder={true}>
