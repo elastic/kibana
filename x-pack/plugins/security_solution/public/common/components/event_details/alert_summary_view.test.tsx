@@ -17,7 +17,6 @@ import { TestProviders, TestProvidersComponent } from '../../mock';
 import { TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
 import * as i18n from './translations';
-import { createAction } from '@kbn/ui-actions-plugin/public';
 
 jest.mock('../../lib/kibana');
 
@@ -33,20 +32,12 @@ jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallbac
   };
 });
 
-const mockAction = createAction({
-  id: 'test_action',
-  execute: async () => {},
-  getIconType: () => 'test-icon',
-});
-
-jest.mock('@kbn/ui-actions-plugin/public/cell_actions/components/cell_actions_context', () => {
-  const actual = jest.requireActual(
-    '@kbn/ui-actions-plugin/public/cell_actions/components/cell_actions_context'
-  );
+jest.mock('@kbn/cell-actions/src/hooks/use_load_actions', () => {
+  const actual = jest.requireActual('@kbn/cell-actions/src/hooks/use_load_actions');
   return {
     ...actual,
     useLoadActions: jest.fn().mockImplementation(() => ({
-      value: [mockAction],
+      value: [],
       error: undefined,
       loading: false,
     })),
@@ -84,11 +75,13 @@ describe('AlertSummaryView', () => {
 
   test('it renders the action cell by default', async () => {
     await act(async () => {
-      const { getAllByTestId } = render(<AlertSummaryView {...props} />, {
-        wrapper: TestProviders,
-      });
+      const { getAllByTestId } = render(
+        <TestProviders>
+          <AlertSummaryView {...props} />
+        </TestProviders>
+      );
 
-      expect(getAllByTestId('actionItem-test_action').length).toBeGreaterThan(0);
+      expect(getAllByTestId('inlineActions').length).toBeGreaterThan(0);
     });
   });
 
@@ -113,7 +106,8 @@ describe('AlertSummaryView', () => {
           <AlertSummaryView {...props} scopeId={TimelineId.active} />
         </TestProviders>
       );
-      expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
+
+      expect(queryAllByTestId('inlineActions').length).toEqual(0);
     });
   });
 
@@ -124,7 +118,7 @@ describe('AlertSummaryView', () => {
           <AlertSummaryView {...{ ...props, isReadOnly: true }} />
         </TestProviders>
       );
-      expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
+      expect(queryAllByTestId('inlineActions').length).toEqual(0);
     });
   });
 
