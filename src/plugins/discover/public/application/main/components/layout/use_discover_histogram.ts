@@ -16,6 +16,7 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { distinctUntilChanged, map, Observable } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
@@ -109,14 +110,8 @@ export const useDiscoverHistogram = ({
    */
 
   useEffect(() => {
-    const subscription = unifiedHistogram
-      ?.getState$(({ lensRequestAdapter, chartHidden, timeInterval, breakdownField }) => ({
-        lensRequestAdapter,
-        chartHidden,
-        timeInterval,
-        breakdownField,
-      }))
-      .subscribe((state) => {
+    const subscription = createStateSyncObservable(unifiedHistogram?.getState$())?.subscribe(
+      (state) => {
         inspectorAdapters.lensRequests = state.lensRequestAdapter;
 
         const { hideChart, interval, breakdownField } = stateContainer.appState.getState();
@@ -130,7 +125,8 @@ export const useDiscoverHistogram = ({
         if (!isEqual(oldState, newState)) {
           stateContainer.setAppState(newState);
         }
-      });
+      }
+    );
 
     return () => {
       subscription?.unsubscribe();
@@ -194,9 +190,8 @@ export const useDiscoverHistogram = ({
    */
 
   useEffect(() => {
-    const subscription = unifiedHistogram
-      ?.getState$((state) => ({ status: state.totalHitsStatus, result: state.totalHitsResult }))
-      .subscribe(({ status, result }) => {
+    const subscription = createTotalHitsObservable(unifiedHistogram?.getState$())?.subscribe(
+      ({ status, result }) => {
         if (result instanceof Error) {
           // Display the error and set totalHits$ to an error state
           sendErrorTo(services.data, savedSearchData$.totalHits$)(result);
@@ -222,7 +217,8 @@ export const useDiscoverHistogram = ({
         // Indicate the first load has completed so we don't show
         // partial results on subsequent fetches
         firstLoadComplete.current = true;
-      });
+      }
+    );
 
     return () => {
       subscription?.unsubscribe();
@@ -262,4 +258,28 @@ export const useDiscoverHistogram = ({
   }, [savedSearchFetch$, unifiedHistogram]);
 
   return { hideChart, setUnifiedHistogramApi };
+};
+
+const createStateSyncObservable = (state$?: Observable<UnifiedHistogramState>) => {
+  return state$?.pipe(
+    map(({ lensRequestAdapter, chartHidden, timeInterval, breakdownField }) => ({
+      lensRequestAdapter,
+      chartHidden,
+      timeInterval,
+      breakdownField,
+    })),
+    distinctUntilChanged((prev, curr) => {
+      const { lensRequestAdapter: prevLensRequestAdapter, ...prevRest } = prev;
+      const { lensRequestAdapter: currLensRequestAdapter, ...currRest } = curr;
+
+      return prevLensRequestAdapter === currLensRequestAdapter && isEqual(prevRest, currRest);
+    })
+  );
+};
+
+const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) => {
+  return state$?.pipe(
+    map((state) => ({ status: state.totalHitsStatus, result: state.totalHitsResult })),
+    distinctUntilChanged((prev, curr) => prev.status === curr.status && prev.result === curr.result)
+  );
 };
