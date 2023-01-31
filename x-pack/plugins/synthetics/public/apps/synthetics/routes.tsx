@@ -7,15 +7,16 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import { EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, useEuiTheme } from '@elastic/eui';
 import { Route, Switch, useHistory } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
 import { getMonitorDetailsRoute } from './components/monitor_details/route_config';
@@ -26,10 +27,9 @@ import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
-import { NotFoundPage } from './components/common/pages/not_found';
 import {
-  MonitorTypePortalNode,
   MonitorDetailsLinkPortalNode,
+  MonitorTypePortalNode,
 } from './components/monitor_add_edit/portals';
 import {
   GETTING_STARTED_ROUTE,
@@ -210,7 +210,27 @@ export const PageRouter: FC = () => {
           </Route>
         )
       )}
-      <Route component={NotFoundPage} />
+      <Route
+        component={() => (
+          <PageTemplateComponent>
+            <NotFoundPrompt
+              actions={[
+                <EuiButtonEmpty
+                  iconType="arrowLeft"
+                  flush="both"
+                  onClick={() => {
+                    application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID);
+                  }}
+                >
+                  {i18n.translate('xpack.synthetics.routes.goToSynthetics', {
+                    defaultMessage: 'Go to Synthetics Home Page',
+                  })}
+                </EuiButtonEmpty>,
+              ]}
+            />
+          </PageTemplateComponent>
+        )}
+      />
     </Switch>
   );
 };
