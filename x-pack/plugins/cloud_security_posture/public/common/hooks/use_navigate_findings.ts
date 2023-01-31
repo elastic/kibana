@@ -24,7 +24,7 @@ const createFilter = (key: string, value: string, negate = false): Filter => ({
   query: { match_phrase: { [key]: value } },
 });
 
-export const useNavigateFindings = (pathname = findingsNavigation.findings_default.path) => {
+const useNavigate = (pathname: string) => {
   const history = useHistory();
   const { services } = useKibana();
 
@@ -34,7 +34,7 @@ export const useNavigateFindings = (pathname = findingsNavigation.findings_defau
       history.push({
         pathname,
         search: encodeQuery({
-          // Set default query from user's preference
+          // Set query language from user's preference
           query: services.data.query.queryString.getDefaultQuery(),
           filters,
         }),
@@ -44,5 +44,7 @@ export const useNavigateFindings = (pathname = findingsNavigation.findings_defau
   );
 };
 
+export const useNavigateFindings = () => useNavigate(findingsNavigation.findings_default.path);
+
 export const useNavigateFindingsByResource = () =>
-  useNavigateFindings(findingsNavigation.findings_by_resource.path);
+  useNavigate(findingsNavigation.findings_by_resource.path);
