@@ -13,6 +13,5 @@ export const errorAlertActionRequired = i18n.translate('xpack.cloudDefend.alertA
 });
 
 export const controlYamlHelp = i18n.translate('xpack.cloudDefend.controlYamlHelp', {
-  defaultMessage:
-    'Configure BPF/LSM controls by creating selectors, and responses below. To learn more click <here>',
+  defaultMessage: 'Configure BPF/LSM controls by creating selectors, and responses below.',
 });

@@ -1,0 +1,15 @@
+type:  object
+title: Unsuccessful rule API response
+properties:
+  error:
+    type: string
+    example: Unauthorized
+    enum:
+      - Unauthorized
+  message:
+    type: string 
+  statusCode:
+    type: integer
+    example: 401
+    enum:
+      - 401

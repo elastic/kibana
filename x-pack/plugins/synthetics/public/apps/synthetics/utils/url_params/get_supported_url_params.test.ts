@@ -8,6 +8,7 @@
 import DateMath from '@kbn/datemath';
 import { getSupportedUrlParams } from './get_supported_url_params';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 
 describe('getSupportedUrlParams', () => {
   let dateMathSpy: any;
@@ -51,15 +52,9 @@ describe('getSupportedUrlParams', () => {
   });
 
   it('returns default values', () => {
-    const {
-      AUTOREFRESH_INTERVAL,
-      AUTOREFRESH_IS_PAUSED,
-      DATE_RANGE_START,
-      DATE_RANGE_END,
-      FILTERS,
-      SEARCH,
-      STATUS_FILTER,
-    } = CLIENT_DEFAULTS;
+    const { AUTOREFRESH_INTERVAL, AUTOREFRESH_IS_PAUSED, FILTERS, SEARCH, STATUS_FILTER } =
+      CLIENT_DEFAULTS;
+    const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
     const result = getSupportedUrlParams({});
     expect(result).toEqual({
       absoluteDateRangeStart: MOCK_DATE_VALUE,

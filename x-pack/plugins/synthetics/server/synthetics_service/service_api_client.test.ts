@@ -200,7 +200,7 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { noDelay: true, rejectUnauthorized: true, path: null },
+        options: { rejectUnauthorized: true, path: null },
       }),
       method: 'POST',
       url: 'https://service.dev/monitors',
@@ -213,7 +213,7 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { noDelay: true, rejectUnauthorized: true, path: null },
+        options: { rejectUnauthorized: true, path: null },
       }),
       method: 'POST',
       url: 'https://qa.service.elstc.co/monitors',
@@ -226,7 +226,7 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { noDelay: true, rejectUnauthorized: true, path: null },
+        options: { rejectUnauthorized: true, path: null },
       }),
       method: 'POST',
       url: 'https://qa.service.stg.co/monitors',
@@ -293,7 +293,6 @@ describe('callAPI', () => {
       httpsAgent: expect.objectContaining({
         options: {
           rejectUnauthorized: true,
-          noDelay: true,
           path: null,
           cert: 'test-certificate',
           key: 'test-key',
