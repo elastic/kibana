@@ -18,6 +18,7 @@ import type {
   CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionDeprecatedResponse,
   CaseUserActionInjectedAttributes,
+  User,
 } from '../../../common/api';
 import { ActionTypes } from '../../../common/api';
 import {
@@ -104,6 +105,11 @@ interface ParticipantsAggsResult {
       key: string;
     }>;
   };
+}
+
+export interface GetUsersResponse {
+  participants: Array<{ id: string; owner: string; user: User }>;
+  userProfileUids: Set<string>;
 }
 
 export class CaseUserActionService {
@@ -680,7 +686,7 @@ export class CaseUserActionService {
     };
   }
 
-  public async getUsers({ caseId }: { caseId: string }) {
+  public async getUsers({ caseId }: { caseId: string }): Promise<GetUsersResponse> {
     const response = await this.context.unsecuredSavedObjectsClient.find<
       CaseUserActionAttributesWithoutConnectorId,
       ParticipantsAggsResult
@@ -693,8 +699,8 @@ export class CaseUserActionService {
       aggs: CaseUserActionService.buildParticipantsAgg(),
     });
 
-    const users = new Set<string>();
-    const participants = [];
+    const userProfileUids: GetUsersResponse['userProfileUids'] = new Set<string>();
+    const participants: GetUsersResponse['participants'] = [];
     const participantsBuckets = response.aggregations?.participants.buckets ?? [];
     const assigneesBuckets = response.aggregations?.assignees.buckets ?? [];
 
@@ -713,20 +719,20 @@ export class CaseUserActionService {
        */
       participants.push({
         id: user.id,
-        created_by: user.attributes.created_by,
+        user: user.attributes.created_by,
         owner: user.attributes.owner,
       });
 
       if (user.attributes.created_by.profile_uid) {
-        users.add(user.attributes.created_by.profile_uid);
+        userProfileUids.add(user.attributes.created_by.profile_uid);
       }
     }
 
     for (const bucket of assigneesBuckets) {
-      users.add(bucket.key);
+      userProfileUids.add(bucket.key);
     }
 
-    return { participants, users };
+    return { participants, userProfileUids };
   }
 
   private static buildParticipantsAgg(): Record<string, estypes.AggregationsAggregationContainer> {

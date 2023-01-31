@@ -9,6 +9,7 @@ import type {
   GetCaseConnectorsResponse,
   UserActionFindResponse,
   CaseUserActionsDeprecatedResponse,
+  GetCaseUsersResponse,
 } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import { get } from './get';

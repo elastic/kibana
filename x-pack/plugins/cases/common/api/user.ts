@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-export const UserRT = rt.intersection([
+export const UserRt = rt.intersection([
   rt.type({
     email: rt.union([rt.undefined, rt.null, rt.string]),
     full_name: rt.union([rt.undefined, rt.null, rt.string]),
@@ -16,13 +16,17 @@ export const UserRT = rt.intersection([
   rt.partial({ profile_uid: rt.string }),
 ]);
 
-export const UsersRt = rt.array(UserRT);
+export const UsersRt = rt.array(UserRt);
 
-export type User = rt.TypeOf<typeof UserRT>;
+export type User = rt.TypeOf<typeof UserRt>;
 
 export const GetCaseUsersResponseRt = rt.type({
-  participants: rt.array(UserRT),
-  users: rt.array(rt.type({ uid: rt.string })),
+  users: rt.array(
+    rt.type({
+      user: UserRt,
+      type: rt.union([rt.literal('participant'), rt.literal('assignee')]),
+    })
+  ),
 });
 
 export type GetCaseUsersResponse = rt.TypeOf<typeof GetCaseUsersResponseRt>;
