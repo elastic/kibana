@@ -16,7 +16,7 @@ import { discoverServiceMock } from '../__mocks__/services';
 import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
 import { render } from 'react-dom';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 
@@ -81,7 +81,7 @@ describe('saved search embeddable', () => {
       (input) => (input.lastReloadRequestTime = Date.now())
     );
 
-    return { embeddable };
+    return { embeddable, searchInput };
   };
 
   beforeEach(() => {
@@ -158,5 +158,25 @@ describe('saved search embeddable', () => {
     expect((embeddable.updateOutput as jest.Mock).mock.calls[1][0].error.message).toBe(
       'Fetch error'
     );
+  });
+
+  it('a custom title should not start another search which would cause an Abort error', async () => {
+    const search = jest.fn().mockReturnValue(
+      of({
+        rawResponse: { hits: { hits: [], total: 0 } },
+        isPartial: false,
+        isRunning: false,
+      })
+    );
+    const { embeddable, searchInput } = createEmbeddable(search);
+
+    embeddable.render(mountpoint);
+    // wait for data fetching
+    await waitOneTick();
+    expect(search).toHaveBeenCalledTimes(1);
+    embeddable.updateOutput({ title: 'custom title' });
+    embeddable.updateInput(searchInput);
+    await waitOneTick();
+    expect(search).toHaveBeenCalledTimes(1);
   });
 });
