@@ -17,7 +17,7 @@ import {
 import {
   CreateSLO,
   DefaultResourceInstaller,
-  DefaultSLIClient,
+  DefaultSummaryClient,
   DefaultTransformManager,
   DeleteSLO,
   FindSLO,
@@ -133,8 +133,8 @@ const getSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const sliClient = new DefaultSLIClient(esClient);
-    const getSLO = new GetSLO(repository, sliClient);
+    const summaryClient = new DefaultSummaryClient(esClient);
+    const getSLO = new GetSLO(repository, summaryClient);
 
     const response = await getSLO.execute(params.path.id);
 
@@ -156,8 +156,8 @@ const findSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const sliClient = new DefaultSLIClient(esClient);
-    const findSLO = new FindSLO(repository, sliClient);
+    const summaryClient = new DefaultSummaryClient(esClient);
+    const findSLO = new FindSLO(repository, summaryClient);
 
     const response = await findSLO.execute(params?.query ?? {});
 

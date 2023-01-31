@@ -131,6 +131,7 @@ type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
 type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParamsSchema.props.body>;
 type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
+type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
 type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
 
@@ -158,6 +159,7 @@ export type {
   GetSLOResponse,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
+  HistoricalSummaryResponse,
   SLOResponse,
   SLOWithSummaryResponse,
   UpdateSLOInput,

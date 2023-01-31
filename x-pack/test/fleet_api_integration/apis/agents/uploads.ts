@@ -53,7 +53,7 @@ export default function (providerContext: FtrProviderContext) {
             agent_id: 'agent1',
             '@timestamp': '2022-10-07T12:00:00.000Z',
             data: {
-              file_id: 'file1',
+              upload_id: 'file1',
             },
           },
         },
@@ -67,6 +67,7 @@ export default function (providerContext: FtrProviderContext) {
         body: {
           doc_as_upsert: true,
           doc: {
+            upload_id: 'file1',
             file: {
               ChunkSize: 4194304,
               extension: 'zip',

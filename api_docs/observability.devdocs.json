@@ -10020,7 +10020,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { [x: string]: { date: string; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; sliValue: number; status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; }[]; }, ",
+          ", { [x: string]: ({ date: string; } & { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; })[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10674,7 +10674,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { [x: string]: { date: string; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; sliValue: number; status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; }[]; }, ",
+          ", { [x: string]: ({ date: string; } & { status: \"NO_DATA\" | \"HEALTHY\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; })[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
