@@ -362,7 +362,7 @@ exports[`Should render warning when some features failed import 1`] = `
     title="File upload complete with failures"
   >
     <p>
-      Indexed 10 features. Unable to index 1 features.
+      Unable to index 1 of 10 features.
     </p>
   </EuiCallOut>
   <EuiFlexGroup

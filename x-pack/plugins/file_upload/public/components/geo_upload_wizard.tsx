@@ -17,6 +17,7 @@ import { ImportResults } from '../importer';
 import { GeoFileImporter } from '../importer/geo';
 import type { Settings } from '../../common/types';
 import { hasImportPermission } from '../api';
+import { getPartialImportMessage } from './utils';
 
 enum PHASE {
   CONFIGURE = 'CONFIGURE',
@@ -183,13 +184,10 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
           success: false,
           error: {
             error: {
-              reason: i18n.translate('xpack.fileUpload.geoUploadWizard.allFeaturesFailedIndexing', {
-                defaultMessage: 'Unable to index {numFailures} of {featureCount} features.',
-                values: {
-                  featureCount: importResults.docCount,
-                  numFailures: importResults.failures!.length,
-                },
-              }),
+              reason: getPartialImportMessage(
+                importResults.failures!.length,
+                importResults.docCount
+              ),
             },
           },
         },
