@@ -56,7 +56,7 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
         data-test-subj={`transformEditFlyout${upperCaseField}Input`}
         placeholder={
           placeHolder
-            ? i18n.translate(`xpack.transform.transformList.editFlyoutFormPlaceholderText`, {
+            ? i18n.translate('xpack.transform.transformList.editFlyoutFormPlaceholderText', {
                 defaultMessage: 'Default: {defaultValue}',
                 values: { defaultValue },
               })

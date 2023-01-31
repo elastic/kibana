@@ -19,16 +19,16 @@ export const EditTransformFlyoutForm: FC = () => (
   <EuiForm>
     <EditTransformFlyoutFormTextInput
       field="description"
-      label={i18n.translate(`xpack.transform.transformList.editFlyoutFormDescriptionLabel`, {
+      label={i18n.translate('xpack.transform.transformList.editFlyoutFormDescriptionLabel', {
         defaultMessage: 'Description',
       })}
     />
     <EditTransformFlyoutFormTextInput
       field="frequency"
-      label={i18n.translate(`xpack.transform.transformList.editFlyoutFormFrequencyLabel`, {
+      label={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyLabel', {
         defaultMessage: 'Frequency',
       })}
-      helpText={i18n.translate(`xpack.transform.transformList.editFlyoutForm$FrequencyHelpText`, {
+      helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelpText', {
         defaultMessage:
           'The interval to check for changes in source indices when the transform runs continuously.',
       })}

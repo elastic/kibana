@@ -127,7 +127,7 @@ export const EditTransformRetentionPolicy: FC = () => {
               <EditTransformFlyoutFormTextInput
                 field="retentionPolicyField"
                 label={i18n.translate(
-                  `xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel`,
+                  'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
                   {
                     defaultMessage: 'Field',
                   }
@@ -138,7 +138,7 @@ export const EditTransformRetentionPolicy: FC = () => {
           <EditTransformFlyoutFormTextInput
             field="retentionPolicyMaxAge"
             label={i18n.translate(
-              `xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeLabel`,
+              'xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeLabel',
               {
                 defaultMessage: 'Max age',
               }
