@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import {
-  termQuery,
-  kqlQuery,
-  rangeQuery,
-} from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  SERVICE_NAME,
-  SESSION_ID,
-  SERVICE_TARGET_TYPE,
-  CLIENT_GEO_COUNTRY_NAME,
-} from '../../../common/es_fields/apm';
-import { environmentQuery } from '../../../common/utils/environment_query';
+import { CLIENT_GEO_COUNTRY_NAME } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getBucketSize } from '../../lib/helpers/get_bucket_size';
-import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { getSessionsByLocation } from './get_mobile_sessions_by_location';
+import { getHttpRequestsByLocation } from './get_mobile_http_requests_by_location';
 
 type Timeseries = Array<{ x: number; y: number }>;
 
@@ -63,100 +51,25 @@ async function getMobileLocationStats({
   locationField = CLIENT_GEO_COUNTRY_NAME,
   offset,
 }: Props) {
-  const { startWithOffset, endWithOffset } = getOffsetInMs({
+  const commonProps = {
+    kuery,
+    apmEventClient,
+    serviceName,
+    environment,
     start,
     end,
+    locationField,
     offset,
-  });
-
-  const { intervalString } = getBucketSize({
-    start: startWithOffset,
-    end: endWithOffset,
-    minBucketSize: 60,
-  });
-
-  const aggs = {
-    sessions: {
-      terms: {
-        field: locationField,
-      },
-      aggs: {
-        sessions: {
-          cardinality: { field: SESSION_ID },
-        },
-      },
-    },
-    requests: {
-      filter: { term: { [SERVICE_TARGET_TYPE]: 'http' } },
-      aggs: {
-        requestsByLocation: {
-          terms: {
-            field: locationField,
-          },
-        },
-      },
-    },
   };
 
-  const response = await apmEventClient.search('get_mobile_location_stats', {
-    apm: {
-      events: [
-        ProcessorEvent.metric,
-        ProcessorEvent.transaction,
-        ProcessorEvent.span,
-      ],
-    },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
-      },
-      aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
-          },
-          aggs,
-        },
-        ...aggs,
-      },
-    },
-  });
+  const [mostSessions, mostRequests] = await Promise.all([
+    getSessionsByLocation({ ...commonProps }),
+    getHttpRequestsByLocation({ ...commonProps }),
+  ]);
 
   return {
-    mostSessions: {
-      location: response.aggregations?.sessions?.buckets[0]?.key,
-      value: response.aggregations?.sessions?.buckets[0]?.sessions.value ?? 0,
-      timeseries:
-        response.aggregations?.timeseries?.buckets.map((bucket) => ({
-          x: bucket.key,
-          y: bucket.sessions.buckets[0]?.sessions.value ?? 0,
-        })) ?? [],
-    },
-    mostRequests: {
-      location:
-        response.aggregations?.requests?.requestsByLocation?.buckets[0]?.key,
-      value:
-        response.aggregations?.requests?.requestsByLocation?.buckets[0]
-          ?.doc_count ?? 0,
-      timeseries:
-        response.aggregations?.timeseries?.buckets.map((bucket) => ({
-          x: bucket.key,
-          y:
-            response.aggregations?.requests?.requestsByLocation?.buckets[0]
-              ?.doc_count ?? 0,
-        })) ?? [],
-    },
+    mostSessions,
+    mostRequests,
   };
 }
 

@@ -29,10 +29,6 @@ const getIcon =
   }) =>
     <EuiIcon type={type} width={width} height={height} fill={color} />;
 
-const valueFormatter = (value: number) => {
-  return `${value}`;
-};
-
 const formatDifference = (value: number) => {
   return value > 0 ? '+' + value.toFixed(2) : value.toFixed(2);
 };
@@ -63,7 +59,7 @@ export function MobileLocationStats({
 
   const {
     path: { serviceName },
-    query: { environment, offset, comparisonEnabled, transactionType },
+    query: { environment, offset, comparisonEnabled },
   } = useAnyOfApmParams('/mobile-services/{serviceName}/overview');
 
   const previousPeriodLabel = usePreviousPeriodLabel();
@@ -84,22 +80,12 @@ export function MobileLocationStats({
               kuery,
               locationField,
               offset,
-              transactionType,
             },
           },
         }
       );
     },
-    [
-      start,
-      end,
-      environment,
-      kuery,
-      serviceName,
-      locationField,
-      offset,
-      transactionType,
-    ]
+    [start, end, environment, kuery, serviceName, locationField, offset]
   );
 
   const loadingLocationStats = isPending(locationStatsStatus);
@@ -139,7 +125,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('visBarHorizontal'),
       value: currentPeriod?.mostRequests.location ?? NOT_AVAILABLE_LABEL,
-      valueFormatter: (value) => valueFormatter(value),
+      valueFormatter: (value) => `${value}`,
       trend: currentPeriod?.mostRequests.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
@@ -153,7 +139,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('bug'),
       value: NOT_AVAILABLE_LABEL,
-      valueFormatter: (value) => valueFormatter(value),
+      valueFormatter: (value) => `${value}`,
       trend: [],
       trendShape: MetricTrendShape.Area,
     },
@@ -168,7 +154,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('timeslider'),
       value: currentPeriod?.mostSessions.location ?? NOT_AVAILABLE_LABEL,
-      valueFormatter: (value) => valueFormatter(value),
+      valueFormatter: (value) => `${value}`,
       trend: currentPeriod?.mostSessions.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
@@ -182,7 +168,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('launch'),
       value: NOT_AVAILABLE_LABEL,
-      valueFormatter: (value) => valueFormatter(value),
+      valueFormatter: (value) => `${value}`,
       trend: [],
       trendShape: MetricTrendShape.Area,
     },
