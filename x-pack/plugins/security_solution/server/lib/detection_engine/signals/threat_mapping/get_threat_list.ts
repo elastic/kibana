@@ -11,7 +11,6 @@ import type {
   GetThreatListOptions,
   ThreatListCountOptions,
   ThreatListDoc,
-  ThreatListItem,
   GetSortForThreatList,
 } from './types';
 
