@@ -24,6 +24,7 @@ import { AssigneesFilterPopover } from './assignees_filter';
 import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
+import type { Solution } from './types';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -32,7 +33,7 @@ interface CasesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
   hiddenStatuses?: CaseStatusWithAllStatus[];
-  availableSolutions: string[];
+  availableSolutions: Solution[];
   isSelectorView?: boolean;
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;

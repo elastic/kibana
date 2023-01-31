@@ -14,11 +14,13 @@ import styled, { css } from 'styled-components';
 import type { Case, CaseStatusWithAllStatus, FilterOptions } from '../../../common/ui/types';
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/api';
+import { OWNER_INFO } from '../../../common/constants';
+import type { CasesOwners } from '../../client/helpers/can_use_cases';
 
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
-import type { EuiBasicTableOnChange } from './types';
+import type { EuiBasicTableOnChange, Solution } from './types';
 
 import { CasesTable } from './table';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -228,6 +230,22 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       []
     );
 
+    const mapToReadableSolutionName = (solution: string): Solution => {
+      if (Object.keys(OWNER_INFO).includes(solution)) {
+        return {
+          id: solution,
+          label: OWNER_INFO[solution as CasesOwners].label,
+          iconType: OWNER_INFO[solution as CasesOwners].iconType,
+        };
+      }
+
+      return { id: solution, label: solution, iconType: '' };
+    };
+
+    const availableSolutionsLabels = availableSolutions.map((solution) =>
+      mapToReadableSolutionName(solution)
+    );
+
     return (
       <>
         <ProgressLoader
@@ -242,7 +260,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           countOpenCases={data.countOpenCases}
           countInProgressCases={data.countInProgressCases}
           onFilterChanged={onFilterChangedCallback}
-          availableSolutions={hasOwner ? [] : availableSolutions}
+          availableSolutions={hasOwner ? [] : availableSolutionsLabels}
           initial={{
             search: filterOptions.search,
             searchFields: filterOptions.searchFields,

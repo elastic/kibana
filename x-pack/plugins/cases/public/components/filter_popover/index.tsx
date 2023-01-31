@@ -14,13 +14,16 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import styled from 'styled-components';
+
+import type { Solution } from '../all_cases/types';
 
 interface FilterPopoverProps {
   buttonLabel: string;
   onSelectedOptionsChanged: (value: string[]) => void;
-  options: string[];
+  options: string[] | Solution[];
   optionsEmptyLabel?: string;
   selectedOptions: string[];
 }
@@ -28,6 +31,10 @@ interface FilterPopoverProps {
 const ScrollableDiv = styled.div`
   max-height: 250px;
   overflow: auto;
+`;
+
+const Icon = styled(EuiIcon)`
+  padding-right: 4px;
 `;
 
 const toggleSelectedGroup = (group: string, selectedGroups: string[]): string[] => {
@@ -88,16 +95,30 @@ export const FilterPopoverComponent = ({
       repositionOnScroll
     >
       <ScrollableDiv>
-        {options.map((option, index) => (
-          <EuiFilterSelectItem
-            checked={selectedOptions.includes(option) ? 'on' : undefined}
-            data-test-subj={`options-filter-popover-item-${option}`}
-            key={`${index}-${option}`}
-            onClick={toggleSelectedGroupCb.bind(null, option)}
-          >
-            {option}
-          </EuiFilterSelectItem>
-        ))}
+        {options.map((option, index) =>
+          typeof option === 'string' ? (
+            <EuiFilterSelectItem
+              checked={selectedOptions.includes(option) ? 'on' : undefined}
+              data-test-subj={`options-filter-popover-item-${option}`}
+              key={`${index}-${option}`}
+              onClick={toggleSelectedGroupCb.bind(null, option)}
+            >
+              {option}
+            </EuiFilterSelectItem>
+          ) : (
+            <EuiFilterSelectItem
+              checked={selectedOptions.includes(option.id) ? 'on' : undefined}
+              data-test-subj={`options-filter-popover-item-${option.id}`}
+              key={`${index}-${option.id}`}
+              onClick={toggleSelectedGroupCb.bind(null, option.id)}
+            >
+              <span>
+                <Icon size="m" type={option.iconType} title={option.label} />
+                {option.label}
+              </span>
+            </EuiFilterSelectItem>
+          )
+        )}
       </ScrollableDiv>
       {options.length === 0 && optionsEmptyLabel != null && (
         <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
