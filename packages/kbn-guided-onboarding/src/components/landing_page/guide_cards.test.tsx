@@ -8,18 +8,20 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { InfrastructureLinkCard } from './infrastructure_link_card';
 
-const defaultProps = {
+import { GuideCards, GuideCardsProps } from './guide_cards';
+
+const defaultProps: GuideCardsProps = {
+  activateGuide: jest.fn(),
   navigateToApp: jest.fn(),
-  isDarkTheme: false,
-  addBasePath: jest.fn(),
+  activeFilter: 'all',
+  guidesState: [],
 };
 
-describe('observability link card', () => {
+describe('guide cards', () => {
   describe('snapshots', () => {
-    test('should render link card for observability', async () => {
-      const component = await shallow(<InfrastructureLinkCard {...defaultProps} />);
+    test('should render all cards', async () => {
+      const component = await shallow(<GuideCards {...defaultProps} />);
       expect(component).toMatchSnapshot();
     });
   });
