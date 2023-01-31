@@ -14,6 +14,10 @@ import { useStepMetrics } from '../hooks/use_step_metrics';
 import { useStepPrevMetrics } from '../hooks/use_step_prev_metrics';
 
 export const formatMillisecond = (ms: number) => {
+  if (ms < 0) {
+    return '- ms';
+  }
+
   if (ms < 1000) {
     return `${ms.toFixed(0)} ms`;
   }

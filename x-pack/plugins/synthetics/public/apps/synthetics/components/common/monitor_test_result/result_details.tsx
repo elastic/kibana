@@ -113,7 +113,7 @@ export const TimingDetails = ({ step }: { step: JourneyStep }) => {
       gutterSize="s"
       type="column"
       listItems={items}
-      style={{ maxWidth: 250 }}
+      style={{ maxWidth: 265 }}
       textStyle="reverse"
       descriptionProps={{ style: { textAlign: 'right' } }}
     />
@@ -147,7 +147,7 @@ export const StepMetrics = ({ step }: { step: JourneyStep }) => {
       gutterSize="s"
       type="column"
       listItems={items}
-      style={{ maxWidth: 250 }}
+      style={{ maxWidth: 265 }}
       textStyle="reverse"
       descriptionProps={{ style: { textAlign: 'right' } }}
     />
