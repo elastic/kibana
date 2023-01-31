@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { BulkGetCommentsRequest } from '../../../../common/api';
+import type { BulkGetAttachmentsRequest } from '../../../../common/api';
 
 import { INTERNAL_BULK_GET_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -26,7 +26,7 @@ export const bulkGetAttachmentsRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const body = request.body as BulkGetCommentsRequest;
+      const body = request.body as BulkGetAttachmentsRequest;
 
       return response.ok({
         body: await client.attachments.bulkGet({

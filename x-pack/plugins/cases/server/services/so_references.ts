@@ -56,13 +56,7 @@ export const injectAttachmentAttributesAndHandleErrors = (
     return savedObject as OptionalAttributes<CommentAttributes>;
   }
 
-  const soExtractor = getAttachmentSOExtractor(savedObject.attributes);
-  const so = soExtractor.populateFieldsFromReferences<CommentAttributes>(savedObject);
-  const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references, {
-    persistableStateAttachmentTypeRegistry,
-  });
-
-  return { ...so, attributes: { ...so.attributes, ...injectedAttributes } };
+  return injectAttachmentSOAttributesFromRefs(savedObject, persistableStateAttachmentTypeRegistry);
 };
 
 const hasAttributes = <T>(savedObject: OptionalAttributes<T>): savedObject is SavedObject<T> => {

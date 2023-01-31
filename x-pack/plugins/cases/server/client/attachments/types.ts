@@ -95,7 +95,7 @@ export interface BulkGetArgs {
   /**
    * The ids of the attachments
    */
-  attachmentIDs: string[] | string;
+  attachmentIDs: string[];
 }
 
 export interface GetAllAlertsAttachToCase {
