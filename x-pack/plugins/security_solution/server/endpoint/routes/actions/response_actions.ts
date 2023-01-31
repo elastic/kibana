@@ -19,6 +19,7 @@ import {
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   EndpointActionGetFileSchema,
+  ExecuteActionRequestSchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
 import {
@@ -34,6 +35,7 @@ import {
   UNISOLATE_HOST_ROUTE,
   ENDPOINT_ACTIONS_INDEX,
   GET_FILE_ROUTE,
+  EXECUTE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -43,6 +45,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionParametersWithPidOrEntityId,
+  ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -175,6 +178,22 @@ export function registerResponseActionRoutes(
       )
     );
   }
+
+  // `execute` currently behind FF (planned for 8.8)
+  if (endpointContext.experimentalFeatures.responseActionExecuteEnabled) {
+    router.post(
+      {
+        path: EXECUTE_ROUTE,
+        validate: ExecuteActionRequestSchema,
+        options: { authRequired: true, tags: ['access:securitySolution'] },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteExecuteOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
+      )
+    );
+  }
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([
@@ -184,6 +203,7 @@ const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKe
   ['suspend-process', 'SUSPEND_PROCESS'],
   ['running-processes', 'RUNNING_PROCESSES'],
   ['get-file', 'GET_FILE'],
+  ['execute', 'EXECUTE'],
 ]);
 
 const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];
