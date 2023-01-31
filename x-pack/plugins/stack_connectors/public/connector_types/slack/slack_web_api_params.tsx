@@ -16,6 +16,7 @@ import {
   EuiFilterButton,
   EuiSelectable,
   EuiSelectableOption,
+  EuiFormRow,
 } from '@elastic/eui';
 import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -123,48 +124,50 @@ export const SlackWebApiParamsFields: React.FunctionComponent<
 
   return (
     <>
-      <EuiFilterGroup>
-        <EuiPopover
-          id={'id'}
-          button={button}
-          isOpen={isPopoverOpen}
-          closePopover={() => setIsPopoverOpen(false)}
-        >
-          <EuiSelectable
-            searchable
-            data-test-subj={'slackChannelsSelectableList'}
-            isLoading={isLoadingChannels}
-            options={options}
-            loadingMessage={i18n.translate(
-              'xpack.stackConnectors.components.slack.loadingMessage',
-              {
-                defaultMessage: 'Loading channels',
-              }
-            )}
-            noMatchesMessage={i18n.translate(
-              'xpack.stackConnectors.components.slack.noChannelsFound',
-              {
-                defaultMessage: 'No channels found',
-              }
-            )}
-            emptyMessage={i18n.translate(
-              'xpack.stackConnectors.components.slack.noChannelsAvailable',
-              {
-                defaultMessage: 'No channels available',
-              }
-            )}
-            onChange={onChange}
+      <EuiFormRow fullWidth error={errors['subActionParams.channels']} isInvalid>
+        <EuiFilterGroup>
+          <EuiPopover
+            id={'id'}
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={() => setIsPopoverOpen(false)}
           >
-            {(list, search) => (
-              <>
-                {search}
-                <EuiSpacer size="xs" />
-                {list}
-              </>
-            )}
-          </EuiSelectable>
-        </EuiPopover>
-      </EuiFilterGroup>
+            <EuiSelectable
+              searchable
+              data-test-subj={'slackChannelsSelectableList'}
+              isLoading={isLoadingChannels}
+              options={options}
+              loadingMessage={i18n.translate(
+                'xpack.stackConnectors.components.slack.loadingMessage',
+                {
+                  defaultMessage: 'Loading channels',
+                }
+              )}
+              noMatchesMessage={i18n.translate(
+                'xpack.stackConnectors.components.slack.noChannelsFound',
+                {
+                  defaultMessage: 'No channels found',
+                }
+              )}
+              emptyMessage={i18n.translate(
+                'xpack.stackConnectors.components.slack.noChannelsAvailable',
+                {
+                  defaultMessage: 'No channels available',
+                }
+              )}
+              onChange={onChange}
+            >
+              {(list, search) => (
+                <>
+                  {search}
+                  <EuiSpacer size="xs" />
+                  {list}
+                </>
+              )}
+            </EuiSelectable>
+          </EuiPopover>
+        </EuiFilterGroup>
+      </EuiFormRow>
       <EuiSpacer size="m" />
       <TextAreaWithMessageVariables
         index={index}
