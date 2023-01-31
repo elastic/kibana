@@ -67,6 +67,14 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
       "thrownError": null,
     }
   }
+  hasCustomBranding$={
+    Observable {
+      "operator": [Function],
+      "source": Observable {
+        "_subscribe": [Function],
+      },
+    }
+  }
   history={
     Object {
       "push": [MockFunction],

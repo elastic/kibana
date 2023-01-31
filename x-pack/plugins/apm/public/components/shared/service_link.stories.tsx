@@ -7,7 +7,7 @@
 
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
-import { MockApmPluginContextWrapper } from '../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmPluginStorybook } from '../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ServiceLink } from './service_link';
 
 type Args = ComponentProps<typeof ServiceLink>;
@@ -18,9 +18,9 @@ export default {
   decorators: [
     (StoryComponent: ComponentType) => {
       return (
-        <MockApmPluginContextWrapper>
+        <MockApmPluginStorybook>
           <StoryComponent />
-        </MockApmPluginContextWrapper>
+        </MockApmPluginStorybook>
       );
     },
   ],
@@ -40,4 +40,36 @@ Example.args = {
     comparisonEnabled: false,
   },
   serviceName: 'opbeans-java',
+};
+
+export const AndroidAgent: Story<Args> = (args) => {
+  return <ServiceLink {...args} />;
+};
+AndroidAgent.args = {
+  agentName: 'android/java',
+  query: {
+    environment: 'ENVIRONMENT_ALL',
+    kuery: '',
+    rangeFrom: 'now-15m',
+    rangeTo: 'now',
+    serviceGroup: '',
+    comparisonEnabled: false,
+  },
+  serviceName: 'opbeans-android',
+};
+
+export const IOSAgent: Story<Args> = (args) => {
+  return <ServiceLink {...args} />;
+};
+IOSAgent.args = {
+  agentName: 'iOS/swift',
+  query: {
+    environment: 'ENVIRONMENT_ALL',
+    kuery: '',
+    rangeFrom: 'now-15m',
+    rangeTo: 'now',
+    serviceGroup: '',
+    comparisonEnabled: false,
+  },
+  serviceName: 'opbeans-swift',
 };

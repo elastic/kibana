@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { omit, isEqual, keyBy } from 'lodash';
-import uuidv5 from 'uuid/v5';
+import { omit, isEqual, keyBy, groupBy } from 'lodash';
+import { v5 as uuidv5 } from 'uuid';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
@@ -51,7 +51,7 @@ import type {
   FleetServerPolicy,
   Installation,
   Output,
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   PackageInfo,
 } from '../../common/types';
 import {
@@ -658,7 +658,7 @@ class AgentPolicyService {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
 
-    const { total } = await getAgentsByKuery(esClient, {
+    const { total } = await getAgentsByKuery(esClient, soClient, {
       showInactive: false,
       perPage: 0,
       page: 1,
@@ -680,7 +680,10 @@ class AgentPolicyService {
           `Cannot delete agent policy ${id} that contains managed package policies`
         );
       }
-      const deletedPackagePolicies: DeletePackagePoliciesResponse =
+
+      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies);
+
+      const deletedPackagePolicies: PostDeletePackagePoliciesResponse =
         await packagePolicyService.delete(
           soClient,
           esClient,
@@ -691,7 +694,7 @@ class AgentPolicyService {
           }
         );
       try {
-        await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
+        await packagePolicyService.runPostDeleteExternalCallbacks(deletedPackagePolicies);
       } catch (error) {
         const logger = appContextService.getLogger();
         logger.error(`An error occurred executing external callback: ${error}`);
@@ -1030,6 +1033,25 @@ class AgentPolicyService {
     );
 
     return res;
+  }
+
+  public async getInactivityTimeouts(
+    soClient: SavedObjectsClientContract
+  ): Promise<Array<{ policyIds: string[]; inactivityTimeout: number }>> {
+    const findRes = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout > 0`,
+      fields: [`inactivity_timeout`],
+    });
+
+    const groupedResults = groupBy(findRes.saved_objects, (so) => so.attributes.inactivity_timeout);
+
+    return Object.entries(groupedResults).map(([inactivityTimeout, policies]) => ({
+      inactivityTimeout: parseInt(inactivityTimeout, 10),
+      policyIds: policies.map((policy) => policy.id),
+    }));
   }
 }
 

@@ -39,20 +39,23 @@ export type ComponentOpts = {
   item: RuleTableItem;
   onRuleChanged: () => Promise<void>;
   onLoading: (isLoading: boolean) => void;
-  setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
+  onDeleteRule: (item: RuleTableItem) => void;
   onEditRule: (item: RuleTableItem) => void;
-  onUpdateAPIKey: (id: string[]) => void;
+  onUpdateAPIKey: (item: RuleTableItem) => void;
   onRunRule: (item: RuleTableItem) => void;
   onCloneRule: (ruleId: string) => void;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
+} & Pick<
+  BulkOperationsComponentOpts,
+  'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
+>;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
   onLoading,
   onRuleChanged,
-  disableRule,
-  enableRule,
-  setRulesToDelete,
+  bulkDisableRules,
+  bulkEnableRules,
+  onDeleteRule,
   onEditRule,
   onUpdateAPIKey,
   snoozeRule,
@@ -192,9 +195,9 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             const enabled = !isDisabled;
             asyncScheduler.schedule(async () => {
               if (enabled) {
-                await disableRule({ ...item, enabled });
+                await bulkDisableRules({ ids: [item.id] });
               } else {
-                await enableRule({ ...item, enabled });
+                await bulkEnableRules({ ids: [item.id] });
               }
               onRuleChanged();
             }, 10);
@@ -240,7 +243,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           'data-test-subj': 'updateApiKey',
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
-            onUpdateAPIKey([item.id]);
+            onUpdateAPIKey(item);
           },
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.updateApiKey',
@@ -265,7 +268,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           'data-test-subj': 'deleteRule',
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
-            setRulesToDelete([item.id]);
+            onDeleteRule(item);
           },
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.deleteRuleTitle',

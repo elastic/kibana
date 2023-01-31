@@ -7,7 +7,7 @@
 
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
@@ -20,8 +20,8 @@ export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction'
 
 export function createApplyEntityFieldFiltersAction(
   getStartServices: MlCoreSetup['getStartServices']
-) {
-  return createAction<AnomalyChartsFieldSelectionContext>({
+): UiActionsActionDefinition<AnomalyChartsFieldSelectionContext> {
+  return {
     id: 'apply-entity-field-filters',
     type: APPLY_ENTITY_FIELD_FILTERS_ACTION,
     getIconType(context: AnomalyChartsFieldSelectionContext): string {
@@ -88,5 +88,5 @@ export function createApplyEntityFieldFiltersAction(
     async isCompatible({ embeddable, data }) {
       return embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE && data !== undefined;
     },
-  });
+  };
 }

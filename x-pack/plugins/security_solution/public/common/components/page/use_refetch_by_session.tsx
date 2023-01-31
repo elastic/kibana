@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useEffect, useMemo } from 'react';
+import type { MutableRefObject } from 'react';
+import { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { inputsSelectors } from '../../store';
@@ -23,15 +25,16 @@ interface UseRefetchByRestartingSessionProps {
 export const useRefetchByRestartingSession = ({
   inputId,
   queryId,
+  skip,
 }: UseRefetchByRestartingSessionProps): {
-  searchSessionId: string;
+  session: MutableRefObject<ISessionService>;
   refetchByRestartingSession: Refetch;
 } => {
   const dispatch = useDispatch();
   const { data } = useKibana().services;
 
   const session = useRef(data.search.session);
-  const searchSessionId = useMemo(() => session.current.start(), [session]);
+
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
   const { selectedInspectIndex } = useDeepEqualSelector((state) =>
@@ -51,16 +54,13 @@ export const useRefetchByRestartingSession = ({
          * like most of our components, it refetches when receiving a new search
          * session ID.
          **/
-        searchSessionId: session.current.start(),
+        searchSessionId: skip ? undefined : session.current.start(),
       })
     );
-  }, [dispatch, queryId, selectedInspectIndex]);
+  }, [dispatch, queryId, selectedInspectIndex, skip]);
 
-  useEffect(() => {
-    return () => {
-      data.search.session.clear();
-    };
-  });
-
-  return { searchSessionId, refetchByRestartingSession };
+  return {
+    session,
+    refetchByRestartingSession,
+  };
 };

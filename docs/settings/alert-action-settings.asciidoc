@@ -199,6 +199,22 @@ Specifies the time allowed for requests to external resources. Requests that tak
 +
 For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
 
+`xpack.actions.run.maxAttempts` {ess-icon}::
+Specifies the maximum number of times an action can be attempted to run. Can be minimum 1 and maximum 10.
+
+`xpack.actions.run.connectorTypeOverrides` {ess-icon}::
+Overrides the configs under `xpack.actions.run` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
++
+For example:
+[source,yaml]
+--
+xpack.actions.run:
+    maxAttempts: 1
+    connectorTypeOverrides:
+        - id: '.server-log'
+          maxAttempts: 5
+--
+
 [float]
 [[alert-settings]]
 ==== Alerting settings

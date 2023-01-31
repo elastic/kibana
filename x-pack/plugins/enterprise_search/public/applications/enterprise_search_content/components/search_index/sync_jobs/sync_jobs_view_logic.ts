@@ -14,7 +14,6 @@ import { Status } from '../../../../../../common/types/api';
 import { ConnectorSyncJob } from '../../../../../../common/types/connectors';
 import { Paginate } from '../../../../../../common/types/pagination';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
 import {
   FetchSyncJobsApiLogic,
   FetchSyncJobsArgs,
@@ -61,10 +60,6 @@ export const SyncJobsViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAct
       ['data as syncJobsData', 'status as syncJobsStatus'],
     ],
   },
-  listeners: () => ({
-    fetchSyncJobs: () => clearFlashMessages(),
-    fetchSyncJobsError: (e) => flashAPIErrors(e),
-  }),
   path: ['enterprise_search', 'content', 'sync_jobs_view_logic'],
   selectors: ({ selectors }) => ({
     syncJobs: [

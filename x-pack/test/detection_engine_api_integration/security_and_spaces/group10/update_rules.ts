@@ -459,7 +459,48 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(409);
 
         expect(body).to.eql({
-          message: `default exception list already exists in rule(s): ${ruleWithException.id}`,
+          message: `default exception list for rule: rule-2 already exists in rule(s): ${ruleWithException.id}`,
+          status_code: 409,
+        });
+      });
+
+      it('should not update a rule if trying to add default rule exception list which attached to another using rule.id', async () => {
+        const ruleWithException = await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          exceptions_list: [
+            {
+              id: '2',
+              list_id: '123',
+              namespace_type: 'single',
+              type: ExceptionListTypeEnum.RULE_DEFAULT,
+            },
+          ],
+        });
+        const createdBody = await createRule(supertest, log, getSimpleRule('rule-2'));
+
+        // update a simple rule's name
+        const updatedRule = getSimpleRuleUpdate('rule-2');
+        updatedRule.id = createdBody.id;
+        delete updatedRule.rule_id;
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...updatedRule,
+            exceptions_list: [
+              {
+                id: '2',
+                list_id: '123',
+                namespace_type: 'single',
+                type: ExceptionListTypeEnum.RULE_DEFAULT,
+              },
+            ],
+          })
+          .expect(409);
+
+        expect(body).to.eql({
+          message: `default exception list for rule: ${updatedRule.id} already exists in rule(s): ${ruleWithException.id}`,
           status_code: 409,
         });
       });

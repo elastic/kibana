@@ -56,7 +56,7 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createUiPlugins(),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(3);
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
@@ -81,6 +81,14 @@ describe('registerBundleRoutes', () => {
       publicPath: '/server-base-path/42/bundles/core/',
       routePath: '/42/bundles/core/',
     });
+
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
+      fileHashCache: expect.any(FileHashCache),
+      isDist: true,
+      bundlesPath: 'kbnMonacoBundleDir',
+      publicPath: '/server-base-path/42/bundles/kbn-monaco/',
+      routePath: '/42/bundles/kbn-monaco/',
+    });
   });
 
   it('registers plugin bundles', () => {
@@ -91,7 +99,7 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createUiPlugins('plugin-a', 'plugin-b'),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(5);
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(6);
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),

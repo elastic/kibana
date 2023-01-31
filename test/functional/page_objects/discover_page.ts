@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 type SidebarSectionName = 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected';
 
@@ -27,6 +28,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
+  private readonly comboBox = this.ctx.getService('comboBox');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -44,12 +46,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async findFieldByName(name: string) {
-    const fieldSearch = await this.testSubjects.find('fieldFilterSearchInput');
+    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
     await fieldSearch.type(name);
   }
 
   public async clearFieldSearchInput() {
-    const fieldSearch = await this.testSubjects.find('fieldFilterSearchInput');
+    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
     await fieldSearch.clearValue();
   }
 
@@ -202,6 +204,22 @@ export class DiscoverPageObject extends FtrService {
       { location: el, offset: { x: -300, y: 20 } },
       { location: el, offset: { x: -100, y: 30 } }
     );
+  }
+
+  public async chooseBreakdownField(field: string) {
+    await this.comboBox.set('unifiedHistogramBreakdownFieldSelector', field);
+  }
+
+  public async getHistogramLegendList() {
+    const unifiedHistogram = await this.testSubjects.find('unifiedHistogramChart');
+    const list = await unifiedHistogram.findAllByClassName('echLegendItem__label');
+    return Promise.all(list.map((elem: WebElementWrapper) => elem.getVisibleText()));
+  }
+
+  public async clickLegendFilter(field: string, type: '+' | '-') {
+    const filterType = type === '+' ? 'filterIn' : 'filterOut';
+    await this.testSubjects.click(`legend-${field}`);
+    await this.testSubjects.click(`legend-${field}-${filterType}`);
   }
 
   public async getCurrentQueryName() {
@@ -379,14 +397,14 @@ export class DiscoverPageObject extends FtrService {
 
   public async editField(field: string) {
     await this.retry.try(async () => {
-      await this.testSubjects.click(`field-${field}`);
+      await this.clickFieldListItem(field);
       await this.testSubjects.click(`discoverFieldListPanelEdit-${field}`);
       await this.find.byClassName('indexPatternFieldEditor__form');
     });
   }
 
   public async removeField(field: string) {
-    await this.testSubjects.click(`field-${field}`);
+    await this.clickFieldListItem(field);
     await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
     await this.testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
     await this.fieldEditor.confirmDelete();
@@ -445,6 +463,10 @@ export class DiscoverPageObject extends FtrService {
     ).getAttribute('innerText');
   }
 
+  public async cleanSidebarLocalStorage(): Promise<void> {
+    await this.browser.setLocalStorageItem('discover.unifiedFieldList.initiallyOpenSections', '{}');
+  }
+
   public async waitUntilSidebarHasLoaded() {
     await this.retry.waitFor('sidebar is loaded', async () => {
       return (await this.getSidebarAriaDescription()).length > 0;
@@ -488,12 +510,16 @@ export class DiscoverPageObject extends FtrService {
     );
   }
 
-  public async clickFieldListItem(field: string) {
-    await this.testSubjects.click(`field-${field}`);
-
+  public async waitUntilFieldPopoverIsOpen() {
     await this.retry.waitFor('popover is open', async () => {
       return Boolean(await this.find.byCssSelector('[data-popover-open="true"]'));
     });
+  }
+
+  public async clickFieldListItem(field: string) {
+    await this.testSubjects.click(`field-${field}`);
+
+    await this.waitUntilFieldPopoverIsOpen();
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
@@ -533,6 +559,12 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async isAdHocDataViewSelected() {
+    const dataView = await this.getCurrentlySelectedDataView();
+    await this.testSubjects.click('discover-dataView-switch-link');
+    return this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
+  }
+
   public async isFieldSelected(field: string) {
     if (!(await this.testSubjects.exists('fieldListGroupedSelectedFields'))) {
       return false;
@@ -565,7 +597,14 @@ export class DiscoverPageObject extends FtrService {
       await field.click();
     }
 
-    await this.testSubjects.click(`fieldVisualize-${fieldName}`);
+    await this.waitUntilFieldPopoverIsOpen();
+    const visualizeButtonTestSubject = `fieldVisualize-${fieldName}`;
+    // wrap visualize button click in retry to ensure button is clicked and retry if button click is not registered
+    await this.retry.try(async () => {
+      await this.testSubjects.click(visualizeButtonTestSubject);
+      await this.testSubjects.waitForDeleted(visualizeButtonTestSubject);
+      await this.testSubjects.missingOrFail(visualizeButtonTestSubject);
+    });
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -632,15 +671,15 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async openSidebarFieldFilter() {
-    await this.testSubjects.click('toggleFieldFilterButton');
-    await this.testSubjects.existOrFail('filterSelectionPanel');
+    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
+    await this.testSubjects.existOrFail('fieldListFiltersFieldTypeFilterOptions');
   }
 
   public async closeSidebarFieldFilter() {
-    await this.testSubjects.click('toggleFieldFilterButton');
+    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
 
     await this.retry.waitFor('sidebar filter closed', async () => {
-      return !(await this.testSubjects.exists('filterSelectionPanel'));
+      return !(await this.testSubjects.exists('fieldListFiltersFieldTypeFilterOptions'));
     });
   }
 
@@ -756,7 +795,10 @@ export class DiscoverPageObject extends FtrService {
     return button.getAttribute('title');
   }
 
-  public async getCurrentDataViewId() {
+  /**
+   * Validates if data view references in the URL are equal.
+   */
+  public async validateDataViewReffsEquality() {
     const currentUrl = await this.browser.getCurrentUrl();
     const matches = currentUrl.matchAll(/index:[^,]*/g);
     const indexes = [];
@@ -769,14 +811,25 @@ export class DiscoverPageObject extends FtrService {
     if (first) {
       const allEqual = indexes.every((val) => val === first);
       if (allEqual) {
-        return first;
+        return { valid: true, result: first };
       } else {
-        throw new Error(
-          'Discover URL state contains different index references. They should be all the same.'
-        );
+        return {
+          valid: false,
+          message:
+            'Discover URL state contains different index references. They should be all the same.',
+        };
       }
     }
-    throw new Error("Discover URL state doesn't contain an index reference.");
+    return { valid: false, message: "Discover URL state doesn't contain an index reference." };
+  }
+
+  public async getCurrentDataViewId() {
+    const validationResult = await this.validateDataViewReffsEquality();
+    if (validationResult.valid) {
+      return validationResult.result!;
+    } else {
+      throw new Error(validationResult.message);
+    }
   }
 
   public async addRuntimeField(name: string, script: string) {

@@ -35,6 +35,7 @@ const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
   [ServiceInventoryFieldName.Throughput]: (item) => item.throughput ?? -1,
   [ServiceInventoryFieldName.TransactionErrorRate]: (item) =>
     item.transactionErrorRate ?? -1,
+  [ServiceInventoryFieldName.AlertsCount]: (item) => item.alertsCount ?? -1,
 };
 
 function reverseSortDirection(sortDirection: 'asc' | 'desc') {

@@ -62,6 +62,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
         await validateRuleDefaultExceptionList({
           exceptionsList: request.body.exceptions_list,
           rulesClient,
+          ruleRuleId: request.body.rule_id,
           ruleId: request.body.id,
         });
 
@@ -83,9 +84,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
         });
 
         if (rule != null) {
-          const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
-          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-          const [validated, errors] = transformValidate(rule, ruleExecutionSummary);
+          const [validated, errors] = transformValidate(rule);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

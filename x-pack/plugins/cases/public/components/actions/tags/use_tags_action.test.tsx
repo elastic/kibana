@@ -53,31 +53,6 @@ describe('useTagsAction', () => {
     `);
   });
 
-  it('closes the flyout', async () => {
-    const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    const action = result.current.getAction([basicCase]);
-
-    act(() => {
-      action.onClick();
-    });
-
-    expect(result.current.isFlyoutOpen).toBe(true);
-
-    act(() => {
-      result.current.onFlyoutClosed();
-    });
-
-    await waitFor(() => {
-      expect(result.current.isFlyoutOpen).toBe(false);
-    });
-  });
-
   it('update the tags correctly', async () => {
     const updateSpy = jest.spyOn(api, 'updateCases');
 
@@ -98,40 +73,7 @@ describe('useTagsAction', () => {
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['one'], unSelectedTags: ['pepsi'] });
-    });
-
-    await waitFor(() => {
-      expect(result.current.isFlyoutOpen).toBe(false);
-      expect(onActionSuccess).toHaveBeenCalled();
-      expect(updateSpy).toHaveBeenCalledWith(
-        [{ tags: ['coke', 'one'], id: basicCase.id, version: basicCase.version }],
-        expect.anything()
-      );
-    });
-  });
-
-  it('removes duplicates', async () => {
-    const updateSpy = jest.spyOn(api, 'updateCases');
-
-    const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    const action = result.current.getAction([basicCase]);
-
-    act(() => {
-      action.onClick();
-    });
-
-    expect(onAction).toHaveBeenCalled();
-    expect(result.current.isFlyoutOpen).toBe(true);
-
-    act(() => {
-      result.current.onSaveTags({ selectedTags: ['one', 'one'], unSelectedTags: ['pepsi'] });
+      result.current.onSaveTags({ selectedItems: ['one'], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
@@ -159,7 +101,7 @@ describe('useTagsAction', () => {
     });
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['one', 'one'], unSelectedTags: ['pepsi'] });
+      result.current.onSaveTags({ selectedItems: ['one', 'one'], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
@@ -184,163 +126,13 @@ describe('useTagsAction', () => {
     });
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['one', 'one'], unSelectedTags: ['pepsi'] });
+      result.current.onSaveTags({ selectedItems: ['one', 'one'], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
       expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
         'Edited 2 cases'
       );
-    });
-  });
-
-  it('do not update cases with no changes', async () => {
-    const updateSpy = jest.spyOn(api, 'updateCases');
-
-    const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    const action = result.current.getAction([{ ...basicCase, tags: [] }]);
-
-    act(() => {
-      action.onClick();
-    });
-
-    expect(onAction).toHaveBeenCalled();
-    expect(result.current.isFlyoutOpen).toBe(true);
-
-    act(() => {
-      result.current.onSaveTags({ selectedTags: [], unSelectedTags: ['pepsi'] });
-    });
-
-    await waitFor(() => {
-      expect(result.current.isFlyoutOpen).toBe(false);
-      expect(onActionSuccess).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  it('do not update if the selected tags are the same but with different order', async () => {
-    const updateSpy = jest.spyOn(api, 'updateCases');
-
-    const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    const action = result.current.getAction([{ ...basicCase, tags: ['1', '2'] }]);
-
-    act(() => {
-      action.onClick();
-    });
-
-    expect(onAction).toHaveBeenCalled();
-    expect(result.current.isFlyoutOpen).toBe(true);
-
-    act(() => {
-      result.current.onSaveTags({ selectedTags: ['2', '1'], unSelectedTags: [] });
-    });
-
-    await waitFor(() => {
-      expect(result.current.isFlyoutOpen).toBe(false);
-      expect(onActionSuccess).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  it('do not update if the selected tags are the same', async () => {
-    const updateSpy = jest.spyOn(api, 'updateCases');
-
-    const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    const action = result.current.getAction([{ ...basicCase, tags: ['1'] }]);
-
-    act(() => {
-      action.onClick();
-    });
-
-    expect(onAction).toHaveBeenCalled();
-    expect(result.current.isFlyoutOpen).toBe(true);
-
-    act(() => {
-      result.current.onSaveTags({ selectedTags: ['1'], unSelectedTags: [] });
-    });
-
-    await waitFor(() => {
-      expect(result.current.isFlyoutOpen).toBe(false);
-      expect(onActionSuccess).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  it('do not update if selecting and unselecting the same tag', async () => {
-    const updateSpy = jest.spyOn(api, 'updateCases');
-
-    const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    const action = result.current.getAction([{ ...basicCase, tags: ['1'] }]);
-
-    act(() => {
-      action.onClick();
-    });
-
-    expect(onAction).toHaveBeenCalled();
-    expect(result.current.isFlyoutOpen).toBe(true);
-
-    act(() => {
-      result.current.onSaveTags({ selectedTags: ['1'], unSelectedTags: ['1'] });
-    });
-
-    await waitFor(() => {
-      expect(result.current.isFlyoutOpen).toBe(false);
-      expect(onActionSuccess).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  it('do not update with empty tags and no selection', async () => {
-    const updateSpy = jest.spyOn(api, 'updateCases');
-
-    const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    const action = result.current.getAction([{ ...basicCase, tags: [] }]);
-
-    act(() => {
-      action.onClick();
-    });
-
-    expect(onAction).toHaveBeenCalled();
-    expect(result.current.isFlyoutOpen).toBe(true);
-
-    act(() => {
-      result.current.onSaveTags({ selectedTags: [], unSelectedTags: [] });
-    });
-
-    await waitFor(() => {
-      expect(result.current.isFlyoutOpen).toBe(false);
-      expect(onActionSuccess).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
     });
   });
 });

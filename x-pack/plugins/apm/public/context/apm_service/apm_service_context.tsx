@@ -15,15 +15,17 @@ import {
 } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 import { useServiceAgentFetcher } from './use_service_agent_fetcher';
-import { useApmParams } from '../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
 import { replace } from '../../components/shared/links/url_helpers';
 import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import { ServerlessType } from '../../../common/serverless';
 
 export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
+  serverlessType?: ServerlessType;
   transactionType?: string;
   transactionTypes: string[];
   runtimeName?: string;
@@ -49,13 +51,17 @@ export function ApmServiceContextProvider({
     path: { serviceName },
     query,
     query: { kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const {
     agentName,
     runtimeName,
+    serverlessType,
     status: serviceAgentStatus,
   } = useServiceAgentFetcher({
     serviceName,
@@ -85,6 +91,7 @@ export function ApmServiceContextProvider({
       value={{
         serviceName,
         agentName,
+        serverlessType,
         transactionType: currentTransactionType,
         transactionTypes,
         runtimeName,

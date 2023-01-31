@@ -56,6 +56,9 @@ import { offsetRt } from '../../../common/comparison_rt';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { getServicesAlerts } from './get_services/get_service_alerts';
+import { ServerlessType } from '../../../common/serverless';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -88,6 +91,10 @@ const servicesRoute = createApmServerRoute({
       | {
           serviceName: string;
           healthStatus: import('./../../../common/service_health_status').ServiceHealthStatus;
+        }
+      | {
+          serviceName: string;
+          alertsCount: number;
         },
       {
         serviceName: string;
@@ -104,6 +111,9 @@ const servicesRoute = createApmServerRoute({
       } & {
         serviceName: string;
         healthStatus: import('./../../../common/service_health_status').ServiceHealthStatus;
+      } & {
+        serviceName: string;
+        alertsCount: number;
       }
     >;
   }> {
@@ -126,15 +136,21 @@ const servicesRoute = createApmServerRoute({
     } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
 
-    const [mlClient, apmEventClient, serviceGroup, randomSampler] =
-      await Promise.all([
-        getMlClient(resources),
-        getApmEventClient(resources),
-        serviceGroupId
-          ? getServiceGroup({ savedObjectsClient, serviceGroupId })
-          : Promise.resolve(null),
-        getRandomSampler({ security, request, probability }),
-      ]);
+    const [
+      mlClient,
+      apmEventClient,
+      apmAlertsClient,
+      serviceGroup,
+      randomSampler,
+    ] = await Promise.all([
+      getMlClient(resources),
+      getApmEventClient(resources),
+      getApmAlertsClient(resources),
+      serviceGroupId
+        ? getServiceGroup({ savedObjectsClient, serviceGroupId })
+        : Promise.resolve(null),
+      getRandomSampler({ security, request, probability }),
+    ]);
 
     const { searchAggregatedTransactions, searchAggregatedServiceMetrics } =
       await getServiceInventorySearchSource({
@@ -151,6 +167,7 @@ const servicesRoute = createApmServerRoute({
       kuery,
       mlClient,
       apmEventClient,
+      apmAlertsClient,
       searchAggregatedTransactions,
       searchAggregatedServiceMetrics,
       logger,
@@ -348,10 +365,11 @@ const serviceAgentRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (
     resources
-  ): Promise<
-    | { agentName?: undefined; runtimeName?: undefined }
-    | { agentName: string | undefined; runtimeName: string | undefined }
-  > => {
+  ): Promise<{
+    agentName?: string;
+    runtimeName?: string;
+    serverlessType?: ServerlessType;
+  }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
@@ -1198,6 +1216,42 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
   },
 });
 
+const serviceAlertsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/alerts_count',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([rangeRt, environmentRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    serviceName: string;
+    alertsCount: number;
+  }> => {
+    const { params } = resources;
+    const {
+      query: { start, end, environment },
+    } = params;
+    const { serviceName } = params.path;
+
+    const apmAlertsClient = await getApmAlertsClient(resources);
+    const servicesAlerts = await getServicesAlerts({
+      serviceName,
+      apmAlertsClient,
+      environment,
+      start,
+      end,
+    });
+
+    return servicesAlerts.length > 0
+      ? servicesAlerts[0]
+      : { serviceName, alertsCount: 0 };
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
@@ -1216,4 +1270,5 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceAnomalyChartsRoute,
   ...sortedAndFilteredServicesRoute,
+  ...serviceAlertsRoute,
 };

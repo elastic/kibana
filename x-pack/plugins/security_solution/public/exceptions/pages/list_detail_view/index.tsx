@@ -13,6 +13,7 @@ import {
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
 import { EuiLoadingContent } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
@@ -25,6 +26,9 @@ import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
 
 export const ListsDetailViewComponent: FC = () => {
+  const { detailName: exceptionListId } = useParams<{
+    detailName: string;
+  }>();
   const {
     isLoading,
     invalidListId,
@@ -53,7 +57,7 @@ export const ListsDetailViewComponent: FC = () => {
     handleDelete,
     handleCloseReferenceErrorModal,
     handleReferenceDelete,
-  } = useListDetailsView();
+  } = useListDetailsView(exceptionListId);
 
   const detailsViewContent = useMemo(() => {
     if (viewerStatus === ViewerStatus.ERROR)

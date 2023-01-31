@@ -7,11 +7,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { safeDecode, encode } from '@kbn/rison';
 import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { decodeRisonUrlState, encodeRisonUrlState } from '../utils/global_query_string/helpers';
 import { useKibana } from '../lib/kibana';
 import type { TimelineUrl } from '../../timelines/store/timeline/model';
 import { URL_PARAM_KEY } from './use_url_state';
@@ -42,12 +42,8 @@ export const useResolveRedirect = () => {
       activeTab,
       graphEventId,
     };
-    let timelineSearch: TimelineUrl = currentTimelineState;
-    try {
-      timelineSearch = decodeRisonUrlState(timelineRison) ?? currentTimelineState;
-    } catch (error) {
-      // do nothing as it's already defaulted on line 77
-    }
+    const timelineSearch =
+      (safeDecode(timelineRison ?? '') as TimelineUrl | null) ?? currentTimelineState;
 
     if (
       hasRedirected ||
@@ -64,7 +60,7 @@ export const useResolveRedirect = () => {
       ...timelineSearch,
       id: newObjectId,
     };
-    const newTimelineRison = encodeRisonUrlState(newTimelineSearch);
+    const newTimelineRison = encode(newTimelineSearch);
     searchQuery.set(URL_PARAM_KEY.timeline, newTimelineRison);
     const newPath = `${pathname}?${searchQuery.toString()}`;
     spaces.ui.redirectLegacyUrl({

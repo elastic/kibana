@@ -15,6 +15,7 @@ import { GuideState } from '../../types';
 const defaultProps: GuideCardFooterProps = {
   guides: [],
   useCase: 'search',
+  telemetryId: 'search',
   activateGuide: jest.fn(),
 };
 

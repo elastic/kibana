@@ -31,7 +31,7 @@ export const DimensionTrigger = ({
   id: string;
   isInvalid?: boolean;
   hideTooltip?: boolean;
-  invalidMessage?: string | JSX.Element;
+  invalidMessage?: string | React.ReactNode;
 }) => {
   if (isInvalid) {
     return (

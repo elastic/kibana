@@ -13,11 +13,11 @@ import { getConnectorByName } from './utils';
 import {
   tinesAgentWebhook,
   tinesStory1,
-} from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/tines_simulation';
+} from '../../../../alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation';
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
-} from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+} from '../../../../alerting_api_integration/common/plugins/actions_simulators/server/plugin';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');

@@ -5,17 +5,18 @@ A custom version of the handlebars package which, to improve security, does not 
 ## Limitations
 
 - Only the following compile options are supported:
+  - `data`
   - `knownHelpers`
   - `knownHelpersOnly`
+  - `noEscape`
   - `strict`
   - `assumeObjects`
-  - `noEscape`
-  - `data`
 
 - Only the following runtime options are supported:
-  - `helpers`
-  - `blockParams`
   - `data`
+  - `helpers`
+  - `decorators` (not documented in the official Handlebars [runtime options documentation](https://handlebarsjs.com/api-reference/runtime-options.html))
+  - `blockParams` (not documented in the official Handlebars [runtime options documentation](https://handlebarsjs.com/api-reference/runtime-options.html))
 
 The [Inline partials](https://handlebarsjs.com/guide/partials.html#inline-partials) handlebars template feature is currently not supported by `@kbn/handlebars`.
 
@@ -58,7 +59,7 @@ To instruct the `Visitor` code to traverse any child nodes of a given node, our 
 
 We keep state internally in the `ElasticHandlebarsVisitor` object using the following private properties:
 
-- `scopes`: An array (stack) of `context` objects. In a simple template this array will always only contain a single element: The main `context` object. In more complicated scenarios, new `context` objects will be pushed and popped to and from the `scopes` stack as needed.
+- `contexts`: An array (stack) of `context` objects. In a simple template this array will always only contain a single element: The main `context` object. In more complicated scenarios, new `context` objects will be pushed and popped to and from the `contexts` stack as needed.
 - `output`: An array containing the "rendered" output of each node (normally just one element per node). In the most simple template, this is simply joined together into a the final output string after the AST has been traversed. In more complicated templates, we use this array temporarily to collect parameters to give to helper functions (see the `getParams` function).
 
 ## Testing
@@ -129,47 +130,14 @@ Output:
       },
       params: [],
       hash: undefined,
-      escaped: true,
-      strip: { open: false, close: false }
-    }
-  ],
-  strip: {}
-}
-```
-
-You can also filter which properties not to display, e.g:
-
-```sh
-./packages/kbn-handlebars/scripts/print_ast.js '{{#myBlock}}Hello {{name}}{{/myBlock}}' params,hash,loc,strip,data,depth,parts,inverse,openStrip,inverseStrip,closeStrip,blockParams,escaped
-```
-
-Output:
-
-```js
-{
-  type: 'Program',
-  body: [
-    {
-      type: 'BlockStatement',
-      path: { type: 'PathExpression', original: 'myBlock' },
-      program: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ContentStatement',
-            original: 'Hello ',
-            value: 'Hello '
-          },
-          {
-            type: 'MustacheStatement',
-            path: { type: 'PathExpression', original: 'name' }
-          }
-        ]
-      }
+      escaped: true
     }
   ]
 }
 ```
+
+By default certain properties will be hidden in the output.
+For more control over the output, check out the options by running the script without any arguments.
 
 ### Print generated code
 

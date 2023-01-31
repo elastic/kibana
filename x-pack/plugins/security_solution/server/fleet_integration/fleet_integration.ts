@@ -10,7 +10,7 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
 import type {
   PostPackagePolicyCreateCallback,
-  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostDeleteCallback,
   PutPackagePolicyUpdateCallback,
   PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
@@ -190,7 +190,7 @@ export const getPackagePolicyPostCreateCallback = (
 
 export const getPackagePolicyDeleteCallback = (
   exceptionsClient: ExceptionListClient | undefined
-): PostPackagePolicyDeleteCallback => {
+): PostPackagePolicyPostDeleteCallback => {
   return async (deletePackagePolicy): Promise<void> => {
     if (!exceptionsClient) {
       return;

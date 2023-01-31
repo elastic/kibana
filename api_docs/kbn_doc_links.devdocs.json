@@ -300,7 +300,7 @@
             "label": "enterpriseSearch",
             "description": [],
             "signature": [
-              "{ readonly apiKeys: string; readonly bulkApi: string; readonly configuration: string; readonly connectors: string; readonly connectorsMongoDB: string; readonly connectorsMySQL: string; readonly connectorsWorkplaceSearch: string; readonly crawlerManaging: string; readonly crawlerOverview: string; readonly deployTrainedModels: string; readonly documentLevelSecurity: string; readonly ingestPipelines: string; readonly languageAnalyzers: string; readonly languageClients: string; readonly licenseManagement: string; readonly machineLearningStart: string; readonly mailService: string; readonly start: string; readonly syncRules: string; readonly troubleshootSetup: string; readonly usersAccess: string; }"
+              "{ readonly apiKeys: string; readonly behavioralAnalyticsEvents: string; readonly bulkApi: string; readonly configuration: string; readonly connectors: string; readonly connectorsMongoDB: string; readonly connectorsMySQL: string; readonly connectorsWorkplaceSearch: string; readonly crawlerManaging: string; readonly crawlerOverview: string; readonly deployTrainedModels: string; readonly documentLevelSecurity: string; readonly ingestPipelines: string; readonly languageAnalyzers: string; readonly languageClients: string; readonly licenseManagement: string; readonly machineLearningStart: string; readonly mailService: string; readonly start: string; readonly syncRules: string; readonly troubleshootSetup: string; readonly usersAccess: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -672,7 +672,21 @@
             "label": "alerting",
             "description": [],
             "signature": [
-              "{ [x: string]: string; }"
+              "{ readonly guide: string; readonly actionTypes: string; readonly apmRules: string; readonly emailAction: string; readonly emailActionConfig: string; readonly emailExchangeClientSecretConfig: string; readonly emailExchangeClientIdConfig: string; readonly generalSettings: string; readonly indexAction: string; readonly esQuery: string; readonly indexThreshold: string; readonly pagerDutyAction: string; readonly preconfiguredConnectors: string; readonly preconfiguredAlertHistoryConnector: string; readonly serviceNowAction: string; readonly serviceNowSIRAction: string; readonly setupPrerequisites: string; readonly slackAction: string; readonly teamsAction: string; readonly connectors: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.taskManager",
+            "type": "Object",
+            "tags": [],
+            "label": "taskManager",
+            "description": [],
+            "signature": [
+              "{ readonly healthMonitoring: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -854,7 +868,7 @@
             "label": "clients",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly goIndex: string; readonly goOverview: string; readonly javaBasicAuthentication: string; readonly javaIndex: string; readonly javaInstallation: string; readonly javaIntroduction: string; readonly javaRestLow: string; readonly jsClientConnecting: string; readonly jsIntro: string; readonly netGuide: string; readonly netIntroduction: string; readonly netNest: string; readonly netSingleNode: string; readonly perlGuide: string; readonly phpGuide: string; readonly phpConnecting: string; readonly phpInstallation: string; readonly phpOverview: string; readonly pythonAuthentication: string; readonly pythonGuide: string; readonly pythonOverview: string; readonly rubyAuthentication: string; readonly rubyOverview: string; readonly rustGuide: string; readonly rustOverview: string; }"
+              "{ readonly guide: string; readonly goIndex: string; readonly goOverview: string; readonly javaBasicAuthentication: string; readonly javaIndex: string; readonly javaInstallation: string; readonly javaIntroduction: string; readonly javaRestLow: string; readonly jsClientConnecting: string; readonly jsIntro: string; readonly netGuide: string; readonly netIntroduction: string; readonly netNest: string; readonly netSingleNode: string; readonly phpGuide: string; readonly phpConnecting: string; readonly phpInstallation: string; readonly phpOverview: string; readonly pythonAuthentication: string; readonly pythonGuide: string; readonly pythonOverview: string; readonly rubyAuthentication: string; readonly rubyOverview: string; readonly rustGuide: string; readonly rustOverview: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,

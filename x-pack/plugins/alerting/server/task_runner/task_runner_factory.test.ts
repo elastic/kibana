@@ -26,6 +26,9 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -35,6 +38,9 @@ const savedObjectsService = savedObjectsServiceMock.createInternalStartContract(
 const uiSettingsService = uiSettingsServiceMock.createStartContract();
 const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 const dataPlugin = dataPluginMock.createStartContract();
+const dataViewsMock = {
+  dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+} as DataViewsServerPluginStart;
 const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
   name: 'My test alert',
@@ -83,7 +89,9 @@ describe('Task Runner Factory', () => {
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
     data: dataPlugin,
+    dataViews: dataViewsMock,
     savedObjects: savedObjectsService,
+    share: {} as SharePluginStart,
     uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),

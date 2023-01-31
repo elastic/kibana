@@ -605,6 +605,79 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.cleanFiltersForSerialize",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanFiltersForSerialize",
+        "description": [],
+        "signature": [
+          "(filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]"
+        ],
+        "path": "src/plugins/presentation_util/public/redux_embeddables/clean_redux_embeddable_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.cleanFiltersForSerialize.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_embeddables/clean_redux_embeddable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.getContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "getContextProvider",
+        "description": [],
+        "signature": [
+          "() => React.FC<{}>"
+        ],
+        "path": "src/plugins/presentation_util/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.LazyDashboardPicker",
         "type": "Function",
         "tags": [],
@@ -1218,79 +1291,6 @@
       },
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.useReduxContainerContext",
-        "type": "Function",
-        "tags": [],
-        "label": "useReduxContainerContext",
-        "description": [
-          "\nA typed use context hook for embeddable containers. it @returns an\nReduxContainerContextServices object typed to the generic inputTypes and ReducerTypes you pass in.\nNote that the reducer type is optional, but will be required to correctly infer the keys and payload\ntypes of your reducers. use `typeof MyReducers` here to retain them. It also includes a containerActions\nkey which contains most of the commonly used container operations"
-        ],
-        "signature": [
-          "<ReduxEmbeddableStateType extends ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ReduxEmbeddableState",
-            "text": "ReduxEmbeddableState"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", unknown> = ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ReduxEmbeddableState",
-            "text": "ReduxEmbeddableState"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", unknown>, ReducerType extends ",
-          "EmbeddableReducers",
-          "<ReduxEmbeddableStateType> = ",
-          "EmbeddableReducers",
-          "<ReduxEmbeddableStateType>>() => ",
-          "ReduxContainerContext",
-          "<ReduxEmbeddableStateType, ReducerType>"
-        ],
-        "path": "src/plugins/presentation_util/public/redux_embeddables/use_redux_embeddable_context.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
         "id": "def-public.useReduxEmbeddableContext",
         "type": "Function",
         "tags": [],
@@ -1351,9 +1351,25 @@
           "EmbeddableReducers",
           "<ReduxEmbeddableStateType> = ",
           "EmbeddableReducers",
-          "<ReduxEmbeddableStateType>>() => ",
+          "<ReduxEmbeddableStateType>, EmbeddableType extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.Embeddable",
+            "text": "Embeddable"
+          },
+          "<any, any, any> = ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.Embeddable",
+            "text": "Embeddable"
+          },
+          "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"], any>>() => ",
           "ReduxEmbeddableContext",
-          "<ReduxEmbeddableStateType, ReducerType>"
+          "<ReduxEmbeddableStateType, ReducerType, EmbeddableType>"
         ],
         "path": "src/plugins/presentation_util/public/redux_embeddables/use_redux_embeddable_context.ts",
         "deprecated": false,
@@ -2231,15 +2247,23 @@
               "EmbeddableReducers",
               "<ReduxEmbeddableStateType> = ",
               "EmbeddableReducers",
-              "<ReduxEmbeddableStateType>>({ reducers, embeddable, syncSettings, initialComponentState, }: { embeddable: ",
+              "<ReduxEmbeddableStateType>>({ reducers, embeddable, syncSettings, additionalMiddleware, initialComponentState, }: { embeddable: ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
                 "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.IEmbeddable",
-                "text": "IEmbeddable"
+                "section": "def-public.Embeddable",
+                "text": "Embeddable"
               },
-              "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"], any>; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
+              "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"], any>; additionalMiddleware?: ",
+              "Middleware",
+              "<",
+              "AnyAction",
+              ", any, ",
+              "Dispatch",
+              "<",
+              "AnyAction",
+              ">>[] | undefined; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
               "ReduxEmbeddableSyncSettings",
               "<",
               {
@@ -2293,10 +2317,18 @@
                     "pluginId": "embeddable",
                     "scope": "public",
                     "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.IEmbeddable",
-                    "text": "IEmbeddable"
+                    "section": "def-public.Embeddable",
+                    "text": "Embeddable"
                   },
-                  "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"], any>; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
+                  "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"], any>; additionalMiddleware?: ",
+                  "Middleware",
+                  "<",
+                  "AnyAction",
+                  ", any, ",
+                  "Dispatch",
+                  "<",
+                  "AnyAction",
+                  ">>[] | undefined; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
                   "ReduxEmbeddableSyncSettings",
                   "<",
                   {
@@ -2534,6 +2566,40 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.onStateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onStateChange",
+            "description": [],
+            "signature": [
+              "(listener: () => void) => ",
+              "Unsubscribe"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxEmbeddableTools.onStateChange.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "node_modules/redux/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": []
+              }
+            ]
           },
           {
             "parentPluginId": "presentationUtil",
@@ -3106,63 +3172,6 @@
       },
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-common.functionWrapper",
-        "type": "Function",
-        "tags": [],
-        "label": "functionWrapper",
-        "description": [],
-        "signature": [
-          "(fnSpec: FnType) => (input: any, args: Record<string, any>, context: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExecutionContext",
-            "text": "ExecutionContext"
-          },
-          "<",
-          {
-            "pluginId": "inspector",
-            "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          ">) => any"
-        ],
-        "path": "src/plugins/presentation_util/common/lib/test_helpers/function_wrapper.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-common.functionWrapper.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "fnSpec",
-            "description": [],
-            "signature": [
-              "FnType"
-            ],
-            "path": "src/plugins/presentation_util/common/lib/test_helpers/function_wrapper.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
         "id": "def-common.getElasticLogo",
         "type": "Function",
         "tags": [],
@@ -3725,143 +3734,6 @@
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
-        "id": "def-common.fontStyle",
-        "type": "Object",
-        "tags": [],
-        "label": "fontStyle",
-        "description": [],
-        "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-common.fontStyle.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-common.fontStyle.spec",
-            "type": "Object",
-            "tags": [],
-            "label": "spec",
-            "description": [],
-            "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.fontStyle.spec.fontFamily",
-                "type": "string",
-                "tags": [],
-                "label": "fontFamily",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.fontStyle.spec.fontWeight",
-                "type": "string",
-                "tags": [],
-                "label": "fontWeight",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.fontStyle.spec.fontStyle",
-                "type": "string",
-                "tags": [],
-                "label": "fontStyle",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.fontStyle.spec.textDecoration",
-                "type": "string",
-                "tags": [],
-                "label": "textDecoration",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.fontStyle.spec.color",
-                "type": "string",
-                "tags": [],
-                "label": "color",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.fontStyle.spec.textAlign",
-                "type": "string",
-                "tags": [],
-                "label": "textAlign",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.fontStyle.spec.fontSize",
-                "type": "string",
-                "tags": [],
-                "label": "fontSize",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.fontStyle.spec.lineHeight",
-                "type": "string",
-                "tags": [],
-                "label": "lineHeight",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-common.fontStyle.css",
-            "type": "string",
-            "tags": [],
-            "label": "css",
-            "description": [],
-            "path": "src/plugins/presentation_util/common/lib/test_helpers/test_styles.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {

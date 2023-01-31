@@ -13,6 +13,8 @@ import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
+const SUPPORTED_CRS_LIST = ['EPSG:4326', 'urn:ogc:def:crs:OGC:1.3:CRS84'];
+
 interface LoaderBatch {
   bytesUsed?: number;
   batchType?: string;
@@ -51,6 +53,28 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
 
     const { value: batch, done } = await this._iterator.next();
 
+    // geojson only supports WGS 84 datum, with longitude and latitude units of decimal degrees.
+    // https://datatracker.ietf.org/doc/html/rfc7946#section-4
+    // Deprecated geojson specification supported crs
+    // https://geojson.org/geojson-spec.html#named-crs
+    // This importer only supports WGS 84 datum
+    if (typeof batch?.container?.crs === 'object') {
+      const crs = batch.container.crs as { type?: string; properties?: { name?: string } };
+      if (
+        crs?.type === 'link' ||
+        (crs?.type === 'name' && !SUPPORTED_CRS_LIST.includes(crs?.properties?.name ?? ''))
+      ) {
+        throw new Error(
+          i18n.translate('xpack.fileUpload.geojsonImporter.unsupportedCrs', {
+            defaultMessage: 'Unsupported coordinate reference system, expecting {supportedCrsList}',
+            values: {
+              supportedCrsList: SUPPORTED_CRS_LIST.join(', '),
+            },
+          })
+        );
+      }
+    }
+
     if (!this._getIsActive() || done) {
       results.hasNext = false;
       return results;
@@ -65,7 +89,7 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
     const isLastBatch = batch.batchType === 'root-object-batch-complete';
     if (isLastBatch) {
       // Handle single feature geoJson
-      if (featureIndex === 0) {
+      if (featureIndex === 0 && features.length === 0) {
         if (batch.container) {
           features.push(batch.container);
         }

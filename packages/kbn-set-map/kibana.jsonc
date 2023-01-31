@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/set-map",
+  "owner": "@elastic/kibana-operations"
+}

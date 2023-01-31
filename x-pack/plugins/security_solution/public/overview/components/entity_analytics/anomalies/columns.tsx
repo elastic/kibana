@@ -16,10 +16,10 @@ import { AnomalyEntity } from '../../../../common/components/ml/anomaly/use_anom
 
 import { LinkAnchor, SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
-import { usersActions } from '../../../../users/store';
-import { hostsActions } from '../../../../hosts/store';
-import { HostsType } from '../../../../hosts/store/model';
-import { UsersType } from '../../../../users/store/model';
+import { usersActions } from '../../../../explore/users/store';
+import { hostsActions } from '../../../../explore/hosts/store';
+import { HostsType } from '../../../../explore/hosts/store/model';
+import { UsersType } from '../../../../explore/users/store/model';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import {
   isJobFailed,
@@ -45,11 +45,11 @@ export const useAnomaliesColumns = (
         truncateText: true,
         mobileOptions: { show: true },
         'data-test-subj': 'anomalies-table-column-name',
-        render: (name, { count, job }) => {
+        render: (jobName, { count, job }) => {
           if (count > 0 || (job && isJobStarted(job.jobState, job.datafeedState))) {
-            return name;
+            return jobName;
           } else {
-            return <MediumShadeText>{name}</MediumShadeText>;
+            return <MediumShadeText>{jobName}</MediumShadeText>;
           }
         },
       },

@@ -42,6 +42,7 @@ export interface UrlPanelContentProps {
   objectId?: string;
   objectType: string;
   shareableUrl?: string;
+  shareableUrlForSavedObject?: string;
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
@@ -242,7 +243,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
       return;
     }
 
-    const url = this.getSnapshotUrl();
+    const url = this.getSnapshotUrl(true);
 
     const parsedUrl = parseUrl(url);
     if (!parsedUrl || !parsedUrl.hash) {
@@ -269,8 +270,14 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     return this.updateUrlParams(formattedUrl);
   };
 
-  private getSnapshotUrl = () => {
-    const url = this.props.shareableUrl || window.location.href;
+  private getSnapshotUrl = (forSavedObject?: boolean) => {
+    let url = '';
+    if (forSavedObject && this.props.shareableUrlForSavedObject) {
+      url = this.props.shareableUrlForSavedObject;
+    }
+    if (!url) {
+      url = this.props.shareableUrl || window.location.href;
+    }
     return this.updateUrlParams(url);
   };
 
@@ -474,7 +481,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     const generateLinkAsHelp = this.isNotSaved() ? (
       <FormattedMessage
         id="share.urlPanel.canNotShareAsSavedObjectHelpText"
-        defaultMessage="Can't share as saved object until the {objectType} has been saved."
+        defaultMessage="To share as a saved object, save the {objectType}."
         values={{ objectType: this.props.objectType }}
       />
     ) : undefined;

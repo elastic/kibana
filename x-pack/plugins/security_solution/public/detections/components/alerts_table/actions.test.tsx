@@ -31,7 +31,7 @@ import {
   mockTimelineData,
 } from '../../../common/mock';
 import type { CreateTimeline, UpdateTimelineLoading } from './types';
-import type { Ecs } from '../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataProvider } from '../../../../common/types/timeline';
 import {
   TimelineId,
@@ -439,6 +439,7 @@ describe('alert actions', () => {
             queryFields: [],
             resolveTimelineConfig: undefined,
             savedObjectId: null,
+            selectAll: false,
             selectedEventIds: {},
             sessionViewConfig: null,
             show: true,
@@ -457,7 +458,9 @@ describe('alert actions', () => {
             version: null,
           },
           to: '2018-11-05T19:03:25.937Z',
+          resolveTimelineConfig: undefined,
           ruleNote: '# this is some markdown documentation',
+          ruleAuthor: ['elastic'],
         };
 
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
@@ -506,6 +509,7 @@ describe('alert actions', () => {
         const defaultTimelinePropsWithoutNote = { ...defaultTimelineProps };
 
         delete defaultTimelinePropsWithoutNote.ruleNote;
+        delete defaultTimelinePropsWithoutNote.ruleAuthor;
 
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({
           id: TimelineId.active,
@@ -1121,6 +1125,7 @@ describe('alert actions', () => {
         };
 
         delete timelineProps.ruleNote;
+        delete timelineProps.ruleAuthor;
 
         await sendAlertToTimelineAction({
           createTimeline,

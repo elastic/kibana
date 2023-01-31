@@ -8,6 +8,7 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../../common/runtime_types';
 import { checkIsStalePing } from '../../utils/monitor_test_result/check_pings';
+import { enableMonitorAlertAction } from '../monitor_list/actions';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
@@ -95,6 +96,11 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(getMonitorAction.fail, (state, action) => {
       state.error = action.payload;
       state.syntheticsMonitorLoading = false;
+    })
+    .addCase(enableMonitorAlertAction.success, (state, action) => {
+      if ('updated_at' in action.payload && state.syntheticsMonitor) {
+        state.syntheticsMonitor = action.payload.attributes as EncryptedSyntheticsSavedMonitor;
+      }
     });
 });
 

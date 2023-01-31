@@ -42,14 +42,6 @@ export class DetectionsPageObject extends FtrService {
     await this.navigateToDetectionsPage('rules');
   }
 
-  async navigateToRuleMonitoring(): Promise<void> {
-    await this.common.clickAndValidate('allRulesTableTab-monitoring', 'monitoring-table');
-  }
-
-  async navigateToExceptionList(): Promise<void> {
-    await this.common.clickAndValidate('allRulesTableTab-exceptions', 'exceptions-table');
-  }
-
   async navigateToCreateRule(): Promise<void> {
     await this.navigateToDetectionsPage('rules/create');
   }

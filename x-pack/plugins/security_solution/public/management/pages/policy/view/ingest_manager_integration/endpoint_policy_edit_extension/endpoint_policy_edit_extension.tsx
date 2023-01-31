@@ -103,39 +103,37 @@ const WrappedPolicyDetailsForm = memo<{
 
   return (
     <div data-test-subj="endpointIntegrationPolicyForm">
-      <>
-        <EndpointPolicyArtifactCards policyId={policyId} />
-        <div>
-          <EuiText>
-            <h5>
+      <EndpointPolicyArtifactCards policyId={policyId} />
+      <div>
+        <EuiText>
+          <h5>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyDetails.settings.title"
+              defaultMessage="Policy settings"
+            />
+          </h5>
+        </EuiText>
+        <EuiSpacer size="s" />
+        {endpointDetailsLoadingError ? (
+          <EuiCallOut
+            title={
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.policyDetails.settings.title"
-                defaultMessage="Policy settings"
+                id="xpack.securitySolution.endpoint.policyDetails.loadError"
+                defaultMessage="Failed to load endpoint policy settings"
               />
-            </h5>
-          </EuiText>
-          <EuiSpacer size="s" />
-          {endpointDetailsLoadingError ? (
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policyDetails.loadError"
-                  defaultMessage="Failed to load endpoint policy settings"
-                />
-              }
-              iconType="alert"
-              color="warning"
-              data-test-subj="endpiontPolicySettingsLoadingError"
-            >
-              {endpointDetailsLoadingError.message}
-            </EuiCallOut>
-          ) : !endpointPolicyDetails ? (
-            <EuiLoadingSpinner size="l" className="essentialAnimation" />
-          ) : (
-            <PolicyDetailsForm />
-          )}
-        </div>
-      </>
+            }
+            iconType="alert"
+            color="warning"
+            data-test-subj="endpiontPolicySettingsLoadingError"
+          >
+            {endpointDetailsLoadingError.message}
+          </EuiCallOut>
+        ) : !endpointPolicyDetails ? (
+          <EuiLoadingSpinner size="l" className="essentialAnimation" />
+        ) : (
+          <PolicyDetailsForm />
+        )}
+      </div>
     </div>
   );
 });

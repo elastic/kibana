@@ -150,10 +150,6 @@ export const serviceDetail = {
             pageSize: toNumberRt,
             sortField: t.string,
             sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-            device: t.string,
-            osVersion: t.string,
-            appVersion: t.string,
-            netConnectionType: t.string,
           }),
         }),
       },
@@ -190,6 +186,7 @@ export const serviceDetail = {
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
+                  flyoutDetailTab: t.string,
                 }),
                 offsetRt,
               ]),
@@ -241,6 +238,7 @@ export const serviceDetail = {
               path: t.type({
                 groupId: t.string,
               }),
+              query: t.partial({ errorId: t.string }),
             }),
           },
           '/services/{serviceName}/errors': {

@@ -64,6 +64,10 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     return this.validateHasPrivilege('canWriteHostIsolationExceptions');
   }
 
+  protected async validateHasDeletePrivilege(): Promise<void> {
+    return this.validateHasPrivilege('canDeleteHostIsolationExceptions');
+  }
+
   protected async validateHasReadPrivilege(): Promise<void> {
     return this.validateHasPrivilege('canReadHostIsolationExceptions');
   }
@@ -99,7 +103,7 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
   }
 
   async validatePreDeleteItem(): Promise<void> {
-    await this.validateHasWritePrivilege();
+    await this.validateHasDeletePrivilege();
   }
 
   async validatePreExport(): Promise<void> {

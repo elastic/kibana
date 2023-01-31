@@ -86,8 +86,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         const { response: osqueryAction } = await createActionHandler(
           osqueryContext,
           request.body,
-          soClient,
-          { currentUser }
+          { soClient, metadata: { currentUser } }
         );
 
         return response.ok({

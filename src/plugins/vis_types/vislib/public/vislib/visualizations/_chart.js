@@ -12,11 +12,7 @@ import _ from 'lodash';
 import { dataLabel } from '../lib/_data_label';
 import { Dispatch } from '../lib/dispatch';
 import { getFormatService } from '../../services';
-import {
-  Tooltip,
-  hierarchicalTooltipFormatter,
-  pointSeriesTooltipFormatter,
-} from '../components/tooltip';
+import { Tooltip, pointSeriesTooltipFormatter } from '../components/tooltip';
 
 /**
  * The Base Class for all visualizations.
@@ -39,10 +35,7 @@ export class Chart {
     const fieldFormatter = getFormatService().deserialize(
       this.handler.data.get('tooltipFormatter')
     );
-    const tooltipFormatterProvider =
-      this.handler.visConfig.get('type') === 'pie'
-        ? hierarchicalTooltipFormatter
-        : pointSeriesTooltipFormatter;
+    const tooltipFormatterProvider = pointSeriesTooltipFormatter;
     const tooltipFormatter = tooltipFormatterProvider(fieldFormatter);
 
     if (this.handler.visConfig && this.handler.visConfig.get('addTooltip', false)) {

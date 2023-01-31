@@ -8,25 +8,28 @@
 import React, { useEffect, FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+import {
+  mlTimefilterRefresh$,
+  useRefreshIntervalUpdates,
+  useTimefilter,
+} from '@kbn/ml-date-picker';
+import { ML_PAGES } from '../../../locator';
 import { NavigateToPath } from '../../contexts/kibana';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
-import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
-import { MlRoute, PageLoader, PageProps } from '../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { JobsPage } from '../../jobs/jobs_list';
-import { useTimefilter } from '../../contexts/kibana';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
-import { useRefreshIntervalUpdates } from '../../contexts/kibana/use_timefilter';
 
 export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   id: 'anomaly_detection',
   title: i18n.translate('xpack.ml.anomalyDetection.jobs.docTitle', {
     defaultMessage: 'Anomaly Detection Jobs',
   }),
-  path: '/jobs',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),

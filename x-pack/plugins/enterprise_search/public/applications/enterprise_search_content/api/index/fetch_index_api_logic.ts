@@ -23,4 +23,7 @@ export const fetchIndex = async ({
   return await HttpLogic.values.http.get<ElasticsearchIndexWithIngestion>(route);
 };
 
-export const FetchIndexApiLogic = createApiLogic(['fetch_index_api_logic'], fetchIndex);
+export const FetchIndexApiLogic = createApiLogic(['fetch_index_api_logic'], fetchIndex, {
+  clearFlashMessagesOnMakeRequest: false,
+  showErrorFlash: false,
+});

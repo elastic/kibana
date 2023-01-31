@@ -14,7 +14,7 @@ import type {
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   DeleteAgentPolicyResponse,
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import { AGENT_POLICY_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common';
 import type { PolicyData } from '../types';
@@ -102,7 +102,7 @@ export const indexFleetEndpointPolicy = async (
 };
 
 export interface DeleteIndexedFleetEndpointPoliciesResponse {
-  integrationPolicies: DeletePackagePoliciesResponse | undefined;
+  integrationPolicies: PostDeletePackagePoliciesResponse | undefined;
   agentPolicies: DeleteAgentPolicyResponse[] | undefined;
 }
 
@@ -132,7 +132,7 @@ export const deleteIndexedFleetEndpointPolicies = async (
             packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
           },
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<DeletePackagePoliciesResponse>
+        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostDeletePackagePoliciesResponse>
     ).data;
   }
 

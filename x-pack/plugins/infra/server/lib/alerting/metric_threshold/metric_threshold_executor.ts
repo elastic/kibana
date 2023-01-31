@@ -144,10 +144,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         });
 
         return {
-          lastRunTimestamp: startedAt.valueOf(),
-          missingGroups: [],
-          groupBy: params.groupBy,
-          filterQuery: params.filterQuery,
+          state: {
+            lastRunTimestamp: startedAt.valueOf(),
+            missingGroups: [],
+            groupBy: params.groupBy,
+            filterQuery: params.filterQuery,
+          },
         };
       }
     }
@@ -300,6 +302,11 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const { getRecoveredAlerts } = services.alertFactory.done();
     const recoveredAlerts = getRecoveredAlerts();
 
+    const groupByKeysObjectForRecovered = getGroupByObject(
+      params.groupBy,
+      new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.getId()))
+    );
+
     for (const alert of recoveredAlerts) {
       const recoveredAlertId = alert.getId();
       const alertUuid = getAlertUuid(recoveredAlertId);
@@ -311,6 +318,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
+        groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
         timestamp: startedAt.toISOString(),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
@@ -322,10 +330,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const stopTime = Date.now();
     logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
     return {
-      lastRunTimestamp: startedAt.valueOf(),
-      missingGroups: [...nextMissingGroups],
-      groupBy: params.groupBy,
-      filterQuery: params.filterQuery,
+      state: {
+        lastRunTimestamp: startedAt.valueOf(),
+        missingGroups: [...nextMissingGroups],
+        groupBy: params.groupBy,
+        filterQuery: params.filterQuery,
+      },
     };
   });
 

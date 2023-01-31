@@ -94,7 +94,7 @@ export interface RuleAggregations {
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
   warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
-  outcomeMsg?: string | null;
+  outcomeMsg?: string[] | null;
   alertsCount: {
     active?: number | null;
     new?: number | null;
@@ -139,6 +139,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   isSnoozedUntil?: Date | null;
   lastRun?: RuleLastRun | null;
   nextRun?: Date | null;
+  running?: boolean | null;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;

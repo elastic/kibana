@@ -20,7 +20,6 @@ import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { NewTemplateTimeline } from './new_template_timeline';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../../common/lib/kibana', () => {
   return {
@@ -31,13 +30,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 describe('NewTemplateTimeline', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mockClosePopover = jest.fn();
   const mockTitle = 'NEW_TIMELINE';
   let wrapper: ReactWrapper;

@@ -5,21 +5,22 @@
  * 2.0.
  */
 
+import { MetricsAPIRequest } from '../../../../common/http_api';
 import { queryTotalGroupings } from './query_total_groupings';
 
 describe('queryTotalGroupings', () => {
   const ESSearchClientMock = jest.fn().mockReturnValue({});
-  const defaultOptions = {
+  const defaultOptions: MetricsAPIRequest = {
     timerange: {
       from: 1615972672011,
       interval: '>=10s',
       to: 1615976272012,
-      field: '@timestamp',
     },
     indexPattern: 'testIndexPattern',
     metrics: [],
-    dropLastBucket: true,
+    dropPartialBuckets: true,
     groupBy: ['testField'],
+    includeTimeseries: true,
   };
 
   beforeEach(() => {

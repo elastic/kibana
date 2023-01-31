@@ -49,6 +49,9 @@ describe('Create a timeline from a template', () => {
   before(() => {
     deleteTimelines();
     createTimelineTemplate(getTimeline());
+  });
+
+  beforeEach(() => {
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
   });
 
@@ -67,15 +70,15 @@ describe('Create a timeline from a template', () => {
 describe('Timelines', (): void => {
   before(() => {
     cleanKibana();
-    login();
-    visit(OVERVIEW_URL);
   });
 
   describe('Toggle create timeline from plus icon', () => {
-    after(() => {
-      closeTimeline();
-    });
     context('Privileges: CRUD', () => {
+      before(() => {
+        login();
+        visit(OVERVIEW_URL);
+      });
+
       it('toggle create timeline ', () => {
         createNewTimeline();
         addNameAndDescriptionToTimeline(getTimeline());
@@ -88,6 +91,7 @@ describe('Timelines', (): void => {
         login(ROLES.reader);
         visit(OVERVIEW_URL, undefined, ROLES.reader);
       });
+
       it('should not be able to create/update timeline ', () => {
         createNewTimeline();
         cy.get(TIMELINE_PANEL).should('be.visible');
@@ -103,19 +107,15 @@ describe('Timelines', (): void => {
   });
 
   describe('Creates a timeline by clicking untitled timeline from bottom bar', () => {
-    after(() => {
-      closeTimeline();
-    });
-
     before(() => {
       login();
+    });
+
+    beforeEach(() => {
       visit(OVERVIEW_URL);
       openTimelineUsingToggle();
       addNameAndDescriptionToTimeline(getTimeline());
       populateTimeline();
-    });
-
-    beforeEach(() => {
       goToQueryTab();
     });
 

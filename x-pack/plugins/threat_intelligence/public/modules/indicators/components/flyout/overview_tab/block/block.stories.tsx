@@ -21,14 +21,14 @@ const mockIndicator = generateMockIndicator();
 
 export function Default() {
   const mockField = 'threat.indicator.ip';
-  const kqlBarIntegration = {
+  const context = {
     kqlBarIntegration: false,
   };
 
   return (
     <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={{} as any}>
-        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+        <IndicatorsFlyoutContext.Provider value={context}>
           <IndicatorBlock indicator={mockIndicator} field={mockField} />
         </IndicatorsFlyoutContext.Provider>
       </IndicatorsFiltersContext.Provider>
@@ -38,14 +38,14 @@ export function Default() {
 
 export function NoFilterButtons() {
   const mockField = 'threat.indicator.ip';
-  const kqlBarIntegration = {
+  const context = {
     kqlBarIntegration: true,
   };
 
   return (
     <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={{} as any}>
-        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+        <IndicatorsFlyoutContext.Provider value={context}>
           <IndicatorBlock indicator={mockIndicator} field={mockField} />
         </IndicatorsFlyoutContext.Provider>
       </IndicatorsFiltersContext.Provider>

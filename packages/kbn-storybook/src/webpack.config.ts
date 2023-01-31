@@ -85,7 +85,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         {
           test: /\.peggy$/,
           use: {
-            loader: '@kbn/peggy-loader',
+            loader: require.resolve('@kbn/peggy-loader'),
           },
         },
         {
@@ -98,7 +98,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
               loader: 'postcss-loader',
               options: {
                 postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                  config: require.resolve('@kbn/optimizer/postcss.config'),
                 },
               },
             },
@@ -151,8 +151,9 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
 
       // move the plugins to the top of the preset array so they will run after the typescript preset
       options.presets = [
+        require.resolve('@kbn/babel-preset/common_preset'),
         {
-          plugins: [...plugins, require.resolve('@kbn/babel-plugin-synthetic-packages')],
+          plugins: [...plugins, require.resolve('@kbn/babel-plugin-package-imports')],
         },
         ...(options.presets as Preset[]).filter(isDesiredPreset).map((preset) => {
           const tsPreset = getTsPreset(preset);

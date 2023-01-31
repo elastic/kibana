@@ -59,6 +59,7 @@ const findTestUtils = (
         name: 'abc',
         tags: ['foo'],
         rule_type_id: 'test.noop',
+        running: false,
         consumer: 'alertsFixture',
         schedule: { interval: '1m' },
         enabled: true,
@@ -327,6 +328,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           createdAt: match.createdAt,
           updatedAt: match.updatedAt,
           executionStatus: match.executionStatus,
+          running: false,
           ...(match.nextRun ? { nextRun: match.nextRun } : {}),
           ...(match.lastRun ? { lastRun: match.lastRun } : {}),
         });

@@ -9,15 +9,15 @@ import { createAction } from 'redux-actions';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { AsyncAction, AsyncActionOptionalPayload } from './types';
 
-export function createAsyncAction<Payload, SuccessPayload>(
+export function createAsyncAction<Payload, SuccessPayload, ErrorPayload = IHttpFetchError>(
   actionStr: string
-): AsyncActionOptionalPayload<Payload, SuccessPayload>;
-export function createAsyncAction<Payload, SuccessPayload>(
+): AsyncActionOptionalPayload<Payload, SuccessPayload, ErrorPayload>;
+export function createAsyncAction<Payload, SuccessPayload, ErrorPayload = IHttpFetchError>(
   actionStr: string
-): AsyncAction<Payload, SuccessPayload> {
+): AsyncAction<Payload, SuccessPayload, ErrorPayload> {
   return {
     get: createAction<Payload>(actionStr),
     success: createAction<SuccessPayload>(`${actionStr}_SUCCESS`),
-    fail: createAction<IHttpFetchError>(`${actionStr}_FAIL`),
+    fail: createAction<ErrorPayload>(`${actionStr}_FAIL`),
   };
 }

@@ -56,7 +56,8 @@ export async function createApmTelemetry({
     },
   });
 
-  const savedObjectsClient = await getInternalSavedObjectsClient(core);
+  const [coreStart] = await core.getStartServices();
+  const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
   const indices = await getApmIndices({ config, savedObjectsClient });
   const telemetryClient = await getTelemetryClient({ core });
 

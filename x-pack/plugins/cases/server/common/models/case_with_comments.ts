@@ -182,10 +182,9 @@ export class CaseCommentModel {
   ) {
     const { id, version, ...queryRestAttributes } = updateRequest;
 
-    await this.params.services.userActionService.createUserAction({
+    await this.params.services.userActionService.creator.createUserAction({
       type: ActionTypes.comment,
       action: Actions.update,
-      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
       caseId: this.caseInfo.id,
       attachmentId: comment.id,
       payload: { attachment: queryRestAttributes },
@@ -336,10 +335,9 @@ export class CaseCommentModel {
     comment: SavedObject<CommentAttributes>,
     req: CommentRequest
   ) {
-    await this.params.services.userActionService.createUserAction({
+    await this.params.services.userActionService.creator.createUserAction({
       type: ActionTypes.comment,
       action: Actions.create,
-      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
       caseId: this.caseInfo.id,
       attachmentId: comment.id,
       payload: {
@@ -351,8 +349,7 @@ export class CaseCommentModel {
   }
 
   private async bulkCreateCommentUserAction(attachments: Array<{ id: string } & CommentRequest>) {
-    await this.params.services.userActionService.bulkCreateAttachmentCreation({
-      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
+    await this.params.services.userActionService.creator.bulkCreateAttachmentCreation({
       caseId: this.caseInfo.id,
       attachments: attachments.map(({ id, ...attachment }) => ({
         id,

@@ -19,3 +19,12 @@ exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
   type="logoElastic"
 />
 `;
+
+exports[`kbnLoadingIndicator shows EuiLoadingSpinner when showPlainSpinner is true 1`] = `
+<EuiLoadingSpinner
+  aria-hidden={false}
+  aria-label="Loading content"
+  data-test-subj="globalLoadingIndicator"
+  size="l"
+/>
+`;

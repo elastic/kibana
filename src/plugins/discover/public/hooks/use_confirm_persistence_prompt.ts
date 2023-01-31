@@ -7,31 +7,39 @@
  */
 
 import { useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 import { showConfirmPanel } from './show_confirm_panel';
 import { persistSavedSearch } from '../application/main/utils/persist_saved_search';
+import { DiscoverStateContainer } from '../application/main/services/discover_state';
+import { updateFiltersReferences } from '../application/main/utils/update_filter_references';
 
-export const useConfirmPersistencePrompt = (
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>
-) => {
+export const useConfirmPersistencePrompt = (stateContainer: DiscoverStateContainer) => {
   const services = useDiscoverServices();
 
-  const persistDataView: (dataView: DataView) => Promise<DataView> = useCallback(
-    async (dataView) => {
+  const persistDataView: (adHocDataView: DataView) => Promise<DataView> = useCallback(
+    async (adHocDataView) => {
       try {
-        const updatedDataView = await updateAdHocDataViewId(dataView);
+        const persistedDataView = await services.dataViews.createAndSave({
+          ...adHocDataView.toSpec(),
+          id: uuidv4(),
+        });
+        services.dataViews.clearInstanceCache(adHocDataView.id);
 
-        const response = await services.dataViews.createAndSave(updatedDataView.toSpec());
+        updateFiltersReferences(adHocDataView, persistedDataView);
+
+        stateContainer.actions.removeAdHocDataViewById(adHocDataView.id!);
+        await stateContainer.replaceUrlAppState({ index: persistedDataView.id });
 
         const message = i18n.translate('discover.dataViewPersist.message', {
           defaultMessage: "Saved '{dataViewName}'",
-          values: { dataViewName: response.getName() },
+          values: { dataViewName: persistedDataView.getName() },
         });
         services.toastNotifications.addSuccess(message);
-        return response;
+        return persistedDataView;
       } catch (error) {
         services.toastNotifications.addDanger({
           title: i18n.translate('discover.dataViewPersistError.title', {
@@ -42,7 +50,7 @@ export const useConfirmPersistencePrompt = (
         throw new Error(error);
       }
     },
-    [services.dataViews, services.toastNotifications, updateAdHocDataViewId]
+    [services.dataViews, services.toastNotifications, stateContainer]
   );
 
   const openConfirmSavePrompt: (dataView: DataView) => Promise<DataView | undefined> = useCallback(
@@ -61,7 +69,7 @@ export const useConfirmPersistencePrompt = (
   );
 
   const onUpdateSuccess = useCallback(
-    (id: string, savedSearch: SavedSearch) => {
+    (savedSearch: SavedSearch) => {
       services.toastNotifications.addSuccess({
         title: i18n.translate('discover.notifications.updateSavedSearchTitle', {
           defaultMessage: `Search '{savedSearchTitle}' updated with saved data view`,
@@ -94,7 +102,7 @@ export const useConfirmPersistencePrompt = (
     ({ savedSearch, dataView, state }) => {
       return persistSavedSearch(savedSearch, {
         dataView,
-        onSuccess: (id) => onUpdateSuccess(id, savedSearch),
+        onSuccess: () => onUpdateSuccess(savedSearch),
         onError: (error) => onUpdateError(error, savedSearch),
         state,
         saveOptions: {},

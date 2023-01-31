@@ -31,8 +31,8 @@ describe('WaterfallContainer', () => {
   it('expands and contracts the accordion', () => {
     const { getAllByRole } = render(<Example />);
     const buttons = getAllByRole('button');
-    const parentItem = buttons[2];
-    const childItem = buttons[3];
+    const parentItem = buttons[1];
+    const childItem = buttons[2];
 
     parentItem.click();
 

@@ -137,6 +137,35 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       });
     });
 
+    describe('tags limit', () => {
+      it('should be 50 be default', async () => {
+        const numOfAlerts = 3;
+        const numOfTagsPerAlert = 30;
+
+        await Promise.all(
+          [...Array(numOfAlerts)].map(async (_, alertIndex) => {
+            const okAlertId = await createTestAlert(
+              {
+                rule_type_id: 'test.noop',
+                schedule: { interval: '1s' },
+                tags: [...Array(numOfTagsPerAlert)].map(
+                  (__, i) => `tag-${i + numOfTagsPerAlert * alertIndex}`
+                ),
+              },
+              'ok'
+            );
+            objectRemover.add(Spaces.space1.id, okAlertId, 'rule', 'alerting');
+          })
+        );
+
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
+        );
+
+        expect(response.body.rule_tags.length).to.eql(50);
+      });
+    });
+
     describe('legacy', () => {
       it('should aggregate alert status totals', async () => {
         const NumOkAlerts = 4;

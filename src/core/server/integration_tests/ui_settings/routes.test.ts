@@ -55,5 +55,32 @@ describe('ui settings service', () => {
         );
       });
     });
+
+    describe('global', () => {
+      describe('set', () => {
+        it('validates value', async () => {
+          const response = await request
+            .post(root, '/api/kibana/global_settings/custom')
+            .send({ value: 100 })
+            .expect(400);
+
+          expect(response.body.message).toBe(
+            '[validation [custom]]: expected value of type [string] but got [number]'
+          );
+        });
+      });
+      describe('set many', () => {
+        it('validates value', async () => {
+          const response = await request
+            .post(root, '/api/kibana/global_settings')
+            .send({ changes: { custom: 100, foo: 'bar' } })
+            .expect(400);
+
+          expect(response.body.message).toBe(
+            '[validation [custom]]: expected value of type [string] but got [number]'
+          );
+        });
+      });
+    });
   });
 });

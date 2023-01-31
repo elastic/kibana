@@ -25,8 +25,8 @@ import {
   VectorLayerDescriptor,
 } from '@kbn/maps-plugin/common';
 import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
+import { isDefined } from '@kbn/ml-is-defined';
 import { useMlKibana } from '../contexts/kibana';
-import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
 import { AnomaliesTableRecord } from '../../../common/types/anomalies';
 

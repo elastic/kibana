@@ -325,6 +325,10 @@ experimental[] Indicates which roles to configure the {kib} process with, which 
 run {kib} in different modes. Valid options are `background_tasks` and `ui`,
 or `*` to select all roles. *Default: `*`*
 
+`notifications.connectors.default.email`::
+Specifies the name of the connector that is used to send email notifications.
+In {ecloud}, the default value is `elastic-cloud-email`.
+
 [[path-data]] `path.data`::
 The path where {kib} stores persistent data
 not saved in {es}. *Default: `data`*
@@ -388,7 +392,7 @@ This setting may not be used when <<server-compression, `server.compression.enab
 
 `server.compression.brotli.enabled`::
 Set to `true` to enable brotli (br) compression format.
-Note: browsers not supporting brotli compression will fallback to using gzip instead. 
+Note: browsers not supporting brotli compression will fallback to using gzip instead.
 This setting may not be used when <<server-compression, `server.compression.enabled`>> is set to `false`. *Default: `false`*
 
 [[server-securityResponseHeaders-strictTransportSecurity]] `server.securityResponseHeaders.strictTransportSecurity`::
@@ -412,11 +416,15 @@ experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web
 is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
 To disable, set to `null`. *Default:* `null`
 
-[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`:: 
+[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`::
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
 {kib} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors:
 'self'` directive to the `Content-Security-Policy` response header and adds the `X-Frame-Options: SAMEORIGIN` response header. *Default:* `false`
+
+[[server-securityResponseHeaders-crossOriginOpenerPolicy]] `server.securityResponseHeaders.crossOriginOpenerPolicy`::
+Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy[`Cross-Origin-Opener-Policy`] header is used in all
+responses to the client from the {kib} server, and specifies what value is used. Allowed values are `unsafe-none`, `same-origin-allow-popups`, `same-origin`, or `null`. To disable, set to `null`. *Default:* `"same-origin"`
 
 `server.customResponseHeaders` {ess-icon}::
 Header names and values to send on all responses to the client from the {kib} server. *Default: `{}`*
@@ -557,7 +565,7 @@ When `true`, users are able to change the telemetry setting at a later time in
 
 [[settings-telemetry-optIn]] `telemetry.optIn`::
 Reporting your cluster statistics helps
-us improve your user experience. Your data is never shared with anyone.
+us improve your user experience.
 Set to `true` to allow telemetry data to be sent to Elastic.
 When `false`, the telemetry data is never sent to Elastic. +
 +
@@ -577,7 +585,7 @@ Set this value to false to disable the Cross-Cluster Replication UI.
 [[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`::
 Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
 +
-When you create visualizations using the *Lens* drag-and-drop editor, you can use the toolbar to open and explore your data in *Discover*. For more information, check out <<explore-lens-data-in-discover, Explore the data in Discover>>. 
+When you create visualizations using the *Lens* drag-and-drop editor, you can use the toolbar to open and explore your data in *Discover*. For more information, check out <<explore-lens-data-in-discover, Explore the data in Discover>>.
 
 [[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.exploreDataInChart.enabled`::
 Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*

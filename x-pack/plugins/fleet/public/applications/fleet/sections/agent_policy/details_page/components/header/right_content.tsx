@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -24,6 +24,7 @@ import { useLink } from '../../../../../hooks';
 import type { AgentPolicy, GetAgentStatusResponse } from '../../../../../types';
 import { AgentPolicyActionMenu, LinkedAgentCount } from '../../../components';
 import { AddAgentHelpPopover } from '../../../../../components';
+import { FLEET_SERVER_PACKAGE } from '../../../../../../../../common/constants';
 
 export interface HeaderRightContentProps {
   isLoading: boolean;
@@ -55,12 +56,31 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
   const { getPath } = useLink();
   const history = useHistory();
 
+  const isFleetServerPolicy = useMemo(
+    () =>
+      agentPolicy?.package_policies?.some(
+        (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
+      ),
+    [agentPolicy]
+  );
+
   if (!agentPolicy) {
     return null;
   }
+
   const addAgentLink = (
     <EuiLink onClick={addAgent}>
-      <FormattedMessage id="xpack.fleet.policyDetails.addAgentButton" defaultMessage="Add agent" />
+      {isFleetServerPolicy ? (
+        <FormattedMessage
+          id="xpack.fleet.policyDetails.addFleetServerButton"
+          defaultMessage="Add Fleet Server"
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.fleet.policyDetails.addAgentButton"
+          defaultMessage="Add agent"
+        />
+      )}
     </EuiLink>
   );
 

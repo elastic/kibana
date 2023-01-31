@@ -17,7 +17,7 @@ import {
   EuiDataGridStyle,
   EuiLoadingContent,
 } from '@elastic/eui';
-import { useSorting, usePagination, useBulkActions } from './hooks';
+import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps } from '../../../types';
 import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
@@ -28,7 +28,7 @@ import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
-const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
+
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const GridStyles: EuiDataGridStyle = {
   border: 'none',
@@ -50,16 +50,17 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
-  const { useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }) } =
-    props.alertsTableConfiguration;
-  const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
-    useActionsColumn();
+  const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
+    useActionsColumn({
+      options: props.alertsTableConfiguration.useActionsColumn,
+    });
 
   const {
     isBulkActionsColumnActive,
     getBulkActionsLeadingControlColumn,
     bulkActionsState,
     bulkActions,
+    setIsBulkActionsLoading,
   } = useBulkActions({
     alerts,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
@@ -111,6 +112,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       onToggleColumn,
       onResetColumns,
       browserFields,
+      controls: props.controls,
+      setIsBulkActionsLoading,
     });
   }, [
     bulkActionsState,
@@ -118,11 +121,13 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alertsCount,
     alertsData.alerts,
     updatedAt,
-    browserFields,
     isLoading,
     visibleColumns,
     onToggleColumn,
     onResetColumns,
+    browserFields,
+    props.controls,
+    setIsBulkActionsLoading,
   ])();
 
   const leadingControlColumns = useMemo(() => {
@@ -168,7 +173,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                 )}
                 {renderCustomActionsRow &&
                   alerts[visibleRowIndex] &&
-                  renderCustomActionsRow(alerts[visibleRowIndex], handleFlyoutAlert, props.id)}
+                  renderCustomActionsRow({
+                    alert: alerts[visibleRowIndex],
+                    setFlyoutAlert: handleFlyoutAlert,
+                    id: props.id,
+                    setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
+                  })}
               </EuiFlexGroup>
             );
           },
@@ -193,6 +203,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     props.showExpandToDetails,
     renderCustomActionsRow,
     setFlyoutAlertIndex,
+    getSetIsActionLoadingCallback,
   ]);
 
   useEffect(() => {

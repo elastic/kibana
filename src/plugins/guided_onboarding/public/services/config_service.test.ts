@@ -7,10 +7,10 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
+import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { API_BASE_PATH, testGuideConfig } from '../../common';
+import { API_BASE_PATH } from '../../common';
 import {
-  testGuide,
   testGuideNotActiveState,
   testGuideStep1InProgressState,
   testGuideStep2InProgressState,
@@ -34,21 +34,21 @@ describe('GuidedOnboarding ConfigService', () => {
   });
   describe('getGuideConfig', () => {
     it('sends only one request to the get configs API', async () => {
-      await configService.getGuideConfig(testGuide);
-      await configService.getGuideConfig(testGuide);
+      await configService.getGuideConfig(testGuideId);
+      await configService.getGuideConfig(testGuideId);
       expect(httpClient.get).toHaveBeenCalledTimes(1);
-      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/configs/${testGuide}`);
+      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/configs/${testGuideId}`);
     });
 
     it('returns undefined if the config is not found', async () => {
       httpClient.get.mockRejectedValueOnce(new Error('Not found'));
       configService.setup(httpClient);
-      const config = await configService.getGuideConfig(testGuide);
+      const config = await configService.getGuideConfig(testGuideId);
       expect(config).toBeUndefined();
     });
 
     it('returns the config for the guide', async () => {
-      const config = await configService.getGuideConfig(testGuide);
+      const config = await configService.getGuideConfig(testGuideId);
       expect(config).toHaveProperty('title');
     });
   });

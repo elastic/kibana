@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { ValuesType } from 'utility-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -98,7 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .timestamp(timestamp);
         });
 
-      await synthtraceClient.index(eventsWithinTimerange.merge(eventsOutsideOfTimerange));
+      await synthtraceClient.index([eventsWithinTimerange, eventsOutsideOfTimerange]);
 
       await createAndRunApmMlJobs({ es, ml, environments: ['production', 'development'] });
     });

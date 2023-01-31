@@ -55,6 +55,7 @@ import {
   TOASTER_ERROR_BTN,
   MODAL_CONFIRMATION_CANCEL_BTN,
   MODAL_CONFIRMATION_BODY,
+  RULE_SEARCH_FIELD,
 } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import { ALL_ACTIONS } from '../screens/rule_details';
@@ -160,6 +161,18 @@ export const exportFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(EXPORT_ACTION_BTN).click();
   cy.get(EXPORT_ACTION_BTN).should('not.exist');
+};
+
+export const filterBySearchTerm = (term: string) => {
+  cy.log(`Filter rules by search term: "${term}"`);
+  cy.get(RULE_SEARCH_FIELD)
+    .type(term, { waitForAnimations: true })
+    .trigger('search', { waitForAnimations: true });
+};
+
+export const filterByElasticRules = () => {
+  cy.get(ELASTIC_RULES_BTN).click();
+  waitForRulesTableToBeRefreshed();
 };
 
 export const filterByCustomRules = () => {
@@ -346,6 +359,18 @@ export const importRules = (rulesFile: string) => {
   cy.get(INPUT_FILE).should('not.exist');
 };
 
+export const expectNumberOfRules = (expectedNumber: number) => {
+  cy.get(RULES_TABLE).then(($table) => {
+    const rulesRow = cy.wrap($table.find(RULES_ROW));
+
+    rulesRow.should('have.length', expectedNumber);
+  });
+};
+
+export const expectToContainRule = (ruleName: string) => {
+  cy.get(RULES_TABLE).find(RULES_ROW).should('include.text', ruleName);
+};
+
 const selectOverwriteRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX)
     .pipe(($el) => $el.trigger('click'))
@@ -412,11 +437,6 @@ export const mockGlobalClock = () => {
    */
 
   cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
-};
-
-export const switchToElasticRules = () => {
-  cy.get(ELASTIC_RULES_BTN).click();
-  waitForRulesTableToBeRefreshed();
 };
 
 export const bulkExportRules = () => {

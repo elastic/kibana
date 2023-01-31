@@ -11,8 +11,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { type ChangePoint, type FieldValuePair, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
+import { type ChangePoint, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
+import type { ChangePointDuplicateGroup, ItemsetResult } from '../../../common/types';
 
 const FREQUENT_ITEMS_FIELDS_LIMIT = 15;
 
@@ -34,10 +36,6 @@ export function dropDuplicates(cps: ChangePoint[], uniqueFields: Array<keyof Cha
   return uniqWith(cps, (a, b) => isEqual(pick(a, uniqueFields), pick(b, uniqueFields)));
 }
 
-interface ChangePointDuplicateGroup {
-  keys: Pick<ChangePoint, keyof ChangePoint>;
-  group: ChangePoint[];
-}
 export function groupDuplicates(cps: ChangePoint[], uniqueFields: Array<keyof ChangePoint>) {
   const groups: ChangePointDuplicateGroup[] = [];
 
@@ -225,13 +223,4 @@ export async function fetchFrequentItems(
     df: results,
     totalDocCount: totalDocCountFi,
   };
-}
-
-export interface ItemsetResult {
-  set: Record<FieldValuePair['fieldName'], FieldValuePair['fieldValue']>;
-  size: number;
-  maxPValue: number;
-  doc_count: number;
-  support: number;
-  total_doc_count: number;
 }

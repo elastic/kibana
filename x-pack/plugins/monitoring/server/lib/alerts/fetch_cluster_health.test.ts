@@ -55,10 +55,15 @@ describe('fetchClusterHealth', () => {
   });
   it('should call ES with correct query', async () => {
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    await fetchClusterHealth(esClient, [
-      { clusterUuid: '1', clusterName: 'foo1' },
-      { clusterUuid: '2', clusterName: 'foo2' },
-    ]);
+    await fetchClusterHealth(
+      esClient,
+      [
+        { clusterUuid: '1', clusterName: 'foo1' },
+        { clusterUuid: '2', clusterName: 'foo2' },
+      ],
+      undefined,
+      '1h'
+    );
     expect(esClient.search).toHaveBeenCalledWith({
       index:
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.cluster_stats-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*',
@@ -90,7 +95,7 @@ describe('fetchClusterHealth', () => {
                   minimum_should_match: 1,
                 },
               },
-              { range: { timestamp: { gte: 'now-2m' } } },
+              { range: { timestamp: { gte: 'now-1h' } } },
             ],
           },
         },

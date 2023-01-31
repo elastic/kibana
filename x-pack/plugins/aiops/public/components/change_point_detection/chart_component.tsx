@@ -6,12 +6,15 @@
  */
 
 import React, { FC, useMemo } from 'react';
+
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
-import { useChangePointDetectionContext } from './change_point_detection_context';
+import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
+
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useTimeRangeUpdates } from '../../hooks/use_time_filter';
+
+import { useChangePointDetectionContext } from './change_point_detection_context';
 import { fnOperationTypeMapping } from './constants';
 
 export interface ChartComponentProps {

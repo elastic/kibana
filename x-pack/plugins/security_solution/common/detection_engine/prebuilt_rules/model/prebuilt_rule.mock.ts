@@ -19,6 +19,26 @@ export const getPrebuiltRuleMock = (): PrebuiltRuleToInstall => ({
   version: 1,
 });
 
+export const getPrebuiltRuleWithExceptionsMock = (): PrebuiltRuleToInstall => ({
+  description: 'A rule with an exception list',
+  name: 'A rule with an exception list',
+  query: 'user.name: root or user.name: admin',
+  severity: 'high',
+  type: 'query',
+  risk_score: 42,
+  language: 'kuery',
+  rule_id: 'rule-with-exceptions',
+  exceptions_list: [
+    {
+      id: 'endpoint_list',
+      list_id: 'endpoint_list',
+      namespace_type: 'agnostic',
+      type: 'endpoint',
+    },
+  ],
+  version: 2,
+});
+
 export const getPrebuiltThreatMatchRuleMock = (): PrebuiltRuleToInstall => ({
   description: 'some description',
   name: 'Query with a rule id',

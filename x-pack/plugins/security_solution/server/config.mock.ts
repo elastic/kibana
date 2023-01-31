@@ -24,10 +24,9 @@ export const createMockConfig = (): ConfigType => {
     maxTimelineImportPayloadBytes: 10485760,
     enableExperimental,
     packagerTaskInterval: '60s',
+    prebuiltRulesPackageVersion: '',
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
-    prebuiltRulesFromFileSystem: true,
-    prebuiltRulesFromSavedObjects: false,
 
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
   };

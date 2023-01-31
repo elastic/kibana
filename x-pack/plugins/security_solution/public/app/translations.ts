@@ -54,7 +54,7 @@ export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
 });
 
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
-  defaultMessage: 'Rule Exceptions',
+  defaultMessage: 'Shared Exception Lists',
 });
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
@@ -129,24 +129,6 @@ export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
 
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',
-});
-
-export const GO_TO_DOCUMENTATION = i18n.translate(
-  'xpack.securitySolution.goToDocumentationButton',
-  {
-    defaultMessage: 'View documentation',
-  }
-);
-
-export const NO_PERMISSIONS_MSG = (subPluginKey: string) =>
-  i18n.translate('xpack.securitySolution.noPermissionsMessage', {
-    values: { subPluginKey },
-    defaultMessage:
-      'To view {subPluginKey}, you must update privileges. For more information, contact your Kibana administrator.',
-  });
-
-export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPermissionsTitle', {
-  defaultMessage: 'Privileges required',
 });
 
 export const THREAT_INTELLIGENCE = i18n.translate(

@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { LegendItemListener, YDomainRange } from '@elastic/charts';
+import {
+  AnnotationDomainType,
+  LegendItemListener,
+  LineAnnotation,
+  Position,
+  YDomainRange,
+} from '@elastic/charts';
 import React from 'react';
+import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
+import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
@@ -15,6 +25,7 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { unit } from '../../../utils/style';
 import { getTimeZone } from './helper/timezone';
 import { TimeseriesChart } from './timeseries_chart';
+import { useTheme } from '../../../hooks/use_theme';
 
 interface AnomalyTimeseries extends ServiceAnomalyTimeseries {
   color?: string;
@@ -62,7 +73,28 @@ export function TimeseriesChartWithContext({
   );
   const { core } = useApmPluginContext();
   const timeZone = getTimeZone(core.uiSettings);
+  const theme = useTheme();
+  const annotationColor = theme.eui.euiColorSuccess;
+  const { annotations } = useAnnotationsContext();
 
+  const getAnnotations = () => (
+    <LineAnnotation
+      id="annotations"
+      domainType={AnnotationDomainType.XDomain}
+      dataValues={annotations.map((annotation) => ({
+        dataValue: annotation['@timestamp'],
+        header: asAbsoluteDateTime(annotation['@timestamp']),
+        details: `${i18n.translate('xpack.apm.chart.annotation.version', {
+          defaultMessage: 'Version',
+        })} ${annotation.text}`,
+      }))}
+      style={{
+        line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
+      }}
+      marker={<EuiIcon type="dot" color={annotationColor} />}
+      markerPosition={Position.Top}
+    />
+  );
   return (
     <TimeseriesChart
       id={id}
@@ -73,6 +105,7 @@ export function TimeseriesChartWithContext({
       yLabelFormat={yLabelFormat}
       yTickFormat={yTickFormat}
       showAnnotations={showAnnotations}
+      annotations={[getAnnotations()]}
       yDomain={yDomain}
       anomalyTimeseries={anomalyTimeseries}
       customTheme={customTheme}

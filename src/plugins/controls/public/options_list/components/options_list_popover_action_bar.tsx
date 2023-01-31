@@ -112,7 +112,11 @@ export const OptionsListPopoverActionBar = ({
                 display={showOnlySelected ? 'base' : 'empty'}
                 onClick={() => setShowOnlySelected(!showOnlySelected)}
                 data-test-subj="optionsList-control-show-only-selected"
-                aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                aria-label={
+                  showOnlySelected
+                    ? OptionsListStrings.popover.getAllOptionsButtonTitle()
+                    : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
+                }
               />
             </EuiToolTip>
           </EuiFlexItem>

@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { join } from 'path';
+import loadJsonFile from 'load-json-file';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   createTestEsCluster,
   CreateTestEsClusterOptions,
@@ -19,7 +21,7 @@ import {
   kibanaServerTestUser,
   systemIndicesSuperuser,
 } from '@kbn/test';
-import { CliArgs, Env } from '@kbn/config';
+import { CliArgs, Env, RawPackageInfo } from '@kbn/config';
 
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
@@ -45,22 +47,33 @@ const DEFAULTS_SETTINGS = {
 
 export function createRootWithSettings(
   settings: Record<string, any>,
-  cliArgs: Partial<CliArgs> = {}
+  cliArgs: Partial<CliArgs> = {},
+  customKibanaVersion?: string
 ) {
-  const env = Env.createDefault(REPO_ROOT, {
-    configs: [],
-    cliArgs: {
-      dev: false,
-      watch: false,
-      basePath: false,
-      runExamples: false,
-      oss: true,
-      disableOptimizer: true,
-      cache: true,
-      dist: false,
-      ...cliArgs,
+  let pkg: RawPackageInfo | undefined;
+  if (customKibanaVersion) {
+    pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+    pkg.version = customKibanaVersion;
+  }
+
+  const env = Env.createDefault(
+    REPO_ROOT,
+    {
+      configs: [],
+      cliArgs: {
+        dev: false,
+        watch: false,
+        basePath: false,
+        runExamples: false,
+        oss: true,
+        disableOptimizer: true,
+        cache: true,
+        dist: false,
+        ...cliArgs,
+      },
     },
-  });
+    pkg
+  );
 
   return new Root(
     {
@@ -103,7 +116,11 @@ export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
  *  @param {Object} [settings={}] Any config overrides for this instance.
  *  @returns {Root}
  */
-export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+export function createRootWithCorePlugins(
+  settings = {},
+  cliArgs: Partial<CliArgs> = {},
+  customKibanaVersion?: string
+) {
   const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
     elasticsearch: {
       hosts: [esTestConfig.getUrl()],
@@ -144,7 +161,8 @@ export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArg
 
   return createRootWithSettings(
     defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS),
-    cliArgs
+    cliArgs,
+    customKibanaVersion
   );
 }
 

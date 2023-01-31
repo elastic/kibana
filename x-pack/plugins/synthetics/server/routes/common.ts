@@ -58,22 +58,19 @@ export const getMonitors = (
     searchAfter,
   } = request as MonitorsQuery;
 
-  const locationFilter = parseLocationFilter(syntheticsService.locations, locations);
-
-  const filterStr = [
+  const filterStr = getMonitorFilters({
     filter,
-    getKqlFilter({ field: 'tags', values: tags }),
-    getKqlFilter({ field: 'type', values: monitorType }),
-    getKqlFilter({ field: 'locations.id', values: locationFilter }),
-  ]
-    .filter((f) => !!f)
-    .join(' AND ');
+    monitorTypes: monitorType,
+    tags,
+    locations,
+    serviceLocations: syntheticsService.locations,
+  });
 
   return savedObjectsClient.find({
     type: syntheticsMonitorType,
     perPage,
     page,
-    sortField: sortField === 'schedule.keyword' ? 'schedule.number' : sortField,
+    sortField: parseMappingKey(sortField),
     sortOrder,
     searchFields: SEARCH_FIELDS,
     search: query ? `${query}*` : undefined,
@@ -81,6 +78,33 @@ export const getMonitors = (
     fields,
     searchAfter,
   });
+};
+
+export const getMonitorFilters = ({
+  tags,
+  ports,
+  filter,
+  locations,
+  monitorTypes,
+  serviceLocations,
+}: {
+  filter?: string;
+  tags?: string | string[];
+  monitorTypes?: string | string[];
+  locations?: string | string[];
+  ports?: string | string[];
+  serviceLocations: ServiceLocations;
+}) => {
+  const locationFilter = parseLocationFilter(serviceLocations, locations);
+
+  return [
+    filter,
+    getKqlFilter({ field: 'tags', values: tags }),
+    getKqlFilter({ field: 'type', values: monitorTypes }),
+    getKqlFilter({ field: 'locations.id', values: locationFilter }),
+  ]
+    .filter((f) => !!f)
+    .join(' AND ');
 };
 
 export const getKqlFilter = ({
@@ -146,3 +170,14 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     !!status?.length
   );
 };
+
+function parseMappingKey(key: string | undefined) {
+  switch (key) {
+    case 'schedule.keyword':
+      return 'schedule.number';
+    case 'project_id.keyword':
+      return 'project_id';
+    default:
+      return key;
+  }
+}

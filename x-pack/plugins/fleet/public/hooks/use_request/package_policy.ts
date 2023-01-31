@@ -16,7 +16,7 @@ import type {
 } from '../../types';
 import type {
   DeletePackagePoliciesRequest,
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   GetPackagePoliciesRequest,
   GetPackagePoliciesResponse,
   GetOnePackagePolicyResponse,
@@ -47,7 +47,7 @@ export const sendUpdatePackagePolicy = (
 };
 
 export const sendDeletePackagePolicy = (body: DeletePackagePoliciesRequest['body']) => {
-  return sendRequest<DeletePackagePoliciesResponse>({
+  return sendRequest<PostDeletePackagePoliciesResponse>({
     path: packagePolicyRouteService.getDeletePath(),
     method: 'post',
     body: JSON.stringify(body),

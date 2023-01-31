@@ -7,29 +7,23 @@
 
 import { ValidatedEmail, ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  getEmailConnectorType,
-  getIndexConnectorType,
-  getPagerDutyConnectorType,
-  getServerLogConnectorType,
-  getServiceNowITOMConnectorType,
-  getSlackConnectorType,
-  getTeamsConnectorType,
-  getWebhookConnectorType,
-  getOpsgenieConnectorType,
-  getXmattersConnectorType,
-} from './stack';
-
-import {
-  getCasesWebhookConnectorType,
-  getJiraConnectorType,
-  getResilientConnectorType,
-  getServiceNowITSMConnectorType,
-  getServiceNowSIRConnectorType,
-  getSwimlaneConnectorType,
-} from './cases';
-
-import { getTinesConnectorType } from './security';
+import { getCasesWebhookConnectorType } from './cases_webhook';
+import { getEmailConnectorType } from './email';
+import { getIndexConnectorType } from './es_index';
+import { getJiraConnectorType } from './jira';
+import { getOpsgenieConnectorType } from './opsgenie';
+import { getPagerDutyConnectorType } from './pagerduty';
+import { getResilientConnectorType } from './resilient';
+import { getServerLogConnectorType } from './server_log';
+import { getServiceNowITOMConnectorType } from './servicenow_itom';
+import { getServiceNowITSMConnectorType } from './servicenow_itsm';
+import { getServiceNowSIRConnectorType } from './servicenow_sir';
+import { getSlackConnectorType } from './slack';
+import { getSwimlaneConnectorType } from './swimlane';
+import { getTeamsConnectorType } from './teams';
+import { getTinesConnectorType } from './tines';
+import { getWebhookConnectorType } from './webhook';
+import { getXmattersConnectorType } from './xmatters';
 
 export interface RegistrationServices {
   validateEmailAddresses: (

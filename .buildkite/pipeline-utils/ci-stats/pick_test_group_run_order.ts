@@ -294,14 +294,14 @@ export async function pickTestGroupRunOrder() {
     groups: [
       {
         type: UNIT_TYPE,
-        defaultMin: 3,
+        defaultMin: 4,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
         names: jestUnitConfigs,
       },
       {
         type: INTEGRATION_TYPE,
-        defaultMin: 10,
+        defaultMin: 60,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
         names: jestIntegrationConfigs,
@@ -389,7 +389,7 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Tests',
             command: getRequiredEnv('JEST_UNIT_SCRIPT'),
             parallelism: unit.count,
-            timeout_in_minutes: 60,
+            timeout_in_minutes: 120,
             key: 'jest',
             agents: {
               queue: 'n2-4-spot',
@@ -409,7 +409,7 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Integration Tests',
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
             parallelism: integration.count,
-            timeout_in_minutes: 60,
+            timeout_in_minutes: 120,
             key: 'jest-integration',
             agents: {
               queue: 'n2-4-spot',
@@ -446,7 +446,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 60,
+                  timeout_in_minutes: 90,
                   agents: {
                     queue,
                   },

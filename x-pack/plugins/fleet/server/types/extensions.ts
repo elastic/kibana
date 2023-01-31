@@ -10,14 +10,19 @@ import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import type { DeepReadonly } from 'utility-types';
 
 import type {
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   NewPackagePolicy,
   UpdatePackagePolicy,
   PackagePolicy,
+  DeletePackagePoliciesResponse,
 } from '../../common/types';
 
 export type PostPackagePolicyDeleteCallback = (
-  deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>
+  packagePolicies: DeletePackagePoliciesResponse
+) => Promise<void>;
+
+export type PostPackagePolicyPostDeleteCallback = (
+  deletedPackagePolicies: DeepReadonly<PostDeletePackagePoliciesResponse>
 ) => Promise<void>;
 
 export type PostPackagePolicyCreateCallback = (
@@ -43,7 +48,12 @@ export type ExternalCallbackPostCreate = [
   'packagePolicyPostCreate',
   PostPackagePolicyPostCreateCallback
 ];
-export type ExternalCallbackDelete = ['postPackagePolicyDelete', PostPackagePolicyDeleteCallback];
+
+export type ExternalCallbackDelete = ['packagePolicyDelete', PostPackagePolicyDeleteCallback];
+export type ExternalCallbackPostDelete = [
+  'packagePolicyPostDelete',
+  PostPackagePolicyPostDeleteCallback
+];
 export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
 
 /**
@@ -53,6 +63,7 @@ export type ExternalCallback =
   | ExternalCallbackCreate
   | ExternalCallbackPostCreate
   | ExternalCallbackDelete
+  | ExternalCallbackPostDelete
   | ExternalCallbackUpdate;
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;

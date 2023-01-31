@@ -14,7 +14,7 @@ describe('ActionMenuContent', () => {
     const { getByRole, getByText } = render(<ActionMenuContent />);
 
     const settingsAnchor = getByRole('link', { name: 'Navigate to the Uptime settings page' });
-    expect(settingsAnchor.getAttribute('href')).toBe('/settings');
+    expect(settingsAnchor.getAttribute('href')).toBe('/settings?dateRangeStart=now-24h');
     expect(getByText('Settings'));
   });
 
@@ -27,16 +27,5 @@ describe('ActionMenuContent', () => {
 
     expect(analyzeAnchor.getAttribute('href')).toContain('/app/observability/exploratory-view');
     expect(getByText('Explore data'));
-  });
-
-  it('renders Add Data link', () => {
-    const { getByLabelText, getByText } = render(<ActionMenuContent />);
-
-    const addDataAnchor = getByLabelText('Navigate to a tutorial about adding Uptime data');
-
-    // this href value is mocked, so it doesn't correspond to the real link
-    // that Kibana core services will provide
-    expect(addDataAnchor.getAttribute('href')).toBe('/home#/tutorial/uptimeMonitors');
-    expect(getByText('Add data'));
   });
 });

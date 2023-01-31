@@ -9,8 +9,9 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
-import { combineQueries } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import type { TableId } from '../../../../../common/types';
+import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -22,7 +23,6 @@ import { dispatchUpdateTimeline } from '../../../../timelines/components/open_ti
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
-import type { TableId } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
@@ -230,11 +230,15 @@ export const useAddBulkToTimelineAction = ({
       : INVESTIGATE_BULK_IN_TIMELINE;
   }, [disableActionOnSelectAll]);
 
-  return {
-    label: investigateInTimelineTitle,
-    key: 'add-bulk-to-timeline',
-    'data-test-subj': 'investigate-bulk-in-timeline',
-    disableOnQuery: disableActionOnSelectAll,
-    onClick: onActionClick,
-  };
+  const memoized = useMemo(
+    () => ({
+      label: investigateInTimelineTitle,
+      key: 'add-bulk-to-timeline',
+      'data-test-subj': 'investigate-bulk-in-timeline',
+      disableOnQuery: disableActionOnSelectAll,
+      onClick: onActionClick,
+    }),
+    [disableActionOnSelectAll, investigateInTimelineTitle, onActionClick]
+  );
+  return memoized;
 };

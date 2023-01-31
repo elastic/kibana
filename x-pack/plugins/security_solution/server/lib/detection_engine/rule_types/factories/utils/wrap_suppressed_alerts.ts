@@ -21,6 +21,7 @@ import type {
 } from '../../../../../../common/detection_engine/schemas/alerts';
 import type { ConfigType } from '../../../../../config';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
+import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import type { SignalSource } from '../../../signals/types';
 import { buildBulkBody } from './build_bulk_body';
 import type { BuildReasonMessage } from '../../../signals/reason_formatters';
@@ -41,6 +42,7 @@ export const wrapSuppressedAlerts = ({
   indicesToQuery,
   buildReasonMessage,
   alertTimestampOverride,
+  ruleExecutionLogger,
 }: {
   suppressionBuckets: SuppressionBuckets[];
   spaceId: string | null | undefined;
@@ -49,6 +51,7 @@ export const wrapSuppressedAlerts = ({
   indicesToQuery: string[];
   buildReasonMessage: BuildReasonMessage;
   alertTimestampOverride: Date | undefined;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Array<WrappedFieldsLatest<SuppressionFieldsLatest>> => {
   return suppressionBuckets.map((bucket) => {
     const id = objectHash([
@@ -69,7 +72,8 @@ export const wrapSuppressedAlerts = ({
       true,
       buildReasonMessage,
       indicesToQuery,
-      alertTimestampOverride
+      alertTimestampOverride,
+      ruleExecutionLogger
     );
     return {
       _id: id,

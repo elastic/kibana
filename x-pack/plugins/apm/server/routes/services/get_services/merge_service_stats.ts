@@ -7,6 +7,7 @@
 import { uniq } from 'lodash';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { getServicesAlerts } from './get_service_alerts';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
@@ -15,12 +16,14 @@ export function mergeServiceStats({
   transactionStats,
   servicesFromErrorAndMetricDocuments,
   healthStatuses,
+  alertCounts,
 }: {
   transactionStats: Awaited<ReturnType<typeof getServiceTransactionStats>>;
   servicesFromErrorAndMetricDocuments: Awaited<
     ReturnType<typeof getServicesFromErrorAndMetricDocuments>
   >;
   healthStatuses: Awaited<ReturnType<typeof getHealthStatuses>>;
+  alertCounts: Awaited<ReturnType<typeof getServicesAlerts>>;
 }) {
   const foundServiceNames = transactionStats.map(
     ({ serviceName }) => serviceName
@@ -46,6 +49,7 @@ export function mergeServiceStats({
       ...transactionStats,
       ...servicesFromErrorAndMetricDocuments,
       ...matchedHealthStatuses,
+      ...alertCounts,
     ] as const),
     'serviceName',
     function merge(a, b) {

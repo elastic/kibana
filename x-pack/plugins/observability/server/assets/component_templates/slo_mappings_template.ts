@@ -29,6 +29,9 @@ export const getSLOMappingsTemplate = (name: string) => ({
             denominator: {
               type: 'long',
             },
+            isGoodSlice: {
+              type: 'byte',
+            },
             context: {
               type: 'flattened',
             },
@@ -39,8 +42,6 @@ export const getSLOMappingsTemplate = (name: string) => ({
                 objective: {
                   properties: {
                     target: { type: 'double' },
-                    timeslice_target: { type: 'double' },
-                    timeslice_window: { type: 'keyword' },
                   },
                 },
                 time_window: {

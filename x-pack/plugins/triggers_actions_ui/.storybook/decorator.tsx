@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { action } from '@storybook/addon-actions';
 import { DecoratorFn } from '@storybook/react';
 import { EMPTY, of } from 'rxjs';
@@ -14,6 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '../public/common/lib/kibana';
 import { ExperimentalFeaturesService } from '../public/common/experimental_features_service';
 import { getHttp } from './context/http';
@@ -24,9 +25,11 @@ interface StorybookContextDecoratorProps {
   context: Parameters<DecoratorFn>[1];
 }
 
+const queryClient = new QueryClient();
+
 const handler = (type: string, ...rest: any[]) => {
   action(`${type} Toast`)(rest);
-  return { id: uuid() };
+  return { id: uuidv4() };
 };
 
 const notifications: NotificationsStart = {
@@ -116,7 +119,7 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
               ruleTypeRegistry: getRuleTypeRegistry(),
             }}
           >
-            {children}
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </EuiThemeProvider>

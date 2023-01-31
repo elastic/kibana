@@ -216,6 +216,15 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       );
     },
 
+    async goToHostsView() {
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'infraOps',
+        `/hosts`,
+        undefined,
+        { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
+      );
+    },
+
     async getSaveViewButton() {
       return await testSubjects.find('openSaveViewModal');
     },

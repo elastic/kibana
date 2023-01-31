@@ -72,6 +72,7 @@ export const logViewAttributesRT = rt.strict({
   logIndices: logIndexReferenceRT,
   logColumns: rt.array(logViewColumnConfigurationRT),
 });
+
 export type LogViewAttributes = rt.TypeOf<typeof logViewAttributesRT>;
 
 export const logViewRT = rt.exact(

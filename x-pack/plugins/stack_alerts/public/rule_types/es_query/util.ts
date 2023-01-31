@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EsQueryRuleParams, SearchType, TriggersAndActionsUiDeps } from './types';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { EsQueryRuleParams, SearchType } from './types';
 
 export const isSearchSourceRule = (
   ruleParams: EsQueryRuleParams
@@ -14,4 +16,29 @@ export const isSearchSourceRule = (
   return ruleParams.searchType === 'searchSource';
 };
 
-export const useTriggerUiActionServices = () => useKibana<TriggersAndActionsUiDeps>().services;
+export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOption[] => {
+  return (fieldSpec ?? [])
+    .filter((spec: FieldSpec) => spec.isMapped)
+    .map((spec: FieldSpec) => {
+      const converted = {
+        name: spec.name,
+        searchable: spec.searchable,
+        aggregatable: spec.aggregatable,
+        type: spec.type,
+        normalizedType: spec.type,
+      };
+
+      if (spec.type === 'string') {
+        const esType = spec.esTypes && spec.esTypes.length > 0 ? spec.esTypes[0] : spec.type;
+        converted.type = esType;
+        converted.normalizedType = esType;
+      } else if (spec.type === 'number') {
+        const esType = spec.esTypes && spec.esTypes.length > 0 ? spec.esTypes[0] : spec.type;
+        converted.type = esType;
+      }
+
+      return converted;
+    });
+};
+
+export const useTriggerUiActionServices = () => useKibana().services;

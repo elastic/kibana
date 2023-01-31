@@ -17,8 +17,20 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 const resolver = new ImportResolver(
   FIXTURES_DIR,
-  new Map([['@pkg/box', 'packages/box']]),
-  new Map([['@synth/bar', 'src/bar']])
+  new Map([
+    ['@synth/bar', 'src/bar'],
+    ['@pkg/box', 'packages/box'],
+  ]),
+  new Map([
+    [
+      '@pkg/box',
+      {
+        id: '@pkg/box',
+        type: 'shared-common',
+        owner: [],
+      },
+    ],
+  ])
 );
 
 describe('#resolve()', () => {
@@ -26,16 +38,17 @@ describe('#resolve()', () => {
     expect(resolver.resolve('@synth/bar', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
         "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/src/bar/index.js,
+        "pkgId": "@synth/bar",
         "type": "file",
       }
     `);
   });
 
-  it('resolves imports to bazel packages that are also found in node_modules', () => {
+  it('resolves imports to bazel packages', () => {
     expect(resolver.resolve('@pkg/box', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/node_modules/@pkg/box/index.js,
-        "nodeModule": "@pkg/box",
+        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/packages/box/index.js,
+        "pkgId": "@pkg/box",
         "type": "file",
       }
     `);
@@ -64,6 +77,7 @@ describe('#resolve()', () => {
     expect(resolver.resolve('./bar', Path.resolve(FIXTURES_DIR, 'src/bar'))).toMatchInlineSnapshot(`
       Object {
         "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/src/bar/bar.js,
+        "pkgId": "@synth/bar",
         "type": "file",
       }
     `);
@@ -167,20 +181,5 @@ describe('#isBazelPackage()', () => {
   });
   it('returns false for unknown packages', () => {
     expect(resolver.isBazelPackage('@kbn/invalid')).toBe(false);
-  });
-});
-
-describe('#isSyntheticPackage()', () => {
-  it('returns true for synth packages', () => {
-    expect(resolver.isSyntheticPackage('@synth/bar')).toBe(true);
-  });
-  it('returns false for bazel packages', () => {
-    expect(resolver.isSyntheticPackage('@pkg/box')).toBe(false);
-  });
-  it('returns false for node_modules packages', () => {
-    expect(resolver.isSyntheticPackage('foo')).toBe(false);
-  });
-  it('returns false for unknown packages', () => {
-    expect(resolver.isSyntheticPackage('@kbn/invalid')).toBe(false);
   });
 });

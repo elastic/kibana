@@ -46,7 +46,16 @@ describe('<ComponentTemplateList />', () => {
       isManaged: false,
     };
 
-    const componentTemplates = [componentTemplate1, componentTemplate2];
+    const componentTemplate3: ComponentTemplateListItem = {
+      name: 'test_component_template_3',
+      hasMappings: true,
+      hasAliases: true,
+      hasSettings: true,
+      usedBy: ['test_index_template_1', 'test_index_template_2'],
+      isManaged: false,
+    };
+
+    const componentTemplates = [componentTemplate1, componentTemplate2, componentTemplate3];
 
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
 
@@ -61,6 +70,26 @@ describe('<ComponentTemplateList />', () => {
 
         expect(row).toEqual(['', name, usedByText, '', '', '', 'EditDelete']);
       });
+    });
+
+    test('should sort "Usage count" column by number', async () => {
+      const { actions, table } = testBed;
+
+      // Sort ascending
+      await actions.clickTableColumnSortButton(1);
+
+      const { tableCellsValues: ascTableCellsValues } =
+        table.getMetaData('componentTemplatesTable');
+      const ascUsageCountValues = ascTableCellsValues.map((row) => row[2]);
+      expect(ascUsageCountValues).toEqual(['Not in use', '1', '2']);
+
+      // Sort descending
+      await actions.clickTableColumnSortButton(1);
+
+      const { tableCellsValues: descTableCellsValues } =
+        table.getMetaData('componentTemplatesTable');
+      const descUsageCountValues = descTableCellsValues.map((row) => row[2]);
+      expect(descUsageCountValues).toEqual(['2', '1', 'Not in use']);
     });
 
     test('should reload the component templates data', async () => {

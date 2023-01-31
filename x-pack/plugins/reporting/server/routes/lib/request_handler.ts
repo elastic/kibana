@@ -14,6 +14,7 @@ import { API_BASE_URL } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
 import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
+import { Counters } from './get_counter';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -24,6 +25,9 @@ const getDownloadBaseUrl = (reporting: ReportingCore) => {
   return config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
 };
 
+/**
+ * Handles the common parts of requests to generate a report
+ */
 export class RequestHandler {
   constructor(
     private reporting: ReportingCore,
@@ -106,7 +110,11 @@ export class RequestHandler {
     return report;
   }
 
-  public async handleGenerateRequest(exportTypeId: string, jobParams: BaseParams) {
+  public async handleGenerateRequest(
+    exportTypeId: string,
+    jobParams: BaseParams,
+    counters: Counters
+  ) {
     // ensure the async dependencies are loaded
     if (!this.context.reporting) {
       return handleUnavailable(this.res);
@@ -129,11 +137,14 @@ export class RequestHandler {
       });
     }
 
+    let report: Report | undefined;
     try {
-      const report = await this.enqueueJob(exportTypeId, jobParams);
+      report = await this.enqueueJob(exportTypeId, jobParams);
 
       // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(this.reporting);
+
+      counters.usageCounter();
 
       return this.res.ok({
         headers: { 'content-type': 'application/json' },
@@ -143,22 +154,24 @@ export class RequestHandler {
         },
       });
     } catch (err) {
-      this.logger.error(err);
-      throw err;
+      return this.handleError(err, counters, report?.jobtype);
     }
   }
 
-  /*
-   * This method does not log the error, as it assumes the error has already
-   * been caught and logged for stack trace context, and then rethrown
-   */
-  public handleError(err: Error | Boom.Boom) {
+  private handleError(err: Error | Boom.Boom, counters: Counters, jobtype?: string) {
+    this.logger.error(err);
+
     if (err instanceof Boom.Boom) {
+      const statusCode = err.output.statusCode;
+      counters?.errorCounter(jobtype, statusCode);
+
       return this.res.customError({
-        statusCode: err.output.statusCode,
+        statusCode,
         body: err.output.payload.message,
       });
     }
+
+    counters?.errorCounter(jobtype, 500);
 
     return this.res.customError({
       statusCode: 500,

@@ -5,15 +5,11 @@
  * 2.0.
  */
 
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
-import {
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
-  getUrlPrefix,
-  ObjectRemover,
-} from '../../../../../common/lib';
-import { createEsDocuments } from '../lib/create_test_data';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { createEsDocuments, createEsDocumentsWithGroups } from '../lib/create_test_data';
 
 export const RULE_TYPE_ID = '.es-query';
 export const CONNECTOR_TYPE_ID = '.index';
@@ -63,6 +59,8 @@ export interface CreateRuleParams {
   searchType?: 'searchSource';
   notifyWhen?: string;
   indexName?: string;
+  aggType?: string;
+  groupBy?: string;
 }
 
 export function getRuleServices(getService: FtrProviderContext['getService']) {
@@ -89,6 +87,23 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
     );
   }
 
+  async function createGroupedEsDocumentsInGroups(
+    groups: number,
+    endDate: string,
+    indexTool: ESTestIndexTool = esTestIndexTool,
+    indexName: string = ES_TEST_INDEX_NAME
+  ) {
+    await createEsDocumentsWithGroups({
+      es,
+      esTestIndexTool: indexTool,
+      endDate,
+      intervals: RULE_INTERVALS_TO_WRITE,
+      intervalMillis: RULE_INTERVAL_MILLIS,
+      groups,
+      indexName,
+    });
+  }
+
   async function waitForDocs(count: number): Promise<any[]> {
     return await esTestIndexToolOutput.waitForDocs(
       ES_TEST_INDEX_SOURCE,
@@ -104,6 +119,7 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
     esTestIndexToolOutput,
     esTestIndexToolDataStream,
     createEsDocumentsInGroups,
+    createGroupedEsDocumentsInGroups,
     waitForDocs,
   };
 }

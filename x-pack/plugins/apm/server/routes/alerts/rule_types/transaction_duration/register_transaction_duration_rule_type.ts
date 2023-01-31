@@ -199,7 +199,7 @@ export function registerTransactionDurationRuleType({
       });
 
       if (!response.aggregations) {
-        return {};
+        return { state: {} };
       }
 
       // Converts threshold to microseconds because this is the unit used on transactionDuration
@@ -299,7 +299,7 @@ export function registerTransactionDurationRuleType({
           });
       }
 
-      return {};
+      return { state: {} };
     },
   });
 

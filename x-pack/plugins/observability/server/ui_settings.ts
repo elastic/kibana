@@ -19,7 +19,6 @@ import {
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
-  apmOperationsTab,
   apmLabsButton,
   enableAgentExplorerView,
   enableAwsLambdaMetrics,
@@ -27,11 +26,8 @@ import {
   apmAWSLambdaRequestCostPerMillion,
   enableCriticalPath,
   enableInfrastructureHostsView,
+  profilingElasticsearchPlugin,
 } from '../common/ui_settings_keys';
-
-const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
-  defaultMessage: 'beta',
-});
 
 const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
@@ -220,25 +216,6 @@ export const uiSettings: Record<string, UiSettings> = {
     type: 'boolean',
     showInLabs: true,
   },
-  [apmOperationsTab]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmOperationsBreakdown', {
-      defaultMessage: 'APM Operations Breakdown',
-    }),
-    description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
-      defaultMessage:
-        '{betaLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-operations-breakdown' }),
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: false,
-  },
   [apmLabsButton]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmLabs', {
@@ -344,5 +321,22 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
+  },
+  [profilingElasticsearchPlugin]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingElasticsearchPlugin', {
+      defaultMessage: 'Use Elasticsearch profiler plugin',
+    }),
+    description: i18n.translate('xpack.observability.profilingElasticsearchPluginDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Whether to load stacktraces using Elasticsearch profiler plugin.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: true,
+    requiresPageReload: true,
+    type: 'boolean',
   },
 };

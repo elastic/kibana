@@ -7,14 +7,17 @@
 
 import { PayloadAction } from '@reduxjs/toolkit';
 import { call, put, takeEvery, takeLeading, select } from 'redux-saga/effects';
+import { SavedObject } from '@kbn/core-saved-objects-common';
+import { enableDefaultAlertingAction } from '../alert_rules';
 import { kibanaService } from '../../../../utils/kibana_service';
-import { MonitorOverviewPageState } from '../overview';
+import { MonitorOverviewPageState, quietFetchOverviewStatusAction } from '../overview';
 import { quietFetchOverviewAction } from '../overview/actions';
 import { selectOverviewState } from '../overview/selectors';
-import { fetchEffectFactory } from '../utils/fetch_effect';
+import { fetchEffectFactory, sendErrorToast, sendSuccessToast } from '../utils/fetch_effect';
 import { serializeHttpFetchError } from '../utils/http_error';
 import {
   clearMonitorUpsertStatus,
+  enableMonitorAlertAction,
   fetchMonitorListAction,
   fetchUpsertFailureAction,
   fetchUpsertMonitorAction,
@@ -23,6 +26,7 @@ import {
 } from './actions';
 import { fetchMonitorManagementList, fetchUpsertMonitor } from './api';
 import { toastTitle } from './toast_title';
+import { ConfigKey, SyntheticsMonitor } from '../../../../../common/runtime_types';
 
 export function* fetchMonitorListEffect() {
   yield takeLeading(
@@ -32,6 +36,33 @@ export function* fetchMonitorListEffect() {
       fetchMonitorListAction.success,
       fetchMonitorListAction.fail
     )
+  );
+}
+
+export function* enableMonitorAlertEffect() {
+  yield takeEvery(
+    enableMonitorAlertAction.get,
+    function* (action: PayloadAction<UpsertMonitorRequest>): Generator {
+      try {
+        const response = yield call(fetchUpsertMonitor, action.payload);
+        yield put(enableMonitorAlertAction.success(response as SavedObject<SyntheticsMonitor>));
+        sendSuccessToast(action.payload.success);
+        if (
+          (response as SavedObject<SyntheticsMonitor>).attributes[ConfigKey.ALERT_CONFIG]?.status
+            ?.enabled
+        ) {
+          yield put(enableDefaultAlertingAction.get());
+        }
+      } catch (error) {
+        sendErrorToast(action.payload.error, error);
+        yield put(
+          enableMonitorAlertAction.fail({
+            configId: action.payload.configId,
+            error: serializeHttpFetchError(error, action.payload),
+          })
+        );
+      }
+    }
   );
 }
 
@@ -57,7 +88,10 @@ export function* upsertMonitorEffect() {
           toastLifeTimeMs: action.payload.error.lifetimeMs,
         });
         yield put(
-          fetchUpsertFailureAction({ id: action.payload.id, error: serializeHttpFetchError(error) })
+          fetchUpsertFailureAction({
+            configId: action.payload.configId,
+            error: serializeHttpFetchError(error, action.payload),
+          })
         );
       } finally {
         if (action.payload.shouldQuietFetchAfterSuccess !== false) {
@@ -66,9 +100,12 @@ export function* upsertMonitorEffect() {
             yield put(
               quietFetchOverviewAction.get(monitorState.pageState as MonitorOverviewPageState)
             );
+            yield put(
+              quietFetchOverviewStatusAction.get(monitorState.pageState as MonitorOverviewPageState)
+            );
           }
         }
-        yield put(clearMonitorUpsertStatus(action.payload.id));
+        yield put(clearMonitorUpsertStatus(action.payload.configId));
       }
     }
   );

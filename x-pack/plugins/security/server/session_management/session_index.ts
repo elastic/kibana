@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { CreateRequest, IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregateName,
+  AggregationsMultiTermsAggregate,
+  CreateRequest,
+  IndicesCreateRequest,
+  MsearchRequestItem,
+  SearchHit,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   BulkOperationContainer,
   SortResults,
@@ -16,8 +23,10 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { AuthenticationProvider } from '../../common/model';
 import type { AuditLogger } from '../audit';
-import { sessionCleanupEvent } from '../audit';
+import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audit';
+import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
+import { getDetailedErrorMessage } from '../errors';
 
 export interface SessionIndexOptions {
   readonly elasticsearchClient: ElasticsearchClient;
@@ -165,6 +174,11 @@ export interface SessionIndexValue {
    */
   metadata: SessionIndexValueMetadata;
 }
+
+/**
+ * Subset of the `SessionIndexValue` fields required for session cleanup.
+ */
+type SessionIndexValueDescriptor = Pick<SessionIndexValue, 'sid' | 'usernameHash' | 'provider'>;
 
 /**
  * Additional index specific information about the session value.
@@ -453,71 +467,153 @@ export class SessionIndex {
    * Trigger a removal of any outdated session values.
    */
   async cleanUp() {
-    const { auditLogger, elasticsearchClient, logger } = this.options;
-    logger.debug(`Running cleanup routine.`);
+    const { auditLogger, logger } = this.options;
+    logger.debug('Running cleanup routine.');
 
     let error: Error | undefined;
     let indexNeedsRefresh = false;
     try {
       for await (const sessionValues of this.getSessionValuesInBatches()) {
-        const operations: Array<Required<Pick<BulkOperationContainer, 'delete'>>> = [];
-        sessionValues.forEach(({ _id, _source }) => {
+        const operations = sessionValues.map(({ _id, _source }) => {
           const { usernameHash, provider } = _source!;
           auditLogger.log(sessionCleanupEvent({ sessionId: _id, usernameHash, provider }));
-          operations.push({ delete: { _id } });
+          return { delete: { _id } };
         });
-        if (operations.length > 0) {
-          const bulkResponse = await elasticsearchClient.bulk(
-            {
-              index: this.aliasName,
-              operations,
-              refresh: false,
-              // delete operations do not respect `require_alias`, but we include it here for consistency.
-              require_alias: true,
-            },
-            { ignore: [409, 404] }
-          );
-          if (bulkResponse.errors) {
-            const errorCount = bulkResponse.items.reduce(
-              (count, item) => (item.delete!.error ? count + 1 : count),
-              0
-            );
-            if (errorCount < bulkResponse.items.length) {
-              logger.warn(
-                `Failed to clean up ${errorCount} of ${bulkResponse.items.length} invalid or expired sessions. The remaining sessions were cleaned up successfully.`
-              );
-              indexNeedsRefresh = true;
-            } else {
-              logger.error(
-                `Failed to clean up ${bulkResponse.items.length} invalid or expired sessions.`
-              );
-            }
-          } else {
-            logger.debug(`Cleaned up ${bulkResponse.items.length} invalid or expired sessions.`);
-            indexNeedsRefresh = true;
-          }
-        }
+
+        indexNeedsRefresh = (await this.bulkDeleteSessions(operations)) || indexNeedsRefresh;
       }
     } catch (err) {
       logger.error(`Failed to clean up sessions: ${err.message}`);
       error = err;
     }
 
+    // Only refresh the index if we have actually deleted one or more sessions. The index will auto-refresh eventually anyway, this just
+    // ensures that searches after the cleanup process are accurate, and this only impacts integration tests.
     if (indexNeedsRefresh) {
-      // Only refresh the index if we have actually deleted one or more sessions. The index will auto-refresh eventually anyway, this just
-      // ensures that searches after the cleanup process are accurate, and this only impacts integration tests.
-      try {
-        await elasticsearchClient.indices.refresh({ index: this.aliasName });
-        logger.debug(`Refreshed session index.`);
-      } catch (err) {
-        logger.error(`Failed to refresh session index: ${err.message}`);
+      await this.refreshSessionIndex();
+    }
+
+    // Once index refresh is complete we can check if there are sessions left that exceed concurrent sessions limit.
+    try {
+      indexNeedsRefresh = false;
+
+      const operations = (await this.getSessionsOutsideConcurrentSessionLimit()).map((session) => {
+        auditLogger.log(
+          sessionCleanupConcurrentLimitEvent({
+            sessionId: session.sid,
+            usernameHash: session.usernameHash,
+            provider: session.provider,
+          })
+        );
+        return { delete: { _id: session.sid } };
+      });
+
+      if (operations.length > 0) {
+        // Limit max number of documents to delete to 10_000 to avoid massively large delete request payloads (10k batch
+        // delete request payload is about 700kb).
+        const batchSize = SESSION_INDEX_CLEANUP_BATCH_SIZE;
+        for (let i = 0; i < operations.length; i += batchSize) {
+          indexNeedsRefresh =
+            (await this.bulkDeleteSessions(operations.slice(i, i + batchSize))) ||
+            indexNeedsRefresh;
+        }
       }
+    } catch (err) {
+      logger.error(
+        `Failed to clean up sessions that exceeded concurrent sessions limit: ${err.message}`
+      );
+      error = err;
+    }
+
+    if (indexNeedsRefresh) {
+      await this.refreshSessionIndex();
     }
 
     if (error) {
+      logger.error(`Cleanup routine failed: ${getDetailedErrorMessage(error)}.`);
       // If we couldn't fetch or delete sessions, throw an error so the task will be retried.
       throw error;
     }
+
+    logger.debug('Cleanup routine successfully completed.');
+  }
+
+  /**
+   * Checks whether specific session is within a concurrent sessions limit.
+   * @param sessionValue Session index value to check against concurrent sessions limit.
+   */
+  async isWithinConcurrentSessionLimit(sessionValue: Readonly<SessionIndexValue>) {
+    // Concurrent user sessions limit doesn't apply if it's not configured, or session isn't authenticated, or session
+    // belongs to the anonymous user.
+    const maxConcurrentSessions = this.options.config.session.concurrentSessions?.maxSessions;
+    if (
+      maxConcurrentSessions == null ||
+      !sessionValue.usernameHash ||
+      sessionValue.provider.type === AnonymousAuthenticationProvider.type
+    ) {
+      return true;
+    }
+
+    let sessionsOutsideLimit: Array<SearchHit<SessionIndexValue>>;
+    try {
+      const searchResponse = await this.options.elasticsearchClient.search<SessionIndexValue>({
+        index: this.aliasName,
+
+        // Find all sessions created for the same user by the same authentication provider.
+        query: {
+          bool: {
+            filter: [
+              { term: { usernameHash: sessionValue.usernameHash } },
+              { term: { 'provider.type': sessionValue.provider.type } },
+              { term: { 'provider.name': sessionValue.provider.name } },
+            ],
+          },
+        },
+
+        // Sort sessions by creation date in descending order to get the most recent session that's also outside the
+        // limit. This query relies on a default value for `missing` sort parameter which is `_last`, meaning that
+        // sessions without `createdAt` field ("legacy" sessions) are always considered older than the ones that have
+        // this field populated. For example, if the limit is 2 the resulting set might look like this:
+        // { createdAt: 3 } <-- the most recent session (within the limit, not returned because of `from`)
+        // { createdAt: 2 } <-- the second most recent session (within the limit, not returned because of `from`)
+        // { createdAt: 1 } <-- the third most recent session (outside the limit, *returned*)
+        // { createdAt: undefined } <--- the oldest "legacy" session (outside the limit, not returned because of `size`)
+        sort: [{ createdAt: { order: 'desc' } }],
+
+        // Improve performance by fetching just one field of one outside-the-limit session and not tracking total hits.
+        _source_includes: 'createdAt',
+        filter_path: 'hits.hits._source',
+        from: maxConcurrentSessions,
+        size: 1,
+        track_total_hits: false,
+      });
+      sessionsOutsideLimit = searchResponse.hits?.hits ?? [];
+    } catch (err) {
+      this.options.logger.error(
+        `Failed to fetch user sessions to check concurrent sessions limit: ${err.message}.`
+      );
+      throw err;
+    }
+
+    // If all sessions are within the limit, then the provided one should be within the limit as well.
+    if (sessionsOutsideLimit.length === 0) {
+      return true;
+    }
+
+    // If there is any session that is outside the limit and the provided session is "legacy" session (doesn't have a
+    // `createdAt` field populated), then we can safely treat it as outside-the-limit session (all "legacy" sessions are
+    // treated equally).
+    if (!sessionValue.createdAt) {
+      return false;
+    }
+
+    // If the first outside-the-limit session doesn't have `createdAt` then all other sessions with `createdAt` are
+    // within the limit, otherwise the specified session is outside the limit only if it was created before or at the
+    // same time as the first outside-the-limit session.
+    const [{ _source: sessionOutsideLimit }] = sessionsOutsideLimit;
+    return (
+      !sessionOutsideLimit?.createdAt || sessionValue.createdAt > sessionOutsideLimit.createdAt
+    );
   }
 
   /**
@@ -764,6 +860,233 @@ export class SessionIndex {
       await this.options.elasticsearchClient.closePointInTime({
         id: openPitResponse.id,
       });
+    }
+  }
+
+  private async getSessionsOutsideConcurrentSessionLimit(): Promise<SessionIndexValueDescriptor[]> {
+    const maxConcurrentSessions = this.options.config.session.concurrentSessions?.maxSessions;
+    if (maxConcurrentSessions == null) {
+      return [];
+    }
+
+    // 1. We need to figure out what users have sessions that exceed the concurrent session limit. For that, we group
+    // existing sessions by username and authentication provider.
+    const aggResponse = await this.options.elasticsearchClient.search<
+      unknown,
+      Record<AggregateName, AggregationsMultiTermsAggregate>
+    >({
+      index: this.aliasName,
+
+      // Exclude unauthenticated sessions and sessions of the anonymous users that shouldn't be affected by the
+      // concurrent user sessions limit.
+      query: {
+        bool: {
+          filter: [
+            { exists: { field: 'usernameHash' } },
+            {
+              bool: {
+                must_not: [{ term: { 'provider.type': AnonymousAuthenticationProvider.type } }],
+              },
+            },
+          ],
+        },
+      },
+
+      aggs: {
+        sessions_grouped_by_user: {
+          multi_terms: {
+            // If we have more than 10_000 users that all exceeded the limit (highly unlikely), then the rest of the
+            // sessions will be cleaned up during the next run. It doesn't expose Kibana to any security risks since the
+            // concurrent sessions limits is enforced on fetch. The `size` is limited by `search.max_buckets` setting
+            // which is 65,536 by default, but we don't want to load Elasticsearch too much (response size for 10000
+            // buckets is around 1mb).
+            size: SESSION_INDEX_CLEANUP_BATCH_SIZE,
+            terms: [
+              { field: 'usernameHash' },
+              { field: 'provider.type' },
+              { field: 'provider.name' },
+            ],
+            // Return only those groups that exceed the limit.
+            min_doc_count: maxConcurrentSessions + 1,
+          },
+        },
+      },
+
+      // Improve performance by not tracking total hits, not returning hits themselves (size=0), and fetching only buckets keys.
+      size: 0,
+      filter_path: [
+        'aggregations.sessions_grouped_by_user.sum_other_doc_count',
+        'aggregations.sessions_grouped_by_user.buckets.key',
+        'aggregations.sessions_grouped_by_user.buckets.doc_count',
+      ],
+      track_total_hits: false,
+    });
+
+    // The reason we check if buckets is an array is to narrow down the type of the response since ES can return buckets as
+    // either an array OR a dictionary (aggregation has keys configured for the different buckets, that's not the case here).
+    const sessionsGroupedByUser = aggResponse.aggregations?.sessions_grouped_by_user;
+    const sessionBuckets = sessionsGroupedByUser?.buckets ?? [];
+    if (sessionBuckets.length === 0 || !Array.isArray(sessionBuckets)) {
+      return [];
+    }
+
+    // Log a warning if we didn't fetch buckets for all users that exceeded the limit.
+    const ungroupedSessions = sessionsGroupedByUser?.sum_other_doc_count ?? 0;
+    if (ungroupedSessions > 0) {
+      this.options.logger.warn(
+        `Unable to check if remaining ${ungroupedSessions} sessions exceed the concurrent session limit. Sessions will be checked during the next cleanup job run.`
+      );
+    }
+
+    // 2. Once we know what users within what authentication providers exceed the concurrent sessions limit, we can
+    // fetch specific sessions documents that are outside the limit.
+    const { sessionGroups, sessionQueries, skippedSessions } = sessionBuckets.reduce(
+      (result, sessionGroup) => {
+        // The keys are arrays of values ordered the same ways as expression in the terms parameter of the aggregation.
+        const [usernameHash, providerType, providerName] = sessionGroup.key as string[];
+
+        // Record a number of session documents that won't be included in the batch during this run.
+        if (sessionGroup.doc_count > SESSION_INDEX_CLEANUP_BATCH_SIZE) {
+          result.skippedSessions += sessionGroup.doc_count - SESSION_INDEX_CLEANUP_BATCH_SIZE;
+        }
+
+        result.sessionGroups.push({
+          usernameHash,
+          provider: { type: providerType, name: providerName },
+        });
+
+        result.sessionQueries.push(
+          {},
+          {
+            query: {
+              bool: {
+                must: [
+                  { term: { usernameHash } },
+                  { term: { 'provider.type': providerType } },
+                  { term: { 'provider.name': providerName } },
+                ],
+              },
+            },
+
+            // Sort sessions by creation date in descending order to get the most recent session that's also outside the
+            // limit. Refer to comment in `isWithinConcurrentSessionLimit` for the explanation and example.
+            sort: [{ createdAt: { order: 'desc' } }],
+
+            // We only need to fetch sessions that exceed the limit.
+            from: maxConcurrentSessions,
+            size: SESSION_INDEX_CLEANUP_BATCH_SIZE - maxConcurrentSessions,
+
+            // Improve performance by not tracking total hits and not fetching _source since we already have all necessary
+            // data returned within aggregation buckets (`usernameHash` and `provider`).
+            _source: false,
+            track_total_hits: false,
+          }
+        );
+
+        return result;
+      },
+      { sessionGroups: [], sessionQueries: [], skippedSessions: 0 } as {
+        sessionGroups: Array<Pick<SessionIndexValue, 'usernameHash' | 'provider'>>;
+        sessionQueries: MsearchRequestItem[];
+        skippedSessions: number;
+      }
+    );
+
+    // Log a warning if we didn't fetch all sessions that exceeded the limit.
+    if (skippedSessions > 0) {
+      this.options.logger.warn(
+        `Unable to fetch ${skippedSessions} sessions that exceed the concurrent session limit. Sessions will be fetched and invalidated during the next cleanup job run.`
+      );
+    }
+
+    const { responses } = await this.options.elasticsearchClient.msearch({
+      index: this.aliasName,
+      searches: sessionQueries,
+      filter_path: ['responses.status', 'responses.hits.hits._id'],
+    });
+
+    const sessionValueDescriptors = responses.flatMap<SessionIndexValueDescriptor>(
+      (response, index) => {
+        if ('error' in response) {
+          this.options.logger.error(
+            `Failed to fetch sessions that exceed the concurrent session limit: ${
+              getDetailedErrorMessage(response.error) ??
+              response.error.reason ??
+              response.error.type
+            }.`
+          );
+          return [];
+        }
+
+        return response.hits?.hits?.map((hit) => ({ sid: hit._id, ...sessionGroups[index] })) ?? [];
+      }
+    );
+
+    this.options.logger.debug(
+      `Preparing to delete ${sessionValueDescriptors.length} sessions of ${sessionBuckets.length} unique users due to exceeded concurrent sessions limit.`
+    );
+
+    return sessionValueDescriptors;
+  }
+
+  /**
+   * Performs a bulk delete operation on the Kibana session index.
+   * @param deleteOperations Bulk delete operations.
+   * @returns Returns `true` if the bulk delete affected any session document.
+   */
+  private async bulkDeleteSessions(
+    deleteOperations: Array<Required<Pick<BulkOperationContainer, 'delete'>>>
+  ) {
+    if (deleteOperations.length === 0) {
+      return false;
+    }
+
+    const bulkResponse = await this.options.elasticsearchClient.bulk(
+      {
+        index: this.aliasName,
+        operations: deleteOperations,
+        refresh: false,
+        // delete operations do not respect `require_alias`, but we include it here for consistency.
+        require_alias: true,
+      },
+      { ignore: [409, 404] }
+    );
+
+    if (!bulkResponse.errors) {
+      this.options.logger.debug(
+        `Cleaned up ${bulkResponse.items.length} invalid or expired sessions.`
+      );
+      return true;
+    }
+
+    const errorCount = bulkResponse.items.reduce(
+      (count, item) => (item.delete!.error ? count + 1 : count),
+      0
+    );
+    if (errorCount < bulkResponse.items.length) {
+      this.options.logger.warn(
+        `Failed to clean up ${errorCount} of ${bulkResponse.items.length} invalid or expired sessions. The remaining sessions were cleaned up successfully.`
+      );
+      return true;
+    }
+
+    this.options.logger.error(
+      `Failed to clean up ${bulkResponse.items.length} invalid or expired sessions.`
+    );
+
+    return false;
+  }
+
+  /**
+   * Refreshes Kibana session index. This is used as a part of the session index cleanup job only and hence doesn't
+   * throw even if the operation fails.
+   */
+  private async refreshSessionIndex() {
+    try {
+      await this.options.elasticsearchClient.indices.refresh({ index: this.aliasName });
+      this.options.logger.debug(`Refreshed session index.`);
+    } catch (err) {
+      this.options.logger.error(`Failed to refresh session index: ${err.message}`);
     }
   }
 }

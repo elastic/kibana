@@ -175,6 +175,10 @@ describe.skip('Rules list bulk enable', () => {
         ids: [],
       })
     );
+    expect(
+      wrapper.find('[data-test-subj="checkboxSelectRow-1"]').first().prop('checked')
+    ).toBeFalsy();
+    expect(wrapper.find('button[data-test-subj="bulkEnable"]').exists()).toBeFalsy();
   });
 
   describe('Toast', () => {

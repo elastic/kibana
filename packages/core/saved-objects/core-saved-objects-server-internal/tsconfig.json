@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -11,5 +9,45 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/core-status-common",
+    "@kbn/core-deprecations-common",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-api-server-internal",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/core-saved-objects-import-export-server-internal",
+    "@kbn/core-usage-data-base-server-internal",
+    "@kbn/core-deprecations-server",
+    "@kbn/core-node-server",
+    "@kbn/core-saved-objects-migration-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-saved-objects-base-server-mocks",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-doc-links-server",
+    "@kbn/core-elasticsearch-server-internal",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/i18n",
+    "@kbn/config",
+    "@kbn/repo-info",
+    "@kbn/config-mocks",
+    "@kbn/core-doc-links-server-mocks",
+    "@kbn/core-node-server-mocks",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/utils",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-saved-objects-utils-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

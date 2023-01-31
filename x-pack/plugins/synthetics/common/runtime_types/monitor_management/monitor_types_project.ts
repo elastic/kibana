@@ -6,13 +6,17 @@
  */
 
 import * as t from 'io-ts';
+import { AlertConfigsCodec } from './alert_config';
 import { ScreenshotOptionCodec } from './monitor_configs';
 
-export const ProjectMonitorThrottlingConfigCodec = t.interface({
-  download: t.number,
-  upload: t.number,
-  latency: t.number,
-});
+export const ProjectMonitorThrottlingConfigCodec = t.union([
+  t.interface({
+    download: t.number,
+    upload: t.number,
+    latency: t.number,
+  }),
+  t.boolean,
+]);
 
 export const ProjectMonitorCodec = t.intersection([
   t.interface({
@@ -36,6 +40,7 @@ export const ProjectMonitorCodec = t.intersection([
     }),
     params: t.record(t.string, t.unknown),
     enabled: t.boolean,
+    alert: AlertConfigsCodec,
     urls: t.union([t.string, t.array(t.string)]),
     hosts: t.union([t.string, t.array(t.string)]),
     max_redirects: t.string,

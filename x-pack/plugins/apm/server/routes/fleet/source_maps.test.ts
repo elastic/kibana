@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  ArtifactSourceMap,
-  getPackagePolicyWithSourceMap,
-  getCleanedBundleFilePath,
-} from './source_maps';
+import { getPackagePolicyWithSourceMap } from './get_package_policy_decorators';
+import { ArtifactSourceMap, getCleanedBundleFilePath } from './source_maps';
 
 const packagePolicy = {
   id: '123',

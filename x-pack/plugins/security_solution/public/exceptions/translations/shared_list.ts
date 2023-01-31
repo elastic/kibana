@@ -88,7 +88,7 @@ export const EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER = i18n.translate(
 export const ALL_EXCEPTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitle',
   {
-    defaultMessage: 'Rule Exceptions',
+    defaultMessage: 'Shared Exception Lists',
   }
 );
 

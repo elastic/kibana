@@ -27,7 +27,11 @@ import {
   sendGetAgentTags,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout } from '../../../components';
-import { AgentStatusKueryHelper, policyHasFleetServer } from '../../../services';
+import {
+  AgentStatusKueryHelper,
+  ExperimentalFeaturesService,
+  policyHasFleetServer,
+} from '../../../services';
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
@@ -52,6 +56,8 @@ import { EmptyPrompt } from './components/empty_prompt';
 const REFRESH_INTERVAL_MS = 30000;
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
+  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
+
   const { notifications, cloud } = useStartServices();
   useBreadcrumbs('agent_list');
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
@@ -87,7 +93,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<string[]>([]);
 
   // Status for filtering
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([
+    'healthy',
+    'unhealthy',
+    'updating',
+    'offline',
+  ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
@@ -183,6 +194,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               return AgentStatusKueryHelper.buildKueryForUpdatingAgents();
             case 'inactive':
               return AgentStatusKueryHelper.buildKueryForInactiveAgents();
+            case 'unenrolled':
+              return AgentStatusKueryHelper.buildKueryForUnenrolledAgents();
           }
 
           return undefined;
@@ -201,7 +214,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [search, selectedAgentPolicies, selectedTags, selectedStatus]);
 
   const showInactive = useMemo(() => {
-    return selectedStatus.includes('inactive');
+    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
 
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -271,6 +284,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               sortOrder,
               showInactive,
               showUpgradeable,
+              withMetrics: displayAgentMetrics,
             }),
             sendGetAgentStatus({
               kuery: kuery && kuery !== '' ? kuery : undefined,
@@ -309,7 +323,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             unhealthy: agentsStatusResponse.data.results.error,
             offline: agentsStatusResponse.data.results.offline,
             updating: agentsStatusResponse.data.results.updating,
-            inactive: agentsResponse.data.totalInactive,
+            inactive: agentsStatusResponse.data.results.inactive,
+            unenrolled: agentsStatusResponse.data.results.unenrolled,
           });
 
           const newAllTags = agentTagsResponse.data.items;
@@ -346,6 +361,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       notifications.toasts,
       sortField,
       sortOrder,
+      displayAgentMetrics,
     ]
   );
 

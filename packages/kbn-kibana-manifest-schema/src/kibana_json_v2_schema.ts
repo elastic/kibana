@@ -13,7 +13,7 @@ export const PLUGIN_ID_PATTERN = /^[a-z][a-zA-Z_]*$/;
 
 export const MANIFEST_V2: JSONSchema = {
   type: 'object',
-  required: ['id', 'type', 'owner', 'typeDeps', 'runtimeDeps'],
+  required: ['id', 'type', 'owner'],
   // @ts-expect-error VSCode specific JSONSchema extension
   allowTrailingCommas: true,
   properties: {
@@ -46,26 +46,6 @@ export const MANIFEST_V2: JSONSchema = {
 
         For additional codeowners, the value can be an array of user/team names.
       `,
-    },
-    typeDeps: {
-      type: 'array',
-      description: desc`
-        Packages which are required for the source code in the package to be
-        type-checked. This list is updated automatically by the package linter.
-      `,
-      items: {
-        type: 'string',
-      },
-    },
-    runtimeDeps: {
-      type: 'array',
-      description: desc`
-        Packages which are required for the source code in the package to run. This list
-        is updated automatically by the package linter.
-      `,
-      items: {
-        type: 'string',
-      },
     },
     devOnly: {
       type: 'boolean',

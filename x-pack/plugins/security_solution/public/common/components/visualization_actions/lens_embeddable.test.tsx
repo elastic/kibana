@@ -7,7 +7,6 @@
 import { render } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 import React from 'react';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -79,13 +78,7 @@ describe('LensEmbeddable', () => {
   };
 
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mockEmbeddableComponent = jest
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);

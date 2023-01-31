@@ -27,7 +27,7 @@ export const MonitorSteps = ({
     <>
       {isEditFlow ? (
         steps.map((step) => (
-          <>
+          <div key={step.title}>
             <EuiPanel hasBorder>
               <EuiText size="s">
                 <h2>{step.title}</h2>
@@ -36,7 +36,7 @@ export const MonitorSteps = ({
               {step.children}
             </EuiPanel>
             <EuiSpacer size="m" />
-          </>
+          </div>
         ))
       ) : (
         <EuiSteps steps={steps} headingElement="h2" />

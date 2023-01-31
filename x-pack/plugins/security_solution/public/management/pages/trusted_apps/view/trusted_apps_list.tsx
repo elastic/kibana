@@ -89,6 +89,12 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       defaultMessage: '"{itemName}" has been removed from trusted applications.',
       values: { itemName },
     }),
+  emptyStateTitleNoEntries: i18n.translate(
+    'xpack.securitySolution.trustedApps.emptyStateTitleNoEntries',
+    {
+      defaultMessage: 'There are no trusted applications to display.',
+    }
+  ),
   emptyStateTitle: i18n.translate('xpack.securitySolution.trustedApps.emptyStateTitle', {
     defaultMessage: 'Add your first trusted application',
   }),

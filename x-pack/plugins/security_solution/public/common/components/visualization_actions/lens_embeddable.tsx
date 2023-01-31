@@ -8,8 +8,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -20,9 +22,11 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
 import { getRequestsAndResponses } from './utils';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
-const LensComponentWrapper = styled.div<{ height?: string }>`
+const LensComponentWrapper = styled.div<{ height?: string; width?: string }>`
   height: ${({ height }) => height ?? 'auto'};
+  width: ${({ width }) => width ?? 'auto'};
   > div {
     background-color: transparent;
   }
@@ -47,14 +51,20 @@ const initVisualizationData: {
 const style = { height: '100%', minWidth: '100px' };
 
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
+  applyGlobalQueriesAndFilters = true,
+  extraActions,
+  extraOptions,
   getLensAttributes,
   height: wrapperHeight,
   id,
   inputsModelId = InputsModelId.global,
+  inspectTitle,
   lensAttributes,
+  onLoad,
+  scopeId = SourcererScopeName.default,
   stackByField,
   timerange,
-  inspectTitle,
+  width: wrapperWidth,
 }) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
@@ -63,8 +73,11 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
   const attributes = useLensAttributes({
-    lensAttributes,
+    applyGlobalQueriesAndFilters,
+    extraOptions,
     getLensAttributes,
+    lensAttributes,
+    scopeId,
     stackByField,
     title: '',
   });
@@ -81,10 +94,11 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   );
 
   const actions = useActions({
-    withActions: true,
     attributes,
-    timeRange: timerange,
+    extraActions,
     inspectActionProps,
+    timeRange: timerange,
+    withActions: true,
   });
 
   const handleCloseModal = useCallback(() => {
@@ -115,28 +129,68 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     return { response, additionalResponses };
   }, [visualizationData.responses]);
 
-  const onLoad = useCallback((isLoading, adapters) => {
-    if (!adapters) {
-      return;
-    }
-    const data = getRequestsAndResponses(adapters?.requests?.getRequests());
-    setVisualizationData({
-      requests: data.requests,
-      responses: data.responses,
-      isLoading,
-    });
-  }, []);
+  const callback = useCallback(
+    (isLoading, adapters) => {
+      if (!adapters) {
+        return;
+      }
+      const data = getRequestsAndResponses(adapters?.requests?.getRequests());
+      setVisualizationData({
+        requests: data.requests,
+        responses: data.responses,
+        isLoading,
+      });
+
+      if (onLoad != null) {
+        onLoad({
+          requests: data.requests,
+          responses: data.responses,
+          isLoading,
+        });
+      }
+    },
+    [onLoad]
+  );
+
+  const adHocDataViews = useMemo(
+    () =>
+      attributes?.state?.adHocDataViews != null
+        ? Object.values(attributes?.state?.adHocDataViews).reduce((acc, adHocDataView) => {
+            if (adHocDataView?.name != null) {
+              acc.push(adHocDataView?.name);
+            }
+            return acc;
+          }, [] as string[])
+        : null,
+    [attributes?.state?.adHocDataViews]
+  );
+
+  if (
+    !attributes ||
+    (visualizationData?.responses != null && visualizationData?.responses?.length === 0)
+  ) {
+    return (
+      <EuiEmptyPrompt
+        body={
+          <FormattedMessage
+            id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
+            defaultMessage="No data to display"
+          />
+        }
+      />
+    );
+  }
 
   return (
     <>
-      {attributes && searchSessionId ? (
-        <LensComponentWrapper height={wrapperHeight}>
+      {attributes && searchSessionId && (
+        <LensComponentWrapper height={wrapperHeight} width={wrapperWidth}>
           <LensComponent
             id={id}
             style={style}
             timeRange={timerange}
             attributes={attributes}
-            onLoad={onLoad}
+            onLoad={callback}
             onBrushEnd={updateDateRange}
             viewMode={ViewMode.VIEW}
             withDefaultActions={false}
@@ -145,9 +199,10 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             showInspector={false}
           />
         </LensComponentWrapper>
-      ) : null}
-      {isShowingModal && requests.request !== null && responses.response !== null && (
+      )}
+      {isShowingModal && requests.request != null && responses.response != null && (
         <ModalInspectQuery
+          adHocDataViews={adHocDataViews}
           additionalRequests={requests.additionalRequests}
           additionalResponses={responses.additionalResponses}
           closeModal={handleCloseModal}

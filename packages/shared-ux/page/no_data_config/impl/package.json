@@ -2,8 +2,5 @@
   "name": "@kbn/shared-ux-page-no-data-config",
   "private": true,
   "version": "1.0.0",
-  "main": "./target_node/index.js",
-  "browser": "./target_web/index.js",
-  "license": "SSPL-1.0 OR Elastic License 2.0",
-  "types": "./target_types/index.d.ts"
+  "license": "SSPL-1.0 OR Elastic License 2.0"
 }

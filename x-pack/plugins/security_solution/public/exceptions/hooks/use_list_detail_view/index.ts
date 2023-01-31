@@ -11,7 +11,6 @@ import type {
   Rule as UIRule,
 } from '@kbn/securitysolution-exception-list-components';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
-import { useParams } from 'react-router-dom';
 import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 import { isEqual } from 'lodash';
@@ -28,6 +27,7 @@ import {
 } from '../../api';
 import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 import * as i18n from '../../translations';
+import { useInvalidateFetchRuleByIdQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_rule_by_id_query';
 
 interface ReferenceModalState {
   contentText: string;
@@ -45,17 +45,13 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listNamespaceType: 'single',
 };
 
-export const useListDetailsView = () => {
+export const useListDetailsView = (exceptionListId: string) => {
   const toasts = useToasts();
   const { services } = useKibana();
   const { http, notifications } = services;
   const { navigateToApp } = services.application;
 
   const { exportExceptionList, deleteExceptionList } = useApi(http);
-
-  const { detailName: exceptionListId } = useParams<{
-    detailName: string;
-  }>();
 
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
@@ -74,6 +70,7 @@ export const useListDetailsView = () => {
   );
   const [disableManageButton, setDisableManageButton] = useState(true);
   const [refreshExceptions, setRefreshExceptions] = useState(false);
+  const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
 
   const headerBackOptions: BackOptions = useMemo(
     () => ({
@@ -90,12 +87,17 @@ export const useListDetailsView = () => {
   );
 
   const handleErrorStatus = useCallback(
-    (error: Error, errorTitle?: string, errorDescription?: string) => {
+    (
+      error: Error,
+      newViewerStatue?: ViewerStatus,
+      errorTitle?: string,
+      errorDescription?: string
+    ) => {
       toasts?.addError(error, {
-        title: errorTitle || i18n.EXCEPTION_ERROR_TITLE,
-        toastMessage: errorDescription || i18n.EXCEPTION_ERROR_DESCRIPTION,
+        title: errorTitle ?? '',
+        toastMessage: errorDescription ?? '',
       });
-      setViewerStatus(ViewerStatus.ERROR);
+      setViewerStatus(newViewerStatue ?? '');
     },
     [toasts]
   );
@@ -125,7 +127,12 @@ export const useListDetailsView = () => {
       setInvalidListId(false);
       if (checkIfListCannotBeEdited(result)) return setCanUserEditList(false);
     } catch (error) {
-      handleErrorStatus(error);
+      handleErrorStatus(
+        error,
+        ViewerStatus.ERROR,
+        i18n.EXCEPTION_ERROR_TITLE,
+        i18n.EXCEPTION_ERROR_DESCRIPTION
+      );
     }
   }, [exceptionListId, http, initializeListRules, handleErrorStatus]);
 
@@ -170,7 +177,12 @@ export const useListDetailsView = () => {
         },
       });
     } catch (error) {
-      handleErrorStatus(error);
+      handleErrorStatus(
+        error,
+        undefined,
+        i18n.EXCEPTION_EXPORT_ERROR,
+        i18n.EXCEPTION_EXPORT_ERROR_DESCRIPTION
+      );
     }
   }, [list, exportExceptionList, handleErrorStatus, toasts]);
 
@@ -310,7 +322,17 @@ export const useListDetailsView = () => {
           setRefreshExceptions(true);
           resetManageRulesAfterSaving();
         })
-        .then(() => setRefreshExceptions(false));
+        .then(() => setRefreshExceptions(false))
+        .then(() => invalidateFetchRuleByIdQuery())
+        .catch((error) => {
+          handleErrorStatus(
+            error,
+            undefined,
+            i18n.EXCEPTION_MANAGE_RULES_ERROR,
+            i18n.EXCEPTION_MANAGE_RULES_ERROR_DESCRIPTION
+          );
+          setShowManageButtonLoader(false);
+        });
     } catch (err) {
       handleErrorStatus(err);
     }
@@ -321,6 +343,7 @@ export const useListDetailsView = () => {
     exceptionListId,
     resetManageRulesAfterSaving,
     handleErrorStatus,
+    invalidateFetchRuleByIdQuery,
   ]);
   const onCancelManageRules = useCallback(() => {
     setShowManageRulesFlyout(false);

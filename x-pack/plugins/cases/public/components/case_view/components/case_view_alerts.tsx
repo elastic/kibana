@@ -35,17 +35,17 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     [caseData.comments]
   );
 
-  const { isLoading: isLoadingAlertFeatureIds, alertFeatureIds } =
+  const { isLoading: isLoadingAlertFeatureIds, data: alertFeatureIds } =
     useGetFeatureIds(alertRegistrationContexts);
 
   const alertStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
     configurationId: caseData.owner,
     id: `case-details-alerts-${caseData.owner}`,
-    flyoutSize: (alertFeatureIds.includes('siem') ? 'm' : 's') as EuiFlyoutSize,
-    featureIds: alertFeatureIds,
+    flyoutSize: (alertFeatureIds?.includes('siem') ? 'm' : 's') as EuiFlyoutSize,
+    featureIds: alertFeatureIds ?? [],
     query: alertIdsQuery,
-    showExpandToDetails: alertFeatureIds.includes('siem'),
+    showExpandToDetails: Boolean(alertFeatureIds?.includes('siem')),
   };
 
   if (alertIdsQuery.ids.values.length === 0) {

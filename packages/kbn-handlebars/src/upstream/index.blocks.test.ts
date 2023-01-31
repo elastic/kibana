@@ -5,6 +5,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
+import Handlebars from '../..';
 import { expectTemplate } from '../__jest__/test_bench';
 
 describe('blocks', () => {
@@ -193,6 +194,173 @@ describe('blocks', () => {
           data: [1, 3, 5],
         })
         .toCompileTo('1\n3\n5\nOK.');
+    });
+  });
+
+  describe('decorators', () => {
+    it('should apply mustache decorators', () => {
+      expectTemplate('{{#helper}}{{*decorator}}{{/helper}}')
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return (options.fn as any).run;
+        })
+        .withDecorator('decorator', function (fn) {
+          (fn as any).run = 'success';
+          return fn;
+        })
+        .toCompileTo('success');
+    });
+
+    it('should apply allow undefined return', () => {
+      expectTemplate('{{#helper}}{{*decorator}}suc{{/helper}}')
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return options.fn() + (options.fn as any).run;
+        })
+        .withDecorator('decorator', function (fn) {
+          (fn as any).run = 'cess';
+        })
+        .toCompileTo('success');
+    });
+
+    it('should apply block decorators', () => {
+      expectTemplate('{{#helper}}{{#*decorator}}success{{/decorator}}{{/helper}}')
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return (options.fn as any).run;
+        })
+        .withDecorator('decorator', function (fn, props, container, options) {
+          (fn as any).run = options.fn();
+          return fn;
+        })
+        .toCompileTo('success');
+    });
+
+    it('should support nested decorators', () => {
+      expectTemplate(
+        '{{#helper}}{{#*decorator}}{{#*nested}}suc{{/nested}}cess{{/decorator}}{{/helper}}'
+      )
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return (options.fn as any).run;
+        })
+        .withDecorators({
+          decorator(fn, props, container, options) {
+            (fn as any).run = options.fn.nested + options.fn();
+            return fn;
+          },
+          nested(fn, props, container, options) {
+            props.nested = options.fn();
+          },
+        })
+        .toCompileTo('success');
+    });
+
+    it('should apply multiple decorators', () => {
+      expectTemplate(
+        '{{#helper}}{{#*decorator}}suc{{/decorator}}{{#*decorator}}cess{{/decorator}}{{/helper}}'
+      )
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return (options.fn as any).run;
+        })
+        .withDecorator('decorator', function (fn, props, container, options) {
+          (fn as any).run = ((fn as any).run || '') + options.fn();
+          return fn;
+        })
+        .toCompileTo('success');
+    });
+
+    it('should access parent variables', () => {
+      expectTemplate('{{#helper}}{{*decorator foo}}{{/helper}}')
+        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          return (options.fn as any).run;
+        })
+        .withDecorator('decorator', function (fn, props, container, options) {
+          (fn as any).run = options.args;
+          return fn;
+        })
+        .withInput({ foo: 'success' })
+        .toCompileTo('success');
+    });
+
+    it('should work with root program', () => {
+      let run;
+      expectTemplate('{{*decorator "success"}}')
+        .withDecorator('decorator', function (fn, props, container, options) {
+          expect(options.args[0]).toEqual('success');
+          run = true;
+          return fn;
+        })
+        .withInput({ foo: 'success' })
+        .toCompileTo('');
+      expect(run).toEqual(true);
+    });
+
+    it('should fail when accessing variables from root', () => {
+      let run;
+      expectTemplate('{{*decorator foo}}')
+        .withDecorator('decorator', function (fn, props, container, options) {
+          expect(options.args[0]).toBeUndefined();
+          run = true;
+          return fn;
+        })
+        .withInput({ foo: 'fail' })
+        .toCompileTo('');
+      expect(run).toEqual(true);
+    });
+
+    describe('registration', () => {
+      beforeEach(() => {
+        global.kbnHandlebarsEnv = Handlebars.create();
+      });
+
+      afterEach(() => {
+        global.kbnHandlebarsEnv = null;
+      });
+
+      it('unregisters', () => {
+        // @ts-expect-error: Cannot assign to 'decorators' because it is a read-only property.
+        kbnHandlebarsEnv!.decorators = {};
+
+        kbnHandlebarsEnv!.registerDecorator('foo', function () {
+          return 'fail';
+        });
+
+        expect(!!kbnHandlebarsEnv!.decorators.foo).toEqual(true);
+        kbnHandlebarsEnv!.unregisterDecorator('foo');
+        expect(kbnHandlebarsEnv!.decorators.foo).toBeUndefined();
+      });
+
+      it('allows multiple globals', () => {
+        // @ts-expect-error: Cannot assign to 'decorators' because it is a read-only property.
+        kbnHandlebarsEnv!.decorators = {};
+
+        // @ts-expect-error: Expected 2 arguments, but got 1.
+        kbnHandlebarsEnv!.registerDecorator({
+          foo() {},
+          bar() {},
+        });
+
+        expect(!!kbnHandlebarsEnv!.decorators.foo).toEqual(true);
+        expect(!!kbnHandlebarsEnv!.decorators.bar).toEqual(true);
+        kbnHandlebarsEnv!.unregisterDecorator('foo');
+        kbnHandlebarsEnv!.unregisterDecorator('bar');
+        expect(kbnHandlebarsEnv!.decorators.foo).toBeUndefined();
+        expect(kbnHandlebarsEnv!.decorators.bar).toBeUndefined();
+      });
+
+      it('fails with multiple and args', () => {
+        expect(() => {
+          kbnHandlebarsEnv!.registerDecorator(
+            // @ts-expect-error: Argument of type '{ world(): string; testHelper(): string; }' is not assignable to parameter of type 'string'.
+            {
+              world() {
+                return 'world!';
+              },
+              testHelper() {
+                return 'found it!';
+              },
+            },
+            {}
+          );
+        }).toThrow('Arg not supported with multiple decorators');
+      });
     });
   });
 });

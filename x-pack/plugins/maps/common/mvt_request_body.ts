@@ -43,7 +43,9 @@ export function getAggsTileRequest({
 }) {
   const requestBody = decodeMvtResponseBody(encodedRequestBody) as any;
   return {
-    path: `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`,
+    path: `/${encodeURIComponent(index)}/_mvt/${encodeURIComponent(
+      geometryFieldName
+    )}/${z}/${x}/${y}`,
     body: {
       size: 0, // no hits
       grid_precision: gridPrecision,
@@ -53,7 +55,7 @@ export function getAggsTileRequest({
       grid_agg: renderAs === RENDER_AS.HEX ? 'geohex' : 'geotile',
       grid_type: renderAs === RENDER_AS.GRID || renderAs === RENDER_AS.HEX ? 'grid' : 'centroid',
       aggs: requestBody.aggs,
-      fields: requestBody.fields,
+      fields: requestBody.fields ? requestBody.fields : [],
       runtime_mappings: requestBody.runtime_mappings,
       with_labels: hasLabels,
     },
@@ -79,7 +81,9 @@ export function getHitsTileRequest({
 }) {
   const requestBody = decodeMvtResponseBody(encodedRequestBody) as any;
   return {
-    path: `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`,
+    path: `/${encodeURIComponent(index)}/_mvt/${encodeURIComponent(
+      geometryFieldName
+    )}/${z}/${x}/${y}`,
     body: {
       grid_precision: 0, // no aggs
       exact_bounds: true,

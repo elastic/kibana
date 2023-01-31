@@ -14,6 +14,7 @@ import path from 'path';
 const STORYBOOKS = [
   'apm',
   'canvas',
+  'cases',
   'ci_composite',
   'cloud_chat',
   'coloring',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
@@ -19,7 +19,6 @@ import {
 } from '../../../../../common/constants';
 
 import type { PatchRuleRequestBody } from '../../../../../common/detection_engine/rule_management';
-import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
@@ -54,7 +53,6 @@ import { assertUnreachable } from '../../../../../common/utility_types';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../../rule_actions_legacy';
-import { mergeRuleExecutionSummary } from '../../rule_monitoring';
 import type {
   InternalRuleCreate,
   RuleParams,
@@ -83,6 +81,7 @@ import {
   transformToNotifyWhen,
 } from './rule_actions';
 import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
+import { createRuleExecutionSummary } from '../../rule_monitoring';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -485,7 +484,7 @@ export const convertCreateAPIToInternalSchema = (
   defaultEnabled = true
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
-  const newRuleId = input.rule_id ?? uuid.v4();
+  const newRuleId = input.rule_id ?? uuidv4();
   return {
     name: input.name,
     tags: input.tags ?? [],
@@ -669,13 +668,9 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 
 export const internalRuleToAPIResponse = (
   rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>,
-  ruleExecutionSummary?: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRuleActions | null
 ): RuleResponse => {
-  const mergedExecutionSummary = mergeRuleExecutionSummary(
-    rule.executionStatus,
-    ruleExecutionSummary ?? null
-  );
+  const executionSummary = createRuleExecutionSummary(rule);
 
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
     (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
@@ -703,6 +698,6 @@ export const internalRuleToAPIResponse = (
     throttle: transformFromAlertThrottle(rule, legacyRuleActions),
     actions: transformActions(rule.actions, legacyRuleActions),
     // Execution summary
-    execution_summary: mergedExecutionSummary ?? undefined,
+    execution_summary: executionSummary ?? undefined,
   };
 };

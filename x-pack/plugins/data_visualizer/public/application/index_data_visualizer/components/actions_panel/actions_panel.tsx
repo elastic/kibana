@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
+import { flatten } from 'lodash';
 import React, { FC, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { useEuiBreakpoint, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { flatten } from 'lodash';
+import { useUrlState } from '@kbn/ml-url-state';
+import { isDefined } from '@kbn/ml-is-defined';
+
 import { LinkCardProps } from '../../../common/components/link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { useUrlState } from '../../../common/util/url_state';
 import { LinkCard } from '../../../common/components/link_card';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
-import { isDefined } from '../../../common/util/is_defined';
 
 interface Props {
   dataView: DataView;
@@ -25,6 +27,8 @@ interface Props {
   searchQueryLanguage?: string;
   getAdditionalLinks?: GetAdditionalLinks;
 }
+
+const ACTIONS_PANEL_WIDTH = '240px';
 
 export const ActionsPanel: FC<Props> = ({
   dataView,
@@ -48,8 +52,8 @@ export const ActionsPanel: FC<Props> = ({
   useEffect(() => {
     let unmounted = false;
 
-    const indexPatternId = dataView.id;
-    const indexPatternTitle = dataView.title;
+    const dataViewId = dataView.id;
+    const dataViewIndexPattern = dataView.getIndexPattern();
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;
@@ -59,7 +63,7 @@ export const ActionsPanel: FC<Props> = ({
         return;
       }
       const discoverUrl = await discover.locator.getUrl({
-        indexPatternId,
+        indexPatternId: dataViewId,
         filters: data.query.filterManager.getFilters() ?? [],
         query:
           searchString && searchQueryLanguage !== undefined
@@ -72,12 +76,12 @@ export const ActionsPanel: FC<Props> = ({
       setDiscoverLink(discoverUrl);
     };
 
-    if (Array.isArray(getAdditionalLinks) && indexPatternId !== undefined) {
+    if (Array.isArray(getAdditionalLinks) && dataViewId !== undefined) {
       Promise.all(
         getAdditionalLinks.map(async (asyncCardGetter) => {
           const results = await asyncCardGetter({
-            dataViewId: indexPatternId,
-            dataViewTitle: indexPatternTitle,
+            dataViewId,
+            dataViewTitle: dataViewIndexPattern,
           });
           if (Array.isArray(results)) {
             return await Promise.all(
@@ -112,23 +116,31 @@ export const ActionsPanel: FC<Props> = ({
     data.query,
     getAdditionalLinks,
   ]);
+  const showActionsPanel =
+    discoverLink || (Array.isArray(asyncHrefCards) && asyncHrefCards.length > 0);
+
+  const dvActionsPanel = css({
+    [useEuiBreakpoint(['xs', 's', 'm', 'l', 'xl'])]: {
+      width: ACTIONS_PANEL_WIDTH,
+    },
+  });
 
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which
   // controls whether the recognizer section is ultimately displayed.
-  return (
-    <div data-test-subj="dataVisualizerActionsPanel">
+  return showActionsPanel ? (
+    <div data-test-subj="dataVisualizerActionsPanel" css={dvActionsPanel}>
+      <EuiTitle size="s">
+        <h2>
+          <FormattedMessage
+            id="xpack.dataVisualizer.index.actionsPanel.exploreTitle"
+            defaultMessage="Explore your data"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       {discoverLink && (
         <>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.dataVisualizer.index.actionsPanel.exploreTitle"
-                defaultMessage="Explore your data"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
           <LinkCard
             href={discoverLink}
             icon="discoverApp"
@@ -164,5 +176,5 @@ export const ActionsPanel: FC<Props> = ({
           </>
         ))}
     </div>
-  );
+  ) : null;
 };

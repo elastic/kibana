@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/securitysolution-io-ts-alerting-types",
-  "owner": "@elastic/security-solution-platform",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/security-solution-platform"
 }

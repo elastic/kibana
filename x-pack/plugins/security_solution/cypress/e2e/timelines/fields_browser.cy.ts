@@ -23,7 +23,6 @@ import { cleanKibana } from '../../tasks/common';
 import {
   addsHostGeoCityNameToTimeline,
   addsHostGeoContinentNameToTimeline,
-  clearFieldsBrowser,
   closeFieldsBrowser,
   filterFieldsBrowser,
   toggleCategoryFilter,
@@ -56,15 +55,11 @@ describe('Fields Browser', () => {
     login();
   });
   context('Fields Browser rendering', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();
-    });
-
-    afterEach(() => {
-      clearFieldsBrowser();
     });
 
     it('displays all categories (by default)', () => {
@@ -126,16 +121,11 @@ describe('Fields Browser', () => {
   });
 
   context('Editing the timeline', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();
-    });
-
-    afterEach(() => {
-      openTimelineFieldsBrowser();
-      clearFieldsBrowser();
     });
 
     it('removes the message field from the timeline when the user un-checks the field', () => {

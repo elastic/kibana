@@ -1,4 +1,4 @@
-1,3c1,12
+1,3c1,13
 < describe('blocks', function() {
 <   it('array', function() {
 <     var string = '{{#goodbyes}}{{text}}! {{/goodbyes}}cruel {{world}}!';
@@ -10,12 +10,13 @@
 >  * See `packages/kbn-handlebars/LICENSE` for more information.
 >  */
 > 
+> import Handlebars from '../..';
 > import { expectTemplate } from '../__jest__/test_bench';
 > 
 > describe('blocks', () => {
 >   it('array', () => {
 >     const string = '{{#goodbyes}}{{text}}! {{/goodbyes}}cruel {{world}}!';
-7,12c16,17
+7,12c17,18
 <         goodbyes: [
 <           { text: 'goodbye' },
 <           { text: 'Goodbye' },
@@ -25,15 +26,15 @@
 ---
 >         goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
 >         world: 'world',
-14d18
+14d19
 <       .withMessage('Arrays iterate over the contents when not empty')
-20c24
+20c25
 <         world: 'world'
 ---
 >         world: 'world',
-22d25
+22d26
 <       .withMessage('Arrays ignore the contents when empty')
-26,29c29,30
+26,29c30,31
 <   it('array without data', function() {
 <     expectTemplate(
 <       '{{#goodbyes}}{{text}}{{/goodbyes}} {{#goodbyes}}{{text}}{{/goodbyes}}'
@@ -41,7 +42,7 @@
 ---
 >   it('array without data', () => {
 >     expectTemplate('{{#goodbyes}}{{text}}{{/goodbyes}} {{#goodbyes}}{{text}}{{/goodbyes}}')
-31,36c32,33
+31,36c33,34
 <         goodbyes: [
 <           { text: 'goodbye' },
 <           { text: 'Goodbye' },
@@ -51,9 +52,9 @@
 ---
 >         goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
 >         world: 'world',
-38d34
+38d35
 <       .withCompileOptions({ compat: false })
-42,45c38,39
+42,45c39,40
 <   it('array with @index', function() {
 <     expectTemplate(
 <       '{{#goodbyes}}{{@index}}. {{text}}! {{/goodbyes}}cruel {{world}}!'
@@ -61,7 +62,7 @@
 ---
 >   it('array with @index', () => {
 >     expectTemplate('{{#goodbyes}}{{@index}}. {{text}}! {{/goodbyes}}cruel {{world}}!')
-47,52c41,42
+47,52c42,43
 <         goodbyes: [
 <           { text: 'goodbye' },
 <           { text: 'Goodbye' },
@@ -71,15 +72,15 @@
 ---
 >         goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
 >         world: 'world',
-54d43
+54d44
 <       .withMessage('The @index variable is used')
-58,59c47,48
+58,59c48,49
 <   it('empty block', function() {
 <     var string = '{{#goodbyes}}{{/goodbyes}}cruel {{world}}!';
 ---
 >   it('empty block', () => {
 >     const string = '{{#goodbyes}}{{/goodbyes}}cruel {{world}}!';
-63,68c52,53
+63,68c53,54
 <         goodbyes: [
 <           { text: 'goodbye' },
 <           { text: 'Goodbye' },
@@ -89,19 +90,19 @@
 ---
 >         goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
 >         world: 'world',
-70d54
+70d55
 <       .withMessage('Arrays iterate over the contents when not empty')
-76c60
+76c61
 <         world: 'world'
 ---
 >         world: 'world',
-78d61
+78d62
 <       .withMessage('Arrays ignore the contents when empty')
-82c65
+82c66
 <   it('block with complex lookup', function() {
 ---
 >   it('block with complex lookup', () => {
-86,90c69
+86,90c70
 <         goodbyes: [
 <           { text: 'goodbye' },
 <           { text: 'Goodbye' },
@@ -109,7 +110,7 @@
 <         ]
 ---
 >         goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
-92,97c71
+92,97c72
 <       .withMessage(
 <         'Templates can access variables in contexts up the stack with relative path syntax'
 <       )
@@ -118,11 +119,11 @@
 <       );
 ---
 >       .toCompileTo('goodbye cruel Alan! Goodbye cruel Alan! GOODBYE cruel Alan! ');
-100c74
+100c75
 <   it('multiple blocks with complex lookup', function() {
 ---
 >   it('multiple blocks with complex lookup', () => {
-104,108c78
+104,108c79
 <         goodbyes: [
 <           { text: 'goodbye' },
 <           { text: 'Goodbye' },
@@ -130,7 +131,7 @@
 <         ]
 ---
 >         goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
-113,116c83,84
+113,116c84,85
 <   it('block with complex lookup using nested context', function() {
 <     expectTemplate(
 <       '{{#goodbyes}}{{text}} cruel {{foo/../name}}! {{/goodbyes}}'
@@ -138,15 +139,15 @@
 ---
 >   it('block with complex lookup using nested context', () => {
 >     expectTemplate('{{#goodbyes}}{{text}} cruel {{foo/../name}}! {{/goodbyes}}').toThrow(Error);
-119c87
+119c88
 <   it('block with deep nested complex lookup', function() {
 ---
 >   it('block with deep nested complex lookup', () => {
-125c93
+125c94
 <         outer: [{ sibling: 'sad', inner: [{ text: 'goodbye' }] }]
 ---
 >         outer: [{ sibling: 'sad', inner: [{ text: 'goodbye' }] }],
-130,133c98,99
+130,133c99,100
 <   it('works with cached blocks', function() {
 <     expectTemplate(
 <       '{{#each person}}{{#with .}}{{first}} {{last}}{{/with}}{{/each}}'
@@ -154,25 +155,25 @@
 ---
 >   it('works with cached blocks', () => {
 >     expectTemplate('{{#each person}}{{#with .}}{{first}} {{last}}{{/with}}{{/each}}')
-138,139c104,105
+138,139c105,106
 <           { first: 'Alan', last: 'Johnson' }
 <         ]
 ---
 >           { first: 'Alan', last: 'Johnson' },
 >         ],
-144,145c110,111
+144,145c111,112
 <   describe('inverted sections', function() {
 <     it('inverted sections with unset value', function() {
 ---
 >   describe('inverted sections', () => {
 >     it('inverted sections with unset value', () => {
-148,150c114
+148,150c115
 <       )
 <         .withMessage("Inverted section rendered when value isn't set.")
 <         .toCompileTo('Right On!');
 ---
 >       ).toCompileTo('Right On!');
-153,156c117,118
+153,156c118,119
 <     it('inverted section with false value', function() {
 <       expectTemplate(
 <         '{{#goodbyes}}{{this}}{{/goodbyes}}{{^goodbyes}}Right On!{{/goodbyes}}'
@@ -180,9 +181,9 @@
 ---
 >     it('inverted section with false value', () => {
 >       expectTemplate('{{#goodbyes}}{{this}}{{/goodbyes}}{{^goodbyes}}Right On!{{/goodbyes}}')
-158d119
+158d120
 <         .withMessage('Inverted section rendered when value is false.')
-162,165c123,124
+162,165c124,125
 <     it('inverted section with empty set', function() {
 <       expectTemplate(
 <         '{{#goodbyes}}{{this}}{{/goodbyes}}{{^goodbyes}}Right On!{{/goodbyes}}'
@@ -190,23 +191,23 @@
 ---
 >     it('inverted section with empty set', () => {
 >       expectTemplate('{{#goodbyes}}{{this}}{{/goodbyes}}{{^goodbyes}}Right On!{{/goodbyes}}')
-167d125
+167d126
 <         .withMessage('Inverted section rendered when value is empty set.')
-171c129
+171c130
 <     it('block inverted sections', function() {
 ---
 >     it('block inverted sections', () => {
-177c135
+177c136
 <     it('chained inverted sections', function() {
 ---
 >     it('chained inverted sections', () => {
-188,190c146
+188,190c147
 <       expectTemplate(
 <         '{{#people}}{{name}}{{else if none}}{{none}}{{else}}fail{{/people}}'
 <       )
 ---
 >       expectTemplate('{{#people}}{{name}}{{else if none}}{{none}}{{else}}fail{{/people}}')
-195,198c151,152
+195,198c152,153
 <     it('chained inverted sections with mismatch', function() {
 <       expectTemplate(
 <         '{{#people}}{{name}}{{else if none}}{{none}}{{/if}}'
@@ -214,21 +215,21 @@
 ---
 >     it('chained inverted sections with mismatch', () => {
 >       expectTemplate('{{#people}}{{name}}{{else if none}}{{none}}{{/if}}').toThrow(Error);
-201c155
+201c156
 <     it('block inverted sections with empty arrays', function() {
 ---
 >     it('block inverted sections with empty arrays', () => {
-205c159
+205c160
 <           people: []
 ---
 >           people: [],
-211,212c165,166
+211,212c166,167
 <   describe('standalone sections', function() {
 <     it('block standalone else sections', function() {
 ---
 >   describe('standalone sections', () => {
 >     it('block standalone else sections', () => {
-226,241c180,181
+226,241c181,182
 <     it('block standalone else sections can be disabled', function() {
 <       expectTemplate('{{#people}}\n{{name}}\n{{^}}\n{{none}}\n{{/people}}\n')
 <         .withInput({ none: 'No people' })
@@ -248,22 +249,21 @@
 ---
 >     it('block standalone chained else sections', () => {
 >       expectTemplate('{{#people}}\n{{name}}\n{{else if none}}\n{{none}}\n{{/people}}\n')
-245,247c185
+245,247c186
 <       expectTemplate(
 <         '{{#people}}\n{{name}}\n{{else if none}}\n{{none}}\n{{^}}\n{{/people}}\n'
 <       )
 ---
 >       expectTemplate('{{#people}}\n{{name}}\n{{else if none}}\n{{none}}\n{{^}}\n{{/people}}\n')
-252c190
+252c191
 <     it('should handle nesting', function() {
 ---
 >     it('should handle nesting', () => {
-255c193
+255c194
 <           data: [1, 3, 5]
 ---
 >           data: [1, 3, 5],
-260,455d197
-< 
+261,297c200,201
 <   describe('compat mode', function() {
 <     it('block with deep recursive lookup lookup', function() {
 <       expectTemplate(
@@ -301,143 +301,203 @@
 < 
 <   describe('decorators', function() {
 <     it('should apply mustache decorators', function() {
-<       expectTemplate('{{#helper}}{{*decorator}}{{/helper}}')
+---
+>   describe('decorators', () => {
+>     it('should apply mustache decorators', () => {
+299,300c203,204
 <         .withHelper('helper', function(options) {
 <           return options.fn.run;
-<         })
+---
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return (options.fn as any).run;
+302,303c206,207
 <         .withDecorator('decorator', function(fn) {
 <           fn.run = 'success';
-<           return fn;
-<         })
-<         .toCompileTo('success');
-<     });
-< 
+---
+>         .withDecorator('decorator', function (fn) {
+>           (fn as any).run = 'success';
+309c213
 <     it('should apply allow undefined return', function() {
-<       expectTemplate('{{#helper}}{{*decorator}}suc{{/helper}}')
+---
+>     it('should apply allow undefined return', () => {
+311,312c215,216
 <         .withHelper('helper', function(options) {
 <           return options.fn() + options.fn.run;
-<         })
+---
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return options.fn() + (options.fn as any).run;
+314,315c218,219
 <         .withDecorator('decorator', function(fn) {
 <           fn.run = 'cess';
-<         })
-<         .toCompileTo('success');
-<     });
-< 
+---
+>         .withDecorator('decorator', function (fn) {
+>           (fn as any).run = 'cess';
+320,325c224,227
 <     it('should apply block decorators', function() {
 <       expectTemplate(
 <         '{{#helper}}{{#*decorator}}success{{/decorator}}{{/helper}}'
 <       )
 <         .withHelper('helper', function(options) {
 <           return options.fn.run;
-<         })
+---
+>     it('should apply block decorators', () => {
+>       expectTemplate('{{#helper}}{{#*decorator}}success{{/decorator}}{{/helper}}')
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return (options.fn as any).run;
+327,328c229,230
 <         .withDecorator('decorator', function(fn, props, container, options) {
 <           fn.run = options.fn();
-<           return fn;
-<         })
-<         .toCompileTo('success');
-<     });
-< 
+---
+>         .withDecorator('decorator', function (fn, props, container, options) {
+>           (fn as any).run = options.fn();
+334c236
 <     it('should support nested decorators', function() {
-<       expectTemplate(
-<         '{{#helper}}{{#*decorator}}{{#*nested}}suc{{/nested}}cess{{/decorator}}{{/helper}}'
-<       )
+---
+>     it('should support nested decorators', () => {
+338,339c240,241
 <         .withHelper('helper', function(options) {
 <           return options.fn.run;
-<         })
-<         .withDecorators({
+---
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return (options.fn as any).run;
+342,343c244,245
 <           decorator: function(fn, props, container, options) {
 <             fn.run = options.fn.nested + options.fn();
-<             return fn;
-<           },
+---
+>           decorator(fn, props, container, options) {
+>             (fn as any).run = options.fn.nested + options.fn();
+346c248
 <           nested: function(fn, props, container, options) {
-<             props.nested = options.fn();
+---
+>           nested(fn, props, container, options) {
+348c250
 <           }
-<         })
-<         .toCompileTo('success');
-<     });
-< 
+---
+>           },
+353c255
 <     it('should apply multiple decorators', function() {
-<       expectTemplate(
-<         '{{#helper}}{{#*decorator}}suc{{/decorator}}{{#*decorator}}cess{{/decorator}}{{/helper}}'
-<       )
+---
+>     it('should apply multiple decorators', () => {
+357,358c259,260
 <         .withHelper('helper', function(options) {
 <           return options.fn.run;
-<         })
+---
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return (options.fn as any).run;
+360,361c262,263
 <         .withDecorator('decorator', function(fn, props, container, options) {
 <           fn.run = (fn.run || '') + options.fn();
-<           return fn;
-<         })
-<         .toCompileTo('success');
-<     });
-< 
+---
+>         .withDecorator('decorator', function (fn, props, container, options) {
+>           (fn as any).run = ((fn as any).run || '') + options.fn();
+367c269
 <     it('should access parent variables', function() {
-<       expectTemplate('{{#helper}}{{*decorator foo}}{{/helper}}')
+---
+>     it('should access parent variables', () => {
+369,370c271,272
 <         .withHelper('helper', function(options) {
 <           return options.fn.run;
-<         })
+---
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
+>           return (options.fn as any).run;
+372,373c274,275
 <         .withDecorator('decorator', function(fn, props, container, options) {
 <           fn.run = options.args;
-<           return fn;
-<         })
-<         .withInput({ foo: 'success' })
-<         .toCompileTo('success');
-<     });
-< 
+---
+>         .withDecorator('decorator', function (fn, props, container, options) {
+>           (fn as any).run = options.args;
+380,381c282,283
 <     it('should work with root program', function() {
 <       var run;
-<       expectTemplate('{{*decorator "success"}}')
+---
+>     it('should work with root program', () => {
+>       let run;
+383,384c285,286
 <         .withDecorator('decorator', function(fn, props, container, options) {
 <           equals(options.args[0], 'success');
-<           run = true;
-<           return fn;
-<         })
-<         .withInput({ foo: 'success' })
-<         .toCompileTo('');
+---
+>         .withDecorator('decorator', function (fn, props, container, options) {
+>           expect(options.args[0]).toEqual('success');
+390c292
 <       equals(run, true);
-<     });
-< 
+---
+>       expect(run).toEqual(true);
+393,394c295,296
 <     it('should fail when accessing variables from root', function() {
 <       var run;
-<       expectTemplate('{{*decorator foo}}')
+---
+>     it('should fail when accessing variables from root', () => {
+>       let run;
+396,397c298,299
 <         .withDecorator('decorator', function(fn, props, container, options) {
 <           equals(options.args[0], undefined);
-<           run = true;
-<           return fn;
-<         })
-<         .withInput({ foo: 'fail' })
-<         .toCompileTo('');
+---
+>         .withDecorator('decorator', function (fn, props, container, options) {
+>           expect(options.args[0]).toBeUndefined();
+403c305
 <       equals(run, true);
-<     });
-< 
+---
+>       expect(run).toEqual(true);
+406,408c308,311
 <     describe('registration', function() {
 <       it('unregisters', function() {
 <         handlebarsEnv.decorators = {};
-< 
+---
+>     describe('registration', () => {
+>       beforeEach(() => {
+>         global.kbnHandlebarsEnv = Handlebars.create();
+>       });
+410c313,321
 <         handlebarsEnv.registerDecorator('foo', function() {
-<           return 'fail';
-<         });
-< 
+---
+>       afterEach(() => {
+>         global.kbnHandlebarsEnv = null;
+>       });
+> 
+>       it('unregisters', () => {
+>         // @ts-expect-error: Cannot assign to 'decorators' because it is a read-only property.
+>         kbnHandlebarsEnv!.decorators = {};
+> 
+>         kbnHandlebarsEnv!.registerDecorator('foo', function () {
+414,416c325,327
 <         equals(!!handlebarsEnv.decorators.foo, true);
 <         handlebarsEnv.unregisterDecorator('foo');
 <         equals(handlebarsEnv.decorators.foo, undefined);
-<       });
-< 
+---
+>         expect(!!kbnHandlebarsEnv!.decorators.foo).toEqual(true);
+>         kbnHandlebarsEnv!.unregisterDecorator('foo');
+>         expect(kbnHandlebarsEnv!.decorators.foo).toBeUndefined();
+419,420c330,332
 <       it('allows multiple globals', function() {
 <         handlebarsEnv.decorators = {};
-< 
+---
+>       it('allows multiple globals', () => {
+>         // @ts-expect-error: Cannot assign to 'decorators' because it is a read-only property.
+>         kbnHandlebarsEnv!.decorators = {};
+422,424c334,337
 <         handlebarsEnv.registerDecorator({
 <           foo: function() {},
 <           bar: function() {}
-<         });
-< 
+---
+>         // @ts-expect-error: Expected 2 arguments, but got 1.
+>         kbnHandlebarsEnv!.registerDecorator({
+>           foo() {},
+>           bar() {},
+427,432c340,345
 <         equals(!!handlebarsEnv.decorators.foo, true);
 <         equals(!!handlebarsEnv.decorators.bar, true);
 <         handlebarsEnv.unregisterDecorator('foo');
 <         handlebarsEnv.unregisterDecorator('bar');
 <         equals(handlebarsEnv.decorators.foo, undefined);
 <         equals(handlebarsEnv.decorators.bar, undefined);
-<       });
-< 
+---
+>         expect(!!kbnHandlebarsEnv!.decorators.foo).toEqual(true);
+>         expect(!!kbnHandlebarsEnv!.decorators.bar).toEqual(true);
+>         kbnHandlebarsEnv!.unregisterDecorator('foo');
+>         kbnHandlebarsEnv!.unregisterDecorator('bar');
+>         expect(kbnHandlebarsEnv!.decorators.foo).toBeUndefined();
+>         expect(kbnHandlebarsEnv!.decorators.bar).toBeUndefined();
+435,445c348,354
 <       it('fails with multiple and args', function() {
 <         shouldThrow(
 <           function() {
@@ -449,13 +509,26 @@
 <                 testHelper: function() {
 <                   return 'found it!';
 <                 }
-<               },
+---
+>       it('fails with multiple and args', () => {
+>         expect(() => {
+>           kbnHandlebarsEnv!.registerDecorator(
+>             // @ts-expect-error: Argument of type '{ world(): string; testHelper(): string; }' is not assignable to parameter of type 'string'.
+>             {
+>               world() {
+>                 return 'world!';
+447,452c356,362
 <               {}
 <             );
 <           },
 <           Error,
 <           'Arg not supported with multiple decorators'
 <         );
-<       });
-<     });
-<   });
+---
+>               testHelper() {
+>                 return 'found it!';
+>               },
+>             },
+>             {}
+>           );
+>         }).toThrow('Arg not supported with multiple decorators');

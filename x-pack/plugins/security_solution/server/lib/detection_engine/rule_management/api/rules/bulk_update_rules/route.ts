@@ -61,7 +61,6 @@ export const bulkUpdateRulesRoute = (
       const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
 
       const rulesClient = ctx.alerting.getRulesClient();
-      const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
       const savedObjectsClient = ctx.core.savedObjects.client;
 
       const mlAuthz = buildMlAuthz({
@@ -100,6 +99,7 @@ export const bulkUpdateRulesRoute = (
             await validateRuleDefaultExceptionList({
               exceptionsList: payloadRule.exceptions_list,
               rulesClient,
+              ruleRuleId: payloadRule.rule_id,
               ruleId: payloadRule.id,
             });
 
@@ -115,8 +115,7 @@ export const bulkUpdateRulesRoute = (
               ruleUpdate: payloadRule,
             });
             if (rule != null) {
-              const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-              return transformValidateBulkError(rule.id, rule, ruleExecutionSummary);
+              return transformValidateBulkError(rule.id, rule);
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

@@ -101,7 +101,8 @@ export const bulkCreateRulesRoute = (
               await validateRuleDefaultExceptionList({
                 exceptionsList: payloadRule.exceptions_list,
                 rulesClient,
-                ruleId: payloadRule.rule_id,
+                ruleRuleId: payloadRule.rule_id,
+                ruleId: undefined,
               });
 
               const validationErrors = validateCreateRuleProps(payloadRule);
@@ -120,7 +121,7 @@ export const bulkCreateRulesRoute = (
                 params: payloadRule,
               });
 
-              return transformValidateBulkError(createdRule.params.ruleId, createdRule, null);
+              return transformValidateBulkError(createdRule.params.ruleId, createdRule);
             } catch (err) {
               return transformBulkError(
                 payloadRule.rule_id,

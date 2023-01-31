@@ -6,7 +6,6 @@
  */
 
 import { takeLatest, takeLeading } from 'redux-saga/effects';
-import { fetchUpsertSuccessAction } from '../monitor_list';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   fetchMonitorOverviewAction,
@@ -29,7 +28,7 @@ export function* fetchMonitorOverviewEffect() {
 
 export function* fetchOverviewStatusEffect() {
   yield takeLatest(
-    [fetchOverviewStatusAction.get, quietFetchOverviewStatusAction.get, fetchUpsertSuccessAction],
+    [fetchOverviewStatusAction.get, quietFetchOverviewStatusAction.get],
     fetchEffectFactory(
       fetchOverviewStatus,
       fetchOverviewStatusAction.success,

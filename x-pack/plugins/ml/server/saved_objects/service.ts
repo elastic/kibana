@@ -6,6 +6,7 @@
  */
 
 import RE2 from 're2';
+import { memoize } from 'lodash';
 import {
   KibanaRequest,
   SavedObjectsClientContract,
@@ -57,6 +58,11 @@ export function mlSavedObjectServiceFactory(
   client: IScopedClusterClient,
   isMlReady: () => Promise<void>
 ) {
+  const _savedObjectsClientFindMemo = memoize(
+    async <T>(options: SavedObjectsFindOptions) => savedObjectsClient.find<T>(options),
+    (options: SavedObjectsFindOptions) => JSON.stringify(options)
+  );
+
   async function _getJobObjects(
     jobType?: JobType,
     jobId?: string,
@@ -87,8 +93,7 @@ export function mlSavedObjectServiceFactory(
       filter,
     };
 
-    const jobs = await savedObjectsClient.find<JobObject>(options);
-
+    const jobs = await _savedObjectsClientFindMemo<JobObject>(options);
     return jobs.saved_objects;
   }
 
@@ -231,7 +236,8 @@ export function mlSavedObjectServiceFactory(
       filter,
     };
 
-    return (await internalSavedObjectsClient.find<JobObject>(options)).saved_objects;
+    const jobs = await _savedObjectsClientFindMemo<JobObject>(options);
+    return jobs.saved_objects;
   }
 
   async function addDatafeed(datafeedId: string, jobId: string) {
@@ -462,8 +468,7 @@ export function mlSavedObjectServiceFactory(
       filter,
     };
 
-    const models = await savedObjectsClient.find<TrainedModelObject>(options);
-
+    const models = await _savedObjectsClientFindMemo<TrainedModelObject>(options);
     return models.saved_objects;
   }
 
@@ -677,7 +682,7 @@ export function mlSavedObjectServiceFactory(
         searchFields,
         filter,
       };
-      return savedObjectsClient.find<TrainedModelObject>(options);
+      return _savedObjectsClientFindMemo<TrainedModelObject>(options);
     });
 
     const finedResult = await Promise.all(searches);

@@ -19,8 +19,8 @@ import {
   EuiSwitch,
   EuiTextAlign,
 } from '@elastic/eui';
+import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { ModuleJobUI, SAVE_STATE } from '../page';
-import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { useMlContext } from '../../../../contexts/ml';
 import {
   composeValidators,
@@ -51,7 +51,8 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
   saveState,
   jobs,
 }) => {
-  const { from, to } = getTimeFilterRange();
+  const timefilter = useTimefilter();
+  const { from, to } = getTimeFilterRange(timefilter);
   const { currentDataView: dataView } = useMlContext();
 
   const jobPrefixValidator = useMemo(
@@ -180,8 +181,8 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.useFullDataLabel"
-                defaultMessage="Use full {indexPatternTitle} data"
-                values={{ indexPatternTitle: dataView.title }}
+                defaultMessage="Use full {dataViewIndexPattern} data"
+                values={{ dataViewIndexPattern: dataView.getIndexPattern() }}
               />
             }
             checked={useFullIndexData}

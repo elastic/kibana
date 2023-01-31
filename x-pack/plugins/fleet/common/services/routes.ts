@@ -197,7 +197,6 @@ export const agentRouteService = {
     AGENT_API_ROUTES.UPGRADE_PATTERN.replace('{agentId}', agentId),
   getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
   getActionStatusPath: () => AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
-  getCurrentUpgradesPath: () => AGENT_API_ROUTES.CURRENT_UPGRADES_PATTERN,
   getCancelActionPath: (actionId: string) =>
     AGENT_API_ROUTES.CANCEL_ACTIONS_PATTERN.replace('{actionId}', actionId),
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
@@ -257,8 +256,9 @@ export const settingsRoutesService = {
 };
 
 export const appRoutesService = {
-  getCheckPermissionsPath: (fleetServerSetup?: boolean) => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
+  getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
   getRegenerateServiceTokenPath: () => APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
+  postHealthCheckPath: () => APP_API_ROUTES.HEALTH_CHECK_PATTERN,
 };
 
 export const enrollmentAPIKeyRouteService = {

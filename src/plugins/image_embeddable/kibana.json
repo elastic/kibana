@@ -1,0 +1,14 @@
+{
+  "id": "imageEmbeddable",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "owner": {
+    "name": "@elastic/appex-sharedux",
+    "githubTeam": "@elastic/appex-sharedux"
+  },
+  "description": "Image embeddable",
+  "requiredPlugins": ["embeddable", "files", "uiActions"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"],
+  "optionalPlugins": ["security"]
+}

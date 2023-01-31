@@ -26,13 +26,13 @@ describe('guide card', () => {
 
       expect(component).toMatchSnapshot();
     });
-    test('should render use case card component for observability', async () => {
-      const component = await shallow(<GuideCard {...defaultProps} useCase="observability" />);
+    test('should render use case card component for kubernetes', async () => {
+      const component = await shallow(<GuideCard {...defaultProps} useCase="kubernetes" />);
 
       expect(component).toMatchSnapshot();
     });
-    test('should render use case card component for security', async () => {
-      const component = await shallow(<GuideCard {...defaultProps} useCase="security" />);
+    test('should render use case card component for siem', async () => {
+      const component = await shallow(<GuideCard {...defaultProps} useCase="siem" />);
 
       expect(component).toMatchSnapshot();
     });

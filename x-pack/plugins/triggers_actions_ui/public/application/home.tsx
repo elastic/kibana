@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { lazy, useEffect } from 'react';
+import React, { useState, lazy, useEffect, useCallback } from 'react';
 import { Route, RouteComponentProps, Switch, Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
+import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
 import { Section, routeToRules, routeToInternalAlerts, routeToLogs } from './constants';
@@ -34,7 +34,8 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { chrome, setBreadcrumbs, docLinks } = useKibana().services;
+  const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
+  const { chrome, setBreadcrumbs } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
 
   const tabs: Array<{
@@ -70,6 +71,30 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     history.push(`/${newSection}`);
   };
 
+  const renderRulesList = useCallback(() => {
+    return suspendedComponentWithProps(
+      RulesList,
+      'xl'
+    )({
+      showCreateRuleButton: false,
+      showCreateRuleButtonInPrompt: true,
+      setHeaderActions,
+    });
+  }, []);
+
+  const renderLogsList = useCallback(() => {
+    return (
+      <EuiPageTemplate.Section grow={false} paddingSize="none">
+        {suspendedComponentWithProps(
+          LogsList,
+          'xl'
+        )({
+          setHeaderActions,
+        })}
+      </EuiPageTemplate.Section>
+    );
+  }, []);
+
   // Set breadcrumb and page title
   useEffect(() => {
     setBreadcrumbs([getAlertingSectionBreadcrumb(section || 'home')]);
@@ -78,26 +103,15 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   return (
     <>
-      <EuiPageHeader
+      <EuiPageTemplate.Header
+        paddingSize="none"
         bottomBorder
         pageTitle={
           <span data-test-subj="appTitle">
             <FormattedMessage id="xpack.triggersActionsUI.home.appTitle" defaultMessage="Rules" />
           </span>
         }
-        rightSideItems={[
-          <EuiButtonEmpty
-            href={docLinks.links.alerting.guide}
-            target="_blank"
-            iconType="help"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.home.docsLinkText"
-              defaultMessage="Documentation"
-            />
-          </EuiButtonEmpty>,
-        ]}
+        rightSideItems={headerActions}
         description={
           <FormattedMessage
             id="xpack.triggersActionsUI.home.sectionDescription"
@@ -112,27 +126,21 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           'data-test-subj': `${tab.id}Tab`,
         }))}
       />
-
       <EuiSpacer size="l" />
-
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
           <Switch>
-            <Route
-              exact
-              path={routeToLogs}
-              component={suspendedComponentWithProps(LogsList, 'xl')}
-            />
-            <Route
-              exact
-              path={routeToRules}
-              component={suspendedComponentWithProps(RulesList, 'xl')}
-            />
+            <Route exact path={routeToLogs} component={renderLogsList} />
+            <Route exact path={routeToRules} component={renderRulesList} />
             {isInternalAlertsTableEnabled ? (
               <Route
                 exact
                 path={routeToInternalAlerts}
-                component={suspendedComponentWithProps(AlertsPage, 'xl')}
+                component={() => (
+                  <EuiPageTemplate.Section grow={false} paddingSize="none">
+                    {suspendedComponentWithProps(AlertsPage, 'xl')({})}
+                  </EuiPageTemplate.Section>
+                )}
               />
             ) : (
               <Redirect to={routeToRules} />

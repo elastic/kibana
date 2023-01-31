@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, ReactElement, useState } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -16,11 +16,13 @@ import {
 } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
-import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
-import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
+import { ResultDetails } from './result_details';
 import { JourneyStep } from '../../../../../../common/runtime_types';
+import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
+import { ScreenshotImageSize, THUMBNAIL_SCREENSHOT_SIZE } from '../screenshot/screenshot_size';
+import { StepDetailsLinkIcon } from '../links/step_details_link';
 
-import { StatusBadge, parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
+import { parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
 import { StepDurationText } from './step_duration_text';
 
 interface Props {
@@ -28,7 +30,9 @@ interface Props {
   error?: Error;
   loading: boolean;
   showStepNumber: boolean;
+  screenshotImageSize?: ScreenshotImageSize;
   compressed?: boolean;
+  showExpand?: boolean;
 }
 
 export function isStepEnd(step: JourneyStep) {
@@ -39,16 +43,44 @@ export const BrowserStepsList = ({
   steps,
   error,
   loading,
+  screenshotImageSize = THUMBNAIL_SCREENSHOT_SIZE,
   showStepNumber = false,
   compressed = true,
+  showExpand = true,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
-  const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, ReactElement>
+  >({});
 
-  const { basePath } = useSyntheticsSettingsContext();
+  const toggleDetails = (item: JourneyStep) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMapValues[item._id]) {
+      delete itemIdToExpandedRowMapValues[item._id];
+    } else {
+      itemIdToExpandedRowMapValues[item._id] = <></>;
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
 
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
+    ...(showExpand
+      ? [
+          {
+            align: 'left' as const,
+            width: '40px',
+            isExpander: true,
+            render: (item: JourneyStep) => (
+              <EuiButtonIcon
+                onClick={() => toggleDetails(item)}
+                aria-label={itemIdToExpandedRowMap[item._id] ? 'Collapse' : 'Expand'}
+                iconType={itemIdToExpandedRowMap[item._id] ? 'arrowDown' : 'arrowRight'}
+              />
+            ),
+          },
+        ]
+      : []),
     ...(showStepNumber
       ? [
           {
@@ -67,11 +99,11 @@ export const BrowserStepsList = ({
       render: (_timestamp: string, step) => (
         <JourneyStepScreenshotContainer
           checkGroup={step.monitor.check_group}
-          initialStepNo={step.synthetics?.step?.index}
+          initialStepNumber={step.synthetics?.step?.index}
           stepStatus={step.synthetics.payload?.status}
           allStepsLoaded={true}
-          stepLabels={stepLabels}
           retryFetchOnRevisit={false}
+          size={screenshotImageSize}
         />
       ),
       mobileOptions: {
@@ -106,7 +138,13 @@ export const BrowserStepsList = ({
     {
       field: 'synthetics.step.status',
       name: RESULT_LABEL,
-      render: (pingStatus: string) => <StatusBadge status={parseBadgeStatus(pingStatus)} />,
+      render: (pingStatus: string, item: JourneyStep) => (
+        <ResultDetails
+          step={item}
+          pingStatus={pingStatus}
+          isExpanded={Boolean(itemIdToExpandedRowMap[item._id])}
+        />
+      ),
     },
     {
       align: 'left',
@@ -125,13 +163,10 @@ export const BrowserStepsList = ({
       name: '',
       mobileOptions: { show: false },
       render: (_val: string, item) => (
-        <EuiButtonIcon
-          aria-label={VIEW_DETAILS}
-          title={VIEW_DETAILS}
-          size="s"
-          href={`${basePath}/app/synthetics/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
-          target="_self"
-          iconType="apmTrace"
+        <StepDetailsLinkIcon
+          checkGroup={item.monitor.check_group}
+          stepIndex={item.synthetics?.step?.index}
+          configId={item.config_id!}
         />
       ),
     },
@@ -140,6 +175,12 @@ export const BrowserStepsList = ({
   return (
     <>
       <EuiBasicTable
+        rowProps={() => ({
+          style: { verticalAlign: 'initial' },
+        })}
+        cellProps={() => ({
+          style: { verticalAlign: 'initial' },
+        })}
         compressed={compressed}
         loading={loading}
         columns={columns}
@@ -157,6 +198,7 @@ export const BrowserStepsList = ({
               })
         }
         tableLayout={'auto'}
+        itemId="_id"
       />
     </>
   );
@@ -200,8 +242,4 @@ const STEP_NAME = i18n.translate('xpack.synthetics.monitor.stepName.label', {
 
 const STEP_DURATION = i18n.translate('xpack.synthetics.monitor.step.duration.label', {
   defaultMessage: 'Duration',
-});
-
-const VIEW_DETAILS = i18n.translate('xpack.synthetics.monitor.step.viewDetails', {
-  defaultMessage: 'View Details',
 });

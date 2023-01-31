@@ -8,23 +8,28 @@
 import React, { FC } from 'react';
 import './_index.scss';
 import ReactDOM from 'react-dom';
+import { pick } from 'lodash';
 
 import { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { MlStorageContextProvider } from './contexts/storage';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
+
+import { ML_STORAGE_KEYS } from '../../common/types/storage';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
+
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
-import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { mlUsageCollectionProvider } from './services/usage_collection';
-
 import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -97,6 +102,13 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     ...coreStart,
   };
 
+  const datePickerDeps = {
+    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
+  };
+
   const I18nContext = coreStart.i18n.Context;
   const ApplicationUsageTrackingProvider =
     deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
@@ -111,9 +123,11 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
               mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
             }}
           >
-            <MlStorageContextProvider>
-              <MlRouter pageDeps={pageDeps} />
-            </MlStorageContextProvider>
+            <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <MlRouter pageDeps={pageDeps} />
+              </DatePickerContextProvider>
+            </StorageContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </I18nContext>
@@ -152,13 +166,12 @@ export const renderApp = (
 
   appMountParams.onAppLeave((actions) => actions.default());
 
-  const mlLicense = setLicenseCache(deps.licensing, coreStart.application, [
-    () =>
-      ReactDOM.render(
-        <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
-        appMountParams.element
-      ),
-  ]);
+  const mlLicense = setLicenseCache(deps.licensing, coreStart.application, () =>
+    ReactDOM.render(
+      <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
+      appMountParams.element
+    )
+  );
 
   return () => {
     mlLicense.unsubscribe();

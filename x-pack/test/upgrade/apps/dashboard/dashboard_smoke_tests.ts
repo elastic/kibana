@@ -51,6 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should render visualizations', async () => {
           await PageObjects.home.launchSampleDashboard('flights');
           await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
           await renderable.waitForRender();
           log.debug('Checking saved searches rendered');
           await dashboardExpect.savedSearchRowCount(49);

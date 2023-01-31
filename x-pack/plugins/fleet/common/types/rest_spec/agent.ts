@@ -22,6 +22,7 @@ export interface GetAgentsRequest {
   query: ListWithKuery & {
     showInactive: boolean;
     showUpgradeable?: boolean;
+    withMetrics?: boolean;
   };
 }
 
@@ -38,6 +39,9 @@ export interface GetAgentTagsResponse {
 export interface GetOneAgentRequest {
   params: {
     agentId: string;
+  };
+  query: {
+    withMetrics?: boolean;
   };
 }
 
@@ -186,6 +190,8 @@ export interface GetAgentStatusResponse {
     offline: number;
     other: number;
     updating: number;
+    inactive: number;
+    unenrolled: number;
   };
 }
 

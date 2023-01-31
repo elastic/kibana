@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/server-http-tools",
-        "id": "def-server.SslConfig",
+        "id": "def-common.SslConfig",
         "type": "Class",
         "tags": [],
         "label": "SslConfig",
@@ -23,7 +31,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.SslConfig.enabled",
+            "id": "def-common.SslConfig.enabled",
             "type": "boolean",
             "tags": [],
             "label": "enabled",
@@ -34,7 +42,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.SslConfig.redirectHttpFromPort",
+            "id": "def-common.SslConfig.redirectHttpFromPort",
             "type": "number",
             "tags": [],
             "label": "redirectHttpFromPort",
@@ -48,7 +56,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.SslConfig.key",
+            "id": "def-common.SslConfig.key",
             "type": "string",
             "tags": [],
             "label": "key",
@@ -62,7 +70,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.SslConfig.certificate",
+            "id": "def-common.SslConfig.certificate",
             "type": "string",
             "tags": [],
             "label": "certificate",
@@ -76,7 +84,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.SslConfig.certificateAuthorities",
+            "id": "def-common.SslConfig.certificateAuthorities",
             "type": "Array",
             "tags": [],
             "label": "certificateAuthorities",
@@ -90,7 +98,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.SslConfig.keyPassphrase",
+            "id": "def-common.SslConfig.keyPassphrase",
             "type": "string",
             "tags": [],
             "label": "keyPassphrase",
@@ -104,7 +112,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.SslConfig.requestCert",
+            "id": "def-common.SslConfig.requestCert",
             "type": "boolean",
             "tags": [],
             "label": "requestCert",
@@ -115,7 +123,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.SslConfig.rejectUnauthorized",
+            "id": "def-common.SslConfig.rejectUnauthorized",
             "type": "boolean",
             "tags": [],
             "label": "rejectUnauthorized",
@@ -126,7 +134,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.SslConfig.cipherSuites",
+            "id": "def-common.SslConfig.cipherSuites",
             "type": "Array",
             "tags": [],
             "label": "cipherSuites",
@@ -140,7 +148,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.SslConfig.supportedProtocols",
+            "id": "def-common.SslConfig.supportedProtocols",
             "type": "Array",
             "tags": [],
             "label": "supportedProtocols",
@@ -154,7 +162,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.SslConfig.getSecureOptions",
+            "id": "def-common.SslConfig.getSecureOptions",
             "type": "Function",
             "tags": [],
             "label": "getSecureOptions",
@@ -177,7 +185,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/server-http-tools",
-        "id": "def-server.createServer",
+        "id": "def-common.createServer",
         "type": "Function",
         "tags": [],
         "label": "createServer",
@@ -196,7 +204,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.createServer.$1",
+            "id": "def-common.createServer.$1",
             "type": "Object",
             "tags": [],
             "label": "serverOptions",
@@ -211,7 +219,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.createServer.$2",
+            "id": "def-common.createServer.$2",
             "type": "Object",
             "tags": [],
             "label": "listenerOptions",
@@ -230,7 +238,7 @@
       },
       {
         "parentPluginId": "@kbn/server-http-tools",
-        "id": "def-server.defaultValidationErrorHandler",
+        "id": "def-common.defaultValidationErrorHandler",
         "type": "Function",
         "tags": [],
         "label": "defaultValidationErrorHandler",
@@ -252,7 +260,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.defaultValidationErrorHandler.$1",
+            "id": "def-common.defaultValidationErrorHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -267,7 +275,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.defaultValidationErrorHandler.$2",
+            "id": "def-common.defaultValidationErrorHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "h",
@@ -282,7 +290,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.defaultValidationErrorHandler.$3",
+            "id": "def-common.defaultValidationErrorHandler.$3",
             "type": "Object",
             "tags": [],
             "label": "err",
@@ -301,7 +309,7 @@
       },
       {
         "parentPluginId": "@kbn/server-http-tools",
-        "id": "def-server.getListenerOptions",
+        "id": "def-common.getListenerOptions",
         "type": "Function",
         "tags": [],
         "label": "getListenerOptions",
@@ -310,9 +318,9 @@
           "(config: ",
           {
             "pluginId": "@kbn/server-http-tools",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnServerHttpToolsPluginApi",
-            "section": "def-server.IHttpConfig",
+            "section": "def-common.IHttpConfig",
             "text": "IHttpConfig"
           },
           ") => ",
@@ -324,7 +332,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.getListenerOptions.$1",
+            "id": "def-common.getListenerOptions.$1",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -332,9 +340,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/server-http-tools",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnServerHttpToolsPluginApi",
-                "section": "def-server.IHttpConfig",
+                "section": "def-common.IHttpConfig",
                 "text": "IHttpConfig"
               }
             ],
@@ -349,7 +357,7 @@
       },
       {
         "parentPluginId": "@kbn/server-http-tools",
-        "id": "def-server.getRequestId",
+        "id": "def-common.getRequestId",
         "type": "Function",
         "tags": [],
         "label": "getRequestId",
@@ -365,7 +373,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.getRequestId.$1",
+            "id": "def-common.getRequestId.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -380,7 +388,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.getRequestId.$2",
+            "id": "def-common.getRequestId.$2",
             "type": "Object",
             "tags": [],
             "label": "{ allowFromAnyIp, ipAllowlist }",
@@ -391,7 +399,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/server-http-tools",
-                "id": "def-server.getRequestId.$2.allowFromAnyIp",
+                "id": "def-common.getRequestId.$2.allowFromAnyIp",
                 "type": "boolean",
                 "tags": [],
                 "label": "allowFromAnyIp",
@@ -402,7 +410,7 @@
               },
               {
                 "parentPluginId": "@kbn/server-http-tools",
-                "id": "def-server.getRequestId.$2.ipAllowlist",
+                "id": "def-common.getRequestId.$2.ipAllowlist",
                 "type": "Array",
                 "tags": [],
                 "label": "ipAllowlist",
@@ -422,7 +430,7 @@
       },
       {
         "parentPluginId": "@kbn/server-http-tools",
-        "id": "def-server.getServerOptions",
+        "id": "def-common.getServerOptions",
         "type": "Function",
         "tags": [],
         "label": "getServerOptions",
@@ -433,9 +441,9 @@
           "(config: ",
           {
             "pluginId": "@kbn/server-http-tools",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnServerHttpToolsPluginApi",
-            "section": "def-server.IHttpConfig",
+            "section": "def-common.IHttpConfig",
             "text": "IHttpConfig"
           },
           ", { configureTLS = true }: { configureTLS?: boolean | undefined; }) => ",
@@ -447,7 +455,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.getServerOptions.$1",
+            "id": "def-common.getServerOptions.$1",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -455,9 +463,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/server-http-tools",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnServerHttpToolsPluginApi",
-                "section": "def-server.IHttpConfig",
+                "section": "def-common.IHttpConfig",
                 "text": "IHttpConfig"
               }
             ],
@@ -468,7 +476,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.getServerOptions.$2",
+            "id": "def-common.getServerOptions.$2",
             "type": "Object",
             "tags": [],
             "label": "{ configureTLS = true }",
@@ -489,7 +497,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/server-http-tools",
-        "id": "def-server.ICorsConfig",
+        "id": "def-common.ICorsConfig",
         "type": "Interface",
         "tags": [],
         "label": "ICorsConfig",
@@ -500,7 +508,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ICorsConfig.enabled",
+            "id": "def-common.ICorsConfig.enabled",
             "type": "boolean",
             "tags": [],
             "label": "enabled",
@@ -511,7 +519,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ICorsConfig.allowCredentials",
+            "id": "def-common.ICorsConfig.allowCredentials",
             "type": "boolean",
             "tags": [],
             "label": "allowCredentials",
@@ -522,7 +530,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ICorsConfig.allowOrigin",
+            "id": "def-common.ICorsConfig.allowOrigin",
             "type": "Array",
             "tags": [],
             "label": "allowOrigin",
@@ -539,7 +547,7 @@
       },
       {
         "parentPluginId": "@kbn/server-http-tools",
-        "id": "def-server.IHttpConfig",
+        "id": "def-common.IHttpConfig",
         "type": "Interface",
         "tags": [],
         "label": "IHttpConfig",
@@ -550,7 +558,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.IHttpConfig.host",
+            "id": "def-common.IHttpConfig.host",
             "type": "string",
             "tags": [],
             "label": "host",
@@ -561,7 +569,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.IHttpConfig.port",
+            "id": "def-common.IHttpConfig.port",
             "type": "number",
             "tags": [],
             "label": "port",
@@ -572,7 +580,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.IHttpConfig.maxPayload",
+            "id": "def-common.IHttpConfig.maxPayload",
             "type": "Object",
             "tags": [],
             "label": "maxPayload",
@@ -580,9 +588,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               }
             ],
@@ -592,7 +600,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.IHttpConfig.keepaliveTimeout",
+            "id": "def-common.IHttpConfig.keepaliveTimeout",
             "type": "number",
             "tags": [],
             "label": "keepaliveTimeout",
@@ -603,7 +611,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.IHttpConfig.socketTimeout",
+            "id": "def-common.IHttpConfig.socketTimeout",
             "type": "number",
             "tags": [],
             "label": "socketTimeout",
@@ -614,7 +622,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.IHttpConfig.cors",
+            "id": "def-common.IHttpConfig.cors",
             "type": "Object",
             "tags": [],
             "label": "cors",
@@ -622,9 +630,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/server-http-tools",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnServerHttpToolsPluginApi",
-                "section": "def-server.ICorsConfig",
+                "section": "def-common.ICorsConfig",
                 "text": "ICorsConfig"
               }
             ],
@@ -634,7 +642,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.IHttpConfig.ssl",
+            "id": "def-common.IHttpConfig.ssl",
             "type": "Object",
             "tags": [],
             "label": "ssl",
@@ -642,9 +650,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/server-http-tools",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnServerHttpToolsPluginApi",
-                "section": "def-server.ISslConfig",
+                "section": "def-common.ISslConfig",
                 "text": "ISslConfig"
               }
             ],
@@ -654,7 +662,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.IHttpConfig.shutdownTimeout",
+            "id": "def-common.IHttpConfig.shutdownTimeout",
             "type": "Object",
             "tags": [],
             "label": "shutdownTimeout",
@@ -671,7 +679,7 @@
       },
       {
         "parentPluginId": "@kbn/server-http-tools",
-        "id": "def-server.ISslConfig",
+        "id": "def-common.ISslConfig",
         "type": "Interface",
         "tags": [],
         "label": "ISslConfig",
@@ -682,7 +690,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ISslConfig.enabled",
+            "id": "def-common.ISslConfig.enabled",
             "type": "boolean",
             "tags": [],
             "label": "enabled",
@@ -693,7 +701,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ISslConfig.key",
+            "id": "def-common.ISslConfig.key",
             "type": "string",
             "tags": [],
             "label": "key",
@@ -707,7 +715,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ISslConfig.certificate",
+            "id": "def-common.ISslConfig.certificate",
             "type": "string",
             "tags": [],
             "label": "certificate",
@@ -721,7 +729,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ISslConfig.certificateAuthorities",
+            "id": "def-common.ISslConfig.certificateAuthorities",
             "type": "Array",
             "tags": [],
             "label": "certificateAuthorities",
@@ -735,7 +743,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ISslConfig.cipherSuites",
+            "id": "def-common.ISslConfig.cipherSuites",
             "type": "Array",
             "tags": [],
             "label": "cipherSuites",
@@ -749,7 +757,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ISslConfig.keyPassphrase",
+            "id": "def-common.ISslConfig.keyPassphrase",
             "type": "string",
             "tags": [],
             "label": "keyPassphrase",
@@ -763,7 +771,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ISslConfig.requestCert",
+            "id": "def-common.ISslConfig.requestCert",
             "type": "CompoundType",
             "tags": [],
             "label": "requestCert",
@@ -777,7 +785,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ISslConfig.rejectUnauthorized",
+            "id": "def-common.ISslConfig.rejectUnauthorized",
             "type": "CompoundType",
             "tags": [],
             "label": "rejectUnauthorized",
@@ -791,7 +799,7 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-server.ISslConfig.getSecureOptions",
+            "id": "def-common.ISslConfig.getSecureOptions",
             "type": "Function",
             "tags": [],
             "label": "getSecureOptions",
@@ -814,7 +822,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/server-http-tools",
-        "id": "def-server.sslSchema",
+        "id": "def-common.sslSchema",
         "type": "Object",
         "tags": [],
         "label": "sslSchema",
@@ -822,129 +830,129 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{ certificate: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; certificateAuthorities: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | string[] | undefined>; cipherSuites: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string[]>; enabled: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<boolean>; key: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; keyPassphrase: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; keystore: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{ path: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; password: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; }>; truststore: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{ path: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; password: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; }>; redirectHttpFromPort: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<number | undefined>; supportedProtocols: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string[]>; clientAuthentication: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<\"optional\" | \"none\" | \"required\">; }>"
@@ -955,13 +963,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

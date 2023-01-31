@@ -9,17 +9,20 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { DashboardPlugin } from './plugin';
 
-export { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-
+export {
+  createDashboardEditUrl,
+  DASHBOARD_APP_ID,
+  LEGACY_DASHBOARD_APP_ID,
+} from './dashboard_constants';
+export { DASHBOARD_CONTAINER_TYPE } from './dashboard_container';
+export type { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
+
 export {
   type DashboardAppLocator,
   type DashboardAppLocatorParams,
   cleanEmptyKeys,
-} from './locator';
-
-export type { SavedDashboardPanel, DashboardContainerInput } from './types';
+} from './dashboard_app/locator/locator';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

@@ -53,7 +53,7 @@ function createImageJSX(img: HTMLImageElement | null) {
   return <img src={img.src} {...params} alt="" />;
 }
 
-function RepeatImageComponent({
+export function RepeatImageComponent({
   max,
   count,
   emptyImage: emptyImageSrc,
@@ -98,6 +98,3 @@ function RepeatImageComponent({
     </div>
   );
 }
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { RepeatImageComponent as default };

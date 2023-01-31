@@ -60,37 +60,48 @@ export const TermsWithMetrics = rt.intersection([
   }),
 ]);
 
-export const HistogramBucketRT = rt.record(
+export const BucketRT = rt.record(
   rt.string,
-  rt.union([rt.number, rt.string, MetricValueTypeRT, TermsWithMetrics])
+  rt.union([
+    rt.number,
+    rt.string,
+    MetricValueTypeRT,
+    TermsWithMetrics,
+    rt.record(rt.string, rt.string),
+  ])
 );
 
-export const HistogramResponseRT = rt.type({
-  histogram: rt.type({
-    buckets: rt.array(HistogramBucketRT),
-  }),
-  metricsets: rt.type({
-    buckets: rt.array(
-      rt.type({
-        key: rt.string,
-        doc_count: rt.number,
-      })
-    ),
-  }),
+export const MetricsetRT = rt.type({
+  buckets: rt.array(
+    rt.type({
+      key: rt.string,
+      doc_count: rt.number,
+    })
+  ),
 });
 
-const GroupingBucketRT = rt.intersection([
+export const HistogramRT = rt.type({
+  histogram: rt.type({
+    buckets: rt.array(BucketRT),
+  }),
+  metricsets: MetricsetRT,
+});
+
+export const MetricsBucketRT = rt.intersection([BucketRT, rt.type({ metricsets: MetricsetRT })]);
+export const HistogramBucketRT = rt.intersection([
   rt.type({
     key: rt.record(rt.string, rt.string),
     doc_count: rt.number,
   }),
-  HistogramResponseRT,
+  HistogramRT,
 ]);
 
-export const GroupingResponseRT = rt.type({
+export const AggregationResponseRT = HistogramRT;
+
+export const CompositeResponseRT = rt.type({
   groupings: rt.intersection([
     rt.type({
-      buckets: rt.array(GroupingBucketRT),
+      buckets: rt.array(rt.union([HistogramBucketRT, MetricsBucketRT])),
     }),
     rt.partial({
       after_key: rt.record(rt.string, rt.string),
@@ -98,13 +109,11 @@ export const GroupingResponseRT = rt.type({
   ]),
 });
 
+export type Bucket = rt.TypeOf<typeof BucketRT>;
 export type HistogramBucket = rt.TypeOf<typeof HistogramBucketRT>;
-
-export type HistogramResponse = rt.TypeOf<typeof HistogramResponseRT>;
-
-export type GroupingResponse = rt.TypeOf<typeof GroupingResponseRT>;
-
-export type MetricsESResponse = HistogramResponse | GroupingResponse;
+export type CompositeResponse = rt.TypeOf<typeof CompositeResponseRT>;
+export type AggregationResponse = rt.TypeOf<typeof AggregationResponseRT>;
+export type MetricsESResponse = AggregationResponse | CompositeResponse;
 
 export interface LogQueryFields {
   indexPattern: string;

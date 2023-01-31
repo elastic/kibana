@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEqual, uniq } from 'lodash';
@@ -30,7 +28,7 @@ import * as i18n from '../translations';
 import { getNoneConnector, normalizeActionConnector } from '../../configure_cases/utils';
 import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
-import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
+import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
 import { AssignUsers } from './assign_users';
 import type { Assignee } from '../../user_profiles/types';
 
@@ -51,7 +49,7 @@ export const CaseViewActivity = ({
   const { getCaseViewUrl } = useCaseViewNavigation();
   const { caseAssignmentAuthorized, pushToServiceAuthorized } = useCasesFeatures();
 
-  const { data: userActionsData, isLoading: isLoadingUserActions } = useGetCaseUserActions(
+  const { data: userActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
     caseData.id,
     caseData.connector.id
   );
@@ -189,7 +187,7 @@ export const CaseViewActivity = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <EuiFlexGroup direction="column" responsive={false} gutterSize="l">
+        <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
           {caseAssignmentAuthorized ? (
             <>
               <AssignUsers

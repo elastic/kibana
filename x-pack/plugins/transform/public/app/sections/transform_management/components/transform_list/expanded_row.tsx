@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { stringHash } from '@kbn/ml-string-hash';
 
 import moment from 'moment-timezone';
-import { isDefined } from '../../../../../../common/types/common';
+import { isDefined } from '@kbn/ml-is-defined';
 import { TransformListRow } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
 import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';

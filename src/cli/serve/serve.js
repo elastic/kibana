@@ -12,7 +12,8 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, fromRoot, isKibanaDistributable } from '@kbn/utils';
+import { getConfigPath } from '@kbn/utils';
+import { fromRoot, isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {

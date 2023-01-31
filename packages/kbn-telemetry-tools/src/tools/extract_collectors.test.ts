@@ -8,13 +8,14 @@
 
 import * as ts from 'typescript';
 import * as path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { extractCollectors, getProgramPaths } from './extract_collectors';
 import { parseTelemetryRC } from './config';
 import { allExtractedCollectors } from './__fixture__/all_extracted_collectors';
 
 describe('extractCollectors', () => {
   it('extracts collectors given rc file', async () => {
-    const configRoot = path.join(process.cwd(), 'src', 'fixtures', 'telemetry_collectors');
+    const configRoot = path.join(REPO_ROOT, 'src/fixtures/telemetry_collectors');
     const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
     if (!tsConfig) {
       throw new Error('Could not find a valid tsconfig.json.');

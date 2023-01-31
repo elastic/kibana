@@ -8,6 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useSelectedLocation } from '../hooks/use_selected_location';
@@ -42,9 +43,13 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_complete',
-          name: 'synthetics-series-1',
+          name: COMPLETE_LABEL,
         },
       ]}
     />
   );
 };
+
+export const COMPLETE_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.complete', {
+  defaultMessage: 'Complete',
+});

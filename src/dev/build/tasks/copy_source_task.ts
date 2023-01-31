@@ -8,6 +8,7 @@
 
 import { resolve } from 'path';
 
+import { getPackages } from '@kbn/repo-packages';
 import globby from 'globby';
 import Piscina from 'piscina';
 
@@ -48,10 +49,20 @@ export const CopySource: Task = {
       '!x-pack/plugins/lens/layout.png', // README.md
       '!x-pack/plugins/cases/images', // README.md
       '!x-pack/plugins/canvas/images', // unused
+
+      // explicitly exclude every package directory outside of the root packages dir
+      `!{${getPackages(config.resolveFromRepo('.'))
+        .flatMap((p) =>
+          p.normalizedRepoRelativeDir.startsWith('packages/') ? [] : p.normalizedRepoRelativeDir
+        )
+        .join(',')}}/**`,
     ];
 
     const piscina = new Piscina({
       filename: resolve(__dirname, 'copy_source_worker.js'),
+      workerData: {
+        ignoredPkgIds: await config.getPkgIdsInNodeModules(),
+      },
     });
 
     const globbyOptions = { cwd: config.resolveFromRepo('.') };
@@ -74,5 +85,7 @@ export const CopySource: Task = {
 
     await Promise.all(tasks);
     await piscina.destroy();
+
+    log.success('copied and transpiled', tasks.length, 'files');
   },
 };

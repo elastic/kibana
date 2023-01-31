@@ -1,11 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true,
+    "outDir": "target/types",
     "types": ["node", "jest"]
   },
   "include": ["**/*.ts"],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/journeys",
+    "@kbn/test-subj-selector",
+    "@kbn/tooling-log",
+  ]
 }

@@ -23,8 +23,6 @@ import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
-  RULES_ROW,
-  RULES_TABLE,
   RULE_SWITCH,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
@@ -64,6 +62,7 @@ import {
   goToRuleDetails,
   selectNumberOfRules,
   checkDuplicatedRule,
+  expectNumberOfRules,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
@@ -103,7 +102,7 @@ import {
 import { goBackToRuleDetails } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
-import { goBackToAllRulesTable, getDetails } from '../../tasks/rule_details';
+import { goBackToRulesTable, getDetails } from '../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL, RULE_CREATION } from '../../urls/navigation';
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
@@ -124,18 +123,19 @@ describe('indicator match', () => {
       esArchiverLoad('suspicious_source_event');
       login();
     });
+
     after(() => {
       esArchiverUnload('threat_indicator');
       esArchiverUnload('suspicious_source_event');
     });
 
     describe('Creating new indicator match rules', () => {
-      before(() => {
-        visitWithoutDateRange(RULE_CREATION);
-        selectIndicatorMatchType();
-      });
-
       describe('Index patterns', () => {
+        beforeEach(() => {
+          visitWithoutDateRange(RULE_CREATION);
+          selectIndicatorMatchType();
+        });
+
         it('Contains a predefined index pattern', () => {
           getIndicatorIndex().should('have.text', getIndexPatterns().join(''));
         });
@@ -154,7 +154,7 @@ describe('indicator match', () => {
       });
 
       describe('Indicator index patterns', () => {
-        before(() => {
+        beforeEach(() => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -175,7 +175,7 @@ describe('indicator match', () => {
       });
 
       describe('custom query input', () => {
-        before(() => {
+        beforeEach(() => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -191,10 +191,11 @@ describe('indicator match', () => {
       });
 
       describe('custom indicator query input', () => {
-        before(() => {
+        beforeEach(() => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
+
         it(`Has a default set of ${DEFAULT_THREAT_MATCH_QUERY}`, () => {
           getCustomIndicatorQueryInput().should('have.text', DEFAULT_THREAT_MATCH_QUERY);
         });
@@ -431,9 +432,7 @@ describe('indicator match', () => {
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-        cy.get(RULES_TABLE).then(($table) => {
-          cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-        });
+        expectNumberOfRules(expectedNumberOfRules);
 
         cy.get(RULE_NAME).should('have.text', rule.name);
         cy.get(RISK_SCORE).should('have.text', rule.riskScore);
@@ -540,7 +539,7 @@ describe('indicator match', () => {
       it('Allows the rule to be duplicated from the table', () => {
         duplicateFirstRule();
         goBackToRuleDetails();
-        goBackToAllRulesTable();
+        goBackToRulesTable();
         checkDuplicatedRule();
       });
 
@@ -554,7 +553,7 @@ describe('indicator match', () => {
         goToRuleDetails();
         duplicateRuleFromMenu();
         goBackToRuleDetails();
-        goBackToAllRulesTable();
+        goBackToRulesTable();
         checkDuplicatedRule();
       });
     });

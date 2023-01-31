@@ -20,3 +20,4 @@ export * from './setup';
 export * from './check_permissions';
 export * from './download_sources';
 export * from './tags';
+export * from './health_check';

@@ -16,9 +16,8 @@ import {
 
 import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../../../../common/constants';
 import { Meta } from '../../../../../common/types';
-import { HttpError, Status } from '../../../../../common/types/api';
+import { Status } from '../../../../../common/types/api';
 
-import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
 
 import { MappingsApiLogic } from '../../api/mappings/mappings_logic';
@@ -42,11 +41,9 @@ export const DEFAULT_PAGINATION = {
 };
 
 interface DocumentsLogicActions {
-  apiError(error: HttpError): HttpError;
   apiReset: typeof SearchDocumentsApiLogic.actions.apiReset;
   makeMappingRequest: typeof MappingsApiLogic.actions.makeRequest;
   makeRequest: typeof SearchDocumentsApiLogic.actions.makeRequest;
-  mappingsApiError(error: HttpError): HttpError;
   onPaginate(newPageIndex: number): { newPageIndex: number };
   setDocsPerPage(docsPerPage: number): { docsPerPage: number };
   setSearchQuery(query: string): { query: string };
@@ -81,9 +78,9 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
   connect: {
     actions: [
       SearchDocumentsApiLogic,
-      ['apiReset', 'makeRequest', 'apiError', 'apiSuccess'],
+      ['apiReset', 'apiSuccess', 'makeRequest'],
       MappingsApiLogic,
-      ['makeRequest as makeMappingRequest', 'apiError as mappingsApiError'],
+      ['makeRequest as makeMappingRequest'],
     ],
     values: [
       SearchDocumentsApiLogic,
@@ -95,9 +92,6 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
     ],
   },
   listeners: ({ actions, values }) => ({
-    apiError: (e) => flashAPIErrors(e),
-    makeRequest: () => clearFlashMessages(),
-    mappingsApiError: (e) => flashAPIErrors(e),
     onPaginate: () => {
       actions.makeRequest({
         docsPerPage: values.docsPerPage,

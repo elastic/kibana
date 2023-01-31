@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import * as fetchers from '../../../state/api/monitor_management';
-import { FETCH_STATUS, useFetcher as originalUseFetcher } from '@kbn/observability-plugin/public';
-import { spyOnUseFetcher } from '../../../lib/helper/spy_use_fetcher';
 import { Actions } from './actions';
 import { DeleteMonitor } from './delete_monitor';
 import {
@@ -19,17 +17,21 @@ import {
   MonitorManagementListResult,
   SourceType,
 } from '../../../../../common/runtime_types';
-import userEvent from '@testing-library/user-event';
+
+import { createRealStore } from '../../../lib/helper/helper_with_redux';
 
 describe('<DeleteMonitor />', () => {
   const onUpdate = jest.fn();
-  const useFetcher = spyOnUseFetcher({});
 
-  it('calls delete monitor on monitor deletion', () => {
-    useFetcher.mockImplementation(originalUseFetcher);
+  it('calls delete monitor on monitor deletion', async () => {
     const deleteMonitor = jest.spyOn(fetchers, 'deleteMonitor');
     const id = 'test-id';
-    render(<DeleteMonitor configId={id} name="sample name" onUpdate={onUpdate} />);
+    const store = createRealStore();
+    render(<DeleteMonitor configId={id} name="sample name" onUpdate={onUpdate} />, {
+      store,
+    });
+
+    const dispatchSpy = jest.spyOn(store, 'dispatch');
 
     expect(deleteMonitor).not.toBeCalled();
 
@@ -37,12 +39,24 @@ describe('<DeleteMonitor />', () => {
 
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
-    expect(deleteMonitor).toBeCalledWith({ id });
+    expect(dispatchSpy).toHaveBeenCalledWith({
+      payload: {
+        id: 'test-id',
+        name: 'sample name',
+      },
+      type: 'DELETE_MONITOR',
+    });
+
+    expect(store.getState().deleteMonitor.loading.includes(id)).toEqual(true);
+
+    expect(await screen.findByLabelText('Loading')).toBeTruthy();
   });
 
-  it('calls set refresh when deletion is successful', () => {
+  it('calls set refresh when deletion is successful', async () => {
     const id = 'test-id';
     const name = 'sample monitor';
+    const store = createRealStore();
+
     render(
       <Actions
         configId={id}
@@ -59,40 +73,18 @@ describe('<DeleteMonitor />', () => {
             },
           ] as unknown as MonitorManagementListResult['monitors']
         }
-      />
+      />,
+      { store }
     );
 
-    userEvent.click(screen.getByTestId('monitorManagementDeleteMonitor'));
+    fireEvent.click(screen.getByRole('button'));
 
-    expect(onUpdate).toHaveBeenCalled();
-  });
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
-  it('shows loading spinner while waiting for monitor to delete', () => {
-    const id = 'test-id';
-    useFetcher.mockReturnValue({
-      data: {},
-      status: FETCH_STATUS.LOADING,
-      refetch: () => {},
+    await waitFor(() => {
+      expect(onUpdate).toHaveBeenCalled();
     });
-    render(
-      <Actions
-        configId={id}
-        name="sample name"
-        onUpdate={onUpdate}
-        monitors={
-          [
-            {
-              id,
-              attributes: {
-                [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
-                [ConfigKey.CONFIG_ID]: id,
-              } as BrowserFields,
-            },
-          ] as unknown as MonitorManagementListResult['monitors']
-        }
-      />
-    );
 
-    expect(screen.getByLabelText('Deleting monitor...')).toBeInTheDocument();
+    expect(store.getState().deleteMonitor.deletedMonitorIds.includes(id)).toEqual(true);
   });
 });

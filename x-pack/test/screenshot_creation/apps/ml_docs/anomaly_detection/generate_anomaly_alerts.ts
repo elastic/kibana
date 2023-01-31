@@ -101,7 +101,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('overview page alert flyout controls', () => {
-      it('alert flyout screenshot', async () => {
+      it('alert flyout screenshots', async () => {
         await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
         await ml.alerting.setRuleName('test-ecommerce');
@@ -112,6 +112,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // close popover
         await browser.pressKeys(browser.keys.ESCAPE);
 
+        await ml.alerting.selectAnomalyDetectionJobHealthAlertType();
+        await ml.alerting.selectJobs([testJobId]);
+        await ml.testExecution.logTestStep('take screenshot');
+        await commonScreenshots.takeScreenshot(
+          'ml-health-check-config',
+          screenshotDirectories,
+          1920,
+          1400
+        );
+        await ml.alerting.clickCancelSaveRuleButton();
+
+        await pageObjects.triggersActionsUI.clickCreateAlertButton();
+        await ml.alerting.setRuleName('test-ecommerce');
         await ml.alerting.selectAnomalyDetectionAlertType();
         await ml.testExecution.logTestStep('should have correct default values');
         await ml.alerting.assertSeverity(75);

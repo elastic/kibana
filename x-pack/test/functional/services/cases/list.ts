@@ -115,7 +115,20 @@ export function CasesTableServiceProvider(
       await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
     },
 
-    async getCaseFromTable(index: number) {
+    async getCaseById(caseId: string) {
+      const targetCase = await find.allByCssSelector(
+        `[data-test-subj*="cases-table-row-${caseId}"`,
+        100
+      );
+
+      if (!targetCase.length) {
+        throw new Error(`Cannot find case with id ${caseId} on table.`);
+      }
+
+      return targetCase[0];
+    },
+
+    async getCaseByIndex(index: number) {
       const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
 
       assertCaseExists(index, rows.length);
@@ -290,6 +303,59 @@ export function CasesTableServiceProvider(
       await testSubjects.missingOrFail('cases-edit-tags-flyout');
     },
 
+    async bulkEditAssignees(selectedCases: number[], assigneesToClick: string[]) {
+      const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
+
+      for (const caseIndex of selectedCases) {
+        assertCaseExists(caseIndex, rows.length);
+        rows[caseIndex].click();
+      }
+
+      await this.openBulkActions();
+      await testSubjects.existOrFail('cases-bulk-action-assignees');
+      await testSubjects.click('cases-bulk-action-assignees');
+
+      await testSubjects.existOrFail('cases-edit-assignees-flyout');
+
+      for (const assignee of assigneesToClick) {
+        await testSubjects.existOrFail(
+          `cases-actions-assignees-edit-selectable-assignee-${assignee}`
+        );
+        await testSubjects.click(`cases-actions-assignees-edit-selectable-assignee-${assignee}`);
+      }
+
+      await testSubjects.click('cases-edit-assignees-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-assignees-flyout');
+    },
+
+    async bulkAddNewAssignees(selectedCases: number[], searchTerm: string) {
+      const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
+
+      for (const caseIndex of selectedCases) {
+        assertCaseExists(caseIndex, rows.length);
+        rows[caseIndex].click();
+      }
+
+      await this.openBulkActions();
+      await testSubjects.existOrFail('cases-bulk-action-assignees');
+      await testSubjects.click('cases-bulk-action-assignees');
+
+      await testSubjects.existOrFail('cases-edit-assignees-flyout');
+
+      await testSubjects.existOrFail('cases-actions-assignees-edit-selectable-search-input');
+      const searchInput = await testSubjects.find(
+        'cases-actions-assignees-edit-selectable-search-input'
+      );
+
+      await testSubjects.existOrFail('cases-actions-assignees-edit-selectable-search-input');
+      await searchInput.type(searchTerm);
+
+      await casesCommon.selectFirstRowInAssigneesPopover();
+
+      await testSubjects.click('cases-edit-assignees-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-assignees-flyout');
+    },
+
     async selectAndChangeStatusOfAllCases(status: CaseStatuses) {
       await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
@@ -308,7 +374,7 @@ export function CasesTableServiceProvider(
 
     async getCaseTitle(index: number) {
       const titleElement = await (
-        await this.getCaseFromTable(index)
+        await this.getCaseByIndex(index)
       ).findByTestSubject('case-details-link');
 
       return await titleElement.getVisibleText();

@@ -12,13 +12,13 @@ import {
   getEntityFieldList,
   getEntityFieldName,
   getEntityFieldValue,
-  getMultiBucketImpactLabel,
   getSeverity,
   getSeverityWithLow,
   getSeverityColor,
   isRuleSupported,
   showActualForFunction,
   showTypicalForFunction,
+  isMultiBucketAnomaly,
 } from './anomaly_utils';
 
 describe('ML - anomaly utils', () => {
@@ -260,30 +260,152 @@ describe('ML - anomaly utils', () => {
     });
   });
 
-  describe('getMultiBucketImpactLabel', () => {
-    test('returns high for 3 <= score <= 5', () => {
-      expect(getMultiBucketImpactLabel(3)).toBe('high');
-      expect(getMultiBucketImpactLabel(5)).toBe('high');
+  describe('isMultiBucketAnomaly', () => {
+    const singleBucketAnomaly: AnomalyRecordDoc = {
+      job_id: 'farequote_sb',
+      result_type: 'record',
+      probability: 0.0191711,
+      record_score: 4.38431,
+      initial_record_score: 19.654,
+      bucket_span: 300,
+      detector_index: 0,
+      is_interim: false,
+      timestamp: 1454890500000,
+      function: 'mean',
+      function_description: 'mean',
+      field_name: 'responsetime',
+      anomaly_score_explanation: {
+        single_bucket_impact: 65,
+        multi_bucket_impact: 14,
+        lower_confidence_bound: 94.79879269994528,
+        typical_value: 100.26620234643129,
+        upper_confidence_bound: 106.04564690901603,
+      },
+    };
+
+    const multiBucketAnomaly: AnomalyRecordDoc = {
+      job_id: 'farequote_mb',
+      result_type: 'record',
+      probability: 0.0191711,
+      record_score: 4.38431,
+      initial_record_score: 19.654,
+      bucket_span: 300,
+      detector_index: 0,
+      is_interim: false,
+      timestamp: 1454890500000,
+      function: 'mean',
+      function_description: 'mean',
+      field_name: 'responsetime',
+      anomaly_score_explanation: {
+        single_bucket_impact: 14,
+        multi_bucket_impact: 65,
+        lower_confidence_bound: 94.79879269994528,
+        typical_value: 100.26620234643129,
+        upper_confidence_bound: 106.04564690901603,
+      },
+    };
+
+    const multiBucketAnomaly2: AnomalyRecordDoc = {
+      job_id: 'farequote_mb2',
+      result_type: 'record',
+      probability: 0.0191711,
+      record_score: 4.38431,
+      initial_record_score: 19.654,
+      bucket_span: 300,
+      detector_index: 0,
+      is_interim: false,
+      timestamp: 1454890500000,
+      function: 'mean',
+      function_description: 'mean',
+      field_name: 'responsetime',
+      anomaly_score_explanation: {
+        multi_bucket_impact: 65,
+        lower_confidence_bound: 94.79879269994528,
+        typical_value: 100.26620234643129,
+        upper_confidence_bound: 106.04564690901603,
+      },
+    };
+
+    const noASEAnomaly: AnomalyRecordDoc = {
+      job_id: 'farequote_ase',
+      result_type: 'record',
+      probability: 0.0191711,
+      record_score: 4.38431,
+      initial_record_score: 19.654,
+      bucket_span: 300,
+      detector_index: 0,
+      is_interim: false,
+      timestamp: 1454890500000,
+      function: 'mean',
+      function_description: 'mean',
+      field_name: 'responsetime',
+    };
+
+    const noMBIAnomaly: AnomalyRecordDoc = {
+      job_id: 'farequote_sbi',
+      result_type: 'record',
+      probability: 0.0191711,
+      record_score: 4.38431,
+      initial_record_score: 19.654,
+      bucket_span: 300,
+      detector_index: 0,
+      is_interim: false,
+      timestamp: 1454890500000,
+      function: 'mean',
+      function_description: 'mean',
+      field_name: 'responsetime',
+      anomaly_score_explanation: {
+        single_bucket_impact: 65,
+        lower_confidence_bound: 94.79879269994528,
+        typical_value: 100.26620234643129,
+        upper_confidence_bound: 106.04564690901603,
+      },
+    };
+
+    const singleBucketAnomaly2: AnomalyRecordDoc = {
+      job_id: 'farequote_sb2',
+      result_type: 'record',
+      probability: 0.0191711,
+      record_score: 4.38431,
+      initial_record_score: 19.654,
+      bucket_span: 300,
+      detector_index: 0,
+      is_interim: false,
+      timestamp: 1454890500000,
+      function: 'mean',
+      function_description: 'mean',
+      field_name: 'responsetime',
+      anomaly_score_explanation: {
+        single_bucket_impact: 65,
+        multi_bucket_impact: 65,
+        lower_confidence_bound: 94.79879269994528,
+        typical_value: 100.26620234643129,
+        upper_confidence_bound: 106.04564690901603,
+      },
+    };
+
+    test('returns false when single_bucket_impact much larger than multi_bucket_impact', () => {
+      expect(isMultiBucketAnomaly(singleBucketAnomaly)).toBe(false);
     });
 
-    test('returns medium for 2 <= score < 3', () => {
-      expect(getMultiBucketImpactLabel(2)).toBe('medium');
-      expect(getMultiBucketImpactLabel(2.99)).toBe('medium');
+    test('returns true when multi_bucket_impact much larger than single_bucket_impact', () => {
+      expect(isMultiBucketAnomaly(multiBucketAnomaly)).toBe(true);
     });
 
-    test('returns low for 1 <= score < 2', () => {
-      expect(getMultiBucketImpactLabel(1)).toBe('low');
-      expect(getMultiBucketImpactLabel(1.99)).toBe('low');
+    test('returns true when multi_bucket_impact > 0 and single_bucket_impact undefined', () => {
+      expect(isMultiBucketAnomaly(multiBucketAnomaly2)).toBe(true);
     });
 
-    test('returns none for -5 <= score < 1', () => {
-      expect(getMultiBucketImpactLabel(-5)).toBe('none');
-      expect(getMultiBucketImpactLabel(0.99)).toBe('none');
+    test('returns false when anomaly_score_explanation undefined', () => {
+      expect(isMultiBucketAnomaly(noASEAnomaly)).toBe(false);
     });
 
-    test('returns expected label when impact outside normal bounds', () => {
-      expect(getMultiBucketImpactLabel(10)).toBe('high');
-      expect(getMultiBucketImpactLabel(-10)).toBe('none');
+    test('returns false when multi_bucket_impact undefined', () => {
+      expect(isMultiBucketAnomaly(noMBIAnomaly)).toBe(false);
+    });
+
+    test('returns false when multi_bucket_impact === single_bucket_impact', () => {
+      expect(isMultiBucketAnomaly(singleBucketAnomaly2)).toBe(false);
     });
   });
 

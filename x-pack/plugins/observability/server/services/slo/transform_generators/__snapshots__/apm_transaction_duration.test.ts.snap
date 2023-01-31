@@ -9,12 +9,19 @@ Object {
           "transaction.root": true,
         },
       },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d",
+          },
+        },
+      },
     ],
   },
 }
 `;
 
-exports[`APM Transaction Duration Transform Generator returns the correct transform params with every specified indicator params 1`] = `
+exports[`APM Transaction Duration Transform Generator returns the expected transform params for timeslices slo 1`] = `
 Object {
   "_meta": Object {
     "version": 1,
@@ -41,6 +48,15 @@ Object {
           "field": "transaction.duration.histogram",
         },
       },
+      "slo.isGoodSlice": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "goodEvents": "slo.numerator.value",
+            "totalEvents": "slo.denominator.value",
+          },
+          "script": "params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0",
+        },
+      },
       "slo.numerator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
@@ -53,8 +69,8 @@ Object {
     "group_by": Object {
       "@timestamp": Object {
         "date_histogram": Object {
-          "calendar_interval": "1m",
           "field": "@timestamp",
+          "fixed_interval": "2m",
         },
       },
       "slo._internal.budgeting_method": Object {
@@ -105,6 +121,191 @@ Object {
           Object {
             "match": Object {
               "transaction.root": true,
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d",
+              },
+            },
+          },
+          Object {
+            "match": Object {
+              "service.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "service.environment": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.type": "irrelevant",
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {
+      "slo._internal.budgeting_method": Object {
+        "script": Object {
+          "source": "emit('timeslices')",
+        },
+        "type": "keyword",
+      },
+      "slo._internal.name": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo._internal.objective.target": Object {
+        "script": Object {
+          "source": "emit(0.98)",
+        },
+        "type": "double",
+      },
+      "slo._internal.time_window.duration": Object {
+        "script": Object {
+          "source": "emit('7d')",
+        },
+        "type": "keyword",
+      },
+      "slo._internal.time_window.is_rolling": Object {
+        "script": Object {
+          "source": "emit(true)",
+        },
+        "type": "boolean",
+      },
+      "slo.id": Object {
+        "script": Object {
+          "source": Any<String>,
+        },
+        "type": "keyword",
+      },
+      "slo.revision": Object {
+        "script": Object {
+          "source": "emit(1)",
+        },
+        "type": "long",
+      },
+    },
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "1m",
+      "field": "@timestamp",
+    },
+  },
+  "transform_id": Any<String>,
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator returns the expected transform params with every specified indicator params 1`] = `
+Object {
+  "_meta": Object {
+    "version": 1,
+  },
+  "dest": Object {
+    "index": "slo-observability.sli-v1",
+    "pipeline": "slo-observability.sli.monthly",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "_numerator": Object {
+        "range": Object {
+          "field": "transaction.duration.histogram",
+          "ranges": Array [
+            Object {
+              "to": 500000,
+            },
+          ],
+        },
+      },
+      "slo.denominator": Object {
+        "value_count": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      "slo.numerator": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "numerator": "_numerator['*-500000.0']>_count",
+          },
+          "script": "params.numerator",
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "@timestamp",
+          "fixed_interval": "1m",
+        },
+      },
+      "slo._internal.budgeting_method": Object {
+        "terms": Object {
+          "field": "slo._internal.budgeting_method",
+        },
+      },
+      "slo._internal.name": Object {
+        "terms": Object {
+          "field": "slo._internal.name",
+        },
+      },
+      "slo._internal.objective.target": Object {
+        "terms": Object {
+          "field": "slo._internal.objective.target",
+        },
+      },
+      "slo._internal.time_window.duration": Object {
+        "terms": Object {
+          "field": "slo._internal.time_window.duration",
+        },
+      },
+      "slo._internal.time_window.is_rolling": Object {
+        "terms": Object {
+          "field": "slo._internal.time_window.is_rolling",
+        },
+      },
+      "slo.id": Object {
+        "terms": Object {
+          "field": "slo.id",
+        },
+      },
+      "slo.revision": Object {
+        "terms": Object {
+          "field": "slo.revision",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+  },
+  "source": Object {
+    "index": "metrics-apm*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "match": Object {
+              "transaction.root": true,
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d",
+              },
             },
           },
           Object {

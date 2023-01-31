@@ -72,7 +72,7 @@ function mockFrame(): FramePublicAPI {
 describe('pie_visualization', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  describe('#getErrorMessages', () => {
+  describe('#getUserMessages', () => {
     describe('too many dimensions', () => {
       const state = { ...getExampleState(), shape: PieChartTypes.MOSAIC };
       const colIds = new Array(PartitionChartsMeta.mosaic.maxBuckets + 1)
@@ -83,7 +83,9 @@ describe('pie_visualization', () => {
       state.layers[0].secondaryGroups = colIds.slice(2);
 
       it('returns error', () => {
-        expect(pieVisualization.getErrorMessages(state)).toHaveLength(1);
+        expect(
+          pieVisualization.getUserMessages!(state, { frame: {} as FramePublicAPI })
+        ).toHaveLength(1);
       });
 
       it("doesn't count collapsed dimensions", () => {
@@ -92,17 +94,23 @@ describe('pie_visualization', () => {
           [colIds[0]]: 'some-fn' as CollapseFunction,
         };
 
-        expect(pieVisualization.getErrorMessages(localState)).toHaveLength(0);
+        expect(
+          pieVisualization.getUserMessages!(localState, { frame: {} as FramePublicAPI })
+        ).toHaveLength(0);
       });
 
       it('counts multiple metrics as an extra bucket dimension', () => {
         const localState = cloneDeep(state);
         localState.layers[0].primaryGroups.pop();
-        expect(pieVisualization.getErrorMessages(localState)).toHaveLength(0);
+        expect(
+          pieVisualization.getUserMessages!(localState, { frame: {} as FramePublicAPI })
+        ).toHaveLength(0);
 
         localState.layers[0].metrics.push('one-metric', 'another-metric');
 
-        expect(pieVisualization.getErrorMessages(localState)).toHaveLength(1);
+        expect(
+          pieVisualization.getUserMessages!(localState, { frame: {} as FramePublicAPI })
+        ).toHaveLength(1);
       });
     });
   });
@@ -260,7 +268,7 @@ describe('pie_visualization', () => {
                   Array [
                     Object {
                       "columnId": "1",
-                      "triggerIcon": "aggregate",
+                      "triggerIconType": "aggregate",
                     },
                     Object {
                       "columnId": "2",
@@ -268,15 +276,15 @@ describe('pie_visualization', () => {
                         "red",
                         "black",
                       ],
-                      "triggerIcon": "colorBy",
+                      "triggerIconType": "colorBy",
                     },
                     Object {
                       "columnId": "3",
-                      "triggerIcon": "aggregate",
+                      "triggerIconType": "aggregate",
                     },
                     Object {
                       "columnId": "4",
-                      "triggerIcon": undefined,
+                      "triggerIconType": undefined,
                     },
                   ]
               `);
@@ -302,7 +310,7 @@ describe('pie_visualization', () => {
             Array [
               Object {
                 "columnId": "1",
-                "triggerIcon": "aggregate",
+                "triggerIconType": "aggregate",
               },
               Object {
                 "columnId": "2",
@@ -310,17 +318,17 @@ describe('pie_visualization', () => {
                   "red",
                   "black",
                 ],
-                "triggerIcon": "colorBy",
+                "triggerIconType": "colorBy",
               },
             ],
             Array [
               Object {
                 "columnId": "3",
-                "triggerIcon": "aggregate",
+                "triggerIconType": "aggregate",
               },
               Object {
                 "columnId": "4",
-                "triggerIcon": undefined,
+                "triggerIconType": undefined,
               },
             ],
             Array [],
@@ -348,22 +356,22 @@ describe('pie_visualization', () => {
               Object {
                 "color": "overridden-color",
                 "columnId": "1",
-                "triggerIcon": "color",
+                "triggerIconType": "color",
               },
               Object {
                 "color": "black",
                 "columnId": "2",
-                "triggerIcon": "color",
+                "triggerIconType": "color",
               },
               Object {
                 "color": "black",
                 "columnId": "3",
-                "triggerIcon": "color",
+                "triggerIconType": "color",
               },
               Object {
                 "color": "black",
                 "columnId": "4",
-                "triggerIcon": "color",
+                "triggerIconType": "color",
               },
             ],
           ]
@@ -422,15 +430,15 @@ describe('pie_visualization', () => {
           Array [
             Object {
               "columnId": "2",
-              "triggerIcon": "disabled",
+              "triggerIconType": "disabled",
             },
             Object {
               "columnId": "3",
-              "triggerIcon": "disabled",
+              "triggerIconType": "disabled",
             },
             Object {
               "columnId": "4",
-              "triggerIcon": "disabled",
+              "triggerIconType": "disabled",
             },
           ]
         `);

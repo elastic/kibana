@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-capabilities-server",
-        "id": "def-server.CapabilitiesSetup",
+        "id": "def-common.CapabilitiesSetup",
         "type": "Interface",
         "tags": [],
         "label": "CapabilitiesSetup",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-server",
-            "id": "def-server.CapabilitiesSetup.registerProvider",
+            "id": "def-common.CapabilitiesSetup.registerProvider",
             "type": "Function",
             "tags": [],
             "label": "registerProvider",
@@ -38,9 +46,9 @@
               "(provider: ",
               {
                 "pluginId": "@kbn/core-capabilities-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-server.CapabilitiesProvider",
+                "section": "def-common.CapabilitiesProvider",
                 "text": "CapabilitiesProvider"
               },
               ") => void"
@@ -51,7 +59,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-capabilities-server",
-                "id": "def-server.CapabilitiesSetup.registerProvider.$1",
+                "id": "def-common.CapabilitiesSetup.registerProvider.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "provider",
@@ -59,9 +67,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-capabilities-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                    "section": "def-server.CapabilitiesProvider",
+                    "section": "def-common.CapabilitiesProvider",
                     "text": "CapabilitiesProvider"
                   }
                 ],
@@ -75,7 +83,7 @@
           },
           {
             "parentPluginId": "@kbn/core-capabilities-server",
-            "id": "def-server.CapabilitiesSetup.registerSwitcher",
+            "id": "def-common.CapabilitiesSetup.registerSwitcher",
             "type": "Function",
             "tags": [],
             "label": "registerSwitcher",
@@ -86,9 +94,9 @@
               "(switcher: ",
               {
                 "pluginId": "@kbn/core-capabilities-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-server.CapabilitiesSwitcher",
+                "section": "def-common.CapabilitiesSwitcher",
                 "text": "CapabilitiesSwitcher"
               },
               ") => void"
@@ -99,7 +107,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-capabilities-server",
-                "id": "def-server.CapabilitiesSetup.registerSwitcher.$1",
+                "id": "def-common.CapabilitiesSetup.registerSwitcher.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "switcher",
@@ -107,9 +115,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-capabilities-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                    "section": "def-server.CapabilitiesSwitcher",
+                    "section": "def-common.CapabilitiesSwitcher",
                     "text": "CapabilitiesSwitcher"
                   }
                 ],
@@ -126,7 +134,7 @@
       },
       {
         "parentPluginId": "@kbn/core-capabilities-server",
-        "id": "def-server.CapabilitiesStart",
+        "id": "def-common.CapabilitiesStart",
         "type": "Interface",
         "tags": [],
         "label": "CapabilitiesStart",
@@ -139,7 +147,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-server",
-            "id": "def-server.CapabilitiesStart.resolveCapabilities",
+            "id": "def-common.CapabilitiesStart.resolveCapabilities",
             "type": "Function",
             "tags": [],
             "label": "resolveCapabilities",
@@ -150,17 +158,17 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, options?: ",
               {
                 "pluginId": "@kbn/core-capabilities-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-server.ResolveCapabilitiesOptions",
+                "section": "def-common.ResolveCapabilitiesOptions",
                 "text": "ResolveCapabilitiesOptions"
               },
               " | undefined) => Promise<",
@@ -179,7 +187,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-capabilities-server",
-                "id": "def-server.CapabilitiesStart.resolveCapabilities.$1",
+                "id": "def-common.CapabilitiesStart.resolveCapabilities.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -187,9 +195,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -201,7 +209,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-capabilities-server",
-                "id": "def-server.CapabilitiesStart.resolveCapabilities.$2",
+                "id": "def-common.CapabilitiesStart.resolveCapabilities.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -209,9 +217,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-capabilities-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                    "section": "def-server.ResolveCapabilitiesOptions",
+                    "section": "def-common.ResolveCapabilitiesOptions",
                     "text": "ResolveCapabilitiesOptions"
                   },
                   " | undefined"
@@ -229,7 +237,7 @@
       },
       {
         "parentPluginId": "@kbn/core-capabilities-server",
-        "id": "def-server.ResolveCapabilitiesOptions",
+        "id": "def-common.ResolveCapabilitiesOptions",
         "type": "Interface",
         "tags": [],
         "label": "ResolveCapabilitiesOptions",
@@ -242,7 +250,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-server",
-            "id": "def-server.ResolveCapabilitiesOptions.useDefaultCapabilities",
+            "id": "def-common.ResolveCapabilitiesOptions.useDefaultCapabilities",
             "type": "boolean",
             "tags": [],
             "label": "useDefaultCapabilities",
@@ -261,7 +269,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-capabilities-server",
-        "id": "def-server.CapabilitiesProvider",
+        "id": "def-common.CapabilitiesProvider",
         "type": "Type",
         "tags": [],
         "label": "CapabilitiesProvider",
@@ -288,7 +296,7 @@
       },
       {
         "parentPluginId": "@kbn/core-capabilities-server",
-        "id": "def-server.CapabilitiesSwitcher",
+        "id": "def-common.CapabilitiesSwitcher",
         "type": "Type",
         "tags": [],
         "label": "CapabilitiesSwitcher",
@@ -299,9 +307,9 @@
           "(request: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
+            "section": "def-common.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>, uiCapabilities: ",
@@ -315,9 +323,9 @@
           ", useDefaultCapabilities: boolean) => ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.MaybePromise",
+            "section": "def-common.MaybePromise",
             "text": "MaybePromise"
           },
           "<Partial<",
@@ -337,7 +345,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-server",
-            "id": "def-server.CapabilitiesSwitcher.$1",
+            "id": "def-common.CapabilitiesSwitcher.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -345,9 +353,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -358,7 +366,7 @@
           },
           {
             "parentPluginId": "@kbn/core-capabilities-server",
-            "id": "def-server.CapabilitiesSwitcher.$2",
+            "id": "def-common.CapabilitiesSwitcher.$2",
             "type": "Object",
             "tags": [],
             "label": "uiCapabilities",
@@ -378,7 +386,7 @@
           },
           {
             "parentPluginId": "@kbn/core-capabilities-server",
-            "id": "def-server.CapabilitiesSwitcher.$3",
+            "id": "def-common.CapabilitiesSwitcher.$3",
             "type": "boolean",
             "tags": [],
             "label": "useDefaultCapabilities",
@@ -391,14 +399,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

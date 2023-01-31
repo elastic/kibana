@@ -15,6 +15,7 @@ import { TraceLink } from '../app/trace_link';
 import { TransactionLink } from '../app/transaction_link';
 import { home } from './home';
 import { serviceDetail } from './service_detail';
+import { mobileServiceDetail } from './mobile_service_detail';
 import { settings } from './settings';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
@@ -105,6 +106,7 @@ const apmRoutes = {
       },
       ...settings,
       ...serviceDetail,
+      ...mobileServiceDetail,
       ...home,
     },
   },

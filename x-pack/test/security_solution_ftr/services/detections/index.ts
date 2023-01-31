@@ -14,13 +14,14 @@ import {
   DETECTION_ENGINE_RULES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { estypes } from '@elastic/elasticsearch';
-import endpointPrePackagedRule from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json';
 import { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
-import { kibanaPackageJson } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { wrapErrorIfNeeded } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
 import { FtrService } from '../../../functional/ftr_provider_context';
 import { EndpointRuleAlertGenerator } from './endpoint_rule_alert_generator';
 import { getAlertsIndexMappings } from './alerts_security_index_mappings';
+import { ELASTIC_SECURITY_RULE_ID } from '../../../detection_engine_api_integration/utils/create_prebuilt_rule_saved_objects';
 
 export interface IndexedEndpointRuleAlerts {
   alerts: estypes.WriteResponseBase[];
@@ -99,7 +100,7 @@ export class DetectionsTestService extends FtrService {
     return this.supertest
       .get(DETECTION_ENGINE_RULES_URL)
       .set('kbn-xsrf', 'true')
-      .query({ rule_id: endpointPrePackagedRule.rule_id })
+      .query({ rule_id: ELASTIC_SECURITY_RULE_ID })
       .send()
       .then(this.getHttpResponseFailureHandler())
       .then((response) => response.body as Rule);

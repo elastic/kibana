@@ -8,34 +8,39 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { EuiSpacer } from '@elastic/eui';
 
 import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ControlsExampleStartDeps } from './plugin';
 import { BasicReduxExample } from './basic_redux_example';
+import { EditExample } from './edit_example';
+import { SearchExample } from './search_example';
 
-const ControlsExamples = ({ dataViewId }: { dataViewId?: string }) => {
-  const examples = dataViewId ? (
-    <>
-      <BasicReduxExample dataViewId={dataViewId} />
-    </>
-  ) : (
-    <div>{'Please install e-commerce sample data to run controls examples.'}</div>
-  );
-  return (
+export const renderApp = async (
+  { data, navigation }: ControlsExampleStartDeps,
+  { element }: AppMountParameters
+) => {
+  const dataViews = await data.dataViews.find('kibana_sample_data_logs');
+  const examples =
+    dataViews.length > 0 ? (
+      <>
+        <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
+        <EuiSpacer size="xl" />
+        <EditExample />
+        <EuiSpacer size="xl" />
+        <BasicReduxExample dataViewId={dataViews[0].id!} />
+      </>
+    ) : (
+      <div>{'Install web logs sample data to run controls examples.'}</div>
+    );
+
+  ReactDOM.render(
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
       <KibanaPageTemplate.Section>{examples}</KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+    </KibanaPageTemplate>,
+    element
   );
-};
-
-export const renderApp = async (
-  { data }: ControlsExampleStartDeps,
-  { element }: AppMountParameters
-) => {
-  const dataViews = await data.dataViews.find('kibana_sample_data_ecommerce');
-  const dataViewId = dataViews.length > 0 ? dataViews[0].id : undefined;
-  ReactDOM.render(<ControlsExamples dataViewId={dataViewId} />, element);
   return () => ReactDOM.unmountComponentAtNode(element);
 };

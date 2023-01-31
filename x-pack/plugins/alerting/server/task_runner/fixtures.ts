@@ -110,7 +110,8 @@ export const generateSavedObjectParams = ({
     },
     lastRun: {
       outcome,
-      outcomeMsg: error?.message || warning?.message || null,
+      outcomeMsg:
+        (error?.message && [error?.message]) || (warning?.message && [warning?.message]) || null,
       warning: error?.reason || warning?.reason || null,
       alertsCount: {
         active: 0,
@@ -121,13 +122,17 @@ export const generateSavedObjectParams = ({
       },
     },
     nextRun,
+    running: false,
   },
   { refresh: false, namespace: undefined },
 ];
 
 export const GENERIC_ERROR_MESSAGE = 'GENERIC ERROR MESSAGE';
 
+export const getSummarizedAlertsMock = jest.fn();
+
 export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+  getSummarizedAlerts: getSummarizedAlertsMock,
   id: RULE_TYPE_ID,
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -139,6 +144,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
+  autoRecoverAlerts: true,
 };
 
 export const mockRunNowResponse = {
@@ -251,6 +257,7 @@ export const generateRunnerResult = ({
   interval = '10s',
   alertInstances = {},
   alertRecoveredInstances = {},
+  summaryActions = {},
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
@@ -278,19 +285,31 @@ export const generateRunnerResult = ({
     state: {
       ...(state && { alertInstances }),
       ...(state && { alertRecoveredInstances }),
-      ...(state && { alertTypeState: undefined }),
+      ...(state && { alertTypeState: {} }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z') }),
+      ...(state && { summaryActions }),
     },
   };
 };
 
-export const generateEnqueueFunctionInput = (isArray: boolean = false) => {
+export const generateEnqueueFunctionInput = ({
+  id = '1',
+  isBulk = false,
+  isResolved,
+  foo,
+}: {
+  id: string;
+  isBulk?: boolean;
+  isResolved?: boolean;
+  foo?: boolean;
+}) => {
   const input = {
     apiKey: 'MTIzOmFiYw==',
     executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-    id: '1',
+    id,
     params: {
-      foo: true,
+      ...(isResolved !== undefined ? { isResolved } : {}),
+      ...(foo !== undefined ? { foo } : {}),
     },
     consumer: 'bar',
     relatedSavedObjects: [
@@ -310,20 +329,25 @@ export const generateEnqueueFunctionInput = (isArray: boolean = false) => {
     },
     spaceId: 'default',
   };
-  return isArray ? [input] : input;
+  return isBulk ? [input] : input;
 };
 
 export const generateAlertInstance = (
-  { id, duration, start, flappingHistory }: GeneratorParams = { id: 1, flappingHistory: [false] }
+  { id, duration, start, flappingHistory, actions }: GeneratorParams = {
+    id: 1,
+    flappingHistory: [false],
+  }
 ) => ({
   [String(id)]: {
     meta: {
       lastScheduledActions: {
         date: new Date(DATE_1970),
         group: 'default',
+        ...(actions && { actions }),
       },
       flappingHistory,
       flapping: false,
+      pendingRecoveredCount: 0,
     },
     state: {
       bar: false,
@@ -332,3 +356,28 @@ export const generateAlertInstance = (
     },
   },
 });
+
+export const mockAAD = {
+  'kibana.alert.rule.category': 'Metric threshold',
+  'kibana.alert.rule.consumer': 'alerts',
+  'kibana.alert.rule.execution.uuid': 'c35db7cc-5bf7-46ea-b43f-b251613a5b72',
+  'kibana.alert.rule.name': 'test-rule',
+  'kibana.alert.rule.producer': 'infrastructure',
+  'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+  'kibana.alert.rule.uuid': '0de91960-7643-11ed-b719-bb9db8582cb6',
+  'kibana.space_ids': ['default'],
+  'kibana.alert.rule.tags': [],
+  '@timestamp': '2022-12-07T15:38:43.472Z',
+  'kibana.alert.reason': 'system.cpu is 90% in the last 1 min for all hosts. Alert when > 50%.',
+  'kibana.alert.duration.us': 100000,
+  'kibana.alert.time_range': { gte: '2022-01-01T12:00:00.000Z' },
+  'kibana.alert.instance.id': '*',
+  'kibana.alert.start': '2022-12-07T15:23:13.488Z',
+  'kibana.alert.uuid': '2d3e8fe5-3e8b-4361-916e-9eaab0bf2084',
+  'kibana.alert.status': 'active',
+  'kibana.alert.workflow_status': 'open',
+  'event.kind': 'signal',
+  'event.action': 'active',
+  'kibana.version': '8.7.0',
+  'kibana.alert.flapping': false,
+};

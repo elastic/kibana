@@ -19,16 +19,17 @@ import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plu
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
 import { CspServerPluginStartDeps } from './types';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import {
-  createFleetAuthzMock,
   Installation,
+  ListResult,
   PackagePolicy,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import {
   ExternalCallback,
   FleetStartContract,
-  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
@@ -88,7 +89,6 @@ describe('Cloud Security Posture Plugin', () => {
           {
             type: 'csp_rule',
             attributes: {
-              enabled: false,
               metadata: {
                 rego_rule_id: 'cis_1_1_1',
                 benchmark: { id: 'cis_k8s' },
@@ -274,68 +274,57 @@ describe('Cloud Security Posture Plugin', () => {
         );
         expect(updatedPackagePolicy).toEqual(packageMock);
       }
+
       expect(fleetMock.packagePolicyService.update).toHaveBeenCalledTimes(0);
     });
 
-    it('should uninstall resources when package is removed', async () => {
-      fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
-        async (): Promise<Installation | undefined> => {
-          return;
+    it.each([
+      [1, [createPackagePolicyMock()], 0],
+      [0, [], 1],
+    ])(
+      'should uninstall resources when package is removed',
+      async (total, items, expectedNumberOfCallsToUninstallResources) => {
+        fleetMock.packagePolicyService.list.mockImplementationOnce(
+          async (): Promise<ListResult<PackagePolicy>> => {
+            return {
+              items,
+              total,
+              page: 1,
+              perPage: 1,
+            };
+          }
+        );
+
+        const deletedPackagePolicyMock = deletePackagePolicyMock();
+        deletedPackagePolicyMock[0].package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+
+        const packagePolicyPostDeleteCallbacks: PostPackagePolicyPostDeleteCallback[] = [];
+        fleetMock.registerExternalCallback.mockImplementation((...args) => {
+          if (args[0] === 'packagePolicyPostDelete') {
+            packagePolicyPostDeleteCallbacks.push(args[1]);
+          }
+        });
+
+        const coreStart = coreMock.createStart();
+        const context = coreMock.createPluginInitializerContext<unknown>();
+        plugin = new CspPlugin(context);
+        const spy = jest.spyOn(plugin, 'uninstallResources').mockImplementation();
+
+        // Act
+        await plugin.start(coreStart, mockPlugins);
+        await mockPlugins.fleet.fleetSetupCompleted();
+
+        // Assert
+        expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
+
+        expect(packagePolicyPostDeleteCallbacks.length).toBeGreaterThan(0);
+
+        for (const cb of packagePolicyPostDeleteCallbacks) {
+          await cb(deletedPackagePolicyMock);
         }
-      );
-
-      const deletedPackagePolicyMock = deletePackagePolicyMock();
-      deletedPackagePolicyMock[0].package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
-
-      const packagePolicyPostDeleteCallbacks: PostPackagePolicyDeleteCallback[] = [];
-      fleetMock.registerExternalCallback.mockImplementation((...args) => {
-        if (args[0] === 'postPackagePolicyDelete') {
-          packagePolicyPostDeleteCallbacks.push(args[1]);
-        }
-      });
-
-      const coreStart = coreMock.createStart();
-      const repositoryFindMock = coreStart.savedObjects.createInternalRepository()
-        .find as jest.Mock;
-
-      repositoryFindMock.mockReturnValueOnce(
-        Promise.resolve({
-          saved_objects: [
-            {
-              type: 'csp-rule-template',
-              id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
-              benchmark: {
-                id: 'cis_k8s',
-              },
-            },
-          ],
-        })
-      );
-
-      repositoryFindMock.mockReturnValueOnce(
-        Promise.resolve({
-          saved_objects: [],
-        })
-      );
-
-      const context = coreMock.createPluginInitializerContext<unknown>();
-      plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'uninstallResources').mockImplementation();
-
-      // Act
-      await plugin.start(coreStart, mockPlugins);
-      await mockPlugins.fleet.fleetSetupCompleted();
-
-      // Assert
-      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
-
-      expect(packagePolicyPostDeleteCallbacks.length).toBeGreaterThan(0);
-
-      for (const cb of packagePolicyPostDeleteCallbacks) {
-        await cb(deletedPackagePolicyMock);
+        expect(fleetMock.packagePolicyService.list).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledTimes(expectedNumberOfCallsToUninstallResources);
       }
-      expect(repositoryFindMock).toHaveBeenCalledTimes(2);
-      expect(spy).toHaveBeenCalledTimes(1);
-    });
+    );
   });
 });

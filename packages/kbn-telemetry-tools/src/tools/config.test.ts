@@ -7,6 +7,7 @@
  */
 
 import * as path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { parseTelemetryRC } from './config';
 
 describe('parseTelemetryRC', () => {
@@ -16,7 +17,7 @@ describe('parseTelemetryRC', () => {
   });
 
   it('returns parsed rc file', async () => {
-    const configRoot = path.join(process.cwd(), 'src', 'fixtures', 'telemetry_collectors');
+    const configRoot = path.resolve(REPO_ROOT, 'src/fixtures/telemetry_collectors');
     const config = await parseTelemetryRC(configRoot);
     expect(config).toStrictEqual([
       {

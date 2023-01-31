@@ -6,18 +6,10 @@
  */
 
 import type { ENDPOINT_PRIVILEGES, FleetAuthz } from '@kbn/fleet-plugin/common';
-import type { Capabilities } from '@kbn/core-capabilities-common';
 
 import type { LicenseService } from '../../../license';
-import type { EndpointPermissions, EndpointAuthz } from '../../types/authz';
+import type { EndpointAuthz } from '../../types/authz';
 import type { MaybeImmutable } from '../../types';
-
-export function defaultEndpointPermissions(): EndpointPermissions {
-  return {
-    canWriteSecuritySolution: false,
-    canReadSecuritySolution: false,
-  };
-}
 
 /**
  * Checks to see if a given Kibana privilege was granted.
@@ -35,7 +27,7 @@ export function hasKibanaPrivilege(
   fleetAuthz: FleetAuthz,
   isEndpointRbacEnabled: boolean,
   isSuperuser: boolean,
-  privilege: typeof ENDPOINT_PRIVILEGES[number]
+  privilege: keyof typeof ENDPOINT_PRIVILEGES
 ): boolean {
   // user is superuser, always return true
   if (isSuperuser) {
@@ -70,13 +62,21 @@ export const calculateEndpointAuthz = (
   fleetAuthz: FleetAuthz,
   userRoles: MaybeImmutable<string[]>,
   isEndpointRbacEnabled: boolean = false,
-  permissions: Partial<EndpointPermissions> = defaultEndpointPermissions(),
   hasHostIsolationExceptionsItems: boolean = false
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
   const hasEndpointManagementAccess = userRoles.includes('superuser');
-  const { canWriteSecuritySolution = false, canReadSecuritySolution = false } = permissions;
+
+  const canWriteSecuritySolution = hasKibanaPrivilege(
+    fleetAuthz,
+    true,
+    hasEndpointManagementAccess,
+    'writeSecuritySolution'
+  );
+  const canReadSecuritySolution =
+    canWriteSecuritySolution ||
+    hasKibanaPrivilege(fleetAuthz, true, hasEndpointManagementAccess, 'readSecuritySolution');
   const canWriteEndpointList = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
@@ -218,7 +218,7 @@ export const calculateEndpointAuthz = (
     canReadSecuritySolution,
     canAccessFleet: fleetAuthz?.fleet.all ?? userRoles.includes('superuser'),
     canAccessEndpointManagement: hasEndpointManagementAccess,
-    canCreateArtifactsByPolicy: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    canCreateArtifactsByPolicy: isPlatinumPlusLicense,
     canWriteEndpointList,
     canReadEndpointList,
     canWritePolicyManagement,
@@ -251,7 +251,8 @@ export const calculateEndpointAuthz = (
 
 export const getEndpointAuthzInitialState = (): EndpointAuthz => {
   return {
-    ...defaultEndpointPermissions(),
+    canWriteSecuritySolution: false,
+    canReadSecuritySolution: false,
     canAccessFleet: false,
     canAccessEndpointActionsLogManagement: false,
     canAccessEndpointManagement: false,
@@ -280,66 +281,3 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadEventFilters: false,
   };
 };
-
-const SIEM_PERMISSIONS = [
-  { permission: 'canWriteSecuritySolution', privilege: 'crud' },
-  { permission: 'canReadSecuritySolution', privilege: 'show' },
-] as const;
-
-function hasPrivilege(
-  kibanaPrivileges: Array<{
-    resource?: string;
-    privilege: string;
-    authorized: boolean;
-  }>,
-  prefix: string,
-  searchPrivilege: string
-): boolean {
-  const privilege = kibanaPrivileges.find((p) =>
-    p.privilege.endsWith(`${prefix}${searchPrivilege}`)
-  );
-  return privilege?.authorized || false;
-}
-
-export function calculatePermissionsFromPrivileges(
-  kibanaPrivileges:
-    | Array<{
-        resource?: string;
-        privilege: string;
-        authorized: boolean;
-      }>
-    | undefined
-): EndpointPermissions {
-  if (!kibanaPrivileges || !kibanaPrivileges.length) {
-    return defaultEndpointPermissions();
-  }
-
-  const siemPermissions: EndpointPermissions = SIEM_PERMISSIONS.reduce(
-    (acc, { permission, privilege }) => {
-      return {
-        ...acc,
-        [permission]: hasPrivilege(kibanaPrivileges, 'siem/', privilege),
-      };
-    },
-    {} as EndpointPermissions
-  );
-
-  return {
-    ...siemPermissions,
-  };
-}
-
-export function calculatePermissionsFromCapabilities(
-  capabilities: Capabilities | undefined
-): EndpointPermissions {
-  if (!capabilities || !capabilities.siem) {
-    return defaultEndpointPermissions();
-  }
-
-  return SIEM_PERMISSIONS.reduce((acc, { permission, privilege }) => {
-    return {
-      ...acc,
-      [permission]: capabilities.siem[privilege] || false,
-    };
-  }, {} as EndpointPermissions);
-}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { TableId } from '../../../common/types';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
-import { TableId } from '../../../common/types/timeline';
 
 export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 

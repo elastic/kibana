@@ -79,8 +79,8 @@ import { ActionAccordionFormProps } from './application/sections/action_connecto
 import type { FieldBrowserProps } from './application/sections/field_browser/types';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
-import { RuleAlertsSummaryProps } from './application/sections/rule_details/components/alert_summary';
-import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
+import { AlertSummaryWidgetProps } from './application/sections/rule_details/components/alert_summary';
+import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 
@@ -128,7 +128,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ) => ReactElement<RulesListNotifyBadgeProps>;
   getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
-  getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => ReactElement<RuleAlertsSummaryProps>;
+  getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
   getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
 }
 
@@ -427,8 +427,8 @@ export class Plugin
       getRuleStatusPanel: (props: RuleStatusPanelProps) => {
         return getRuleStatusPanelLazy(props);
       },
-      getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => {
-        return getRuleAlertsSummaryLazy(props);
+      getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => {
+        return getAlertSummaryWidgetLazy(props);
       },
       getRuleSnoozeModal: (props: RuleSnoozeModalProps) => {
         return getRuleSnoozeModalLazy(props);

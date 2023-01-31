@@ -12,7 +12,7 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { ThreatEcs } from '@kbn/security-solution-plugin/common/ecs/threat';
+import { ThreatEcs } from '@kbn/securitysolution-ecs';
 import {
   EqlRuleCreateProps,
   QueryRuleCreateProps,

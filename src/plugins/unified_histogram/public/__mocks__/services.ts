@@ -25,4 +25,5 @@ export const unifiedHistogramServicesMock = {
     useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
     useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
   },
+  lens: { EmbeddableComponent: jest.fn(() => null) },
 } as unknown as UnifiedHistogramServices;

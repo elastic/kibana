@@ -8,6 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useSelectedLocation } from '../hooks/use_selected_location';
@@ -42,9 +43,13 @@ export const MonitorTotalRunsCount = (props: MonitorTotalRunsCountProps) => {
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_total_runs',
-          name: 'synthetics-series-1',
+          name: TOTAL_RUNS_LABEL,
         },
       ]}
     />
   );
 };
+
+const TOTAL_RUNS_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.totalRuns', {
+  defaultMessage: 'Total runs',
+});

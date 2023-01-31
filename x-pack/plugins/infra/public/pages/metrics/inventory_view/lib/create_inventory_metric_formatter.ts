@@ -6,6 +6,7 @@
  */
 
 import { get } from 'lodash';
+import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { InfraFormatterType } from '../../../../lib/lib';
 import {
   SnapshotMetricInput,
@@ -20,71 +21,71 @@ interface MetricFormatter {
   bounds?: { min: number; max: number };
 }
 
-interface MetricFormatters {
-  [key: string]: MetricFormatter;
-}
+type MetricFormatters = {
+  [key in SnapshotMetricType]?: MetricFormatter;
+};
 
 const METRIC_FORMATTERS: MetricFormatters = {
-  ['count']: { formatter: InfraFormatterType.number, template: '{{value}}' },
-  ['cpu']: {
+  count: { formatter: InfraFormatterType.number, template: '{{value}}' },
+  cpu: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },
-  ['cpuCores']: {
+  cpuCores: {
     formatter: InfraFormatterType.number,
     template: '{{value}}',
   },
-  ['memory']: {
+  memory: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },
-  ['memoryTotal']: {
+  memoryTotal: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}',
   },
-  ['diskLatency']: {
+  diskLatency: {
     formatter: InfraFormatterType.number,
     template: '{{value}} ms',
   },
-  ['rx']: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
-  ['tx']: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
-  ['logRate']: {
+  rx: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  tx: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  logRate: {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}/s',
   },
-  ['diskIOReadBytes']: {
+  diskIOReadBytes: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}/s',
   },
-  ['diskIOWriteBytes']: {
+  diskIOWriteBytes: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}/s',
   },
-  ['s3BucketSize']: {
+  s3BucketSize: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}',
   },
-  ['s3TotalRequests']: {
+  s3TotalRequests: {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}',
   },
-  ['s3NumberOfObjects']: {
+  s3NumberOfObjects: {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}',
   },
-  ['s3UploadBytes']: {
+  s3UploadBytes: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}',
   },
-  ['s3DownloadBytes']: {
+  s3DownloadBytes: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}',
   },
-  ['sqsOldestMessage']: {
+  sqsOldestMessage: {
     formatter: InfraFormatterType.number,
     template: '{{value}} seconds',
   },
-  ['rdsLatency']: {
+  rdsLatency: {
     formatter: InfraFormatterType.number,
     template: '{{value}} ms',
   },
@@ -97,7 +98,7 @@ export const createInventoryMetricFormatter =
       return formatter(val);
     }
     const metricFormatter = get(METRIC_FORMATTERS, metric.type, METRIC_FORMATTERS.count);
-    if (val == null) {
+    if (val == null || !metricFormatter) {
       return '';
     }
     const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);

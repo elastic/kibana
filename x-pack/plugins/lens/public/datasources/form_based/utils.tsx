@@ -25,7 +25,8 @@ import {
 } from '@kbn/data-plugin/public';
 
 import { estypes } from '@elastic/elasticsearch';
-import type { FramePublicAPI, IndexPattern, StateSetter } from '../../types';
+import type { DateRange } from '../../../common/types';
+import type { FramePublicAPI, IndexPattern, StateSetter, UserMessage } from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
@@ -54,7 +55,8 @@ import { isQueryValid } from '../../shared_components';
 export function isColumnInvalid(
   layer: FormBasedLayer,
   columnId: string,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  dateRange: DateRange | undefined
 ) {
   const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
   if (!column || !indexPattern) return;
@@ -64,11 +66,17 @@ export function isColumnInvalid(
   const referencesHaveErrors =
     true &&
     'references' in column &&
-    Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
+    Boolean(getReferencesErrors(layer, column, indexPattern, dateRange).filter(Boolean).length);
 
   const operationErrorMessages =
     operationDefinition &&
-    operationDefinition.getErrorMessage?.(layer, columnId, indexPattern, operationDefinitionMap);
+    operationDefinition.getErrorMessage?.(
+      layer,
+      columnId,
+      indexPattern,
+      dateRange,
+      operationDefinitionMap
+    );
 
   const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
 
@@ -82,7 +90,8 @@ export function isColumnInvalid(
 function getReferencesErrors(
   layer: FormBasedLayer,
   column: ReferenceBasedIndexPatternColumn,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  dateRange: DateRange | undefined
 ) {
   return column.references?.map((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
@@ -91,6 +100,7 @@ function getReferencesErrors(
       layer,
       referenceId,
       indexPattern,
+      dateRange,
       operationDefinitionMap
     );
   });
@@ -176,7 +186,7 @@ export function getShardFailuresWarningMessages(
   request: SearchRequest,
   response: estypes.SearchResponse,
   theme: ThemeServiceStart
-): Array<string | React.ReactNode> {
+): UserMessage[] {
   if (state) {
     if (warning.type === 'shard_failure') {
       switch (warning.reason.type) {
@@ -195,38 +205,55 @@ export function getShardFailuresWarningMessages(
                   ].includes(col.operationType)
                 )
                 .map((col) => col.label)
-            ).map((label) =>
-              i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
-                defaultMessage:
-                  '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-                values: {
-                  label,
-                },
-              })
+            ).map(
+              (label) =>
+                ({
+                  uniqueId: `unsupported_aggregation_on_downsampled_index--${label}`,
+                  severity: 'warning',
+                  fixableInEditor: true,
+                  displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+                  shortMessage: '',
+                  longMessage: i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+                    defaultMessage:
+                      '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+                    values: {
+                      label,
+                    },
+                  }),
+                } as UserMessage)
             )
           );
         default:
           return [
-            <>
-              <EuiText size="s">
-                <strong>{warning.message}</strong>
-                <p>{warning.text}</p>
-              </EuiText>
-              <EuiSpacer size="s" />
-              {warning.text ? (
-                <ShardFailureOpenModalButton
-                  theme={theme}
-                  title={warning.message}
-                  size="m"
-                  getRequestMeta={() => ({
-                    request: request as ShardFailureRequest,
-                    response,
-                  })}
-                  color="primary"
-                  isButtonEmpty={true}
-                />
-              ) : null}
-            </>,
+            {
+              uniqueId: `shard_failure`,
+              severity: 'warning',
+              fixableInEditor: true,
+              displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+              shortMessage: '',
+              longMessage: (
+                <>
+                  <EuiText size="s">
+                    <strong>{warning.message}</strong>
+                    <p>{warning.text}</p>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  {warning.text ? (
+                    <ShardFailureOpenModalButton
+                      theme={theme}
+                      title={warning.message}
+                      size="m"
+                      getRequestMeta={() => ({
+                        request: request as ShardFailureRequest,
+                        response,
+                      })}
+                      color="primary"
+                      isButtonEmpty={true}
+                    />
+                  ) : null}
+                </>
+              ),
+            } as UserMessage,
           ];
       }
     }

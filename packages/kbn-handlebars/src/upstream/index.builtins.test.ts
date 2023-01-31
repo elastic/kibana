@@ -476,6 +476,8 @@ describe('builtin helpers', () => {
       console.log = $log;
       console.info = $info;
       console.error = $error;
+
+      global.kbnHandlebarsEnv = null;
     });
 
     it('should call logger at default level', function () {

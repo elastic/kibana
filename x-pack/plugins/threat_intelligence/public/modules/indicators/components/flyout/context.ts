@@ -9,6 +9,7 @@ import { createContext } from 'react';
 
 export interface IndicatorsFlyoutContextValue {
   kqlBarIntegration: boolean;
+  indicatorName?: string | undefined;
 }
 
 export const IndicatorsFlyoutContext = createContext<IndicatorsFlyoutContextValue | undefined>(

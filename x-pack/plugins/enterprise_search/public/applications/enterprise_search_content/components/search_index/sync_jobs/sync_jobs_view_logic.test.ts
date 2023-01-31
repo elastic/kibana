@@ -188,11 +188,9 @@ describe('SyncJobsViewLogic', () => {
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
 
-    it('calls flashAPIErrors on apiError', async () => {
+    it('updates state on apiError', async () => {
       SyncJobsViewLogic.actions.fetchSyncJobsError({} as HttpError);
       await nextTick();
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
       expect(SyncJobsViewLogic.values).toEqual({
         ...DEFAULT_VALUES,
         syncJobsLoading: false,

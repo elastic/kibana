@@ -6,8 +6,8 @@
  */
 
 import { BaseDataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/base_data_generator';
-import endpointPrePackagedRule from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json';
-import { kibanaPackageJson } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { mergeWith } from 'lodash';
 import { EndpointMetadataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_metadata_generator';
 import { HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
@@ -229,17 +229,90 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
         ],
         'kibana.alert.rule.execution.uuid': this.seededUUIDv4(),
         'kibana.alert.rule.false_positives': [],
-        'kibana.alert.rule.from': endpointPrePackagedRule.from,
+        'kibana.alert.rule.from': 'now-10m',
         'kibana.alert.rule.immutable': true,
-        'kibana.alert.rule.indices': endpointPrePackagedRule.index,
+        'kibana.alert.rule.indices': ['logs-endpoint.alerts-*'],
         'kibana.alert.rule.interval': '5m',
         'kibana.alert.rule.license': 'Elastic License v2',
         'kibana.alert.rule.max_signals': 10000,
-        'kibana.alert.rule.name': endpointPrePackagedRule.name,
-        'kibana.alert.rule.parameters': endpointPrePackagedRule,
+        'kibana.alert.rule.name': 'Endpoint Security',
+        'kibana.alert.rule.parameters': {
+          author: ['Elastic'],
+          description:
+            'Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.',
+          enabled: true,
+          exceptions_list: [
+            {
+              id: 'endpoint_list',
+              list_id: 'endpoint_list',
+              namespace_type: 'agnostic',
+              type: 'endpoint',
+            },
+          ],
+          from: 'now-10m',
+          index: ['logs-endpoint.alerts-*'],
+          language: 'kuery',
+          license: 'Elastic License v2',
+          max_signals: 10000,
+          name: 'Endpoint Security',
+          query: 'event.kind:alert and event.module:(endpoint and not endgame)\n',
+          required_fields: [
+            {
+              ecs: true,
+              name: 'event.kind',
+              type: 'keyword',
+            },
+            {
+              ecs: true,
+              name: 'event.module',
+              type: 'keyword',
+            },
+          ],
+          risk_score: 47,
+          risk_score_mapping: [
+            {
+              field: 'event.risk_score',
+              operator: 'equals',
+              value: '',
+            },
+          ],
+          rule_id: '9a1a2dae-0b5f-4c3d-8305-a268d404c306',
+          rule_name_override: 'message',
+          severity: 'medium',
+          severity_mapping: [
+            {
+              field: 'event.severity',
+              operator: 'equals',
+              severity: 'low',
+              value: '21',
+            },
+            {
+              field: 'event.severity',
+              operator: 'equals',
+              severity: 'medium',
+              value: '47',
+            },
+            {
+              field: 'event.severity',
+              operator: 'equals',
+              severity: 'high',
+              value: '73',
+            },
+            {
+              field: 'event.severity',
+              operator: 'equals',
+              severity: 'critical',
+              value: '99',
+            },
+          ],
+          tags: ['Elastic', 'Endpoint Security'],
+          timestamp_override: 'event.ingested',
+          type: 'query',
+          version: 100,
+        },
         'kibana.alert.rule.producer': 'siem',
         'kibana.alert.rule.references': [],
-        'kibana.alert.rule.risk_score': endpointPrePackagedRule.risk_score,
+        'kibana.alert.rule.risk_score': 47,
         'kibana.alert.rule.risk_score_mapping': [
           {
             field: 'event.risk_score',
@@ -247,14 +320,39 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
             value: '',
           },
         ],
-        'kibana.alert.rule.rule_id': endpointPrePackagedRule.rule_id,
+        'kibana.alert.rule.rule_id': '9a1a2dae-0b5f-4c3d-8305-a268d404c306',
         'kibana.alert.rule.rule_name_override': 'message',
         'kibana.alert.rule.rule_type_id': 'siem.queryRule',
         'kibana.alert.rule.severity': 'medium',
-        'kibana.alert.rule.severity_mapping': endpointPrePackagedRule.severity_mapping,
-        'kibana.alert.rule.tags': endpointPrePackagedRule.tags,
+        'kibana.alert.rule.severity_mapping': [
+          {
+            field: 'event.severity',
+            operator: 'equals',
+            severity: 'low',
+            value: '21',
+          },
+          {
+            field: 'event.severity',
+            operator: 'equals',
+            severity: 'medium',
+            value: '47',
+          },
+          {
+            field: 'event.severity',
+            operator: 'equals',
+            severity: 'high',
+            value: '73',
+          },
+          {
+            field: 'event.severity',
+            operator: 'equals',
+            severity: 'critical',
+            value: '99',
+          },
+        ],
+        'kibana.alert.rule.tags': ['Elastic', 'Endpoint Security'],
         'kibana.alert.rule.threat': [],
-        'kibana.alert.rule.timestamp_override': endpointPrePackagedRule.timestamp_override,
+        'kibana.alert.rule.timestamp_override': 'event.ingested',
         'kibana.alert.rule.to': 'now',
         'kibana.alert.rule.type': 'query',
         'kibana.alert.rule.updated_at': '2022-10-26T21:02:00.237Z',

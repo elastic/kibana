@@ -37,6 +37,9 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 | <<add-text,Text>>
 | Add context to your panels with *Text*.
 
+| <<add-image,Image>>
+| Personalize your dashboard with a custom image.
+
 |===
 
 [float]
@@ -236,6 +239,27 @@ To save the panel to the dashboard:
 .. On the *Customize panel* window, select *Show panel title*.
 
 .. Enter the *Panel title*, then click *Save*.
+
+[float]
+[[add-image]]
+== Add image panels
+
+To personalize your dashboards, add your own logos and graphics with the *Image* panel. You can upload images from your computer, select previously uploaded images, or add images from an external link.
+
+. On the dashboard, click image:images/dashboard_createNewImageButton_8.7.0.png[Create New Image button in dashboard toolbar].
+. Use the editor to add an image.
+
+[role="screenshot"]
+image::images/dashboard_addImageEditor_8.7.0.png[Add image editor]
+
+To manage your uploaded image files, open the main menu, then click *Stack Management > Kibana > Files*. 
+
+
+[WARNING]
+============================================================================
+When you export a dashboard, the uploaded image files are not exported. 
+When importing a dashboard with an image panel, and the image file is unavailable, the image panel displays a `not found` warning. Such panels have to be fixed manually by re-uploading the image using the panel's image editor.
+============================================================================
 
 [float]
 [[arrange-panels]]

@@ -6,15 +6,11 @@
  */
 
 import Handlebars from '../..';
+import { forEachCompileFunctionName } from '../__jest__/test_bench';
 
 describe('compiler', () => {
-  const compileFns = ['compile', 'compileAST'];
-  if (process.env.AST) compileFns.splice(0, 1);
-  else if (process.env.EVAL) compileFns.splice(1, 1);
-
-  compileFns.forEach((compileName) => {
-    // @ts-expect-error
-    const compile = Handlebars[compileName];
+  forEachCompileFunctionName((compileName) => {
+    const compile = Handlebars[compileName].bind(Handlebars);
 
     describe(`#${compileName}`, () => {
       it('should fail with invalid input', () => {
@@ -33,7 +29,7 @@ describe('compiler', () => {
 
       it('should include the location in the error (row and column)', () => {
         try {
-          compile(' \n  {{#if}}\n{{/def}}')({});
+          compile(' \n  {{#if}}\n{{/def}}')();
           expect(true).toEqual(false);
         } catch (err) {
           expect(err.message).toEqual("if doesn't match def - 2:5");
@@ -49,7 +45,7 @@ describe('compiler', () => {
 
       it('should include the location as enumerable property', () => {
         try {
-          compile(' \n  {{#if}}\n{{/def}}')({});
+          compile(' \n  {{#if}}\n{{/def}}')();
           expect(true).toEqual(false);
         } catch (err) {
           expect(Object.prototype.propertyIsEnumerable.call(err, 'column')).toEqual(true);
@@ -61,17 +57,18 @@ describe('compiler', () => {
           compile({
             type: 'Program',
             body: [{ type: 'ContentStatement', value: 'Hello' }],
-          })({})
+          })()
         ).toEqual('Hello');
       });
 
       it('can pass through an empty string', () => {
-        expect(compile('')({})).toEqual('');
+        expect(compile('')()).toEqual('');
       });
 
       it('should not modify the options.data property(GH-1327)', () => {
-        const options = { data: [{ a: 'foo' }, { a: 'bar' }] };
-        compile('{{#each data}}{{@index}}:{{a}} {{/each}}', options)({});
+        // The `data` property is supposed to be a boolean, but in this test we want to ignore that
+        const options = { data: [{ a: 'foo' }, { a: 'bar' }] as unknown as boolean };
+        compile('{{#each data}}{{@index}}:{{a}} {{/each}}', options)();
         expect(JSON.stringify(options, null, 2)).toEqual(
           JSON.stringify({ data: [{ a: 'foo' }, { a: 'bar' }] }, null, 2)
         );
@@ -79,7 +76,7 @@ describe('compiler', () => {
 
       it('should not modify the options.knownHelpers property(GH-1327)', () => {
         const options = { knownHelpers: {} };
-        compile('{{#each data}}{{@index}}:{{a}} {{/each}}', options)({});
+        compile('{{#each data}}{{@index}}:{{a}} {{/each}}', options)();
         expect(JSON.stringify(options, null, 2)).toEqual(
           JSON.stringify({ knownHelpers: {} }, null, 2)
         );

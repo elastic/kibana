@@ -48,9 +48,10 @@ export const CommentChildren: VFC<CommentChildrenProps> = ({ id, metadata }) => 
           indicator={indicator as Indicator}
           closeFlyout={() => setExpanded(false)}
           kqlBarIntegration={true}
+          indicatorName={indicatorName}
         />
       ) : null,
-    [expanded, indicator]
+    [expanded, indicator, indicatorName]
   );
 
   if (isLoading) {

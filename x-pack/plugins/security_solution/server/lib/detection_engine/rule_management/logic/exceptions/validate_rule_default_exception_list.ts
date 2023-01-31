@@ -27,9 +27,11 @@ export class ExceptionListError extends Error {
 export const validateRuleDefaultExceptionList = async ({
   exceptionsList,
   rulesClient,
+  ruleRuleId,
   ruleId,
 }: {
   exceptionsList: ListArray | undefined;
+  ruleRuleId: string | undefined;
   ruleId: string | undefined;
   rulesClient: RulesClient;
 }): Promise<undefined> => {
@@ -61,26 +63,27 @@ export const validateRuleDefaultExceptionList = async ({
 
   if (!rulesWithDefaultExceptionList || rulesWithDefaultExceptionList?.data?.length === 0) return;
 
+  const existingRuleId = ruleId || ruleRuleId;
   let isExceptionsExistInOtherRule = false;
   // exceptions exists in other rules
-  if (!ruleId && rulesWithDefaultExceptionList.data.length > 0) {
+  if (!existingRuleId && rulesWithDefaultExceptionList.data.length > 0) {
     isExceptionsExistInOtherRule = true;
   }
 
   let isExceptionAttachToThisRule = false;
   // check if exceptions in this rule
-  if (ruleId) {
+  if (existingRuleId) {
     isExceptionAttachToThisRule = rulesWithDefaultExceptionList.data.some(
-      (rule) => ruleId === rule.id
+      (rule) => (ruleId && ruleId === rule.id) || (ruleRuleId && ruleRuleId === rule.params.ruleId)
     );
   }
 
   if (isExceptionsExistInOtherRule || !isExceptionAttachToThisRule) {
     const ids = rulesWithDefaultExceptionList.data.map((rule) => rule.id);
     throw new CustomHttpRequestError(
-      `default exception list${ruleId ? ` for rule: ${ruleId}` : ''} already exists ${
-        ids ? `in rule(s): ${ids}` : ''
-      }`,
+      `default exception list${
+        existingRuleId ? ` for rule: ${existingRuleId}` : ''
+      } already exists ${ids ? `in rule(s): ${ids}` : ''}`,
       409
     );
   }
