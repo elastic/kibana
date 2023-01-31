@@ -48,7 +48,7 @@ const localStorage = new Storage(window.localStorage);
 // temporary function to hardcode the serverless state
 // this will be replaced by the true serverless information from kibana
 export function isServerless() {
-  return true;
+  return false;
 }
 
 /**
