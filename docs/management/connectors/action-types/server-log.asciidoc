@@ -29,7 +29,7 @@ image::management/connectors/images/serverlog-connector.png[Server log connector
 
 [float]
 [[preconfigured-server-log-configuration]]
-=== Created a preconfigured connector
+=== Create a preconfigured connector
 
 If you are running {kib} on-prem, you can define a server log connector by
 adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
