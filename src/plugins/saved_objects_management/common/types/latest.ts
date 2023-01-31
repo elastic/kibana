@@ -9,11 +9,8 @@
 export type {
   SavedObjectInvalidRelation,
   SavedObjectManagementTypeInfo,
-  SavedObjectMetadata,
   SavedObjectRelation,
   SavedObjectRelationKind,
+  SavedObjectMetadata,
   SavedObjectWithMetadata,
-} from './latest';
-
-import type * as v1 from './v1';
-export { v1 };
+} from './v1';
