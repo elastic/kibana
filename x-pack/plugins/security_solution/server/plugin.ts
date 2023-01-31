@@ -513,7 +513,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.kibanaIndex!,
       DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
-      exceptionListClient
+      exceptionListClient,
+      packageService
     );
 
     artifactService.start(this.telemetryReceiver);

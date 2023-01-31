@@ -154,8 +154,7 @@ export const useIndexData = (
     setColumnCharts,
     setCcsWarning,
     setErrorMessage,
-    setRowCount,
-    setRowCountRelation,
+    setRowCountInfo,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -206,12 +205,13 @@ export const useIndexData = (
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
     setCcsWarning(isCrossClusterSearch && isMissingFields);
-    setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
-    setRowCountRelation(
-      typeof resp.hits.total === 'number'
-        ? ('eq' as estypes.SearchTotalHitsRelation)
-        : resp.hits.total!.relation
-    );
+    setRowCountInfo({
+      rowCount: typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value,
+      rowCountRelation:
+        typeof resp.hits.total === 'number'
+          ? ('eq' as estypes.SearchTotalHitsRelation)
+          : resp.hits.total!.relation,
+    });
     setTableItems(docs);
     setStatus(INDEX_STATUS.LOADED);
   };

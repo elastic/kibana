@@ -8,9 +8,10 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
 
@@ -25,7 +26,7 @@ export const fileBasedRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'filedatavisualizer',
-  path: '/filedatavisualizer',
+  path: createPath(ML_PAGES.DATA_VISUALIZER_FILE),
   title: i18n.translate('xpack.ml.dataVisualizer.file.docTitle', {
     defaultMessage: 'File Data Visualizer',
   }),

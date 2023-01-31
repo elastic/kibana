@@ -1445,6 +1445,18 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
           },
           {
+            "plugin": "@kbn/core-saved-objects-server",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
+          },
+          {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts"
           },

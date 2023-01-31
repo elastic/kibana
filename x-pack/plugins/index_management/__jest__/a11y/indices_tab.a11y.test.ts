@@ -19,8 +19,7 @@ import {
   createNonDataStreamIndex,
 } from '../client_integration/home/data_streams_tab.helpers';
 
-// FLAKY: https://github.com/elastic/kibana/issues/128836
-describe.skip('A11y Indices tab', () => {
+describe('A11y Indices tab', () => {
   let testBed: IndicesTestBed;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
