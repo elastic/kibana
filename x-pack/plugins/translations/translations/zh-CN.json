@@ -13248,7 +13248,6 @@
     "xpack.fileUpload.geoUploadWizard.creatingDataView": "正在创建数据视图：{indexName}",
     "xpack.fileUpload.geoUploadWizard.dataIndexingStarted": "正在创建索引：{indexName}",
     "xpack.fileUpload.geoUploadWizard.writingToIndex": "正在写入索引：已完成 {progress}%",
-    "xpack.fileUpload.importComplete.failedFeaturesMsg": "无法索引 {numFailures} 个特征。",
     "xpack.fileUpload.importComplete.permissionFailureMsg": "您无权创建或将数据导入索引“{indexName}”。",
     "xpack.fileUpload.importComplete.uploadFailureMsgErrorBlock": "错误：{reason}",
     "xpack.fileUpload.importComplete.uploadSuccessMsg": "已索引 {numFeatures} 个特征。",
