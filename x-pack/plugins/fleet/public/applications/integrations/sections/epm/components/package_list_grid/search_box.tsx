@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiFieldSearch, EuiText, useEuiTheme, EuiIcon, EuiScreenReaderOnly } from '@elastic/eui';
 
@@ -25,6 +25,7 @@ export interface Props {
   selectedCategory: ExtendedIntegrationCategory;
   setCategory: (category: ExtendedIntegrationCategory) => void;
   categories: CategoryFacet[];
+  availableSubCategories?: CategoryFacet[];
   setUrlandReplaceHistory: (params: IntegrationsURLParameters) => void;
   selectedSubCategory?: string;
   setSelectedSubCategory?: (c: string | undefined) => void;
@@ -36,6 +37,7 @@ export const SearchBox: FunctionComponent<Props> = ({
   selectedCategory,
   setCategory,
   categories,
+  availableSubCategories,
   setSelectedSubCategory,
   selectedSubCategory,
   setUrlandReplaceHistory,
@@ -55,6 +57,19 @@ export const SearchBox: FunctionComponent<Props> = ({
   const selectedCategoryTitle = selectedCategory
     ? categories.find((category) => category.id === selectedCategory)?.title
     : undefined;
+
+  const getCategoriesLabel = useMemo(() => {
+    const selectedSubCategoryTitle =
+      selectedSubCategory && availableSubCategories
+        ? availableSubCategories.find((subCat) => subCat.id === selectedSubCategory)?.title
+        : undefined;
+
+    if (selectedCategoryTitle && selectedSubCategoryTitle) {
+      return `${selectedCategoryTitle}, ${selectedSubCategoryTitle}`;
+    } else if (selectedCategoryTitle) {
+      return `${selectedCategoryTitle}`;
+    } else return '';
+  }, [availableSubCategories, selectedCategoryTitle, selectedSubCategory]);
 
   return (
     <EuiFieldSearch
@@ -82,7 +97,7 @@ export const SearchBox: FunctionComponent<Props> = ({
             <EuiScreenReaderOnly>
               <span>Searching category: </span>
             </EuiScreenReaderOnly>
-            {selectedCategoryTitle}
+            {getCategoriesLabel}
             <button
               data-test-subj="epmList.categoryBadge.closeBtn"
               onClick={() => {

@@ -151,12 +151,13 @@ export const PackageListGrid: FunctionComponent<Props> = ({
             onSubCategoryClick(subCategory.id);
             closePopover();
           }}
+          icon={selectedSubCategory === subCategory.id ? 'check' : 'empty'}
         >
           {subCategory.title}
         </EuiContextMenuItem>
       );
     });
-  }, [onSubCategoryClick, splitSubcat.hiddenSubCategories]);
+  }, [onSubCategoryClick, selectedSubCategory, splitSubcat?.hiddenSubCategories]);
 
   return (
     <EuiFlexGroup alignItems="flexStart" gutterSize="xl" data-test-subj="epmList.integrationCards">
@@ -178,6 +179,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
           selectedCategory={selectedCategory}
           setCategory={setCategory}
           categories={categories}
+          availableSubCategories={availableSubCategories}
           setSelectedSubCategory={setSelectedSubCategory}
           selectedSubCategory={selectedSubCategory}
           setUrlandReplaceHistory={setUrlandReplaceHistory}
@@ -193,25 +195,28 @@ export const PackageListGrid: FunctionComponent<Props> = ({
               maxWidth: 943,
             }}
           >
-            {visibleSubCategories?.map((subCategory) => (
-              <EuiFlexItem grow={false} key={subCategory.id}>
-                <EuiButton
-                  css={subCategory.id === selectedSubCategory ? 'color: white' : ''}
-                  color={subCategory.id === selectedSubCategory ? 'accent' : 'text'}
-                  fill={subCategory.id === selectedSubCategory}
-                  aria-label={subCategory?.title}
-                  onClick={() => onSubCategoryClick(subCategory.id)}
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.epmList.subcategoriesButton"
-                    defaultMessage="{subcategory}"
-                    values={{
-                      subcategory: subCategory.title,
-                    }}
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            ))}
+            {visibleSubCategories?.map((subCategory) => {
+              const isSelected = subCategory.id === selectedSubCategory;
+              return (
+                <EuiFlexItem grow={false} key={subCategory.id}>
+                  <EuiButton
+                    css={isSelected ? 'color: white' : ''}
+                    color={isSelected ? 'accent' : 'text'}
+                    fill={isSelected}
+                    aria-label={subCategory?.title}
+                    onClick={() => onSubCategoryClick(subCategory.id)}
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.epmList.subcategoriesButton"
+                      defaultMessage="{subcategory}"
+                      values={{
+                        subcategory: subCategory.title,
+                      }}
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              );
+            })}
             {hiddenSubCategoriesItems?.length ? (
               <EuiFlexItem grow={false}>
                 <EuiPopover
