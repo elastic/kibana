@@ -43,6 +43,7 @@
     "@kbn/core-doc-links-browser",
     "@kbn/ui-theme",
     "@kbn/datemath",
+    "@kbn/core-capabilities-common",
   ],
   "exclude": [
     "target/**/*",

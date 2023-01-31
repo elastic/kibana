@@ -38,7 +38,7 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
-import { packageToPackagePolicy } from '../../common/services';
+import { getAllowedOutputTypeForPolicy, packageToPackagePolicy } from '../../common/services';
 import {
   agentPolicyStatuses,
   AGENT_POLICY_INDEX,
@@ -122,7 +122,7 @@ class AgentPolicyService {
       soClient,
       agentPolicy,
       existingAgentPolicy,
-      this.hasAPMIntegration(existingAgentPolicy)
+      getAllowedOutputTypeForPolicy(existingAgentPolicy)
     );
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
