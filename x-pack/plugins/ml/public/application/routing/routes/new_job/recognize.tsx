@@ -10,9 +10,10 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath, useNavigateToPath } from '../../../contexts/kibana';
 
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../jobs/new_job/recognize';
@@ -25,7 +26,7 @@ export const recognizeRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/jobs/new_job/recognize',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -41,7 +42,7 @@ export const recognizeRouteFactory = (
 });
 
 export const checkViewOrCreateRouteFactory = (): MlRoute => ({
-  path: '/modules/check_view_or_create',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE),
   render: (props, deps) => <CheckViewOrCreateWrapper {...props} deps={deps} />,
   // no breadcrumbs since it's just a redirect
   breadcrumbs: [],

@@ -7,8 +7,9 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { DatavisualizerSelector } from '../../../datavisualizer';
 import { checkBasicLicense } from '../../../license';
@@ -20,7 +21,7 @@ export const selectorRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'datavisualizer',
-  path: '/datavisualizer',
+  path: createPath(ML_PAGES.DATA_VISUALIZER),
   title: i18n.translate('xpack.ml.dataVisualizer.docTitle', {
     defaultMessage: 'Data Visualizer',
   }),

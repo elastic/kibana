@@ -10,9 +10,10 @@ import { parse } from 'query-string';
 
 import { i18n } from '@kbn/i18n';
 
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { IndexDataVisualizerPage as Page } from '../../../datavisualizer/index_based/index_data_visualizer';
 
@@ -26,7 +27,7 @@ export const indexBasedRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'data_view_datavisualizer',
-  path: '/jobs/new_job/datavisualizer',
+  path: createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER),
   title: i18n.translate('xpack.ml.dataVisualizer.dataView.docTitle', {
     defaultMessage: 'Index Data Visualizer',
   }),

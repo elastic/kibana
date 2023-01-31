@@ -56,9 +56,7 @@ journey(`TestNowMode`, async ({ page, params }) => {
       type: 'http',
       urls: 'https://www.google.com',
       custom_heartbeat_id: 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
-      locations: [
-        { id: 'Test private location', label: 'Test private location', isServiceManaged: true },
-      ],
+      locations: [{ id: 'us_central_qa', label: 'US Central QA', isServiceManaged: true }],
     });
     await services.addTestSummaryDocument({ timestamp: firstCheckTime });
   });
@@ -85,7 +83,7 @@ journey(`TestNowMode`, async ({ page, params }) => {
     await services.addTestSummaryDocument({ testRunId });
     await page.waitForSelector('text=Completed');
     await page.waitForSelector('text=Took 155 ms');
-    await page.waitForSelector('text=Test private location');
+    await page.waitForSelector('text=US Central QA');
   });
 
   step('Displays data in expanded row', async () => {
@@ -104,9 +102,7 @@ journey(`TestNowMode`, async ({ page, params }) => {
       'source.inline.script':
         "step('Go to https://www.google.com', async () => {\n  await page.goto('https://www.google.com');\n});\n\nstep('Go to https://www.google.com', async () => {\n  await page.goto('https://www.google.com');\n});",
       urls: 'https://www.google.com',
-      locations: [
-        { id: 'Test private location', label: 'Test private location', isServiceManaged: true },
-      ],
+      locations: [{ id: 'us_central_qa', label: 'US Central QA', isServiceManaged: true }],
     });
 
     await page.click(byTestId('syntheticsMonitorManagementTab'));
@@ -132,7 +128,7 @@ journey(`TestNowMode`, async ({ page, params }) => {
     await page.waitForTimeout(1000);
     await services.addTestSummaryDocument({ testRunId, docType: 'journeyStart' });
     await page.waitForTimeout(1000);
-    await page.waitForSelector('text=Test private location');
+    await page.waitForSelector('text=US Central QA');
     await page.waitForSelector('text=IN PROGRESS');
   });
 

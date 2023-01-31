@@ -13,9 +13,10 @@ import {
   useRefreshIntervalUpdates,
   useTimefilter,
 } from '@kbn/ml-date-picker';
+import { ML_PAGES } from '../../../locator';
 import { NavigateToPath } from '../../contexts/kibana';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
-import { MlRoute, PageLoader, PageProps } from '../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { JobsPage } from '../../jobs/jobs_list';
@@ -28,7 +29,7 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   title: i18n.translate('xpack.ml.anomalyDetection.jobs.docTitle', {
     defaultMessage: 'Anomaly Detection Jobs',
   }),
-  path: '/jobs',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),

@@ -50,7 +50,7 @@ export function SloEditForm({ slo }: Props) {
     notifications: { toasts },
   } = useKibana().services;
 
-  const { control, watch, getFieldState, getValues, formState, trigger } = useForm({
+  const { control, watch, getFieldState, getValues, formState } = useForm({
     defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
     values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
@@ -144,7 +144,7 @@ export function SloEditForm({ slo }: Props) {
           <EuiSpacer size="xxl" />
 
           {watch('indicator.type') === 'sli.kql.custom' ? (
-            <SloEditFormDefinitionCustomKql control={control} trigger={trigger} />
+            <SloEditFormDefinitionCustomKql control={control} />
           ) : null}
 
           <EuiSpacer size="m" />

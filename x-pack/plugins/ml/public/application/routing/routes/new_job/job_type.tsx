@@ -10,16 +10,17 @@ import { parse } from 'query-string';
 
 import { i18n } from '@kbn/i18n';
 
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../jobs/new_job/pages/job_type';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 export const jobTypeRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
-  path: '/jobs/new_job/step/job_type',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
