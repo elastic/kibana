@@ -114,25 +114,27 @@ export const OverviewGrid = memo(() => {
       <div ref={intersectionRef}>
         <EuiSpacer size="l" />
       </div>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        {currentMonitors.length === monitors.length && (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">{SHOWING_ALL_MONITORS_LABEL}</EuiText>
-          </EuiFlexItem>
-        )}
-        {currentMonitors.length === monitors.length && currentMonitors.length > perPage && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={() => window.scrollTo(0, 0)}
-              iconType="sortUp"
-              iconSide="right"
-              size="xs"
-            >
-              {SCROLL_TO_TOP_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      {groupField === 'none' && (
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          {currentMonitors.length === monitors.length && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">{SHOWING_ALL_MONITORS_LABEL}</EuiText>
+            </EuiFlexItem>
+          )}
+          {currentMonitors.length === monitors.length && currentMonitors.length > perPage && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={() => window.scrollTo(0, 0)}
+                iconType="sortUp"
+                iconSide="right"
+                size="xs"
+              >
+                {SCROLL_TO_TOP_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
       {flyoutConfig?.configId && flyoutConfig?.location && (
         <MonitorDetailFlyout
           configId={flyoutConfig.configId}
