@@ -6,19 +6,19 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import { getAgentVersionMatchingCurrentStack } from '../common/fleet_services';
+import type { StartRuntimeServicesOptions } from './types';
 import type { RuntimeServices } from '../common/stack_services';
 import { createRuntimeServices } from '../common/stack_services';
 
-let runtimeServices: undefined | RuntimeServices;
-
-interface StartRuntimeServicesOptions {
-  kibanaUrl: string;
-  elasticUrl: string;
-  username: string;
-  password: string;
-  version?: string;
-  log?: ToolingLog;
+interface EndpointRunnerRuntimeServices extends RuntimeServices {
+  options: Required<
+    Omit<StartRuntimeServicesOptions, 'kibanaUrl' | 'elasticUrl' | 'username' | 'password' | 'log'>
+  >;
 }
+
+// Internal singleton storing the services for the current run
+let runtimeServices: undefined | EndpointRunnerRuntimeServices;
 
 export const startRuntimeServices = async ({
   log = new ToolingLog(),
@@ -26,14 +26,26 @@ export const startRuntimeServices = async ({
   kibanaUrl,
   username,
   password,
+  ...otherOptions
 }: StartRuntimeServicesOptions) => {
-  runtimeServices = await createRuntimeServices({
+  const stackServices = await createRuntimeServices({
     kibanaUrl,
     elasticsearchUrl: elasticUrl,
     username,
     password,
     log,
   });
+
+  runtimeServices = {
+    ...stackServices,
+    options: {
+      ...otherOptions,
+
+      version:
+        otherOptions.version ||
+        (await getAgentVersionMatchingCurrentStack(stackServices.kbnClient)),
+    },
+  };
 };
 
 export const stopRuntimeServices = async () => {

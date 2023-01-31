@@ -36,19 +36,28 @@ interface ElasticArtifactSearchResponse {
   };
 }
 
-export const enrollEndpointHost = async (agentPolicyId?: string) => {
-  const { log, kbnClient } = getRuntimeServices();
+export const enrollEndpointHost = async () => {
+  const {
+    log,
+    kbnClient,
+    options: { version },
+  } = getRuntimeServices();
 
   log.info(`Creating VM and enrolling Elastic Agent`);
   log.indent(4);
 
   try {
+    const agentPolicyId = ''; // FIXME:PT get value from input
     const uniqueId = Math.random().toString(32).substring(2).substring(0, 4);
     const username = userInfo().username.toLowerCase();
     const policyId: string = agentPolicyId || (await getOrCreateAgentPolicyId());
 
     if (!policyId) {
       throw new Error(`No valid policy id provide or unable to create it`);
+    }
+
+    if (!version) {
+      throw new Error(`No 'version' specified`);
     }
 
     const [fleetServerHostUrl, enrollmentToken] = await Promise.all([
@@ -72,8 +81,7 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
 
     log.verbose(await execa('multipass', ['info', vmName]));
 
-    // FIXME:PT need to get the version from input args
-    const agentDownloadUrl = await getAgentDownloadUrl('8.7.0-SNAPSHOT');
+    const agentDownloadUrl = await getAgentDownloadUrl(version);
     const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
     const vmDirName = agentDownloadedFile.replace(/\.tar\.gz$/, '');
 

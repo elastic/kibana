@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
 import { runFleetServerIfNeeded } from './fleet_server';
 import { startRuntimeServices, stopRuntimeServices } from './runtime';
 import { checkDependencies } from './pre_check';
 import { enrollEndpointHost } from './elastic_endpoint';
+import type { StartRuntimeServicesOptions } from './types';
 
-interface SetupOptions {
-  kibanaUrl: string;
-  elasticUrl: string;
-  username: string;
-  password: string;
-  log?: ToolingLog;
-}
-export const setupAll = async (options: SetupOptions) => {
+export const setupAll = async (options: StartRuntimeServicesOptions) => {
   await startRuntimeServices(options);
 
   await checkDependencies();

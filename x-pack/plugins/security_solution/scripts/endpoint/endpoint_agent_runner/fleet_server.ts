@@ -8,9 +8,9 @@
 import type {
   AgentPolicy,
   CreateAgentPolicyResponse,
-  PackagePolicy,
   GetPackagePoliciesResponse,
   Output,
+  PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
@@ -20,11 +20,11 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { APP_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
 import type {
+  FleetServerHost,
+  GenerateServiceTokenResponse,
+  GetOneOutputResponse,
   GetOutputsResponse,
   PutOutputRequest,
-  GetOneOutputResponse,
-  GenerateServiceTokenResponse,
-  FleetServerHost,
 } from '@kbn/fleet-plugin/common/types';
 import {
   fleetServerHostsRoutesService,
@@ -189,6 +189,7 @@ const startFleetServerWithDocker = async ({
     localhostRealIp,
     elastic: { url: elasticUrl, isLocalhost: isElasticOnLocalhost },
     kbnClient,
+    options: { version },
   } = getRuntimeServices();
 
   log.info(`Starting a new fleet server using Docker`);
@@ -204,8 +205,6 @@ const startFleetServerWithDocker = async ({
   }
 
   try {
-    const agentVersion = await getAgentVersionMatchingCurrentStack();
-
     const dockerArgs = [
       'run',
 
@@ -241,7 +240,7 @@ const startFleetServerWithDocker = async ({
       '--publish',
       '8220:8220',
 
-      `docker.elastic.co/beats/elastic-agent:${agentVersion}`,
+      `docker.elastic.co/beats/elastic-agent:${version}`,
     ];
 
     await execa('docker', ['kill', containerName])
@@ -280,24 +279,6 @@ const startFleetServerWithDocker = async ({
   }
 
   log.indent(-4);
-};
-
-const getAgentVersionMatchingCurrentStack = async (): Promise<string> => {
-  const { kbnClient } = getRuntimeServices();
-
-  const kbnStatus = await kbnClient.status.get();
-  let version = kbnStatus.version.number;
-
-  // Add `-SNAPSHOT` if version indicates it was from a snapshot or the build hash starts
-  // with `xxxxxxxxx` (value that seems to be present when running kibana from source)
-  if (
-    kbnStatus.version.build_snapshot ||
-    kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX')
-  ) {
-    version += '-SNAPSHOT';
-  }
-
-  return version;
 };
 
 const configureFleetIfNeeded = async () => {
