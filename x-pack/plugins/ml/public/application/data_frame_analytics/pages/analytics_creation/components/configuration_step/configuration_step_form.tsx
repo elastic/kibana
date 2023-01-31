@@ -626,13 +626,14 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             helpText={
               dependentVariableOptions.length === 0 &&
               dependentVariableFetchFail === false &&
-              currentDataView &&
-              i18n.translate(
-                'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
-                {
-                  defaultMessage: 'No numeric type fields were found for this data view.',
-                }
-              )
+              currentDataView
+                ? i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
+                    {
+                      defaultMessage: 'No numeric type fields were found for this data view.',
+                    }
+                  )
+                : undefined
             }
             isInvalid={maxDistinctValuesError !== undefined}
             error={[
@@ -682,7 +683,8 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             isDisabled={isJobCreated}
             isLoading={loadingDepVarOptions}
             dependentVariableOptions={dependentVariableOptions}
-            selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
+            dependentVariable={dependentVariable}
+            loadingDepVarOptions={loadingDepVarOptions}
             onChange={(selectedOptions) => {
               setFormState({
                 dependentVariable: selectedOptions[0].label || '',
@@ -692,96 +694,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               loadingDepVarOptions ? ' loading' : ' loaded'
             }`}
           />
-          // <Fragment>
-          //   <EuiFormRow
-          //     fullWidth
-          //     label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
-          //       defaultMessage: 'Dependent variable',
-          //     })}
-          //     helpText={
-          //       dependentVariableOptions.length === 0 &&
-          //       dependentVariableFetchFail === false &&
-          //       currentDataView &&
-          //       i18n.translate(
-          //         'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
-          //         {
-          //           defaultMessage: 'No numeric type fields were found for this data view.',
-          //         }
-          //       )
-          //     }
-          //     isInvalid={maxDistinctValuesError !== undefined}
-          //     error={[
-          //       ...(dependentVariableFetchFail === true
-          //         ? [
-          //             <Fragment>
-          //               {i18n.translate(
-          //                 'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
-          //                 {
-          //                   defaultMessage:
-          //                     'There was a problem fetching fields. Please refresh the page and try again.',
-          //                 }
-          //               )}
-          //             </Fragment>,
-          //           ]
-          //         : []),
-          //       ...(fieldOptionsFetchFail === true && maxDistinctValuesError !== undefined
-          //         ? [
-          //             <Fragment>
-          //               {i18n.translate(
-          //                 'xpack.ml.dataframe.analytics.create.dependentVariableMaxDistictValuesError',
-          //                 {
-          //                   defaultMessage: 'Invalid. {message}',
-          //                   values: { message: maxDistinctValuesError },
-          //                 }
-          //               )}
-          //             </Fragment>,
-          //           ]
-          //         : []),
-          //     ]}
-          //   >
-          //     <EuiComboBox
-          //       fullWidth
-          //       aria-label={i18n.translate(
-          //         'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
-          //         {
-          //           defaultMessage: 'Enter field to be used as dependent variable.',
-          //         }
-          //       )}
-          //       placeholder={
-          //         jobType === ANALYSIS_CONFIG_TYPE.REGRESSION
-          //           ? i18n.translate(
-          //               'xpack.ml.dataframe.analytics.create.dependentVariableRegressionPlaceholder',
-          //               {
-          //                 defaultMessage: 'Select the numeric field that you want to predict.',
-          //               }
-          //             )
-          //           : i18n.translate(
-          //               'xpack.ml.dataframe.analytics.create.dependentVariableClassificationPlaceholder',
-          //               {
-          //                 defaultMessage:
-          //                   'Select the numeric, categorical, or boolean field that you want to predict.',
-          //               }
-          //             )
-          //       }
-          //       isDisabled={isJobCreated}
-          //       isLoading={loadingDepVarOptions}
-          //       singleSelection={true}
-          //       options={dependentVariableOptions}
-          //       selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
-          //       onChange={(selectedOptions) => {
-          //         setFormState({
-          //           dependentVariable: selectedOptions[0].label || '',
-          //         });
-          //       }}
-          //       isClearable={false}
-          //       isInvalid={dependentVariable === ''}
-          //       data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
-          //         loadingDepVarOptions ? ' loading' : ' loaded'
-          //       }`}
-          //       renderOption={renderOption}
-          //     />
-          //   </EuiFormRow>
-          // </Fragment>
         )}
         <AnalysisFieldsTable
           dependentVariable={dependentVariable}

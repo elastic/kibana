@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { Fragment, FC, ReactNode } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DependentVariable } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { useFieldStatsTrigger } from '../../../../../components/field_stats_flyout';
 
 interface ConfigurationStepDependentVariableRowProps {
-  helpText: string;
   label: string;
   isInvalid: boolean;
-  error: string;
   placeholder: string;
   isDisabled: boolean;
   isLoading: boolean;
@@ -23,6 +21,8 @@ interface ConfigurationStepDependentVariableRowProps {
   dependentVariableOptions: EuiComboBoxOptionOption[];
   dependentVariable: DependentVariable;
   onChange: (options: EuiComboBoxOptionOption[]) => void;
+  helpText?: string;
+  error?: ReactNode | ReactNode[];
 }
 export const ConfigurationStepDependentVariableRow: FC<
   ConfigurationStepDependentVariableRowProps
