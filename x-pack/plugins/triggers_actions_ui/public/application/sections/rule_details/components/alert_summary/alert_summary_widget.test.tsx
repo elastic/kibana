@@ -31,10 +31,6 @@ jest.mock('../../../../hooks/use_load_alert_summary', () => ({
         { key: 1671321600000, doc_count: 0 },
         { key: 1671408000000, doc_count: 1 },
       ],
-      recoveredAlerts: [
-        { key: 1671321600000, doc_count: 2 },
-        { key: 1671408000000, doc_count: 5 },
-      ],
     },
   }),
 }));
@@ -74,7 +70,6 @@ describe('AlertSummaryWidget', () => {
   it('should render counts and title correctly', async () => {
     const alertSummaryWidget = renderComponent();
     expect(alertSummaryWidget.queryByTestId('activeAlertsCount')).toHaveTextContent('1');
-    expect(alertSummaryWidget.queryByTestId('recoveredAlertsCount')).toHaveTextContent('7');
     expect(alertSummaryWidget.queryByTestId('totalAlertsCount')).toHaveTextContent('8');
     expect(alertSummaryWidget.queryByTestId(TITLE_DATA_TEST_SUBJ)).toBeTruthy();
   });

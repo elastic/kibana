@@ -16,6 +16,7 @@ import {
   quietFetchOverviewAction,
   setFlyoutConfig,
   setOverviewPageStateAction,
+  toggleErrorPopoverOpen,
 } from './actions';
 import { enableMonitorAlertAction } from '../monitor_list/actions';
 import { ConfigKey } from '../../components/monitor_add_edit/types';
@@ -37,6 +38,7 @@ const initialState: MonitorOverviewState = {
   error: null,
   status: null,
   statusError: null,
+  isErrorPopoverOpen: null,
 };
 
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
@@ -99,6 +101,9 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.statusError = action.payload;
+    })
+    .addCase(toggleErrorPopoverOpen, (state, action) => {
+      state.isErrorPopoverOpen = action.payload;
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.statusError = null;

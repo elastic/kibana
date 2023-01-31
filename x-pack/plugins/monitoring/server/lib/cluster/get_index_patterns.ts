@@ -69,7 +69,7 @@ export function getLegacyIndexPattern({
     case 'beats':
       indexPattern = INDEX_PATTERN_BEATS;
       break;
-    case 'enterprise_search':
+    case 'enterprisesearch':
       indexPattern = INDEX_PATTERN_ENTERPRISE_SEARCH;
       break;
     case 'filebeat':
@@ -127,6 +127,7 @@ export const getElasticsearchDataset = getDataset('elasticsearch');
 export const getKibanaDataset = getDataset('kibana');
 export const getLogstashDataset = getDataset('logstash');
 export const getBeatDataset = getDataset('beats');
+export const getEntsearchDataset = getDataset('enterprisesearch');
 
 function buildDatasetPattern(
   moduleType?: INDEX_PATTERN_TYPES,
