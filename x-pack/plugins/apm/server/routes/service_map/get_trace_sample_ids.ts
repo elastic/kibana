@@ -143,7 +143,6 @@ export async function getTraceSampleIds({
       },
     },
   };
-  console.log(JSON.stringify(params));
 
   try {
     const tracesSampleResponse = await apmEventClient.search(
