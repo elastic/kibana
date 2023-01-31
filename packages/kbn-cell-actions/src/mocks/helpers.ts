@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { MutableRefObject } from 'react';
 import { CellActionExecutionContext } from '../types';
 
 export const makeAction = (actionsName: string, icon: string = 'icon', order?: number) => ({
@@ -29,6 +30,9 @@ export const makeActionContext = (
   field: {
     name: 'fieldName',
     type: 'keyword',
+    value: 'some value',
   },
+  extraContentNodeRef: {} as MutableRefObject<HTMLDivElement>,
+  nodeRef: {} as MutableRefObject<HTMLElement>,
   ...override,
 });
