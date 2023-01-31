@@ -24,11 +24,12 @@ export function SloList() {
   const [sort, setSort] = useState<SortType>('name');
   const [indicatorTypeFilter, setIndicatorTypeFilter] = useState<FilterType[]>([]);
 
-  const [deleting, setIsDeleting] = useState(false);
+  const [isCloning, setIsCloning] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [shouldReload, setShouldReload] = useState(false);
 
   const {
-    loading,
+    loading: isLoadingSloList,
     error,
     sloList: { results: sloList = [], total, perPage },
   } = useFetchSloList({
@@ -42,16 +43,21 @@ export function SloList() {
   useEffect(() => {
     if (shouldReload) {
       setShouldReload(false);
+      setIsCloning(false);
       setIsDeleting(false);
     }
   }, [shouldReload]);
 
-  const handleDeleted = () => {
-    setShouldReload(true);
+  const handleCloning = (bla: boolean) => {
+    setIsCloning(bla);
   };
 
-  const handleDeleting = () => {
-    setIsDeleting(true);
+  const handleDeleting = (bla: boolean) => {
+    setIsDeleting(bla);
+  };
+
+  const handleClonedOrDeleted = () => {
+    setShouldReload(true);
   };
 
   const handlePageClick = (pageNumber: number) => {
@@ -79,7 +85,7 @@ export function SloList() {
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
         <SloListSearchFilterSortBar
-          loading={loading || deleting}
+          loading={isLoadingSloList || isCloning || isDeleting}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
           onChangeIndicatorTypeFilter={handleChangeIndicatorTypeFilter}
@@ -89,10 +95,12 @@ export function SloList() {
       <EuiFlexItem>
         <SloListItems
           sloList={sloList}
-          loading={loading}
+          loading={isLoadingSloList}
           error={error}
+          onCloned={handleClonedOrDeleted}
+          onCloning={handleCloning}
           onDeleting={handleDeleting}
-          onDeleted={handleDeleted}
+          onDeleted={handleClonedOrDeleted}
         />
       </EuiFlexItem>
 

@@ -15,7 +15,7 @@ import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 export interface SloDeleteConfirmationModalProps {
   slo: SLOWithSummaryResponse;
   onCancel: () => void;
-  onDeleting: () => void;
+  onDeleting: (isDeleting: boolean) => void;
   onDeleted: () => void;
 }
 
@@ -34,16 +34,18 @@ export function SloDeleteConfirmationModal({
   const { deleteSlo, success, loading, error } = useDeleteSlo();
 
   if (loading) {
-    onDeleting();
+    onDeleting(true);
   }
 
   if (success) {
     toasts.addSuccess(getDeleteSuccesfulMessage(name));
+    onDeleting(false);
     onDeleted();
   }
 
   if (error) {
     toasts.addDanger(getDeleteFailMessage(name));
+    onDeleting(false);
   }
 
   const handleConfirm = () => {
