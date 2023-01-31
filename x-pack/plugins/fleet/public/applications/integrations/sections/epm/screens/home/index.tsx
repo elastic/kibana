@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Switch, Route } from 'react-router-dom';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
