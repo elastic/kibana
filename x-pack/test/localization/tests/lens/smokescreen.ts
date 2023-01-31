@@ -50,6 +50,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return 'Enregistrements';
       case 'records':
         return 'enregistrements';
+      case 'moving_average':
+        return 'Moyenne mobile de';
       case 'sum':
         return 'somme';
       default:
@@ -85,7 +87,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return '線形';
       case 'Records':
       case 'records':
-        return 'レコ';
+        return '記録';
+      case 'moving_average':
+          return 'の移動平均';
       case 'sum':
         return '合計';
       default:
@@ -122,6 +126,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'Records':
       case 'records':
         return '记录';
+      case 'moving_average':
+        return '的移动平均值';
       case 'sum':
         return '求和';
       default:
@@ -736,7 +742,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain(
-        termTranslator('records')
+        termTranslator('moving_average')
       );
 
       await PageObjects.lens.configureDimension({
@@ -751,7 +757,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain(
-        termTranslator('records')
+        termTranslator('moving_average')
       );
     });
 
