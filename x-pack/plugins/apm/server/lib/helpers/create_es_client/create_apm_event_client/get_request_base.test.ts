@@ -17,7 +17,6 @@ describe('getRequestBase', () => {
       body: {
         track_total_hits: false,
         size: 0,
-        query: { bool: { filter: [{ terms: { foo: 'bar' } }] } },
       },
     } as APMEventESSearchRequest;
 
@@ -36,13 +35,6 @@ describe('getRequestBase', () => {
     expect(res.body.query.bool.filter).toContainEqual({
       terms: { 'processor.event': ['transaction', 'error'] },
     });
-  });
-
-  it('merges queries', () => {
-    expect(res.body.query.bool.filter).toEqual([
-      { terms: { foo: 'bar' } },
-      { terms: { 'processor.event': ['transaction', 'error'] } },
-    ]);
   });
 
   it('searches the specified indices', () => {

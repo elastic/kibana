@@ -119,7 +119,7 @@ export async function getServiceTransactionGroups({
               ...getOutcomeAggregation(
                 searchAggregatedTransactions
                   ? ApmDocumentType.TransactionMetric
-                  : ApmDocumentType.TransactionMetric
+                  : ApmDocumentType.TransactionEvent
               ),
             },
           },

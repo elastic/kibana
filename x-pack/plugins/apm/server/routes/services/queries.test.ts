@@ -57,8 +57,8 @@ describe('services queries', () => {
         getServicesItems({
           mlClient: undefined,
           apmEventClient: mockApmEventClient,
-          documentType: ApmDocumentType.TransactionMetric,
-          rollupInterval: RollupInterval.OneMinute,
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
           logger: {} as any,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
