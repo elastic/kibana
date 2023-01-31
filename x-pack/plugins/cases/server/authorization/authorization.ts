@@ -14,7 +14,7 @@ import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AuthFilterHelpers, OwnerEntity } from './types';
 import { getOwnersFilter, groupByAuthorization } from './utils';
 import type { OperationDetails } from '.';
-import { AuthorizationAuditLogger, Operations } from '.';
+import { AuthorizationAuditLogger } from '.';
 import { createCaseError } from '../common/error';
 
 /**
@@ -109,10 +109,9 @@ export class Authorization {
     operation: OperationDetails;
   }) {
     try {
-      await this._ensureAuthorized(
-        entities.map((entity) => entity.owner),
-        operation
-      );
+      const uniqueOwners = Array.from(new Set(entities.map((entity) => entity.owner)));
+
+      await this._ensureAuthorized(uniqueOwners, operation);
     } catch (error) {
       this.logSavedObjects({ entities, operation, error });
       throw error;
@@ -128,13 +127,15 @@ export class Authorization {
    *
    * @param savedObjects an array of saved objects to be authorized. Each saved objects should contain
    * an ID and an owner
+   * @param operation the operation that should be authorized
    */
   public async getAndEnsureAuthorizedEntities<T extends { owner: string }>({
     savedObjects,
+    operation,
   }: {
     savedObjects: Array<SavedObject<T>>;
+    operation: OperationDetails;
   }): Promise<{ authorized: Array<SavedObject<T>>; unauthorized: Array<SavedObject<T>> }> {
-    const operation = Operations.bulkGetCases;
     const entities = savedObjects.map((so) => ({
       id: so.id,
       owner: so.attributes.owner,
