@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -34,7 +33,7 @@ describe('Options list popover', () => {
     popoverProps: Partial<OptionsListPopoverProps>;
   }
 
-  async function mountComponent(options?: Partial<MountOptions>): Promise<ReactWrapper> {
+  async function mountComponent(options?: Partial<MountOptions>) {
     const compProps = { ...defaultProps, ...(options?.popoverProps ?? {}) };
     const mockReduxEmbeddableTools = await mockOptionsListReduxEmbeddableTools({
       componentState: options?.componentState ?? {},
@@ -42,16 +41,11 @@ describe('Options list popover', () => {
       output: options?.output ?? {},
     } as Partial<OptionsListReduxState>);
 
-    let ret!: ReactWrapper;
-    await act(async () => {
-      ret = mountWithIntl(
-        <mockReduxEmbeddableTools.Wrapper>
-          <OptionsListPopover {...compProps} />
-        </mockReduxEmbeddableTools.Wrapper>
-      );
-    });
-    ret.update();
-    return ret;
+    return mountWithIntl(
+      <mockReduxEmbeddableTools.Wrapper>
+        <OptionsListPopover {...compProps} />
+      </mockReduxEmbeddableTools.Wrapper>
+    );
   }
 
   const clickShowOnlySelections = (popover: ReactWrapper) => {
@@ -67,14 +61,14 @@ describe('Options list popover', () => {
     let popoverDiv = findTestSubject(popover, 'optionsList-control-popover');
     expect(popoverDiv.getDOMNode().getAttribute('style')).toBe('width: 301px; min-width: 300px;');
 
-    popover = await mountComponent({ popoverProps: { width: 301 } });
+    // the div cannot be smaller than 301 pixels wide
+    popover = await mountComponent({ popoverProps: { width: 300 } });
     popoverDiv = findTestSubject(popover, 'optionsList-control-available-options');
     expect(popoverDiv.getDOMNode().getAttribute('style')).toBe('width: 100%; height: 100%;');
   });
 
   test('no available options', async () => {
     const popover = await mountComponent({ componentState: { availableOptions: {} } });
-
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     const noOptionsDiv = findTestSubject(
       availableOptionsDiv,
@@ -84,12 +78,8 @@ describe('Options list popover', () => {
   });
 
   test('display error message when the show only selected toggle is true but there are no selections', async () => {
-    const popover = await mountComponent({ componentState: { availableOptions: {} } });
-    await act(async () => {
-      clickShowOnlySelections(popover);
-    });
-    popover.update();
-
+    const popover = await mountComponent();
+    clickShowOnlySelections(popover);
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     const noSelectionsDiv = findTestSubject(
       availableOptionsDiv,
@@ -99,12 +89,11 @@ describe('Options list popover', () => {
   });
 
   test('show only selected options', async () => {
-    const selections = ['exists', 'woof', 'bark'];
-    const popover = await mountComponent({ explicitInput: { selectedOptions: selections } });
-    await act(async () => {
-      clickShowOnlySelections(popover);
+    const selections = ['woof', 'bark'];
+    const popover = await mountComponent({
+      explicitInput: { selectedOptions: selections },
     });
-    popover.update();
+    clickShowOnlySelections(popover);
     const availableOptions = popover.find(
       '[data-test-subj="optionsList-control-available-options"] ul'
     );
@@ -123,11 +112,7 @@ describe('Options list popover', () => {
     expect(searchBox.prop('disabled')).toBeFalsy();
     expect(sortButton.prop('disabled')).toBeFalsy();
 
-    await act(async () => {
-      clickShowOnlySelections(popover);
-    });
-    popover.update();
-
+    clickShowOnlySelections(popover);
     searchBox = findTestSubject(popover, 'optionsList-control-search-input');
     sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
     expect(searchBox.prop('disabled')).toBe(true);
@@ -147,7 +132,6 @@ describe('Options list popover', () => {
         invalidSelections: ['woof'],
       },
     });
-
     const validSelection = findTestSubject(popover, 'optionsList-control-selection-bark');
     expect(validSelection.find('.euiSelectableListItem__text').text()).toEqual(
       'bark - Checked option.'
@@ -201,12 +185,8 @@ describe('Options list popover', () => {
     const popover = await mountComponent({
       explicitInput: { existsSelected: true },
     });
-
     const woofOption = findTestSubject(popover, 'optionsList-control-selection-woof');
-    await act(async () => {
-      woofOption.simulate('click');
-    });
-    popover.update();
+    woofOption.simulate('click');
 
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     availableOptionsDiv.children().forEach((child, i) => {
@@ -220,18 +200,14 @@ describe('Options list popover', () => {
     const popover = await mountComponent({
       explicitInput: { existsSelected: false, selectedOptions: selections },
     });
+    const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');
     let availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     availableOptionsDiv.children().forEach((child, i) => {
       if (selections.includes(child.text())) expect(child.prop('checked')).toBe('on');
       else expect(child.prop('checked')).toBeFalsy();
     });
 
-    const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');
-    await act(async () => {
-      existsOption.simulate('click');
-    });
-    popover.update();
-
+    existsOption.simulate('click');
     availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     availableOptionsDiv.children().forEach((child, i) => {
       if (child.text() === 'Exists (*)') expect(child.prop('checked')).toBe('on');
@@ -252,12 +228,7 @@ describe('Options list popover', () => {
     const popover = await mountComponent({
       explicitInput: { existsSelected: true },
     });
-
-    await act(async () => {
-      clickShowOnlySelections(popover);
-    });
-    popover.update();
-
+    clickShowOnlySelections(popover);
     const availableOptions = popover.find(
       '[data-test-subj="optionsList-control-available-options"] ul'
     );
@@ -270,12 +241,8 @@ describe('Options list popover', () => {
         field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec,
       },
     });
-
     const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
-    await act(async () => {
-      sortButton.simulate('click');
-    });
-    popover.update();
+    sortButton.simulate('click');
 
     const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
     const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
@@ -289,12 +256,8 @@ describe('Options list popover', () => {
         field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec,
       },
     });
-
     const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
-    await act(async () => {
-      sortButton.simulate('click');
-    });
-    popover.update();
+    sortButton.simulate('click');
 
     const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
     const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
@@ -310,12 +273,8 @@ describe('Options list popover', () => {
     const popover = await mountComponent({
       componentState: { field: { name: 'Test IP field', type: 'ip' } as FieldSpec },
     });
-
     const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
-    await act(async () => {
-      sortButton.simulate('click');
-    });
-    popover.update();
+    sortButton.simulate('click');
 
     const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
     const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
@@ -357,21 +316,21 @@ describe('Options list popover', () => {
     };
 
     test('can hide exists option', async () => {
-      await ensureComponentIsHidden({
+      ensureComponentIsHidden({
         explicitInput: { hideExists: true },
         testSubject: 'optionsList-control-selection-exists',
       });
     });
 
     test('can hide include/exclude toggle', async () => {
-      await ensureComponentIsHidden({
+      ensureComponentIsHidden({
         explicitInput: { hideExclude: true },
         testSubject: 'optionsList__includeExcludeButtonGroup',
       });
     });
 
     test('can hide sorting button', async () => {
-      await ensureComponentIsHidden({
+      ensureComponentIsHidden({
         explicitInput: { hideSort: true },
         testSubject: 'optionsListControl__sortingOptionsButton',
       });

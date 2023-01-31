@@ -7,7 +7,6 @@
  */
 
 import { createReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public/redux_embeddables/create_redux_embeddable_tools';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import { OptionsListEmbeddable, OptionsListEmbeddableFactory } from '../../public';
 import { OptionsListComponentState, OptionsListReduxState } from '../../public/options_list/types';
@@ -17,29 +16,6 @@ import {
 } from '../../public/options_list/options_list_reducers';
 import { ControlFactory, ControlOutput } from '../../public/types';
 import { OptionsListEmbeddableInput } from './types';
-
-export const mockOptionsListDataView = {
-  spec: {
-    id: 'sample id',
-    fields: {
-      'sample field': {
-        name: 'sample field',
-        type: 'string',
-        esTypes: ['keyword'],
-        aggregatable: true,
-        searchable: true,
-        count: 20,
-        readFromDocValues: true,
-        scripted: false,
-        isMapped: true,
-      },
-    },
-    runtimeFieldMap: {},
-  },
-  fieldFormats: fieldFormatsMock,
-  shortDotsEnable: false,
-  metaFields: [],
-};
 
 const mockOptionsListComponentState = {
   ...getDefaultComponentState(),

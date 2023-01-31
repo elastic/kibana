@@ -10,7 +10,6 @@ import {
   PluginServiceProviders,
   PluginServiceProvider,
   PluginServices,
-  PluginServiceRegistry,
 } from '@kbn/presentation-util-plugin/public';
 
 import { ControlsServices } from './types';
@@ -20,7 +19,7 @@ import { httpServiceFactory } from './http/http.stub';
 import { overlaysServiceFactory } from './overlays/overlays.stub';
 import { controlsServiceFactory } from './controls/controls.story';
 import { dataServiceFactory } from './data/data.story';
-import { dataViewsServiceFactory } from './data_views/data_views.stub';
+import { dataViewsServiceFactory } from './data_views/data_views.story';
 import { optionsListServiceFactory } from './options_list/options_list.story';
 import { settingsServiceFactory } from './settings/settings.story';
 import { unifiedSearchServiceFactory } from './unified_search/unified_search.story';
@@ -42,8 +41,6 @@ export const providers: PluginServiceProviders<ControlsServices> = {
 };
 
 export const pluginServices = new PluginServices<ControlsServices>();
-
-export const registry = new PluginServiceRegistry<ControlsServices>(providers);
 
 export const getStubPluginServices = (): ControlsPluginStart => {
   pluginServices.setRegistry(stubRegistry.start({}));
