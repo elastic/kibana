@@ -41,7 +41,6 @@ const getO11yAlertsTableConfiguration = (
     const { header, body, footer } = useToGetInternalFlyout(observabilityRuleTypeRegistry);
     return { header, body, footer };
   },
-  showInspectButton: true,
 });
 
 export { getO11yAlertsTableConfiguration };

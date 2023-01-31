@@ -11,7 +11,7 @@ export const INSPECT = i18n.translate('xpack.triggersActionsUI.inspectDescriptio
   defaultMessage: 'Inspect',
 });
 
-export const CLOSE = i18n.translate('xpack.securitySolution.inspect.modal.closeTitle', {
+export const CLOSE = i18n.translate('xpack.triggersActionsUI.inspect.modal.closeTitle', {
   defaultMessage: 'Close',
 });
 
