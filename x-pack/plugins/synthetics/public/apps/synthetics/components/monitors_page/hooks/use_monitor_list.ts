@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'react-use';
 import {
@@ -30,8 +30,6 @@ export function useMonitorList() {
 
   const { handleFilterChange } = useMonitorFiltersState();
   const { refreshInterval } = useSyntheticsRefreshContext();
-
-  const [] = useState(pageState);
 
   const loadPage = useCallback(
     (state: MonitorListPageState) => {
