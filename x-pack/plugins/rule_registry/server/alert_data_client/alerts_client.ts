@@ -594,8 +594,8 @@ export class AlertsClient {
       let activeAlertCount = 0;
       let recoveredAlertCount = 0;
       (
-        (responseAlertSum.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase)
-          .buckets as estypes.AggregationsStringTermsBucketKeys[]
+        ((responseAlertSum.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase)
+          ?.buckets as estypes.AggregationsStringTermsBucketKeys[]) ?? []
       ).forEach((b) => {
         if (b.key === ALERT_STATUS_ACTIVE) {
           activeAlertCount = b.doc_count;
