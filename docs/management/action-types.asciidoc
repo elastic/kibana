@@ -74,6 +74,10 @@ a| <<cases-webhook-action-type,{webhook-cm}>>
 a| <<xmatters-action-type,xMatters>>
 
 | Send actionable alerts to on-call xMatters resources.
+
+a| <<torq-action-type,Torq>>
+
+| Trigger a Torq workflow.
 |===
 
 [NOTE]
