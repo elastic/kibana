@@ -104,14 +104,3 @@ CustomEquationEditorWithEquationErrors.args = {
       'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
   },
 };
-
-CustomEquationEditorWithFieldError.args = {
-  ...BASE_ARGS,
-  expression: {
-    ...BASE_ARGS.expression,
-    customMetrics: [{ name: 'B', aggType: Aggregators.AVERAGE }],
-  },
-  errors: {
-    customMetrics: { B: { field: 'Field is required' } },
-  },
-};
