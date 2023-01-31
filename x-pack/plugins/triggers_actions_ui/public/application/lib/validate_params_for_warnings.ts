@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { intersection } from 'lodash';
+import { intersection, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 const publicUrlWarning = i18n.translate(
@@ -22,20 +22,20 @@ export function validateParamsForWarnings(
   warnings: Record<string, any>;
 } {
   const publicUrlFields = ['context.alertDetailsUrl', 'context.viewInAppUrl'];
+  const warningFields = ['message', 'comments', 'description', 'note'];
   const mustacheRegex = /[^{\}]+(?=}})/g;
-  const warnings: Record<string, any> = {
-    message: '',
-    comments: '',
-    description: '',
-    note: '',
-  };
+  const warnings: Record<string, any> = {};
   const validationResult = { warnings };
+
   if (!publicBaseUrl && actionParams) {
-    for (const key of Object.keys(warnings)) {
-      if (actionParams[key]) {
-        const contextVariables = (actionParams[key] as string).match(mustacheRegex);
+    for (const field of warningFields) {
+      const value = actionParams.subActionParams
+        ? get(actionParams, `subActionParams.${field}`)
+        : get(actionParams, field);
+      if (value) {
+        const contextVariables = (value as string).match(mustacheRegex);
         if (intersection(contextVariables, publicUrlFields).length > 0) {
-          warnings[key] = publicUrlWarning;
+          warnings[field] = publicUrlWarning;
         }
       }
     }

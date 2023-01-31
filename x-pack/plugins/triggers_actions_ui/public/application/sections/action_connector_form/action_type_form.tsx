@@ -470,6 +470,26 @@ export const ActionTypeForm = ({
                           </EuiBadge>
                         </EuiFlexItem>
                       )}
+                      {Object.keys(actionParamsWarnings.warnings).length > 0 && !isOpen && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge
+                            data-test-subj="action-group-warning-badge"
+                            iconType="alert"
+                            color="warning"
+                          >
+                            {i18n.translate(
+                              'xpack.triggersActionsUI.sections.actionTypeForm.actionWarningsTitle',
+                              {
+                                defaultMessage:
+                                  'Action has {warningsToShow} {warningsToShow, plural, one {warning} other {warnings}}',
+                                values: {
+                                  warningsToShow: Object.keys(actionParamsWarnings.warnings).length,
+                                },
+                              }
+                            )}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
                       <EuiFlexItem grow={false}>
                         {checkEnabledResult.isEnabled === false && (
                           <>
