@@ -15,6 +15,7 @@ const runSetupAll: RunFn = async (cliContext) => {
   const kibanaUrl = cliContext.flags.kibanaUrl as string;
   const elasticUrl = cliContext.flags.elasticUrl as string;
   const version = cliContext.flags.version as string;
+  const policy = cliContext.flags.policy as string;
   const log = cliContext.log;
 
   await setupAll({
@@ -23,6 +24,7 @@ const runSetupAll: RunFn = async (cliContext) => {
     username,
     password,
     version,
+    policy,
     log,
   });
 };
@@ -36,27 +38,30 @@ export const cli = () => {
       description: `
   Enrolls a new host running Elastic Agent with Fleet. It will (if necessary) first create a
   Fleet Server instance using Docker, and then it will initialize a new Ubuntu VM using
-  'multipass', install Endpoint and enroll it with Fleet. Can be used multiple times against
-  the same stack.`,
+  'multipass', installs Elastic Agent and enrolls it with Fleet. Can be used multiple times
+  against the same stack.`,
       flags: {
-        string: ['kibana', 'elastic', 'username', 'password', 'version'],
+        string: ['kibana', 'elastic', 'username', 'password', 'version', 'policy'],
         default: {
           kibanaUrl: 'http://127.0.0.1:5601',
           elasticUrl: 'http://127.0.0.1:9200',
           username: 'elastic',
           password: 'changeme',
           version: '',
+          policy: '',
         },
         help: `
-        --version           The version of the Agent to use for enrolling the new host.
+        --version           Optional. The version of the Agent to use for enrolling the new host.
                             Default: uses the same version as the stack (kibana). Version
                             can also be from 'SNAPSHOT'.
                             Examples: 8.6.0, 8.7.0-SNAPSHOT
-        --username          User name to be used for auth against elasticsearch and
+        --policy            Optional. An Agent Policy ID to use when enrolling the new Host
+                            running Elastic Agent.
+        --username          Optional. User name to be used for auth against elasticsearch and
                             kibana (Default: elastic).
-        --password          Password associated with the username (Default: changeme)
-        --kibanaUrl         The url to Kibana (Default: http://127.0.0.1:5601)
-        --elasticUrl        The url to Elasticsearch (Default: http://127.0.0.1:9200)
+        --password          Optional. Password associated with the username (Default: changeme)
+        --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
+        --elasticUrl        Optional. The url to Elasticsearch (Default: http://127.0.0.1:9200)
       `,
       },
     }

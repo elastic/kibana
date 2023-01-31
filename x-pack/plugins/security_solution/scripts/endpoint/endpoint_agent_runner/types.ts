@@ -13,5 +13,6 @@ export interface StartRuntimeServicesOptions {
   username: string;
   password: string;
   version: string;
+  policy: string;
   log?: ToolingLog;
 }

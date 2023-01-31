@@ -40,17 +40,16 @@ export const enrollEndpointHost = async () => {
   const {
     log,
     kbnClient,
-    options: { version },
+    options: { version, policy },
   } = getRuntimeServices();
 
   log.info(`Creating VM and enrolling Elastic Agent`);
   log.indent(4);
 
   try {
-    const agentPolicyId = ''; // FIXME:PT get value from input
     const uniqueId = Math.random().toString(32).substring(2).substring(0, 4);
     const username = userInfo().username.toLowerCase();
-    const policyId: string = agentPolicyId || (await getOrCreateAgentPolicyId());
+    const policyId: string = policy || (await getOrCreateAgentPolicyId());
 
     if (!policyId) {
       throw new Error(`No valid policy id provide or unable to create it`);
@@ -147,6 +146,7 @@ export const enrollEndpointHost = async () => {
 
     log.info(`VM created using Multipass.
     VM Name: ${vmName}
+    Elastic Agent Version: ${version}
 
     Shell access: multipass shell ${vmName}
     Delete VM:    multipass delete -p ${vmName}${await getVmCountNotice()}
