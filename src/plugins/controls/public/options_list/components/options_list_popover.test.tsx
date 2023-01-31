@@ -50,7 +50,7 @@ describe('Options list popover', () => {
         </mockReduxEmbeddableTools.Wrapper>
       );
     });
-    ret.update(); // need to update so that `allowExpensiveQueries` gets updated to `true`
+    ret.update();
     return ret;
   }
 
@@ -322,7 +322,7 @@ describe('Options list popover', () => {
     expect(optionsText).toEqual(['By document count - Checked option.']);
   });
 
-  test('ensure warning icon does not show up when testAllowExpensiveQueries = true', async () => {
+  test('ensure warning icon does not show up when testAllowExpensiveQueries = true/undefined', async () => {
     const popover = await mountComponent({
       componentState: { field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec },
     });

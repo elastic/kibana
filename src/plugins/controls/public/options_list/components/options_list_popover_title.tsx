@@ -9,10 +9,10 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiIconTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListReduxState } from '../types';
+import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
 
 export const OptionsListPopoverTitle = () => {
@@ -36,15 +36,7 @@ export const OptionsListPopoverTitle = () => {
               aria-label="Warning"
               type="alert"
               color="warning"
-              content={
-                <FormattedMessage
-                  id="controls.optionsList.popover.allowExpensiveQueriesWarning"
-                  defaultMessage="{allowExpensiveQueriesSetting} is off, so some features have been disabled."
-                  values={{
-                    allowExpensiveQueriesSetting: <code>search.allow_expensive_queries</code>,
-                  }}
-                />
-              }
+              content={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
             />
           </EuiFlexItem>
         )}
