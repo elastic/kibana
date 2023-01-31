@@ -101,9 +101,6 @@ export const query = async (
       },
     };
   } catch (e) {
-    if (e.body?.error?.caused_by?.type === 'script_exception') {
-      return EMPTY_RESPONSE;
-    }
     throw e;
   }
 };
