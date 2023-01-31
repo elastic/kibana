@@ -166,9 +166,8 @@ describe('SLO Edit Page', () => {
             SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type
           );
 
-          expect(screen.queryByTestId('sloFormCustomKqlIndexInput')).toHaveValue(
-            SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.index
-          );
+          expect(screen.queryByTestId('indexSelectionSelectedValue')).toBeNull();
+
           expect(screen.queryByTestId('sloFormCustomKqlFilterQueryInput')).toHaveValue(
             SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
               ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.filter
@@ -222,7 +221,7 @@ describe('SLO Edit Page', () => {
 
           render(<SloEditPage />, config);
 
-          userEvent.type(screen.getByTestId('sloFormCustomKqlIndexInput'), 'some-index');
+          userEvent.type(screen.getByTestId('indexSelection'), 'some-index');
           userEvent.type(screen.getByTestId('sloFormCustomKqlFilterQueryInput'), 'irrelevant');
           userEvent.type(screen.getByTestId('sloFormCustomKqlGoodQueryInput'), 'irrelevant');
           userEvent.type(screen.getByTestId('sloFormCustomKqlTotalQueryInput'), 'irrelevant');
@@ -307,9 +306,10 @@ describe('SLO Edit Page', () => {
             slo.indicator.type
           );
 
-          expect(screen.queryByTestId('sloFormCustomKqlIndexInput')).toHaveValue(
-            slo.indicator.params.index
+          expect(screen.queryByTestId('indexSelectionSelectedValue')).toHaveTextContent(
+            slo.indicator.params.index!
           );
+
           expect(screen.queryByTestId('sloFormCustomKqlFilterQueryInput')).toHaveValue(
             slo.indicator.type === 'sli.kql.custom' ? slo.indicator.params.filter : ''
           );
