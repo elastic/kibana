@@ -54,12 +54,14 @@ const mountComponent = async ({
   storage,
   savedSearch = savedSearchMock,
   resetSavedSearch = jest.fn(),
+  searchSessionId = '123',
 }: {
   isPlainRecord?: boolean;
   isTimeBased?: boolean;
   storage?: Storage;
   savedSearch?: SavedSearch;
   resetSavedSearch?(): void;
+  searchSessionId?: string | null;
 } = {}) => {
   let services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -110,7 +112,7 @@ const mountComponent = async ({
 
   const session = getSessionServiceMock();
 
-  session.getSession$.mockReturnValue(new BehaviorSubject('123'));
+  session.getSession$.mockReturnValue(new BehaviorSubject(searchSessionId ?? undefined));
 
   const stateContainer = getStateContainer();
   stateContainer.dataState.data$ = savedSearchData$;
@@ -152,6 +154,23 @@ const mountComponent = async ({
 };
 
 describe('Discover histogram layout component', () => {
+  describe('render', () => {
+    it('should render null if there is no search session', async () => {
+      const component = await mountComponent({ searchSessionId: null });
+      expect(component.isEmptyRender()).toBe(true);
+    });
+
+    it('should not render null if there is a search session', async () => {
+      const component = await mountComponent();
+      expect(component.isEmptyRender()).toBe(false);
+    });
+
+    it('should not render null if there is no search session, but isPlainRecord is true', async () => {
+      const component = await mountComponent({ isPlainRecord: true });
+      expect(component.isEmptyRender()).toBe(false);
+    });
+  });
+
   describe('reset search button', () => {
     it('renders the button when there is a saved search', async () => {
       const component = await mountComponent();

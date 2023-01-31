@@ -9,6 +9,7 @@
 import React, { RefObject } from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
+import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
@@ -21,6 +22,10 @@ export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
 }
+
+const histogramLayoutCss = css`
+  height: 100%;
+`;
 
 export const DiscoverHistogramLayout = ({
   isPlainRecord,
@@ -35,21 +40,24 @@ export const DiscoverHistogramLayout = ({
 }: DiscoverHistogramLayoutProps) => {
   const commonProps = {
     dataView,
-    isPlainRecord,
     stateContainer,
     savedSearchData$: stateContainer.dataState.data$,
   };
 
+  const searchSessionId = useObservable(searchSessionManager.searchSessionId$);
+
   const { hideChart, setUnifiedHistogramApi } = useDiscoverHistogram({
     inspectorAdapters,
-    searchSessionManager,
     savedSearchFetch$: stateContainer.dataState.fetch$,
+    searchSessionId,
     ...commonProps,
   });
 
-  const histogramLayoutCss = css`
-    height: 100%;
-  `;
+  // Initialized when the first search has been requested or
+  // when in SQL mode since search sessions are not supported
+  if (!searchSessionId && !isPlainRecord) {
+    return null;
+  }
 
   return (
     <UnifiedHistogramContainer
@@ -64,6 +72,7 @@ export const DiscoverHistogramLayout = ({
         {...commonProps}
         {...mainContentProps}
         savedSearch={savedSearch}
+        isPlainRecord={isPlainRecord}
         // The documents grid doesn't rerender when the chart visibility changes
         // which causes it to render blank space, so we need to force a rerender
         key={`docKey${hideChart}`}

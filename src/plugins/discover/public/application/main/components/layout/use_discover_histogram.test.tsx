@@ -27,9 +27,7 @@ import { useDiscoverHistogram, UseDiscoverHistogramProps } from './use_discover_
 import { setTimeout } from 'timers/promises';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
-import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramInitializeOptions,
@@ -99,7 +97,6 @@ describe('useDiscoverHistogram', () => {
   };
 
   const renderUseDiscoverHistogram = async ({
-    isPlainRecord = false,
     stateContainer = getStateContainer(),
     searchSessionId = '123',
     inspectorAdapters = { requests: new RequestAdapter() },
@@ -109,14 +106,13 @@ describe('useDiscoverHistogram', () => {
     }) as DataTotalHits$,
     main$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
-      recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
+      recordRawType: RecordRawType.DOCUMENT,
       foundDocuments: true,
     }) as DataMain$,
     savedSearchFetch$ = new Subject() as DataFetch$,
   }: {
-    isPlainRecord?: boolean;
     stateContainer?: DiscoverStateContainer;
-    searchSessionId?: string | null;
+    searchSessionId?: string;
     inspectorAdapters?: InspectorAdapters;
     totalHits$?: DataTotalHits$;
     main$?: DataMain$;
@@ -139,18 +135,13 @@ describe('useDiscoverHistogram', () => {
       availableFields$,
     };
 
-    const session = getSessionServiceMock();
-    session.getSession$.mockReturnValue(new BehaviorSubject(searchSessionId ?? undefined));
-    const searchSessionManager = createSearchSessionMock(session).searchSessionManager;
-
     const initialProps = {
       stateContainer,
       savedSearchData$,
       savedSearchFetch$,
       dataView: dataViewWithTimefieldMock,
-      isPlainRecord,
       inspectorAdapters,
-      searchSessionManager: searchSessionManager!,
+      searchSessionId,
     };
 
     const Wrapper: WrapperComponent<UseDiscoverHistogramProps> = ({ children }) => (
@@ -173,46 +164,6 @@ describe('useDiscoverHistogram', () => {
   };
 
   describe('initialization', () => {
-    it('should call initialize if there is a search session', async () => {
-      const { hook } = await renderUseDiscoverHistogram();
-      const api = createMockUnifiedHistogramApi();
-      act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
-      });
-      expect(api.initialize).toHaveBeenCalled();
-    });
-
-    it('should call initialize if there is no search session, but isPlainRecord is true', async () => {
-      const { hook } = await renderUseDiscoverHistogram({
-        searchSessionId: null,
-        isPlainRecord: true,
-      });
-      const api = createMockUnifiedHistogramApi();
-      act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
-      });
-      expect(api.initialize).toHaveBeenCalled();
-    });
-
-    it('should not call initialize if there is no search session', async () => {
-      const { hook } = await renderUseDiscoverHistogram({ searchSessionId: null });
-      const api = createMockUnifiedHistogramApi();
-      act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
-      });
-      expect(api.initialize).not.toHaveBeenCalled();
-    });
-
-    it('should not call initialize again if already initialized', async () => {
-      const { hook } = await renderUseDiscoverHistogram();
-      const api = createMockUnifiedHistogramApi();
-      api.initialized = true;
-      act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
-      });
-      expect(api.initialize).not.toHaveBeenCalled();
-    });
-
     it('should pass the expected parameters to initialize', async () => {
       const { hook } = await renderUseDiscoverHistogram();
       const api = createMockUnifiedHistogramApi();
@@ -245,7 +196,7 @@ describe('useDiscoverHistogram', () => {
   describe('state', () => {
     it('should subscribe to state changes', async () => {
       const { hook } = await renderUseDiscoverHistogram();
-      const api = createMockUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi({ initialized: true });
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -264,7 +215,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createMockUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi({ initialized: true });
       api.getState$ = jest.fn((selector) => {
         const returnedState = { ...state, lensRequestAdapter };
         if (selector) {
@@ -294,7 +245,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createMockUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi({ initialized: true });
       api.getState$ = jest.fn((selector) => {
         if (selector) {
           return new BehaviorSubject(selector(state));
@@ -310,7 +261,7 @@ describe('useDiscoverHistogram', () => {
     it('should sync the state container state with Unified Histogram', async () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const api = createMockUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi({ initialized: true });
       let params: Partial<UnifiedHistogramState> | undefined;
       api.updateState = jest.fn((p) => {
         params = p;
@@ -342,7 +293,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createMockUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi({ initialized: true });
       let params: Partial<UnifiedHistogramState> | undefined;
       api.updateState = jest.fn((p) => {
         params = p;
@@ -405,7 +356,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createMockUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi({ initialized: true });
       api.getState$ = jest.fn((selector) => {
         const returnedState = {
           ...state,
@@ -444,7 +395,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createMockUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi({ initialized: true });
       api.getState$ = jest.fn((selector) => {
         const returnedState = {
           ...state,
@@ -475,48 +426,7 @@ describe('useDiscoverHistogram', () => {
         searchSessionId: string;
       }>();
       const { hook } = await renderUseDiscoverHistogram({ savedSearchFetch$ });
-      const api = createMockUnifiedHistogramApi();
-      act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
-      });
-      expect(api.refetch).not.toHaveBeenCalled();
-      act(() => {
-        savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });
-      });
-      expect(api.refetch).toHaveBeenCalled();
-    });
-
-    it('should not call refetch when searchSessionId is not set', async () => {
-      const savedSearchFetch$ = new Subject<{
-        reset: boolean;
-        searchSessionId: string;
-      }>();
-      const { hook } = await renderUseDiscoverHistogram({
-        savedSearchFetch$,
-        searchSessionId: null,
-      });
-      const api = createMockUnifiedHistogramApi();
-      act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
-      });
-      expect(api.refetch).not.toHaveBeenCalled();
-      act(() => {
-        savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });
-      });
-      expect(api.refetch).not.toHaveBeenCalled();
-    });
-
-    it('should call refetch when searchSessionId is not set and isPlainRecord is true', async () => {
-      const savedSearchFetch$ = new Subject<{
-        reset: boolean;
-        searchSessionId: string;
-      }>();
-      const { hook } = await renderUseDiscoverHistogram({
-        savedSearchFetch$,
-        searchSessionId: null,
-        isPlainRecord: true,
-      });
-      const api = createMockUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi({ initialized: true });
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -534,7 +444,7 @@ describe('useDiscoverHistogram', () => {
         searchSessionId: string;
       }>();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer, savedSearchFetch$ });
-      const api = createMockUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi({ initialized: true });
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });

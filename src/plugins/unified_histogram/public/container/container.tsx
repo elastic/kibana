@@ -91,10 +91,8 @@ export const UnifiedHistogramContainer = forwardRef<
   const [state, setState] = useState<UnifiedHistogramState>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
   const stateProps = useStateProps({ state, stateService });
-  const input$ = useMemo(() => new Subject<UnifiedHistogramInputMessage>(), []);
-
-  useImperativeHandle(
-    ref,
+  const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
+  const api = useMemo<UnifiedHistogramApi>(
     () => ({
       initialized,
       initialize: (options: UnifiedHistogramInitializeOptions) => {
@@ -128,6 +126,8 @@ export const UnifiedHistogramContainer = forwardRef<
     }),
     [initialized, input$, stateService]
   );
+
+  useImperativeHandle(ref, () => api, [api]);
 
   // Subscribe to state changes
   useEffect(() => {

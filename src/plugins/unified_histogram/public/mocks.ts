@@ -12,9 +12,11 @@ import type { UnifiedHistogramInitializedApi, UnifiedHistogramUninitializedApi }
 export type MockUnifiedHistogramApi = Omit<UnifiedHistogramUninitializedApi, 'initialized'> &
   Omit<UnifiedHistogramInitializedApi, 'initialized'> & { initialized: boolean };
 
-export const createMockUnifiedHistogramApi = () => {
+export const createMockUnifiedHistogramApi = (
+  { initialized }: { initialized: boolean } = { initialized: false }
+) => {
   const api: MockUnifiedHistogramApi = {
-    initialized: false,
+    initialized,
     initialize: jest.fn(() => {
       api.initialized = true;
     }),
