@@ -95,6 +95,10 @@ export class ServiceAPIClient {
     return this.callAPI('POST', { ...data, endpoint: 'run' });
   }
 
+  async syncMonitors(data: ServiceData) {
+    return this.callAPI('PUT', { ...data, endpoint: 'sync' });
+  }
+
   addVersionHeader(req: AxiosRequestConfig) {
     req.headers = { ...req.headers, 'x-kibana-version': this.stackVersion };
     return req;
@@ -212,6 +216,10 @@ export class ServiceAPIClient {
         break;
       case 'run':
         url += '/run';
+        break;
+      case 'sync':
+        url += '/monitors/sync';
+        break;
     }
 
     return axios(

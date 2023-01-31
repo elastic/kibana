@@ -343,6 +343,51 @@ describe('callAPI', () => {
       url: 'https://service.dev/run',
     });
   });
+
+  it('Calls the `/monitors/sync` endpoint when calling `syncMonitors`', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      config: {},
+      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
+    });
+
+    const apiClient = new ServiceAPIClient(
+      logger,
+      {
+        manifestUrl: 'http://localhost:8080/api/manifest',
+        tls: { certificate: 'test-certificate', key: 'test-key' } as any,
+      },
+      { isDev: true, stackVersion: '8.7.0' } as UptimeServerSetup
+    );
+
+    apiClient.locations = testLocations;
+
+    const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
+
+    await apiClient.syncMonitors({
+      monitors: testMonitors,
+      output,
+    });
+
+    expect(axiosSpy).toHaveBeenNthCalledWith(1, {
+      data: { monitors: request1, is_edit: undefined, output, stack_version: '8.7.0' },
+      headers: {
+        'x-kibana-version': '8.7.0',
+      },
+      httpsAgent: expect.objectContaining({
+        options: {
+          rejectUnauthorized: true,
+          path: null,
+          cert: 'test-certificate',
+          key: 'test-key',
+        },
+      }),
+      method: 'PUT',
+      url: 'https://service.dev/monitors/sync',
+    });
+  });
 });
 
 const testLocations: PublicLocations = [
