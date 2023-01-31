@@ -8,6 +8,7 @@
 
 import { fromRoot, REPO_ROOT } from '@kbn/repo-info';
 import type { LoggerFactory } from '@kbn/logging';
+import { getPackages } from '@kbn/repo-packages';
 import { ConfigService as KbnConfigService, CliArgs, Env, RawConfigService } from '@kbn/config';
 import { getArgValues } from './read_argv';
 
@@ -38,6 +39,7 @@ export function getConfigService({ logger }: { logger: LoggerFactory }) {
   const env = Env.createDefault(REPO_ROOT, {
     configs: configPath,
     cliArgs: KIBANA_CLI_ARGS,
+    repoPackages: getPackages(REPO_ROOT),
   });
 
   return new KbnConfigService(rawConfigService, env, logger);
