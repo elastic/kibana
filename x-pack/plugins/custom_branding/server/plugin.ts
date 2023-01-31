@@ -23,6 +23,7 @@ import { PLUGIN } from '../common/constants';
 import type { CustomBrandingRequestHandlerContext } from './types';
 import { Dependencies } from './types';
 import { registerRoutes } from './routes';
+import { registerUiSettings } from './ui_settings';
 
 const settingsKeys: Array<keyof CustomBranding> = [
   'logo',
@@ -51,6 +52,8 @@ export class CustomBrandingPlugin implements Plugin {
     });
     const router = core.http.createRouter<CustomBrandingRequestHandlerContext>();
     registerRoutes(router);
+
+    registerUiSettings(core);
 
     const fetchFn = async (
       request: KibanaRequest,
@@ -95,8 +98,9 @@ export class CustomBrandingPlugin implements Plugin {
     const branding: CustomBranding = {};
     for (let i = 0; i < settingsKeys!.length; i++) {
       const key = settingsKeys[i];
-      const fullKey = `customBranding:${key}`;
+      const fullKey = `xpackCustomBranding:${key}`;
       const value = await uiSettingsClient.get(fullKey);
+      this.logger.info(`Fetching custom branding key ${fullKey} with value ${value}`);
       if (value) {
         branding[key] = value;
       }
