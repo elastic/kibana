@@ -552,6 +552,7 @@ export interface AlertsTableConfigurationRegistry {
   usePersistentControls?: () => {
     right?: ReactNode;
   };
+  showInspectButton?: boolean;
 }
 
 export enum BulkActionsVerbs {
