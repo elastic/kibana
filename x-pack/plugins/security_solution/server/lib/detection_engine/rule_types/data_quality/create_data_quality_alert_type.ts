@@ -9,8 +9,6 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { DATA_QUALITY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import has from 'lodash/has';
-import { EcsFlat } from '@kbn/ecs';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { DataQualityRuleParams } from '../../rule_schema';
@@ -21,11 +19,10 @@ import { validateIndexPatterns } from '../utils';
 import { createSearchAfterReturnType, getUnprocessedExceptionsWarnings } from '../../signals/utils';
 import { createEnrichEventsFunction } from '../../signals/enrichments';
 import type { GetUnallowedFieldValuesInputs } from './types';
-import { fetchMappings } from './fetch_mappings';
 import { getMSearchRequestHeader } from './get_msearch_request_header';
 import { getMSearchRequestBody } from './get_msearch_request_body';
-import { getFieldTypes } from './field_types';
 import { buildAlerts } from './build_alerts';
+import { runDataQualityCheck } from './run_data_quality_check';
 
 export const getUnallowedFieldValues = async (
   esClient: ElasticsearchClient,
@@ -47,75 +44,6 @@ export const getUnallowedFieldValues = async (
   return {
     responses: responses.map((resp, i) => ({ ...resp, indexName: items[i].indexName })),
   };
-};
-
-interface InvalidFieldsSummary {
-  key: string;
-  doc_count: number;
-}
-
-export type UnallowedFieldCheckResults = Array<[string, InvalidFieldsSummary[]]>;
-
-const runDataQualityCheck = async (
-  es: ElasticsearchClient,
-  indexPatterns: string[],
-  from: string,
-  to: string
-) => {
-  const mappingRequestResult = await fetchMappings(es, indexPatterns);
-
-  const inputs: GetUnallowedFieldValuesInputs = [];
-
-  for (const indexName in mappingRequestResult) {
-    if (has(mappingRequestResult, indexName)) {
-      const {
-        [indexName]: {
-          mappings: { properties },
-        },
-      } = mappingRequestResult;
-
-      const fields = getFieldTypes(properties as Record<string, unknown>);
-
-      const fieldsWithAllowedValuesSpecified = fields
-        .map((field) => ({
-          ...field,
-          allowedValues: (EcsFlat as Record<string, { allowed_values?: unknown[] }>)[field.field]
-            ?.allowed_values,
-        }))
-        .filter((field) => field.allowedValues);
-
-      inputs.push(
-        ...(fieldsWithAllowedValuesSpecified.map((field) => ({
-          indexName,
-          allowedValues: field.allowedValues,
-          indexFieldName: field.field,
-          from,
-          to,
-        })) as GetUnallowedFieldValuesInputs)
-      );
-    }
-  }
-
-  const { responses } = await getUnallowedFieldValues(es, inputs);
-
-  const results: UnallowedFieldCheckResults = [];
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (responses as any[]).forEach(({ aggregations: { unallowedValues }, indexName }) => {
-    if (!unallowedValues) {
-      return;
-    }
-
-    const { buckets: values } = unallowedValues;
-
-    if (!values.length) {
-      return;
-    }
-
-    results.push([indexName, values as InvalidFieldsSummary[]]);
-  });
-
-  return results;
 };
 
 export const createDataQualityAlertType = (
@@ -178,11 +106,6 @@ export const createDataQualityAlertType = (
         `Data quality checking indices ${index.join()}, interval=${interval} from=${from} to=${to}`
       );
       const esClient = services.scopedClusterClient.asCurrentUser;
-
-      /*
-      TODO check schema types types like that
-       isEcsCompliant: type === ecsMetadata[field].type && indexInvalidValues.length === 0
-      */
 
       try {
         const qualityCheckResults = await runDataQualityCheck(esClient, index, from, to);

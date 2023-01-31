@@ -9,7 +9,7 @@ import { ALERT_UUID } from '@kbn/rule-data-utils';
 import objectHash from 'object-hash';
 import type { CompleteRule, RuleParams } from '../../rule_schema';
 import { buildAlert } from '../factories/utils/build_alert';
-import type { UnallowedFieldCheckResults } from './create_data_quality_alert_type';
+import { UnallowedFieldCheckResults } from './run_data_quality_check';
 
 interface BuildAlertsParams {
   spaceId: string;
