@@ -23,7 +23,7 @@ import {
 import { checkForUnknownDocs, UnknownDocsFound } from './check_for_unknown_docs';
 import { isTypeof } from '.';
 import { calculateExcludeFilters } from './calculate_exclude_filters';
-import { unpersistedSearchSessionsQuery } from '../core/unused_types';
+import { REMOVED_TYPES, unpersistedSearchSessionsQuery } from '../core/unused_types';
 
 /** @internal */
 export interface CleanupUnknownAndExcludedParams {
@@ -108,6 +108,7 @@ export const cleanupUnknownAndExcluded = ({
             bool: {
               should: [
                 ...excludeFiltersRes.filterClauses,
+                ...REMOVED_TYPES.map((type) => ({ term: { type } })),
                 ...unknownDocTypes.map((type) => ({ term: { type } })),
                 unpersistedSearchSessionsQuery,
               ],
