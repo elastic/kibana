@@ -47,7 +47,7 @@ For more information, go to <<pre-configured-connectors>>.
 
 [float]
 [[server-log-action-configuration]]
-=== Test the connector actions
+=== Test the connector
 
 You can test your server log connector with the
 <<execute-connector-api,run connector API>> or as you're creating or editing
