@@ -116,6 +116,8 @@ const servicesRoute = createApmServerRoute({
         alertsCount: number;
       }
     >;
+    maxServiceCountExceeded: boolean;
+    serviceOverflowCount: number;
   }> {
     const {
       config,
