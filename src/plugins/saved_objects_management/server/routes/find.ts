@@ -84,9 +84,9 @@ export const registerFindRoute = (
       const response: v1.FindResponseHTTP = {
         saved_objects: savedObjects.map((so) => {
           const obj = injectMetaAttributes(so, managementService);
-          const result = { ...obj, attributes: {} as Record<string, any> };
+          const result = { ...obj, attributes: {} as Record<string, unknown> };
           for (const field of includedFields) {
-            result.attributes[field] = (obj.attributes as Record<string, any>)[field];
+            result.attributes[field] = (obj.attributes as Record<string, unknown>)[field];
           }
           return result;
         }),
