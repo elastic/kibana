@@ -19,6 +19,23 @@ import {
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
+interface ElasticArtifactSearchResponse {
+  manifest: {
+    'last-update-time': string;
+    'seconds-since-last-update': number;
+  };
+  packages: {
+    [packageFileName: string]: {
+      architecture: string;
+      os: string[];
+      type: string;
+      asc_url: string;
+      sha_url: string;
+      url: string;
+    };
+  };
+}
+
 export const enrollEndpointHost = async (agentPolicyId?: string) => {
   const { log, kbnClient } = getRuntimeServices();
 
@@ -137,32 +154,31 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
 
 const getAgentDownloadUrl = async (version: string): Promise<string> => {
   const { log } = getRuntimeServices();
-  const isSnapshot = version.indexOf(`SNAPSHOT`);
-  let urlRoot = `https://artifacts.elastic.co/downloads/beats/elastic-agent`;
-  // const archType = arch(); // FIXME:PT use arch and maybe platform to build download file name
-  const agentFile = `/elastic-agent-${version}-linux-arm64.tar.gz`;
+  // TODO:PT use arch and platform of VM to build download file name below (will be needed if tools ever supports different types of VMs)
+  const agentFile = `elastic-agent-${version}-linux-arm64.tar.gz`;
+  const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${version}/${agentFile}`;
 
-  // FIXME:PT use https://artifacts-api.elastic.co/v1/search/8.7.0-SNAPSHOT for urls below, which has both prod adn snapshot version listed.
+  log.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
 
-  if (isSnapshot) {
-    const snapshotDownloadsInfoUrl = 'https://snapshots.elastic.co/latest/master.json';
-    const snapshotRepoInfo: { build_id: string } = await nodeFetch(snapshotDownloadsInfoUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`${response.statusText} (HTTP ${response.status})`);
-        }
+  const searchResult: ElasticArtifactSearchResponse = await nodeFetch(artifactSearchUrl).then(
+    (response) => {
+      if (!response.ok) {
+        throw new Error(
+          `Failed to search elastic's artifact repository: ${response.statusText} (HTTP ${response.status})`
+        );
+      }
 
-        return response.json();
-      })
-      .catch((error) => {
-        log.verbose(`Attempt to retrieve [${snapshotDownloadsInfoUrl}] failed with: ${error}`);
-        throw error;
-      });
+      return response.json();
+    }
+  );
 
-    urlRoot = `https://snapshots.elastic.co/${snapshotRepoInfo.build_id}/downloads/beats/elastic-agent`;
+  log.verbose(searchResult);
+
+  if (!searchResult.packages[agentFile]) {
+    throw new Error(`Unable to find an Agent download URL for version [${version}]`);
   }
 
-  return `${urlRoot}${agentFile}`;
+  return searchResult.packages[agentFile].url;
 };
 
 const getOrCreateAgentPolicyId = async (): Promise<string> => {
