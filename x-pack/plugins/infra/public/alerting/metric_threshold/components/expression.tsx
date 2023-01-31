@@ -38,7 +38,7 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { ExpressionRow } from './expression_row';
-import { IndexPatternField } from './index_pattern_override';
+import { IndexPatternField } from './index_pattern_field';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
