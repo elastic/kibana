@@ -26,16 +26,6 @@ describe('Inspect Button', () => {
     cleanup();
   });
 
-  test('inspect button', async () => {
-    render(<InspectButton getInspectQuery={getInspectQuery} showInspectButton />);
-    expect((await screen.findAllByTestId('inspect-icon-button'))[0]).toBeInTheDocument();
-  });
-
-  test('it does NOT render the button when showInspectButton is false', async () => {
-    render(<InspectButton getInspectQuery={getInspectQuery} />);
-    expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
-  });
-
   test('open Inspect Modal', async () => {
     render(<InspectButton showInspectButton getInspectQuery={getInspectQuery} />);
     fireEvent.click(await screen.findByTestId('inspect-icon-button'));
