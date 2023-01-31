@@ -95,7 +95,7 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
     onFiltersUpdated(filters);
   }
 
-  return <>{renderItems()}</>;
+  return <div data-test-subj="unifiedFilterItems">{renderItems()}</div>;
 });
 
 const FilterItems = injectI18n(FilterItemsUI);

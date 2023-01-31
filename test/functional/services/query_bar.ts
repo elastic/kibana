@@ -9,6 +9,9 @@
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 export class QueryBarService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
@@ -33,6 +36,7 @@ export class QueryBarService extends FtrService {
       const input = await this.find.activeElement();
       await input.clearValueWithKeyboard();
       await input.type(query);
+      await sleep(500);
       const currentQuery = await this.getQueryString();
       if (currentQuery !== query) {
         throw new Error(`Failed to set query input to ${query}, instead query is ${currentQuery}`);
@@ -48,9 +52,11 @@ export class QueryBarService extends FtrService {
 
   public async submitQuery(): Promise<void> {
     this.log.debug('QueryBar.submitQuery');
-    await this.testSubjects.click('queryInput');
-    await this.common.pressEnterKey();
-    await this.header.waitUntilLoadingHasFinished();
+    await this.retry.try(async () => {
+      await this.testSubjects.click('queryInput');
+      await this.common.pressEnterKey();
+      await this.header.waitUntilLoadingHasFinished();
+    });
   }
 
   public async clickQuerySubmitButton(): Promise<void> {

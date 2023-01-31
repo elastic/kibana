@@ -42,9 +42,13 @@ export class UnifiedSearchPublicPlugin
 
   public setup(
     core: CoreSetup<UnifiedSearchStartDependencies, UnifiedSearchPublicPluginStart>,
-    { uiActions, data, usageCollection }: UnifiedSearchSetupDependencies
+    plugins: UnifiedSearchSetupDependencies
   ): UnifiedSearchPluginSetup {
-    const { query } = data;
+    const {
+      data: { query },
+      uiActions,
+      usageCollection,
+    } = plugins;
 
     uiActions.registerTrigger(updateFilterReferencesTrigger);
 
@@ -53,6 +57,7 @@ export class UnifiedSearchPublicPlugin
     );
 
     uiActions.registerAction(createUpdateFilterReferencesAction(query.filterManager));
+
     this.usageCollection = usageCollection;
 
     return {
@@ -65,22 +70,27 @@ export class UnifiedSearchPublicPlugin
 
   public start(
     core: CoreStart,
-    { data, dataViews, uiActions, screenshotMode }: UnifiedSearchStartDependencies
+    plugins: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
+    const { data, dataViews, uiActions, screenshotMode } = plugins;
+
     setTheme(core.theme);
     setOverlays(core.overlays);
     setIndexPatterns(dataViews);
+
     const autocompleteStart = this.autocomplete.start();
+
+    const IndexPatternSelect = createIndexPatternSelect(dataViews);
 
     const SearchBar = createSearchBar({
       core,
       data,
       storage: this.storage,
-      usageCollection: this.usageCollection,
       isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
       unifiedSearch: {
         autocomplete: autocompleteStart,
       },
+      usageCollection: this.usageCollection,
     });
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER);
@@ -89,9 +99,9 @@ export class UnifiedSearchPublicPlugin
 
     return {
       ui: {
-        IndexPatternSelect: createIndexPatternSelect(dataViews),
-        SearchBar,
         AggregateQuerySearchBar: SearchBar,
+        SearchBar,
+        IndexPatternSelect,
       },
       autocomplete: autocompleteStart,
     };
