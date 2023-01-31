@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
+import { EuiCodeBlock } from '@elastic/eui';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { EmptyMessage } from '../empty_message';
 import { LibraryStacktrace } from './library_stacktrace';
 import { Stackframe as StackframeComponent } from './stackframe';
-import { EuiCodeBlock } from '@elastic/eui';
 
 interface Props {
   stackframes?: Stackframe[];
