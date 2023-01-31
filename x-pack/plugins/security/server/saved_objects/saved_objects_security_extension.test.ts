@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { always } from '@elastic/eui/src/services/predicate';
-
 import type { BulkResolveError, LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { AuthorizeCreateObject, AuthorizeUpdateObject } from '@kbn/core-saved-objects-server';
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
