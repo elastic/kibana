@@ -117,7 +117,6 @@ export function getServiceMap(
       getServiceStats(options),
       anomaliesPromise,
     ]);
-    console.log(servicesData);
     return transformServiceMapResponses({
       ...connectionData,
       services: servicesData,
