@@ -26,8 +26,8 @@ import {
   EuiToolTip,
   EuiBetaBadge,
 } from '@elastic/eui';
-import { intersection, isEmpty, partition, some } from 'lodash';
-import { ActionVariable, RuleActionParam, RuleActionParams } from '@kbn/alerting-plugin/common';
+import { isEmpty, partition, some } from 'lodash';
+import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -50,6 +50,7 @@ import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
 import { ActionNotifyWhen } from './action_notify_when';
+import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -151,41 +152,6 @@ export const ActionTypeForm = ({
     return defaultParams;
   };
 
-  const publicUrlWarning = i18n.translate(
-    'xpack.triggersActionsUI.sections.actionTypeForm.warning.publicUrl',
-    {
-      defaultMessage:
-        'Kibana missing publicUrl environment variable. Action will use relative URLs.',
-    }
-  );
-  const validateParamsForWarnings = (
-    actionParams: RuleActionParams
-  ): {
-    warnings: Record<string, any>;
-  } => {
-    const setPublicUrl = basePath.publicBaseUrl;
-    const publicUrlFields = ['context.alertDetailsUrl', 'context.viewInAppUrl'];
-    const mustacheRegex = /[^{\}]+(?=}})/g;
-    const warnings: Record<string, any> = {
-      message: '',
-      comments: '',
-      description: '',
-      note: '',
-    };
-    const validationResult = { warnings };
-    if (!setPublicUrl && actionParams) {
-      for (const key of Object.keys(warnings)) {
-        if (actionParams[key]) {
-          const contextVariables = (actionParams[key] as string).match(mustacheRegex);
-          if (intersection(contextVariables, publicUrlFields).length > 0) {
-            warnings[key] = publicUrlWarning;
-          }
-        }
-      }
-    }
-    return validationResult;
-  };
-
   const [showMinimumThrottleWarning, showMinimumThrottleUnitWarning] = useMemo(() => {
     try {
       if (!actionThrottle) return [false, false];
@@ -241,7 +207,7 @@ export const ActionTypeForm = ({
         .get(actionItem.actionTypeId)
         ?.validateParams(actionItem.params);
       setActionParamsErrors(res);
-      setActionParamsWarnings(validateParamsForWarnings(actionItem.params));
+      setActionParamsWarnings(validateParamsForWarnings(actionItem.params, basePath.publicBaseUrl));
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem]);

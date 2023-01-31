@@ -57,6 +57,7 @@ const defaultProps = {
   actionParams,
   editAction,
   errors: { 'subActionParams.incident.summary': [] },
+  warnings: {},
   index: 0,
   messageVariables: [],
 };

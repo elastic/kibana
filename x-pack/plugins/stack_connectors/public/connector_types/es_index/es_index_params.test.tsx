@@ -59,6 +59,7 @@ describe('IndexParamsFields renders', () => {
       <ParamsFields
         actionParams={actionParams}
         errors={{ index: [] }}
+        warnings={{}}
         editAction={() => {}}
         index={0}
         actionConnector={actionConnector}
@@ -86,6 +87,7 @@ describe('IndexParamsFields renders', () => {
       <ParamsFields
         actionParams={actionParams}
         errors={{ index: [] }}
+        warnings={{}}
         editAction={() => {}}
         index={0}
         actionConnector={actionConnector}
@@ -114,6 +116,7 @@ describe('IndexParamsFields renders', () => {
       <ParamsFields
         actionParams={actionParams}
         errors={{ index: [] }}
+        warnings={{}}
         editAction={() => {}}
         index={0}
         actionConnector={preconfiguredActionConnector}
@@ -144,6 +147,7 @@ describe('IndexParamsFields renders', () => {
       <ParamsFields
         actionParams={actionParams}
         errors={{ index: [] }}
+        warnings={{}}
         editAction={() => {}}
         index={0}
         actionConnector={preconfiguredActionConnector}

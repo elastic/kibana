@@ -87,6 +87,7 @@ export const TestConnectorForm = ({
               actionParams={actionParams}
               index={0}
               errors={actionErrors}
+              warnings={{}}
               editAction={(field, value) =>
                 setActionParams({
                   ...actionParams,

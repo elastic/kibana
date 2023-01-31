@@ -46,6 +46,7 @@ const editAction = jest.fn();
 const defaultProps = {
   actionParams,
   errors: { 'subActionParams.incident.name': [] },
+  warnings: {},
   editAction,
   index: 0,
   messageVariables: [],
