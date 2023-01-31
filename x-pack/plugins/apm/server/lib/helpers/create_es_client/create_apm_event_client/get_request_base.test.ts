@@ -7,10 +7,10 @@
 
 import { APMEventESSearchRequest } from '.';
 import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
-import { unpackProcessorEvents } from './unpack_processor_events';
+import { getRequestBase } from './get_request_base';
 
-describe('unpackProcessorEvents', () => {
-  let res: ReturnType<typeof unpackProcessorEvents>;
+describe('getRequestBase', () => {
+  let res: ReturnType<typeof getRequestBase>;
   beforeEach(() => {
     const request = {
       apm: { events: ['transaction', 'error'] },
@@ -29,7 +29,7 @@ describe('unpackProcessorEvents', () => {
       onboarding: 'my-apm-*-onboarding-*',
     } as ApmIndicesConfig;
 
-    res = unpackProcessorEvents(request, indices);
+    res = getRequestBase({ ...request, indices });
   });
 
   it('adds terms filter for apm events', () => {

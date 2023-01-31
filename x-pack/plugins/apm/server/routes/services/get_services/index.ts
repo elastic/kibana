@@ -6,13 +6,14 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { withApmSpan } from '../../../utils/with_apm_span';
-import { MlClient } from '../../../lib/helpers/get_ml_client';
-import { getServicesItems } from './get_services_items';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 import { ServiceGroup } from '../../../../common/service_groups';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import { MlClient } from '../../../lib/helpers/get_ml_client';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getServicesItems } from './get_services_items';
 
 export async function getServices({
   environment,
@@ -20,45 +21,43 @@ export async function getServices({
   mlClient,
   apmEventClient,
   apmAlertsClient,
-  searchAggregatedTransactions,
-  searchAggregatedServiceMetrics,
   logger,
   start,
   end,
   serviceGroup,
   randomSampler,
+  documentType,
+  rollupInterval,
 }: {
   environment: string;
   kuery: string;
   mlClient?: MlClient;
   apmEventClient: APMEventClient;
   apmAlertsClient: ApmAlertsClient;
-  searchAggregatedTransactions: boolean;
-  searchAggregatedServiceMetrics: boolean;
   logger: Logger;
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
   randomSampler: RandomSampler;
+  documentType: ApmDocumentType;
+  rollupInterval: RollupInterval;
 }) {
-  return withApmSpan('get_services', async () => {
-    const items = await getServicesItems({
-      environment,
-      kuery,
-      mlClient,
-      apmEventClient,
-      apmAlertsClient,
-      searchAggregatedTransactions,
-      searchAggregatedServiceMetrics,
-      logger,
-      start,
-      end,
-      serviceGroup,
-      randomSampler,
-    });
-
-    return {
-      items,
-    };
+  const items = await getServicesItems({
+    environment,
+    kuery,
+    mlClient,
+    apmEventClient,
+    apmAlertsClient,
+    logger,
+    start,
+    end,
+    serviceGroup,
+    randomSampler,
+    documentType,
+    rollupInterval,
   });
+
+  return {
+    items,
+  };
 }

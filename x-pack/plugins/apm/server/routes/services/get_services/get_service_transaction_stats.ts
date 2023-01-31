@@ -6,73 +6,76 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ApmDocumentType } from '../../../../common/document_type';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
+import { RollupInterval } from '../../../../common/rollup';
+import { ServiceGroup } from '../../../../common/service_groups';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import {
-  getDocumentTypeFilterForTransactions,
-  getDurationFieldForTransactions,
-  getProcessorEventForTransactions,
-} from '../../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { serviceGroupQuery } from '../../../lib/service_group_query';
-import { ServiceGroup } from '../../../../common/service_groups';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface AggregationParams {
   environment: string;
   kuery: string;
   apmEventClient: APMEventClient;
-  searchAggregatedTransactions: boolean;
   maxNumServices: number;
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
   randomSampler: RandomSampler;
+  documentType: ApmDocumentType;
+  rollupInterval: RollupInterval;
 }
 
 export async function getServiceTransactionStats({
   environment,
   kuery,
   apmEventClient,
-  searchAggregatedTransactions,
   maxNumServices,
   start,
   end,
   serviceGroup,
   randomSampler,
+  documentType,
+  rollupInterval,
 }: AggregationParams) {
-  const outcomes = getOutcomeAggregation();
+  const outcomes = getOutcomeAggregation(documentType);
 
   const metrics = {
     avg_duration: {
       avg: {
-        field: getDurationFieldForTransactions(searchAggregatedTransactions),
+        field: getDurationFieldForTransactions(documentType),
       },
     },
-    outcomes,
+    ...outcomes,
   };
 
   const response = await apmEventClient.search(
     'get_service_transaction_stats',
     {
       apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
+        sources: [
+          {
+            documentType,
+            rollupInterval,
+          },
         ],
       },
       body: {
@@ -81,9 +84,6 @@ export async function getServiceTransactionStats({
         query: {
           bool: {
             filter: [
-              ...getDocumentTypeFilterForTransactions(
-                searchAggregatedTransactions
-              ),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -150,7 +150,7 @@ export async function getServiceTransactionStats({
         ] as AgentName,
         latency: topTransactionTypeBucket.avg_duration.value,
         transactionErrorRate: calculateFailedTransactionRate(
-          topTransactionTypeBucket.outcomes
+          topTransactionTypeBucket
         ),
         throughput: calculateThroughputWithRange({
           start,
