@@ -12,6 +12,7 @@ import { useTheme } from '@kbn/observability-plugin/public';
 
 import { useAbsoluteDate } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
+import { useGetMonitorEmbeddedFilters } from '../list_filters/use_filters';
 import * as labels from '../labels';
 
 export const MonitorTestRunsSparkline = () => {
@@ -20,6 +21,7 @@ export const MonitorTestRunsSparkline = () => {
   const { ExploratoryViewEmbeddable } = observability;
 
   const theme = useTheme();
+  const { embeddableReportDefinitions, embeddableFilters } = useGetMonitorEmbeddedFilters();
 
   const { from, to } = useAbsoluteDate({ from: 'now-30d', to: 'now' });
 
@@ -35,10 +37,11 @@ export const MonitorTestRunsSparkline = () => {
           time: { from, to },
           reportDefinitions: {
             'monitor.id': [],
-            'observer.geo.name': [],
+            ...embeddableReportDefinitions,
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor.check_group',
+          filters: embeddableFilters,
           name: labels.TEST_RUNS_LABEL,
           color: theme.eui.euiColorVis1,
           operationType: 'unique_count',

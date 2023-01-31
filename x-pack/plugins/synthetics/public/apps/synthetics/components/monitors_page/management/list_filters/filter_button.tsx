@@ -7,10 +7,15 @@
 
 import React, { useState } from 'react';
 import { FieldValueSelection } from '@kbn/observability-plugin/public';
-import { FilterItem } from './filter_group';
+import {
+  getSyntheticsFilterDisplayValues,
+  getSyntheticsFilterKeyForLabel,
+  SyntheticsFilterItem,
+  valueToLabelWithEmptyCount,
+} from './filter_fields';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
 
-export const FilterButton = ({ filter }: { filter: FilterItem }) => {
+export const FilterButton = ({ filter }: { filter: SyntheticsFilterItem }) => {
   const { label, values, field } = filter;
 
   const [query, setQuery] = useState('');
@@ -19,9 +24,16 @@ export const FilterButton = ({ filter }: { filter: FilterItem }) => {
 
   const urlParams = useGetUrlParams();
 
+  // Transform the values to readable labels (if any) so that selected values are checked on filter dropdown
+  const selectedValueLabels = getSyntheticsFilterDisplayValues(
+    (urlParams[field] || []).map(valueToLabelWithEmptyCount),
+    field,
+    []
+  ).map(({ label: selectedValueLabel }) => selectedValueLabel);
+
   return (
     <FieldValueSelection
-      selectedValue={urlParams[field] || []}
+      selectedValue={selectedValueLabels}
       singleSelection={false}
       label={label}
       values={
@@ -34,7 +46,9 @@ export const FilterButton = ({ filter }: { filter: FilterItem }) => {
         updateUrlParams({
           [field]:
             selectedValues && selectedValues.length > 0
-              ? JSON.stringify(selectedValues)
+              ? JSON.stringify(
+                  selectedValues.map((value) => getSyntheticsFilterKeyForLabel(value, field))
+                )
               : undefined,
         });
       }}

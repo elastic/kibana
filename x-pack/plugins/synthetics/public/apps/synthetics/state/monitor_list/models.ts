@@ -19,6 +19,8 @@ export interface MonitorListPageState {
   sortField: MonitorListSortField;
   sortOrder: NonNullable<FetchMonitorManagementListQueryArgs['sortOrder']>;
   tags?: string[];
-  monitorType?: string[];
+  monitorTypes?: string[];
+  projects?: string[];
+  schedules?: string[];
   locations?: string[];
 }

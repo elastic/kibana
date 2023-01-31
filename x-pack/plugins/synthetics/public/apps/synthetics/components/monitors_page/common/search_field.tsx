@@ -29,6 +29,7 @@ export function SearchField() {
 
   return (
     <EuiFieldSearch
+      css={{ minWidth: 230 }}
       fullWidth
       placeholder={PLACEHOLDER_TEXT}
       value={search}

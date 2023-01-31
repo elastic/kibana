@@ -15,6 +15,7 @@ import {
   fetchOverviewStatusAction,
   quietFetchOverviewAction,
   setFlyoutConfig,
+  setOverviewGroupByAction,
   setOverviewPageStateAction,
   toggleErrorPopoverOpen,
 } from './actions';
@@ -32,6 +33,7 @@ const initialState: MonitorOverviewState = {
     sortOrder: 'asc',
     sortField: 'status',
   },
+  groupBy: { field: 'none', order: 'none' },
   flyoutConfig: null,
   loading: false,
   loaded: false,
@@ -68,6 +70,12 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         ...action.payload,
       };
       state.loaded = false;
+    })
+    .addCase(setOverviewGroupByAction, (state, action) => {
+      state.groupBy = {
+        ...state.groupBy,
+        ...action.payload,
+      };
     })
     .addCase(fetchOverviewStatusAction.get, (state) => {
       state.status = null;

@@ -91,7 +91,7 @@ export function useMonitorListColumns({
           ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
           onClick={() => {
             history.push({
-              search: `monitorType=${encodeURIComponent(
+              search: `monitorTypes=${encodeURIComponent(
                 JSON.stringify([monitor[ConfigKey.MONITOR_TYPE]])
               )}`,
             });

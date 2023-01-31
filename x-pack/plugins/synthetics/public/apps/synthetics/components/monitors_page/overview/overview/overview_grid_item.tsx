@@ -9,12 +9,19 @@ import { MetricItem } from './metric_item';
 import { useLast50DurationChart } from '../../../../hooks';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 
+export interface FlyoutParamProps {
+  id: string;
+  configId: string;
+  location: string;
+  locationId: string;
+}
+
 export const OverviewGridItem = ({
   monitor,
   onClick,
 }: {
   monitor: MonitorOverviewItem;
-  onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
+  onClick: (params: FlyoutParamProps) => void;
 }) => {
   const { data, loading, averageDuration } = useLast50DurationChart({
     locationId: monitor.location?.id,

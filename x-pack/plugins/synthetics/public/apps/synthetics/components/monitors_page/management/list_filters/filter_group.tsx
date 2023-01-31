@@ -13,12 +13,7 @@ import { ServiceLocations } from '../../../../../../../common/runtime_types';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
 import { selectServiceLocationsState } from '../../../../state';
-
-export interface FilterItem {
-  label: string;
-  values: Array<{ label: string; count: number }>;
-  field: 'tags' | 'status' | 'locations' | 'monitorType';
-}
+import { SyntheticsFilterItem, getSyntheticsFilterDisplayValues } from './filter_fields';
 
 export const findLocationItem = (query: string, locations: ServiceLocations) => {
   return locations.find(({ id, label }) => query === id || label === query);
@@ -29,26 +24,36 @@ export const FilterGroup = () => {
 
   const { locations } = useSelector(selectServiceLocationsState);
 
-  const filters: FilterItem[] = [
+  const filters: SyntheticsFilterItem[] = [
     {
       label: TYPE_LABEL,
-      field: 'monitorType',
-      values: data.types,
+      field: 'monitorTypes',
+      values: getSyntheticsFilterDisplayValues(data.monitorTypes, 'monitorTypes', locations),
     },
     {
       label: LOCATION_LABEL,
       field: 'locations',
-      values: data.locations.map(({ label, count }) => ({
-        label: findLocationItem(label, locations)?.label ?? label,
-        count,
-      })),
+      values: getSyntheticsFilterDisplayValues(data.locations, 'locations', locations),
     },
     {
       label: TAGS_LABEL,
       field: 'tags',
-      values: data.tags,
+      values: getSyntheticsFilterDisplayValues(data.tags, 'tags', locations),
+    },
+    {
+      label: SCHEDULE_LABEL,
+      field: 'schedules',
+      values: getSyntheticsFilterDisplayValues(data.schedules, 'schedules', locations),
     },
   ];
+
+  if (data.projects.length > 0) {
+    filters.push({
+      label: PROJECT_LABEL,
+      field: 'projects',
+      values: getSyntheticsFilterDisplayValues(data.projects, 'projects', locations),
+    });
+  }
 
   return (
     <EuiFilterGroup>
@@ -63,10 +68,18 @@ const TYPE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.typ
   defaultMessage: `Type`,
 });
 
+const PROJECT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.projectLabel', {
+  defaultMessage: `Project`,
+});
+
 const LOCATION_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.locationLabel', {
   defaultMessage: `Location`,
 });
 
 const TAGS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.tagsLabel', {
   defaultMessage: `Tags`,
+});
+
+const SCHEDULE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.frequencyLabel', {
+  defaultMessage: `Frequency`,
 });

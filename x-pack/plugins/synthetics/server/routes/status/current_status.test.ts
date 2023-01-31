@@ -321,13 +321,18 @@ describe('current status route', () => {
        *
        * The expectation here is we will send the test client two separate "requests", one for each of the two IDs.
        */
+      const concernedLocations = [
+        'Asia/Pacific - Japan',
+        'Europe - Germany',
+        'Asia/Pacific - Japan',
+      ];
       expect(
         await queryMonitorStatus(
           uptimeEsClient,
-          times(10000).map((n) => 'Europe - Germany' + n),
+          [...concernedLocations, ...times(9997).map((n) => 'Europe - Germany' + n)],
           { from: 2500, to: 'now' },
           ['id1', 'id2'],
-          { id1: ['Asia/Pacific - Japan'], id2: ['Europe - Germany', 'Asia/Pacific - Japan'] }
+          { id1: [concernedLocations[0]], id2: [concernedLocations[1], concernedLocations[2]] }
         )
       ).toEqual({
         pending: 0,

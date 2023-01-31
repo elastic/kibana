@@ -23,7 +23,14 @@ export function useMonitorList() {
   const { pageState, loading, loaded, error, data } = useSelector(selectMonitorListState);
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
 
-  const { query, tags, monitorType, locations: locationFilters } = useGetUrlParams();
+  const {
+    query,
+    tags,
+    monitorTypes,
+    locations: locationFilters,
+    projects,
+    schedules,
+  } = useGetUrlParams();
 
   const { search } = useLocation();
 
@@ -34,11 +41,13 @@ export function useMonitorList() {
           ...state,
           query,
           tags,
-          monitorType,
+          monitorTypes,
           locations: locationFilters,
+          projects,
+          schedules,
         })
       ),
-    [dispatch, locationFilters, monitorType, query, tags]
+    [dispatch, locationFilters, monitorTypes, query, tags, projects, schedules]
   );
 
   const reloadPage = useCallback(() => loadPage(pageState), [pageState, loadPage]);
