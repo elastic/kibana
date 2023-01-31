@@ -16,6 +16,7 @@ import { Observable } from 'rxjs';
  */
 export interface Services {
   kibanaGuideDocLink: string;
+  customBranding: { hasCustomBranding$: Observable<boolean> };
 }
 
 /**
