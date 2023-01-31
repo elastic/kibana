@@ -318,7 +318,7 @@ export class SyntheticsService {
 
         this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
 
-        service.syncErrors = await this.apiClient.put({
+        service.syncErrors = await this.apiClient.syncMonitors({
           monitors,
           output,
         });
