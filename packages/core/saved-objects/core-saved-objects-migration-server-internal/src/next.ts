@@ -43,6 +43,7 @@ import type {
   WaitForMigrationCompletionState,
   CheckTargetMappingsState,
   PrepareCompatibleMigration,
+  CleanupUnknownAndExcluded,
 } from './state';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
@@ -65,6 +66,15 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
     PREPARE_COMPATIBLE_MIGRATION: (state: PrepareCompatibleMigration) =>
       Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
+    CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
+      Actions.cleanupUnknownAndExcluded({
+        client,
+        indexName: state.sourceIndex.value,
+        discardUnknownDocs: state.discardUnknownObjects,
+        excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
+        excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
+        knownTypes: state.knownTypes,
+      }),
     WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>

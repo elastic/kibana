@@ -49,6 +49,23 @@ export const REMOVED_TYPES: string[] = [
 // saved objects which are no longer used. These saved objects will still be
 // kept in the outdated index for backup purposes, but won't be available in
 // the upgraded index.
+export const unpersistedSearchSessionsQuery = {
+  bool: {
+    must: [
+      {
+        match: {
+          type: 'search-session',
+        },
+      },
+      {
+        match: {
+          'search-session.persisted': false,
+        },
+      },
+    ],
+  },
+};
+
 export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
   bool: {
     must_not: [
@@ -58,22 +75,7 @@ export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
         },
       })),
       // https://github.com/elastic/kibana/issues/96131
-      {
-        bool: {
-          must: [
-            {
-              match: {
-                type: 'search-session',
-              },
-            },
-            {
-              match: {
-                'search-session.persisted': false,
-              },
-            },
-          ],
-        },
-      },
+      unpersistedSearchSessionsQuery,
     ],
   },
 };

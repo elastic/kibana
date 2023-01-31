@@ -283,7 +283,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
       };
     } else if (Either.isLeft(res)) {
       // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
@@ -294,13 +294,26 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // We assume that the alias was already deleted by another Kibana instance
         return {
           ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
         };
       } else {
         throwBadResponse(stateP, res.left as never);
       }
     } else {
       throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      // we didn't need to cleanup, or the cleanup went well
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+      };
+    } else if (Either.isLeft(res)) {
+      return throwBadResponse(stateP, res.left as never);
+    } else {
+      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -465,7 +478,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'PREPARE_COMPATIBLE_MIGRATION',
-          sourceIndex: Option.none,
           targetIndex: source!,
           targetIndexRawMappings: stateP.sourceIndexMappings,
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
@@ -579,7 +591,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (Either.isRight(res)) {
       excludeOnUpgradeQuery = addMustNotClausesToBoolQuery(
-        res.right.mustNotClauses,
+        res.right.filterClauses,
         stateP.excludeOnUpgradeQuery?.bool
       );
 
