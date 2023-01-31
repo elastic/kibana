@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiButtonEmpty,
   EuiCheckbox,
-  EuiFieldSearch,
   EuiFormRow,
   EuiIcon,
   EuiLink,
@@ -28,6 +27,7 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -38,6 +38,7 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { ExpressionRow } from './expression_row';
+import { IndexPatternField } from './index_pattern_override';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
@@ -56,18 +57,24 @@ export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { http, notifications, docLinks } = useKibanaContextForPlugin().services;
+  const { http, notifications, docLinks, dataViews } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     fetch: http.fetch,
     toastWarning: notifications.toasts.addWarning,
   });
 
+  const [overridenDataView, setOverridenDataView] = useState<DataView | undefined>();
+  const handleIndexPatternOverrideChange = useCallback(
+    (value) => setRuleParams('indexPatternOverride', value),
+    [setRuleParams]
+  );
+
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
+    () => overridenDataView || createDerivedIndexPattern(),
+    [createDerivedIndexPattern, overridenDataView]
   );
 
   const options = useMemo<MetricsExplorerOptions>(() => {
@@ -247,11 +254,6 @@ export const Expressions: React.FC<Props> = (props) => {
     }
   }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleFieldSearchChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
-    [onFilterChange]
-  );
-
   const hasGroupBy = useMemo(
     () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
     [ruleParams.groupBy]
@@ -351,6 +353,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
       <EuiSpacer size={'m'} />
       <EuiAccordion
+        initialIsOpen={ruleParams.indexPatternOverride != null}
         id="advanced-options-accordion"
         buttonContent={i18n.translate('xpack.infra.metrics.alertFlyout.advancedOptions', {
           defaultMessage: 'Advanced options',
@@ -381,6 +384,22 @@ export const Expressions: React.FC<Props> = (props) => {
             checked={ruleParams.alertOnNoData}
             onChange={(e) => setRuleParams('alertOnNoData', e.target.checked)}
           />
+          <EuiSpacer size="s" />
+          <IndexPatternField
+            label={i18n.translate('xpack.infra.metrics.alertFlyout.indexPatternOverrideLabel', {
+              defaultMessage: 'Index pattern override',
+            })}
+            helpText={i18n.translate(
+              'xpack.infra.metrics.alertFlyout.indexPatternOverrideDefaultHelpText',
+              {
+                defaultMessage: 'Use this field to override the index pattern.',
+              }
+            )}
+            value={ruleParams.indexPatternOverride}
+            onChange={handleIndexPatternOverrideChange}
+            onDataViewChange={setOverridenDataView}
+            dataViewsService={dataViews}
+          />
         </EuiPanel>
       </EuiAccordion>
       <EuiSpacer size={'m'} />
@@ -395,20 +414,12 @@ export const Expressions: React.FC<Props> = (props) => {
         fullWidth
         display="rowCompressed"
       >
-        {(metadata && (
-          <MetricsExplorerKueryBar
-            derivedIndexPattern={derivedIndexPattern}
-            onChange={debouncedOnFilterChange}
-            onSubmit={onFilterChange}
-            value={ruleParams.filterQueryText}
-          />
-        )) || (
-          <EuiFieldSearch
-            onChange={handleFieldSearchChange}
-            value={ruleParams.filterQueryText}
-            fullWidth
-          />
-        )}
+        <MetricsExplorerKueryBar
+          derivedIndexPattern={derivedIndexPattern}
+          onChange={debouncedOnFilterChange}
+          onSubmit={onFilterChange}
+          value={ruleParams.filterQueryText}
+        />
       </EuiFormRow>
 
       <EuiSpacer size={'m'} />

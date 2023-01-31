@@ -179,7 +179,6 @@ describe('ExpressionRow', () => {
             type: 'bzzz',
             searchable: true,
             aggregatable: true,
-            displayable: true,
           },
         ]}
       />

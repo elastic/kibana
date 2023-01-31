@@ -11,15 +11,19 @@ import {
   Comparator,
   FilterQuery,
   MetricExpressionParams,
+  IndexPatternOverride,
   QUERY_INVALID,
+  INDEX_PATTERN_INVALID,
 } from '../../../../common/alerting/metrics';
 
 export function validateMetricThreshold({
   criteria,
   filterQuery,
+  indexPatternOverride,
 }: {
   criteria: MetricExpressionParams[];
   filterQuery?: FilterQuery;
+  indexPatternOverride?: IndexPatternOverride;
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {
@@ -37,13 +41,21 @@ export function validateMetricThreshold({
       };
       metric: string[];
     };
-  } & { filterQuery?: string[] } = {};
+  } & { filterQuery?: string[]; indexPatternOverride?: string[] } = {};
   validationResult.errors = errors;
 
   if (filterQuery === QUERY_INVALID) {
     errors.filterQuery = [
       i18n.translate('xpack.infra.metrics.alertFlyout.error.invalidFilterQuery', {
         defaultMessage: 'Filter query is invalid.',
+      }),
+    ];
+  }
+
+  if (indexPatternOverride === INDEX_PATTERN_INVALID) {
+    errors.indexPatternOverride = [
+      i18n.translate('xpack.infra.metrics.alertFlyout.error.invalidIndexPattern', {
+        defaultMessage: 'The index pattern is invalid',
       }),
     ];
   }

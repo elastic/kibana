@@ -77,7 +77,7 @@ export function useMetricsExplorerData(
             groupBy: options.groupBy,
             afterKey,
             limit: options.limit,
-            indexPattern: source.metricAlias,
+            indexPattern: derivedIndexPattern.title,
             filterQuery:
               (options.filterQuery &&
                 convertKueryToElasticSearchQuery(options.filterQuery, derivedIndexPattern)) ||
@@ -120,7 +120,7 @@ export function useMetricsExplorerData(
         setLoading(false);
       },
     },
-    [source, timerange, options, signal, afterKey]
+    [source, timerange, options, signal, afterKey, derivedIndexPattern]
   );
 
   useEffect(() => {

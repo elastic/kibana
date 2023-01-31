@@ -30,14 +30,12 @@ describe('ExpressionRow', () => {
             type: 'test',
             searchable: true,
             aggregatable: true,
-            displayable: true,
           },
           {
             name: 'system.load.1',
             type: 'test',
             searchable: true,
             aggregatable: true,
-            displayable: true,
           },
         ]}
         remove={() => {}}

@@ -22,6 +22,7 @@ export interface EvaluatedRuleParams {
   groupBy: string | undefined | string[];
   filterQuery?: string;
   filterQueryText?: string;
+  indexPatternOverride?: string;
 }
 
 export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
@@ -60,10 +61,12 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         lastPeriodEnd
       );
 
+      const indexPattern = params.indexPatternOverride || config.metricAlias;
+
       const currentValues = await getData(
         esClient,
         criterion,
-        config.metricAlias,
+        indexPattern,
         groupBy,
         filterQuery,
         compositeSize,
@@ -76,7 +79,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const verifiedMissingGroups = await checkMissingGroups(
         esClient,
         criterion,
-        config.metricAlias,
+        indexPattern,
         groupBy,
         filterQuery,
         logger,

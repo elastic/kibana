@@ -259,9 +259,12 @@ export const RuleForm = ({
     [setRuleProperty]
   );
 
-  const setRuleParams = (key: string, value: any) => {
-    dispatch({ command: { type: 'setRuleParams' }, payload: { key, value } });
-  };
+  const setRuleParams = useCallback(
+    (key: string, value: any) => {
+      dispatch({ command: { type: 'setRuleParams' }, payload: { key, value } });
+    },
+    [dispatch]
+  );
 
   const setScheduleProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setScheduleProperty' }, payload: { key, value } });

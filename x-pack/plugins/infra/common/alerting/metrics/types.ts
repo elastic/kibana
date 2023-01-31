@@ -110,8 +110,10 @@ export interface CountMetricExpressionParams extends BaseMetricExpressionParams 
 export type MetricExpressionParams = NonCountMetricExpressionParams | CountMetricExpressionParams;
 
 export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
+export const INDEX_PATTERN_INVALID: unique symbol = Symbol('INDEX_PATTERN_INVALID');
 
 export type FilterQuery = string | typeof QUERY_INVALID;
+export type IndexPatternOverride = string | typeof INDEX_PATTERN_INVALID;
 
 export interface AlertExecutionDetails {
   alertId: string;

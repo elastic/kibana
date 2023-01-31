@@ -205,7 +205,6 @@ const SourceStatusFieldRuntimeType = rt.type({
   type: rt.string,
   searchable: rt.boolean,
   aggregatable: rt.boolean,
-  displayable: rt.boolean,
 });
 
 export type InfraSourceIndexField = rt.TypeOf<typeof SourceStatusFieldRuntimeType>;

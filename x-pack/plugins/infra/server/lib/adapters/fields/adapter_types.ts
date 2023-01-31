@@ -19,5 +19,4 @@ export interface IndexFieldDescriptor {
   type: string;
   searchable: boolean;
   aggregatable: boolean;
-  displayable: boolean;
 }

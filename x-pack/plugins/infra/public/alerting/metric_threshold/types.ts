@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { FilterQuery, MetricExpressionParams } from '../../../common/alerting/metrics';
+import {
+  FilterQuery,
+  IndexPatternOverride,
+  MetricExpressionParams,
+} from '../../../common/alerting/metrics';
 import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
@@ -60,4 +64,5 @@ export interface AlertParams {
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
   shouldDropPartialBuckets?: boolean;
+  indexPatternOverride?: IndexPatternOverride;
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FieldSpec } from '@kbn/data-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { FieldsAdapter, IndexFieldDescriptor } from './adapter_types';
@@ -31,9 +30,6 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
       allowNoIndex: true,
     });
 
-    return response.map((field: FieldSpec) => ({
-      ...field,
-      displayable: true,
-    }));
+    return response;
   }
 }
