@@ -71,7 +71,7 @@ export const ConnectorConfigurationLogic = kea<
   connect: {
     actions: [
       ConnectorConfigurationApiLogic,
-      ['apiSuccess'],
+      ['apiSuccess', 'makeRequest'],
       CachedFetchIndexApiLogic,
       ['apiSuccess as fetchIndexApiSuccess'],
     ],

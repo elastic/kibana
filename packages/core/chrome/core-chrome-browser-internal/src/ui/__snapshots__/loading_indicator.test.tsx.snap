@@ -20,11 +20,11 @@ exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
 />
 `;
 
-exports[`kbnLoadingIndicator shows EuiLoadingSpinner when showPlainSpinner is true 1`] = `
-<EuiLoadingSpinner
-  aria-hidden={false}
-  aria-label="Loading content"
-  data-test-subj="globalLoadingIndicator"
-  size="l"
+exports[`kbnLoadingIndicator shows logo image when customLogo is set 1`] = `
+<EuiImage
+  alt="logo"
+  aria-label="User logo"
+  size={24}
+  src="customLogo"
 />
 `;
