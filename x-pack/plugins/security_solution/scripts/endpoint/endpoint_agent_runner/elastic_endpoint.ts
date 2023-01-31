@@ -9,6 +9,7 @@ import { userInfo } from 'os';
 import execa from 'execa';
 import nodeFetch from 'node-fetch';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import chalk from 'chalk';
 import { getEndpointPackageInfo } from '../../../common/endpoint/index_data';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
@@ -148,8 +149,8 @@ export const enrollEndpointHost = async () => {
     VM Name: ${vmName}
     Elastic Agent Version: ${version}
 
-    Shell access: multipass shell ${vmName}
-    Delete VM:    multipass delete -p ${vmName}${await getVmCountNotice()}
+    Shell access: ${chalk.bold(`multipass shell ${vmName}`)}
+    Delete VM:    ${chalk.bold(`multipass delete -p ${vmName}${await getVmCountNotice()}`)}
 `);
   } catch (error) {
     log.error(error);
@@ -236,9 +237,11 @@ const getVmCountNotice = async (threshold: number = 1): Promise<string> => {
     return `
 
 -----------------------------------------------------------------
-NOTE: You currently have ${output.list.length} VMs running. Remember to delete those
+${chalk.red('NOTE:')} ${chalk.bold(
+      `You currently have ${output.list.length} VMs running.`
+    )} Remember to delete those
       no longer being used.
-      View running VMs: multipass list
+      View running VMs: ${chalk.bold('multipass list')}
   -----------------------------------------------------------------
 `;
   }

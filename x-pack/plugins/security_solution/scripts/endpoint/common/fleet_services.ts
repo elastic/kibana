@@ -111,7 +111,7 @@ export const fetchFleetAgents = async (
 export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
   hostname: string,
-  timeoutMs: number = 15000
+  timeoutMs: number = 30000
 ): Promise<Agent> => {
   const started = new Date();
   const hasTimedOut = (): boolean => {

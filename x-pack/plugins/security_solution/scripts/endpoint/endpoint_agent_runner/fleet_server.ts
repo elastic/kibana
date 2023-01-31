@@ -35,6 +35,7 @@ import type {
   PostFleetServerHostsRequest,
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
+import chalk from 'chalk';
 import { isLocalhost } from '../common/localhost_services';
 import {
   fetchFleetAgents,
@@ -261,7 +262,7 @@ const startFleetServerWithDocker = async ({
 
     const fleetServerAgent = await waitForHostToEnroll(kbnClient, containerName);
 
-    log.verbose(`Fleet server enrolled agent:\n${fleetServerAgent}`);
+    log.verbose(`Fleet server enrolled agent:\n${JSON.stringify(fleetServerAgent, null, 2)}`);
 
     await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:8220`);
 
@@ -269,8 +270,8 @@ const startFleetServerWithDocker = async ({
   Container Name: ${containerName}
   Container Id:   ${containerId}
 
-  View running output:  docker attach ---sig-proxy=false ${containerName}
-  Shell access:         docker exec -it ${containerName} /bin/bash
+  View running output:  ${chalk.bold(`docker attach ---sig-proxy=false ${containerName}`)}
+  Shell access:         ${chalk.bold(`docker exec -it ${containerName} /bin/bash`)}
 `);
   } catch (error) {
     log.error(error);
