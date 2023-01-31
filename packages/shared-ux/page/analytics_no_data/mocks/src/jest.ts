@@ -23,7 +23,8 @@ export const getServicesMock = () => {
 export const getServicesMockCustomBranding = () => {
   const services: AnalyticsNoDataPageServices = {
     ...getKibanaNoDataPageServicesMock(),
-    customBranding: { hasCustomBranding$: of(false) },
+    // this mock will have custom branding set to true
+    customBranding: { hasCustomBranding$: of(true) },
     kibanaGuideDocLink: 'Kibana guide',
   };
 
