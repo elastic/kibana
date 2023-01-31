@@ -24,7 +24,7 @@ jest.mock('../kibana_services', () => ({
   getHttp: () => {
     return {
       basePath: {
-        prepend: (path) => `abc${path}`,
+        prepend: (path: string) => `abc${path}`,
       },
     };
   },

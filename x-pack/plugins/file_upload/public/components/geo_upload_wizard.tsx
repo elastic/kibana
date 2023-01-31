@@ -187,7 +187,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
                 defaultMessage: 'Unable to index {numFailures} of {featureCount} features.',
                 values: {
                   featureCount: importResults.docCount,
-                  numFailures: importResults.failures.length,
+                  numFailures: importResults.failures!.length,
                 },
               }),
             },
