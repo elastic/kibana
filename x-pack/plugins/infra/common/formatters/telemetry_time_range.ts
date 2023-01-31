@@ -23,7 +23,7 @@ const NINETY_DAYS = ONE_DAY * 90;
 const HALF_YEAR = ONE_DAY * 180;
 const ONE_YEAR = ONE_DAY * 365;
 
-export const telemetryTimeRangeFormatter = (ms: number) => {
+export const telemetryTimeRangeFormatter = (ms: number): string => {
   if (ms < ONE_MINUTE) return '1. Less than 1 minute';
   if (ms >= ONE_MINUTE && ms < FIVE_MINUTES) return '2. 1-5 minutes';
   if (ms >= FIVE_MINUTES && ms < TEN_MINUTES) return '3. 5-10 minutes';
@@ -41,5 +41,5 @@ export const telemetryTimeRangeFormatter = (ms: number) => {
   if (ms >= SIXTY_DAYS && ms < NINETY_DAYS) return '15. 60-90 days';
   if (ms >= NINETY_DAYS && ms < HALF_YEAR) return '16. 90-180 days';
   if (ms >= HALF_YEAR && ms < ONE_YEAR) return '17. 180-365 days';
-  if (ms >= ONE_YEAR) return '18. More than 1 year';
+  return '18. More than 1 year';
 };
