@@ -52,6 +52,9 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-saved-objects-common",
+    "@kbn/core-custom-branding-browser-mocks",
+    "@kbn/core-custom-branding-common",
+    "@kbn/core-custom-branding-server-mocks",
   ],
   "exclude": [
     "target/**/*",

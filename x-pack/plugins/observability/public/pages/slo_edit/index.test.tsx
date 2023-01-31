@@ -56,7 +56,23 @@ const mockBasePathPrepend = jest.fn();
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
-      application: { navigateToUrl: mockNavigate },
+      application: {
+        navigateToUrl: mockNavigate,
+      },
+      data: {
+        dataViews: {
+          find: jest.fn().mockReturnValue([]),
+          get: jest.fn().mockReturnValue([]),
+        },
+      },
+      dataViews: {
+        create: jest.fn().mockResolvedValue(42),
+      },
+      docLinks: {
+        links: {
+          query: {},
+        },
+      },
       http: {
         basePath: {
           prepend: mockBasePathPrepend,
@@ -64,8 +80,19 @@ const mockKibana = () => {
       },
       notifications: {
         toasts: {
-          addSuccess: mockAddSuccess,
           addError: mockAddError,
+          addSuccess: mockAddSuccess,
+        },
+      },
+      storage: {
+        get: () => {},
+      },
+      uiSettings: {
+        get: () => {},
+      },
+      unifiedSearch: {
+        autocomplete: {
+          hasQuerySuggestions: () => {},
         },
       },
     },

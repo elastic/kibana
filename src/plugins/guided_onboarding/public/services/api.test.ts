@@ -13,7 +13,7 @@ import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 import { firstValueFrom, Subscription } from 'rxjs';
 
 import { API_BASE_PATH } from '../../common';
-import { ApiService } from './api';
+import { ApiService } from './api.service';
 import {
   testGuideFirstStep,
   testGuideLastStep,

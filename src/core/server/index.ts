@@ -530,3 +530,5 @@ export type {
   PublicHttpServiceSetup as HttpServiceSetup,
   HttpServiceSetup as BaseHttpServiceSetup,
 };
+
+export type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
