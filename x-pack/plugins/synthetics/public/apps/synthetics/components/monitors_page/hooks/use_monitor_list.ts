@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'react-use';
 import {
@@ -17,6 +17,7 @@ import {
   selectOverviewStatus,
   updateManagementPageStateAction,
 } from '../../../state';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 
 export function useMonitorList() {
@@ -28,6 +29,7 @@ export function useMonitorList() {
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
 
   const { handleFilterChange } = useMonitorFiltersState();
+  const { refreshInterval } = useSyntheticsRefreshContext();
 
   const [] = useState(pageState);
 
@@ -38,6 +40,17 @@ export function useMonitorList() {
     [dispatch]
   );
   const reloadPage = useCallback(() => loadPage(pageState), [pageState, loadPage]);
+
+  // Periodically refresh
+  useEffect(() => {
+    const intervalId = setTimeout(() => {
+      reloadPage();
+    }, refreshInterval);
+
+    return () => {
+      clearTimeout(intervalId);
+    };
+  }, [reloadPage, refreshInterval]);
 
   useDebounce(
     () => {
