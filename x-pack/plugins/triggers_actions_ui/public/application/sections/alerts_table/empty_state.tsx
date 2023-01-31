@@ -40,7 +40,7 @@ export const EmptyState: React.FC<{
       <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
         {showInpectButton && (
           <EuiFlexItem grow={false}>
-            <InspectButton showInspectButton getInspectQuery={getInspectQuery} />
+            <InspectButton getInspectQuery={getInspectQuery} />
           </EuiFlexItem>
         )}
         {controls?.right && <EuiFlexItem grow={false}>{controls.right}</EuiFlexItem>}

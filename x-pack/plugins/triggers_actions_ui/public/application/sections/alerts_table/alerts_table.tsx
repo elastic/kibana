@@ -88,6 +88,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     updatedAt,
     browserFields,
     onChangeVisibleColumns,
+    showInspectButton,
   } = props;
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
@@ -117,6 +118,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       controls: props.controls,
       setIsBulkActionsLoading,
       getInspectQuery,
+      showInspectButton,
     });
   }, [
     bulkActionsState,
@@ -132,6 +134,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     props.controls,
     setIsBulkActionsLoading,
     getInspectQuery,
+    showInspectButton,
   ])();
 
   const leadingControlColumns = useMemo(() => {

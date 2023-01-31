@@ -259,6 +259,7 @@ const AlertsTableState = ({
       onColumnsChange,
       onChangeVisibleColumns,
       controls: persistentControls,
+      showInspectButton,
     }),
     [
       alertsTableConfiguration,
@@ -276,6 +277,7 @@ const AlertsTableState = ({
       onColumnsChange,
       onChangeVisibleColumns,
       persistentControls,
+      showInspectButton,
     ]
   );
 

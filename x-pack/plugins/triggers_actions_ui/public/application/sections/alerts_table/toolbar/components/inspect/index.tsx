@@ -36,10 +36,7 @@ interface InspectButtonProps {
   getInspectQuery: GetInspectQuery;
 }
 
-const InspectButtonComponent: React.FC<InspectButtonProps> = ({
-  showInspectButton = false,
-  getInspectQuery,
-}) => {
+const InspectButtonComponent: React.FC<InspectButtonProps> = ({ getInspectQuery }) => {
   const [isShowingModal, setIsShowingModal] = useState(false);
 
   const onOpenModal = () => {
@@ -52,17 +49,15 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
 
   return (
     <>
-      {showInspectButton && (
-        <EuiButtonIcon
-          className={BUTTON_CLASS}
-          aria-label={i18n.INSPECT}
-          data-test-subj="inspect-icon-button"
-          iconSize="m"
-          iconType="inspect"
-          title={i18n.INSPECT}
-          onClick={onOpenModal}
-        />
-      )}
+      <EuiButtonIcon
+        className={BUTTON_CLASS}
+        aria-label={i18n.INSPECT}
+        data-test-subj="inspect-icon-button"
+        iconSize="m"
+        iconType="inspect"
+        title={i18n.INSPECT}
+        onClick={onOpenModal}
+      />
       {isShowingModal && (
         <ModalInspectQuery
           closeModal={onCloseModal}

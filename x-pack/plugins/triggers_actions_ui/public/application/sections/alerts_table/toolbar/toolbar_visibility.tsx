@@ -24,14 +24,16 @@ const rightControl = ({
   controls,
   updatedAt,
   getInspectQuery,
+  showInspectButton,
 }: {
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   updatedAt: number;
   getInspectQuery: GetInspectQuery;
+  showInspectButton: boolean;
 }) => {
   return (
     <>
-      <InspectButton showInspectButton getInspectQuery={getInspectQuery} />
+      {showInspectButton && <InspectButton getInspectQuery={getInspectQuery} />}
       <LastUpdatedAt updatedAt={updatedAt} />
       {controls?.right}
     </>
@@ -47,6 +49,7 @@ const getDefaultVisibility = ({
   browserFields,
   controls,
   getInspectQuery,
+  showInspectButton,
 }: {
   alertsCount: number;
   updatedAt: number;
@@ -56,10 +59,11 @@ const getDefaultVisibility = ({
   browserFields: BrowserFields;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   getInspectQuery: GetInspectQuery;
+  showInspectButton: boolean;
 }): EuiDataGridToolBarVisibilityOptions => {
   const hasBrowserFields = Object.keys(browserFields).length > 0;
   const additionalControls = {
-    right: rightControl({ controls, updatedAt, getInspectQuery }),
+    right: rightControl({ controls, updatedAt, getInspectQuery, showInspectButton }),
     left: {
       append: (
         <>
@@ -100,6 +104,7 @@ export const getToolbarVisibility = ({
   setIsBulkActionsLoading,
   controls,
   getInspectQuery,
+  showInspectButton,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -114,6 +119,7 @@ export const getToolbarVisibility = ({
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   getInspectQuery: GetInspectQuery;
+  showInspectButton: boolean;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibility = getDefaultVisibility({
@@ -125,6 +131,7 @@ export const getToolbarVisibility = ({
     browserFields,
     controls,
     getInspectQuery,
+    showInspectButton,
   });
   const isBulkActionsActive =
     selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;
@@ -135,7 +142,7 @@ export const getToolbarVisibility = ({
     showColumnSelector: false,
     showSortSelector: false,
     additionalControls: {
-      right: rightControl({ controls, updatedAt, getInspectQuery }),
+      right: rightControl({ controls, updatedAt, getInspectQuery, showInspectButton }),
       left: {
         append: (
           <>
