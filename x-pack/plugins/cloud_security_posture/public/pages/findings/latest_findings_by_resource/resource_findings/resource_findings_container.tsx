@@ -135,21 +135,15 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       }),
     });
   };
-  function resourceFindingsPageTitleTranslation(resourceName: string) {
+  function resourceFindingsPageTitleTranslation(resourceName: string | undefined) {
     return i18n.translate('xpack.csp.findings.resourceFindings.resourceFindingsPageTitle', {
-      defaultMessage: '{resourceName} - Findings',
+      defaultMessage: '{resourceName} {hyphen} Findings',
       values: {
         resourceName,
+        hyphen: resourceFindings.data?.resourceName ? '-' : '',
       },
     });
   }
-
-  const defaultPageTitle = i18n.translate(
-    'xpack.csp.findings.resourceFindings.resourceFindingsDefaultPageTitle',
-    {
-      defaultMessage: 'Findings',
-    }
-  );
 
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
@@ -164,13 +158,9 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         <BackToResourcesButton />
         <PageTitleText
           title={
-            resourceFindings.data?.resourceName ? (
-              <CloudPosturePageTitle
-                title={resourceFindingsPageTitleTranslation(resourceFindings.data.resourceName)}
-              />
-            ) : (
-              <CloudPosturePageTitle title={defaultPageTitle} />
-            )
+            <CloudPosturePageTitle
+              title={resourceFindingsPageTitleTranslation(resourceFindings.data?.resourceName)}
+            />
           }
         />
       </PageTitle>

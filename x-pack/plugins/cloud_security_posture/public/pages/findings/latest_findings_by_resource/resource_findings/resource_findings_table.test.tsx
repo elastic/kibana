@@ -10,65 +10,9 @@ import * as TEST_SUBJECTS from '../../test_subjects';
 import { ResourceFindingsTable, ResourceFindingsTableProps } from './resource_findings_table';
 import { TestProvider } from '../../../../test/test_provider';
 
-import Chance from 'chance';
-import { CspFinding } from '../../../../../common/schemas/csp_finding';
-import { EcsEvent } from '@kbn/ecs';
 import { capitalize } from 'lodash';
 import moment from 'moment';
-
-const chance = new Chance();
-
-const getFakeFindings = (): CspFinding & { id: string } => ({
-  cluster_id: chance.guid(),
-  id: chance.word(),
-  result: {
-    expected: {
-      source: {},
-    },
-    evaluation: chance.weighted(['passed', 'failed'], [0.5, 0.5]),
-    evidence: {
-      filemode: chance.word(),
-    },
-  },
-  rule: {
-    audit: chance.paragraph(),
-    benchmark: {
-      name: 'CIS Kubernetes',
-      version: '1.6.0',
-      id: 'cis_k8s',
-    },
-    default_value: chance.sentence(),
-    description: chance.paragraph(),
-    id: chance.guid(),
-    impact: chance.word(),
-    name: chance.string(),
-    profile_applicability: chance.sentence(),
-    rationale: chance.paragraph(),
-    references: chance.paragraph(),
-    rego_rule_id: 'cis_X_X_X',
-    remediation: chance.word(),
-    section: chance.sentence(),
-    tags: [],
-    version: '1.0',
-  },
-  agent: {
-    id: chance.string(),
-    name: chance.string(),
-    type: chance.string(),
-    version: chance.string(),
-  },
-  resource: {
-    name: chance.string(),
-    type: chance.string(),
-    raw: {} as any,
-    sub_type: chance.string(),
-    id: chance.string(),
-  },
-  host: {} as any,
-  ecs: {} as any,
-  event: {} as EcsEvent,
-  '@timestamp': new Date().toISOString(),
-});
+import { getResourceFindingsTableFixture } from '../../../../test/fixtures/resource_findings_fixture';
 
 describe('<ResourceFindingsTable />', () => {
   it('should render no findings empty state when status success and data has a length of zero ', async () => {
@@ -95,7 +39,7 @@ describe('<ResourceFindingsTable />', () => {
   });
 
   it('should render resource finding table content when data items exists', () => {
-    const data = Array.from({ length: 10 }, getFakeFindings);
+    const data = Array.from({ length: 10 }, getResourceFindingsTableFixture);
 
     const props: ResourceFindingsTableProps = {
       loading: false,
