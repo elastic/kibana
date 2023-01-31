@@ -489,14 +489,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.testExecution.logTestStep(
             `sets the date picker to the default '15 minutes ago'`
           );
-          await transform.datePicker.openSuperDatePicker();
           await transform.datePicker.quickSelect(15, 'm');
 
           await transform.testExecution.logTestStep('displays an empty index preview');
           await transform.wizard.assertIndexPreviewEmpty();
 
           await transform.testExecution.logTestStep(`sets the date picker to '10 Years ago'`);
-          await transform.datePicker.openSuperDatePicker();
           await transform.datePicker.quickSelect();
 
           await transform.testExecution.logTestStep('loads the index preview');
@@ -718,13 +716,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await transform.testExecution.logTestStep(
               `sets the date picker to the default '15 minutes ago'`
             );
-            await transform.datePicker.openSuperDatePicker();
             await transform.datePicker.quickSelect(15, 'm');
             await transform.discover.assertNoResults(testData.destinationIndex);
             await transform.testExecution.logTestStep(
               'should switch quick select lookback to years'
             );
-            await transform.datePicker.openSuperDatePicker();
             await transform.datePicker.quickSelect();
           }
 

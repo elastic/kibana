@@ -26,6 +26,7 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
     },
 
     async quickSelect(timeValue: number = 15, timeUnit: string = 'y') {
+      await this.openSuperDatePicker();
       const quickMenuElement = await testSubjects.find('superDatePickerQuickMenu');
 
       // No test subject, defaults to select `"Years"` to look back 15 years instead of 15 minutes.
