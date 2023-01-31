@@ -24,8 +24,7 @@ export function SloList() {
   const [sort, setSort] = useState<SortType>('name');
   const [indicatorTypeFilter, setIndicatorTypeFilter] = useState<FilterType[]>([]);
 
-  const [isCloning, setIsCloning] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCloningOrDeleting, setIsCloningOrDeleting] = useState(false);
   const [shouldReload, setShouldReload] = useState(false);
 
   const {
@@ -43,17 +42,15 @@ export function SloList() {
   useEffect(() => {
     if (shouldReload) {
       setShouldReload(false);
-      setIsCloning(false);
-      setIsDeleting(false);
     }
-  }, [shouldReload]);
 
-  const handleCloning = (cloning: boolean) => {
-    setIsCloning(cloning);
-  };
+    if (!isLoadingSloList) {
+      setIsCloningOrDeleting(false);
+    }
+  }, [isLoadingSloList, shouldReload]);
 
-  const handleDeleting = (deleting: boolean) => {
-    setIsDeleting(deleting);
+  const handleCloningOrDeleting = () => {
+    setIsCloningOrDeleting(true);
   };
 
   const handleClonedOrDeleted = () => {
@@ -85,7 +82,7 @@ export function SloList() {
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
         <SloListSearchFilterSortBar
-          loading={isLoadingSloList || isCloning || isDeleting}
+          loading={isLoadingSloList || isCloningOrDeleting}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
           onChangeIndicatorTypeFilter={handleChangeIndicatorTypeFilter}
@@ -98,8 +95,8 @@ export function SloList() {
           loading={isLoadingSloList}
           error={error}
           onCloned={handleClonedOrDeleted}
-          onCloning={handleCloning}
-          onDeleting={handleDeleting}
+          onCloning={handleCloningOrDeleting}
+          onDeleting={handleCloningOrDeleting}
           onDeleted={handleClonedOrDeleted}
         />
       </EuiFlexItem>

@@ -35,9 +35,9 @@ export interface SloListItemProps {
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
   onCloned: () => void;
-  onCloning: (isCloning: boolean) => void;
+  onCloning: () => void;
   onDeleted: () => void;
-  onDeleting: (isDeleting: boolean) => void;
+  onDeleting: () => void;
 }
 
 export function SloListItem({
@@ -94,7 +94,9 @@ export function SloListItem({
   };
 
   useEffect(() => {
-    onCloning(isCloning);
+    if (isCloning) {
+      onCloning();
+    }
 
     if (isCloned) {
       onCloned();

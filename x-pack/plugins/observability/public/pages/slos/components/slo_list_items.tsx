@@ -18,9 +18,9 @@ export interface Props {
   loading: boolean;
   error: boolean;
   onCloned: () => void;
-  onCloning: (isCloning: boolean) => void;
+  onCloning: () => void;
   onDeleted: () => void;
-  onDeleting: (isDeleting: boolean) => void;
+  onDeleting: () => void;
 }
 
 export function SloListItems({
