@@ -64,7 +64,7 @@ export const CustomEquationEditor = ({
   const handleAddNewRow = useCallback(() => {
     setCustomMetrics((previous) => {
       const currentVars = previous?.map((m) => m.name) ?? [];
-      const name = first(xor(VAR_NAMES, currentVars)) || 'XX'; // This should never happen.
+      const name = first(xor(VAR_NAMES, currentVars))!;
       const nextMetrics = [...(previous || []), { ...NEW_METRIC, name }];
       debouncedOnChange({ ...expression, customMetrics: nextMetrics, equation, label });
       return nextMetrics;
