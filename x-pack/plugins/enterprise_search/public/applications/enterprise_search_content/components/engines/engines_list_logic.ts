@@ -130,6 +130,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
         setIsFirstRequest: () => true,
       },
     ],
+
     parameters: [
       { meta: DEFAULT_META },
       {
@@ -166,10 +167,11 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
         [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
     results: [() => [selectors.data], (data) => data?.results ?? []],
+
     hasNoEngines: [
       () => [selectors.data, selectors.results],
       (data: EngineListValues['data'], results: EngineListValues['results']) =>
-        (data?.isInitialRequest && results.length === 0) ?? false,
+        (data?.meta?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
     ],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
   }),
