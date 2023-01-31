@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning basic license - permissions', function () {
+  describe('machine learning basic license - data visualizer - group 2', function () {
     this.tags(['skipFirefox', 'ml']);
 
     before(async () => {
@@ -34,8 +34,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./full_ml_access'));
-    loadTestFile(require.resolve('./read_ml_access'));
-    loadTestFile(require.resolve('./no_ml_access'));
+    // The data visualizer should work the same as with a trial license, except the missing create actions
+    // That's why the 'basic' version of 'index_data_visualizer_actions_panel' is loaded here
+    loadTestFile(
+      require.resolve('../../../../../functional/apps/ml/data_visualizer/index_data_visualizer')
+    );
   });
 }

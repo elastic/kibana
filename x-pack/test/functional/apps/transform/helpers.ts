@@ -9,45 +9,7 @@ import {
   TransformLatestConfig,
   TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';
-import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const transform = getService('transform');
-
-  describe('transform', function () {
-    this.tags('transform');
-
-    before(async () => {
-      await transform.securityCommon.createTransformRoles();
-      await transform.securityCommon.createTransformUsers();
-    });
-
-    after(async () => {
-      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await transform.securityUI.logout();
-
-      await transform.securityCommon.cleanTransformUsers();
-      await transform.securityCommon.cleanTransformRoles();
-
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
-
-      await transform.testResources.resetKibanaTimeZone();
-    });
-
-    loadTestFile(require.resolve('./permissions'));
-    loadTestFile(require.resolve('./creation_index_pattern'));
-    loadTestFile(require.resolve('./creation_saved_search'));
-    loadTestFile(require.resolve('./creation_runtime_mappings'));
-    loadTestFile(require.resolve('./cloning'));
-    loadTestFile(require.resolve('./editing'));
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./deleting'));
-    loadTestFile(require.resolve('./resetting'));
-    loadTestFile(require.resolve('./starting'));
-  });
-}
 export interface ComboboxOption {
   identifier: string;
   label: string;
