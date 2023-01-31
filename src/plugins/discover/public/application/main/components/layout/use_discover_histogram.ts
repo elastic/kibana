@@ -14,7 +14,7 @@ import {
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
@@ -80,6 +80,7 @@ export const useDiscoverHistogram = ({
         services: { ...services, uiActions: getUiActions() },
         localStorageKeyPrefix: 'discover',
         disableAutoFetching: true,
+        getEditVisualizationTimeRange: services.timefilter.getTime,
         initialState: {
           dataView,
           query,
@@ -157,7 +158,19 @@ export const useDiscoverHistogram = ({
   }, [inspectorAdapters, stateContainer, unifiedHistogram]);
 
   const firstLoadComplete = useRef(false);
-  const { query, filters, timeRange } = useQuerySubscriber({ data: services.data });
+
+  const {
+    query,
+    filters,
+    fromDate: from,
+    toDate: to,
+  } = useQuerySubscriber({ data: services.data });
+
+  const timeRange = useMemo(
+    () => (from && to ? { from, to } : services.data.query.timefilter.timefilter.getTimeDefaults()),
+    [services.data.query.timefilter.timefilter, from, to]
+  );
+
   const { fetchStatus: totalHitsStatus, result: totalHitsResult } = useDataState(
     savedSearchData$.totalHits$
   );

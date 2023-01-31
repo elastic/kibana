@@ -19,7 +19,11 @@ import { useStateProps } from './hooks/use_state_props';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
-  'services' | 'disableAutoFetching' | 'disableTriggers' | 'disabledActions'
+  | 'services'
+  | 'disableAutoFetching'
+  | 'disableTriggers'
+  | 'disabledActions'
+  | 'getEditVisualizationTimeRange'
 >;
 
 /**
@@ -94,9 +98,21 @@ export const UnifiedHistogramContainer = forwardRef<
     () => ({
       initialized,
       initialize: (options: UnifiedHistogramInitializeOptions) => {
-        const { services, disableAutoFetching, disableTriggers, disabledActions } = options;
+        const {
+          services,
+          disableAutoFetching,
+          disableTriggers,
+          disabledActions,
+          getEditVisualizationTimeRange,
+        } = options;
 
-        setLayoutProps({ services, disableAutoFetching, disableTriggers, disabledActions });
+        setLayoutProps({
+          services,
+          disableAutoFetching,
+          disableTriggers,
+          disabledActions,
+          getEditVisualizationTimeRange,
+        });
         setStateService(new UnifiedHistogramStateService(options));
         setInitialized(true);
       },

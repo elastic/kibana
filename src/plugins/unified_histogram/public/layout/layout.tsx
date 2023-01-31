@@ -97,6 +97,11 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   input$?: UnifiedHistogramInput$;
   /**
+   * Override the time range used for the edit visualization button (e.g. passed in an absolute
+   * range, but want the edit button to use a relative range) -- defaults to the current time range
+   */
+  getEditVisualizationTimeRange?: () => TimeRange;
+  /**
    * Callback to update the topPanelHeight prop when a resize is triggered
    */
   onTopPanelHeightChange?: (topPanelHeight: number | undefined) => void;
@@ -149,6 +154,7 @@ export const UnifiedHistogramLayout = ({
   disableTriggers,
   disabledActions,
   input$,
+  getEditVisualizationTimeRange,
   onTopPanelHeightChange,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -217,6 +223,7 @@ export const UnifiedHistogramLayout = ({
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           input$={input$}
+          getEditVisualizationTimeRange={getEditVisualizationTimeRange}
           onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
