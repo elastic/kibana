@@ -36,6 +36,7 @@ const MonitorEditPage: React.FC = () => {
   }, []);
 
   const isReadOnly = data?.attributes[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+  const projectId = data?.attributes[ConfigKey.PROJECT_ID];
 
   return data && !loading && !error ? (
     <MonitorForm defaultValues={data?.attributes}>
@@ -43,6 +44,7 @@ const MonitorEditPage: React.FC = () => {
         stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
         isEditFlow={true}
         readOnly={isReadOnly}
+        projectId={projectId}
       />
       <MonitorDetailsLinkPortal
         configId={data?.attributes[ConfigKey.CONFIG_ID]}

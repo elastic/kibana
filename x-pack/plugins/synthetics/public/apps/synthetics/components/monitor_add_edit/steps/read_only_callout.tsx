@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const ReadOnlyCallout = () => {
+export const ReadOnlyCallout = ({ projectId }: { projectId: string }) => {
   return (
     <EuiCallOut
       title={
@@ -21,8 +21,9 @@ export const ReadOnlyCallout = () => {
     >
       <p>
         <FormattedMessage
-          id="xpack.synthetics.browser.project.readOnly.callout.content"
-          defaultMessage="This monitor was added from an external project. Configuration is read only."
+          id="xpack.synthetics.project.readOnly.callout.content"
+          defaultMessage="This monitor was added from an external project: {projectId}. Configuration is read only."
+          values={{ projectId: <strong>{projectId}</strong> }}
         />
       </p>
     </EuiCallOut>

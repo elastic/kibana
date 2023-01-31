@@ -15,12 +15,14 @@ import { ReadOnlyCallout } from './read_only_callout';
 
 export const MonitorSteps = ({
   stepMap,
+  projectId,
   isEditFlow = false,
   readOnly = false,
 }: {
   stepMap: StepMap;
   readOnly?: boolean;
   isEditFlow?: boolean;
+  projectId?: string;
 }) => {
   const { watch } = useFormContext();
   const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
@@ -30,7 +32,7 @@ export const MonitorSteps = ({
     <>
       {readOnly ? (
         <>
-          <ReadOnlyCallout />
+          <ReadOnlyCallout projectId={projectId} />
           <EuiSpacer size="m" />
         </>
       ) : null}
