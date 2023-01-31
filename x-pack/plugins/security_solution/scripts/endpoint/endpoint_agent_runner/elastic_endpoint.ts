@@ -8,10 +8,12 @@
 import { userInfo } from 'os';
 import execa from 'execa';
 import nodeFetch from 'node-fetch';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { getEndpointPackageInfo } from '../../../common/endpoint/index_data';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   fetchAgentPolicyEnrollmentKey,
+  fetchAgentPolicyList,
   fetchFleetServerUrl,
   waitForHostToEnroll,
 } from '../common/fleet_services';
@@ -25,32 +27,10 @@ export const enrollEndpointHost = async (agentPolicyId?: string) => {
 
   try {
     const uniqueId = Math.random().toString(32).substring(2).substring(0, 4);
-    const endpointPackageVersion = (await getEndpointPackageInfo(kbnClient)).version;
     const username = userInfo().username.toLowerCase();
 
     // FIXME:PT try to limit how many policies are created
-    const policyId: string =
-      agentPolicyId ||
-      (await indexFleetEndpointPolicy(
-        kbnClient,
-        `${username} policy ${uniqueId}`,
-        endpointPackageVersion
-      )
-        .then((response) => {
-          const agentPolicy = response.agentPolicies[0];
-
-          log.info(`New agent policy with Endpoint integration created:
-    Name: ${agentPolicy.name}
-    Id:   ${agentPolicy.id}`);
-
-          log.verbose(JSON.stringify(response, null, 2));
-
-          return agentPolicy.id ?? '';
-        })
-        .catch((error) => {
-          log.verbose(error);
-          throw error;
-        }));
+    const policyId: string = agentPolicyId || (await getOrCreateAgentPolicyId());
 
     if (!policyId) {
       throw new Error(`No valid policy id provide or unable to create it`);
@@ -184,4 +164,41 @@ const getAgentDownloadUrl = async (version: string): Promise<string> => {
   }
 
   return `${urlRoot}${agentFile}`;
+};
+
+const getOrCreateAgentPolicyId = async (): Promise<string> => {
+  const { kbnClient, log } = getRuntimeServices();
+  const username = userInfo().username.toLowerCase();
+  const endpointPolicyName = `${username} test integration`;
+  const agentPolicyName = `${username} test policy`;
+
+  const existingPolicy = await fetchAgentPolicyList(kbnClient, {
+    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${agentPolicyName}"`,
+  });
+
+  if (existingPolicy.items[0]) {
+    log.info(`Using existing Fleet test agent policy`);
+    log.verbose(existingPolicy.items[0]);
+
+    return existingPolicy.items[0].id;
+  }
+
+  // Create new policy
+  const endpointPackageVersion = (await getEndpointPackageInfo(kbnClient)).version;
+  const response = await indexFleetEndpointPolicy(
+    kbnClient,
+    endpointPolicyName,
+    endpointPackageVersion,
+    agentPolicyName
+  );
+
+  const agentPolicy = response.agentPolicies[0];
+
+  log.info(`New agent policy with Endpoint integration created:
+  Name: ${agentPolicy.name}
+  Id:   ${agentPolicy.id}`);
+
+  log.verbose(JSON.stringify(response, null, 2));
+
+  return agentPolicy.id ?? '';
 };

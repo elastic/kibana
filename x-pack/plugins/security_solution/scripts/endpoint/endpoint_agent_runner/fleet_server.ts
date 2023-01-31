@@ -55,8 +55,6 @@ export const runFleetServerIfNeeded = async () => {
   const fleetServerAlreadyEnrolled = await isFleetServerEnrolled();
 
   if (fleetServerAlreadyEnrolled) {
-    // FIXME:PT If localhost, ensure fleet host info in Fleet has correct IP for this machine
-
     log.info(`Fleet server is already enrolled with Fleet. Nothing to do.`);
     log.indent(-4);
     return;
@@ -376,13 +374,12 @@ const addFleetServerHostToFleetSettings = async (
   log.indent(4);
 
   try {
-    // Check if a fleet server entry needs to be added
-    const exitingFleetServerHostEntry = await fetchFleetServerUrl(kbnClient);
+    const exitingFleetServerHostUrl = await fetchFleetServerUrl(kbnClient);
 
     const newFleetHostEntry: PostFleetServerHostsRequest['body'] = {
       name: `Dev fleet server running on localhost`,
       host_urls: [fleetServerHostUrl],
-      is_default: !exitingFleetServerHostEntry,
+      is_default: !exitingFleetServerHostUrl,
     };
 
     const { item } = await kbnClient
