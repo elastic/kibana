@@ -890,8 +890,8 @@ describe('SavedObjectsRepository Spaces Extension', () => {
 
   describe(`with security extension`, () => {
     // Note: resolve, bulkResolve, and collectMultiNamespaceReferences are not tested here because they
-    // receive parameter arguments from internal methods (internalBulkResolve and the internal
-    // implemenation of collectMultiNamespaceReferences). Arguments to these methods are tested above.
+    // are called from other internal methods (internalBulkResolve and the internal
+    // implementation of collectMultiNamespaceReferences). Arguments to these methods are tested above.
     const currentSpace = 'current_space';
 
     beforeEach(() => {
