@@ -50,6 +50,7 @@ describe('WebhookParamsFields renders', () => {
         actionConnector={actionConnector}
         actionParams={actionParams}
         errors={{ body: [] }}
+        warnings={{}}
         editAction={() => {}}
         index={0}
         messageVariables={[
@@ -78,6 +79,7 @@ describe('WebhookParamsFields renders', () => {
         actionConnector={actionConnectorNoComments}
         actionParams={actionParams}
         errors={{ body: [] }}
+        warnings={{}}
         editAction={() => {}}
         index={0}
         messageVariables={[

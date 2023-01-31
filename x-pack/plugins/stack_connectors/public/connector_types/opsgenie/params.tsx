@@ -43,6 +43,7 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
   index,
   messageVariables,
   executionMode,
+  warnings,
 }) => {
   const { subAction, subActionParams } = actionParams;
 
@@ -124,6 +125,7 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
           editSubAction={editSubAction}
           editOptionalSubAction={editOptionalSubAction}
           errors={errors}
+          warnings={warnings}
           index={index}
           messageVariables={messageVariables}
         />
@@ -136,6 +138,7 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
           editSubAction={editSubAction}
           editOptionalSubAction={editOptionalSubAction}
           errors={errors}
+          warnings={warnings}
           index={index}
           messageVariables={messageVariables}
         />

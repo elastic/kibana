@@ -70,6 +70,7 @@ const webhook = {
 const story = { id: webhook.storyId, name: 'test story', published: false };
 const actionParams = { subActionParams: { webhook } };
 const emptyErrors = { subAction: [], subActionParams: [] };
+const emptyWarnings = {};
 
 describe('TinesParamsFields renders', () => {
   beforeEach(() => {
@@ -82,6 +83,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={{}}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.ActionForm}
@@ -109,6 +111,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={{}}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.Test}
@@ -135,6 +138,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={{}}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.ActionForm}
@@ -154,6 +158,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={{}}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.ActionForm}
@@ -186,6 +191,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={{}}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.ActionForm}
@@ -206,6 +212,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={{}}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.ActionForm}
@@ -243,6 +250,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={{}}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.ActionForm}
@@ -288,6 +296,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={{}}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.ActionForm}
@@ -304,6 +313,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={actionParams}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.ActionForm}
@@ -329,6 +339,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={actionParams}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.ActionForm}
@@ -350,6 +361,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={{ subActionParams: { webhook: { ...webhook, storyId: story.id + 1 } } }}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.ActionForm}
@@ -366,6 +378,7 @@ describe('TinesParamsFields renders', () => {
         <TinesParamsFields
           actionParams={{ subActionParams: { webhook: { ...webhook, id: webhook.id + 1 } } }}
           errors={emptyErrors}
+          warnings={emptyWarnings}
           editAction={mockEditAction}
           index={index}
           executionMode={ActionConnectorMode.ActionForm}
@@ -397,6 +410,7 @@ describe('TinesParamsFields renders', () => {
           <TinesParamsFields
             actionParams={actionParams}
             errors={emptyErrors}
+            warnings={emptyWarnings}
             editAction={mockEditAction}
             index={index}
             executionMode={ActionConnectorMode.ActionForm}
@@ -417,6 +431,7 @@ describe('TinesParamsFields renders', () => {
           <TinesParamsFields
             actionParams={actionParams}
             errors={emptyErrors}
+            warnings={emptyWarnings}
             editAction={mockEditAction}
             index={index}
             executionMode={ActionConnectorMode.ActionForm}
@@ -431,6 +446,7 @@ describe('TinesParamsFields renders', () => {
           <TinesParamsFields
             actionParams={actionParams}
             errors={emptyErrors}
+            warnings={emptyWarnings}
             editAction={mockEditAction}
             index={index}
             executionMode={ActionConnectorMode.ActionForm}
@@ -451,6 +467,7 @@ describe('TinesParamsFields renders', () => {
           <TinesParamsFields
             actionParams={actionParams}
             errors={emptyErrors}
+            warnings={emptyWarnings}
             editAction={mockEditAction}
             index={index}
             executionMode={ActionConnectorMode.ActionForm}
@@ -466,6 +483,7 @@ describe('TinesParamsFields renders', () => {
           <TinesParamsFields
             actionParams={{ subActionParams: { ...actionParams.subActionParams, webhookUrl } }}
             errors={emptyErrors}
+            warnings={emptyWarnings}
             editAction={mockEditAction}
             index={index}
             executionMode={ActionConnectorMode.ActionForm}
@@ -492,6 +510,7 @@ describe('TinesParamsFields renders', () => {
           <TinesParamsFields
             actionParams={{}}
             errors={emptyErrors}
+            warnings={emptyWarnings}
             editAction={mockEditAction}
             index={index}
             executionMode={ActionConnectorMode.ActionForm}
@@ -516,6 +535,7 @@ describe('TinesParamsFields renders', () => {
           <TinesParamsFields
             actionParams={{}}
             errors={emptyErrors}
+            warnings={emptyWarnings}
             editAction={mockEditAction}
             index={index}
             executionMode={ActionConnectorMode.ActionForm}

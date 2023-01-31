@@ -20,6 +20,7 @@ describe('TeamsParamsFields renders', () => {
       <TeamsParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
+        warnings={{}}
         editAction={() => {}}
         index={0}
       />

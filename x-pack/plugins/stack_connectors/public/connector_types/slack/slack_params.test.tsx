@@ -19,6 +19,7 @@ describe('SlackParamsFields renders', () => {
       <SlackParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
+        warnings={{}}
         editAction={() => {}}
         index={0}
       />

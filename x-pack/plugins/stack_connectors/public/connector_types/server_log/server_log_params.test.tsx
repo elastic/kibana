@@ -21,6 +21,7 @@ describe('ServerLogParamsFields renders', () => {
       <ServerLogParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
+        warnings={{}}
         editAction={editAction}
         index={0}
         defaultMessage={'test default message'}
@@ -44,6 +45,7 @@ describe('ServerLogParamsFields renders', () => {
       <ServerLogParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
+        warnings={{}}
         editAction={editAction}
         index={0}
       />
@@ -64,6 +66,7 @@ describe('ServerLogParamsFields renders', () => {
         actionParams={actionParams}
         defaultMessage={'Some default message'}
         errors={{ message: [] }}
+        warnings={{}}
         editAction={editAction}
         index={0}
       />
@@ -83,6 +86,7 @@ describe('ServerLogParamsFields renders', () => {
         actionParams={actionParams}
         defaultMessage={'Some default message'}
         errors={{ message: [] }}
+        warnings={{}}
         editAction={editAction}
         index={0}
       />
@@ -108,6 +112,7 @@ describe('ServerLogParamsFields renders', () => {
         actionParams={actionParams}
         defaultMessage={'Some default message'}
         errors={{ message: [] }}
+        warnings={{}}
         editAction={editAction}
         index={0}
       />

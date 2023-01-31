@@ -23,6 +23,7 @@ describe('EmailParamsFields renders', () => {
       <EmailParamsFields
         actionParams={actionParams}
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+        warnings={{}}
         editAction={() => {}}
         index={0}
       />
@@ -49,6 +50,7 @@ describe('EmailParamsFields renders', () => {
       <EmailParamsFields
         actionParams={actionParams}
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+        warnings={{}}
         editAction={editAction}
         defaultMessage={'Some default message'}
         index={0}
@@ -71,6 +73,7 @@ describe('EmailParamsFields renders', () => {
       <EmailParamsFields
         actionParams={actionParams}
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+        warnings={{}}
         editAction={editAction}
         defaultMessage={'Some default message'}
         index={0}
@@ -99,6 +102,7 @@ describe('EmailParamsFields renders', () => {
       <EmailParamsFields
         actionParams={actionParams}
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+        warnings={{}}
         editAction={editAction}
         defaultMessage={'Some default message'}
         index={0}

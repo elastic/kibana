@@ -15,6 +15,7 @@ describe('AdditionalOptions', () => {
   const options = {
     index: 0,
     editOptionalSubAction,
+    warnings: {},
   };
 
   beforeEach(() => jest.clearAllMocks());
