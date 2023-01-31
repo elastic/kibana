@@ -53,12 +53,14 @@ export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
 export const caseWithAlertsId = 'case-with-alerts-id';
 export const caseWithAlertsSyncOffId = 'case-with-alerts-syncoff-id';
+export const pushConnectorId = 'servicenow-1';
 
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
 const basicClosedAt = '2020-02-21T15:02:57.995Z';
-const laterTime = '2020-02-28T15:02:57.995Z';
+const basicPushedAt = '2023-01-17T09:46:29.813Z';
+const laterTime = '2023-01-18T09:46:29.813Z';
 
 export const elasticUser = {
   fullName: 'Leslie Knope',
@@ -370,21 +372,21 @@ export const casesMetrics: CasesMetrics = {
 };
 
 export const basicPush = {
-  connectorId: '123',
-  connectorName: 'connector name',
+  connectorId: pushConnectorId,
+  connectorName: 'My SN connector',
   externalId: 'external_id',
   externalTitle: 'external title',
   externalUrl: 'basicPush.com',
-  pushedAt: basicUpdatedAt,
+  pushedAt: basicPushedAt,
   pushedBy: elasticUser,
 };
 
 export const pushedCase: Case = {
   ...basicCase,
   connector: {
-    id: '123',
-    name: 'My Connector',
-    type: ConnectorTypes.jira,
+    id: pushConnectorId,
+    name: 'My SN connector',
+    type: ConnectorTypes.serviceNowITSM,
     fields: null,
   },
   externalService: basicPush,
@@ -539,10 +541,9 @@ export const casesStatusSnake: CasesStatusResponse = {
   count_open_cases: 20,
 };
 
-export const pushConnectorId = '123';
 export const pushSnake = {
   connector_id: pushConnectorId,
-  connector_name: 'connector name',
+  connector_name: 'My SN connector',
   external_id: 'external_id',
   external_title: 'external title',
   external_url: 'basicPush.com',
@@ -550,16 +551,16 @@ export const pushSnake = {
 
 export const basicPushSnake = {
   ...pushSnake,
-  pushed_at: basicUpdatedAt,
+  pushed_at: basicPushedAt,
   pushed_by: elasticUserSnake,
 };
 
 export const pushedCaseSnake = {
   ...basicCaseSnake,
   connector: {
-    id: '123',
-    name: 'My Connector',
-    type: ConnectorTypes.jira,
+    id: pushConnectorId,
+    name: 'My SN connector',
+    type: ConnectorTypes.serviceNowITSM,
     fields: null,
   },
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
@@ -605,11 +606,11 @@ export const getUserAction = (
 
   const externalService = {
     connectorId: pushConnectorId,
-    connectorName: 'connector name',
+    connectorName: 'My SN connector',
     externalId: 'external_id',
     externalTitle: 'external title',
     externalUrl: 'basicPush.com',
-    pushedAt: basicUpdatedAt,
+    pushedAt: basicPushedAt,
     pushedBy: elasticUser,
   };
 
@@ -667,6 +668,7 @@ export const getUserAction = (
     case ActionTypes.pushed:
       return {
         ...commonProperties,
+        createdAt: basicPushedAt,
         type: ActionTypes.pushed,
         payload: {
           externalService,
