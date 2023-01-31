@@ -15,15 +15,22 @@ interface GetSignalsMatchesFromThreatIndexOptions {
   eventsCount: number;
 }
 
+/**
+ * fetch threats and creates signals matches map form them
+ */
 export const getSignalsMatchesFromThreatIndex = async ({
   threatSearchParams,
   eventsCount,
 }: GetSignalsMatchesFromThreatIndexOptions): Promise<Map<string, ThreatMatchNamedQuery[]>> => {
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
-  const mapper = new Map<string, ThreatMatchNamedQuery[]>();
-  const disabledMap = new Map();
+  const signalsMap = new Map<string, ThreatMatchNamedQuery[]>();
+  // number of threat matches per signal is limited by MAX_NUMBER_OF_SIGNAL_MATCHES. Once it hits this number, threats stop to be processed for a signal
+  const maxThreatsReachedMap = new Map<string, boolean>();
 
-  while (disabledMap.size < eventsCount && (threatList ? threatList?.hits.hits.length > 0 : true)) {
+  while (
+    maxThreatsReachedMap.size < eventsCount &&
+    (threatList ? threatList?.hits.hits.length > 0 : true)
+  ) {
     threatList = await getThreatList({
       ...threatSearchParams,
       searchAfter: threatList?.hits.hits[threatList.hits.hits.length - 1].sort || undefined,
@@ -32,10 +39,10 @@ export const getSignalsMatchesFromThreatIndex = async ({
     threatList.hits.hits.forEach((threatHit) => {
       const matchedQueries = threatHit?.matched_queries || [];
 
-      matchedQueries.forEach((mq) => {
-        const matchDecoded = decodeThreatMatchNamedQuery(mq);
+      matchedQueries.forEach((matchedQuery) => {
+        const matchDecoded = decodeThreatMatchNamedQuery(matchedQuery);
 
-        if (disabledMap.get(matchDecoded.id)) {
+        if (maxThreatsReachedMap.get(matchDecoded.id)) {
           return;
         }
 
@@ -46,15 +53,15 @@ export const getSignalsMatchesFromThreatIndex = async ({
           value: matchDecoded.value,
         };
 
-        const signalMatch = mapper.get(matchDecoded.id);
+        const signalMatch = signalsMap.get(matchDecoded.id);
 
         if (!signalMatch) {
-          mapper.set(matchDecoded.id, [threatQuery]);
+          signalsMap.set(matchDecoded.id, [threatQuery]);
           return;
         }
 
         if (signalMatch.length === MAX_NUMBER_OF_SIGNAL_MATCHES) {
-          disabledMap.set(matchDecoded.id, true);
+          maxThreatsReachedMap.set(matchDecoded.id, true);
         } else if (signalMatch.length < MAX_NUMBER_OF_SIGNAL_MATCHES) {
           signalMatch.push(threatQuery);
         }
@@ -62,5 +69,5 @@ export const getSignalsMatchesFromThreatIndex = async ({
     });
   }
 
-  return mapper;
+  return signalsMap;
 };

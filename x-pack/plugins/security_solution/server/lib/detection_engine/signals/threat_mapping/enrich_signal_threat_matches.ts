@@ -156,37 +156,9 @@ export const enrichSignalThreatMatches = async (
     });
   });
 
-  const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit, i) => {
-    const threat = get(signalHit._source, 'threat') ?? {};
-    if (!isObject(threat)) {
-      throw new Error(`Expected threat field to be an object, but found: ${threat}`);
-    }
-    // We are not using ENRICHMENT_DESTINATION_PATH here because the code above
-    // and below make assumptions about its current value, 'threat.enrichments',
-    // and making this code dynamic on an arbitrary path would introduce several
-    // new issues.
-    const existingEnrichmentValue = get(signalHit._source, 'threat.enrichments') ?? [];
-    const existingEnrichments = [existingEnrichmentValue].flat(); // ensure enrichments is an array
-    const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[signalHit._id] ?? [];
-    const newEnrichments = newEnrichmentsWithoutAtomic.map((enrichment) => ({
-      ...enrichment,
-      matched: {
-        ...enrichment.matched,
-        atomic: get(signalHit._source, enrichment.matched.field),
-      },
-    }));
-
-    return {
-      ...signalHit,
-      _source: {
-        ...signalHit._source,
-        threat: {
-          ...threat,
-          enrichments: [...existingEnrichments, ...newEnrichments],
-        },
-      },
-    };
-  });
+  const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit) =>
+    enrichSignalWithThreatMatches(signalHit, enrichmentsWithoutAtomic)
+  );
 
   return enrichedSignals;
 };
@@ -226,7 +198,10 @@ const enrichSignalWithThreatMatches = (
   };
 };
 
-export const enrichSignalThreatMatches2 = async (
+/**
+ * enrich signals threat matches using signalsMap(Map<string, ThreatMatchNamedQuery[]>) that has match named query results
+ */
+export const enrichSignalThreatMatchesFromSignalsMap = async (
   signals: SignalSourceHit[],
   getMatchedThreats: GetMatchedThreats,
   indicatorPath: string,
@@ -250,7 +225,7 @@ export const enrichSignalThreatMatches2 = async (
     });
   });
 
-  const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit, i) =>
+  const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit) =>
     enrichSignalWithThreatMatches(signalHit, enrichmentsWithoutAtomic)
   );
 

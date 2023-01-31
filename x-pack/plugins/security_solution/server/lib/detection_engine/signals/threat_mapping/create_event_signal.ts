@@ -11,18 +11,12 @@ import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
 import type { CreateEventSignalOptions } from './types';
 import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
-import { getAllThreatListHits, getThreatList } from './get_threat_list';
-import {
-  enrichSignalThreatMatches,
-  enrichSignalThreatMatches2,
-  getSignalMatchesFromThreatList,
-} from './enrich_signal_threat_matches';
+import { getThreatList } from './get_threat_list';
+import { enrichSignalThreatMatchesFromSignalsMap } from './enrich_signal_threat_matches';
 import { getSignalsMatchesFromThreatIndex } from './get_signal_matches_from_threat_index';
 
-export const createEventSignalOld = async ({
-  alertId,
+export const createEventSignal = async ({
   bulkCreate,
-  completeRule,
   currentResult,
   currentEventList,
   eventsTelemetry,
@@ -30,7 +24,6 @@ export const createEventSignalOld = async ({
   inputIndex,
   language,
   listClient,
-  outputIndex,
   query,
   ruleExecutionLogger,
   savedId,
@@ -67,7 +60,7 @@ export const createEventSignalOld = async ({
     );
     return currentResult;
   } else {
-    const threatListHits = await getAllThreatListHits({
+    const threatSearchParams = {
       esClient: services.scopedClusterClient.asCurrentUser,
       threatFilters: [...threatFilters, threatFilter],
       query: threatQuery,
@@ -75,7 +68,7 @@ export const createEventSignalOld = async ({
       index: threatIndex,
       ruleExecutionLogger,
       threatListConfig: {
-        _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
+        _source: false,
         fields: undefined,
       },
       pitId: threatPitId,
@@ -83,144 +76,10 @@ export const createEventSignalOld = async ({
       runtimeMappings,
       listClient,
       exceptionFilter,
-    });
-
-    const signalMatches = getSignalMatchesFromThreatList(threatListHits);
-
-    const ids = signalMatches.map((item) => item.signalId);
-
-    const indexFilter = {
-      query: {
-        bool: {
-          filter: {
-            ids: { values: ids },
-          },
-        },
-      },
     };
 
-    const esFilter = await getFilter({
-      type,
-      filters: [...filters, indexFilter],
-      language,
-      query,
-      savedId,
-      services,
-      index: inputIndex,
-      exceptionFilter,
-    });
-
-    ruleExecutionLogger.debug(
-      `${ids?.length} matched signals found from ${threatListHits.length} indicators`
-    );
-
-    const threatEnrichment = (signals: SignalSourceHit[]): Promise<SignalSourceHit[]> =>
-      enrichSignalThreatMatches(
-        signals,
-        () => Promise.resolve(threatListHits),
-        threatIndicatorPath,
-        signalMatches
-      );
-
-    const result = await searchAfterAndBulkCreate({
-      buildReasonMessage: buildReasonMessageForThreatMatchAlert,
-      bulkCreate,
-      enrichment: threatEnrichment,
-      eventsTelemetry,
-      exceptionsList: unprocessedExceptions,
-      filter: esFilter,
-      inputIndexPattern: inputIndex,
-      listClient,
-      pageSize: searchAfterSize,
-      ruleExecutionLogger,
-      services,
-      sortOrder: 'desc',
-      trackTotalHits: false,
-      tuple,
-      wrapHits,
-      runtimeMappings,
-      primaryTimestamp,
-      secondaryTimestamp,
-    });
-
-    ruleExecutionLogger.debug(
-      `${
-        threatFilter.query?.bool.should.length
-      } items have completed match checks and the total times to search were ${
-        result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
-      }ms`
-    );
-    return result;
-  }
-};
-
-export const createEventSignal = async ({
-  alertId,
-  bulkCreate,
-  completeRule,
-  currentResult,
-  currentEventList,
-  eventsTelemetry,
-  filters,
-  inputIndex,
-  language,
-  listClient,
-  outputIndex,
-  query,
-  ruleExecutionLogger,
-  savedId,
-  searchAfterSize,
-  services,
-  threatMapping,
-  tuple,
-  type,
-  wrapHits,
-  // threatEnrichment,
-  threatQuery,
-  threatFilters,
-  threatLanguage,
-  threatIndex,
-  threatIndicatorPath,
-  threatPitId,
-  reassignThreatPitId,
-  runtimeMappings,
-  primaryTimestamp,
-  secondaryTimestamp,
-  exceptionFilter,
-  unprocessedExceptions,
-}: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const threatFilter = buildThreatMappingFilter({
-    threatMapping,
-    threatList: currentEventList,
-    entryKey: 'field',
-  });
-
-  if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
-    // empty event list and we do not want to return everything as being
-    // a hit so opt to return the existing result.
-    ruleExecutionLogger.debug(
-      'Indicator items are empty after filtering for missing data, returning without attempting a match'
-    );
-    return currentResult;
-  } else {
     const signalsMap = await getSignalsMatchesFromThreatIndex({
-      threatSearchParams: {
-        esClient: services.scopedClusterClient.asCurrentUser,
-        threatFilters: [...threatFilters, threatFilter],
-        query: threatQuery,
-        language: threatLanguage,
-        index: threatIndex,
-        ruleExecutionLogger,
-        threatListConfig: {
-          _source: false,
-          fields: undefined,
-        },
-        pitId: threatPitId,
-        reassignPitId: reassignThreatPitId,
-        runtimeMappings,
-        listClient,
-        exceptionFilter,
-      },
+      threatSearchParams,
       eventsCount: currentEventList.length,
     });
 
@@ -246,9 +105,7 @@ export const createEventSignal = async ({
       exceptionFilter,
     });
 
-    // ruleExecutionLogger.debug(
-    //   `${ids?.length} matched signals found from ${threatListHits.length} indicators`
-    // );
+    ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
 
     const threatEnrichment = (signals: SignalSourceHit[]): Promise<SignalSourceHit[]> => {
       const buildThreatEnrichment = async () => {
@@ -273,29 +130,20 @@ export const createEventSignal = async ({
             },
           },
         };
+
         const threatResponse = await getThreatList({
-          esClient: services.scopedClusterClient.asCurrentUser,
-          index: threatIndex,
-          language: threatLanguage,
-          perPage: undefined,
-          query: threatQuery,
-          ruleExecutionLogger,
-          searchAfter: undefined,
-          threatFilters: [...threatFilters, matchedThreatsFilter],
+          ...threatSearchParams,
           threatListConfig: {
             _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
             fields: undefined,
           },
-          pitId: threatPitId,
-          reassignPitId: reassignThreatPitId,
-          runtimeMappings: undefined,
-          listClient,
-          exceptionFilter,
+          threatFilters: [...threatFilters, matchedThreatsFilter],
+          searchAfter: undefined,
         });
 
         return threatResponse.hits.hits;
       };
-      return enrichSignalThreatMatches2(
+      return enrichSignalThreatMatchesFromSignalsMap(
         signals,
         buildThreatEnrichment,
         threatIndicatorPath,
