@@ -81,7 +81,6 @@ import type {
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
-
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
@@ -475,6 +474,7 @@ export interface AlertsTableProps {
   id?: string;
   leadingControlColumns: EuiDataGridControlColumn[];
   showExpandToDetails: boolean;
+  showAlertStatusWithFlapping?: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
   visibleColumns: string[];
