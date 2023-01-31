@@ -6,21 +6,31 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 const { makeUsageCollector } = createUsageCollectionSetupMock();
 
 interface Usage {
-  locale: string;
+  [key: string]: {
+    count_1?: number;
+    count_2?: number;
+  };
 }
 
-// @ts-expect-error Intentionally not specifying `schema`
 export const myCollector = makeUsageCollector<Usage>({
-  type: 'unmapped_collector',
+  type: 'indexed_interface_with_not_matching_schema',
   isReady: () => true,
-  fetch(): Usage {
-    return {
-      locale: 'en',
-    };
+  fetch() {
+    if (Math.random()) {
+      return { something: { count_1: 1 } };
+    }
+    return { something: { count_2: 2 } };
+  },
+  schema: {
+    // @ts-expect-error Intentionally missing count_2
+    something: {
+      count_1: { type: 'long' },
+    },
   },
 });

@@ -6,21 +6,22 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { Usage } from './constants';
+import type { Usage } from './types';
 
 const { makeUsageCollector } = createUsageCollectionSetupMock();
 
 export const myCollector = makeUsageCollector<Usage>({
-  type: 'imported_usage_interface_collector',
+  type: 'importing_from_export_collector',
   isReady: () => true,
   fetch() {
     return {
-      locale: 'en',
+      some_field: 'abc',
     };
   },
   schema: {
-    locale: {
+    some_field: {
       type: 'keyword',
     },
   },

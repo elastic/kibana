@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getUsageCollector } from './get_usage_collector';
 
