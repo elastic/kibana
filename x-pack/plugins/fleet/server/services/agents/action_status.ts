@@ -119,14 +119,13 @@ export async function getActionStatuses(
       ...action,
       nbAgentsAck: nbAgentsAck - errorCount,
       nbAgentsFailed: errorCount,
-      status:
-        errorCount > 0
-          ? 'FAILED'
-          : complete
-          ? 'COMPLETE'
-          : cancelledAction
-          ? 'CANCELLED'
-          : action.status,
+      status: cancelledAction
+        ? 'CANCELLED'
+        : errorCount > 0 && complete
+        ? 'FAILED'
+        : complete
+        ? 'COMPLETE'
+        : action.status,
       nbAgentsActioned,
       cancellationTime: cancelledAction?.timestamp,
       completionTime,
@@ -196,7 +195,10 @@ async function _getActions(
       const source = hit._source!;
 
       if (!acc[source.action_id!]) {
-        const isExpired = source.expiration ? Date.parse(source.expiration) < Date.now() : false;
+        const isExpired =
+          source.expiration && source.type !== 'UPGRADE'
+            ? Date.parse(source.expiration) < Date.now()
+            : false;
         acc[hit._source.action_id] = {
           actionId: hit._source.action_id,
           nbAgentsActionCreated: 0,
