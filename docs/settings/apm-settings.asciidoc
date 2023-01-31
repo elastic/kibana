@@ -74,11 +74,6 @@ Maximum number of child items displayed when viewing trace details. Defaults to 
 `xpack.observability.annotations.index` {ess-icon}::
 Index name where Observability annotations are stored. Defaults to `observability-annotations`.
 
-`xpack.apm.searchAggregatedTransactions` {ess-icon}::
-Enables Transaction histogram metrics. Defaults to `auto` so the UI will use metric indices over transaction indices for transactions if aggregated transactions are found. When set to `always`, additional configuration in APM Server is required. When set to `never` and aggregated transactions are not used.
-+
-See {apm-guide-ref}/transaction-metrics.html[Configure transaction metrics] for more information.
-
 `xpack.apm.metricsInterval` {ess-icon}::
 Sets a `fixed_interval` for date histograms in metrics aggregations. Defaults to `30`.
 

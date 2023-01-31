@@ -5,24 +5,31 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
-import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
+import React from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
+import { joinByKey } from '../../../../common/utils/join_by_key';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { SearchBar } from '../../shared/search_bar';
-import { ServiceList } from './service_list';
-import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
-import { joinByKey } from '../../../../common/utils/join_by_key';
-import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
+import { SearchBar } from '../../shared/search_bar';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
+import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
 
 const initialData = {
@@ -202,6 +209,12 @@ export function ServiceInventory() {
     ...preloadedServices,
   ].some((item) => 'healthStatus' in item);
 
+  const hasKibanaUiLimitRestrictedData =
+    mainStatisticsFetch.data?.maxServiceCountExceeded;
+
+  const serviceOverflowCount =
+    mainStatisticsFetch.data?.serviceOverflowCount ?? 0;
+
   const displayAlerts = [...mainStatisticsItems, ...preloadedServices].some(
     (item) => ServiceInventoryFieldName.AlertsCount in item
   );
@@ -280,19 +293,45 @@ export function ServiceInventory() {
     'serviceName'
   );
 
+  const mlCallout = (
+    <EuiFlexItem>
+      <MLCallout
+        isOnSettingsPage={false}
+        anomalyDetectionSetupState={anomalyDetectionSetupState}
+        onDismiss={() => setUserHasDismissedCallout(true)}
+      />
+    </EuiFlexItem>
+  );
+
+  const kibanaUiServiceLimitCallout = (
+    <EuiFlexItem>
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.apm.serviceList.ui.limit.warning.calloutTitle',
+          {
+            defaultMessage:
+              'Number of services exceed the allowed maximum that are displayed (1,000)',
+          }
+        )}
+        color="warning"
+        iconType="alert"
+      >
+        <EuiText size="s">
+          <FormattedMessage
+            defaultMessage="Max. number of services that can be viewed in Kibana has been reached. Try narrowing down results by using the query bar or consider using service groups."
+            id="xpack.apm.serviceList.ui.limit.warning.calloutDescription"
+          />
+        </EuiText>
+      </EuiCallOut>
+    </EuiFlexItem>
+  );
+
   return (
     <>
       <SearchBar showTimeComparison />
       <EuiFlexGroup direction="column" gutterSize="m">
-        {displayMlCallout && (
-          <EuiFlexItem>
-            <MLCallout
-              isOnSettingsPage={false}
-              anomalyDetectionSetupState={anomalyDetectionSetupState}
-              onDismiss={() => setUserHasDismissedCallout(true)}
-            />
-          </EuiFlexItem>
-        )}
+        {displayMlCallout && mlCallout}
+        {hasKibanaUiLimitRestrictedData && kibanaUiServiceLimitCallout}
         <EuiFlexItem>
           <ServiceList
             isLoading={isLoading}
@@ -316,6 +355,7 @@ export function ServiceInventory() {
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
             initialPageSize={INITIAL_PAGE_SIZE}
+            serviceOverflowCount={serviceOverflowCount}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
