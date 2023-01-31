@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { isServerless } from '../../../common/util/serverless';
 import { checkPermission } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';
 import { GettingStartedCallout } from './components/getting_started_callout';
@@ -23,10 +22,11 @@ import { useMlKibana } from '../contexts/kibana';
 import { NodesList } from '../memory_usage/nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
+import { useIsServerless } from '../contexts/kibana/use_is_serverless';
 
 export const OverviewPage: FC = () => {
+  const serverless = useIsServerless();
   const canViewMlNodes = checkPermission('canViewMlNodes');
-  const serverless = useMemo(() => isServerless(), []);
 
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
   const {

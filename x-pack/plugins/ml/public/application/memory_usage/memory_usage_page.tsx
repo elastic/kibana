@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isServerless } from '../../../common/util/serverless';
 import { NodesList } from './nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { JobMemoryTreeMap } from './memory_tree_map';
+import { useIsServerless } from '../contexts/kibana/use_is_serverless';
 
 enum TAB {
   NODES,
@@ -20,10 +20,9 @@ enum TAB {
 }
 
 export const MemoryUsagePage: FC = () => {
+  const serverless = useIsServerless();
   const [selectedTab, setSelectedTab] = useState<TAB>(TAB.NODES);
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
-
-  const serverless = useMemo(() => isServerless(), []);
 
   return (
     <>
