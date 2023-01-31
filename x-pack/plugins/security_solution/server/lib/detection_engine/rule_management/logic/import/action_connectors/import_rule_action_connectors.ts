@@ -8,22 +8,17 @@ import { Readable } from 'stream';
 
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { pick } from 'lodash';
-import type { RuleToImport } from '../../../../../../../common/detection_engine/rule_management';
+
 import type { WarningSchema } from '../../../../../../../common/detection_engine/schemas/response';
 import {
+  checkIfActionsHaveMissingConnectors,
+  filterExistingActionConnectors,
+  getActionConnectorRules,
   handleActionsHaveNoConnectors,
   mapSOErrorToRuleError,
   returnErroredImportResult,
 } from './utils';
 import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
-
-const getActionConnectorRules = (rules: Array<RuleToImport | Error>) =>
-  rules.reduce((acc: { [actionsIds: string]: string[] }, rule) => {
-    if (rule instanceof Error) return acc;
-    rule.actions?.forEach(({ id }) => (acc[id] = [...(acc[id] || []), rule.rule_id]));
-    return acc;
-  }, {});
 
 export const importRuleActionConnectors = async ({
   actionConnectors,
@@ -44,32 +39,21 @@ export const importRuleActionConnectors = async ({
         warnings: [],
       };
 
-    const ruleIds: string = [...new Set(...Object.values(actionsIds))].join();
-
     if (overwrite && !actionConnectors.length)
-      return handleActionsHaveNoConnectors(actionsIds, ruleIds);
+      return handleActionsHaveNoConnectors(actionsIds, actionConnectorRules);
 
     let actionConnectorsToImport: SavedObject[] = actionConnectors;
+
     if (!overwrite) {
-      const storedActionIds: string[] = await (await actionsClient.getAll()).map(({ id }) => id);
+      const newIdsToAdd = await filterExistingActionConnectors(actionsClient, actionsIds);
 
-      const newIdsToAdd = actionsIds.filter((id) => !storedActionIds.includes(id));
-
-      // if new action-connectors don't have exported connectors will fail with missing
-      if (actionConnectors.length < newIdsToAdd.length) {
-        const actionConnectorsIds = actionConnectors.map(({ id }) => id);
-        const missingActionConnector = newIdsToAdd.filter(
-          (id) => !actionConnectorsIds.includes(id)
-        );
-        const missingActionRules = pick(actionConnectorRules, [...missingActionConnector]);
-
-        const missingRuleIds: string = [
-          ...new Set(Object.values(missingActionRules).flat()),
-        ].join();
-
-        return handleActionsHaveNoConnectors(missingActionConnector, missingRuleIds);
-      }
-      // Incase connectors imported before
+      const foundMissingConnectors = checkIfActionsHaveMissingConnectors(
+        actionConnectors,
+        newIdsToAdd,
+        actionConnectorRules
+      );
+      if (foundMissingConnectors) return foundMissingConnectors;
+      // filter out existing connectors
       actionConnectorsToImport = actionConnectors.filter(({ id }) => newIdsToAdd.includes(id));
     }
     if (!actionConnectorsToImport.length)

@@ -4,11 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { pick } from 'lodash';
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BulkError } from '../../../../../routes/utils';
 import { createBulkErrorObject } from '../../../../../routes/utils';
-import type { ConflictError, ErrorType, ImportRuleActionConnectorsResult, SOError } from '../types';
+import type { RuleToImport } from '../../../../../../../../common/detection_engine/rule_management';
+import type {
+  ActionRules,
+  ConflictError,
+  ErrorType,
+  ImportRuleActionConnectorsResult,
+  SOError,
+} from '../types';
 
 export const returnErroredImportResult = (error: ErrorType): ImportRuleActionConnectorsResult => ({
   success: false,
@@ -19,8 +28,10 @@ export const returnErroredImportResult = (error: ErrorType): ImportRuleActionCon
 
 export const handleActionsHaveNoConnectors = (
   actionsIds: string[],
-  ruleIds: string
+  actionConnectorRules: ActionRules
 ): ImportRuleActionConnectorsResult => {
+  const ruleIds: string = [...new Set(Object.values(actionConnectorRules).flat())].join();
+
   if (actionsIds && actionsIds.length) {
     const errors: BulkError[] = [];
     const errorMessage =
@@ -86,4 +97,33 @@ export const handleActionConnectorsErrors = (error: ErrorType, id?: string): Bul
 
 export const mapSOErrorToRuleError = (errors: SavedObjectsImportFailure[]): BulkError[] => {
   return errors.map(({ id, error }) => handleActionConnectorsErrors(error, id));
+};
+
+export const filterExistingActionConnectors = async (
+  actionsClient: ActionsClient,
+  actionsIds: string[]
+) => {
+  const storedConnectors = await actionsClient.getAll();
+  const storedActionIds: string[] = storedConnectors.map(({ id }) => id);
+  return actionsIds.filter((id) => !storedActionIds.includes(id));
+};
+export const getActionConnectorRules = (rules: Array<RuleToImport | Error>) =>
+  rules.reduce((acc: { [actionsIds: string]: string[] }, rule) => {
+    if (rule instanceof Error) return acc;
+    rule.actions?.forEach(({ id }) => (acc[id] = [...(acc[id] || []), rule.rule_id]));
+    return acc;
+  }, {});
+export const checkIfActionsHaveMissingConnectors = (
+  actionConnectors: SavedObject[],
+  newIdsToAdd: string[],
+  actionConnectorRules: ActionRules
+) => {
+  // if new action-connectors don't have exported connectors will fail with missing connectors
+  if (actionConnectors.length < newIdsToAdd.length) {
+    const actionConnectorsIds = actionConnectors.map(({ id }) => id);
+    const missingActionConnector = newIdsToAdd.filter((id) => !actionConnectorsIds.includes(id));
+    const missingActionRules = pick(actionConnectorRules, [...missingActionConnector]);
+    return handleActionsHaveNoConnectors(missingActionConnector, missingActionRules);
+  }
+  return null;
 };

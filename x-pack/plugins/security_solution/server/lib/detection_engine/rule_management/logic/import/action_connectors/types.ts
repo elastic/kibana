@@ -39,3 +39,6 @@ export interface ConflictError {
 }
 
 export type ErrorType = SOError | ConflictError | SavedObjectsImportFailure | Error;
+export interface ActionRules {
+  [actionsIds: string]: string[];
+}
