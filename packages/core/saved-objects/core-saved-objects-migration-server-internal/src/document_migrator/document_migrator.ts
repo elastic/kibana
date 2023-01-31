@@ -28,10 +28,23 @@ interface DocumentMigratorOptions {
   log: Logger;
 }
 
+interface MigrationVersionParams {
+  /**
+   * Include deferred migrations in the migrationVersion.
+   * @default true
+   */
+  includeDeferred?: boolean;
+}
+
 /**
  * Manages transformations of individual documents.
  */
 export interface VersionedTransformer {
+  /**
+   * Gets the latest pending version of each type.
+   */
+  getMigrationVersion(params?: MigrationVersionParams): SavedObjectsMigrationVersion;
+
   /**
    * Migrates a document to its latest version.
    */
@@ -71,16 +84,22 @@ export class DocumentMigrator implements VersionedTransformer {
   }
 
   /**
-   * Gets the latest version of each migrate-able property.
+   * Gets the latest pending version of each type.
    */
-  public get migrationVersion(): SavedObjectsMigrationVersion {
+  public getMigrationVersion({
+    includeDeferred = true,
+  }: MigrationVersionParams = {}): SavedObjectsMigrationVersion {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
 
     return Object.entries(this.migrations).reduce((acc, [prop, { latestVersion }]) => {
       // some migration objects won't have a latest migration version (they only contain reference transforms that are applied from other types)
-      const latestMigrationVersion = maxVersion(latestVersion.migrate, latestVersion.convert);
+      const latestMigrationVersion = maxVersion(
+        latestVersion.migrate,
+        latestVersion.convert,
+        includeDeferred ? latestVersion.deferred : undefined
+      );
       if (latestMigrationVersion) {
         return { ...acc, [prop]: latestMigrationVersion };
       }

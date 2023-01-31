@@ -23,6 +23,7 @@ const TRANSFORM_PRIORITY = [
   TransformType.Reference,
   TransformType.Convert,
   TransformType.Migrate,
+  TransformType.Deferred,
 ];
 
 /**

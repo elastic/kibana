@@ -635,7 +635,7 @@ describe('DocumentMigrator', () => {
         ),
       });
       migrator.prepareMigrations();
-      expect(migrator.migrationVersion).toEqual({
+      expect(migrator.getMigrationVersion()).toEqual({
         aaa: '10.4.0',
         bbb: '3.2.3',
         ccc: '11.0.0',

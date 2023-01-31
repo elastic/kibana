@@ -90,6 +90,7 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
           Semver.gt(version, this.targetCoreVersion)
         );
       // including migrate transforms between the targetTypeVersion and the typeMigrationVersion
+      case TransformType.Deferred:
       case TransformType.Migrate:
         return (
           (typeMigrationVersion == null || Semver.gte(typeMigrationVersion, version)) &&

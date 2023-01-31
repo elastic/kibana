@@ -63,6 +63,7 @@ export enum TransformType {
    * types based on their `coreMigrationVersion` field. These are applied during index migrations, NOT document migrations.
    */
   Reference = 'reference',
+  Deferred = 'deferred',
 }
 
 /**

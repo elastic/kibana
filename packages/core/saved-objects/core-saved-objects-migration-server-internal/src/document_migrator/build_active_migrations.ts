@@ -80,7 +80,10 @@ const buildTypeTransforms = ({
     ([version, transform]) => ({
       version,
       transform: convertMigrationFunction(version, type, transform, log),
-      transformType: TransformType.Migrate,
+      transformType:
+        _.isFunction(transform) || !transform.deferred
+          ? TransformType.Migrate
+          : TransformType.Deferred,
     })
   );
 
