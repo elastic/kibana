@@ -8,6 +8,7 @@
 
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
+import { pick } from 'lodash';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
 import type { UnifiedHistogramInputMessage } from '../types';
 import {
@@ -64,25 +65,25 @@ export interface UnifiedHistogramUninitializedApi {
 /**
  * The initialized API exposed by the container
  */
-export interface UnifiedHistogramInitializedApi {
+export type UnifiedHistogramInitializedApi = {
   /**
    * Whether the container has been initialized
    */
   initialized: true;
   /**
-   * Get an observable to watch the container state, optionally providing a
-   * selector function which only gets triggered when the selected state changes
-   */
-  getState$: () => UnifiedHistogramStateService['state$'];
-  /**
-   * Update the container state my providing a partial state object
-   */
-  updateState: UnifiedHistogramStateService['updateState'];
-  /**
    * Manually trigger a refetch of the data
    */
   refetch: () => void;
-}
+} & Pick<
+  UnifiedHistogramStateService,
+  | 'state$'
+  | 'setChartHidden'
+  | 'setTopPanelHeight'
+  | 'setBreakdownField'
+  | 'setTimeInterval'
+  | 'setRequestParams'
+  | 'setTotalHits'
+>;
 
 /**
  * The API exposed by the container
@@ -119,15 +120,19 @@ export const UnifiedHistogramContainer = forwardRef<
         setStateService(new UnifiedHistogramStateService(options));
         setInitialized(true);
       },
-      getState$: () => {
-        return stateService!.state$;
-      },
-      updateState: (stateUpdate) => {
-        stateService!.updateState(stateUpdate);
-      },
       refetch: () => {
         input$.next({ type: 'refetch' });
       },
+      ...pick(
+        stateService!,
+        'state$',
+        'setChartHidden',
+        'setTopPanelHeight',
+        'setBreakdownField',
+        'setTimeInterval',
+        'setRequestParams',
+        'setTotalHits'
+      ),
     }),
     [initialized, input$, stateService]
   );

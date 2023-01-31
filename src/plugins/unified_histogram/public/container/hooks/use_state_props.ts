@@ -92,40 +92,31 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
 
   const onTopPanelHeightChange = useCallback(
     (topPanelHeight: number | undefined) => {
-      stateService?.updateState({ topPanelHeight });
+      stateService?.setTopPanelHeight(topPanelHeight);
     },
     [stateService]
   );
 
   const onTimeIntervalChange = useCallback(
     (newTimeInterval: string) => {
-      stateService?.updateState({ timeInterval: newTimeInterval });
+      stateService?.setTimeInterval(newTimeInterval);
     },
     [stateService]
   );
 
   const onTotalHitsChange = useCallback(
     (newTotalHitsStatus: UnifiedHistogramFetchStatus, newTotalHitsResult?: number | Error) => {
-      // If we have a partial result already, we don't
-      // want to update the total hits back to loading
-      if (
-        totalHitsStatus === UnifiedHistogramFetchStatus.partial &&
-        newTotalHitsStatus === UnifiedHistogramFetchStatus.loading
-      ) {
-        return;
-      }
-
-      stateService?.updateState({
+      stateService?.setTotalHits({
         totalHitsStatus: newTotalHitsStatus,
         totalHitsResult: newTotalHitsResult,
       });
     },
-    [totalHitsStatus, stateService]
+    [stateService]
   );
 
   const onChartHiddenChange = useCallback(
     (newChartHidden: boolean) => {
-      stateService?.updateState({ chartHidden: newChartHidden });
+      stateService?.setChartHidden(newChartHidden);
     },
     [stateService]
   );
@@ -133,14 +124,14 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
   const onChartLoad = useCallback(
     (event: UnifiedHistogramChartLoadEvent) => {
       // We need to store the Lens request adapter in order to inspect its requests
-      stateService?.updateState({ lensRequestAdapter: event.adapters.requests });
+      stateService?.setLensRequestAdapter(event.adapters.requests);
     },
     [stateService]
   );
 
   const onBreakdownFieldChange = useCallback(
     (newBreakdownField: DataViewField | undefined) => {
-      stateService?.updateState({ breakdownField: newBreakdownField?.name });
+      stateService?.setBreakdownField(newBreakdownField?.name);
     },
     [stateService]
   );
@@ -152,7 +143,7 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
   // Clear the Lens request adapter when the chart is hidden
   useEffect(() => {
     if (chartHidden || !chart) {
-      stateService?.updateState({ lensRequestAdapter: undefined });
+      stateService?.setLensRequestAdapter(undefined);
     }
   }, [chart, chartHidden, stateService]);
 

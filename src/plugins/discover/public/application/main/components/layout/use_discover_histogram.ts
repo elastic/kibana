@@ -106,34 +106,34 @@ export const useDiscoverHistogram = ({
   );
 
   /**
-   * State syncing
+   * Sync Unified Histogram state with Discover state
    */
 
   useEffect(() => {
-    const subscription = createStateSyncObservable(unifiedHistogram?.getState$())?.subscribe(
-      (state) => {
-        inspectorAdapters.lensRequests = state.lensRequestAdapter;
+    const subscription = createStateSyncObservable(unifiedHistogram?.state$)?.subscribe((state) => {
+      inspectorAdapters.lensRequests = state.lensRequestAdapter;
 
-        const { hideChart, interval, breakdownField } = stateContainer.appState.getState();
-        const oldState = { hideChart, interval, breakdownField };
-        const newState = {
-          hideChart: state.chartHidden,
-          interval: state.timeInterval,
-          breakdownField: state.breakdownField,
-        };
+      const { hideChart, interval, breakdownField } = stateContainer.appState.getState();
+      const oldState = { hideChart, interval, breakdownField };
+      const newState = {
+        hideChart: state.chartHidden,
+        interval: state.timeInterval,
+        breakdownField: state.breakdownField,
+      };
 
-        if (!isEqual(oldState, newState)) {
-          stateContainer.setAppState(newState);
-        }
+      if (!isEqual(oldState, newState)) {
+        stateContainer.setAppState(newState);
       }
-    );
+    });
 
     return () => {
       subscription?.unsubscribe();
     };
   }, [inspectorAdapters, stateContainer, unifiedHistogram]);
 
-  const firstLoadComplete = useRef(false);
+  /**
+   * Update Unified Histgoram request params
+   */
 
   const {
     query,
@@ -147,32 +147,15 @@ export const useDiscoverHistogram = ({
     [timefilter, from, to]
   );
 
-  const { fetchStatus: totalHitsStatus, result: totalHitsResult } = useDataState(
-    savedSearchData$.totalHits$
-  );
-
   useEffect(() => {
-    let newState: Partial<UnifiedHistogramState> = {
+    unifiedHistogram?.setRequestParams({
       dataView,
       query,
       filters,
       timeRange,
       searchSessionId,
       requestAdapter: inspectorAdapters.requests,
-    };
-
-    // We only want to show the partial results on the first load,
-    // or there will be a flickering effect as the loading spinner
-    // is quickly shown and hidden again on fetches
-    if (!firstLoadComplete.current) {
-      newState = {
-        ...newState,
-        totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
-        totalHitsResult,
-      };
-    }
-
-    unifiedHistogram?.updateState(newState);
+    });
   }, [
     dataView,
     filters,
@@ -180,17 +163,63 @@ export const useDiscoverHistogram = ({
     query,
     searchSessionId,
     timeRange,
-    totalHitsResult,
-    totalHitsStatus,
     unifiedHistogram,
   ]);
+
+  /**
+   * Override Unified Histgoram total hits with Discover partial results
+   */
+
+  const firstLoadComplete = useRef(false);
+
+  const { fetchStatus: totalHitsStatus, result: totalHitsResult } = useDataState(
+    savedSearchData$.totalHits$
+  );
+
+  useEffect(() => {
+    // We only want to show the partial results on the first load,
+    // or there will be a flickering effect as the loading spinner
+    // is quickly shown and hidden again on fetches
+    if (!firstLoadComplete.current) {
+      unifiedHistogram?.setTotalHits({
+        totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
+        totalHitsResult,
+      });
+    }
+  }, [totalHitsResult, totalHitsStatus, unifiedHistogram]);
+
+  /**
+   * Sync URL query params with Unified Histogram
+   */
+
+  const hideChart = useAppStateSelector((state) => state.hideChart);
+
+  useEffect(() => {
+    if (typeof hideChart === 'boolean') {
+      unifiedHistogram?.setChartHidden(hideChart);
+    }
+  }, [hideChart, unifiedHistogram]);
+
+  const timeInterval = useAppStateSelector((state) => state.interval);
+
+  useEffect(() => {
+    if (timeInterval) {
+      unifiedHistogram?.setTimeInterval(timeInterval);
+    }
+  }, [timeInterval, unifiedHistogram]);
+
+  const breakdownField = useAppStateSelector((state) => state.breakdownField);
+
+  useEffect(() => {
+    unifiedHistogram?.setBreakdownField(breakdownField);
+  }, [breakdownField, unifiedHistogram]);
 
   /**
    * Total hits
    */
 
   useEffect(() => {
-    const subscription = createTotalHitsObservable(unifiedHistogram?.getState$())?.subscribe(
+    const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
       ({ status, result }) => {
         if (result instanceof Error) {
           // Display the error and set totalHits$ to an error state
@@ -229,7 +258,6 @@ export const useDiscoverHistogram = ({
    * Data fetching
    */
 
-  const hideChart = useAppStateSelector((state) => state.hideChart);
   const skipRefetch = useRef<boolean>();
 
   // Skip refetching when showing the chart since Lens will

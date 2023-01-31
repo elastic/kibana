@@ -101,6 +101,9 @@ export class UnifiedHistogramStateService {
   private localStorageKeyPrefix?: string;
   private services: UnifiedHistogramServices;
 
+  /**
+   * The current state of the container
+   */
   state$: BehaviorSubject<UnifiedHistogramState>;
 
   constructor(options: UnifiedHistogramStateOptions) {
@@ -135,32 +138,90 @@ export class UnifiedHistogramStateService {
     });
   }
 
-  public updateState(stateUpdate: Partial<UnifiedHistogramState>) {
-    if (this.localStorageKeyPrefix) {
-      if ('chartHidden' in stateUpdate) {
-        setChartHidden(this.services.storage, this.localStorageKeyPrefix, stateUpdate.chartHidden);
-      }
-
-      if ('topPanelHeight' in stateUpdate) {
-        setTopPanelHeight(
-          this.services.storage,
-          this.localStorageKeyPrefix,
-          stateUpdate.topPanelHeight
-        );
-      }
-
-      if ('breakdownField' in stateUpdate) {
-        setBreakdownField(
-          this.services.storage,
-          this.localStorageKeyPrefix,
-          stateUpdate.breakdownField
-        );
-      }
-    }
-
+  private updateState(stateUpdate: Partial<UnifiedHistogramState>) {
     this.state$.next({
       ...this.state$.getValue(),
       ...stateUpdate,
     });
+  }
+
+  /**
+   * Sets the current chart hidden state
+   */
+  setChartHidden(chartHidden: boolean) {
+    if (this.localStorageKeyPrefix) {
+      setChartHidden(this.services.storage, this.localStorageKeyPrefix, chartHidden);
+    }
+
+    this.updateState({ chartHidden });
+  }
+
+  /**
+   * Sets the current top panel height
+   */
+  setTopPanelHeight(topPanelHeight: number | undefined) {
+    if (this.localStorageKeyPrefix) {
+      setTopPanelHeight(this.services.storage, this.localStorageKeyPrefix, topPanelHeight);
+    }
+
+    this.updateState({ topPanelHeight });
+  }
+
+  /**
+   * Sets the current breakdown field
+   */
+  setBreakdownField(breakdownField: string | undefined) {
+    if (this.localStorageKeyPrefix) {
+      setBreakdownField(this.services.storage, this.localStorageKeyPrefix, breakdownField);
+    }
+
+    this.updateState({ breakdownField });
+  }
+
+  /**
+   * Sets the current time interval
+   */
+  setTimeInterval(timeInterval: string) {
+    this.updateState({ timeInterval });
+  }
+
+  /**
+   * Sets the current request parameters
+   */
+  setRequestParams(requestParams: {
+    dataView?: DataView;
+    filters?: Filter[];
+    query?: Query | AggregateQuery;
+    requestAdapter?: RequestAdapter | undefined;
+    searchSessionId?: string | undefined;
+    timeRange?: TimeRange;
+  }) {
+    this.updateState(requestParams);
+  }
+
+  /**
+   * Sets the current Lens request adapter
+   */
+  setLensRequestAdapter(lensRequestAdapter: RequestAdapter | undefined) {
+    this.updateState({ lensRequestAdapter });
+  }
+
+  /**
+   * Sets the current total hits status and result
+   */
+  setTotalHits(totalHits: {
+    totalHitsStatus: UnifiedHistogramFetchStatus;
+    totalHitsResult: number | Error | undefined;
+  }) {
+    // If we have a partial result already, we don't
+    // want to update the total hits back to loading
+    if (
+      this.state$.getValue().totalHitsStatus === UnifiedHistogramFetchStatus.partial &&
+      totalHits.totalHitsStatus === UnifiedHistogramFetchStatus.loading
+    ) {
+      return;
+    }
+
+    this.updateState(totalHits);
   }
 }
