@@ -22,7 +22,6 @@ jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
-    isGoldPlus: jest.fn(),
     isEnterprise: jest.fn(() => true),
   };
   return {
@@ -102,13 +101,14 @@ describe('Onboarding Component new section', () => {
       expect(mockedOnChange).toHaveBeenCalledTimes(2);
     });
 
-    it('make sure NGAV is the default value for endpoint environment', async () => {
+    it('make sure EDR Complete is the default value for endpoint environment', async () => {
       renderResult = mockedContext.render(
         <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
       );
-      expect(renderResult.getByDisplayValue('NGAV')).toBeChecked();
+      expect(renderResult.getByDisplayValue('DataCollection')).not.toBeChecked();
+      expect(renderResult.getByDisplayValue('NGAV')).not.toBeChecked();
       expect(renderResult.getByDisplayValue('EDREssential')).not.toBeChecked();
-      expect(renderResult.getByDisplayValue('EDRComplete')).not.toBeChecked();
+      expect(renderResult.getByDisplayValue('EDRComplete')).toBeChecked();
     });
 
     it('make sure interactive only is the default value for cloud environment', async () => {
@@ -120,49 +120,43 @@ describe('Onboarding Component new section', () => {
       expect(renderResult.getByDisplayValue('INTERACTIVE_ONLY')).toBeChecked();
     });
 
-    it('all license should be able to see EDR Licese', async () => {
-      const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+    describe('showing license notes for config presets', () => {
+      it.each`
+        preset              | license             | result              | text
+        ${'EDREssential'}   | ${'below platinum'} | ${'should see'}     | ${'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.'}
+        ${'EDREssential'}   | ${'platinum'}       | ${'should see'}     | ${'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.'}
+        ${'EDREssential'}   | ${'enterprise'}     | ${'should NOT see'} | ${''}
+        ${'EDRComplete'}    | ${'below platinum'} | ${'should see'}     | ${'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.'}
+        ${'EDRComplete'}    | ${'platinum'}       | ${'should see'}     | ${'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.'}
+        ${'EDRComplete'}    | ${'enterprise'}     | ${'should NOT see'} | ${''}
+        ${'NGAV'}           | ${'below platinum'} | ${'should see'}     | ${'Note: advanced protections require a platinum license level.'}
+        ${'NGAV'}           | ${'platinum'}       | ${'should NOT see'} | ${''}
+        ${'NGAV'}           | ${'enterprise'}     | ${'should NOT see'} | ${''}
+        ${'DataCollection'} | ${'below platinum'} | ${'should NOT see'} | ${''}
+        ${'DataCollection'} | ${'platinum'}       | ${'should NOT see'} | ${''}
+        ${'DataCollection'} | ${'enterprise'}     | ${'should NOT see'} | ${''}
+      `('$preset: $license users $result notes', ({ license, preset, result, text }) => {
+        const isEnterprise = license === 'enterprise';
+        const isPlatinumPlus = ['platinum', 'enterprise'].includes(license);
 
-      licenseServiceMock.isEnterprise.mockReturnValue(false);
-      renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
-      );
-      userEvent.click(screen.getByDisplayValue('EDREssential'));
-      expect(renderResult.getByDisplayValue('EDREssential')).toBeChecked();
-      expect(
-        renderResult.getByText(
-          'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.',
-          { exact: false }
-        )
-      ).toBeInTheDocument();
-    });
+        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        licenseServiceMock.isEnterprise.mockReturnValue(isEnterprise);
+        licenseServiceMock.isPlatinumPlus.mockReturnValue(isPlatinumPlus);
 
-    it('gold license below users will be able to see NGAV notes', async () => {
-      const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        renderResult = mockedContext.render(
+          <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
+        );
+        userEvent.click(screen.getByDisplayValue(preset));
+        expect(renderResult.getByDisplayValue(preset)).toBeChecked();
 
-      licenseServiceMock.isGoldPlus.mockReturnValue(true);
-      renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
-      );
-      expect(
-        renderResult.getByText('Note: advanced protections require a platinum license level.', {
-          exact: false,
-        })
-      ).toBeInTheDocument();
-    });
-
-    it('platinum license users will not be able to see NGAV notes', async () => {
-      const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
-
-      licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-      renderResult = mockedContext.render(
-        <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
-      );
-      expect(
-        renderResult.queryByText('Note: advanced protections require a platinum license level.', {
-          exact: false,
-        })
-      ).not.toBeInTheDocument();
+        if (result === 'should see') {
+          expect(renderResult.getByText(text, { exact: false })).toBeInTheDocument();
+        } else {
+          expect(
+            renderResult.queryByTestId('create-endpoint-policy-license-note')
+          ).not.toBeInTheDocument();
+        }
+      });
     });
   });
 });

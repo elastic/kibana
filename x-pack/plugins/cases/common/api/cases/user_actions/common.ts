@@ -51,24 +51,19 @@ export const UserActionCommonAttributesRt = rt.type({
  * This should only be used for the getAll route and it should be removed when the route is removed
  * @deprecated use CaseUserActionInjectedIdsRt instead
  */
-export const CaseUserActionSavedObjectIdsRt = rt.type({
+export const CaseUserActionInjectedDeprecatedIdsRt = rt.type({
   action_id: rt.string,
   case_id: rt.string,
   comment_id: rt.union([rt.string, rt.null]),
 });
 
-export type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonAttributesRt>;
-export type UserActionWithResponse<T> = T & rt.TypeOf<typeof CaseUserActionSavedObjectIdsRt>;
-
-/**
- * This should be used for all user action types going forward it will be renamed to CaseUserActionSavedObjectIdsRt
- * Once the UI is switched to using the new user actions _find API
- */
 export const CaseUserActionInjectedIdsRt = rt.type({
   comment_id: rt.union([rt.string, rt.null]),
 });
 
-/**
- * Temporary type until CaseUserActionInjectedIdsRt replaces CaseUserActionSavedObjectIdsRt
- */
-export type UserActionWithResponseInjection<T> = T & rt.TypeOf<typeof CaseUserActionInjectedIdsRt>;
+export type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonAttributesRt>;
+export type UserActionWithResponse<T> = T & { id: string; version: string } & rt.TypeOf<
+    typeof CaseUserActionInjectedIdsRt
+  >;
+export type UserActionWithDeprecatedResponse<T> = T &
+  rt.TypeOf<typeof CaseUserActionInjectedDeprecatedIdsRt>;
