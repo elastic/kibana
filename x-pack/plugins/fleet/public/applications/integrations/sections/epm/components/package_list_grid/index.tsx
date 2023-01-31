@@ -8,20 +8,11 @@
 import type { ReactNode, FunctionComponent } from 'react';
 import { useMemo } from 'react';
 import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
 
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiSpacer,
-  EuiTitle,
-  EuiFieldSearch,
-  EuiText,
-  useEuiTheme,
-  EuiIcon,
-  EuiScreenReaderOnly,
   EuiButton,
   EuiButtonIcon,
   EuiPopover,
@@ -29,24 +20,25 @@ import {
   EuiContextMenuItem,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Loading } from '../../../components';
-import { useLocalSearch, searchIdField } from '../../../hooks';
+import { useLocalSearch, searchIdField } from '../../../../hooks';
 
-import type { IntegrationCardItem } from '../../../../../../common/types/models';
+import type { IntegrationCardItem } from '../../../../../../../common/types/models';
 
-import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
+import type {
+  ExtendedIntegrationCategory,
+  CategoryFacet,
+} from '../../screens/home/category_facets';
 
-import type { IntegrationsURLParameters } from '../screens/home/hooks/use_available_packages';
+import type { IntegrationsURLParameters } from '../../screens/home/hooks/use_available_packages';
 
-import { ExperimentalFeaturesService } from '../../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
 
-import { promoteFeaturedIntegrations } from './utils';
+import { promoteFeaturedIntegrations } from '../utils';
 
-import { PackageCard } from './package_card';
+import { ControlsColumn, MissingIntegrationContent, GridColumn } from './controls';
+import { SearchBox } from './search_box';
 
 export interface Props {
   isLoading?: boolean;
@@ -89,7 +81,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   showCardLabels = true,
 }) => {
   const localSearchRef = useLocalSearch(list);
-  const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -103,16 +94,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
 
   const closePopover = () => {
     setPopover(false);
-  };
-
-  const onQueryChange = (e: any) => {
-    const queryText = e.target.value;
-    setSearchTerm(queryText);
-    setUrlandReplaceHistory({
-      searchString: queryText,
-      categoryId: selectedCategory,
-      subCategoryId: selectedSubCategory,
-    });
   };
 
   const resetQuery = () => {
@@ -130,10 +111,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     },
     [selectedCategory, setSelectedSubCategory, setUrlandPushHistory]
   );
-
-  const selectedCategoryTitle = selectedCategory
-    ? categories.find((category) => category.id === selectedCategory)?.title
-    : undefined;
 
   const filteredPromotedList = useMemo(() => {
     if (isLoading) return [];
@@ -195,63 +172,15 @@ export const PackageListGrid: FunctionComponent<Props> = ({
         <ControlsColumn controls={controls} title={title} />
       </EuiFlexItem>
       <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn">
-        <EuiFieldSearch
-          data-test-subj="epmList.searchBar"
-          placeholder={i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
-            defaultMessage: 'Search for integrations',
-          })}
-          value={searchTerm}
-          onChange={(e) => onQueryChange(e)}
-          isClearable={true}
-          incremental={true}
-          fullWidth={true}
-          prepend={
-            selectedCategoryTitle ? (
-              <EuiText
-                data-test-subj="epmList.categoryBadge"
-                size="xs"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  fontWeight: euiTheme.font.weight.bold,
-                  backgroundColor: euiTheme.colors.lightestShade,
-                }}
-              >
-                <EuiScreenReaderOnly>
-                  <span>Searching category: </span>
-                </EuiScreenReaderOnly>
-                {selectedCategoryTitle}
-                <button
-                  data-test-subj="epmList.categoryBadge.closeBtn"
-                  onClick={() => {
-                    setCategory('');
-                    if (setSelectedSubCategory) setSelectedSubCategory(undefined);
-                    setUrlandReplaceHistory({
-                      searchString: '',
-                      categoryId: '',
-                      subCategoryId: '',
-                    });
-                  }}
-                  aria-label="Remove filter"
-                  style={{
-                    padding: euiTheme.size.xs,
-                    paddingTop: '2px',
-                  }}
-                >
-                  <EuiIcon
-                    type="cross"
-                    color="text"
-                    size="s"
-                    style={{
-                      width: 'auto',
-                      padding: 0,
-                      backgroundColor: euiTheme.colors.lightestShade,
-                    }}
-                  />
-                </button>
-              </EuiText>
-            ) : undefined
-          }
+        <SearchBox
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedCategory={selectedCategory}
+          setCategory={setCategory}
+          categories={categories}
+          setSelectedSubCategory={setSelectedSubCategory}
+          selectedSubCategory={selectedSubCategory}
+          setUrlandReplaceHistory={setUrlandReplaceHistory}
         />
         {showIntegrationsSubcategories && availableSubCategories?.length ? <EuiSpacer /> : null}
         {showIntegrationsSubcategories ? (
@@ -267,7 +196,9 @@ export const PackageListGrid: FunctionComponent<Props> = ({
             {visibleSubCategories?.map((subCategory) => (
               <EuiFlexItem grow={false} key={subCategory.id}>
                 <EuiButton
-                  color="text"
+                  css={subCategory.id === selectedSubCategory ? 'color: white' : ''}
+                  color={subCategory.id === selectedSubCategory ? 'accent' : 'text'}
+                  fill={subCategory.id === selectedSubCategory}
                   aria-label={subCategory?.title}
                   onClick={() => onSubCategoryClick(subCategory.id)}
                 >
@@ -332,138 +263,5 @@ export const PackageListGrid: FunctionComponent<Props> = ({
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-};
-
-interface ControlsColumnProps {
-  controls: ReactNode;
-  title: string | undefined;
-}
-
-const ControlsColumn = ({ controls, title }: ControlsColumnProps) => {
-  let titleContent;
-  if (title) {
-    titleContent = (
-      <>
-        <EuiTitle size="s">
-          <h2>{title}</h2>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-      </>
-    );
-  }
-  return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      {titleContent}
-      {controls}
-    </EuiFlexGroup>
-  );
-};
-
-interface GridColumnProps {
-  list: IntegrationCardItem[];
-  isLoading: boolean;
-  showMissingIntegrationMessage?: boolean;
-  showCardLabels?: boolean;
-}
-
-const GridColumn = ({
-  list,
-  showMissingIntegrationMessage = false,
-  showCardLabels = false,
-  isLoading,
-}: GridColumnProps) => {
-  if (isLoading) return <Loading />;
-
-  return (
-    <EuiFlexGrid gutterSize="l" columns={3}>
-      {list.length ? (
-        list.map((item) => {
-          return (
-            <EuiFlexItem
-              key={item.id}
-              // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
-              css={css`
-                & > .euiPopover,
-                & > .euiPopover > .euiPopover__anchor,
-                & > .euiPopover > .euiPopover__anchor > .euiCard {
-                  height: 100%;
-                }
-              `}
-            >
-              <PackageCard {...item} showLabels={showCardLabels} />
-            </EuiFlexItem>
-          );
-        })
-      ) : (
-        <EuiFlexItem grow={3}>
-          <EuiText>
-            <p>
-              {showMissingIntegrationMessage ? (
-                <FormattedMessage
-                  id="xpack.fleet.epmList.missingIntegrationPlaceholder"
-                  defaultMessage="We didn't find any integrations matching your search term. Please try another keyword or browse using the categories on the left."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
-                  defaultMessage="No integrations found"
-                />
-              )}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGrid>
-  );
-};
-
-interface MissingIntegrationContentProps {
-  resetQuery: () => void;
-  setSelectedCategory: (category: ExtendedIntegrationCategory) => void;
-  setUrlandPushHistory: (params: IntegrationsURLParameters) => void;
-}
-
-const MissingIntegrationContent = ({
-  resetQuery,
-  setSelectedCategory,
-  setUrlandPushHistory,
-}: MissingIntegrationContentProps) => {
-  const handleCustomInputsLinkClick = useCallback(() => {
-    resetQuery();
-    setSelectedCategory('custom');
-    setUrlandPushHistory({
-      categoryId: 'custom',
-      subCategoryId: '',
-    });
-  }, [resetQuery, setSelectedCategory, setUrlandPushHistory]);
-
-  return (
-    <EuiText size="s" color="subdued">
-      <p>
-        <FormattedMessage
-          id="xpack.fleet.integrations.missing"
-          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations in our {forumLink}."
-          values={{
-            customInputsLink: (
-              <EuiLink onClick={handleCustomInputsLinkClick}>
-                <FormattedMessage
-                  id="xpack.fleet.integrations.customInputsLink"
-                  defaultMessage="custom inputs"
-                />
-              </EuiLink>
-            ),
-            forumLink: (
-              <EuiLink href="https://discuss.elastic.co/tag/integrations" external target="_blank">
-                <FormattedMessage
-                  id="xpack.fleet.integrations.discussForumLink"
-                  defaultMessage="forum"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </p>
-    </EuiText>
   );
 };
