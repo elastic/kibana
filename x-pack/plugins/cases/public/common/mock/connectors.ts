@@ -138,7 +138,7 @@ export const getCaseConnectorsMockResponse = (
   overrides?: Record<string, unknown>
 ): CaseConnectors => {
   return connectorsMock.reduce((acc, connector) => {
-    const newConnector = {
+    const newConnectors: CaseConnectors = {
       ...acc,
       [connector.id]: {
         id: connector.id,
@@ -163,10 +163,10 @@ export const getCaseConnectorsMockResponse = (
 
     if (overrides != null) {
       for (const path of Object.keys(overrides)) {
-        set(newConnector, path, overrides[path]);
+        set(newConnectors[connector.id], path, overrides[path]);
       }
     }
 
-    return newConnector;
+    return newConnectors;
   }, {});
 };
