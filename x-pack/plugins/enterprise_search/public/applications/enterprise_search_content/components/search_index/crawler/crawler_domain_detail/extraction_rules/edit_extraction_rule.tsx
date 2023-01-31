@@ -168,16 +168,20 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
           control={control}
           name="description"
           rules={{
-            required: i18n.translate(
-              'xpack.enterpriseSearch.content.indices.extractionRules.editRule.descriptionError',
-              {
-                defaultMessage: 'A description is required for a content extraction rule',
+            validate: (rule) => {
+              if (!rule?.trim()) {
+                return i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.extractionRules.editRule.descriptionError',
+                  {
+                    defaultMessage: 'A description is required for a content extraction rule',
+                  }
+                );
               }
-            ),
+            },
           }}
           render={({ field, fieldState }) => (
             <EuiFormRow
-              error={fieldState.error}
+              error={fieldState.error?.message}
               isInvalid={!!(fieldState.error && fieldState.isTouched)}
               helpText={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.extractionRules.editRule.helpText',

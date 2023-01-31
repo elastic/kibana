@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButtonEmpty,
   EuiCode,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -105,22 +106,29 @@ export const ExtractionRulesTable: React.FC = () => {
       }),
       render: (filters: ExtractionRule['url_filters']) => (
         <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
-          {filters.length > 0
-            ? filters.map(({ pattern }, index) => (
-                <EuiFlexItem key={`${index}`}>
-                  <EuiCode>{pattern}</EuiCode>
-                </EuiFlexItem>
-              ))
-            : ''}
+          {filters.length > 0 ? (
+            filters.map(({ pattern }, index) => (
+              <EuiFlexItem key={`${index}`}>
+                <EuiCode>{pattern}</EuiCode>
+              </EuiFlexItem>
+            ))
+          ) : (
+            <EuiFlexItem>
+              <EuiCode>{'/*'}</EuiCode>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       ),
     },
     {
-      field: 'rules',
       name: i18n.translate('xpack.enterpriseSearch.crawler.extractionRulesTable.rulesLabel', {
         defaultMessage: 'Field rules',
       }),
-      render: (rules: ExtractionRule['rules']) => rules.length,
+      render: (rule: ExtractionRule) => (
+        <EuiButtonEmpty onClick={() => toggleExpandedItem(rule)}>
+          {rule.rules.length}
+        </EuiButtonEmpty>
+      ),
       textOnly: true,
     },
     {
@@ -179,11 +187,11 @@ export const ExtractionRulesTable: React.FC = () => {
           type: 'icon',
         },
         {
-          color: 'danger',
+          color: 'primary',
           description: i18n.translate(
-            'xpack.enterpriseSearch.content.crawler.extractionRules.actions.deleteRule.title',
+            'xpack.enterpriseSearch.content.crawler.extractionRules.actions.expandRule.title',
             {
-              defaultMessage: 'Delete this extraction rule',
+              defaultMessage: 'Expand this extraction rule',
             }
           ),
           icon: (item) => (!!itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'),

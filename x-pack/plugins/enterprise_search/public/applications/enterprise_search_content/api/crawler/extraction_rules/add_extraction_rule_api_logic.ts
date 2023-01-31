@@ -24,10 +24,20 @@ export interface AddExtractionRuleResponse {
   extraction_rules: ExtractionRule[];
 }
 
-export const addExtractionRule = async ({ domainId, indexName, rule }: AddExtractionRuleArgs) => {
+export const addExtractionRule = async ({
+  domainId,
+  indexName,
+  rule: { description, rules, url_filters: urlFilters },
+}: AddExtractionRuleArgs) => {
   const route = `/internal/enterprise_search/indices/${indexName}/crawler/domains/${domainId}/extraction_rules`;
 
-  const params = { extraction_rule: rule };
+  const params = {
+    extraction_rule: {
+      description,
+      rules,
+      url_filters: urlFilters,
+    },
+  };
 
   return await HttpLogic.values.http.post<AddExtractionRuleResponse>(route, {
     body: JSON.stringify(params),

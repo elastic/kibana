@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CrawlerDomain } from '../../../../api/crawler/types';
@@ -43,6 +43,13 @@ export const CrawlerDomainDetailTabs: React.FC<CrawlerDomainDetailTabsProps> = (
       content: (
         <>
           <EuiSpacer />
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.title', {
+                defaultMessage: 'Entry points',
+              })}
+            </h2>
+          </EuiTitle>
           <EntryPointsTable domain={domain} indexName={indexName} items={domain.entryPoints} />
         </>
       ),
@@ -67,6 +74,13 @@ export const CrawlerDomainDetailTabs: React.FC<CrawlerDomainDetailTabsProps> = (
       content: (
         <>
           <EuiSpacer />
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.enterpriseSearch.crawler.sitemapsTable.title', {
+                defaultMessage: 'Sitemaps',
+              })}
+            </h2>
+          </EuiTitle>
           <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
         </>
       ),
@@ -79,6 +93,13 @@ export const CrawlerDomainDetailTabs: React.FC<CrawlerDomainDetailTabsProps> = (
       content: (
         <>
           <EuiSpacer />
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.title', {
+                defaultMessage: 'Crawl rules',
+              })}
+            </h2>
+          </EuiTitle>
           <CrawlRulesTable
             domainId={domain.id}
             indexName={indexName}

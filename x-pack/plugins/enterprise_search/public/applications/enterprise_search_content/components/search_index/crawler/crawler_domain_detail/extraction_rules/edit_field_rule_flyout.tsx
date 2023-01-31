@@ -117,12 +117,14 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
               control={control}
               name="field_name"
               rules={{
-                required: i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.extractionRules.edilidtContentField.documentField.requiredError',
-                  {
-                    defaultMessage: 'A field name is required.',
-                  }
-                ),
+                validate: (rule) =>
+                  !!rule?.trim() ||
+                  i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.extractionRules.edilidtContentField.documentField.requiredError',
+                    {
+                      defaultMessage: 'A field name is required.',
+                    }
+                  ),
               }}
               render={({ field, fieldState: { error, isTouched } }) => (
                 <EuiFormRow
@@ -174,12 +176,14 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
               control={control}
               name="source_type"
               rules={{
-                required: i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.source.requiredError',
-                  {
-                    defaultMessage: 'A source for the content is required.',
-                  }
-                ),
+                validate: (rule) =>
+                  !!rule?.trim() ||
+                  i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.source.requiredError',
+                    {
+                      defaultMessage: 'A source for the content is required.',
+                    }
+                  ),
               }}
               render={({ field }) => (
                 <>
@@ -303,12 +307,14 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
               control={control}
               name="content_from.value_type"
               rules={{
-                required: i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.requiredError',
-                  {
-                    defaultMessage: 'A value for this content field is required',
-                  }
-                ),
+                validate: (field) =>
+                  !!field?.trim() ||
+                  i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.requiredError',
+                    {
+                      defaultMessage: 'A value for this content field is required',
+                    }
+                  ),
               }}
               render={({ field, fieldState: { error, isTouched } }) => (
                 <>
@@ -316,7 +322,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                     label={i18n.translate(
                       'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.label',
                       {
-                        defaultMessage: 'Extract content from',
+                        defaultMessage: 'Use content from',
                       }
                     )}
                     isInvalid={!!error && isTouched}
@@ -330,7 +336,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                           label: i18n.translate(
                             'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.extractedLabel',
                             {
-                              defaultMessage: 'Extracted',
+                              defaultMessage: 'Extracted value',
                             }
                           ),
                         },
@@ -339,7 +345,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                           label: i18n.translate(
                             'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.fixedLabel',
                             {
-                              defaultMessage: 'Fixed',
+                              defaultMessage: 'A fixed value',
                             }
                           ),
                         },
@@ -400,32 +406,46 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                       )}
                     />
                   ) : (
-                    <>
-                      <EuiSpacer />
-                      <Controller
-                        control={control}
-                        name="content_from.value"
-                        render={({ field: valueField }) => (
-                          <EuiFormRow
-                            label={i18n.translate(
-                              'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.fixedValue.label',
-                              {
-                                defaultMessage: 'Fixed value',
-                              }
-                            )}
-                          >
-                            <EuiFieldText
-                              data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleFixedValue"
-                              fullWidth
-                              value={valueField.value ?? ''}
-                              onChange={valueField.onChange}
-                              inputRef={valueField.ref}
-                              onBlur={valueField.onBlur}
-                            />
-                          </EuiFormRow>
-                        )}
-                      />
-                    </>
+                    field.value === ContentFrom.FIXED && (
+                      <>
+                        <EuiSpacer />
+                        <Controller
+                          control={control}
+                          name="content_from.value"
+                          render={({ field: valueField }) => (
+                            <EuiFormRow
+                              helpText={i18n.translate(
+                                'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.fixedValue.helpText',
+                                {
+                                  defaultMessage: 'Use a fixed value for this document field.',
+                                }
+                              )}
+                              label={i18n.translate(
+                                'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.fixedValue.label',
+                                {
+                                  defaultMessage: 'Fixed value',
+                                }
+                              )}
+                            >
+                              <EuiFieldText
+                                data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleFixedValue"
+                                fullWidth
+                                placeholder={i18n.translate(
+                                  'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.fixedValue.placeHolder',
+                                  {
+                                    defaultMessage: 'e.g., "Some Value',
+                                  }
+                                )}
+                                value={valueField.value ?? ''}
+                                onChange={valueField.onChange}
+                                inputRef={valueField.ref}
+                                onBlur={valueField.onBlur}
+                              />
+                            </EuiFormRow>
+                          )}
+                        />
+                      </>
+                    )
                   )}
                 </>
               )}
