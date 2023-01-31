@@ -294,7 +294,7 @@ const formattedTime = (time?: string) => {
 const inProgressTitle = (action: ActionStatus) => (
   <FormattedMessage
     id="xpack.fleet.agentActivity.inProgressTitle"
-    defaultMessage="{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}"
+    defaultMessage="{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}{failuresText}"
     values={{
       nbAgents:
         action.nbAgentsAck >= action.nbAgentsActioned
@@ -307,6 +307,7 @@ const inProgressTitle = (action: ActionStatus) => (
       reassignText:
         action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
       upgradeText: action.type === 'UPGRADE' ? `to version ${action.version}` : '',
+      failuresText: action.nbAgentsFailed > 0 ? `, has ${action.nbAgentsFailed} failure(s)` : '',
     }}
   />
 );

@@ -168,9 +168,9 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     }
 
     const indexTemplate = indexTemplateRes.index_templates[0].index_template;
-    let updatedIndexTemplate = indexTemplate;
+    let updatedIndexTemplate = indexTemplate as IndexTemplate;
 
-    if (isTSDBOptInChanged && featureMapEntry.features.tsdb) {
+    if (isTSDBOptInChanged) {
       const indexTemplateBody = {
         ...indexTemplate,
         template: {
@@ -178,23 +178,24 @@ export async function handleExperimentalDatastreamFeatureOptIn({
           settings: {
             ...(indexTemplate.template?.settings ?? {}),
             index: {
-              mode: 'time_series',
+              mode: featureMapEntry.features.tsdb ? 'time_series' : null,
             },
           },
         },
       };
 
-      updatedIndexTemplate = indexTemplateBody;
+      updatedIndexTemplate = indexTemplateBody as IndexTemplate;
 
       await esClient.indices.putIndexTemplate({
         name: featureMapEntry.data_stream,
+        // @ts-expect-error
         body: indexTemplateBody,
       });
     }
 
     updatedIndexTemplates.push({
       templateName: featureMapEntry.data_stream,
-      indexTemplate: updatedIndexTemplate as IndexTemplate,
+      indexTemplate: updatedIndexTemplate,
     });
   }
 

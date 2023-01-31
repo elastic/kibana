@@ -14,11 +14,12 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_PAGES } from '../../../locator';
 import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
-import { MlRoute, PageLoader, PageProps } from '../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../router';
 import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
@@ -50,7 +51,7 @@ export const explorerRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'explorer',
-  path: '/explorer',
+  path: createPath(ML_PAGES.ANOMALY_EXPLORER),
   title: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorer.docTitle', {
     defaultMessage: 'Anomaly Explorer',
   }),
