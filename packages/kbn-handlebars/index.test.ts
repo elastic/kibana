@@ -378,7 +378,7 @@ describe('blocks', () => {
           const falsy = [undefined, null, false, 0, ''];
           const truthy = [true, 42, 'foo', {}];
 
-          // Falsy return values from decorators are simply ingored and the
+          // Falsy return values from decorators are simply ignored and the
           // execution falls back to default behavior which is to render the
           // other parts of the template.
           for (const value of falsy) {

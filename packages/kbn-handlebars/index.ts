@@ -319,27 +319,46 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       this.ast = Handlebars.parse(this.template!);
     }
 
-    let main: Handlebars.HelperDelegate = (_context) => {
+    // The `defaultMain` function contains the default behavior:
+    //
+    // Generate a "program" function based on the root `Program` in the AST and
+    // call it. This will start the processing of all the child nodes in the
+    // AST.
+    const defaultMain: Handlebars.TemplateDelegate = (_context) => {
       const prog = this.generateProgramFunction(this.ast!);
       return prog(_context, this.runtimeOptions);
     };
 
-    // Run any decorators that might exist on the root
-    main = this.processDecorators(this.ast, main);
+    // Run any decorators that might exist on the root:
+    //
+    // The `defaultMain` function is passed in, and if there are no root
+    // decorators, or if the decorators chooses to do so, the same function is
+    // returned from `processDecorators` and the default behavior is retained.
+    //
+    // Alternatively any of the root decorators might call the `defaultMain`
+    // function themselves, process its return value, and return a completely
+    // different `main` function.
+    const main = this.processDecorators(this.ast, defaultMain);
     this.processedRootDecorators = true;
 
+    // Call the `main` function and add the result to the final output.
     const result = main(this.context, options);
-    this.output.push(result);
 
-    // This is a workaround to support decorators that returns a custom
-    // function which itself doesn't return a string, in which case joining as
-    // strings will result in an unexpected output.
-    //
-    // It should be enough to only concern ourselfs with output arrays of
-    // length one, as decorators alsways should control the entire output. So
-    // we shouldn't have situations where non-strings exists in output arrays
-    // larger than one (fingers crossed!).
-    return this.output.length === 1 ? this.output[0] : this.output.join('');
+    if (main === defaultMain) {
+      this.output.push(result);
+      return this.output.join('');
+    } else {
+      // We normally expect the return value of `main` to be a string. However,
+      // if a decorator is used to override the `defaultMain` function, the
+      // return value can be any type. To match the upstream handlebars project
+      // behavior, we want the result of rendering the template to be the
+      // literal value returned by the decorator.
+      //
+      // Since the output array in this case always will be empty, we just
+      // return that single value instead of attempting to join all the array
+      // elements as strings.
+      return result;
+    }
   }
 
   // ********************************************** //
@@ -360,14 +379,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.processStatementOrExpression(block);
   }
 
-  // This space intentionally left blank: We want to override the Visitor class implementation
-  // of this method, but since we handle decorators separately before traversing the nodes, we
-  // just want to make this a no-op.
+  // This space is intentionally left blank: We want to override the Visitor
+  // class implementation of this method, but since we handle decorators
+  // separately before traversing the nodes, we just want to make this a no-op.
   DecoratorBlock(decorator: hbs.AST.DecoratorBlock) {}
 
-  // This space intentionally left blank: We want to override the Visitor class implementation
-  // of this method, but since we handle decorators separately before traversing the nodes, we
-  // just want to make this a no-op.
+  // This space is intentionally left blank: We want to override the Visitor
+  // class implementation of this method, but since we handle decorators
+  // separately before traversing the nodes, we just want to make this a no-op.
   Decorator(decorator: hbs.AST.Decorator) {}
 
   SubExpression(sexpr: hbs.AST.SubExpression) {
