@@ -1536,7 +1536,7 @@ describe('migrations v2 model', () => {
       });
       it('CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP if action succeeds with filters', () => {
         const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.right({
-          mustNotClauses: [{ term: { fieldA: 'abc' } }],
+          filterClauses: [{ term: { fieldA: 'abc' } }],
           errorsByType: { type1: new Error('an error!') },
         });
         const newState = model(state, res);
