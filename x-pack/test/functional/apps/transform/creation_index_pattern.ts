@@ -724,7 +724,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await transform.testExecution.logTestStep(
               'should switch quick select lookback to years'
             );
-            await transform.datePicker.assertSuperDatePickerToggleQuickMenuButtonExists();
             await transform.datePicker.openSuperDatePicker();
             await transform.datePicker.quickSelect();
           }
