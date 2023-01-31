@@ -8,7 +8,7 @@
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup } from '@elastic/eui';
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.populationField.title', {
@@ -20,13 +20,11 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.populationField.description"
-          defaultMessage="All values in the selected field will be modeled together as a population. This analysis type is recommended for high cardinality data."
+          defaultMessage="All values in the selected field will be modeled together as a population."
         />
       }
     >
-      <EuiFormRow label={title}>
-        <>{children}</>
-      </EuiFormRow>
+      <>{children}</>
     </EuiDescribedFormGroup>
   );
 });

@@ -169,12 +169,12 @@ describe('computeErrorBudget', () => {
   it('computes the error budget with rounded values', () => {
     const slo = createSLO();
     const dateRange = toDateRange(slo.timeWindow);
-    const errorBudget = computeErrorBudget(slo, { good: 333, total: 777, dateRange });
+    const errorBudget = computeErrorBudget(slo, { good: 770, total: 777, dateRange });
 
     expect(errorBudget).toEqual({
       initial: 0.001,
-      consumed: 571.428571, // i.e. 57,142% consumed
-      remaining: 0,
+      consumed: 9.009009, // i.e. 900.90% consumed
+      remaining: -8.009009, // i.e. -800.90% remaining
       isEstimated: false,
     });
   });
@@ -187,7 +187,7 @@ describe('computeErrorBudget', () => {
     expect(errorBudget).toEqual({
       initial: 0.001,
       consumed: 1000, // i.e. 100,000% consumed
-      remaining: 0,
+      remaining: -999,
       isEstimated: false,
     });
   });

@@ -10,4 +10,8 @@ export { CellActions } from './components';
 export { CellActionsProvider } from './context';
 export { useDataGridColumnsCellActions, type UseDataGridColumnsCellActionsProps } from './hooks';
 export { CellActionsMode } from './types';
-export type { CellAction, CellActionExecutionContext } from './types';
+export type {
+  CellAction,
+  CellActionExecutionContext,
+  CellActionCompatibilityContext,
+} from './types';
