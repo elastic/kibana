@@ -50,22 +50,19 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
   const dashboard = {
     getDashboardContainer: () => testSubjects.find('dashboard-container'),
 
-    getIntegrationTabs: async () => {
+    getDashboardTabs: async () => {
       const dashboardContainer = await dashboard.getDashboardContainer();
-      const tabs = await dashboardContainer.findByClassName('euiTabs');
-      return tabs;
+      return await dashboardContainer.findByClassName('euiTabs');
     },
 
     getCloudTab: async () => {
-      const tabs = await dashboard.getIntegrationTabs();
-      const cloudTab = await tabs.findByXpath(`span[text()="Cloud"]`);
-      return cloudTab;
+      const tabs = await dashboard.getDashboardTabs();
+      return await tabs.findByXpath(`span[text()="Cloud"]`);
     },
 
     getKubernetesTab: async () => {
-      const tabs = await dashboard.getIntegrationTabs();
-      const kubernetesTab = await tabs.findByXpath(`span[text()="Kubernetes"]`);
-      return kubernetesTab;
+      const tabs = await dashboard.getDashboardTabs();
+      return await tabs.findByXpath(`span[text()="Kubernetes"]`);
     },
 
     clickTab: async (tab: 'Cloud' | 'Kubernetes') => {

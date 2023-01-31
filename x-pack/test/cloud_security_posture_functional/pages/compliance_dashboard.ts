@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import Chance from 'chance';
-import { within } from '@testing-library/dom';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -53,12 +52,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Kubernetes Dashboard', () => {
       it('displays accurate summary compliance score', async () => {
-        const scoreElement = await dashboard.getKubernetesComplianceScore2();
+        const scoreElement = await dashboard.getKubernetesComplianceScore();
+        const scoreElement2 = await dashboard.getKubernetesComplianceScore2();
 
         expect((await scoreElement.getVisibleText()) === '0%').to.be(true);
-        expect((await scoreElement.getVisibleText()) === '0%').to.be(true);
-        const { getByText } = within(scoreElement);
-        expect(getByText('0%')).toBeInTheDocument();
+        expect((await scoreElement2.getVisibleText()) === '0%').to.be(true);
       });
     });
   });
