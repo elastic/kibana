@@ -4,45 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Filter, Query } from '@kbn/es-query';
+import { has } from 'lodash';
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
+import type { AlertsBySeverityAgg } from '../severity_level_panel/types';
+import type { AlertsByTypeAgg, AlertsTypeData } from '../alerts_by_type_panel/types';
+import type {
+  AlertsByGroupingAgg,
+  AlertsProgressBarData,
+} from '../alerts_progress_bar_panel/types';
 
-export interface EntityFilter {
-  field: string;
-  value: string;
+export type SummaryChartsAgg = Partial<AlertsBySeverityAgg | AlertsByTypeAgg | AlertsByGroupingAgg>;
+
+export type SummaryChartsData = SeverityData | AlertsTypeData | AlertsProgressBarData;
+
+export interface ChartsPanelProps {
+  filters?: Filter[];
+  query?: Query;
+  signalIndexName: string | null;
+  runtimeMappings?: MappingRuntimeFields;
+  skip?: boolean;
+  addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
 }
 
-export type ParsedSeverityData = SeverityData[] | undefined | null;
-export interface SeverityData {
-  key: Severity;
-  value: number;
-  label: string;
-}
+export const isAlertsBySeverityAgg = (
+  data: AlertSearchResponse<{}, SummaryChartsAgg>
+): data is AlertSearchResponse<{}, AlertsBySeverityAgg> => {
+  return has(data, 'aggregations.statusBySeverity');
+};
 
-export interface AlertsBySeverityAgg {
-  statusBySeverity: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    buckets: SeverityBucket[];
-  };
-}
-interface SeverityBucket {
-  key: Severity;
-  doc_count: number;
-}
-export interface AlertsResponse<Hit = {}, Aggregations = {} | undefined> {
-  took: number;
-  _shards: {
-    total: number;
-    successful: number;
-    skipped: number;
-    failed: number;
-  };
-  aggregations?: Aggregations;
-  hits: {
-    total: {
-      value: number;
-      relation: string;
-    };
-    hits: Hit[];
-  };
-}
+export const isAlertsByTypeAgg = (
+  data: AlertSearchResponse<{}, SummaryChartsAgg>
+): data is AlertSearchResponse<{}, AlertsByTypeAgg> => {
+  return has(data, 'aggregations.alertsByRule');
+};
+
+export const isAlertsByGroupingAgg = (
+  data: AlertSearchResponse<{}, SummaryChartsAgg>
+): data is AlertSearchResponse<{}, AlertsByGroupingAgg> => {
+  return has(data, 'aggregations.alertsByGrouping');
+};
