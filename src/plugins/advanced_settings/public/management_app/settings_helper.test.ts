@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  PublicUiSettingsParams,
-  UiSettingsType,
-  UserProvidedValues,
-} from '@kbn/core-ui-settings-common';
+import { UiSettingsType, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import { PublicUiSettingsParams } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import { FieldSetting } from './types';
 import { mapConfig, mapSettings, initCategoryCounts, initCategories } from './settings_helper';
