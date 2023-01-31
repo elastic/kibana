@@ -18,7 +18,7 @@ import type {
 } from './types';
 import { extractNamedQueries } from './utils';
 
-export const MAX_NUMBER_OF_SIGNAL_MATCHES = 100;
+export const MAX_NUMBER_OF_SIGNAL_MATCHES = 200;
 
 export const getSignalMatchesFromThreatList = (
   threatList: ThreatListItem[] = []
