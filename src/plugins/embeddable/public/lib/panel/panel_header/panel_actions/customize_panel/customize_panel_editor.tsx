@@ -27,9 +27,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { hasTimeRange, TimeRangeInput } from './customize_panel_action';
+import { TimeRangeInput } from './customize_panel_action';
 import { doesInheritTimeRange } from './does_inherit_time_range';
-import { IEmbeddable, Embeddable, EmbeddableOutput, CommonlyUsedRange } from '../../../..';
+import { IEmbeddable, Embeddable, CommonlyUsedRange, ViewMode } from '../../../..';
 import { canInheritTimeRange } from './can_inherit_time_range';
 
 type PanelSettings = {
@@ -41,40 +41,15 @@ type PanelSettings = {
 
 interface CustomizePanelProps {
   embeddable: IEmbeddable;
+  timeRangeCompatible: boolean;
   dateFormat?: string;
   commonlyUsedRanges?: CommonlyUsedRange[];
   onClose: () => void;
 }
 
-const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
-
-type VisualizeEmbeddable = IEmbeddable<{ id: string }, EmbeddableOutput & { visTypeName: string }>;
-
-function isVisualizeEmbeddable(
-  embeddable: IEmbeddable | VisualizeEmbeddable
-): embeddable is VisualizeEmbeddable {
-  return embeddable.type === VISUALIZE_EMBEDDABLE_TYPE;
-}
-
-function isTimeRangeCompatible(embeddable: IEmbeddable) {
-  const isInputControl =
-    isVisualizeEmbeddable(embeddable) &&
-    (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'input_control_vis';
-
-  const isMarkdown =
-    isVisualizeEmbeddable(embeddable) &&
-    (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
-
-  const isImage = embeddable.type === 'image';
-
-  return Boolean(
-    embeddable && hasTimeRange(embeddable) && !isInputControl && !isMarkdown && !isImage
-  );
-}
-
 export const CustomizePanelEditor = (props: CustomizePanelProps) => {
-  const { onClose, embeddable, dateFormat } = props;
-  const timeRangeCompatible = isTimeRangeCompatible(embeddable);
+  const { onClose, embeddable, dateFormat, timeRangeCompatible } = props;
+  const editMode = embeddable.getInput().viewMode === ViewMode.EDIT;
   const [hideTitle, setHideTitle] = useState(embeddable.getInput().hidePanelTitles);
   const [panelDescription, setPanelDescription] = useState(
     embeddable.getInput().description ?? embeddable.getOutput().defaultDescription
@@ -117,6 +92,119 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
 
     embeddable.updateInput(newPanelSettings);
     onClose();
+  };
+
+  const renderCustomTitleComponent = () => {
+    if (!editMode) return null;
+
+    return (
+      <>
+        <EuiFormRow>
+          <EuiSwitch
+            checked={!hideTitle}
+            data-test-subj="customEmbeddablePanelHideTitleSwitch"
+            disabled={!editMode}
+            id="hideTitle"
+            label={
+              <FormattedMessage
+                defaultMessage="Show panel title"
+                id="embeddableApi.customizePanel.flyout.optionsMenuForm.showTitle"
+              />
+            }
+            onChange={(e) => setHideTitle(!e.target.checked)}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="embeddableApi.customizePanel.flyout.optionsMenuForm.panelTitleFormRowLabel"
+              defaultMessage="Panel title"
+            />
+          }
+          labelAppend={
+            <EuiButtonEmpty
+              size="xs"
+              data-test-subj="resetCustomEmbeddablePanelTitleButton"
+              onClick={() => setPanelTitle(embeddable.getOutput().defaultTitle)}
+              disabled={hideTitle || !editMode}
+              aria-label={i18n.translate(
+                'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
+                {
+                  defaultMessage: 'Reset panel title',
+                }
+              )}
+            >
+              <FormattedMessage
+                id="embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonLabel"
+                defaultMessage="Reset"
+              />
+            </EuiButtonEmpty>
+          }
+        >
+          <EuiFieldText
+            id="panelTitleInput"
+            className="panelTitleInputText"
+            data-test-subj="customEmbeddablePanelTitleInput"
+            name="title"
+            type="text"
+            disabled={hideTitle || !editMode}
+            value={panelTitle ?? ''}
+            onChange={(e) => setPanelTitle(e.target.value)}
+            aria-label={i18n.translate(
+              'embeddableApi.customizePanel.flyout.optionsMenuForm.panelTitleInputAriaLabel',
+              {
+                defaultMessage: 'Enter a custom title for your panel',
+              }
+            )}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="embeddableApi.customizePanel.flyout.optionsMenuForm.panelDescriptionFormRowLabel"
+              defaultMessage="Panel description"
+            />
+          }
+          labelAppend={
+            <EuiButtonEmpty
+              size="xs"
+              data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
+              onClick={() => {
+                setPanelDescription(embeddable.getOutput().defaultDescription);
+              }}
+              disabled={hideTitle || !editMode}
+              aria-label={i18n.translate(
+                'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
+                {
+                  defaultMessage: 'Reset panel description',
+                }
+              )}
+            >
+              <FormattedMessage
+                id="embeddableApi.customizePanel.modal.optionsMenuForm.resetCustomDescriptionButtonLabel"
+                defaultMessage="Reset"
+              />
+            </EuiButtonEmpty>
+          }
+        >
+          <EuiTextArea
+            id="panelDescriptionInput"
+            className="panelDescriptionInputText"
+            data-test-subj="customEmbeddablePanelDescriptionInput"
+            disabled={hideTitle || !editMode}
+            name="description"
+            value={panelDescription ?? ''}
+            onChange={(e) => setPanelDescription(e.target.value)}
+            aria-label={i18n.translate(
+              'embeddableApi.customizePanel.flyout.optionsMenuForm.panelDescriptionAriaLabel',
+              {
+                defaultMessage: 'Enter a custom description for your panel',
+              }
+            )}
+          />
+        </EuiFormRow>
+      </>
+    );
   };
 
   const renderCustomTimeRangeComponent = () => {
@@ -178,109 +266,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm>
-          <EuiFormRow>
-            <EuiSwitch
-              checked={!hideTitle}
-              data-test-subj="customEmbeddablePanelHideTitleSwitch"
-              id="hideTitle"
-              label={
-                <FormattedMessage
-                  defaultMessage="Show panel title"
-                  id="embeddableApi.customizePanel.flyout.optionsMenuForm.showTitle"
-                />
-              }
-              onChange={(e) => setHideTitle(!e.target.checked)}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="embeddableApi.customizePanel.flyout.optionsMenuForm.panelTitleFormRowLabel"
-                defaultMessage="Panel title"
-              />
-            }
-            labelAppend={
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="resetCustomEmbeddablePanelTitleButton"
-                onClick={() => setPanelTitle(embeddable.getOutput().defaultTitle)}
-                disabled={hideTitle}
-                aria-label={i18n.translate(
-                  'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
-                  {
-                    defaultMessage: 'Reset panel title',
-                  }
-                )}
-              >
-                <FormattedMessage
-                  id="embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonLabel"
-                  defaultMessage="Reset"
-                />
-              </EuiButtonEmpty>
-            }
-          >
-            <EuiFieldText
-              id="panelTitleInput"
-              className="panelTitleInputText"
-              data-test-subj="customEmbeddablePanelTitleInput"
-              name="title"
-              type="text"
-              disabled={hideTitle}
-              value={panelTitle ?? ''}
-              onChange={(e) => setPanelTitle(e.target.value)}
-              aria-label={i18n.translate(
-                'embeddableApi.customizePanel.flyout.optionsMenuForm.panelTitleInputAriaLabel',
-                {
-                  defaultMessage: 'Enter a custom title for your panel',
-                }
-              )}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="embeddableApi.customizePanel.flyout.optionsMenuForm.panelDescriptionFormRowLabel"
-                defaultMessage="Panel description"
-              />
-            }
-            labelAppend={
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
-                onClick={() => {
-                  setPanelDescription(embeddable.getOutput().defaultDescription);
-                }}
-                disabled={hideTitle}
-                aria-label={i18n.translate(
-                  'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
-                  {
-                    defaultMessage: 'Reset panel description',
-                  }
-                )}
-              >
-                <FormattedMessage
-                  id="embeddableApi.customizePanel.modal.optionsMenuForm.resetCustomDescriptionButtonLabel"
-                  defaultMessage="Reset"
-                />
-              </EuiButtonEmpty>
-            }
-          >
-            <EuiTextArea
-              id="panelDescriptionInput"
-              className="panelDescriptionInputText"
-              data-test-subj="customEmbeddablePanelDescriptionInput"
-              disabled={hideTitle}
-              name="description"
-              value={panelDescription ?? ''}
-              onChange={(e) => setPanelDescription(e.target.value)}
-              aria-label={i18n.translate(
-                'embeddableApi.customizePanel.flyout.optionsMenuForm.panelDescriptionAriaLabel',
-                {
-                  defaultMessage: 'Enter a custom description for your panel',
-                }
-              )}
-            />
-          </EuiFormRow>
+          {renderCustomTitleComponent()}
           {renderCustomTimeRangeComponent()}
         </EuiForm>
       </EuiFlyoutBody>

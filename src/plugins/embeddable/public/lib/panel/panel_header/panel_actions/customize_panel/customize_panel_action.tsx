@@ -8,17 +8,32 @@
 
 import React from 'react';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, take, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { ViewMode } from '../../../../types';
-import { IEmbeddable, Embeddable, EmbeddableInput, CommonlyUsedRange } from '../../../..';
+import {
+  IEmbeddable,
+  Embeddable,
+  EmbeddableInput,
+  CommonlyUsedRange,
+  EmbeddableOutput,
+} from '../../../..';
 import { CustomizePanelEditor } from './customize_panel_editor';
 
 export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
+
+const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
+
+type VisualizeEmbeddable = IEmbeddable<{ id: string }, EmbeddableOutput & { visTypeName: string }>;
+
+function isVisualizeEmbeddable(
+  embeddable: IEmbeddable | VisualizeEmbeddable
+): embeddable is VisualizeEmbeddable {
+  return embeddable.type === VISUALIZE_EMBEDDABLE_TYPE;
+}
 
 export interface TimeRangeInput extends EmbeddableInput {
   timeRange: TimeRange;
@@ -46,6 +61,22 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
     protected readonly dateFormat?: string
   ) {}
 
+  protected isTimeRangeCompatible({ embeddable }: CustomizePanelActionContext): boolean {
+    const isInputControl =
+      isVisualizeEmbeddable(embeddable) &&
+      (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'input_control_vis';
+
+    const isMarkdown =
+      isVisualizeEmbeddable(embeddable) &&
+      (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
+
+    const isImage = embeddable.type === 'image';
+
+    return Boolean(
+      embeddable && hasTimeRange(embeddable) && !isInputControl && !isMarkdown && !isImage
+    );
+  }
+
   public getDisplayName({ embeddable }: CustomizePanelActionContext): string {
     return i18n.translate('embeddableApi.customizePanel.action.displayName', {
       defaultMessage: 'Edit panel settings',
@@ -57,7 +88,10 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
   }
 
   public async isCompatible({ embeddable }: CustomizePanelActionContext) {
-    return embeddable.getInput().viewMode === ViewMode.EDIT ? true : false;
+    // It should be possible to customize just the time range in View mode
+    return (
+      embeddable.getInput().viewMode === ViewMode.EDIT || this.isTimeRangeCompatible({ embeddable })
+    );
   }
 
   public async execute({ embeddable }: CustomizePanelActionContext) {
@@ -76,6 +110,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
       toMountPoint(
         <CustomizePanelEditor
           embeddable={embeddable}
+          timeRangeCompatible={this.isTimeRangeCompatible({ embeddable })}
           dateFormat={this.dateFormat}
           commonlyUsedRanges={this.commonlyUsedRanges}
           onClose={close}
@@ -87,17 +122,5 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
         'data-test-subj': 'customizePanel',
       }
     );
-
-    // Close flyout on dashboard switch to "view" mode or on embeddable destroy.
-    embeddable
-      .getInput$()
-      .pipe(
-        takeUntil(closed$),
-        map((input) => input.viewMode),
-        distinctUntilChanged(),
-        filter((mode) => mode !== ViewMode.EDIT),
-        take(1)
-      )
-      .subscribe({ next: close, complete: close });
   }
 }

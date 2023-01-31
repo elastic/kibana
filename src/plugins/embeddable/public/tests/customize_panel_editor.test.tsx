@@ -8,7 +8,7 @@
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import * as React from 'react';
-import { EmbeddableOutput, isErrorEmbeddable } from '../lib';
+import { EmbeddableOutput, isErrorEmbeddable, ViewMode } from '../lib';
 import { coreMock } from '@kbn/core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { CustomizePanelEditor } from '../lib/panel/panel_header/panel_actions/customize_panel/customize_panel_editor';
@@ -44,6 +44,7 @@ beforeEach(async () => {
     id: '4321',
     title: 'A time series',
     description: 'This might be a neat line chart',
+    viewMode: ViewMode.EDIT,
   });
   if (isErrorEmbeddable(timeRangeEmbeddable)) {
     throw new Error('Error creating new hello world embeddable');
@@ -54,7 +55,7 @@ beforeEach(async () => {
 
 test('Value is initialized with the embeddables title', async () => {
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
   );
 
   const titleField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -68,7 +69,7 @@ test('Value is initialized with the embeddables title', async () => {
 test('Calls updateInput with a new title', async () => {
   const updateInput = jest.spyOn(embeddable, 'updateInput');
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -85,7 +86,7 @@ test('Calls updateInput with a new title', async () => {
 test('Input value shows custom title if one given', async () => {
   embeddable.updateInput({ title: 'new title' });
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -97,7 +98,7 @@ test('Input value shows custom title if one given', async () => {
 test('Reset updates the input values with the default properties when the embeddable has overridden the properties', async () => {
   embeddable.updateInput({ title: 'my custom title', description: 'my custom description' });
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
   );
 
   const titleField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -117,7 +118,7 @@ test('Reset updates the input values with the default properties when the embedd
 
 test('Reset updates the input with the default properties when the embeddable has no property overrides', async () => {
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
   );
 
   const titleField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -141,7 +142,7 @@ test('Reset updates the input with the default properties when the embeddable ha
 test('Reset title calls updateInput with undefined', async () => {
   const updateInput = jest.spyOn(embeddable, 'updateInput');
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -159,7 +160,7 @@ test('Reset title calls updateInput with undefined', async () => {
 test('Reset description calls updateInput with undefined', async () => {
   const updateInput = jest.spyOn(embeddable, 'updateInput');
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelDescriptionInput').find(
@@ -179,7 +180,7 @@ test('Reset description calls updateInput with undefined', async () => {
 test('Can set title and description to an empty string', async () => {
   const updateInput = jest.spyOn(embeddable, 'updateInput');
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
   );
 
   for (const subject of [
