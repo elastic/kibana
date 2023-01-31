@@ -22,11 +22,11 @@ export interface GetAgentsRequest {
   query: ListWithKuery & {
     showInactive: boolean;
     showUpgradeable?: boolean;
+    withMetrics?: boolean;
   };
 }
 
 export interface GetAgentsResponse extends ListResult<Agent> {
-  totalInactive: number;
   // deprecated in 8.x
   list?: Agent[];
 }
@@ -38,6 +38,9 @@ export interface GetAgentTagsResponse {
 export interface GetOneAgentRequest {
   params: {
     agentId: string;
+  };
+  query: {
+    withMetrics?: boolean;
   };
 }
 

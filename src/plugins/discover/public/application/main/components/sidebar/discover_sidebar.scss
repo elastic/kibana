@@ -2,7 +2,7 @@
   overflow: hidden;
   margin: 0 !important;
   flex-grow: 1;
-  padding: $euiSizeS 0 $euiSizeS $euiSizeS;
+  padding: 0;
   width: $euiSize * 19;
   height: 100%;
 
@@ -10,6 +10,14 @@
     width: 100%;
     padding: $euiSize;
     background-color: $euiPageBackgroundColor;
+  }
+}
+
+.dscSidebar__list {
+  padding: $euiSizeS 0 $euiSizeS $euiSizeS;
+
+  @include euiBreakpoint('xs', 's') {
+    padding: $euiSizeS 0 0 0;
   }
 }
 

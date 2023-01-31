@@ -31,17 +31,21 @@ import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { postSourcererDataView } from './api';
+import { createSourcererDataView } from './create_sourcerer_data_view';
 import { useDataView } from '../source/use_data_view';
 import { useFetchIndex } from '../source';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { useKibana } from '../../lib/kibana';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
 ) => {
   const dispatch = useDispatch();
+  const {
+    data: { dataViews },
+  } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
@@ -229,6 +233,7 @@ export const useInitSourcerer = (
     signalIndexName,
     signalIndexNameSourcerer,
   ]);
+  const { dataViewId } = useSourcererDataView(scopeId);
 
   const updateSourcererDataView = useCallback(
     (newSignalsIndex: string) => {
@@ -236,18 +241,21 @@ export const useInitSourcerer = (
         abortCtrl.current = new AbortController();
 
         dispatch(sourcererActions.setSourcererScopeLoading({ loading: true }));
+
         try {
-          const response = await postSourcererDataView({
+          const response = await createSourcererDataView({
             body: { patternList: newPatternList },
             signal: abortCtrl.current.signal,
+            dataViewService: dataViews,
+            dataViewId,
           });
 
-          if (response.defaultDataView.patternList.includes(newSignalsIndex)) {
+          if (response?.defaultDataView.patternList.includes(newSignalsIndex)) {
             // first time signals is defined and validated in the sourcerer
             // redo indexFieldsSearch
             indexFieldsSearch({ dataViewId: response.defaultDataView.id });
+            dispatch(sourcererActions.setSourcererDataViews(response));
           }
-          dispatch(sourcererActions.setSourcererDataViews(response));
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
         } catch (err) {
           addError(err, {
@@ -267,7 +275,7 @@ export const useInitSourcerer = (
         asyncSearch([...defaultDataView.title.split(','), newSignalsIndex]);
       }
     },
-    [defaultDataView.title, dispatch, indexFieldsSearch, addError]
+    [defaultDataView.title, dispatch, dataViews, dataViewId, indexFieldsSearch, addError]
   );
 
   const onSignalIndexUpdated = useCallback(() => {
@@ -426,6 +434,7 @@ export const useSourcererDataView = (
       indexPattern: {
         fields: sourcererDataView.indexFields,
         title: selectedPatterns.join(','),
+        getName: () => selectedPatterns.join(','),
       },
       indicesExist,
       loading: loading || sourcererDataView.loading,

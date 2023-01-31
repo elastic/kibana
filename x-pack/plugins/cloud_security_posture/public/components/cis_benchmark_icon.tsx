@@ -21,6 +21,8 @@ const getBenchmarkIdIconType = (props: Props): string => {
   switch (props.type) {
     case 'cis_eks':
       return cisEksIcon;
+    case 'cis_aws':
+      return 'logoAWS';
     case 'cis_k8s':
     default:
       return 'logoKubernetes';

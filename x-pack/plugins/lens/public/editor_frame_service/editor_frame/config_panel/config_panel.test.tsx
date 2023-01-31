@@ -135,6 +135,7 @@ describe('ConfigPanel', () => {
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
       uiActions,
+      getUserMessages: () => [],
     };
   }
 

@@ -106,14 +106,28 @@ export enum TriggerMethod {
 export enum FeatureName {
   FILTERING_ADVANCED_CONFIG = 'filtering_advanced_config',
   FILTERING_RULES = 'filtering_rules',
+  SYNC_RULES = 'sync_rules',
 }
+
+export type ConnectorFeatures = Partial<{
+  [FeatureName.FILTERING_ADVANCED_CONFIG]: boolean;
+  [FeatureName.FILTERING_RULES]: boolean;
+  [FeatureName.SYNC_RULES]: {
+    advanced?: {
+      enabled: boolean;
+    };
+    basic?: {
+      enabled: boolean;
+    };
+  };
+}> | null;
 
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
   description: string | null;
   error: string | null;
-  features: Partial<Record<FeatureName, boolean>> | null;
+  features: ConnectorFeatures;
   filtering: FilteringConfig[];
   id: string;
   index_name: string;

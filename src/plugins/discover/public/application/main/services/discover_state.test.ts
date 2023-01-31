@@ -157,6 +157,7 @@ describe('Test discover state with legacy migration', () => {
 
 describe('createSearchSessionRestorationDataProvider', () => {
   let mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
+  history = createBrowserHistory();
   const mockDataPlugin = dataPluginMock.createStartContract();
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
     data: mockDataPlugin,

@@ -6,15 +6,19 @@
  */
 
 import { AlertsSummaryWidgetFullSize as Component } from './alert_summary_widget_full_size';
-import { mockAlertSummaryResponse } from '../../../../../mock/alert_summary_widget';
+import {
+  mockedAlertSummaryResponse,
+  mockedChartThemes,
+} from '../../../../../mock/alert_summary_widget';
 
 export default {
   component: Component,
-  title: 'app/AlertsSummaryWidget',
+  title: 'app/AlertSummaryWidget',
 };
 
 export const FullSize = {
   args: {
-    ...mockAlertSummaryResponse,
+    ...mockedAlertSummaryResponse,
+    chartThemes: mockedChartThemes,
   },
 };

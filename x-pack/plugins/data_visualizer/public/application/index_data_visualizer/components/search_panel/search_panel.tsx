@@ -7,7 +7,13 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { useEuiBreakpoint, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import {
+  useEuiBreakpoint,
+  useIsWithinMaxBreakpoint,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
@@ -45,7 +51,6 @@ interface Props {
   }): void;
   showEmptyFields: boolean;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
-  compact?: boolean;
 }
 
 export const SearchPanel: FC<Props> = ({
@@ -60,7 +65,6 @@ export const SearchPanel: FC<Props> = ({
   visibleFieldNames,
   setSearchParams,
   showEmptyFields,
-  compact,
 }) => {
   const {
     services: {
@@ -139,6 +143,8 @@ export const SearchPanel: FC<Props> = ({
     },
   });
 
+  const isWithinXl = useIsWithinMaxBreakpoint('xl');
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -168,7 +174,7 @@ export const SearchPanel: FC<Props> = ({
         />
       </EuiFlexItem>
 
-      {compact ? <EuiSpacer size="s" /> : null}
+      {isWithinXl ? <EuiSpacer size="s" /> : null}
       <EuiFlexItem grow={2} css={dvSearchPanelControls}>
         <DataVisualizerFieldNamesFilter
           overallStats={overallStats}

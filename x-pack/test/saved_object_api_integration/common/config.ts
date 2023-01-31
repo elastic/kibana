@@ -56,7 +56,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         serverArgs: [
           ...config.xpack.api.get('kbnTestServer.serverArgs'),
           '--server.xsrf.disableProtection=true',
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'saved_object_test_plugin')}`,
+          `--plugin-path=${path.resolve(__dirname, 'plugins/saved_object_test_plugin')}`,
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),

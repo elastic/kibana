@@ -9,7 +9,8 @@ import type {
   AuditAction,
   AddAuditEventParams as SavedObjectEventParams,
 } from '@kbn/core-saved-objects-server';
-import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from '@kbn/core/server';
+import type { EcsEvent, KibanaRequest, LogMeta } from '@kbn/core/server';
+import type { ArrayElement } from '@kbn/utility-types';
 
 import type { AuthenticationProvider } from '../../common/model';
 import type { AuthenticationResult } from '../authentication/authentication_result';
@@ -215,6 +216,32 @@ export function userLogoutEvent({
   };
 }
 
+export function userSessionConcurrentLimitLogoutEvent({
+  username,
+  provider,
+  userProfileId,
+}: UserLogoutParams): AuditEvent {
+  return {
+    message: `User [${username}] is logging out due to exceeded concurrent sessions limit for ${provider.type} provider [name=${provider.name}]`,
+    event: {
+      action: 'user_logout',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user:
+      userProfileId || username
+        ? {
+            id: userProfileId,
+            name: username,
+          }
+        : undefined,
+    kibana: {
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
 export interface SessionCleanupParams {
   sessionId: string;
   usernameHash?: string;
@@ -228,6 +255,29 @@ export function sessionCleanupEvent({
 }: SessionCleanupParams): AuditEvent {
   return {
     message: `Removing invalid or expired session for user [hash=${usernameHash}]`,
+    event: {
+      action: 'session_cleanup',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user: {
+      hash: usernameHash,
+    },
+    kibana: {
+      session_id: sessionId,
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
+export function sessionCleanupConcurrentLimitEvent({
+  usernameHash,
+  sessionId,
+  provider,
+}: SessionCleanupParams): AuditEvent {
+  return {
+    message: `Removing session for user [hash=${usernameHash}] due to exceeded concurrent sessions limit`,
     event: {
       action: 'session_cleanup',
       category: ['authentication'],
@@ -306,7 +356,7 @@ const savedObjectAuditVerbs: Record<AuditAction, VerbsTuple> = {
   ],
 };
 
-const savedObjectAuditTypes: Record<AuditAction, EcsEventType> = {
+const savedObjectAuditTypes: Record<AuditAction, ArrayElement<EcsEvent['type']>> = {
   saved_object_create: 'creation',
   saved_object_get: 'access',
   saved_object_resolve: 'access',
@@ -381,7 +431,7 @@ const spaceAuditVerbs: Record<SpaceAuditAction, VerbsTuple> = {
   space_find: ['access', 'accessing', 'accessed'],
 };
 
-const spaceAuditTypes: Record<SpaceAuditAction, EcsEventType> = {
+const spaceAuditTypes: Record<SpaceAuditAction, ArrayElement<EcsEvent['type']>> = {
   space_create: 'creation',
   space_get: 'access',
   space_update: 'change',
@@ -391,7 +441,7 @@ const spaceAuditTypes: Record<SpaceAuditAction, EcsEventType> = {
 
 export interface SpacesAuditEventParams {
   action: SpaceAuditAction;
-  outcome?: EcsEventOutcome;
+  outcome?: EcsEvent['outcome'];
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
 }

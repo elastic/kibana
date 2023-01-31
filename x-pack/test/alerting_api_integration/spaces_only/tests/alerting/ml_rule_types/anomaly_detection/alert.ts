@@ -12,13 +12,9 @@ import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_job
 import { MlAnomalyDetectionAlertParams } from '@kbn/ml-plugin/common/types/alerts';
 import { ANOMALY_SCORE_MATCH_GROUP_ID } from '@kbn/ml-plugin/server/lib/alerts/register_anomaly_detection_alert_type';
 import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../../../scenarios';
-import {
-  ES_TEST_INDEX_NAME,
-  ESTestIndexTool,
-  getUrlPrefix,
-  ObjectRemover,
-} from '../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const ACTION_TYPE_ID = '.index';

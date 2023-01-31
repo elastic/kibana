@@ -14,7 +14,7 @@ import { RUNNING_IN_EDITOR } from './helpers/running_in_editor';
 let importResolverCache: ImportResolver | undefined;
 
 /**
- * Create a request resolver for ESLint, requires a PluginPackageResolver from @kbn/bazel-packages which will
+ * Create a request resolver for ESLint, requires a PluginPackageResolver from @kbn/repo-packages which will
  * be created and cached on contextServices automatically.
  *
  * All import requests in the repository should return a result, if they don't it's a bug

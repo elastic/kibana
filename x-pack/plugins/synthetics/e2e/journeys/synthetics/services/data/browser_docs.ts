@@ -7,87 +7,106 @@
 
 import { DocOverrides } from './sample_docs';
 
-export const journeySummary = ({ name, timestamp, monitorId, testRunId }: DocOverrides = {}) => ({
-  summary: {
-    up: 1,
-    down: 0,
-  },
-  test_run_id: testRunId ?? '07e339f4-4d56-4cdb-b314-96faacaee645',
-  agent: {
-    name: 'job-88fe737c53c39aea-lp69x',
-    id: '049c1703-b4bd-45fa-8715-61812add68c0',
-    type: 'heartbeat',
-    ephemeral_id: 'e5a562a7-0fff-4684-bb5d-93abf7a754be',
-    version: '8.6.0',
-  },
-  synthetics: {
-    journey: {
-      name: 'inline',
-      id: 'inline',
-      tags: null,
-    },
-    type: 'heartbeat/summary',
-  },
-  monitor: {
-    duration: {
-      us: 2218379,
-    },
-    origin: 'ui',
-    name: name ?? 'https://www.google.com',
-    check_group: testRunId ?? '6e7ce5d2-8756-11ed-98ca-6a95015d8678',
-    id: monitorId ?? '07e339f4-4d56-4cdb-b314-96faacaee645',
-    timespan: {
-      lt: '2022-12-29T09:04:45.789Z',
-      gte: '2022-12-29T08:54:45.789Z',
-    },
-    type: 'browser',
-    status: 'up',
-  },
-  url: {
-    path: '/',
-    scheme: 'https',
-    port: 443,
-    domain: 'www.google.com',
-    full: 'https://www.google.com/',
-  },
+export const getGeoData = (locationName?: string) => ({
   observer: {
     geo: {
-      name: 'US Central QA',
+      name: locationName ?? 'North America - US Central',
       location: '41.8780, 93.0977',
     },
-    name: 'US Central QA',
-  },
-  '@timestamp': timestamp ?? '2022-12-29T08:54:44.502Z',
-  ecs: {
-    version: '8.0.0',
-  },
-  config_id: '07e339f4-4d56-4cdb-b314-96faacaee645',
-  data_stream: {
-    namespace: 'default',
-    type: 'synthetics',
-    dataset: 'browser',
-  },
-  run_once: true,
-  state: {
-    duration_ms: 0,
-    checks: 1,
-    ends: null,
-    started_at: '2022-12-29T08:54:45.845773057Z',
-    id: 'default-1855d174b55-0',
-    up: 1,
-    flap_history: [],
-    down: 0,
-    status: 'up',
-  },
-  event: {
-    agent_id_status: 'auth_metadata_missing',
-    ingested: '2022-12-29T08:54:47Z',
-    type: 'heartbeat/summary',
-    dataset: 'browser',
+    name: locationName ?? 'North America - US Central',
   },
 });
 
-export const journeyStart = ({ name, timestamp, monitorId, testRunId }: DocOverrides = {}) => ({
+export const journeySummary = ({
+  name,
+  timestamp,
+  monitorId,
+  testRunId,
+  locationName,
+}: DocOverrides = {}) => {
+  return {
+    ...getGeoData(locationName),
+    summary: {
+      up: 1,
+      down: 0,
+    },
+    test_run_id: testRunId ?? '07e339f4-4d56-4cdb-b314-96faacaee645',
+    agent: {
+      name: 'job-88fe737c53c39aea-lp69x',
+      id: '049c1703-b4bd-45fa-8715-61812add68c0',
+      type: 'heartbeat',
+      ephemeral_id: 'e5a562a7-0fff-4684-bb5d-93abf7a754be',
+      version: '8.6.0',
+    },
+    synthetics: {
+      journey: {
+        name: 'inline',
+        id: 'inline',
+        tags: null,
+      },
+      type: 'heartbeat/summary',
+    },
+    monitor: {
+      duration: {
+        us: 2218379,
+      },
+      origin: 'ui',
+      name: name ?? 'https://www.google.com',
+      check_group: testRunId ?? '6e7ce5d2-8756-11ed-98ca-6a95015d8678',
+      id: monitorId ?? '07e339f4-4d56-4cdb-b314-96faacaee645',
+      timespan: {
+        lt: '2022-12-29T09:04:45.789Z',
+        gte: '2022-12-29T08:54:45.789Z',
+      },
+      type: 'browser',
+      status: 'up',
+    },
+    url: {
+      path: '/',
+      scheme: 'https',
+      port: 443,
+      domain: 'www.google.com',
+      full: 'https://www.google.com/',
+    },
+    '@timestamp': timestamp ?? '2022-12-29T08:54:44.502Z',
+    ecs: {
+      version: '8.0.0',
+    },
+    config_id: '07e339f4-4d56-4cdb-b314-96faacaee645',
+    data_stream: {
+      namespace: 'default',
+      type: 'synthetics',
+      dataset: 'browser',
+    },
+    run_once: true,
+    state: {
+      duration_ms: 0,
+      checks: 1,
+      ends: null,
+      started_at: '2022-12-29T08:54:45.845773057Z',
+      id: 'default-1855d174b55-0',
+      up: 1,
+      flap_history: [],
+      down: 0,
+      status: 'up',
+    },
+    event: {
+      agent_id_status: 'auth_metadata_missing',
+      ingested: '2022-12-29T08:54:47Z',
+      type: 'heartbeat/summary',
+      dataset: 'browser',
+    },
+  };
+};
+
+export const journeyStart = ({
+  name,
+  timestamp,
+  monitorId,
+  testRunId,
+  locationName,
+}: DocOverrides = {}) => ({
+  ...getGeoData(locationName),
   test_run_id: testRunId ?? '07e339f4-4d56-4cdb-b314-96faacaee645',
   agent: {
     name: 'job-88fe737c53c39aea-lp69x',
@@ -128,13 +147,6 @@ export const journeyStart = ({ name, timestamp, monitorId, testRunId }: DocOverr
     },
     type: 'browser',
   },
-  observer: {
-    geo: {
-      name: 'Test private location',
-      location: '41.8780, 93.0977',
-    },
-    name: 'Test private location',
-  },
   '@timestamp': timestamp ?? '2022-12-29T08:54:42.284Z',
   ecs: {
     version: '8.0.0',
@@ -154,7 +166,14 @@ export const journeyStart = ({ name, timestamp, monitorId, testRunId }: DocOverr
   },
 });
 
-export const step1 = ({ name, timestamp, monitorId, testRunId }: DocOverrides = {}) => ({
+export const step1 = ({
+  name,
+  timestamp,
+  monitorId,
+  testRunId,
+  locationName,
+}: DocOverrides = {}) => ({
+  ...getGeoData(locationName),
   test_run_id: testRunId ?? 'c16b1614-7f48-4791-8f46-9ccf3a896e20',
   agent: {
     name: 'job-76905d93798e6fff-z6nsb',
@@ -210,13 +229,6 @@ export const step1 = ({ name, timestamp, monitorId, testRunId }: DocOverrides = 
     domain: 'www.google.com',
     full: 'https://www.google.com/',
   },
-  observer: {
-    geo: {
-      name: 'US Central QA',
-      location: '41.8780, 93.0977',
-    },
-    name: 'US Central QA',
-  },
   '@timestamp': timestamp ?? '2022-12-29T09:55:23.729Z',
   ecs: {
     version: '8.0.0',
@@ -236,7 +248,14 @@ export const step1 = ({ name, timestamp, monitorId, testRunId }: DocOverrides = 
   },
 });
 
-export const step2 = ({ name, timestamp, monitorId, testRunId }: DocOverrides = {}) => ({
+export const step2 = ({
+  name,
+  timestamp,
+  monitorId,
+  testRunId,
+  locationName,
+}: DocOverrides = {}) => ({
+  ...getGeoData(locationName),
   test_run_id: testRunId ?? 'c16b1614-7f48-4791-8f46-9ccf3a896e20',
   agent: {
     name: 'job-76905d93798e6fff-z6nsb',
@@ -291,13 +310,6 @@ export const step2 = ({ name, timestamp, monitorId, testRunId }: DocOverrides = 
     port: 443,
     domain: 'www.google.com',
     full: 'https://www.google.com/',
-  },
-  observer: {
-    geo: {
-      name: 'US Central QA',
-      location: '41.8780, 93.0977',
-    },
-    name: 'US Central QA',
   },
   '@timestamp': timestamp ?? '2022-12-29T09:55:24.520Z',
   ecs: {

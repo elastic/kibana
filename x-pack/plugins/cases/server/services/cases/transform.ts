@@ -51,8 +51,20 @@ export function transformUpdateResponsesToExternalModels(
 export function transformUpdateResponseToExternalModel(
   updatedCase: SavedObjectsUpdateResponse<ESCaseAttributes>
 ): SavedObjectsUpdateResponse<CaseAttributes> {
-  const { connector, external_service, severity, status, ...restUpdateAttributes } =
-    updatedCase.attributes ?? {};
+  const {
+    connector,
+    external_service,
+    severity,
+    status,
+    total_alerts,
+    total_comments,
+    ...restUpdateAttributes
+  } =
+    updatedCase.attributes ??
+    ({
+      total_alerts: -1,
+      total_comments: -1,
+    } as ESCaseAttributes);
 
   const transformedConnector = transformESConnectorToExternalModel({
     // if the saved object had an error the attributes field will not exist
@@ -192,10 +204,17 @@ export function transformSavedObjectToExternalModel(
   const status =
     STATUS_ESMODEL_TO_EXTERNAL[caseSavedObject.attributes?.status] ?? CaseStatuses.open;
 
+  const { total_alerts, total_comments, ...caseSavedObjectAttributes } =
+    caseSavedObject.attributes ??
+    ({
+      total_alerts: -1,
+      total_comments: -1,
+    } as ESCaseAttributes);
+
   return {
     ...caseSavedObject,
     attributes: {
-      ...caseSavedObject.attributes,
+      ...caseSavedObjectAttributes,
       severity,
       status,
       connector,

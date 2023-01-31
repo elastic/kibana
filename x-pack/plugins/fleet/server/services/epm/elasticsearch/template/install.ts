@@ -50,6 +50,11 @@ import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
 import {
+  applyDocOnlyValueToMapping,
+  forEachMappings,
+} from '../../../experimental_datastream_features_helper';
+
+import {
   generateMappings,
   generateTemplateName,
   generateTemplateIndexPattern,
@@ -61,10 +66,11 @@ import { buildDefaultSettings } from './default_settings';
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
 
 export const prepareToInstallTemplates = (
-  installablePackage: InstallablePackage,
+  installablePackage: InstallablePackage | PackageInfo,
   paths: string[],
   esReferences: EsAssetReference[],
-  experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = []
+  experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = [],
+  onlyForDataStreams?: RegistryDataStream[]
 ): {
   assetsToAdd: EsAssetReference[];
   assetsToRemove: EsAssetReference[];
@@ -78,7 +84,7 @@ export const prepareToInstallTemplates = (
   );
 
   // build templates per data stream from yml files
-  const dataStreams = installablePackage.data_streams;
+  const dataStreams = onlyForDataStreams || installablePackage.data_streams;
   if (!dataStreams) return { assetsToAdd: [], assetsToRemove, install: () => Promise.resolve([]) };
 
   const templates = dataStreams.map((dataStream) => {
@@ -261,6 +267,7 @@ export function buildComponentTemplates(params: {
     defaultSettings,
     mappings,
     pipelineName,
+    experimentalDataStreamFeature,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -274,6 +281,23 @@ export function buildComponentTemplates(params: {
 
   const indexTemplateMappings = registryElasticsearch?.['index_template.mappings'] ?? {};
 
+  const isDocValueOnlyNumericEnabled =
+    experimentalDataStreamFeature?.features.doc_value_only_numeric === true;
+  const isDocValueOnlyOtherEnabled =
+    experimentalDataStreamFeature?.features.doc_value_only_other === true;
+
+  if (isDocValueOnlyNumericEnabled || isDocValueOnlyOtherEnabled) {
+    forEachMappings(mappings.properties, (mappingProp, name) =>
+      applyDocOnlyValueToMapping(
+        mappingProp,
+        name,
+        experimentalDataStreamFeature,
+        isDocValueOnlyNumericEnabled,
+        isDocValueOnlyOtherEnabled
+      )
+    );
+  }
+
   const mappingsProperties = merge(mappings.properties, indexTemplateMappings.properties ?? {});
 
   const mappingsDynamicTemplates = uniqBy(
@@ -285,8 +309,8 @@ export function buildComponentTemplates(params: {
   const isSyntheticSourceEnabledByDefault = registryElasticsearch?.source_mode === 'synthetic';
 
   const sourceModeSynthetic =
-    params.experimentalDataStreamFeature?.features.synthetic_source !== false &&
-    (params.experimentalDataStreamFeature?.features.synthetic_source === true ||
+    experimentalDataStreamFeature?.features.synthetic_source !== false &&
+    (experimentalDataStreamFeature?.features.synthetic_source === true ||
       isSyntheticSourceEnabledByDefault ||
       isTimeSeriesEnabledByDefault);
 
@@ -343,7 +367,6 @@ async function installDataStreamComponentTemplates({
   logger: Logger;
   componentTemplates: TemplateMap;
 }) {
-  // TODO: Check return values for errors
   await Promise.all(
     Object.entries(componentTemplates).map(async ([name, body]) => {
       if (isUserSettingsTemplate(name)) {
@@ -491,7 +514,12 @@ export function prepareTemplate({
   const { name: packageName, version: packageVersion } = pkg;
   const fields = loadFieldsFromYaml(pkg, dataStream.path);
   const validFields = processFields(fields);
-  const mappings = generateMappings(validFields);
+
+  const isIndexModeTimeSeries =
+    dataStream.elasticsearch?.index_mode === 'time_series' ||
+    experimentalDataStreamFeature?.features.tsdb;
+
+  const mappings = generateMappings(validFields, { isIndexModeTimeSeries });
   const templateName = generateTemplateName(dataStream);
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
@@ -524,6 +552,7 @@ export function prepareTemplate({
     hidden: dataStream.hidden,
     registryElasticsearch: dataStream.elasticsearch,
     mappings,
+    isIndexModeTimeSeries,
   });
 
   return {

@@ -9,6 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { ClientPluginsStart } from '../../../../../../../plugin';
+import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 
 interface Props {
   from: string;
@@ -39,7 +40,7 @@ export const OverviewErrorsSparklines = ({ from, to, monitorId }: Props) => {
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
-          name: 'Monitor errors',
+          name: ERRORS_LABEL,
           color: euiTheme.colors.danger,
           operationType: 'unique_count',
         },

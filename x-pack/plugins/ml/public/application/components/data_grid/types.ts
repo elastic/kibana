@@ -29,6 +29,11 @@ export type DataGridItem = Record<string, any>;
 export type ChartsVisible = boolean | undefined;
 export type RowCountRelation = estypes.SearchTotalHitsRelation | undefined;
 
+export interface RowCountInfo {
+  rowCount: number;
+  rowCountRelation: RowCountRelation;
+}
+
 export type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 
 export type OnChangeItemsPerPage = (pageSize: any) => void;
@@ -105,8 +110,7 @@ export interface UseDataGridReturnType {
   setErrorMessage: Dispatch<SetStateAction<string>>;
   setNoDataMessage: Dispatch<SetStateAction<string>>;
   setPagination: Dispatch<SetStateAction<IndexPagination>>;
-  setRowCount: Dispatch<SetStateAction<number>>;
-  setRowCountRelation: Dispatch<SetStateAction<RowCountRelation>>;
+  setRowCountInfo: Dispatch<SetStateAction<RowCountInfo>>;
   setSortingColumns: Dispatch<SetStateAction<EuiDataGridSorting['columns']>>;
   setStatus: Dispatch<SetStateAction<INDEX_STATUS>>;
   setTableItems: Dispatch<SetStateAction<DataGridItem[]>>;

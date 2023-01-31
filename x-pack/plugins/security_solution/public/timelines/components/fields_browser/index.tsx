@@ -170,8 +170,12 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
     openDeleteFieldModal,
   });
 
-  return {
-    createFieldButton,
-    getFieldTableColumns,
-  };
+  const memoized = useMemo(
+    () => ({
+      createFieldButton,
+      getFieldTableColumns,
+    }),
+    [createFieldButton, getFieldTableColumns]
+  );
+  return memoized;
 };

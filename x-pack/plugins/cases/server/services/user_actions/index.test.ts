@@ -5,47 +5,20 @@
  * 2.0.
  */
 
-import { get, omit } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   SavedObject,
-  SavedObjectReference,
   SavedObjectsBulkCreateObject,
   SavedObjectsFindResponse,
-  SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import type {
-  CaseAttributes,
-  CaseUserActionAttributes,
-  ConnectorUserAction,
-  UserAction,
-} from '../../../common/api';
+import type { CaseAttributes } from '../../../common/api';
 import { Actions, ActionTypes, CaseSeverity, CaseStatuses } from '../../../common/api';
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  CASE_USER_ACTION_SAVED_OBJECT,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common/constants';
-import {
-  CASE_REF_NAME,
-  COMMENT_REF_NAME,
-  CONNECTOR_ID_REFERENCE_NAME,
-  EXTERNAL_REFERENCE_REF_NAME,
-  PUSH_CONNECTOR_ID_REFERENCE_NAME,
-} from '../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
-import {
-  createCaseSavedObjectResponse,
-  createConnectorObject,
-  createExternalService,
-  createJiraConnector,
-  createSOFindResponse,
-} from '../test_utils';
+import { createCaseSavedObjectResponse } from '../test_utils';
 import {
   casePayload,
   externalService,
@@ -57,254 +30,10 @@ import {
   originalCasesWithAssignee,
   updatedTagsCases,
 } from './mocks';
-import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import {
-  externalReferenceAttachmentSO,
-  createPersistableStateAttachmentTypeRegistryMock,
-  persistableStateAttachment,
-} from '../../attachment_framework/mocks';
-
-const createConnectorUserAction = (
-  overrides?: Partial<CaseUserActionAttributes>
-): SavedObject<CaseUserActionAttributes> => {
-  const { id, ...restConnector } = createConnectorObject().connector;
-  return {
-    ...createUserActionSO({
-      action: Actions.create,
-      payload: { connector: restConnector },
-      type: 'connector',
-      connectorId: id,
-    }),
-    ...(overrides && { ...overrides }),
-  };
-};
-
-const updateConnectorUserAction = ({
-  overrides,
-}: {
-  overrides?: Partial<CaseUserActionAttributes>;
-} = {}): SavedObject<CaseUserActionAttributes> => {
-  const { id, ...restConnector } = createJiraConnector();
-  return {
-    ...createUserActionSO({
-      action: Actions.update,
-      payload: { connector: restConnector },
-      type: 'connector',
-      connectorId: id,
-    }),
-    ...(overrides && { ...overrides }),
-  };
-};
-
-const pushConnectorUserAction = ({
-  overrides,
-}: {
-  overrides?: Partial<CaseUserActionAttributes>;
-} = {}): SavedObject<CaseUserActionAttributes> => {
-  const { connector_id: connectorId, ...restExternalService } = createExternalService();
-  return {
-    ...createUserActionSO({
-      action: Actions.push_to_service,
-      payload: { externalService: restExternalService },
-      pushedConnectorId: connectorId,
-      type: 'pushed',
-    }),
-    ...(overrides && { ...overrides }),
-  };
-};
-
-const createCaseUserAction = (): SavedObject<CaseUserActionAttributes> => {
-  const { id, ...restConnector } = createJiraConnector();
-  return {
-    ...createUserActionSO({
-      action: Actions.create,
-      payload: {
-        connector: restConnector,
-        title: 'a title',
-        description: 'a desc',
-        settings: { syncAlerts: false },
-        status: CaseStatuses.open,
-        severity: CaseSeverity.LOW,
-        tags: [],
-        owner: SECURITY_SOLUTION_OWNER,
-      },
-      connectorId: id,
-      type: 'create_case',
-    }),
-  };
-};
-
-const createUserActionFindSO = (
-  userAction: SavedObject<CaseUserActionAttributes>
-): SavedObjectsFindResult<CaseUserActionAttributes> => ({
-  ...userAction,
-  score: 0,
-});
-
-const createUserActionSO = ({
-  action,
-  attributesOverrides,
-  commentId,
-  connectorId,
-  pushedConnectorId,
-  payload,
-  type,
-  references = [],
-}: {
-  action: UserAction;
-  type?: string;
-  payload?: Record<string, unknown>;
-  attributesOverrides?: Partial<CaseUserActionAttributes>;
-  commentId?: string;
-  connectorId?: string;
-  pushedConnectorId?: string;
-  references?: SavedObjectReference[];
-}): SavedObject<CaseUserActionAttributes> => {
-  const defaultParams = {
-    action,
-    created_at: 'abc',
-    created_by: {
-      email: 'a',
-      username: 'b',
-      full_name: 'abc',
-    },
-    type: type ?? 'title',
-    payload: payload ?? { title: 'a new title' },
-    owner: 'securitySolution',
-  };
-
-  return {
-    type: CASE_USER_ACTION_SAVED_OBJECT,
-    id: '100',
-    attributes: {
-      ...defaultParams,
-      ...(attributesOverrides && { ...attributesOverrides }),
-    },
-    references: [
-      ...references,
-      {
-        type: CASE_SAVED_OBJECT,
-        name: CASE_REF_NAME,
-        id: '1',
-      },
-      ...(commentId
-        ? [
-            {
-              type: CASE_COMMENT_SAVED_OBJECT,
-              name: COMMENT_REF_NAME,
-              id: commentId,
-            },
-          ]
-        : []),
-      ...(connectorId
-        ? [
-            {
-              type: ACTION_SAVED_OBJECT_TYPE,
-              name: CONNECTOR_ID_REFERENCE_NAME,
-              id: connectorId,
-            },
-          ]
-        : []),
-      ...(pushedConnectorId
-        ? [
-            {
-              type: ACTION_SAVED_OBJECT_TYPE,
-              name: PUSH_CONNECTOR_ID_REFERENCE_NAME,
-              id: pushedConnectorId,
-            },
-          ]
-        : []),
-    ],
-  } as SavedObject<CaseUserActionAttributes>;
-};
-
-const createPersistableStateUserAction = () => {
-  return {
-    ...createUserActionSO({
-      action: Actions.create,
-      commentId: 'persistable-state-test-id',
-      payload: {
-        comment: {
-          ...persistableStateAttachment,
-          persistableStateAttachmentState: { foo: 'foo' },
-        },
-      },
-      type: 'comment',
-      references: [{ id: 'testRef', name: 'myTestReference', type: 'test-so' }],
-    }),
-  };
-};
-
-const createExternalReferenceUserAction = () => {
-  return {
-    ...createUserActionSO({
-      action: Actions.create,
-      commentId: 'external-reference-test-id',
-      payload: {
-        comment: omit(externalReferenceAttachmentSO, 'externalReferenceId'),
-      },
-      type: 'comment',
-      references: [{ id: 'my-id', name: EXTERNAL_REFERENCE_REF_NAME, type: 'test-so' }],
-    }),
-  };
-};
-
-const testConnectorId = (
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry,
-  userAction: SavedObject<CaseUserActionAttributes>,
-  path: string,
-  expectedConnectorId = '1'
-) => {
-  it('does set payload.connector.id to none when it cannot find the reference', () => {
-    const userActionWithEmptyRef = { ...userAction, references: [] };
-    const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)]),
-      persistableStateAttachmentTypeRegistry
-    );
-
-    expect(get(transformed.saved_objects[0].attributes.payload, path)).toBe('none');
-  });
-
-  it('does not populate the payload.connector.id when the reference exists but the action is not of type connector', () => {
-    const invalidUserAction = {
-      ...userAction,
-      attributes: { ...userAction.attributes, type: 'not-connector' },
-    };
-    const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([
-        createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-      ]),
-      persistableStateAttachmentTypeRegistry
-    );
-
-    expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
-  });
-
-  it('does not populate the payload.connector.id when the reference exists but the payload does not contain a connector', () => {
-    const invalidUserAction = {
-      ...userAction,
-      attributes: { ...userAction.attributes, payload: {} },
-    };
-    const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([
-        createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-      ]),
-      persistableStateAttachmentTypeRegistry
-    ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-    expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
-  });
-
-  it('populates the payload.connector.id', () => {
-    const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userAction)]),
-      persistableStateAttachmentTypeRegistry
-    ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-    expect(get(transformed.saved_objects[0].attributes.payload, path)).toEqual(expectedConnectorId);
-  });
-};
+import { CaseUserActionService } from '.';
+import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
+import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { createUserActionFindSO, createConnectorUserAction } from './test_utils';
 
 describe('CaseUserActionService', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
@@ -316,322 +45,6 @@ describe('CaseUserActionService', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-  });
-
-  describe('transformFindResponseToExternalModel', () => {
-    it('does not populate the ids when the response is an empty array', () => {
-      expect(
-        transformFindResponseToExternalModel(
-          createSOFindResponse([]),
-          persistableStateAttachmentTypeRegistry
-        )
-      ).toMatchInlineSnapshot(`
-        Object {
-          "page": 1,
-          "per_page": 0,
-          "saved_objects": Array [],
-          "total": 0,
-        }
-      `);
-    });
-
-    it('preserves the saved object fields and attributes when inject the ids', () => {
-      const transformed = transformFindResponseToExternalModel(
-        createSOFindResponse([createUserActionFindSO(createConnectorUserAction())]),
-        persistableStateAttachmentTypeRegistry
-      );
-
-      expect(transformed).toMatchInlineSnapshot(`
-        Object {
-          "page": 1,
-          "per_page": 1,
-          "saved_objects": Array [
-            Object {
-              "attributes": Object {
-                "action": "create",
-                "action_id": "100",
-                "case_id": "1",
-                "comment_id": null,
-                "created_at": "abc",
-                "created_by": Object {
-                  "email": "a",
-                  "full_name": "abc",
-                  "username": "b",
-                },
-                "owner": "securitySolution",
-                "payload": Object {
-                  "connector": Object {
-                    "fields": Object {
-                      "issueType": "bug",
-                      "parent": "2",
-                      "priority": "high",
-                    },
-                    "id": "1",
-                    "name": ".jira",
-                    "type": ".jira",
-                  },
-                },
-                "type": "connector",
-              },
-              "id": "100",
-              "references": Array [
-                Object {
-                  "id": "1",
-                  "name": "associated-cases",
-                  "type": "cases",
-                },
-                Object {
-                  "id": "1",
-                  "name": "connectorId",
-                  "type": "action",
-                },
-              ],
-              "score": 0,
-              "type": "cases-user-actions",
-            },
-          ],
-          "total": 1,
-        }
-      `);
-    });
-
-    it('populates the payload.connector.id for multiple user actions', () => {
-      const transformed = transformFindResponseToExternalModel(
-        createSOFindResponse([
-          createUserActionFindSO(createConnectorUserAction()),
-          createUserActionFindSO(createConnectorUserAction()),
-        ]),
-        persistableStateAttachmentTypeRegistry
-      ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-      expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('1');
-      expect(transformed.saved_objects[1].attributes.payload.connector.id).toEqual('1');
-    });
-
-    describe('reference ids', () => {
-      it('sets case_id to an empty string when it cannot find the reference', () => {
-        const userAction = {
-          ...createConnectorUserAction(),
-          references: [],
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)]),
-          persistableStateAttachmentTypeRegistry
-        );
-
-        expect(transformed.saved_objects[0].attributes.case_id).toEqual('');
-      });
-
-      it('sets comment_id to null when it cannot find the reference', () => {
-        const userAction = {
-          ...createUserActionSO({ action: Actions.create, commentId: '5' }),
-          references: [],
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)]),
-          persistableStateAttachmentTypeRegistry
-        );
-
-        expect(transformed.saved_objects[0].attributes.comment_id).toBeNull();
-      });
-
-      it('sets case_id correctly when it finds the reference', () => {
-        const userAction = createConnectorUserAction();
-
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)]),
-          persistableStateAttachmentTypeRegistry
-        );
-
-        expect(transformed.saved_objects[0].attributes.case_id).toEqual('1');
-      });
-
-      it('sets comment_id correctly when it finds the reference', () => {
-        const userAction = createUserActionSO({
-          action: Actions.create,
-          commentId: '5',
-        });
-
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)]),
-          persistableStateAttachmentTypeRegistry
-        );
-
-        expect(transformed.saved_objects[0].attributes.comment_id).toEqual('5');
-      });
-
-      it('sets action_id correctly to the saved object id', () => {
-        const userAction = {
-          ...createUserActionSO({ action: Actions.create, commentId: '5' }),
-        };
-
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)]),
-          persistableStateAttachmentTypeRegistry
-        );
-
-        expect(transformed.saved_objects[0].attributes.action_id).toEqual('100');
-      });
-    });
-
-    describe('create connector', () => {
-      const userAction = createConnectorUserAction();
-      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
-    });
-
-    describe('update connector', () => {
-      const userAction = updateConnectorUserAction();
-      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
-    });
-
-    describe('push connector', () => {
-      const userAction = pushConnectorUserAction();
-      testConnectorId(
-        persistableStateAttachmentTypeRegistry,
-        userAction,
-        'externalService.connector_id',
-        '100'
-      );
-    });
-
-    describe('create case', () => {
-      const userAction = createCaseUserAction();
-      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
-    });
-
-    describe('persistable state attachments', () => {
-      it('populates the persistable state', () => {
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(createPersistableStateUserAction())]),
-          persistableStateAttachmentTypeRegistry
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-        expect(transformed).toMatchInlineSnapshot(`
-          Object {
-            "page": 1,
-            "per_page": 1,
-            "saved_objects": Array [
-              Object {
-                "attributes": Object {
-                  "action": "create",
-                  "action_id": "100",
-                  "case_id": "1",
-                  "comment_id": "persistable-state-test-id",
-                  "created_at": "abc",
-                  "created_by": Object {
-                    "email": "a",
-                    "full_name": "abc",
-                    "username": "b",
-                  },
-                  "owner": "securitySolution",
-                  "payload": Object {
-                    "comment": Object {
-                      "owner": "securitySolutionFixture",
-                      "persistableStateAttachmentState": Object {
-                        "foo": "foo",
-                        "injectedId": "testRef",
-                      },
-                      "persistableStateAttachmentTypeId": ".test",
-                      "type": "persistableState",
-                    },
-                  },
-                  "type": "comment",
-                },
-                "id": "100",
-                "references": Array [
-                  Object {
-                    "id": "testRef",
-                    "name": "myTestReference",
-                    "type": "test-so",
-                  },
-                  Object {
-                    "id": "1",
-                    "name": "associated-cases",
-                    "type": "cases",
-                  },
-                  Object {
-                    "id": "persistable-state-test-id",
-                    "name": "associated-cases-comments",
-                    "type": "cases-comments",
-                  },
-                ],
-                "score": 0,
-                "type": "cases-user-actions",
-              },
-            ],
-            "total": 1,
-          }
-        `);
-      });
-    });
-
-    describe('external references', () => {
-      it('populates the external references attributes', () => {
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(createExternalReferenceUserAction())]),
-          persistableStateAttachmentTypeRegistry
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-        expect(transformed).toMatchInlineSnapshot(`
-          Object {
-            "page": 1,
-            "per_page": 1,
-            "saved_objects": Array [
-              Object {
-                "attributes": Object {
-                  "action": "create",
-                  "action_id": "100",
-                  "case_id": "1",
-                  "comment_id": "external-reference-test-id",
-                  "created_at": "abc",
-                  "created_by": Object {
-                    "email": "a",
-                    "full_name": "abc",
-                    "username": "b",
-                  },
-                  "owner": "securitySolution",
-                  "payload": Object {
-                    "comment": Object {
-                      "externalReferenceAttachmentTypeId": ".test",
-                      "externalReferenceId": "my-id",
-                      "externalReferenceMetadata": null,
-                      "externalReferenceStorage": Object {
-                        "soType": "test-so",
-                        "type": "savedObject",
-                      },
-                      "owner": "securitySolution",
-                      "type": "externalReference",
-                    },
-                  },
-                  "type": "comment",
-                },
-                "id": "100",
-                "references": Array [
-                  Object {
-                    "id": "my-id",
-                    "name": "externalReferenceId",
-                    "type": "test-so",
-                  },
-                  Object {
-                    "id": "1",
-                    "name": "associated-cases",
-                    "type": "cases",
-                  },
-                  Object {
-                    "id": "external-reference-test-id",
-                    "name": "associated-cases-comments",
-                    "type": "cases-comments",
-                  },
-                ],
-                "score": 0,
-                "type": "cases-user-actions",
-              },
-            ],
-            "total": 1,
-          }
-        `);
-      });
-    });
   });
 
   describe('methods', () => {
@@ -661,6 +74,8 @@ describe('CaseUserActionService', () => {
     };
     const mockAuditLogger = auditLoggerMock.create();
 
+    const soSerializerMock = serializerMock.create();
+
     beforeEach(() => {
       jest.clearAllMocks();
       service = new CaseUserActionService({
@@ -668,13 +83,14 @@ describe('CaseUserActionService', () => {
         log: mockLogger,
         persistableStateAttachmentTypeRegistry,
         auditLogger: mockAuditLogger,
+        savedObjectsSerializer: soSerializerMock,
       });
     });
 
     describe('createUserAction', () => {
       describe('create case', () => {
         it('creates a create case user action', async () => {
-          await service.createUserAction({
+          await service.creator.createUserAction({
             ...commonArgs,
             payload: casePayload,
             type: ActionTypes.create_case,
@@ -726,7 +142,7 @@ describe('CaseUserActionService', () => {
         });
 
         it('logs a create case user action', async () => {
-          await service.createUserAction({
+          await service.creator.createUserAction({
             ...commonArgs,
             payload: casePayload,
             type: ActionTypes.create_case,
@@ -760,7 +176,7 @@ describe('CaseUserActionService', () => {
 
         describe('status', () => {
           it('creates an update status user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { status: CaseStatuses.closed },
               type: ActionTypes.status,
@@ -785,7 +201,7 @@ describe('CaseUserActionService', () => {
           });
 
           it('logs an update status user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { status: CaseStatuses.closed },
               type: ActionTypes.status,
@@ -820,7 +236,7 @@ describe('CaseUserActionService', () => {
 
         describe('severity', () => {
           it('creates an update severity user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { severity: CaseSeverity.MEDIUM },
               type: ActionTypes.severity,
@@ -845,7 +261,7 @@ describe('CaseUserActionService', () => {
           });
 
           it('logs an update severity user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { severity: CaseSeverity.MEDIUM },
               type: ActionTypes.severity,
@@ -880,7 +296,7 @@ describe('CaseUserActionService', () => {
 
         describe('push', () => {
           it('creates a push user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { externalService },
               type: ActionTypes.pushed,
@@ -924,7 +340,7 @@ describe('CaseUserActionService', () => {
           });
 
           it('logs a push user action', async () => {
-            await service.createUserAction({
+            await service.creator.createUserAction({
               ...commonArgs,
               payload: { externalService },
               type: ActionTypes.pushed,
@@ -961,7 +377,7 @@ describe('CaseUserActionService', () => {
           it.each([[Actions.create], [Actions.delete], [Actions.update]])(
             'creates a comment user action of action: %s',
             async (action) => {
-              await service.createUserAction({
+              await service.creator.createUserAction({
                 ...commonArgs,
                 type: ActionTypes.comment,
                 action,
@@ -1002,7 +418,7 @@ describe('CaseUserActionService', () => {
           it.each([[Actions.create], [Actions.delete], [Actions.update]])(
             'logs a comment user action of action: %s',
             async (action) => {
-              await service.createUserAction({
+              await service.creator.createUserAction({
                 ...commonArgs,
                 type: ActionTypes.comment,
                 action,
@@ -1020,7 +436,7 @@ describe('CaseUserActionService', () => {
 
     describe('bulkAuditLogCaseDeletion', () => {
       it('logs a delete case audit log message', async () => {
-        await service.bulkAuditLogCaseDeletion(['1', '2']);
+        await service.creator.bulkAuditLogCaseDeletion(['1', '2']);
 
         expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
 
@@ -1076,7 +492,7 @@ describe('CaseUserActionService', () => {
 
     describe('bulkCreateUpdateCase', () => {
       it('creates the correct user actions when bulk updating cases', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases,
@@ -1244,7 +660,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('logs the correct user actions when bulk updating cases', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases,
@@ -1427,7 +843,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('creates the correct user actions when an assignee is added', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases: updatedAssigneesCases,
@@ -1474,7 +890,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('logs the correct user actions when an assignee is added', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases: updatedAssigneesCases,
@@ -1520,7 +936,7 @@ describe('CaseUserActionService', () => {
           },
         ];
 
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases: originalCasesWithAssignee,
           updatedCases: casesWithAssigneeRemoved,
@@ -1577,7 +993,7 @@ describe('CaseUserActionService', () => {
           },
         ];
 
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases: originalCasesWithAssignee,
           updatedCases: casesWithAssigneeRemoved,
@@ -1623,7 +1039,7 @@ describe('CaseUserActionService', () => {
           },
         ];
 
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases: originalCasesWithAssignee,
           updatedCases: caseAssignees,
@@ -1708,7 +1124,7 @@ describe('CaseUserActionService', () => {
           },
         ];
 
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases: originalCasesWithAssignee,
           updatedCases: caseAssignees,
@@ -1765,7 +1181,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('creates the correct user actions when tags are added and removed', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases: updatedTagsCases,
@@ -1837,7 +1253,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('logs the correct user actions when tags are added and removed', async () => {
-        await service.bulkCreateUpdateCase({
+        await service.creator.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases: updatedTagsCases,
@@ -1896,7 +1312,7 @@ describe('CaseUserActionService', () => {
 
     describe('bulkCreateAttachmentDeletion', () => {
       it('creates delete comment user action', async () => {
-        await service.bulkCreateAttachmentDeletion({
+        await service.creator.bulkCreateAttachmentDeletion({
           ...commonArgs,
           attachments,
         });
@@ -1956,7 +1372,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('logs delete comment user action', async () => {
-        await service.bulkCreateAttachmentDeletion({
+        await service.creator.bulkCreateAttachmentDeletion({
           ...commonArgs,
           attachments,
         });

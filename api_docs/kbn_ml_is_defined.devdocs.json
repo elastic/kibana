@@ -41,7 +41,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "argument",
-            "description": [],
+            "description": [
+              "- argument to check whether it is defined."
+            ],
             "signature": [
               "T | null | undefined"
             ],

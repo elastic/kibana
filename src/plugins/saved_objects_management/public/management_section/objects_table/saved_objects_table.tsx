@@ -7,23 +7,19 @@
  */
 
 import React, { Component } from 'react';
-import { debounce } from 'lodash';
+import { debounce, matches } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import { EuiSpacer, Query, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectsClientContract,
-  HttpStart,
-  OverlayStart,
-  NotificationsStart,
-  ApplicationStart,
-} from '@kbn/core/public';
+import { HttpStart, OverlayStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import { Subscription } from 'rxjs';
 import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import {
   parseQuery,
@@ -32,6 +28,7 @@ import {
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   findObjects,
+  bulkDeleteObjects,
   bulkGetObjects,
   extractExportDetails,
   SavedObjectsExportResultDetails,
@@ -60,7 +57,6 @@ export interface SavedObjectsTableProps {
   allowedTypes: SavedObjectManagementTypeInfo[];
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
-  savedObjectsClient: SavedObjectsClientContract;
   dataViews: DataViewsContract;
   taggingApi?: SavedObjectsTaggingApi;
   http: HttpStart;
@@ -72,6 +68,7 @@ export interface SavedObjectsTableProps {
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   initialQuery?: Query;
+  customBranding: CustomBrandingStart;
 }
 
 export interface SavedObjectsTableState {
@@ -94,6 +91,7 @@ export interface SavedObjectsTableState {
   exportAllOptions: ExportAllOption[];
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
+  hasCustomBranding: boolean;
 }
 
 const unableFindSavedObjectsNotificationMessage = i18n.translate(
@@ -107,6 +105,7 @@ const unableFindSavedObjectNotificationMessage = i18n.translate(
 
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
+  private hasCustomBrandingSubscription?: Subscription;
 
   constructor(props: SavedObjectsTableProps) {
     super(props);
@@ -137,6 +136,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
+      hasCustomBranding: false,
     };
   }
 
@@ -144,12 +144,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this._isMounted = true;
     this.fetchAllSavedObjects();
     this.fetchCounts();
+    this.hasCustomBrandingSubscription = this.props.customBranding.hasCustomBranding$.subscribe(
+      (next) => {
+        this.setState({ ...this.state, hasCustomBranding: next });
+      }
+    );
   }
 
   componentWillUnmount() {
     this._isMounted = false;
     this.debouncedFindObjects.cancel();
     this.debouncedBulkGetObjects.cancel();
+    this.hasCustomBrandingSubscription?.unsubscribe();
   }
 
   fetchCounts = async () => {
@@ -507,7 +513,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   delete = async () => {
-    const { savedObjectsClient } = this.props;
+    const { http, notifications } = this.props;
     const { selectedSavedObjects, isDeleting } = this.state;
 
     if (isDeleting) {
@@ -521,14 +527,27 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       await this.props.dataViews.clearCache();
     }
 
-    const deletes = selectedSavedObjects
-      .filter((object) => !object.meta.hiddenType)
-      .map((object) => savedObjectsClient.delete(object.type, object.id, { force: true }));
-    await Promise.all(deletes);
+    const deleteStatus = await bulkDeleteObjects(
+      http,
+      selectedSavedObjects
+        .filter((object) => !object.meta.hiddenType)
+        .map(({ id, type }) => ({ id, type }))
+    );
+
+    notifications.toasts.addInfo({
+      title: i18n.translate('savedObjectsManagement.objectsTable.delete.successNotification', {
+        defaultMessage: `Successfully deleted {count, plural, one {# object} other {# objects}}.`,
+        values: {
+          count: deleteStatus.filter(({ success }) => !!success).length,
+        },
+      }),
+    });
 
     // Unset this
     this.setState({
-      selectedSavedObjects: [],
+      selectedSavedObjects: selectedSavedObjects.filter(({ id, type }) =>
+        deleteStatus.some(matches({ id, type, success: false }))
+      ),
     });
 
     // Fetching all data
@@ -567,6 +586,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         basePath={this.props.http.basePath}
         search={this.props.search}
         allowedTypes={this.props.allowedTypes}
+        showPlainSpinner={this.state.hasCustomBranding}
       />
     );
   }
@@ -585,12 +605,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         goInspectObject={this.props.goInspectObject}
         canGoInApp={this.props.canGoInApp}
         allowedTypes={this.props.allowedTypes}
+        showPlainSpinner={this.state.hasCustomBranding}
       />
     );
   }
 
   renderDeleteConfirmModal() {
-    const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects } = this.state;
+    const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects, hasCustomBranding } =
+      this.state;
     const { allowedTypes } = this.props;
 
     if (!isShowingDeleteConfirmModal) {
@@ -608,6 +630,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         }}
         selectedObjects={selectedSavedObjects}
         allowedTypes={allowedTypes}
+        showPlainSpinner={hasCustomBranding}
       />
     );
   }

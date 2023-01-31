@@ -125,6 +125,8 @@ export const basicESCaseFields: ESCaseAttributes = {
   },
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],
+  total_alerts: -1,
+  total_comments: -1,
 };
 
 export const basicCaseFields: CaseAttributes = {

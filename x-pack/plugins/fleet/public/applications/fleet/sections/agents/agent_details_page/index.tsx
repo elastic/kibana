@@ -32,7 +32,6 @@ import {
   AgentLogs,
   AgentDetailsActionMenu,
   AgentDetailsContent,
-  AgentDashboardLink,
   AgentDiagnosticsTab,
 } from './components';
 
@@ -41,6 +40,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
+  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
   const {
     isLoading,
     isInitialRequest,
@@ -49,6 +49,9 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     resendRequest: sendAgentRequest,
   } = useGetOneAgent(agentId, {
     pollIntervalMs: 5000,
+    query: {
+      withMetrics: displayAgentMetrics,
+    },
   });
   const {
     isLoading: isAgentPolicyLoading,
@@ -127,9 +130,6 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <AgentDashboardLink agent={agentData?.item} agentPolicy={agentPolicyData?.item} />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </>
       ) : undefined,

@@ -20,9 +20,6 @@
   ],
   "exclude": [
     "target/**/*",
-    "analytics/fixtures/plugins/**/*",
-    "interactive_setup_api_integration/fixtures/test_endpoints/**/*",
-    "server_integration/__fixtures__/plugins/**/*",
     "*/plugins/**/*",
   ],
   "kbn_references": [
@@ -37,7 +34,6 @@
     "@kbn/visualizations-plugin",
     "@kbn/analytics-ftr-helpers-plugin",
     "@kbn/analytics-plugin-a-plugin",
-    { "path": "interactive_setup_api_integration/fixtures/test_endpoints/tsconfig.json" },
     "@kbn/core-app-status-plugin",
     "@kbn/core-provider-plugin",
     "@kbn/test",

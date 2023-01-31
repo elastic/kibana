@@ -51,3 +51,10 @@ export {
 } from './datastream_es_name';
 
 export * from './file_storage';
+export {
+  getPackageReleaseLabel,
+  isPackagePrerelease,
+  mapPackageReleaseToIntegrationCardRelease,
+} from './package_prerelease';
+
+export { getAllowedOutputTypeForPolicy } from './output_helpers';

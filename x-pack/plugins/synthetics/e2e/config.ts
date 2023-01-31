@@ -7,15 +7,13 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { argv } from '@kbn/observability-plugin/e2e/parse_args_params';
-
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { readKibanaConfig } from './tasks/read_kibana_config';
-
-const { watch } = argv;
-
 const MANIFEST_KEY = 'xpack.uptime.service.manifestUrl';
 const SERVICE_PASSWORD = 'xpack.uptime.service.password';
 const SERVICE_USERNAME = 'xpack.uptime.service.username';
+
+const { watch } = argv;
 
 async function config({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(

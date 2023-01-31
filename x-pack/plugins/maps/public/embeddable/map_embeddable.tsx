@@ -263,6 +263,10 @@ export class MapEmbeddable
     return getMapAttributeService().getInputAsValueType(this.getExplicitInput());
   }
 
+  public getLayerList() {
+    return getLayerList(this._savedMap.getStore().getState());
+  }
+
   public getDescription() {
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }

@@ -7,10 +7,12 @@
 
 import React from 'react';
 import { createLogViewsServiceStartMock } from './services/log_views/log_views_service.mock';
+import { createTelemetryServiceMock } from './services/telemetry/telemetry_service.mock';
 import { InfraClientStartExports } from './types';
 
 export const createInfraPluginStartMock = () => ({
   logViews: createLogViewsServiceStartMock(),
+  telemetry: createTelemetryServiceMock(),
   ContainerMetricsTable: () => <div />,
   HostMetricsTable: () => <div />,
   PodMetricsTable: () => <div />,

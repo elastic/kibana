@@ -229,9 +229,7 @@ function showModal(
     savePolicy: deps.savePolicy,
     hasData: workspace.nodes.length > 0 || workspace.blocklistedNodes.length > 0,
     workspace: savedWorkspace,
-    showSaveModal: deps.showSaveModal,
     saveWorkspace: saveWorkspaceHandler,
-    I18nContext: deps.I18nContext,
     services: {
       savedObjectsClient: deps.savedObjectsClient,
       overlays: deps.overlays,

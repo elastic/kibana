@@ -52,6 +52,7 @@ export interface UserSummaryProps {
   narrowDateRange: NarrowDateRange;
   userName: string;
   indexPatterns: string[];
+  jobNameById: Record<string, string | undefined>;
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
@@ -74,6 +75,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     endDate,
     userName,
     indexPatterns,
+    jobNameById,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -179,6 +181,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
                     endDate={endDate}
                     isLoading={isLoadingAnomaliesData}
                     narrowDateRange={narrowDateRange}
+                    jobNameById={jobNameById}
                   />
                 ),
               },
@@ -192,6 +195,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
         narrowDateRange,
         startDate,
         userPermissions,
+        jobNameById,
       ]
     );
 

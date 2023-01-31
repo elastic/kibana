@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { type FrozenTierPreference } from '@kbn/ml-date-picker';
+
 import { EntityFieldType } from './anomalies';
 
 export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields' as const;
@@ -13,14 +15,6 @@ export const ML_GETTING_STARTED_CALLOUT_DISMISSED = 'ml.gettingStarted.isDismiss
 export const ML_FROZEN_TIER_PREFERENCE = 'ml.frozenDataTierPreference';
 export const ML_ANOMALY_EXPLORER_PANELS = 'ml.anomalyExplorerPanels';
 export const ML_NOTIFICATIONS_LAST_CHECKED_AT = 'ml.notificationsLastCheckedAt';
-
-export const FROZEN_TIER_PREFERENCE = {
-  EXCLUDE: 'exclude-frozen',
-  INCLUDE: 'include-frozen',
-} as const;
-
-export type FrozenTierPreference =
-  typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
 
 export type PartitionFieldConfig =
   | {

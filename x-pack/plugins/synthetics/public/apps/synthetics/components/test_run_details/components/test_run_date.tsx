@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
-export const TestRunDate: React.FC = () => {
+export const TestRunDate = () => {
   const { data } = useJourneySteps();
 
   let startedAt: string | ReactElement = useFormatTestRunAt(data?.details?.timestamp);

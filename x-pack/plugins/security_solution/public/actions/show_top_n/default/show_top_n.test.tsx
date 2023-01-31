@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { Subject } from 'rxjs';
 import { APP_UI_ID } from '../../../../common/constants';
 import {
@@ -52,6 +52,7 @@ describe('createShowTopNAction', () => {
   });
   const context = {
     field: { name: 'user.name', value: 'the-value', type: 'keyword' },
+    trigger: { id: 'trigger' },
     extraContentNodeRef: {
       current: element,
     },

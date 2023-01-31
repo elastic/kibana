@@ -25,6 +25,7 @@ export const AGENT_POLICY_DEFAULT_MONITORING_DATASETS = [
   'elastic_agent.auditbeat',
   'elastic_agent.heartbeat',
   'elastic_agent.cloudbeat',
+  'elastic_agent.cloud_defend',
 ];
 
 export const LICENSE_FOR_SCHEDULE_UPGRADE = 'platinum';

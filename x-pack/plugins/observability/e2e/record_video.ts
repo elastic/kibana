@@ -21,7 +21,7 @@ export const recordVideo = (page: Page, postfix = '') => {
       const pathToVideo = videoFilePath?.replace('.journeys/videos/', '').replace('.webm', '');
       const newVideoPath = videoFilePath?.replace(
         pathToVideo!,
-        runner.currentJourney!.name + `-${postfix}`
+        postfix ? runner.currentJourney!.name + `-${postfix}` : runner.currentJourney!.name
       );
       fs.renameSync(videoFilePath!, newVideoPath!);
     } catch (e) {

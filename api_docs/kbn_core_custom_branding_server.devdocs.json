@@ -1,0 +1,165 @@
+{
+  "id": "@kbn/core-custom-branding-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-custom-branding-server",
+        "id": "def-common.CustomBrandingSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomBrandingSetup",
+        "description": [],
+        "path": "packages/core/custom-branding/core-custom-branding-server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-custom-branding-server",
+            "id": "def-common.CustomBrandingSetup.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [],
+            "signature": [
+              "(fetchFn: ",
+              {
+                "pluginId": "@kbn/core-custom-branding-server",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingServerPluginApi",
+                "section": "def-common.CustomBrandingFetchFn",
+                "text": "CustomBrandingFetchFn"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-custom-branding-server",
+                "id": "def-common.CustomBrandingSetup.register.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "fetchFn",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-custom-branding-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreCustomBrandingServerPluginApi",
+                    "section": "def-common.CustomBrandingFetchFn",
+                    "text": "CustomBrandingFetchFn"
+                  }
+                ],
+                "path": "packages/core/custom-branding/core-custom-branding-server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-custom-branding-server",
+        "id": "def-common.CustomBrandingStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomBrandingStart",
+        "description": [],
+        "path": "packages/core/custom-branding/core-custom-branding-server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-custom-branding-server",
+        "id": "def-common.CustomBrandingFetchFn",
+        "type": "Type",
+        "tags": [],
+        "label": "CustomBrandingFetchFn",
+        "description": [],
+        "signature": [
+          "(request: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-custom-branding-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
+            "section": "def-common.CustomBranding",
+            "text": "CustomBranding"
+          },
+          ">"
+        ],
+        "path": "packages/core/custom-branding/core-custom-branding-server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-custom-branding-server",
+            "id": "def-common.CustomBrandingFetchFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

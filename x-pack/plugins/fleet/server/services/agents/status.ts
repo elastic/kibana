@@ -106,9 +106,10 @@ export async function getAgentStatusForAgentPolicy(
           },
         },
       },
+      ignore_unavailable: true,
     });
   } catch (error) {
-    logger.warn(`Error getting agent statuses: ${error}`);
+    logger.debug(`Error getting agent statuses: ${error}`);
     throw error;
   }
 

@@ -8,9 +8,11 @@
 import expect from '@kbn/expect';
 
 import { TimeSeriesQuery } from '@kbn/triggers-actions-ui-plugin/server';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
+import { getUrlPrefix } from '../../../../../common/lib';
 
 import { createEsDocumentsWithGroups } from '../lib/create_test_data';
 

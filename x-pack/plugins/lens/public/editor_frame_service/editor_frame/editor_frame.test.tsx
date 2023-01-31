@@ -99,6 +99,8 @@ function getDefaultProps() {
     lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
     showNoDataPopover: jest.fn(),
     indexPatternService: createIndexPatternServiceMock(),
+    getUserMessages: () => [],
+    addUserMessages: () => () => {},
   };
   return defaultProps;
 }

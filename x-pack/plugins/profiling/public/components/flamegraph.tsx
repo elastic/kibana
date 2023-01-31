@@ -24,6 +24,7 @@ import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../common/flameg
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { getFlamegraphModel } from '../utils/get_flamegraph_model';
 import { FlamegraphInformationWindow } from './flame_graphs_view/flamegraph_information_window';
+import { FlameGraphLegend } from './flame_graphs_view/flame_graph_legend';
 
 function TooltipRow({
   value,
@@ -320,6 +321,9 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
             </EuiFlexItem>
           ) : undefined}
         </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FlameGraphLegend legendItems={columnarData.legendItems} asScale={!!comparisonFlamegraph} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

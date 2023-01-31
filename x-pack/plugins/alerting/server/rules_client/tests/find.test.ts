@@ -356,7 +356,9 @@ describe('find()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'myApp',
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
@@ -367,7 +369,9 @@ describe('find()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -552,7 +556,9 @@ describe('find()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'myApp',
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
@@ -563,7 +569,9 @@ describe('find()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),

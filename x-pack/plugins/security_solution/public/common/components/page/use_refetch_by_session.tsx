@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useMemo } from 'react';
+import type { MutableRefObject } from 'react';
+import { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { inputsSelectors } from '../../store';
@@ -25,7 +27,7 @@ export const useRefetchByRestartingSession = ({
   queryId,
   skip,
 }: UseRefetchByRestartingSessionProps): {
-  searchSessionId: string | undefined;
+  session: MutableRefObject<ISessionService>;
   refetchByRestartingSession: Refetch;
 } => {
   const dispatch = useDispatch();
@@ -35,16 +37,10 @@ export const useRefetchByRestartingSession = ({
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const { selectedInspectIndex, searchSessionId: existingSearchSessionId } = useDeepEqualSelector(
-    (state) =>
-      inputId === InputsModelId.global
-        ? getGlobalQuery(state, queryId)
-        : getTimelineQuery(state, queryId)
-  );
-
-  const searchSessionId = useMemo(
-    () => (skip ? undefined : existingSearchSessionId ?? session.current.start()),
-    [existingSearchSessionId, skip]
+  const { selectedInspectIndex } = useDeepEqualSelector((state) =>
+    inputId === InputsModelId.global
+      ? getGlobalQuery(state, queryId)
+      : getTimelineQuery(state, queryId)
   );
 
   const refetchByRestartingSession = useCallback(() => {
@@ -63,5 +59,8 @@ export const useRefetchByRestartingSession = ({
     );
   }, [dispatch, queryId, selectedInspectIndex, skip]);
 
-  return { searchSessionId, refetchByRestartingSession };
+  return {
+    session,
+    refetchByRestartingSession,
+  };
 };

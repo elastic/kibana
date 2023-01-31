@@ -229,7 +229,7 @@ export function ErrorGroupDetails() {
               title={i18n.translate(
                 'xpack.apm.errorGroupDetails.occurrencesChartLabel',
                 {
-                  defaultMessage: 'Occurrences',
+                  defaultMessage: 'Error occurrences',
                 }
               )}
             />

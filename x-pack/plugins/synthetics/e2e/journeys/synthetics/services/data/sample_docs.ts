@@ -5,16 +5,27 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+import { getGeoData } from './browser_docs';
 
 export interface DocOverrides {
   timestamp?: string;
   monitorId?: string;
   name?: string;
   testRunId?: string;
+  locationName?: string;
+  configId?: string;
 }
 
-export const getUpHit = ({ name, timestamp, monitorId, testRunId }: DocOverrides = {}) => ({
+export const getUpHit = ({
+  name,
+  timestamp,
+  monitorId,
+  configId,
+  testRunId,
+  locationName,
+}: DocOverrides = {}) => ({
+  ...getGeoData(locationName),
   summary: {
     up: 1,
     down: 0,
@@ -67,17 +78,11 @@ export const getUpHit = ({ name, timestamp, monitorId, testRunId }: DocOverrides
     domain: 'www.google.com',
     full: 'https://www.google.com',
   },
-  observer: {
-    geo: {
-      name: 'Test private location',
-    },
-    name: 'Test private location',
-  },
   '@timestamp': timestamp ?? '2022-12-18T09:52:04.056Z',
   ecs: {
     version: '8.0.0',
   },
-  config_id: monitorId ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
+  config_id: configId ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
   data_stream: {
     namespace: 'default',
     type: 'synthetics',
@@ -177,7 +182,14 @@ export const getUpHit = ({ name, timestamp, monitorId, testRunId }: DocOverrides
   },
 });
 
-export const firstDownHit = ({ name, timestamp, monitorId }: DocOverrides = {}) => ({
+export const firstDownHit = ({
+  name,
+  timestamp,
+  monitorId,
+  locationName,
+  configId,
+}: DocOverrides = {}) => ({
+  ...getGeoData(locationName),
   summary: {
     up: 0,
     down: 1,
@@ -215,7 +227,7 @@ export const firstDownHit = ({ name, timestamp, monitorId }: DocOverrides = {}) 
     ip: '142.250.181.196',
     name: name ?? 'Test Monitor',
     fleet_managed: true,
-    check_group: uuid.v4(),
+    check_group: uuidv4(),
     timespan: {
       lt: '2022-12-18T09:52:50.128Z',
       gte: '2022-12-18T09:49:50.128Z',
@@ -234,17 +246,11 @@ export const firstDownHit = ({ name, timestamp, monitorId }: DocOverrides = {}) 
     domain: 'www.google.com',
     full: 'https://www.google.com',
   },
-  observer: {
-    geo: {
-      name: 'Test private location',
-    },
-    name: 'Test private location',
-  },
   '@timestamp': timestamp ?? '2022-12-18T09:49:49.976Z',
   ecs: {
     version: '8.0.0',
   },
-  config_id: monitorId ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
+  config_id: configId ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
   data_stream: {
     namespace: 'default',
     type: 'synthetics',

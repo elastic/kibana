@@ -7,7 +7,7 @@
 
 import { calculateEndpointAuthz, getEndpointAuthzInitialState } from './authz';
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { createLicenseServiceMock } from '../../../license/mocks';
 import type { EndpointAuthzKeyList } from '../../types/authz';
 
@@ -138,6 +138,7 @@ describe('Endpoint Authz service', () => {
         ['canKillProcess', 'writeProcessOperations'],
         ['canSuspendProcess', 'writeProcessOperations'],
         ['canGetRunningProcesses', 'writeProcessOperations'],
+        ['canWriteExecuteOperations', 'writeExecuteOperations'],
         ['canWriteFileOperations', 'writeFileOperations'],
         ['canWriteTrustedApplications', 'writeTrustedApplications'],
         ['canReadTrustedApplications', 'readTrustedApplications'],
@@ -168,6 +169,7 @@ describe('Endpoint Authz service', () => {
         ['canKillProcess', ['writeProcessOperations']],
         ['canSuspendProcess', ['writeProcessOperations']],
         ['canGetRunningProcesses', ['writeProcessOperations']],
+        ['canWriteExecuteOperations', ['writeExecuteOperations']],
         ['canWriteFileOperations', ['writeFileOperations']],
         ['canWriteTrustedApplications', ['writeTrustedApplications']],
         ['canReadTrustedApplications', ['writeTrustedApplications', 'readTrustedApplications']],
@@ -213,6 +215,7 @@ describe('Endpoint Authz service', () => {
         canSuspendProcess: false,
         canGetRunningProcesses: false,
         canAccessResponseConsole: false,
+        canWriteExecuteOperations: false,
         canWriteFileOperations: false,
         canWriteTrustedApplications: false,
         canReadTrustedApplications: false,

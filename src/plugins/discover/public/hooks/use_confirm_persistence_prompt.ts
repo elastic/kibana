@@ -7,7 +7,7 @@
  */
 
 import { useCallback } from 'react';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -25,7 +25,7 @@ export const useConfirmPersistencePrompt = (stateContainer: DiscoverStateContain
       try {
         const persistedDataView = await services.dataViews.createAndSave({
           ...adHocDataView.toSpec(),
-          id: uuid(),
+          id: uuidv4(),
         });
         services.dataViews.clearInstanceCache(adHocDataView.id);
 

@@ -15,8 +15,20 @@ import {
 } from '../../common';
 
 function transformAction(input: AsApiContract<RuleAction>): RuleAction {
-  const { connector_type_id: actionTypeId, ...rest } = input;
-  return { actionTypeId, ...rest };
+  const { connector_type_id: actionTypeId, frequency, ...rest } = input;
+  return {
+    actionTypeId,
+    ...(frequency
+      ? {
+          frequency: {
+            summary: frequency.summary,
+            throttle: frequency.throttle,
+            notifyWhen: frequency.notify_when,
+          },
+        }
+      : {}),
+    ...rest,
+  };
 }
 
 // AsApiContract does not deal with object properties that are dates - the

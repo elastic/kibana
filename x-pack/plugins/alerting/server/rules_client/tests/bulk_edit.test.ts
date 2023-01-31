@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -156,7 +156,9 @@ describe('bulkEdit()', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
   });
@@ -589,7 +591,7 @@ describe('bulkEdit()', () => {
 
     const getSnoozeSchedule = (useId: boolean = true) => {
       return {
-        ...(useId && { id: uuid.v4() }),
+        ...(useId && { id: uuidv4() }),
         duration: 28800000,
         rRule: {
           dtstart: '2010-09-19T11:49:59.329Z',
@@ -1682,7 +1684,9 @@ describe('bulkEdit()', () => {
             param1: schema.string(),
           }),
         },
-        async executor() {},
+        async executor() {
+          return { state: {} };
+        },
         producer: 'alerts',
       });
 
@@ -1724,7 +1728,9 @@ describe('bulkEdit()', () => {
             },
           },
         },
-        async executor() {},
+        async executor() {
+          return { state: {} };
+        },
         producer: 'alerts',
       });
 
