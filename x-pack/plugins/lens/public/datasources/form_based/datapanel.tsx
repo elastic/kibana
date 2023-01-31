@@ -7,7 +7,7 @@
 
 import './datapanel.scss';
 import { uniq } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,13 +19,9 @@ import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
-  FieldList,
-  FieldListFilters,
-  FieldListGrouped,
-  type FieldListGroupedProps,
+  UnifiedFieldList,
+  type UnifiedFieldListProps,
   FieldsGroupNames,
-  useExistingFieldsFetcher,
-  useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
@@ -207,24 +203,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   const { indexPatterns } = frame.dataViews;
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
 
-  const { refetchFieldsExistenceInfo, isProcessing } = useExistingFieldsFetcher({
-    dataViews: activeIndexPatterns as unknown as DataView[],
-    query,
-    filters,
-    fromDate: dateRange.fromDate,
-    toDate: dateRange.toDate,
-    services: {
-      data,
-      dataViews,
-      core,
-    },
-    onNoData: (dataViewId) => {
-      if (dataViewId === currentIndexPatternId) {
-        showNoDataPopover();
-      }
-    },
-  });
-
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
     if (!currentIndexPattern) return [];
@@ -235,8 +213,14 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         );
   }, [currentIndexPattern, visualizeGeoFieldTrigger]);
 
-  const editPermission =
-    indexPatternFieldEditor.userPermissions.editIndexPattern() || !currentIndexPattern.isPersisted;
+  const onNoData = useCallback(
+    (dataViewId) => {
+      if (dataViewId === currentIndexPatternId) {
+        showNoDataPopover();
+      }
+    },
+    [currentIndexPatternId, showNoDataPopover]
+  );
 
   const onSelectedFieldFilter = useCallback(
     (field: IndexPatternField): boolean => {
@@ -254,30 +238,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         }),
       };
     }
-  }, []);
-
-  const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<IndexPatternField>({
-    dataViewId: currentIndexPatternId,
-    allFields,
-    services: {
-      dataViews,
-      core,
-    },
-    isAffectedByGlobalFilter: Boolean(filters.length),
-    onSupportedFieldFilter,
-    onSelectedFieldFilter,
-    onOverrideFieldGroupDetails,
-  });
-
-  const closeFieldEditor = useRef<() => void | undefined>();
-
-  useEffect(() => {
-    return () => {
-      // Make sure to close the editor when unmounting
-      if (closeFieldEditor.current) {
-        closeFieldEditor.current();
-      }
-    };
   }, []);
 
   const refreshFieldList = useCallback(async () => {
@@ -304,123 +264,113 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     data.search.session,
   ]);
 
-  const editField = useMemo(
-    () =>
-      editPermission
-        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            const indexPatternInstance = await dataViews.get(currentIndexPattern?.id);
-            closeFieldEditor.current = indexPatternFieldEditor.openEditor({
-              ctx: {
-                dataView: indexPatternInstance,
-              },
-              fieldName,
-              onSave: () => {
-                if (indexPatternInstance.isPersisted()) {
-                  refreshFieldList();
-                  refetchFieldsExistenceInfo(indexPatternInstance.id);
-                } else {
-                  indexPatternService.replaceDataViewId(indexPatternInstance);
-                }
-              },
-            });
-          }
-        : undefined,
-    [
-      editPermission,
-      dataViews,
-      currentIndexPattern?.id,
-      indexPatternFieldEditor,
-      refreshFieldList,
-      indexPatternService,
-      refetchFieldsExistenceInfo,
-    ]
-  );
+  const onFieldEditedOrRemoved: UnifiedFieldListProps<IndexPatternField>['onFieldEdited'] =
+    useCallback(
+      (fieldName, dataViewInstance) => {
+        if (dataViewInstance.isPersisted()) {
+          refreshFieldList();
+        } else {
+          indexPatternService.replaceDataViewId(dataViewInstance);
+        }
+      },
+      [refreshFieldList, indexPatternService]
+    );
 
-  const removeField = useMemo(
-    () =>
-      editPermission
-        ? async (fieldName: string) => {
-            const indexPatternInstance = await dataViews.get(currentIndexPattern?.id);
-            closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
-              ctx: {
-                dataView: indexPatternInstance,
-              },
-              fieldName,
-              onDelete: () => {
-                if (indexPatternInstance.isPersisted()) {
-                  refreshFieldList();
-                  refetchFieldsExistenceInfo(indexPatternInstance.id);
-                } else {
-                  indexPatternService.replaceDataViewId(indexPatternInstance);
-                }
-              },
-            });
-          }
-        : undefined,
-    [
-      currentIndexPattern?.id,
-      dataViews,
-      editPermission,
-      indexPatternFieldEditor,
-      indexPatternService,
-      refreshFieldList,
-      refetchFieldsExistenceInfo,
-    ]
-  );
+  const onRenderFieldItem: UnifiedFieldListProps<IndexPatternField>['onRenderFieldItem'] =
+    useCallback(
+      ({
+        field,
+        itemIndex,
+        groupIndex,
+        groupName,
+        hideDetails,
+        fieldSearchHighlight,
+        editField,
+        removeField,
+      }) => (
+        <FieldItem
+          field={field}
+          exists={groupName !== FieldsGroupNames.EmptyFields}
+          hideDetails={hideDetails || field.type === 'document'}
+          itemIndex={itemIndex}
+          groupIndex={groupIndex}
+          dropOntoWorkspace={dropOntoWorkspace}
+          hasSuggestionForField={hasSuggestionForField}
+          editField={editField}
+          removeField={removeField}
+          uiActions={uiActions}
+          core={core}
+          fieldFormats={fieldFormats}
+          indexPattern={currentIndexPattern}
+          highlight={fieldSearchHighlight}
+          dateRange={dateRange}
+          query={query}
+          filters={filters}
+          chartsThemeService={charts.theme}
+        />
+      ),
+      [
+        core,
+        fieldFormats,
+        currentIndexPattern,
+        dateRange,
+        query,
+        filters,
+        charts.theme,
+        dropOntoWorkspace,
+        hasSuggestionForField,
+        uiActions,
+      ]
+    );
 
-  const renderFieldItem: FieldListGroupedProps<IndexPatternField>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex, groupIndex, groupName, hideDetails, fieldSearchHighlight }) => (
-      <FieldItem
-        field={field}
-        exists={groupName !== FieldsGroupNames.EmptyFields}
-        hideDetails={hideDetails || field.type === 'document'}
-        itemIndex={itemIndex}
-        groupIndex={groupIndex}
-        dropOntoWorkspace={dropOntoWorkspace}
-        hasSuggestionForField={hasSuggestionForField}
-        editField={editField}
-        removeField={removeField}
-        uiActions={uiActions}
-        core={core}
-        fieldFormats={fieldFormats}
-        indexPattern={currentIndexPattern}
-        highlight={fieldSearchHighlight}
-        dateRange={dateRange}
-        query={query}
-        filters={filters}
-        chartsThemeService={charts.theme}
-      />
-    ),
-    [
+  const listServices = useMemo(
+    () => ({
+      data,
+      dataViews,
+      dataViewFieldEditor: indexPatternFieldEditor,
       core,
-      fieldFormats,
-      currentIndexPattern,
-      dateRange,
-      query,
-      filters,
-      charts.theme,
-      dropOntoWorkspace,
-      hasSuggestionForField,
-      editField,
-      removeField,
-      uiActions,
-    ]
+    }),
+    [data, dataViews, indexPatternFieldEditor, core]
   );
+
+  const [currentDataView, setCurrentDataView] = useState<DataView | null>(null);
+
+  // TODO: is there another way instead of converting types in Lens between DataView vs IndexPattern
+  useEffect(() => {
+    const getDataView = async () => {
+      const dataView = await dataViews.get(currentIndexPattern.id, false);
+      setCurrentDataView(dataView);
+    };
+    getDataView();
+  }, [currentIndexPattern, setCurrentDataView, dataViews]);
+
+  if (!currentDataView) {
+    return null;
+  }
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
-      <FieldList
+      <UnifiedFieldList<IndexPatternField>
+        allFields={allFields}
+        dataView={currentDataView}
+        allActiveDataViews={activeIndexPatterns as unknown as DataView[]}
+        query={query}
+        filters={filters}
+        fromDate={dateRange.fromDate}
+        toDate={dateRange.toDate}
+        services={listServices}
         className="lnsInnerIndexPatternDataPanel"
-        isProcessing={isProcessing}
-        prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
-      >
-        <FieldListGrouped<IndexPatternField>
-          {...fieldListGroupedProps}
-          renderFieldItem={renderFieldItem}
-          data-test-subj="lnsIndexPattern"
-          localStorageKeyPrefix="lens"
-        />
-      </FieldList>
+        data-test-subj="lnsIndexPattern"
+        localStorageKeyPrefix="lens"
+        originatingApp="lens"
+        onRenderFieldItem={onRenderFieldItem}
+        onSupportedFieldFilter={onSupportedFieldFilter}
+        onSelectedFieldFilter={onSelectedFieldFilter}
+        onOverrideFieldGroupDetails={onOverrideFieldGroupDetails}
+        onFieldEdited={onFieldEditedOrRemoved}
+        onFieldRemoved={onFieldEditedOrRemoved}
+        onNoData={onNoData}
+      />
     </ChildDragDropProvider>
   );
 };

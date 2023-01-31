@@ -13,9 +13,11 @@ export type {
   NumberStatsResult,
   TopValuesResult,
 } from '../common/types';
+export { UnifiedFieldList, type UnifiedFieldListProps } from './components/unified_field_list';
 export { FieldList, type FieldListProps } from './components/field_list';
 export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list_grouped';
 export { FieldListFilters, type FieldListFiltersProps } from './components/field_list_filters';
+export { FieldItemButton, type FieldItemButtonProps } from './components/field_item_button';
 export { FieldIcon, type FieldIconProps, getFieldIconProps } from './components/field_icon';
 export type {
   FieldTopValuesBucketProps,
