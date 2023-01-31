@@ -263,12 +263,8 @@ export interface DataViewsServicePublicMethods {
   /**
    * Converts data view saved object to spec
    * @params savedObject - Data view saved object
-   * @params displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  savedObjectToSpec: (
-    savedObject: SavedObject<DataViewAttributes>,
-    displayErrors?: boolean
-  ) => DataViewSpec;
+  savedObjectToSpec: (savedObject: SavedObject<DataViewAttributes>) => DataViewSpec;
   /**
    * Set default data view.
    * @param id - Id of the data view to set as default.
