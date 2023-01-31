@@ -12,6 +12,7 @@ import { pick } from 'lodash';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
 import type { UnifiedHistogramInputMessage } from '../types';
 import {
+  createStateService,
   UnifiedHistogramStateOptions,
   UnifiedHistogramStateService,
 } from './services/state_service';
@@ -117,7 +118,7 @@ export const UnifiedHistogramContainer = forwardRef<
           disabledActions,
           getRelativeTimeRange,
         });
-        setStateService(new UnifiedHistogramStateService(options));
+        setStateService(createStateService(options));
         setInitialized(true);
       },
       refetch: () => {
