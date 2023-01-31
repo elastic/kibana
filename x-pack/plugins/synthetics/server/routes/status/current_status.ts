@@ -68,7 +68,7 @@ export async function getStatus(
   });
 
   const {
-    enabledIds,
+    enabledMonitorQueryIds,
     disabledCount,
     maxPeriod,
     listOfLocations,
@@ -82,7 +82,7 @@ export async function getStatus(
     uptimeEsClient,
     listOfLocations,
     { from: maxPeriod, to: 'now' },
-    enabledIds,
+    enabledMonitorQueryIds,
     monitorLocationMap,
     monitorQueryIdToConfigIdMap
   );
@@ -91,7 +91,7 @@ export async function getStatus(
     allMonitorsCount: allMonitors.length,
     disabledMonitorsCount,
     projectMonitorsCount,
-    enabledIds,
+    enabledMonitorQueryIds,
     disabledCount,
     up,
     down,

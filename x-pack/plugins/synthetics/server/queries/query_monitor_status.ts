@@ -16,7 +16,7 @@ export async function queryMonitorStatus(
   esClient: UptimeEsClient,
   listOfLocations: string[],
   range: { from: string | number; to: string },
-  ids: string[],
+  monitorQueryIds: string[],
   monitorLocationsMap: Record<string, string[]>,
   monitorQueryIdToConfigIdMap: Record<string, string>
 ): Promise<
@@ -26,7 +26,7 @@ export async function queryMonitorStatus(
   >
 > {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / listOfLocations.length || 1);
-  const pageCount = Math.ceil(ids.length / idSize);
+  const pageCount = Math.ceil(monitorQueryIds.length / idSize);
   const promises: Array<Promise<any>> = [];
   const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
   for (let i = 0; i < pageCount; i++) {
@@ -48,7 +48,7 @@ export async function queryMonitorStatus(
             },
             {
               terms: {
-                'monitor.id': (ids as string[]).slice(i * idSize, i * idSize + idSize),
+                'monitor.id': (monitorQueryIds as string[]).slice(i * idSize, i * idSize + idSize),
               },
             },
             ...(listOfLocations.length > 0
@@ -189,5 +189,13 @@ export async function queryMonitorStatus(
     });
   }
 
-  return { up, down, pending, upConfigs, downConfigs, pendingConfigs, enabledIds: ids };
+  return {
+    up,
+    down,
+    pending,
+    upConfigs,
+    downConfigs,
+    pendingConfigs,
+    enabledMonitorQueryIds: monitorQueryIds,
+  };
 }

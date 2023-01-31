@@ -32,7 +32,7 @@ export const OverviewStatusCodec = t.interface({
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   pendingConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
-  enabledIds: t.array(t.string),
+  enabledMonitorQueryIds: t.array(t.string),
 });
 
 export const OverviewStatusStateCodec = t.intersection([

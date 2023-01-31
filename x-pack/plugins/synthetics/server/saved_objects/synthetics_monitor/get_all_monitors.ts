@@ -68,7 +68,7 @@ export const processMonitors = async (
    * latest ping for all enabled monitors.
    */
 
-  const enabledIds: string[] = [];
+  const enabledMonitorQueryIds: string[] = [];
   let disabledCount = 0;
   let disabledMonitorsCount = 0;
   let maxPeriod = 0;
@@ -109,7 +109,7 @@ export const processMonitors = async (
     } else {
       const missingLabels = new Set<string>();
 
-      enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
+      enabledMonitorQueryIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
       const monLocs = new Set([
         ...(attrs[ConfigKey.LOCATIONS]
           .filter((loc) => {
@@ -138,7 +138,7 @@ export const processMonitors = async (
   return {
     maxPeriod,
     allIds,
-    enabledIds,
+    enabledMonitorQueryIds,
     disabledCount,
     monitorLocationMap,
     disabledMonitorsCount,

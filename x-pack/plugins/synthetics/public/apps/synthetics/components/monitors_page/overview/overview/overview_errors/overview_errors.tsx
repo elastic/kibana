@@ -25,7 +25,7 @@ import { selectOverviewStatus } from '../../../../../state';
 export function OverviewErrors() {
   const { status } = useSelector(selectOverviewStatus);
 
-  const loading = !status?.enabledIds || status?.enabledIds.length === 0;
+  const loading = !status?.enabledMonitorQueryIds || status?.enabledMonitorQueryIds.length === 0;
 
   const { from, to } = useAbsoluteDate({ from: 'now-6h', to: 'now' });
 
@@ -40,10 +40,18 @@ export function OverviewErrors() {
       ) : (
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
-            <OverviewErrorsCount from={from} to={to} monitorId={status?.enabledIds ?? []} />
+            <OverviewErrorsCount
+              from={from}
+              to={to}
+              monitorId={status?.enabledMonitorQueryIds ?? []}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <OverviewErrorsSparklines from={from} to={to} monitorId={status?.enabledIds ?? []} />
+            <OverviewErrorsSparklines
+              from={from}
+              to={to}
+              monitorId={status?.enabledMonitorQueryIds ?? []}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={{ alignSelf: 'center' }}>
             <ErrorsLink disabled={true} />

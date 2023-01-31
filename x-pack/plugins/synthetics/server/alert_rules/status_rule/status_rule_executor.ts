@@ -93,24 +93,40 @@ export class StatusRuleExecutor {
       search: `attributes.${AlertConfigKey.STATUS_ENABLED}: true`,
     });
 
-    const { allIds, enabledIds, listOfLocations, monitorLocationMap, projectMonitorsCount } =
-      await processMonitors(
-        this.monitors,
-        this.server,
-        this.soClient,
-        this.syntheticsMonitorClient
-      );
+    const {
+      allIds,
+      enabledMonitorQueryIds,
+      listOfLocations,
+      monitorLocationMap,
+      projectMonitorsCount,
+    } = await processMonitors(
+      this.monitors,
+      this.server,
+      this.soClient,
+      this.syntheticsMonitorClient
+    );
 
-    return { enabledIds, listOfLocations, allIds, monitorLocationMap, projectMonitorsCount };
+    return {
+      enabledMonitorQueryIds,
+      listOfLocations,
+      allIds,
+      monitorLocationMap,
+      projectMonitorsCount,
+    };
   }
 
   async getDownChecks(
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
-    const { listOfLocations, enabledIds, allIds, monitorLocationMap, projectMonitorsCount } =
-      await this.getMonitors();
+    const {
+      listOfLocations,
+      enabledMonitorQueryIds,
+      allIds,
+      monitorLocationMap,
+      projectMonitorsCount,
+    } = await this.getMonitors();
 
-    if (enabledIds.length > 0) {
+    if (enabledMonitorQueryIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
         listOfLocations,
@@ -118,7 +134,7 @@ export class StatusRuleExecutor {
           to: 'now',
           from: this.previousStartedAt?.toISOString() ?? 'now-1m',
         },
-        enabledIds,
+        enabledMonitorQueryIds,
         monitorLocationMap
       );
 
@@ -138,18 +154,19 @@ export class StatusRuleExecutor {
         staleDownConfigs,
         projectMonitorsCount,
         allMonitorsCount: allIds.length,
-        disabledMonitorsCount: allIds.length - enabledIds.length,
+        disabledMonitorsCount: allIds.length - enabledMonitorQueryIds.length,
       };
     }
     const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
     return {
       downConfigs: { ...prevDownConfigs },
       upConfigs: {},
+      pendingConfigs: {},
       staleDownConfigs,
       down: 0,
       up: 0,
       pending: 0,
-      enabledIds,
+      enabledMonitorQueryIds,
       allMonitorsCount: allIds.length,
       disabledMonitorsCount: allIds.length,
       projectMonitorsCount,

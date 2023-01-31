@@ -33,7 +33,7 @@ export const OverviewAlerts = () => {
 
   const { status } = useSelector(selectOverviewStatus);
 
-  const loading = !status?.enabledIds || status?.enabledIds.length === 0;
+  const loading = !status?.enabledMonitorQueryIds || status?.enabledMonitorQueryIds.length === 0;
 
   return (
     <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
@@ -61,7 +61,7 @@ export const OverviewAlerts = () => {
                   selectedMetricField: RECORDS_FIELD,
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id': status?.enabledIds,
+                    'monitor.id': status?.enabledMonitorQueryIds,
                   },
                   filters: [{ field: 'kibana.alert.status', values: ['active', 'recovered'] }],
                   color: theme.eui.euiColorVis1,
@@ -83,7 +83,7 @@ export const OverviewAlerts = () => {
                   },
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id': status?.enabledIds,
+                    'monitor.id': status?.enabledMonitorQueryIds,
                   },
                   dataType: 'alerts',
                   selectedMetricField: RECORDS_FIELD,
