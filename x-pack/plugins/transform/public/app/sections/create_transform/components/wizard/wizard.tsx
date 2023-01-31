@@ -19,6 +19,7 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
+import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
@@ -109,6 +110,10 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   const appDependencies = useAppDependencies();
   const {
     ml: { FieldStatsFlyoutProvider },
+    uiSettings,
+    data,
+    fieldFormats,
+    charts,
   } = appDependencies;
   const { dataView } = searchItems;
 
@@ -229,13 +234,16 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     uiSettingsKeys: UI_SETTINGS,
   };
 
-  const fieldStatsServices = pick(appDependencies, [
-    'uiSettings',
-    'dataViews',
-    'data',
-    'charts',
-    'fieldFormats',
-  ]);
+  const fieldStatsServices: FieldStatsServices = useMemo(
+    () => ({
+      uiSettings,
+      dataViews: data.dataViews,
+      data,
+      fieldFormats,
+      charts,
+    }),
+    [uiSettings, data, fieldFormats, charts]
+  );
 
   return (
     <FieldStatsFlyoutProvider
