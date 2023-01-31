@@ -30,12 +30,13 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
     onLoad,
     ...lensPorps
   } = props;
-  const { session, refetchByRestartingSession } = useRefetchByRestartingSession({
-    inputId,
-    queryId: id,
-  });
+  const { session, refetchByRestartingSession, refetchByDeletingSession } =
+    useRefetchByRestartingSession({
+      inputId,
+      queryId: id,
+    });
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const { inspect } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
+  const { inspect, searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
   const visualizationData = inspect?.response
     ? parseVisualizationData<VisualizationAlertsByStatusResponse>(inspect?.response)
     : null;
@@ -70,17 +71,30 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   );
 
   useEffect(() => {
-    dispatch(
-      inputsActions.setQuery({
-        inputId,
-        id,
-        searchSessionId: session.current.start(),
-        refetch: refetchByRestartingSession,
-        loading: false,
-        inspect: null,
-      })
-    );
-  }, [dispatch, inputId, id, refetchByRestartingSession, session]);
+    if (!searchSessionId) {
+      setTimeout(() => {
+        dispatch(
+          inputsActions.setQuery({
+            inputId,
+            id,
+            searchSessionId: session.current.start(),
+            refetch: dataExists ? refetchByRestartingSession : refetchByDeletingSession,
+            loading: false,
+            inspect: null,
+          })
+        );
+      }, 200);
+    }
+  }, [
+    dispatch,
+    inputId,
+    id,
+    session,
+    dataExists,
+    refetchByRestartingSession,
+    searchSessionId,
+    refetchByDeletingSession,
+  ]);
 
   useEffect(() => {
     return () => {

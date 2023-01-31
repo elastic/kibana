@@ -172,6 +172,10 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [attributes?.state?.adHocDataViews]
   );
 
+  if (!searchSessionId) {
+    return null;
+  }
+
   if (
     !attributes ||
     (visualizationData?.responses != null && visualizationData?.responses?.length === 0)
