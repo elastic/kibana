@@ -141,17 +141,9 @@ const accuracyModeDisabledWarning = (
     <>
       <FormattedMessage
         id="xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled"
-        defaultMessage="{name} might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster. {learnMoreLink}"
+        defaultMessage="{name} might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster."
         values={{
           name: <strong>{columnName}</strong>,
-          learnMoreLink: (
-            <EuiLink href={docLink} color="text" target="_blank" external={true}>
-              <FormattedMessage
-                defaultMessage="Learn more."
-                id="xpack.lens.indexPattern.precisionErrorWarning.link"
-              />
-            </EuiLink>
-          ),
         }}
       />
       <EuiSpacer size="s" />
@@ -176,7 +168,7 @@ const accuracyModeEnabledWarning = (
     'xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled.shortMessage',
     {
       defaultMessage:
-        'might be an approximation. For more precise results, use Filters or increase the number of Top Values.',
+        'This might be an approximation. For more precise results, use Filters or increase the number of Top Values.',
     }
   ),
   longMessage: (
@@ -202,7 +194,7 @@ const accuracyModeEnabledWarning = (
           </strong>
         ),
         learnMoreLink: (
-          <EuiLink href={docLink} color="text" target="_blank" external={true}>
+          <EuiLink href={docLink} target="_blank" external={true}>
             <FormattedMessage
               defaultMessage="Learn more."
               id="xpack.lens.indexPattern.precisionErrorWarning.link"
@@ -396,7 +388,6 @@ export function getPrecisionErrorWarningMessages(
                       link: (
                         <EuiLink
                           href={docLinks.links.aggs.rare_terms}
-                          color="text"
                           target="_blank"
                           external={true}
                         >
