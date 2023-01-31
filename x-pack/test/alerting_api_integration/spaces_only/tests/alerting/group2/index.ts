@@ -14,11 +14,6 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     before(async () => await buildUp(getService));
     after(async () => await tearDown(getService));
 
-    loadTestFile(require.resolve('./get_alert_state'));
-    loadTestFile(require.resolve('./get_alert_summary'));
-    loadTestFile(require.resolve('./get_execution_log'));
-    loadTestFile(require.resolve('./get_action_error_log'));
-    loadTestFile(require.resolve('./rule_types'));
     loadTestFile(require.resolve('./execution_status'));
     loadTestFile(require.resolve('./monitoring_collection'));
     loadTestFile(require.resolve('./monitoring'));
@@ -28,5 +23,9 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./unmute_instance'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./update_api_key'));
+    loadTestFile(require.resolve('./alerts_space1'));
+    loadTestFile(require.resolve('./alerts_default_space'));
+    loadTestFile(require.resolve('./transform_rule_types'));
+    loadTestFile(require.resolve('./ml_rule_types'));
   });
 }
