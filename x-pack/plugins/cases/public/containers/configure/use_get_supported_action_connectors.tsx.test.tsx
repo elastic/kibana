@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
 import { TestProviders } from '../../common/mock';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
-import { useGetConnectors } from './use_connectors';
+import { useGetSupportedActionConnectors } from './use_get_supported_action_connectors';
 
 const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
   typeof useApplicationCapabilities
@@ -25,8 +25,8 @@ describe('useConnectors', () => {
   });
 
   it('fetches connectors', async () => {
-    const spy = jest.spyOn(api, 'fetchConnectors');
-    const { waitForNextUpdate } = renderHook(() => useGetConnectors(), {
+    const spy = jest.spyOn(api, 'getSupportedActionConnectors');
+    const { waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -39,12 +39,12 @@ describe('useConnectors', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const spyOnfetchConnectors = jest.spyOn(api, 'fetchConnectors');
+    const spyOnfetchConnectors = jest.spyOn(api, 'getSupportedActionConnectors');
     spyOnfetchConnectors.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    const { waitForNextUpdate } = renderHook(() => useGetConnectors(), {
+    const { waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
     await waitForNextUpdate();
@@ -53,10 +53,10 @@ describe('useConnectors', () => {
   });
 
   it('does not fetch connectors when the user does not has access to actions', async () => {
-    const spyOnFetchConnectors = jest.spyOn(api, 'fetchConnectors');
+    const spyOnFetchConnectors = jest.spyOn(api, 'getSupportedActionConnectors');
     useApplicationCapabilitiesMock().actions = { crud: false, read: false };
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetConnectors(), {
+    const { result, waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
