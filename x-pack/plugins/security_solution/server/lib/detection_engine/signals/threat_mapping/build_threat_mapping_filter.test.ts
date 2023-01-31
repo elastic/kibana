@@ -446,6 +446,62 @@ describe('build_threat_mapping_filter', () => {
       };
       expect(mapping).toEqual(expected);
     });
+
+    test('it should use terms query if allowedFieldsForTermsQuery provided', () => {
+      const threatMapping = getThreatMappingMock();
+      const threatList = getThreatListSearchResponseMock().hits.hits;
+      const mapping = buildEntriesMappingFilter({
+        threatMapping,
+        threatList,
+        chunkSize: 1024,
+        entryKey: 'value',
+        allowedFieldsForTermsQuery: {
+          source: { 'source.ip': true },
+          threat: { 'source.ip': true },
+        },
+      });
+      const mock = { ...getThreatMappingFilterShouldMock() };
+      mock.bool.should.pop();
+
+      const expected: BooleanFilter = {
+        bool: {
+          should: [
+            mock,
+            {
+              terms: {
+                _name: '__SEP____SEP__source.ip__SEP__source.ip__SEP__tq',
+                'source.ip': ['127.0.0.1'],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      };
+      expect(mapping).toEqual(expected);
+    });
+
+    test('it should use match query if allowedFieldsForTermsQuery provided, but it is AND', () => {
+      const threatMapping = getThreatMappingMock();
+      const threatList = getThreatListSearchResponseMock().hits.hits;
+      const mapping = buildEntriesMappingFilter({
+        threatMapping,
+        threatList,
+        chunkSize: 1024,
+        entryKey: 'value',
+        allowedFieldsForTermsQuery: {
+          source: { 'host.name': true, 'host.ip': true },
+          threat: { 'host.name': true, 'host.ip': true },
+        },
+      });
+
+      const expected: BooleanFilter = {
+        bool: {
+          should: [getThreatMappingFilterShouldMock()],
+          minimum_should_match: 1,
+        },
+      };
+      expect(mapping).toEqual(expected);
+    });
   });
 
   describe('splitShouldClauses', () => {
