@@ -26,7 +26,6 @@ import {
   fetchUpsertFailureAction,
   fetchUpsertMonitorAction,
   fetchUpsertSuccessAction,
-  resetMonitorState,
 } from './actions';
 
 export interface MonitorListState {
@@ -117,9 +116,6 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
       if (state.monitorUpsertStatuses[action.payload]) {
         delete state.monitorUpsertStatuses[action.payload];
       }
-    })
-    .addCase(resetMonitorState, (state, action) => {
-      return initialState;
     });
 });
 

@@ -212,21 +212,23 @@ export const PageRouter: FC = () => {
       )}
       <Route
         component={() => (
-          <NotFoundPrompt
-            actions={[
-              <EuiButtonEmpty
-                iconType="arrowLeft"
-                flush="both"
-                onClick={() => {
-                  application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID);
-                }}
-              >
-                {i18n.translate('xpack.synthetics.routes.goToSynthetics', {
-                  defaultMessage: 'Go to Synthetics Home Page',
-                })}
-              </EuiButtonEmpty>,
-            ]}
-          />
+          <PageTemplateComponent>
+            <NotFoundPrompt
+              actions={[
+                <EuiButtonEmpty
+                  iconType="arrowLeft"
+                  flush="both"
+                  onClick={() => {
+                    application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID);
+                  }}
+                >
+                  {i18n.translate('xpack.synthetics.routes.goToSynthetics', {
+                    defaultMessage: 'Go to Synthetics Home Page',
+                  })}
+                </EuiButtonEmpty>,
+              ]}
+            />
+          </PageTemplateComponent>
         )}
       />
     </Switch>

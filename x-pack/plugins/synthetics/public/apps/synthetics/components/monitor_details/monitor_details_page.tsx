@@ -8,22 +8,18 @@
 import React from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 
-import { useDispatch } from 'react-redux';
 import { MONITOR_NOT_FOUND_ROUTE } from '../../../../../common/constants';
 import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumbs';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
-import { resetMonitorState } from '../../state';
 
 export const MonitorDetailsPage: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { monitor, error } = useSelectedMonitor();
 
   const { monitorId } = useParams<{ monitorId: string }>();
-  const dispatch = useDispatch();
 
   useMonitorListBreadcrumbs(monitor ? [{ text: monitor?.name ?? '' }] : []);
 
   if (error?.body.statusCode === 404) {
-    dispatch(resetMonitorState());
     return <Redirect to={MONITOR_NOT_FOUND_ROUTE.replace(':monitorId', monitorId)} />;
   }
   return children;
