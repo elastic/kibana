@@ -97,7 +97,9 @@ function OnPremLink() {
   );
 }
 
-export const AvailablePackages: React.FC<{}> = ({}) => {
+export const AvailablePackages: React.FC<{
+  setPrereleaseEnabled: (isEnabled: boolean) => void;
+}> = ({ setPrereleaseEnabled }) => {
   useBreadcrumbs('integrations_all');
 
   const {
@@ -137,6 +139,7 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
         onChange={setPreference}
         onPrereleaseEnabledChange={(isEnabled) => {
           setPrereleaseIntegrationsEnabled(isEnabled);
+          setPrereleaseEnabled(isEnabled);
         }}
       />
     </EuiFlexItem>,

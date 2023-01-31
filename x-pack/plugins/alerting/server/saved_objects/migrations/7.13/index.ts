@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute } from '@kbn/core-saved-objects-common';
+import { SavedObjectAttribute } from '@kbn/core-saved-objects-server';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { RawRule } from '../../../types';

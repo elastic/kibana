@@ -82,8 +82,8 @@ describe('test fetchAll', () => {
     };
     searchSource = savedSearchMock.searchSource.createChild();
 
-    mockFetchDocuments.mockReset().mockResolvedValue([]);
-    mockFetchSQL.mockReset().mockResolvedValue([]);
+    mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
+    mockFetchSQL.mockReset().mockResolvedValue({ records: [] });
   });
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
@@ -108,7 +108,7 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockFetchDocuments.mockResolvedValue(documents);
+    mockFetchDocuments.mockResolvedValue({ records: documents });
     fetchAll(subjects, searchSource, false, deps);
     await waitForNextTick();
     expect(await collect()).toEqual([
@@ -130,7 +130,7 @@ describe('test fetchAll', () => {
     ];
     searchSource.getField('index')!.isTimeBased = () => false;
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockFetchDocuments.mockResolvedValue(documents);
+    mockFetchDocuments.mockResolvedValue({ records: documents });
 
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
@@ -181,7 +181,7 @@ describe('test fetchAll', () => {
     searchSource.getField('index')!.isTimeBased = () => false;
     const hits = [{ _id: '1', _index: 'logs' }];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockFetchDocuments.mockResolvedValue(documents);
+    mockFetchDocuments.mockResolvedValue({ records: documents });
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
       recordRawType: RecordRawType.DOCUMENT,
@@ -248,7 +248,10 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockFetchSQL.mockResolvedValue(documents);
+    mockFetchSQL.mockResolvedValue({
+      records: documents,
+      textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
+    });
     const query = { sql: 'SELECT * from foo' };
     deps = {
       appStateContainer: {
@@ -275,6 +278,7 @@ describe('test fetchAll', () => {
         fetchStatus: FetchStatus.COMPLETE,
         recordRawType: 'plain',
         result: documents,
+        textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
         query,
       },
     ]);

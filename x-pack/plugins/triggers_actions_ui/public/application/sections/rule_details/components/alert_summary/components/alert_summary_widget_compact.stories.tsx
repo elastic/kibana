@@ -14,7 +14,7 @@ import {
 
 export default {
   component: Component,
-  title: 'app/AlertsSummaryWidget',
+  title: 'app/AlertSummaryWidget',
 };
 
 export const Compact = {

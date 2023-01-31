@@ -145,6 +145,7 @@ export class CasesClientFactory {
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
       spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
+      savedObjectsSerializer,
     });
   }
 
@@ -169,10 +170,11 @@ export class CasesClientFactory {
   }): CasesServices {
     this.validateInitialization();
 
-    const attachmentService = new AttachmentService(
-      this.logger,
-      this.options.persistableStateAttachmentTypeRegistry
-    );
+    const attachmentService = new AttachmentService({
+      log: this.logger,
+      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
+      unsecuredSavedObjectsClient,
+    });
 
     const caseService = new CasesService({
       log: this.logger,

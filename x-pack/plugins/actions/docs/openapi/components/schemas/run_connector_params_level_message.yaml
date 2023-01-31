@@ -1,0 +1,20 @@
+title: Server log connector parameters
+description: Test an action that writes an entry to the Kibana server log.
+type: object
+required:
+  - message
+properties: 
+  level:
+    type: string
+    description: The log level of the message for server log connectors.
+    enum:
+      - debug
+      - error
+      - fatal
+      - info
+      - trace
+      - warn
+    default: info
+  message:
+    type: string
+    description: The message for server log connectors.

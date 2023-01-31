@@ -8,7 +8,10 @@
   },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack", "alerting"],
+  "configPath": [
+    "xpack",
+    "alerting"
+  ],
   "requiredPlugins": [
     "actions",
     "data",
@@ -19,9 +22,16 @@
     "features",
     "kibanaUtils",
     "licensing",
-    "spaces",
     "taskManager"
   ],
-  "optionalPlugins": ["usageCollection", "security", "monitoringCollection"],
-  "extraPublicDirs": ["common", "common/parse_duration"]
+  "optionalPlugins": [
+    "usageCollection",
+    "security",
+    "monitoringCollection",
+    "spaces"
+  ],
+  "extraPublicDirs": [
+    "common",
+    "common/parse_duration"
+  ]
 }
