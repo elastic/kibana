@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     ".storybook/**/*",
@@ -43,9 +43,9 @@
     "@kbn/core-doc-links-browser",
     "@kbn/ui-theme",
     "@kbn/datemath",
-    "@kbn/safer-lodash-set",
+    "@kbn/core-capabilities-common"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

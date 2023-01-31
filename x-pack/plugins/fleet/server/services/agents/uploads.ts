@@ -31,21 +31,24 @@ export async function getAgentUploads(
   esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentDiagnostics[]> {
-  const getFile = async (fileId: string) => {
-    if (!fileId) return;
+  const getFile = async (actionId: string) => {
     try {
       const fileResponse = await esClient.search({
         index: FILE_STORAGE_METADATA_AGENT_INDEX,
         query: {
           bool: {
             filter: {
-              term: { upload_id: fileId },
+              bool: {
+                must: [{ term: { agent_id: agentId } }, { term: { action_id: actionId } }],
+              },
             },
           },
         },
       });
-      if (fileResponse.hits.total === 0) {
-        appContextService.getLogger().debug(`No matches for upload_id ${fileId}`);
+      if (fileResponse.hits.hits.length === 0) {
+        appContextService
+          .getLogger()
+          .debug(`No matches for action_id ${actionId} and agent_id ${agentId}`);
         return;
       }
       return {
@@ -64,10 +67,14 @@ export async function getAgentUploads(
 
   const actions = await _getRequestDiagnosticsActions(esClient, agentId);
 
-  const results = [];
+  const results: AgentDiagnostics[] = [];
   for (const action of actions) {
-    const file = action.fileId ? await getFile(action.fileId) : undefined;
-    const fileName = file?.name ?? `${moment(action.timestamp!).format('YYYY-MM-DD HH:mm:ss')}.zip`;
+    const file = await getFile(action.actionId);
+    const fileName =
+      file?.name ??
+      `elastic-agent-diagnostics-${moment
+        .utc(action.timestamp!)
+        .format('YYYY-MM-DDTHH-mm-ss')}Z-00.zip`;
     const filePath = file ? agentRouteService.getAgentFileDownloadLink(file.id, file.name) : '';
     const result = {
       actionId: action.actionId,
@@ -76,6 +83,7 @@ export async function getAgentUploads(
       name: fileName,
       createTime: action.timestamp!,
       filePath,
+      error: action.error,
     };
     results.push(result);
   }
@@ -91,6 +99,7 @@ async function _getRequestDiagnosticsActions(
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
     size: SO_SEARCH_LIMIT,
+    sort: { '@timestamp': 'desc' },
     query: {
       bool: {
         must: [
@@ -150,7 +159,7 @@ async function _getRequestDiagnosticsActions(
       const actionResult = actionResults.find((result) => result.actionId === action.actionId);
       return {
         actionId: action.actionId,
-        timestamp: actionResult?.timestamp ?? action.timestamp,
+        timestamp: action.timestamp,
         fileId: actionResult?.fileId,
         error: actionResult?.error,
       };

@@ -66,6 +66,7 @@ export type AlertsTableStateProps = {
   showExpandToDetails: boolean;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
+  showAlertStatusWithFlapping?: boolean;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -110,6 +111,7 @@ const AlertsTableState = ({
   gridStyle,
   browserFields: propBrowserFields,
   onUpdate,
+  showAlertStatusWithFlapping,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
@@ -288,6 +290,7 @@ const AlertsTableState = ({
       id,
       leadingControlColumns: leadingControlColumns ?? [],
       showExpandToDetails,
+      showAlertStatusWithFlapping,
       trailingControlColumns: [],
       useFetchAlertsData,
       visibleColumns,
@@ -311,6 +314,7 @@ const AlertsTableState = ({
       pagination.pageSize,
       id,
       showExpandToDetails,
+      showAlertStatusWithFlapping,
       useFetchAlertsData,
       visibleColumns,
       updatedAt,
