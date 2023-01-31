@@ -42,6 +42,7 @@ import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -58,7 +59,6 @@ import { createExploratoryViewUrl } from './components/shared/exploratory_view/c
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 export interface ConfigSchema {
   unsafe: {
