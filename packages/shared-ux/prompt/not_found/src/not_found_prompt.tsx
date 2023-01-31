@@ -73,7 +73,7 @@ export const NotFoundPrompt = ({ actions, title, body }: NotFoundProps) => {
       color="subdued"
       titleSize="m"
       icon={icon}
-      title={typeof title === 'string' ? <h2>{title ?? NOT_FOUND_TITLE}</h2> : title}
+      title={typeof title === 'string' || !title ? <h2>{title ?? NOT_FOUND_TITLE}</h2> : title}
       body={body ?? NOT_FOUND_BODY}
       actions={actions ?? DEFAULT_ACTIONS}
     />
