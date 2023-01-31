@@ -175,6 +175,28 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
       });
       this.props.onUploadError();
       return;
+    } else if (importResults.docCount === importResults.failures?.length) {
+      this.setState({
+        // Force importResults into failure shape when no features are indexed
+        importResults: {
+          ...importResults,
+          success: false,
+          error: {
+            error: {
+              reason: i18n.translate('xpack.fileUpload.geoUploadWizard.allFeaturesFailedIndexing', {
+                defaultMessage: 'Unable to index {numFailures} of {featureCount} features.',
+                values: {
+                  featureCount: importResults.docCount,
+                  numFailures: importResults.failures.length,
+                },
+              })
+            }
+          }
+        },
+        phase: PHASE.COMPLETE,
+      });
+      this.props.onUploadError();
+      return;
     }
 
     //

@@ -133,7 +133,7 @@ export class ImportCompleteView extends Component<Props, {}> {
         // Display http request error message
         reason = this.props.importResults.error.body.message;
       } else if (this.props.importResults?.error?.error?.reason) {
-        // Display elasticxsearch request error message
+        // Display elasticsearch request error message
         reason = this.props.importResults.error.error.reason;
       }
       const errorMsg = reason
@@ -163,14 +163,26 @@ export class ImportCompleteView extends Component<Props, {}> {
       },
     });
 
-    const failedFeaturesMsg = this.props.importResults.failures?.length
-      ? i18n.translate('xpack.fileUpload.importComplete.failedFeaturesMsg', {
-          defaultMessage: 'Unable to index {numFailures} features.',
-          values: {
-            numFailures: this.props.importResults.failures.length,
-          },
-        })
-      : '';
+    if (this.props.importResults.failures?.length) {
+      const failedFeaturesMsg = i18n.translate('xpack.fileUpload.importComplete.failedFeaturesMsg', {
+        defaultMessage: 'Unable to index {numFailures} features.',
+        values: {
+          numFailures: this.props.importResults.failures.length,
+        },
+      });
+      return (
+        <EuiCallOut
+          title={i18n.translate('xpack.fileUpload.importComplete.uploadSuccessWithFailuresTitle', {
+            defaultMessage: 'File upload complete with failures',
+          })}
+          color="warning"
+          iconType="help"
+          data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
+        >
+          <p>{`${successMsg} ${failedFeaturesMsg}`}</p>
+        </EuiCallOut>
+      );
+    }
 
     return (
       <EuiCallOut
@@ -179,7 +191,7 @@ export class ImportCompleteView extends Component<Props, {}> {
         })}
         data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
       >
-        <p>{`${successMsg} ${failedFeaturesMsg}`}</p>
+        <p>{successMsg}</p>
       </EuiCallOut>
     );
   }
