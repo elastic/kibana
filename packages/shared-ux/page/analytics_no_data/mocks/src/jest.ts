@@ -21,7 +21,6 @@ export const getServicesMock = () => {
 export const getServicesMockCustomBranding = () => {
   const services: AnalyticsNoDataPageServices = {
     ...getKibanaNoDataPageServicesMock(),
-    // not specifying showPlainSpinner as true for testing the component
     kibanaGuideDocLink: 'Kibana guide',
   };
 
