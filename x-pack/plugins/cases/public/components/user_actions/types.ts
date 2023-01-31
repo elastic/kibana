@@ -10,7 +10,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
 import type { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
-import type { CaseServices } from '../../containers/use_get_case_user_actions';
+import type { CaseServices } from '../../containers/use_find_case_user_actions';
 import type { AddCommentRefObject } from '../add_comment';
 import type { UserActionMarkdownRefObject } from './markdown_form';
 import type { CasesNavigation } from '../links';

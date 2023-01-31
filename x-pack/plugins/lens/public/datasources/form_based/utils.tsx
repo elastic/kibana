@@ -8,10 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoreStart, DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
+import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq } from 'lodash';
@@ -391,52 +391,6 @@ export function getPrecisionErrorWarningMessages(
   }
 
   return warningMessages;
-}
-
-export function getDeprecatedSamplingWarningMessage(core: CoreStart): UserMessage[] {
-  const useFieldExistenceSamplingKey = 'lens:useFieldExistenceSampling';
-  const isUsingSampling = core.uiSettings.get(useFieldExistenceSamplingKey);
-
-  return isUsingSampling
-    ? [
-        {
-          severity: 'warning',
-          fixableInEditor: false,
-          displayLocations: [{ id: 'banner' }],
-          shortMessage: '',
-          longMessage: (
-            <EuiCallOut
-              color="warning"
-              iconType="alert"
-              size="s"
-              title={
-                <FormattedMessage
-                  id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
-                  defaultMessage="Field existence sampling has been deprecated and will be removed in Kibana {version}. You may disable this feature in {link}."
-                  values={{
-                    version: '8.6.0',
-                    link: (
-                      <EuiLink
-                        onClick={() => {
-                          core.application.navigateToApp('management', {
-                            path: `/kibana/settings?query=${useFieldExistenceSamplingKey}`,
-                          });
-                        }}
-                      >
-                        <FormattedMessage
-                          id="xpack.lens.indexPattern.useFieldExistenceSampling.advancedSettings"
-                          defaultMessage="Advanced Settings"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
-            />
-          ),
-        },
-      ]
-    : [];
 }
 
 export function getVisualDefaultsForLayer(layer: FormBasedLayer) {

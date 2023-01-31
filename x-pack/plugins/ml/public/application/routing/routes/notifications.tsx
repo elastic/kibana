@@ -8,7 +8,8 @@
 import React, { FC, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { PageLoader, PageProps } from '../router';
+import { ML_PAGES } from '../../../locator';
+import { createPath, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { checkFullLicense } from '../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capabilities';
@@ -25,7 +26,7 @@ export const notificationsRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'notifications',
-  path: '/notifications',
+  path: createPath(ML_PAGES.NOTIFICATIONS),
   title: i18n.translate('xpack.ml.notifications.notificationsLabel', {
     defaultMessage: 'Notifications',
   }),

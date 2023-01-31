@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_UUID, ALERT_STATUS, ALERT_FLAPPING } from '@kbn/rule-data-utils';
+import { AlertStatus } from '@kbn/rule-data-utils';
 import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiDataGrid,
@@ -23,6 +24,7 @@ import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
 } from './translations';
+import { AlertLifecycleStatusBadge } from '../../components/alert_lifecycle_status_badge';
 
 import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
@@ -34,6 +36,40 @@ const GridStyles: EuiDataGridStyle = {
   border: 'none',
   header: 'underline',
   fontSize: 's',
+};
+
+const basicRenderCellValue = ({
+  data,
+  columnId,
+}: {
+  data: Array<{ field: string; value: string[] }>;
+  columnId: string;
+}) => {
+  const value = data.find((d) => d.field === columnId)?.value ?? [];
+  if (Array.isArray(value)) {
+    return <>{value.length ? value.join() : '--'}</>;
+  }
+  return <>{value}</>;
+};
+
+const renderAlertLifecycleStatus = ({
+  data,
+  columnId,
+}: {
+  data: Array<{ field: string; value: string[] }>;
+  columnId: string;
+}) => {
+  const alertStatus = data.find((d) => d.field === ALERT_STATUS)?.value ?? [];
+  if (Array.isArray(alertStatus) && alertStatus.length) {
+    const flapping = data.find((d) => d.field === ALERT_FLAPPING)?.value ?? [];
+    return (
+      <AlertLifecycleStatusBadge
+        alertStatus={alertStatus.join() as AlertStatus}
+        flapping={flapping[0]}
+      />
+    );
+  }
+  return basicRenderCellValue({ data, columnId });
 };
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
@@ -86,6 +122,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     updatedAt,
     browserFields,
     onChangeVisibleColumns,
+    showAlertStatusWithFlapping = false,
   } = props;
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
@@ -216,20 +253,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
-  const basicRenderCellValue = ({
-    data,
-    columnId,
-  }: {
-    data: Array<{ field: string; value: string[] }>;
-    columnId: string;
-  }) => {
-    const value = data.find((d) => d.field === columnId)?.value ?? [];
-    if (Array.isArray(value)) {
-      return <>{value.length ? value.join() : '--'}</>;
-    }
-    return <>{value}</>;
-  };
-
   const renderCellValue = useCallback(
     () =>
       props.alertsTableConfiguration?.getRenderCellValue
@@ -249,6 +272,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         Object.entries(alert ?? {}).forEach(([key, value]) => {
           data.push({ field: key, value: value as string[] });
         });
+        if (showAlertStatusWithFlapping && _props.columnId === ALERT_STATUS) {
+          return renderAlertLifecycleStatus({
+            ..._props,
+            data,
+          });
+        }
         return renderCellValue({
           ..._props,
           data,
@@ -258,7 +287,14 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       }
       return null;
     },
-    [alerts, isLoading, pagination.pageIndex, pagination.pageSize, renderCellValue]
+    [
+      alerts,
+      isLoading,
+      pagination.pageIndex,
+      pagination.pageSize,
+      renderCellValue,
+      showAlertStatusWithFlapping,
+    ]
   );
 
   return (

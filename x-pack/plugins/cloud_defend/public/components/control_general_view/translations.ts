@@ -76,6 +76,10 @@ export const name = i18n.translate('xpack.cloudDefend.name', {
   defaultMessage: 'Name',
 });
 
+export const errorConditionRequired = i18n.translate('xpack.cloudDefend.errorConditionRequired', {
+  defaultMessage: 'At least one condition per selector is required.',
+});
+
 export const errorDuplicateName = i18n.translate('xpack.cloudDefend.errorDuplicateName', {
   defaultMessage: 'This name is already used by another selector.',
 });

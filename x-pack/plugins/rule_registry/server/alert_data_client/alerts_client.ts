@@ -34,7 +34,7 @@ import {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from '@kbn/alerting-plugin/server';
-import { Logger, ElasticsearchClient, EcsEventOutcome } from '@kbn/core/server';
+import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
@@ -146,7 +146,7 @@ export class AlertsClient {
 
   private getOutcome(
     operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get
-  ): { outcome: EcsEventOutcome } {
+  ): { outcome: EcsEvent['outcome'] } {
     return {
       outcome: operation === WriteOperations.Update ? 'unknown' : 'success',
     };

@@ -22,8 +22,8 @@ export const cli = () => {
         string: ['kibana', 'elastic', 'username', 'password'],
         boolean: ['asSuperuser'],
         default: {
-          kibana: 'http://localhost:5601',
-          elasticsearch: 'http://localhost:9200',
+          kibana: 'http://127.0.0.1:5601',
+          elasticsearch: 'http://127.0.0.1:9200',
           username: 'elastic',
           password: 'changeme',
           asSuperuser: false,
@@ -39,8 +39,8 @@ export const cli = () => {
         --asSuperuser       If defined, then a Security super user will be created using the
                             the credentials defined via 'username' and 'password' options. This
                             new user will then be used to run this utility.
-        --kibana            The url to Kibana (Default: http://localhost:5601)
-        --elasticsearch     The url to Elasticsearch (Default: http://localhost:9200)
+        --kibana            The url to Kibana (Default: http://127.0.0.1:5601)
+        --elasticsearch     The url to Elasticsearch (Default: http://127.0.0.1:9200)
         --checkinInterval   The interval between how often the Agent is checked into fleet and a
                             metadata document update is sent for the endpoint. Default is 1 minute
         --actionDelay       The delay (in milliseconds) that should be applied before responding
