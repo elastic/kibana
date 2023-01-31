@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'records':
         return '記録';
       case 'moving_average':
-          return 'の移動平均';
+        return 'の移動平均';
       case 'sum':
         return '合計';
       default:
