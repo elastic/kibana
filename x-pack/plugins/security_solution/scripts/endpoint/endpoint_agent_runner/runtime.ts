@@ -16,6 +16,7 @@ interface StartRuntimeServicesOptions {
   elasticUrl: string;
   username: string;
   password: string;
+  version?: string;
   log?: ToolingLog;
 }
 

@@ -142,6 +142,8 @@ const getAgentDownloadUrl = async (version: string): Promise<string> => {
   // const archType = arch(); // FIXME:PT use arch and maybe platform to build download file name
   const agentFile = `/elastic-agent-${version}-linux-arm64.tar.gz`;
 
+  // FIXME:PT use https://artifacts-api.elastic.co/v1/search/8.7.0-SNAPSHOT for urls below, which has both prod adn snapshot version listed.
+
   if (isSnapshot) {
     const snapshotDownloadsInfoUrl = 'https://snapshots.elastic.co/latest/master.json';
     const snapshotRepoInfo: { build_id: string } = await nodeFetch(snapshotDownloadsInfoUrl)
