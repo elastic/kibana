@@ -11,6 +11,7 @@ import { KibanaServices } from '../common/lib/kibana';
 
 import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
 import {
+  CASES_INTERNAL_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
@@ -34,6 +35,7 @@ import {
   resolveCase,
   getFeatureIds,
   postComment,
+  getCaseConnectors,
 } from './api';
 
 import {
@@ -54,10 +56,12 @@ import {
   caseWithRegisteredAttachmentsSnake,
   caseWithRegisteredAttachments,
   caseUserActionsWithRegisteredAttachmentsSnake,
+  basicPushSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { getCasesStatus } from '../api';
+import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -844,6 +848,35 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await postComment(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
+    });
+  });
+
+  describe('getCaseConnectors', () => {
+    const caseConnectors = getCaseConnectorsMockResponse();
+    const connectorCamelCase = caseConnectors['servicenow-1'];
+
+    const snakeCaseConnector = {
+      ...connectorCamelCase,
+      push: { ...connectorCamelCase.push, externalService: basicPushSnake },
+    };
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({ 'servicenow-1': snakeCaseConnector });
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await getCaseConnectors(basicCase.id, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/${basicCase.id}/_connectors`, {
+        method: 'GET',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should return correct response', async () => {
+      const resp = await getCaseConnectors(basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual({ 'servicenow-1': connectorCamelCase });
     });
   });
 });
