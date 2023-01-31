@@ -6,6 +6,7 @@
  */
 
 import { createEsParams, useEsSearch } from '@kbn/observability-plugin/public';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { MarkerItems } from './waterfall/context/waterfall_context';
 
 export interface Props {
@@ -22,7 +23,7 @@ export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest, step
   const { data, loading } = useEsSearch(
     hasNavigationRequest
       ? createEsParams({
-          index: 'synthetics-*',
+          index: SYNTHETICS_INDEX_PATTERN,
           body: {
             query: {
               bool: {
