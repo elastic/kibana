@@ -9,18 +9,22 @@ import React, { useState } from 'react';
 import { FieldValueSelection } from '@kbn/observability-plugin/public';
 import {
   getSyntheticsFilterDisplayValues,
-  getSyntheticsFilterKeyForLabel,
-  SyntheticsFilterItem,
+  SyntheticsMonitorFilterItem,
   valueToLabelWithEmptyCount,
 } from './filter_fields';
-import { useGetUrlParams, useUrlParams } from '../../../../hooks';
+import { useGetUrlParams } from '../../../../hooks';
+import { useMonitorFiltersState } from './use_filters';
 
-export const FilterButton = ({ filter }: { filter: SyntheticsFilterItem }) => {
+export const FilterButton = ({
+  filter,
+  handleFilterChange,
+}: {
+  filter: SyntheticsMonitorFilterItem;
+  handleFilterChange: ReturnType<typeof useMonitorFiltersState>['handleFilterChange'];
+}) => {
   const { label, values, field } = filter;
 
   const [query, setQuery] = useState('');
-
-  const [, updateUrlParams] = useUrlParams();
 
   const urlParams = useGetUrlParams();
 
@@ -42,16 +46,7 @@ export const FilterButton = ({ filter }: { filter: SyntheticsFilterItem }) => {
           : values
       }
       setQuery={setQuery}
-      onChange={(selectedValues) => {
-        updateUrlParams({
-          [field]:
-            selectedValues && selectedValues.length > 0
-              ? JSON.stringify(
-                  selectedValues.map((value) => getSyntheticsFilterKeyForLabel(value, field))
-                )
-              : undefined,
-        });
-      }}
+      onChange={(selectedValues) => handleFilterChange(field, selectedValues)}
       allowExclusions={false}
       loading={false}
       asFilterButton={true}

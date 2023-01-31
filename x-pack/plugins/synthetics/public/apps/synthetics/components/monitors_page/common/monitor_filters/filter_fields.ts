@@ -8,32 +8,33 @@
 import { i18n } from '@kbn/i18n';
 import { invert } from 'lodash';
 import { DataStream, ServiceLocations } from '../../../../../../../common/runtime_types';
+import { MonitorFilterState } from '../../../../state';
 
-export type SyntheticsFilterField =
-  | 'tags'
-  | 'locations'
-  | 'monitorTypes'
-  | 'projects'
-  | 'schedules';
+export type SyntheticsMonitorFilterField = keyof MonitorFilterState;
 
 export interface LabelWithCountValue {
   label: string;
   count: number;
 }
 
-export interface SyntheticsFilterItem {
+export interface SyntheticsMonitorFilterItem {
   label: string;
   values: LabelWithCountValue[];
-  field: SyntheticsFilterField;
+  field: SyntheticsMonitorFilterField;
 }
 
-export function getMonitorFilterFields(): SyntheticsFilterField[] {
+export function getMonitorFilterFields(): SyntheticsMonitorFilterField[] {
   return ['tags', 'locations', 'monitorTypes', 'projects', 'schedules'];
 }
 
+export type SyntheticsMonitorFilterChangeHandler = (
+  field: SyntheticsMonitorFilterField,
+  selectedValues: string[] | undefined
+) => void;
+
 export function getSyntheticsFilterDisplayValues(
   values: LabelWithCountValue[],
-  field: SyntheticsFilterField,
+  field: SyntheticsMonitorFilterField,
   locations: ServiceLocations
 ) {
   switch (field) {
@@ -66,7 +67,7 @@ export function getSyntheticsFilterDisplayValues(
   }
 }
 
-export function getSyntheticsFilterKeyForLabel(value: string, field: SyntheticsFilterField) {
+export function getSyntheticsFilterKeyForLabel(value: string, field: SyntheticsMonitorFilterField) {
   switch (field) {
     case 'monitorTypes':
       return invert(monitorTypeKeyLabelMap)[value] ?? value;

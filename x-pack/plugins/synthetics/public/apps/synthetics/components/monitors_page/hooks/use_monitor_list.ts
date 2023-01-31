@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-import { useGetUrlParams } from '../../../hooks';
+import { useDebounce } from 'react-use';
 import {
   fetchMonitorListAction,
+  fetchOverviewStatusAction,
   MonitorListPageState,
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
+  selectOverviewStatus,
+  updateManagementPageStateAction,
 } from '../../../state';
+import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 
 export function useMonitorList() {
   const dispatch = useDispatch();
@@ -22,52 +25,30 @@ export function useMonitorList() {
 
   const { pageState, loading, loaded, error, data } = useSelector(selectMonitorListState);
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
+  const { status: overviewStatus } = useSelector(selectOverviewStatus);
 
-  const {
-    query,
-    tags,
-    monitorTypes,
-    locations: locationFilters,
-    projects,
-    schedules,
-  } = useGetUrlParams();
+  const { handleFilterChange } = useMonitorFiltersState();
 
-  const { search } = useLocation();
+  const [] = useState(pageState);
 
   const loadPage = useCallback(
-    (state: MonitorListPageState) =>
-      dispatch(
-        fetchMonitorListAction.get({
-          ...state,
-          query,
-          tags,
-          monitorTypes,
-          locations: locationFilters,
-          projects,
-          schedules,
-        })
-      ),
-    [dispatch, locationFilters, monitorTypes, query, tags, projects, schedules]
+    (state: MonitorListPageState) => {
+      dispatch(updateManagementPageStateAction(state));
+    },
+    [dispatch]
   );
-
   const reloadPage = useCallback(() => loadPage(pageState), [pageState, loadPage]);
 
-  useEffect(() => {
-    reloadPage();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  useDebounce(
+    () => {
+      const overviewStatusArgs = { ...pageState, perPage: pageState.pageSize };
 
-  // Initial loading
-  useEffect(() => {
-    if (!loading && !isDataQueriedRef.current) {
-      isDataQueriedRef.current = true;
-      reloadPage();
-    }
-
-    if (loading) {
-      isDataQueriedRef.current = true;
-    }
-  }, [reloadPage, syntheticsMonitors, loading]);
+      dispatch(fetchOverviewStatusAction.get(overviewStatusArgs));
+      dispatch(fetchMonitorListAction.get(pageState));
+    },
+    500,
+    [pageState]
+  );
 
   return {
     loading,
@@ -80,5 +61,7 @@ export function useMonitorList() {
     reloadPage,
     isDataQueried: isDataQueriedRef.current,
     absoluteTotal: data.absoluteTotal ?? 0,
+    overviewStatus,
+    handleFilterChange,
   };
 }

@@ -9,18 +9,15 @@ import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
-import { isEmpty, isEqual, omitBy } from 'lodash';
-import { FilterGroup } from '../management/list_filters/filter_group';
+import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
-import { useEnablement, useGetUrlParams } from '../../../hooks';
+import { useEnablement } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
-  setOverviewPageStateAction,
   selectOverviewPageState,
   selectServiceLocationsState,
-  MonitorOverviewPageState,
 } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
 
@@ -43,14 +40,6 @@ export const OverviewPage: React.FC = () => {
   const dispatch = useDispatch();
 
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const {
-    query,
-    tags,
-    monitorTypes,
-    locations: locationFilters,
-    projects,
-    schedules,
-  } = useGetUrlParams();
   const { search } = useLocation();
 
   const pageState = useSelector(selectOverviewPageState);
@@ -61,23 +50,6 @@ export const OverviewPage: React.FC = () => {
       dispatch(getServiceLocations());
     }
   }, [dispatch, locationsLoaded, locationsLoading]);
-
-  // fetch overview for query state changes
-  useEffect(() => {
-    const newPageState = {
-      ...pageState,
-      query,
-      tags,
-      monitorTypes,
-      projects,
-      schedules,
-      locations: locationFilters,
-    };
-    if (hasPageStateChanged(pageState, newPageState)) {
-      dispatch(fetchMonitorOverviewAction.get({ ...pageState, ...newPageState }));
-      dispatch(setOverviewPageStateAction(newPageState));
-    }
-  }, [dispatch, locationFilters, monitorTypes, pageState, projects, query, tags, schedules]);
 
   // fetch overview for all other page state changes
   useEffect(() => {
@@ -94,7 +66,12 @@ export const OverviewPage: React.FC = () => {
     loading: enablementLoading,
   } = useEnablement();
 
-  const { syntheticsMonitors, loading: monitorsLoading, loaded: monitorsLoaded } = useMonitorList();
+  const {
+    syntheticsMonitors,
+    loading: monitorsLoading,
+    loaded: monitorsLoaded,
+    handleFilterChange,
+  } = useMonitorList();
 
   if (
     !search &&
@@ -126,7 +103,7 @@ export const OverviewPage: React.FC = () => {
           <QuickFilters />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <FilterGroup />
+          <FilterGroup handleFilterChange={handleFilterChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -150,11 +127,4 @@ export const OverviewPage: React.FC = () => {
       {monitorsLoaded && syntheticsMonitors?.length === 0 && <NoMonitorsFound />}
     </>
   );
-};
-
-const hasPageStateChanged = (
-  pageState: MonitorOverviewPageState,
-  newPageState: MonitorOverviewPageState
-) => {
-  return !isEqual(omitBy(pageState, isEmpty), omitBy(newPageState, isEmpty));
 };

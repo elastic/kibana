@@ -73,6 +73,7 @@ export async function getStatus(
   });
 
   const {
+    allIds,
     enabledIds,
     disabledCount,
     maxPeriod,
@@ -98,6 +99,7 @@ export async function getStatus(
   );
 
   return {
+    allIds,
     allMonitorsCount: allMonitors.length,
     disabledMonitorsCount,
     projectMonitorsCount,

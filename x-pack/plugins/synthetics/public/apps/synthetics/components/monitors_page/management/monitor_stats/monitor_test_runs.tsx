@@ -13,13 +13,11 @@ import { ReportTypes } from '@kbn/observability-plugin/public';
 
 import { useAbsoluteDate } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
-import { useGetMonitorEmbeddedFilters } from '../list_filters/use_filters';
 import * as labels from '../labels';
 
-export const MonitorTestRunsCount = () => {
+export const MonitorTestRunsCount = ({ monitorIds }: { monitorIds: string[] }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
   const theme = useTheme();
-  const { embeddableReportDefinitions, embeddableFilters } = useGetMonitorEmbeddedFilters();
 
   const { ExploratoryViewEmbeddable } = observability;
 
@@ -33,12 +31,11 @@ export const MonitorTestRunsCount = () => {
         {
           time: { from: absFrom, to: absTo },
           reportDefinitions: {
-            'monitor.id': [],
-            ...embeddableReportDefinitions,
+            'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'], // Show no data when monitorIds is empty
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_total_runs',
-          filters: embeddableFilters,
+          filters: [],
           name: labels.TEST_RUNS_LABEL,
           color: theme.eui.euiColorVis1,
         },

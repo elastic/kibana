@@ -10,21 +10,30 @@ import { EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import { ServiceLocations } from '../../../../../../../common/runtime_types';
+import { selectServiceLocationsState } from '../../../../state';
+
+import {
+  SyntheticsMonitorFilterItem,
+  getSyntheticsFilterDisplayValues,
+  SyntheticsMonitorFilterChangeHandler,
+} from './filter_fields';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
-import { selectServiceLocationsState } from '../../../../state';
-import { SyntheticsFilterItem, getSyntheticsFilterDisplayValues } from './filter_fields';
 
 export const findLocationItem = (query: string, locations: ServiceLocations) => {
   return locations.find(({ id, label }) => query === id || label === query);
 };
 
-export const FilterGroup = () => {
+export const FilterGroup = ({
+  handleFilterChange,
+}: {
+  handleFilterChange: SyntheticsMonitorFilterChangeHandler;
+}) => {
   const data = useFilters();
 
   const { locations } = useSelector(selectServiceLocationsState);
 
-  const filters: SyntheticsFilterItem[] = [
+  const filters: SyntheticsMonitorFilterItem[] = [
     {
       label: TYPE_LABEL,
       field: 'monitorTypes',
@@ -58,7 +67,7 @@ export const FilterGroup = () => {
   return (
     <EuiFilterGroup>
       {filters.map((filter, index) => (
-        <FilterButton key={index} filter={filter} />
+        <FilterButton key={index} filter={filter} handleFilterChange={handleFilterChange} />
       ))}
     </EuiFilterGroup>
   );

@@ -12,16 +12,14 @@ import { useTheme } from '@kbn/observability-plugin/public';
 
 import { useAbsoluteDate } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
-import { useGetMonitorEmbeddedFilters } from '../list_filters/use_filters';
 import * as labels from '../labels';
 
-export const MonitorTestRunsSparkline = () => {
+export const MonitorTestRunsSparkline = ({ monitorIds }: { monitorIds: string[] }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
 
   const theme = useTheme();
-  const { embeddableReportDefinitions, embeddableFilters } = useGetMonitorEmbeddedFilters();
 
   const { from, to } = useAbsoluteDate({ from: 'now-30d', to: 'now' });
 
@@ -36,12 +34,11 @@ export const MonitorTestRunsSparkline = () => {
           seriesType: 'area',
           time: { from, to },
           reportDefinitions: {
-            'monitor.id': [],
-            ...embeddableReportDefinitions,
+            'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'], // Show no data when monitorIds is empty
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor.check_group',
-          filters: embeddableFilters,
+          filters: [],
           name: labels.TEST_RUNS_LABEL,
           color: theme.eui.euiColorVis1,
           operationType: 'unique_count',

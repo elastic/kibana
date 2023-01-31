@@ -34,15 +34,13 @@ import { MonitorLocations } from './monitor_locations';
 
 export function useMonitorListColumns({
   canEditSynthetics,
-  reloadPage,
   loading,
-  status,
+  overviewStatus,
   setMonitorPendingDeletion,
 }: {
   canEditSynthetics: boolean;
   loading: boolean;
-  status: OverviewStatusState | null;
-  reloadPage: () => void;
+  overviewStatus: OverviewStatusState | null;
   setMonitorPendingDeletion: (config: EncryptedSyntheticsSavedMonitor) => void;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
@@ -66,7 +64,7 @@ export function useMonitorListColumns({
       ),
     },
     // Only show Project ID column if project monitors are present
-    ...(status?.projectMonitorsCount ?? 0 > 0
+    ...(overviewStatus?.projectMonitorsCount ?? 0 > 0
       ? [
           {
             align: 'left' as const,
@@ -119,7 +117,7 @@ export function useMonitorListColumns({
           <MonitorLocations
             monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations}
-            status={status}
+            status={overviewStatus}
           />
         ) : null,
     },
@@ -149,7 +147,7 @@ export function useMonitorListColumns({
         <MonitorEnabled
           configId={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
-          reloadPage={reloadPage}
+          reloadPage={() => {}}
           isSwitchable={!loading}
         />
       ),

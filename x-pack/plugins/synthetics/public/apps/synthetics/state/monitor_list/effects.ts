@@ -9,6 +9,7 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { call, put, takeEvery, takeLeading, select } from 'redux-saga/effects';
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import { enableDefaultAlertingAction } from '../alert_rules';
+import { ConfigKey, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { MonitorOverviewPageState, quietFetchOverviewStatusAction } from '../overview';
 import { quietFetchOverviewAction } from '../overview/actions';
@@ -22,11 +23,10 @@ import {
   fetchUpsertFailureAction,
   fetchUpsertMonitorAction,
   fetchUpsertSuccessAction,
-  UpsertMonitorRequest,
 } from './actions';
 import { fetchMonitorManagementList, fetchUpsertMonitor } from './api';
 import { toastTitle } from './toast_title';
-import { ConfigKey, SyntheticsMonitor } from '../../../../../common/runtime_types';
+import { UpsertMonitorRequest } from './models';
 
 export function* fetchMonitorListEffect() {
   yield takeLeading(
