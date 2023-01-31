@@ -487,6 +487,7 @@ export class TaskRunner<
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule`;
       apm.currentTransaction.addLabels({
+        alerting_rule_space_id: spaceId,
         alerting_rule_id: ruleId,
       });
     }

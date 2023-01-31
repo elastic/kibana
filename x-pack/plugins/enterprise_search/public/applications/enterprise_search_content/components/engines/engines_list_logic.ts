@@ -13,6 +13,7 @@ import {
   EnterpriseSearchEngine,
   EnterpriseSearchEnginesResponse,
 } from '../../../../../common/types/engines';
+import { Page } from '../../../../../common/types/pagination';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
@@ -26,7 +27,7 @@ import {
   FetchEnginesAPILogic,
 } from '../../api/engines/fetch_engines_api_logic';
 
-import { DEFAULT_META, Meta, updateMetaPageIndex } from './types';
+import { DEFAULT_META, updateMetaPageIndex } from './types';
 
 interface EuiBasicTableOnChange {
   page: { index: number };
@@ -58,8 +59,8 @@ interface EngineListValues {
   isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
   isLoading: boolean;
-  meta: Meta;
-  parameters: { meta: Meta; searchQuery?: string }; // Added this variable to store to the search Query value as well
+  meta: Page;
+  parameters: { meta: Page; searchQuery?: string }; // Added this variable to store to the search Query value as well
   results: EnterpriseSearchEngine[]; // stores engine list value from data
   searchQuery: string;
   status: typeof FetchEnginesAPILogic.values.status;
@@ -105,6 +106,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
         openDeleteEngineModal: (_, { engine }) => engine,
       },
     ],
+
     isDeleteModalVisible: [
       false,
       {
@@ -112,6 +114,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
         openDeleteEngineModal: () => true,
       },
     ],
+
     parameters: [
       { meta: DEFAULT_META },
       {
@@ -137,6 +140,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   }),
   selectors: ({ selectors }) => ({
     deleteModalEngineName: [() => [selectors.deleteModalEngine], (engine) => engine?.name ?? ''],
+
     isDeleteLoading: [
       () => [selectors.deleteStatus],
       (status: EngineListValues['deleteStatus']) => [Status.LOADING].includes(status),

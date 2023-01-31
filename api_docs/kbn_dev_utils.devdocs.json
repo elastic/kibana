@@ -204,23 +204,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-common.shipCiStatsCli",
-        "type": "Function",
-        "tags": [],
-        "label": "shipCiStatsCli",
-        "description": [],
-        "signature": [
-          "() => void"
-        ],
-        "path": "packages/kbn-dev-utils/src/ship_ci_stats_cli.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-common.transformFileStream",
         "type": "Function",
         "tags": [],

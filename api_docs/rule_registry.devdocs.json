@@ -1938,19 +1938,12 @@
           {
             "parentPluginId": "ruleRegistry",
             "id": "def-server.AlertAuditEventParams.outcome",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "outcome",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/ecs",
-                "scope": "common",
-                "docId": "kibKbnEcsPluginApi",
-                "section": "def-common.EcsEventOutcome",
-                "text": "EcsEventOutcome"
-              },
-              " | undefined"
+              "string | undefined"
             ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
             "deprecated": false,

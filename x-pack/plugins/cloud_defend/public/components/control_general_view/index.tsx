@@ -42,7 +42,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
     try {
       const result = yaml.load(configuration);
 
-      if (result) {
+      if (result && result.hasOwnProperty('selectors') && result.hasOwnProperty('responses')) {
         return result;
       }
     } catch {
@@ -77,8 +77,11 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   const incrementName = useCallback(
     (name: string): string => {
       // increment name using ints
-      const lastChar = parseInt(name.slice(-1), 10);
-      const newName = isNaN(lastChar) ? name + '1' : name.slice(0, -1) + (lastChar + 1);
+      const numberSuffix = name.search(/\d+$/);
+      const newName =
+        numberSuffix !== -1
+          ? name.slice(0, numberSuffix) + (parseInt(name.slice(numberSuffix), 10) + 1)
+          : name + '1';
       const dupe = selectors.find((selector) => selector.name === newName);
 
       if (dupe) {
