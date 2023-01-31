@@ -23,7 +23,7 @@ import {
   SavedObjectsManagementColumnServiceStart,
 } from './services';
 
-import { v1 } from '../common';
+import type { v1 } from '../common';
 
 import { SavedObjectManagementTypeInfo } from './types';
 import {
