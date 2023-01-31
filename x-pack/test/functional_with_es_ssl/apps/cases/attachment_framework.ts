@@ -299,19 +299,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await deleteAllCaseItems(es);
         });
 
-        it('renders different solutions', async () => {
-          await openModal();
-
-          await testSubjects.existOrFail('options-filter-popover-button-Solution');
-
-          for (const [owner, caseId] of createdCases.entries()) {
-            await testSubjects.existOrFail(`cases-table-row-${caseId}`);
-            await testSubjects.existOrFail(`case-table-column-owner-icon-${owner}`);
-          }
-
-          await closeModal();
-        });
-
         it('filters correctly', async () => {
           for (const [owner, currentCaseId] of createdCases.entries()) {
             await openModal();

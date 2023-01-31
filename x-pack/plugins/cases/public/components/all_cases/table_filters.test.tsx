@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -19,7 +18,7 @@ import {
   OBSERVABILITY_OWNER,
 } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { CasesTableFilters } from './table_filters';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -56,13 +55,9 @@ describe('CasesTableFilters ', () => {
   });
 
   it('should render the case status filter dropdown', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CasesTableFilters {...props} />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<CasesTableFilters {...props} />);
 
-    expect(wrapper.find(`[data-test-subj="case-status-filter"]`).first().exists()).toBeTruthy();
+    expect(result.getByTestId('case-status-filter')).toBeInTheDocument();
   });
 
   it('should render the case severity filter dropdown', () => {
