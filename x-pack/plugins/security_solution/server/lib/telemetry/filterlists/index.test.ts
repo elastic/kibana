@@ -25,6 +25,7 @@ describe('Security Telemetry filters', () => {
       'event.outcome': true,
       'event.provider': true,
       'event.type': true,
+      package_version: true,
     };
 
     it('filters top level', () => {
@@ -160,6 +161,7 @@ describe('Security Telemetry filters', () => {
         'event.outcome': 'success',
         'event.provider': 'iam.amazonaws.com',
         'event.type': ['user', 'creation'],
+        package_version: '3.4.1',
       };
       expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
         'event.id': '36857486973080746231799376445175633955031786243637182487',
@@ -169,6 +171,7 @@ describe('Security Telemetry filters', () => {
         'event.outcome': 'success',
         'event.provider': 'iam.amazonaws.com',
         'event.type': ['user', 'creation'],
+        package_version: '3.4.1',
       });
     });
   });

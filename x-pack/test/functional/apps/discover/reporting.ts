@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // get clipboard value using field search input, since
         // 'browser.getClipboardValue()' doesn't work, due to permissions
-        const textInput = await testSubjects.find('fieldFilterSearchInput');
+        const textInput = await testSubjects.find('fieldListFiltersFieldSearch');
         await textInput.click();
         await browser.getActions().keyDown(Key.CONTROL).perform();
         await browser.getActions().keyDown('v').perform();
