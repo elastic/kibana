@@ -28,6 +28,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/react-field",
     "@kbn/field-types",
+    "@kbn/data-view-field-editor-plugin",
   ],
   "exclude": [
     "target/**/*",

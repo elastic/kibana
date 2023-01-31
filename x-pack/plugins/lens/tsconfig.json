@@ -54,7 +54,6 @@
     "@kbn/analytics",
     "@kbn/core-execution-context-common",
     "@kbn/chart-icons",
-    "@kbn/react-field",
     "@kbn/tinymath",
     "@kbn/ui-theme",
     "@kbn/shared-ux-link-redirect-app",
