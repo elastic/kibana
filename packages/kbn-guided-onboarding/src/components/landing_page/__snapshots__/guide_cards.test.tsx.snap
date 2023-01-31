@@ -15,7 +15,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
       activeFilter="all"
       card={
         Object {
-          "guideId": "search",
+          "guideId": "appSearch",
           "order": 1,
           "solution": "search",
           "telemetryId": "guided-onboarding--search--application",
@@ -87,7 +87,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
       activeFilter="all"
       card={
         Object {
-          "guideId": "search",
+          "guideId": "websiteSearch",
           "order": 4,
           "solution": "search",
           "telemetryId": "guided-onboarding--search--website",
@@ -162,7 +162,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
       activeFilter="all"
       card={
         Object {
-          "guideId": "search",
+          "guideId": "databaseSearch",
           "order": 7,
           "solution": "search",
           "telemetryId": "guided-onboarding--search--database",

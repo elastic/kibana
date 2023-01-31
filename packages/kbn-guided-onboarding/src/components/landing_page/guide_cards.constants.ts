@@ -33,7 +33,7 @@ export const guideCards: GuideCardConstants[] = [
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.appSearch.title', {
       defaultMessage: 'Build an application on top of Elasticsearch',
     }),
-    guideId: 'search',
+    guideId: 'appSearch',
     telemetryId: 'guided-onboarding--search--application',
     order: 1,
   },
@@ -42,7 +42,7 @@ export const guideCards: GuideCardConstants[] = [
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title', {
       defaultMessage: 'Add search to my website',
     }),
-    guideId: 'search',
+    guideId: 'websiteSearch',
     telemetryId: 'guided-onboarding--search--website',
     order: 4,
   },
@@ -51,7 +51,7 @@ export const guideCards: GuideCardConstants[] = [
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title', {
       defaultMessage: 'Search across databases and business systems',
     }),
-    guideId: 'search',
+    guideId: 'databaseSearch',
     telemetryId: 'guided-onboarding--search--database',
     order: 7,
   },

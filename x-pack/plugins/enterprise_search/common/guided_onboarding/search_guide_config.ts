@@ -8,7 +8,9 @@
 import type { GuideConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
 
-export const searchGuideId = 'search';
+export const appSearchGuideId = 'appSearch';
+export const websiteSearchGuideId = 'websiteSearch';
+export const databaseSearchGuideId = 'databaseSearch';
 export const searchGuideConfig: GuideConfig = {
   title: i18n.translate('xpack.enterpriseSearch.guideConfig.title', {
     defaultMessage: 'Search my data',
