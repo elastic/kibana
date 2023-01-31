@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseConfig = await readConfigFile(require.resolve('../../config.base.ts'));
+  const baseConfig = await readConfigFile(require.resolve('../config.base.ts'));
 
   return {
     // default to the  ml/config.base.ts
@@ -16,7 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     junit: {
       ...baseConfig.get('junit'),
-      reportName: 'Chrome X-Pack UI Functional Tests Basic License - ml - permissions - group1',
+      reportName: 'Chrome X-Pack UI Functional Tests Basic License - ml - permissions',
     },
   };
 }
