@@ -60,9 +60,10 @@ export function registerV1HealthRoute(server: MonitoringCore) {
         getDsIndexPattern({ config, moduleType: 'kibana' }),
         getDsIndexPattern({ config, moduleType: 'logstash' }),
         getDsIndexPattern({ config, moduleType: 'beats' }),
+        getDsIndexPattern({ config, moduleType: 'enterprisesearch' }),
       ].join(',');
 
-      const entSearchIndex = getIndexPatterns({ config, moduleType: 'enterprise_search' });
+      const entSearchIndex = getIndexPatterns({ config, moduleType: 'enterprisesearch' });
 
       const monitoredClustersFn = () =>
         fetchMonitoredClusters({

@@ -61,6 +61,7 @@ export enum WriteOperations {
   UpdateCase = 'updateCase',
   PushCase = 'pushCase',
   CreateComment = 'createComment',
+  BulkCreateAttachments = 'bulkCreateAttachments',
   DeleteAllComments = 'deleteAllComments',
   DeleteComment = 'deleteComment',
   UpdateComment = 'updateComment',
