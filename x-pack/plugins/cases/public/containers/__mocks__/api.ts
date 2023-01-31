@@ -10,8 +10,8 @@ import type {
   Cases,
   Case,
   CasesStatus,
-  CaseUserActions,
   FetchCasesProps,
+  FindCaseUserActions,
 } from '../types';
 import { SortFieldCase } from '../types';
 import {
@@ -23,9 +23,9 @@ import {
   basicCasePost,
   basicResolvedCase,
   casesStatus,
-  caseUserActions,
   pushedCase,
   tags,
+  findCaseUserActionsResponse,
 } from '../mock';
 import type { CaseUpdateRequest, ResolvedCase } from '../../../common/ui/types';
 import { SeverityAll } from '../../../common/ui/types';
@@ -64,10 +64,10 @@ export const getTags = async (signal: AbortSignal): Promise<string[]> => Promise
 
 export const findAssignees = async (): Promise<UserProfile[]> => userProfiles;
 
-export const getCaseUserActions = async (
+export const findCaseUserActions = async (
   caseId: string,
   signal: AbortSignal
-): Promise<CaseUserActions[]> => Promise.resolve(caseUserActions);
+): Promise<FindCaseUserActions> => Promise.resolve(findCaseUserActionsResponse);
 
 export const getCases = async ({
   filterOptions = {
