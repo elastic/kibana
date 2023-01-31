@@ -227,15 +227,13 @@ export const DiscoverTopNav = ({
       onSaveSearch({
         savedSearch,
         services,
-        dataView,
         navigateTo,
         state: stateContainer,
         onClose: onCancel,
         onSaveCb: onSave,
-        updateAdHocDataViewId,
       });
     },
-    [dataView, navigateTo, savedSearch, services, stateContainer, updateAdHocDataViewId]
+    [navigateTo, savedSearch, services, stateContainer]
   );
 
   return (

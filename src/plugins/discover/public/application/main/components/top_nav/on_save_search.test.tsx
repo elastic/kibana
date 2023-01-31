@@ -12,7 +12,6 @@ jest.mock('../../utils/persist_saved_search', () => ({
   persistSavedSearch: jest.fn(() => ({ id: 'the-saved-search-id' })),
 }));
 import { onSaveSearch } from './on_save_search';
-import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
@@ -38,12 +37,10 @@ describe('onSaveSearch', () => {
     } as unknown as DiscoverStateContainer;
 
     await onSaveSearch({
-      dataView: dataViewMock,
       navigateTo: jest.fn(),
       savedSearch: savedSearchMock,
       services: serviceMock,
       state: stateMock,
-      updateAdHocDataViewId: jest.fn(),
     });
 
     expect(savedObjectsPlugin.showSaveModal).toHaveBeenCalled();
@@ -63,7 +60,6 @@ describe('onSaveSearch', () => {
       saveModal = modal;
     });
     await onSaveSearch({
-      dataView: dataViewMock,
       navigateTo: jest.fn(),
       savedSearch: {
         ...savedSearchMock,
@@ -71,7 +67,6 @@ describe('onSaveSearch', () => {
       },
       services: serviceMock,
       state: stateMock,
-      updateAdHocDataViewId: jest.fn(),
     });
     expect(saveModal?.props.tags).toEqual(['tag1', 'tag2']);
   });
@@ -95,12 +90,10 @@ describe('onSaveSearch', () => {
       tags: ['tag1', 'tag2'],
     };
     await onSaveSearch({
-      dataView: dataViewMock,
       navigateTo: jest.fn(),
       savedSearch,
       services: serviceMock,
       state: stateMock,
-      updateAdHocDataViewId: jest.fn(),
     });
     expect(savedSearch.tags).toEqual(['tag1', 'tag2']);
     jest
@@ -139,7 +132,6 @@ describe('onSaveSearch', () => {
       tags: ['tag1', 'tag2'],
     };
     await onSaveSearch({
-      dataView: dataViewMock,
       navigateTo: jest.fn(),
       savedSearch,
       services: {
@@ -147,7 +139,6 @@ describe('onSaveSearch', () => {
         savedObjectsTagging: undefined,
       },
       state: stateMock,
-      updateAdHocDataViewId: jest.fn(),
     });
     expect(savedSearch.tags).toEqual(['tag1', 'tag2']);
     jest

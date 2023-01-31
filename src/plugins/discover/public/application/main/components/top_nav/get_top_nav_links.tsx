@@ -36,7 +36,6 @@ export const getTopNavLinks = ({
   persistDataView,
   adHocDataViews,
   updateDataViewList,
-  updateAdHocDataViewId,
 }: {
   dataView: DataView;
   navigateTo: (url: string) => void;
@@ -50,7 +49,6 @@ export const getTopNavLinks = ({
   adHocDataViews: DataView[];
   updateDataViewList: (dataView: DataView[]) => void;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -120,10 +118,8 @@ export const getTopNavLinks = ({
       onSaveSearch({
         savedSearch,
         services,
-        dataView,
         navigateTo,
         state,
-        updateAdHocDataViewId,
         onClose: () => {
           anchorElement?.focus();
         },
