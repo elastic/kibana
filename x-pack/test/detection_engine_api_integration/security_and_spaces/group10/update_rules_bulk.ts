@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
             },
-          ] as unknown as RuleResponse['actions'];
+          ];
           outputRule.throttle = '1d';
           const bodyToCompare = removeServerGeneratedProperties(response);
           expect(bodyToCompare).to.eql(outputRule);

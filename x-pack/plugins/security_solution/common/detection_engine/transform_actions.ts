@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleActionWithOptionalUuidCamel } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
 import type { RuleAlertAction } from './types';
 
+// update - patch - create
 export const transformRuleToAlertAction = ({
   group,
   id,
   action_type_id: actionTypeId,
   params,
   uuid,
-}: RuleAlertAction): RuleAction => ({
+}: RuleAlertAction): RuleActionWithOptionalUuidCamel => ({
   group,
   id,
   params,
   actionTypeId,
-  uuid,
+  ...(uuid && { uuid }),
 });
 
 export const transformAlertToRuleAction = ({
@@ -29,12 +30,12 @@ export const transformAlertToRuleAction = ({
   actionTypeId,
   params,
   uuid,
-}: RuleAction): RuleAlertAction => ({
+}: RuleActionWithOptionalUuidCamel): RuleAlertAction => ({
   group,
   id,
   params,
   action_type_id: actionTypeId,
-  uuid,
+  ...(uuid && { uuid }),
 });
 
 export const transformRuleToAlertResponseAction = ({

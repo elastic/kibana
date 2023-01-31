@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { omit } from 'lodash';
 import { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RawRule, RuleAction, RuleTypeParams } from '../../types';
@@ -21,9 +20,14 @@ export function injectReferencesIntoActions(
   references: SavedObjectReference[]
 ): RuleAction[] {
   return actions.map((action) => {
+    const { uuid, group, actionTypeId, params } = action;
+
     if (action.actionRef.startsWith(preconfiguredConnectorActionRefPrefix)) {
       return {
-        ...omit(action, 'actionRef'),
+        uuid,
+        group,
+        actionTypeId,
+        params,
         id: action.actionRef.replace(preconfiguredConnectorActionRefPrefix, ''),
       };
     }
@@ -32,11 +36,15 @@ export function injectReferencesIntoActions(
     if (!reference) {
       throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
     }
+
     return {
-      ...omit(action, 'actionRef'),
+      uuid,
+      group,
+      actionTypeId,
+      params,
       id: reference.id,
     };
-  }) as RuleAction[];
+  });
 }
 
 export function injectReferencesIntoParams<

@@ -18,6 +18,7 @@ import type { RuleToImport } from '../../../../../common/detection_engine/rule_m
 import type {
   AlertSuppression,
   RuleResponse,
+  LegacyRuleResponse,
 } from '../../../../../common/detection_engine/rule_schema';
 
 // eslint-disable-next-line no-restricted-imports
@@ -93,7 +94,7 @@ export const getIdBulkError = ({
 export const transformAlertsToRules = (
   rules: RuleAlertType[],
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
-): RuleResponse[] => {
+): RuleResponse[] | LegacyRuleResponse[] => {
   return rules.map((rule) => internalRuleToAPIResponse(rule, legacyRuleActions[rule.id]));
 };
 
@@ -104,7 +105,7 @@ export const transformFindAlerts = (
   page: number;
   perPage: number;
   total: number;
-  data: Array<Partial<RuleResponse>>;
+  data: Array<Partial<RuleResponse>> | Array<Partial<LegacyRuleResponse>>;
 } | null => {
   return {
     page: ruleFindResults.page,
@@ -119,7 +120,7 @@ export const transformFindAlerts = (
 export const transform = (
   rule: PartialRule<RuleParams>,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
-): RuleResponse | null => {
+): RuleResponse | LegacyRuleResponse | null => {
   if (isAlertType(rule)) {
     return internalRuleToAPIResponse(rule, legacyRuleActions);
   }

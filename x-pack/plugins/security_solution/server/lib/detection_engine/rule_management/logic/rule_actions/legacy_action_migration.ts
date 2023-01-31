@@ -120,7 +120,7 @@ export const legacyMigrate = async ({
         data: migratedRule,
       });
 
-      return { id: rule.id, ...migratedRule };
+      return { id: rule.id, ...migratedRule } as RuleAlertType;
     }
   });
 
@@ -137,7 +137,9 @@ export const getUpdatedActionsParams = ({
   ruleThrottle: string | null;
   actions: LegacyRuleAlertSavedObjectAction[];
   references: SavedObjectReference[];
-}): Omit<RuleAlertType, 'id'> => {
+}): Omit<RuleAlertType, 'id' | 'actions'> & {
+  actions: Array<Omit<RuleAction, 'uuid'>>;
+} => {
   const { id, ...restOfRule } = rule;
 
   const actionReference = references.reduce<Record<string, SavedObjectReference>>(
@@ -158,7 +160,7 @@ export const getUpdatedActionsParams = ({
   // into the rule itself
   return {
     ...restOfRule,
-    actions: actions.reduce<RuleAction[]>((acc, action) => {
+    actions: actions.reduce<Array<Omit<RuleAction, 'uuid'>>>((acc, action) => {
       const { actionRef, action_type_id: actionTypeId, ...resOfAction } = action;
       if (!actionReference[actionRef]) {
         return acc;
@@ -170,7 +172,7 @@ export const getUpdatedActionsParams = ({
           id: actionReference[actionRef].id,
           actionTypeId,
         },
-      ] as RuleAction[];
+      ];
     }, []),
     throttle: transformToAlertThrottle(ruleThrottle),
     notifyWhen: transformToNotifyWhen(ruleThrottle),

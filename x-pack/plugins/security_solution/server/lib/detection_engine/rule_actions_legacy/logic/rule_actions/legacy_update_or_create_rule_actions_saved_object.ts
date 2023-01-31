@@ -22,7 +22,7 @@ import { legacyUpdateRuleActionsSavedObject } from './legacy_update_rule_actions
 interface LegacyUpdateOrCreateRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: RuleExecutorServices['savedObjectsClient'];
-  actions: RuleAction[] | undefined;
+  actions: Array<Omit<RuleAction, 'uuid'>> | undefined;
   throttle: string | null | undefined;
   logger: Logger;
 }

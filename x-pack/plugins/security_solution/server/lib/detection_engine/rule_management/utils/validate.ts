@@ -36,7 +36,7 @@ export const transformValidate = (
 export const transformValidateBulkError = (
   ruleId: string,
   rule: PartialRule<RuleParams>
-): RuleResponse | BulkError => {
+): RuleResponse | LegacyRuleResponse | BulkError => {
   if (isAlertType(rule)) {
     const transformed = internalRuleToAPIResponse(rule);
     const [validated, errors] = validateNonExact(transformed, LegacyRuleResponse);
@@ -47,7 +47,7 @@ export const transformValidateBulkError = (
         message: errors ?? 'Internal error transforming',
       });
     } else {
-      return validated as RuleResponse;
+      return validated;
     }
   } else {
     return createBulkErrorObject({

@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyUpdateOrCreateRuleActionsSavedObject } from '../../logic/rule_actions/legacy_update_or_create_rule_actions_saved_object';
@@ -97,7 +96,7 @@ export const legacyCreateLegacyNotificationRoute = (
         await legacyUpdateOrCreateRuleActionsSavedObject({
           ruleAlertId,
           savedObjectsClient,
-          actions: actions as unknown as RuleAction[],
+          actions,
           throttle: interval,
           logger,
         });

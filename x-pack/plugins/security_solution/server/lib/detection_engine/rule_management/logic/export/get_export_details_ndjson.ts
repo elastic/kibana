@@ -7,10 +7,13 @@
 
 import type { ExportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExportRulesDetails } from '../../../../../../common/detection_engine/rule_management';
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
+import type {
+  RuleResponse,
+  LegacyRuleResponse,
+} from '../../../../../../common/detection_engine/rule_schema';
 
 export const getExportDetailsNdjson = (
-  rules: RuleResponse[],
+  rules: RuleResponse[] | LegacyRuleResponse[],
   missingRules: Array<{ rule_id: string }> = [],
   exceptionDetails?: ExportExceptionDetails
 ): string => {

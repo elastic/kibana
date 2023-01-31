@@ -12,7 +12,10 @@ import {
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../../common/constants';
 
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
+import type {
+  RuleResponse,
+  LegacyRuleResponse,
+} from '../../../../../common/detection_engine/rule_schema';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type { RuleAlertType } from '../../rule_schema';
@@ -364,14 +367,14 @@ describe('Rule actions normalization', () => {
         ],
       };
       const transformed = transformActions(alertAction, legacyRuleActions);
-      expect(transformed).toEqual<RuleResponse['actions']>([
+      expect(transformed).toEqual<LegacyRuleResponse['actions']>([
         {
           id: 'id_2',
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
         },
-      ] as RuleResponse['actions']);
+      ]);
     });
 
     test('It will transform the legacyRuleActions if the alertAction is undefined', () => {
@@ -389,14 +392,14 @@ describe('Rule actions normalization', () => {
         ],
       };
       const transformed = transformActions(undefined, legacyRuleActions);
-      expect(transformed).toEqual<RuleResponse['actions']>([
+      expect(transformed).toEqual<LegacyRuleResponse['actions']>([
         {
           id: 'id_2',
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
         },
-      ] as RuleResponse['actions']);
+      ]);
     });
   });
 });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { requestContextMock } from '../../../routes/__mocks__';
 import {
   getEmptyFindResult,
@@ -170,8 +169,9 @@ describe('Legacy rule action migration logic', () => {
               },
               id: connectorId,
               group: 'default',
+              uuid: '123',
             },
-          ] as unknown as RuleAction[],
+          ],
           throttle: null,
           notifyWhen: 'onActiveAlert',
           muteAll: false,
@@ -193,6 +193,7 @@ describe('Legacy rule action migration logic', () => {
             subject: 'Test Actions',
             to: ['test@test.com'],
           },
+          uuid: '123',
         },
       ]);
       expect(migratedRule?.notifyWhen).toEqual('onActiveAlert');

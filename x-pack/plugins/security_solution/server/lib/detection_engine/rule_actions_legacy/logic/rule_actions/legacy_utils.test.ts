@@ -343,14 +343,14 @@ describe('legacy_utils', () => {
 
   describe('legacyTransformActionToReference', () => {
     type FuncReturn = ReturnType<typeof legacyTransformActionToReference>;
-    const alertAction: RuleAction = {
+    const alertAction: Omit<RuleAction, 'uuid'> = {
       id: '123',
       group: 'group_1',
       params: {
         test: '123',
       },
       actionTypeId: '567',
-    } as unknown as RuleAction;
+    };
 
     test('it returns the id and index transformed with the index at 0', () => {
       expect(legacyTransformActionToReference(alertAction, 0)).toEqual<FuncReturn>({

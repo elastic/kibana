@@ -43,6 +43,10 @@ export const RuleAction = t.exact(
   t.intersection([BaseRuleAction, t.type({ uuid: RuleActionUuid })])
 );
 
+const RuleActionWithOptionalUuid = t.exact(
+  t.intersection([BaseRuleAction, t.partial({ uuid: RuleActionOptionalUuid })])
+);
+
 export type RuleActionWithoutUuid = t.TypeOf<typeof BaseRuleAction>;
 
 export type RuleActionArray = t.TypeOf<typeof RuleActionArray>;
@@ -62,20 +66,20 @@ export const RuleActionCamel = t.exact(
   t.intersection([BaseRuleActionCamel, t.type({ uuid: RuleActionUuid })])
 );
 
+export type RuleActionWithOptionalUuidCamel = t.TypeOf<typeof RuleActionWithOptionalUuidCamel>;
+const RuleActionWithOptionalUuidCamel = t.exact(
+  t.intersection([BaseRuleActionCamel, t.partial({ uuid: RuleActionOptionalUuid })])
+);
+
 export type RuleActionArrayCamel = t.TypeOf<typeof RuleActionArrayCamel>;
 export const RuleActionArrayCamel = t.array(RuleActionCamel);
 
 // --------
 
-export const RuleActionWithOptionalUuidArray = t.array(
-  t.exact(t.intersection([BaseRuleAction, t.partial({ uuid: RuleActionOptionalUuid })]))
-);
+export const RuleActionWithOptionalUuidArray = t.array(RuleActionWithOptionalUuid);
 
-export const RuleActionWithOptionalUuidArrayCamel = t.array(
-  t.exact(t.intersection([BaseRuleActionCamel, t.partial({ uuid: RuleActionOptionalUuid })]))
-);
+export const RuleActionWithOptionalUuidArrayCamel = t.array(RuleActionWithOptionalUuidCamel);
 
-// --------
 export type RuleActionWithoutUuidArray = t.TypeOf<typeof RuleActionWithoutUuidArray>;
 export const RuleActionWithoutUuidArray = t.array(t.exact(BaseRuleAction));
 

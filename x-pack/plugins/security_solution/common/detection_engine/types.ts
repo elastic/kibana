@@ -7,8 +7,9 @@
 
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 
-export type RuleAlertAction = Omit<RuleAction, 'actionTypeId'> & {
+export type RuleAlertAction = Omit<RuleAction, 'actionTypeId' | 'uuid'> & {
   action_type_id: string;
+  uuid?: string;
 };
 
 /**
