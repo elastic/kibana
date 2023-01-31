@@ -19,6 +19,6 @@ export default createTestConfig('spaces_only', {
   preconfiguredAlertHistoryEsIndex: true,
   emailDomainsAllowed: EmailDomainsAllowed,
   useDedicatedTaskRunner: true,
-  testFiles: ['.'],
+  testFiles: [require.resolve('.')],
   reportName: 'X-Pack Alerting API Integration Tests - Alerting',
 });
