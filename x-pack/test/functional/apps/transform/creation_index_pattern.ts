@@ -494,7 +494,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.testExecution.logTestStep('displays an empty index preview');
           await transform.wizard.assertIndexPreviewEmpty();
 
-          await transform.testExecution.logTestStep(`sets the date picker to '10 Years ago'`);
+          await transform.testExecution.logTestStep(`sets the date picker to '15 Years ago'`);
           await transform.datePicker.quickSelect();
 
           await transform.testExecution.logTestStep('loads the index preview');
