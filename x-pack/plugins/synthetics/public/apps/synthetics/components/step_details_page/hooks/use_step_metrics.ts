@@ -8,8 +8,14 @@
 import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { formatBytes } from './use_object_metrics';
+import { formatMillisecond } from '../step_metrics/step_metrics';
+import { CLS_HELP_LABEL, DCL_TOOLTIP, FCP_TOOLTIP, LCP_HELP_LABEL } from '../step_metrics/labels';
+import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { CLS_HELP_LABEL, DCL_TOOLTIP, FCP_TOOLTIP, LCP_HELP_LABEL } from '../step_metrics/labels';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
 export const SYNTHETICS_CLS = 'browser.experience.cls';
@@ -22,8 +28,10 @@ export const SYNTHETICS_STEP_DURATION = 'synthetics.step.duration.us';
 
 export type StepMetrics = ReturnType<typeof useStepMetrics>;
 
-export const useStepMetrics = () => {
-  const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
+export const useStepMetrics = (step?: JourneyStep) => {
+  const urlParams = useParams<{ checkGroupId: string; stepIndex: string }>();
+  const checkGroupId = step?.monitor.check_group ?? urlParams.checkGroupId;
+  const stepIndex = step?.synthetics.step?.index ?? urlParams.stepIndex;
 
   const { data } = useEsSearch(
     {
@@ -150,37 +158,37 @@ export const useStepMetrics = () => {
       {
         label: STEP_DURATION_LABEL,
         value: metrics?.totalDuration.value,
-        unit: 'milli',
+        formatted: formatMillisecond((metrics?.totalDuration.value ?? 0) / 1000),
       },
       {
         value: metrics?.lcp.value,
         label: LCP_LABEL,
         helpText: LCP_HELP_LABEL,
-        unit: 'milli',
+        formatted: formatMillisecond((metrics?.lcp.value ?? 0) / 1000),
       },
       {
         value: metrics?.fcp.value,
         label: FCP_LABEL,
         helpText: FCP_TOOLTIP,
-        unit: 'milli',
+        formatted: formatMillisecond((metrics?.fcp.value ?? 0) / 1000),
       },
       {
         value: metrics?.cls.value,
         label: CLS_LABEL,
         helpText: CLS_HELP_LABEL,
-        unit: 'milli',
+        formatted: formatMillisecond((metrics?.cls.value ?? 0) / 1000),
       },
       {
         value: metrics?.dcl.value,
         label: DCL_LABEL,
         helpText: DCL_TOOLTIP,
-        unit: 'milli',
+        formatted: formatMillisecond((metrics?.dcl.value ?? 0) / 1000),
       },
       {
         value: transferDataVal,
         label: TRANSFER_SIZE,
         helpText: '',
-        unit: 'bytes',
+        formatted: formatBytes(transferDataVal ?? 0),
       },
     ],
   };

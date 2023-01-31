@@ -17,14 +17,15 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-export const getDeltaPercent = (current: number, previous: number | null) => {
-  if (previous === 0 || previous === null) {
+export const getDeltaPercent = (current: number, previous?: number | null) => {
+  if (previous === 0 || previous === null || previous === undefined) {
     return 0;
   }
-
   return Number((((current - previous) / previous) * 100).toFixed(0));
 };
 export const ThresholdIndicator = ({
+  description,
+  helpText,
   loading,
   description,
   helpText,
@@ -34,13 +35,17 @@ export const ThresholdIndicator = ({
   currentFormatted,
   asStat = false,
 }: {
+  description?: string;
+  helpText?: string;
   loading: boolean;
   description?: string;
   helpText?: string;
   current: number;
-  previous: number | null;
+  previous?: number | null;
   previousFormatted: string;
   currentFormatted: string;
+  asStat?: boolean;
+  setHasAnyDelta?: (hasDelta: boolean) => void;
   asStat?: boolean;
 }) => {
   if (loading) {
@@ -79,25 +84,28 @@ export const ThresholdIndicator = ({
 
   const hasDelta = Math.abs(delta) > 0;
 
-  const content = (
-    <EuiToolTip
-      content={getToolTipContent()}
-      title={i18n.translate('xpack.synthetics.stepDetails.palette.previous', {
-        defaultMessage: 'Median(24h): {previous}',
-        values: { previous: previousFormatted },
-      })}
-    >
-      {hasDelta ? (
-        <EuiIcon
-          type={delta > 0 ? 'sortUp' : 'sortDown'}
-          size={asStat ? 'l' : 'm'}
-          color={getColor()}
-        />
-      ) : (
-        <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" />
-      )}
-    </EuiToolTip>
-  );
+  const content =
+    previous === null ? (
+      <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" />
+    ) : (
+      <EuiToolTip
+        content={getToolTipContent()}
+        title={i18n.translate('xpack.synthetics.stepDetails.palette.previous', {
+          defaultMessage: 'Median(24h): {previous}',
+          values: { previous: previousFormatted },
+        })}
+      >
+        {hasDelta ? (
+          <EuiIcon
+            type={delta > 0 ? 'sortUp' : 'sortDown'}
+            size={asStat ? 'l' : 'm'}
+            color={getColor()}
+          />
+        ) : (
+          <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" />
+        )}
+      </EuiToolTip>
+    );
 
   if (asStat) {
     return (

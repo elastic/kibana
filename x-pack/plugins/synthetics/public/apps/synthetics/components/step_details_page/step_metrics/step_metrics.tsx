@@ -15,6 +15,10 @@ import { useStepPrevMetrics } from '../hooks/use_step_prev_metrics';
 import { formatBytes } from '../hooks/use_object_metrics';
 
 export const formatMillisecond = (ms: number) => {
+  if (ms < 0) {
+    return '- ms';
+  }
+
   if (ms < 1000) {
     return `${ms.toFixed(0)} ms`;
   }
@@ -40,20 +44,9 @@ export const StepMetrics = () => {
 
       <EuiSpacer size="s" />
       <EuiFlexGrid gutterSize="l" columns={3}>
-        {stepMetrics.map(({ label, value, helpText, unit }) => {
+        {stepMetrics.map(({ label, value, helpText, formatted }) => {
           const prevVal = prevMetrics.find((prev) => prev.label === label);
-          let formattedVal = '';
-          let formattedValPrev = '';
-          if (unit === 'milli') {
-            formattedVal = formatMillisecond((value ?? 0) / 1000);
-            formattedValPrev = formatMillisecond((prevVal?.value ?? 0) / 1000);
-          } else if (unit === 'bytes') {
-            formattedVal = formatBytes(value ?? 0);
-            formattedValPrev = formatBytes(prevVal?.value ?? 0);
-          } else {
-            formattedVal = String(value ?? 0);
-            formattedValPrev = String(prevVal?.value ?? 0);
-          }
+
           if (label)
             return (
               <EuiFlexItem key={label}>
@@ -64,8 +57,8 @@ export const StepMetrics = () => {
                   current={value ?? 0}
                   previous={prevVal?.value ?? 0}
                   helpText={helpText}
-                  currentFormatted={formattedVal}
-                  previousFormatted={formattedValPrev}
+                  currentFormatted={formatted}
+                  previousFormatted={prevVal?.formatted!}
                 />
               </EuiFlexItem>
             );

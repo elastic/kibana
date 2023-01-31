@@ -37,6 +37,7 @@ export function createSpanMetricsAggregator(flushInterval: string) {
         return {
           ...set,
           'metricset.name': 'service_destination',
+          'metricset.interval': flushInterval,
           'processor.event': 'metric',
           'processor.name': 'metric',
           'span.destination.service.response_time.count': 0,
