@@ -233,7 +233,8 @@ export const Settings = (props: Props) => {
       append:
         queryState.query.text !== '' ? (
           <EuiNotificationBadge className="eui-alignCenter" size="m" key="spaceSettings-badge">
-            {Object.keys(queryState.filteredSettings.global).length}
+            {Object.keys(queryState.filteredSettings.global).length +
+              Number(queryState.footerQueryMatched)}
           </EuiNotificationBadge>
         ) : null,
       content: renderAdvancedSettings('global'),
