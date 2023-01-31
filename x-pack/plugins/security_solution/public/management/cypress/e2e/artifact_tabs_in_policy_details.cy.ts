@@ -11,7 +11,7 @@ import {
   createPerPolicyArtifact,
   createArtifactList,
   removeAllArtifacts,
-  removeArtifactsFromLists,
+  removeExceptionsList,
   yieldFirstPolicyID,
 } from '../tasks/artifacts';
 import { loadEndpointDataForEventFiltersIfNeeded } from '../tasks/load_endpoint_data';
@@ -99,7 +99,7 @@ describe('Artifact tabs in Policy Details page', () => {
   for (const testData of getArtifactsListTestsData()) {
     beforeEach(() => {
       login();
-      removeArtifactsFromLists(testData.createRequestBody.list_id);
+      removeExceptionsList(testData.createRequestBody.list_id);
     });
 
     describe(`${testData.title} tab`, () => {

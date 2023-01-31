@@ -18,11 +18,11 @@ const API_HEADER = { 'kbn-xsrf': 'kibana' };
 
 export const removeAllArtifacts = () => {
   for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
-    removeArtifactsFromLists(listId);
+    removeExceptionsList(listId);
   }
 };
 
-export const removeArtifactsFromLists = (listId: string) => {
+export const removeExceptionsList = (listId: string) => {
   cy.request({
     method: 'DELETE',
     url: `${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`,
