@@ -402,8 +402,7 @@ export class LegacyCoreEditor implements CoreEditor {
         getCompletions: (
           // eslint-disable-next-line @typescript-eslint/naming-convention
           DO_NOT_USE_1: IAceEditor,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          DO_NOT_USE_2: IAceEditSession,
+          aceEditSession: IAceEditSession,
           pos: { row: number; column: number },
           prefix: string,
           callback: (...args: unknown[]) => void
@@ -417,7 +416,7 @@ export class LegacyCoreEditor implements CoreEditor {
             let customAnnotation: Annotation;
             return {
               setAnnotation(text: string) {
-                const annotations = DO_NOT_USE_2.getAnnotations();
+                const annotations = aceEditSession.getAnnotations();
                 customAnnotation = {
                   text,
                   row: pos.row,
@@ -425,11 +424,11 @@ export class LegacyCoreEditor implements CoreEditor {
                   type: 'warning',
                 };
 
-                DO_NOT_USE_2.setAnnotations([...annotations, customAnnotation]);
+                aceEditSession.setAnnotations([...annotations, customAnnotation]);
               },
               removeAnnotation() {
-                DO_NOT_USE_2.setAnnotations(
-                  DO_NOT_USE_2.getAnnotations().filter((a: Annotation) => a !== customAnnotation)
+                aceEditSession.setAnnotations(
+                  aceEditSession.getAnnotations().filter((a: Annotation) => a !== customAnnotation)
                 );
               },
             };
