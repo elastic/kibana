@@ -27,8 +27,6 @@ export const ThresholdIndicator = ({
   description,
   helpText,
   loading,
-  description,
-  helpText,
   current,
   previous,
   previousFormatted,
@@ -38,13 +36,10 @@ export const ThresholdIndicator = ({
   description?: string;
   helpText?: string;
   loading: boolean;
-  description?: string;
-  helpText?: string;
   current: number;
   previous?: number | null;
   previousFormatted: string;
   currentFormatted: string;
-  asStat?: boolean;
   setHasAnyDelta?: (hasDelta: boolean) => void;
   asStat?: boolean;
 }) => {
