@@ -64,6 +64,11 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    * run platform-generic build tasks
    */
   if (options.createGenericFolders) {
+    // Build before copying source files
+    if (options.buildCanvasShareableRuntime) {
+      await run(Tasks.BuildCanvasShareableRuntime);
+    }
+
     await run(Tasks.CopySource);
     await run(Tasks.CopyBinScripts);
 
@@ -71,9 +76,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateReadme);
     await run(Tasks.BuildBazelPackages);
     await run(Tasks.ReplaceFavicon);
-    if (options.buildCanvasShareableRuntime) {
-      await run(Tasks.BuildCanvasShareableRuntime);
-    }
     await run(Tasks.BuildKibanaPlatformPlugins);
     if (options.buildExamplePlugins) {
       await run(Tasks.BuildKibanaExamplePlugins);
