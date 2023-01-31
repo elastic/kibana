@@ -103,7 +103,6 @@ export const DATA_QUALITY_TYPE_TITLE = i18n.translate(
 export const DATA_QUALITY_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.dataQualityDescription',
   {
-    defaultMessage:
-      "POC: Scan user environment for threats and enrich IOC's with occurrence metadata",
+    defaultMessage: 'Monitor data quality of the specified indices',
   }
 );

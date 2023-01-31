@@ -7,117 +7,25 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { DATA_QUALITY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import * as t from 'io-ts';
-import type {
-  IndicesGetMappingIndexMappingRecord,
-  IndicesStatsResponse,
-  MsearchMultisearchBody,
-  MsearchMultisearchHeader,
-  MsearchRequestItem,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import has from 'lodash/has';
 import { EcsFlat } from '@kbn/ecs';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
-import objectHash from 'object-hash';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { CompleteRule, DataQualityRuleParams, RuleParams } from '../../rule_schema';
+import type { DataQualityRuleParams } from '../../rule_schema';
 import { dataQualityRuleParams } from '../../rule_schema';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 
 import { createSearchAfterReturnType, getUnprocessedExceptionsWarnings } from '../../signals/utils';
 import { createEnrichEventsFunction } from '../../signals/enrichments';
-import { buildAlert } from '../factories/utils/build_alert';
-
-// TODO move all this to separate files
-export const AllowedValues = t.array(
-  t.partial({
-    description: t.string,
-    name: t.string,
-  })
-);
-
-export type AllowedValuesInputs = t.TypeOf<typeof AllowedValues>;
-
-export const GetUnallowedFieldValuesBody = t.array(
-  t.type({
-    indexName: t.string,
-    indexFieldName: t.string,
-    allowedValues: AllowedValues,
-    from: t.string,
-    to: t.string,
-  })
-);
-
-export type GetUnallowedFieldValuesInputs = t.TypeOf<typeof GetUnallowedFieldValuesBody>;
-
-export const getMSearchRequestHeader = (indexName: string): MsearchMultisearchHeader => ({
-  expand_wildcards: ['open'],
-  index: indexName,
-});
-
-export const getMSearchRequestBody = ({
-  indexFieldName,
-  allowedValues,
-  from,
-  to,
-}: {
-  indexFieldName: string;
-  allowedValues: AllowedValuesInputs;
-  from: string;
-  to: string;
-}): MsearchMultisearchBody => ({
-  aggregations: {
-    unallowedValues: {
-      terms: {
-        field: indexFieldName,
-        order: {
-          _count: 'desc',
-        },
-      },
-    },
-  },
-  query: {
-    bool: {
-      filter: [
-        {
-          bool: {
-            must: [],
-            filter: [],
-            should: [],
-            must_not:
-              allowedValues.length > 0
-                ? [
-                    {
-                      bool: {
-                        should: allowedValues.map(({ name: allowedValue }) => ({
-                          match_phrase: {
-                            [indexFieldName]: allowedValue,
-                          },
-                        })),
-                        minimum_should_match: 1,
-                      },
-                    },
-                  ]
-                : [],
-          },
-        },
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
-            },
-          },
-        },
-      ],
-    },
-  },
-  runtime_mappings: {},
-  size: 0,
-});
+import type { GetUnallowedFieldValuesInputs } from './types';
+import { fetchMappings } from './fetch_mappings';
+import { getMSearchRequestHeader } from './get_msearch_request_header';
+import { getMSearchRequestBody } from './get_msearch_request_body';
+import { getFieldTypes } from './field_types';
+import { buildAlerts } from './build_alerts';
 
 export const getUnallowedFieldValues = async (
   esClient: ElasticsearchClient,
@@ -141,99 +49,12 @@ export const getUnallowedFieldValues = async (
   };
 };
 
-export const fetchStats = async (
-  client: ElasticsearchClient,
-  indices: string[]
-): Promise<IndicesStatsResponse> =>
-  client.indices.stats({
-    expand_wildcards: ['open'],
-    index: indices,
-  });
-
-export const fetchMappings = async (
-  client: ElasticsearchClient,
-  indexPatterns: string[]
-): Promise<Record<string, IndicesGetMappingIndexMappingRecord>> =>
-  client.indices.getMapping({
-    expand_wildcards: ['open'],
-    index: indexPatterns,
-  });
-
-export interface FieldType {
-  field: string;
-  type: string;
-}
-
-function shouldReadKeys(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-const getNextPathWithoutProperties = ({
-  key,
-  pathWithoutProperties,
-  value,
-}: {
-  key: string;
-  pathWithoutProperties: string;
-  value: unknown;
-}): string => {
-  if (!pathWithoutProperties) {
-    return key;
-  }
-
-  if (shouldReadKeys(value) && key === 'properties') {
-    return `${pathWithoutProperties}`; // TODO: wrap required?
-  } else {
-    return `${pathWithoutProperties}.${key}`;
-  }
-};
-
-export function getFieldTypes(mappingsProperties: Record<string, unknown>): FieldType[] {
-  if (!shouldReadKeys(mappingsProperties)) {
-    throw new TypeError(`Root value is not flatten-able, received ${mappingsProperties}`);
-  }
-
-  const result: FieldType[] = [];
-
-  (function flatten(prefix, object, pathWithoutProperties) {
-    for (const [key, value] of Object.entries(object)) {
-      const path = prefix ? `${prefix}.${key}` : key;
-
-      const nextPathWithoutProperties = getNextPathWithoutProperties({
-        key,
-        pathWithoutProperties,
-        value,
-      });
-
-      if (shouldReadKeys(value)) {
-        flatten(path, value, nextPathWithoutProperties);
-      } else {
-        if (nextPathWithoutProperties.endsWith('.type')) {
-          const pathWithoutType = nextPathWithoutProperties.slice(
-            0,
-            nextPathWithoutProperties.lastIndexOf('.type')
-          );
-
-          result.push({
-            field: pathWithoutType,
-            type: `${value}`,
-          });
-        }
-      }
-    }
-  })('', mappingsProperties, '');
-
-  return result;
-}
-
-// END files TODO
-
 interface InvalidFieldsSummary {
   key: string;
   doc_count: number;
 }
 
-type UnallowedFieldCheckResults = Array<[string, InvalidFieldsSummary[]]>;
+export type UnallowedFieldCheckResults = Array<[string, InvalidFieldsSummary[]]>;
 
 const runDataQualityCheck = async (
   es: ElasticsearchClient,
@@ -297,42 +118,6 @@ const runDataQualityCheck = async (
   return results;
 };
 
-interface BuildAlertsParams {
-  spaceId: string;
-  index: string[];
-  completeRule: CompleteRule<RuleParams>;
-}
-
-const buildAlerts = (
-  { spaceId, completeRule, index }: BuildAlertsParams,
-  issues: UnallowedFieldCheckResults
-) =>
-  issues.map(([faultyIndex, invalidFields]) => {
-    const invalidFieldsSummary = invalidFields
-      .map((f) => `invalid key in ${faultyIndex} "${f.key}" in ${f.doc_count} docs`)
-      .join(', ');
-
-    const id = objectHash([Date.now(), faultyIndex, invalidFields]);
-
-    const baseAlert = buildAlert(
-      [],
-      completeRule,
-      spaceId,
-      `ecs integrity issues found: ${invalidFieldsSummary}`,
-      index,
-      undefined
-    );
-
-    return {
-      _id: id,
-      _index: '',
-      _source: {
-        ...baseAlert,
-        [ALERT_UUID]: id,
-      },
-    };
-  });
-
 export const createDataQualityAlertType = (
   _createOptions: CreateRuleOptions
 ): SecurityAlertType<DataQualityRuleParams, {}, {}, 'default'> => {
@@ -394,11 +179,10 @@ export const createDataQualityAlertType = (
       );
       const esClient = services.scopedClusterClient.asCurrentUser;
 
-      // TODO check types like that
-
       /*
+      TODO check schema types types like that
        isEcsCompliant: type === ecsMetadata[field].type && indexInvalidValues.length === 0
-       */
+      */
 
       try {
         const qualityCheckResults = await runDataQualityCheck(esClient, index, from, to);
