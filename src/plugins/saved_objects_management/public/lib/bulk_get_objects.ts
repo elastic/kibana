@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { BulkGetBodyHTTPV1, BulkGetResponseHTTPV1 } from '../../common/types';
+import type { HttpStart } from '@kbn/core/public';
+import type { v1 } from '../../common';
 
 export async function bulkGetObjects(
   http: HttpStart,
-  objects: BulkGetBodyHTTPV1
-): Promise<BulkGetResponseHTTPV1> {
+  objects: v1.BulkGetBodyHTTP
+): Promise<v1.BulkGetResponseHTTP> {
   return await http.post(`/api/kibana/management/saved_objects/_bulk_get`, {
     body: JSON.stringify(objects),
   });

@@ -7,31 +7,12 @@
  */
 
 export type {
-  SavedObjectGetRelationshipsResponse,
   SavedObjectInvalidRelation,
   SavedObjectManagementTypeInfo,
   SavedObjectMetadata,
   SavedObjectRelation,
   SavedObjectRelationKind,
   SavedObjectWithMetadata,
-} from './types';
+} from './latest';
 
-export type {
-  BulkGetBodyHTTPV1,
-  BulkGetResponseHTTPV1,
-  BulkDeleteBodyHTTPV1,
-  BulkDeleteResponseHTTPV1,
-  FindQueryHTTPV1,
-  FindResponseHTTPV1,
-  FindSearchOperatorHTTPV1,
-  ReferenceHTTPV1,
-  FindSortOrderHTTPV1,
-  ScrollCountBodyHTTPV1,
-  RelationshipsQueryHTTPV1,
-  RelationshipsParamsHTTPV1,
-  ScrollCountResponseHTTPV1,
-  RelationshipsResponseHTTPV1,
-  GetAllowedTypesResponseHTTPV1,
-  DeleteObjectBodyHTTPV1,
-  DeleteObjectResponseHTTPV1,
-} from './v1';
+export type * as v1 from './v1';

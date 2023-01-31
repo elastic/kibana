@@ -7,9 +7,9 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { SavedObjectWithMetadataV1 } from '../../common/types/v1';
+import { SavedObjectWithMetadata } from '../../common/types/v1';
 
-export function toSavedObjectWithMeta(so: SavedObject): SavedObjectWithMetadataV1 {
+export function toSavedObjectWithMeta(so: SavedObject): SavedObjectWithMetadata {
   return {
     id: so.id,
     type: so.type,

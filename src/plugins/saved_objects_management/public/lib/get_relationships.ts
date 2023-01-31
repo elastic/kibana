@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { get } from 'lodash';
-import type { RelationshipsResponseHTTPV1 } from '../../common/types';
+import type { v1 } from '../../common';
 
 export async function getRelationships(
   http: HttpStart,
   type: string,
   id: string,
   savedObjectTypes: string[]
-): Promise<RelationshipsResponseHTTPV1> {
+): Promise<v1.RelationshipsResponseHTTP> {
   const url = `/api/kibana/management/saved_objects/relationships/${encodeURIComponent(
     type
   )}/${encodeURIComponent(id)}`;

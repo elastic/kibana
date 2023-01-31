@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/core/server';
 import { chain } from 'lodash';
-import type { ScrollCountResponseHTTPV1 } from '../../common';
+import type { v1 } from '../../common';
 import { findAll } from '../lib';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
@@ -71,7 +71,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         }
       }
 
-      const body: ScrollCountResponseHTTPV1 = counts;
+      const body: v1.ScrollCountResponseHTTP = counts;
 
       return res.ok({
         body,

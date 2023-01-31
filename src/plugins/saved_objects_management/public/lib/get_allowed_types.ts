@@ -7,12 +7,12 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { GetAllowedTypesResponseHTTPV1 } from '../../common/types';
+import type { v1 } from '../../common';
 
 export async function getAllowedTypes(
   http: HttpStart
-): Promise<GetAllowedTypesResponseHTTPV1['types']> {
-  const response = await http.get<GetAllowedTypesResponseHTTPV1>(
+): Promise<v1.GetAllowedTypesResponseHTTP['types']> {
+  const response = await http.get<v1.GetAllowedTypesResponseHTTP>(
     '/api/kibana/management/saved_objects/_allowed_types'
   );
   return response.types;

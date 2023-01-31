@@ -7,12 +7,12 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { FindQueryHTTPV1, FindResponseHTTPV1 } from '../../common/types';
+import type { v1 } from '../../common';
 
 export async function findObjects(
   http: HttpStart,
-  findOptions: FindQueryHTTPV1
-): Promise<FindResponseHTTPV1> {
+  findOptions: v1.FindQueryHTTP
+): Promise<v1.FindResponseHTTP> {
   return http.get('/api/kibana/management/saved_objects/_find', {
     query: {
       ...findOptions,

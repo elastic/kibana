@@ -13,9 +13,9 @@ import type { SavedObjectsNamespaceType } from '@kbn/core/public';
 
 /**
  * Saved Object Management metadata associated with a saved object. See
- * {@link SavedObjectWithMetadataV1}.
+ * {@link SavedObjectWithMetadata}.
  */
-export interface SavedObjectMetadataV1 {
+export interface SavedObjectMetadata {
   icon?: string;
   title?: string;
   editUrl?: string;
@@ -39,10 +39,10 @@ export interface SavedObjectReferenceV1 {
  * @note This is intended as a domain-specific representation of a SavedObject
  * which is intended for server-side only use.
  */
-export interface SavedObjectWithMetadataV1<T = unknown> {
+export interface SavedObjectWithMetadata<T = unknown> {
   id: string;
   type: string;
-  meta: SavedObjectMetadataV1;
+  meta: SavedObjectMetadata;
   error?: SavedObjectError;
   created_at?: string;
   updated_at?: string;
@@ -51,64 +51,51 @@ export interface SavedObjectWithMetadataV1<T = unknown> {
   references: SavedObjectReferenceV1[];
 }
 
-export type SavedObjectRelationKindV1 = 'child' | 'parent';
+export type SavedObjectRelationKind = 'child' | 'parent';
 
 /**
- * {@inheritdoc SavedObjectRelation}
+ * Represents a relation between two {@link SavedObjectWithMetadata | saved objects}.
  */
-export interface SavedObjectRelationV1 {
+export interface SavedObjectRelation {
   id: string;
   type: string;
-  relationship: SavedObjectRelationKindV1;
-  meta: SavedObjectMetadataV1;
+  relationship: SavedObjectRelationKind;
+  meta: SavedObjectMetadata;
 }
 
 /**
- * Represents a relation between two {@link SavedObject | saved object}
+ * Represents a relation between two {@link SavedObjectWithMetadata | saved objects}.
  */
-export type SavedObjectRelation = SavedObjectRelationV1;
-
-/**
- * {@inheritdoc SavedObjectInvalidRelation}
- */
-export interface SavedObjectInvalidRelationV1 {
+export interface SavedObjectInvalidRelation {
   id: string;
   type: string;
-  relationship: SavedObjectRelationKindV1;
+  relationship: SavedObjectRelationKind;
   error: string;
 }
 
-/**
- * Represents a relation between two {@link SavedObject | saved object}
- */
-export type SavedObjectInvalidRelation = SavedObjectInvalidRelationV1;
-
-export type SavedObjectGetRelationshipsResponseV1 = RelationshipsResponseHTTPV1;
-
-export interface SavedObjectManagementTypeInfoV1 {
+export interface SavedObjectManagementTypeInfo {
   name: string;
   // TODO: Fix. We should not directly expose these values to public code.
   namespaceType: SavedObjectsNamespaceType;
   hidden: boolean;
   displayName: string;
 }
-export type SavedObjectManagementTypeInfo = SavedObjectManagementTypeInfoV1;
 
 /** HTTP API interfaces */
 
-export type BulkGetBodyHTTPV1 = Array<{
+export type BulkGetBodyHTTP = Array<{
   id: string;
   type: string;
 }>;
 
-export type BulkGetResponseHTTPV1 = SavedObjectWithMetadataV1[];
+export type BulkGetResponseHTTP = SavedObjectWithMetadata[];
 
-export type BulkDeleteBodyHTTPV1 = Array<{
+export type BulkDeleteBodyHTTP = Array<{
   type: string;
   id: string;
 }>;
 
-export type BulkDeleteResponseHTTPV1 = Array<{
+export type BulkDeleteResponseHTTP = Array<{
   /** The ID of the saved object */
   id: string;
   /** The type of the saved object */
@@ -119,73 +106,73 @@ export type BulkDeleteResponseHTTPV1 = Array<{
   error?: SavedObjectError;
 }>;
 
-export type FindSearchOperatorHTTPV1 = 'AND' | 'OR';
-export type FindSortOrderHTTPV1 = 'asc' | 'desc';
+export type FindSearchOperatorHTTP = 'AND' | 'OR';
+export type FindSortOrderHTTP = 'asc' | 'desc';
 
-export interface ReferenceHTTPV1 {
+export interface ReferenceHTTP {
   type: string;
   id: string;
 }
 
-export interface FindQueryHTTPV1 {
+export interface FindQueryHTTP {
   perPage?: number;
   page?: number;
   type: string | string[];
   // TODO: Fix. this API allows writing an arbitrary query that is passed straight to our persistence layer, thus leaking SO attributes to the public...
   search?: string;
-  defaultSearchOperator?: FindSearchOperatorHTTPV1;
+  defaultSearchOperator?: FindSearchOperatorHTTP;
   // TODO: Fix. this API allows sorting by any field, thus leaking SO attributes to the public...
   sortField?: string;
-  sortOrder?: FindSortOrderHTTPV1;
-  hasReference?: ReferenceHTTPV1 | ReferenceHTTPV1[];
-  hasReferenceOperator?: FindSearchOperatorHTTPV1;
+  sortOrder?: FindSortOrderHTTP;
+  hasReference?: ReferenceHTTP | ReferenceHTTP[];
+  hasReferenceOperator?: FindSearchOperatorHTTP;
   // TODO: Fix. This exposes attribute schemas to clients.
   fields?: string | string[];
 }
 
-export interface FindResponseHTTPV1 {
-  saved_objects: SavedObjectWithMetadataV1[];
+export interface FindResponseHTTP {
+  saved_objects: SavedObjectWithMetadata[];
   total: number;
   page: number;
   per_page: number;
 }
 
-export interface GetAllowedTypesResponseHTTPV1 {
-  types: SavedObjectManagementTypeInfoV1[];
+export interface GetAllowedTypesResponseHTTP {
+  types: SavedObjectManagementTypeInfo[];
 }
 
-export interface RelationshipsParamsHTTPV1 {
+export interface RelationshipsParamsHTTP {
   type: string;
   id: string;
 }
 
-export interface RelationshipsQueryHTTPV1 {
+export interface RelationshipsQueryHTTP {
   size: number;
   savedObjectTypes: string | string[];
 }
 
-export interface RelationshipsResponseHTTPV1 {
+export interface RelationshipsResponseHTTP {
   relations: SavedObjectRelation[];
   invalidRelations: SavedObjectInvalidRelation[];
 }
 
-export interface ScrollCountBodyHTTPV1 {
+export interface ScrollCountBodyHTTP {
   typesToInclude: string[];
   // TODO: Fix. this API allows writing an arbitrary query that is passed straight to our persistence layer, thus leaking SO attributes to the public...
   searchString?: string;
   references?: Array<{ type: string; id: string }>;
 }
 
-export interface DeleteObjectBodyHTTPV1 {
+export interface DeleteObjectBodyHTTP {
   id: string;
   type: string;
 }
 
-export interface DeleteObjectResponseHTTPV1 {
+export interface DeleteObjectResponseHTTP {
   id: string;
 }
 
 /**
- * In this case "string" is a direct mapping from "typesToInlcude" in {@link ScrollCountBodyHTTPV1['typesToInclude']']}
+ * In this case "string" is a direct mapping from "typesToInlcude" in {@link ScrollCountBodyHTTP['typesToInclude']']}
  */
-export type ScrollCountResponseHTTPV1 = Record<string, number>;
+export type ScrollCountResponseHTTP = Record<string, number>;

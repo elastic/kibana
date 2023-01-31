@@ -9,8 +9,8 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
+import type { v1 } from '../../common';
 import type { ISavedObjectsManagement } from '../services';
-import type { BulkGetResponseHTTPV1 } from '../../common';
 
 export const registerBulkGetRoute = (
   router: IRouter,
@@ -41,7 +41,7 @@ export const registerBulkGetRoute = (
       const client = getClient({ includedHiddenTypes });
       const response = await client.bulkGet<unknown>(objects);
 
-      const body: BulkGetResponseHTTPV1 = response.saved_objects.map((obj) => {
+      const body: v1.BulkGetResponseHTTP = response.saved_objects.map((obj) => {
         const so = toSavedObjectWithMeta(obj);
         if (!so.error) {
           return injectMetaAttributes(obj, managementService);
