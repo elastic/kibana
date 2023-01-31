@@ -139,6 +139,7 @@ export const buildAlert = (
   alertTimestampOverride: Date | undefined,
   overrides?: {
     nameOverride: string;
+    noteOverride?: string;
     severityOverride: string;
     riskScoreOverride: number;
   }

@@ -21,6 +21,7 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -56,6 +57,7 @@ import { useRiskScoreData } from './use_risk_score_data';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { DATA_QUALITY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 
@@ -211,6 +213,24 @@ const EventDetailsComponent: React.FC<Props> = ({
     return hasEnrichments || hasRiskInfoWithLicense;
   }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
 
+  // TODO register suggestions in a hashmap
+  const dataQualitySuggestions = useMemo(() => {
+    const hit = rawEventData as SearchHit;
+    const isDataQualityAlert = hit.fields?.[ALERT_RULE_TYPE_ID][0] === DATA_QUALITY_RULE_TYPE_ID;
+
+    if (!isDataQualityAlert) {
+      return null;
+    }
+
+    return (
+      <div>
+        <h3>{`TODO Data quality tips`}</h3>
+        <p>{`Some of your documents do not adhere to the ECS schema. Please fix it`}</p>
+        <p>{`TODO list values and indices from the alert here`}</p>
+      </div>
+    );
+  }, [rawEventData]);
+
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
@@ -231,6 +251,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   handleOnEventClosed={handleOnEventClosed}
                   isReadOnly={isReadOnly}
                 />
+                {dataQualitySuggestions}
                 <EuiSpacer size="l" />
                 <ThreatTacticContainer direction="column" wrap={false} gutterSize="none">
                   {threatDetails && threatDetails[0] && (
@@ -317,11 +338,12 @@ const EventDetailsComponent: React.FC<Props> = ({
       indexName,
       handleOnEventClosed,
       isReadOnly,
+      threatDetails,
+      dataQualitySuggestions,
       renderer,
       detailsEcsData,
       isDraggable,
       goToTableTab,
-      threatDetails,
       showThreatSummary,
       hostRisk,
       userRisk,

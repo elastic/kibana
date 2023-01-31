@@ -250,7 +250,6 @@ export type NewTermsRuleParams = t.TypeOf<typeof newTermsRuleParams>;
 const dataQualitySpecificRuleParams = t.type({
   type: t.literal('data_quality'),
   index: t.union([IndexPatternArray, t.undefined]),
-  threatIndex: t.union([IndexPatternArray, t.undefined]),
   filters: t.union([RuleFilterArray, t.undefined]),
   dataViewId: t.union([DataViewId, t.undefined]),
 });

@@ -69,7 +69,6 @@ import {
   isThreatMatchRule,
   isThresholdRule,
   isQueryRule,
-  isDataQualityRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
@@ -854,23 +853,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 }}
               >
                 {ThresholdInputChildren}
-              </UseMultiFields>
-            </>
-          </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isThreatMatchRule(ruleType) || isDataQualityRule(ruleType)}
-            data-test-subj="threatMatchInput"
-            fullWidth
-          >
-            <>
-              <UseMultiFields
-                fields={{
-                  threatMapping: {
-                    path: 'threatMapping',
-                  },
-                }}
-              >
-                {ThreatMatchInputChildren}
               </UseMultiFields>
             </>
           </RuleTypeEuiFormRow>

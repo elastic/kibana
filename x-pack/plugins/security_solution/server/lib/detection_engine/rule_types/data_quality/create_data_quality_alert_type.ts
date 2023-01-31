@@ -19,6 +19,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import has from 'lodash/has';
 import { EcsFlat } from '@kbn/ecs';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
+import objectHash from 'object-hash';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { CompleteRule, DataQualityRuleParams, RuleParams } from '../../rule_schema';
@@ -118,7 +119,7 @@ export const getMSearchRequestBody = ({
   size: 0,
 });
 
-export const getUnallowedFieldValues = (
+export const getUnallowedFieldValues = async (
   esClient: ElasticsearchClient,
   items: GetUnallowedFieldValuesInputs
 ) => {
@@ -131,9 +132,13 @@ export const getUnallowedFieldValues = (
     []
   );
 
-  return esClient.msearch({
+  const { responses } = await esClient.msearch({
     searches,
   });
+
+  return {
+    responses: responses.map((resp, i) => ({ ...resp, indexName: items[i].indexName })),
+  };
 };
 
 export const fetchStats = async (
@@ -223,6 +228,13 @@ export function getFieldTypes(mappingsProperties: Record<string, unknown>): Fiel
 
 // END files TODO
 
+interface InvalidFieldsSummary {
+  key: string;
+  doc_count: number;
+}
+
+type UnallowedFieldCheckResults = Array<[string, InvalidFieldsSummary[]]>;
+
 const runDataQualityCheck = async (
   es: ElasticsearchClient,
   indexPatterns: string[],
@@ -263,10 +275,26 @@ const runDataQualityCheck = async (
     }
   }
 
-  const results = await getUnallowedFieldValues(es, inputs);
+  const { responses } = await getUnallowedFieldValues(es, inputs);
 
-  // eslint-disable-next-line no-console
-  console.log(`getUnallowedFieldValues ${JSON.stringify(results, null, 2)}`);
+  const results: UnallowedFieldCheckResults = [];
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (responses as any[]).forEach(({ aggregations: { unallowedValues }, indexName }) => {
+    if (!unallowedValues) {
+      return;
+    }
+
+    const { buckets: values } = unallowedValues;
+
+    if (!values.length) {
+      return;
+    }
+
+    results.push([indexName, values as InvalidFieldsSummary[]]);
+  });
+
+  return results;
 };
 
 interface BuildAlertsParams {
@@ -275,29 +303,35 @@ interface BuildAlertsParams {
   completeRule: CompleteRule<RuleParams>;
 }
 
-interface FieldIssue {
-  index: string;
-  description: string;
-}
+const buildAlerts = (
+  { spaceId, completeRule, index }: BuildAlertsParams,
+  issues: UnallowedFieldCheckResults
+) =>
+  issues.map(([faultyIndex, invalidFields]) => {
+    const invalidFieldsSummary = invalidFields
+      .map((f) => `invalid key in ${faultyIndex} "${f.key}" in ${f.doc_count} docs`)
+      .join(', ');
 
-const buildAlerts = ({ spaceId, completeRule, index }: BuildAlertsParams, issues: FieldIssue[]) => {
-  const id = `${Date.now()}`;
+    const id = objectHash([Date.now(), faultyIndex, invalidFields]);
 
-  const baseAlert = buildAlert([], completeRule, spaceId, 'reason blabla', index, undefined);
+    const baseAlert = buildAlert(
+      [],
+      completeRule,
+      spaceId,
+      `ecs integrity issues found: ${invalidFieldsSummary}`,
+      index,
+      undefined
+    );
 
-  return [
-    {
+    return {
       _id: id,
       _index: '',
       _source: {
         ...baseAlert,
-        // [ALERT_NEW_TERMS]: eventAndTerms.newTerms,
         [ALERT_UUID]: id,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
-    },
-  ];
-};
+      },
+    };
+  });
 
 export const createDataQualityAlertType = (
   _createOptions: CreateRuleOptions
@@ -351,41 +385,39 @@ export const createDataQualityAlertType = (
         rule: {
           schedule: { interval },
         },
-        params: { index = ['filebeat-*'], from, to, maxSignals },
+        params: { index = [], from, to, maxSignals },
         spaceId,
       } = execOptions;
 
       ruleExecutionLogger.info(
-        `Data quality scanning ${index.join()} interval=${interval} from=${from} to=${to}`
+        `Data quality checking indices ${index.join()}, interval=${interval} from=${from} to=${to}`
       );
       const esClient = services.scopedClusterClient.asCurrentUser;
 
       // TODO check types like that
 
       /*
-      
-       isEcsCompliant: type === ecsMetadata[field].type && indexInvalidValues.length === 0,
-
+       isEcsCompliant: type === ecsMetadata[field].type && indexInvalidValues.length === 0
        */
 
       try {
-        await runDataQualityCheck(esClient, index, from, to);
+        const qualityCheckResults = await runDataQualityCheck(esClient, index, from, to);
 
-        const bulkCreateResult = await bulkCreate(
-          buildAlerts({ spaceId, completeRule, index }, []),
-          maxSignals, // TODO adjust this
-          createEnrichEventsFunction({
-            services,
-            logger: ruleExecutionLogger,
-          })
-        );
+        if (qualityCheckResults.length) {
+          const alertCreationResult = await bulkCreate(
+            buildAlerts({ spaceId, completeRule, index }, qualityCheckResults),
+            maxSignals, // TODO adjust this
+            createEnrichEventsFunction({
+              services,
+              logger: ruleExecutionLogger,
+            })
+          );
 
-        // eslint-disable-next-line no-console
-        console.log(bulkCreateResult);
+          ruleExecutionLogger.info(`${alertCreationResult.createdItemsCount} alerts created`);
+        }
 
         // TODO remove changes to x-pack/plugins/threat_intelligence folder
       } catch (error: unknown) {
-        console.error(error);
         if (error instanceof Error) {
           ruleExecutionLogger.error(error.message);
         }
