@@ -21,6 +21,8 @@ import {
   secOnly,
   secOnlyRead,
   superUser,
+  obsOnly,
+  obsOnlyRead,
 } from '../../../../common/lib/authentication/users';
 import { getCaseUserActionStats } from '../../../../common/lib/user_actions';
 import {
@@ -51,11 +53,6 @@ const getCaseUpdateData = (id: string, version: string) => ({
     syncAlerts: false,
   },
   tags: ['one', 'two'],
-  assignees: [
-    {
-      uid: '123',
-    },
-  ],
   connector: {
     id: 'my-id',
     name: 'Jira',
@@ -132,9 +129,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const userActionTotals = await getCaseUserActionStats({ supertest, caseID: theCase.id });
 
-      expect(userActionTotals.total).to.equal(14);
+      expect(userActionTotals.total).to.equal(13);
       expect(userActionTotals.total_comments).to.equal(1);
-      expect(userActionTotals.total_other_actions).to.equal(13);
+      expect(userActionTotals.total_other_actions).to.equal(12);
       expect(userActionTotals.total).to.equal(
         userActionTotals.total_comments + userActionTotals.total_other_actions
       );
@@ -178,9 +175,9 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: { user, space: 'space1' },
           });
 
-          expect(userActionTotals.total).to.equal(10);
+          expect(userActionTotals.total).to.equal(9);
           expect(userActionTotals.total_comments).to.equal(1);
-          expect(userActionTotals.total_other_actions).to.equal(9);
+          expect(userActionTotals.total_other_actions).to.equal(8);
           expect(userActionTotals.total).to.equal(
             userActionTotals.total_comments + userActionTotals.total_other_actions
           );
@@ -190,6 +187,8 @@ export default ({ getService }: FtrProviderContext): void => {
       for (const scenario of [
         { user: noKibanaPrivileges, space: 'space1' },
         { user: secOnly, space: 'space2' },
+        { user: obsOnly, space: 'space1' },
+        { user: obsOnlyRead, space: 'space1' },
       ]) {
         it(`should 403 when requesting the user action stats of a case with user ${
           scenario.user.username

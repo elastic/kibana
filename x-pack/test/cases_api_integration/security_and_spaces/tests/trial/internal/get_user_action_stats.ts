@@ -11,7 +11,8 @@ import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { deleteAllCaseItems, pushCase, updateCase } from '../../../../common/lib/utils';
+import { createCase, deleteAllCaseItems, pushCase, updateCase } from '../../../../common/lib/utils';
+import { postCaseReq } from '../../../../common/lib/mock';
 import {
   createCaseWithConnector,
   createConnector,
@@ -91,6 +92,38 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(userActionTotals.total).to.equal(3);
       expect(userActionTotals.total_comments).to.equal(0);
       expect(userActionTotals.total_other_actions).to.equal(3);
+      expect(userActionTotals.total).to.equal(
+        userActionTotals.total_comments + userActionTotals.total_other_actions
+      );
+    });
+
+    it('assignees are counted in total_other_actions', async () => {
+      // 1 creation action
+      const theCase = await createCase(supertest, postCaseReq);
+
+      // 1 assignee action
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              assignees: [
+                {
+                  uid: '123',
+                },
+              ],
+              id: theCase.id,
+              version: theCase.version,
+            },
+          ],
+        },
+      });
+
+      const userActionTotals = await getCaseUserActionStats({ supertest, caseID: theCase.id });
+
+      expect(userActionTotals.total).to.equal(2);
+      expect(userActionTotals.total_comments).to.equal(0);
+      expect(userActionTotals.total_other_actions).to.equal(2);
       expect(userActionTotals.total).to.equal(
         userActionTotals.total_comments + userActionTotals.total_other_actions
       );
