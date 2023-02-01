@@ -339,6 +339,7 @@ describe('current status route', () => {
         pending: 0,
         down: 1,
         enabledIds: ['id1', 'id2'],
+        allIds: ['id1', 'id2'],
         up: 2,
         upConfigs: {
           'id1-Asia/Pacific - Japan': {
