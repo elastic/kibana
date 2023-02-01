@@ -25,7 +25,7 @@ import {
   RULE_INTERVAL_SECONDS,
   RULE_TYPE_ID,
 } from './common';
-import { createDataStream, deleteDataStream } from '../lib/create_test_data';
+import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
 // eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {

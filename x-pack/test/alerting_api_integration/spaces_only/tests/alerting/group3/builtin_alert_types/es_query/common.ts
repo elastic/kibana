@@ -9,7 +9,7 @@ import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integrati
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
-import { createEsDocuments, createEsDocumentsWithGroups } from '../lib/create_test_data';
+import { createEsDocuments, createEsDocumentsWithGroups } from '../../../create_test_data';
 
 export const RULE_TYPE_ID = '.es-query';
 export const CONNECTOR_TYPE_ID = '.index';

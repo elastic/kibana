@@ -12,7 +12,7 @@ import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, TaskManagerUtils } from '../../../../../../common/lib';
-import { createEsDocuments } from '../lib/create_test_data';
+import { createEsDocuments } from '../../../create_test_data';
 
 const RULE_INTERVAL_SECONDS = 6;
 const RULE_INTERVALS_TO_WRITE = 5;

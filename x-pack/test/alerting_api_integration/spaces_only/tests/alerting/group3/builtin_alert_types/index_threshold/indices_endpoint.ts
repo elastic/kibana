@@ -12,8 +12,8 @@ import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integrati
 import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix } from '../../../../../../common/lib';
-import { createEsDocumentsWithGroups } from '../lib/create_test_data';
-import { createDataStream, deleteDataStream } from '../lib/create_test_data';
+import { createEsDocumentsWithGroups } from '../../../create_test_data';
+import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
 const API_URI = 'internal/triggers_actions_ui/data/_indices';
 

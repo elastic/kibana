@@ -14,7 +14,7 @@ import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix } from '../../../../../../common/lib';
 
-import { createEsDocumentsWithGroups } from '../lib/create_test_data';
+import { createEsDocumentsWithGroups } from '../../../create_test_data';
 
 const INDEX_THRESHOLD_TIME_SERIES_QUERY_URL =
   'internal/triggers_actions_ui/data/_time_series_query';
