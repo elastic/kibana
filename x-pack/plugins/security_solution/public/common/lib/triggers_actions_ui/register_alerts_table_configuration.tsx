@@ -15,7 +15,7 @@ import { getUseActionColumnHook } from '../../../detections/hooks/trigger_action
 import { getPersistentControlsHook } from '../../../detections/hooks/trigger_actions_alert_table/use_persistent_controls';
 import { APP_ID, CASES_FEATURE_ID } from '../../../../common/constants';
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
-import { TableId, TimelineId } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
 import { getColumns } from '../../../detections/configurations/security_solution_detections';
 import { getRenderCellValueHook } from '../../../detections/configurations/security_solution_detections/render_cell_value';
 import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';
@@ -38,11 +38,11 @@ const registerAlertsTableConfiguration = (
   };
 
   const renderCellValueHookAlertPage = getRenderCellValueHook({
-    scopeId: SourcererScopeName.default,
+    scopeId: SourcererScopeName.detections,
   });
 
   const renderCellValueHookCasePage = getRenderCellValueHook({
-    scopeId: TimelineId.casePage,
+    scopeId: SourcererScopeName.detections,
   });
 
   const sort: AlertsTableConfigurationRegistry['sort'] = [
