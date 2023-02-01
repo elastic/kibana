@@ -86,7 +86,7 @@ export const LastTestRunComponent = ({
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 356 }}>
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
-      {!loading && latestPing?.error ? (
+      {!(loading && !latestPing) && latestPing?.error ? (
         <EuiCallOut
           data-test-subj="monitorTestRunErrorCallout"
           style={{
@@ -127,7 +127,7 @@ export const LastTestRunComponent = ({
           steps={stepsData?.steps ?? []}
           loading={stepsLoading}
           showStepNumber={true}
-          showExpand={false}
+          showExpand={isErrorDetails}
         />
       ) : (
         <SinglePingResult ping={latestPing} loading={loading} />
@@ -163,7 +163,7 @@ const PanelHeader = ({
     </EuiTitle>
   );
 
-  if (loading) {
+  if (loading && !latestPing) {
     return (
       <>
         <EuiFlexGroup alignItems="center" gutterSize="s">

@@ -10,7 +10,6 @@ import { Route, Switch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { enableEnginesSection } from '../../../../../common/ui_settings_keys';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINES_PATH, ENGINE_PATH } from '../../routes';
 
@@ -20,8 +19,8 @@ import { NotFound } from '../not_found';
 import { EnginesList } from './engines_list';
 
 export const EnginesRouter: React.FC = () => {
-  const { uiSettings } = useValues(KibanaLogic);
-  const enginesSectionEnabled = uiSettings?.get<boolean>(enableEnginesSection, false);
+  const { productAccess } = useValues(KibanaLogic);
+  const enginesSectionEnabled = productAccess.hasSearchEnginesAccess;
   if (!enginesSectionEnabled) {
     return (
       <Switch>

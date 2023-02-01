@@ -38,7 +38,7 @@ describe('service logs', () => {
       );
     });
 
-    it('filter by host names as fallback', () => {
+    it('does not filter by host names as fallback', () => {
       expect(
         getInfrastructureKQLFilter(
           {
@@ -48,9 +48,7 @@ describe('service logs', () => {
           },
           serviceName
         )
-      ).toEqual(
-        'service.name: "opbeans-node" or (not service.name and (host.name: "baz" or host.name: "quz"))'
-      );
+      ).toEqual('service.name: "opbeans-node"');
     });
   });
 });
