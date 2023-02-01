@@ -78,6 +78,7 @@ export const OverviewPage: React.FC = () => {
     !enablementLoading &&
     isEnabled &&
     !monitorsLoading &&
+    monitorsLoaded &&
     syntheticsMonitors.length === 0
   ) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;

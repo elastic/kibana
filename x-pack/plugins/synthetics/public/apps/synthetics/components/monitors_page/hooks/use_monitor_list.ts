@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'react-use';
 import {
   fetchMonitorListAction,
+  quietFetchMonitorListAction,
   fetchOverviewStatusAction,
   MonitorListPageState,
   selectEncryptedSyntheticsSavedMonitors,
@@ -39,16 +40,20 @@ export function useMonitorList() {
   );
   const reloadPage = useCallback(() => loadPage(pageState), [pageState, loadPage]);
 
+  const reloadPageQuiet = useCallback(() => {
+    dispatch(quietFetchMonitorListAction(pageState));
+  }, [dispatch, pageState]);
+
   // Periodically refresh
   useEffect(() => {
-    const intervalId = setTimeout(() => {
-      reloadPage();
+    const intervalId = setInterval(() => {
+      reloadPageQuiet();
     }, refreshInterval);
 
     return () => {
-      clearTimeout(intervalId);
+      clearInterval(intervalId);
     };
-  }, [reloadPage, refreshInterval]);
+  }, [reloadPageQuiet, refreshInterval]);
 
   useDebounce(
     () => {

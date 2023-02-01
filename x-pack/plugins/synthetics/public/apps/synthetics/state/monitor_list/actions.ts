@@ -16,6 +16,9 @@ export const fetchMonitorListAction = createAsyncAction<
   MonitorListPageState,
   MonitorManagementListResult
 >('fetchMonitorListAction');
+export const quietFetchMonitorListAction = createAction<MonitorListPageState>(
+  'quietFetchMonitorListAction'
+);
 
 export const fetchUpsertMonitorAction = createAction<UpsertMonitorRequest>('fetchUpsertMonitor');
 export const fetchUpsertSuccessAction = createAction<{
