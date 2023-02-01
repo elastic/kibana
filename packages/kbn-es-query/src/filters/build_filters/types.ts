@@ -50,6 +50,22 @@ export enum FilterStateStore {
   GLOBAL_STATE = 'globalState',
 }
 
+export type FilterMetaParams =
+  | Filter
+  | Filter[]
+  | RangeFilterMeta
+  | RangeFilterParams
+  | PhraseFilterMeta
+  | PhraseFilterMetaParams
+  | PhrasesFilterMeta
+  | MatchAllFilterMeta
+  | string
+  | string[]
+  | boolean
+  | boolean[]
+  | number
+  | number[];
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FilterMeta = {
   alias?: string | null;
@@ -64,21 +80,7 @@ export type FilterMeta = {
   isMultiIndex?: boolean;
   type?: string;
   key?: string;
-  params?:
-    | Filter
-    | Filter[]
-    | RangeFilterMeta
-    | RangeFilterParams
-    | PhraseFilterMeta
-    | PhraseFilterMetaParams
-    | PhrasesFilterMeta
-    | MatchAllFilterMeta
-    | string
-    | string[]
-    | boolean
-    | boolean[]
-    | number
-    | number[];
+  params?: FilterMetaParams;
   value?: string;
 };
 
