@@ -685,7 +685,6 @@ describe('Response actions history', () => {
         'suspend-process',
         'processes',
         'get-file',
-        'execute',
       ]);
     });
 
