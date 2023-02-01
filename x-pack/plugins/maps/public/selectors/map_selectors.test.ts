@@ -338,46 +338,9 @@ describe('getSpatialFiltersLayer', () => {
   });
 
   test('should not show layer when showSpatialFilters is false', () => {
-    const embeddableSearchContext = {
-      filters: [
-        buildGeoShapeFilter({
-          geometry: {
-            coordinates: [
-              [
-                [1, 0],
-                [1, 1],
-                [0, 1],
-                [0, 0],
-                [1, 0],
-              ],
-            ],
-            type: 'Polygon',
-          },
-          geometryLabel: 'myShape',
-          geoFieldNames: ['geo.coordinates'],
-        }),
-      ],
-    };
     const geoJsonVectorLayer = getSpatialFiltersLayer.resultFunc(
-      [
-        buildGeoShapeFilter({
-          geometry: {
-            coordinates: [
-              [
-                [-101.21639, 48.1413],
-                [-101.21639, 41.84905],
-                [-90.95149, 41.84905],
-                [-90.95149, 48.1413],
-                [-101.21639, 48.1413],
-              ],
-            ],
-            type: 'Polygon',
-          },
-          geometryLabel: 'myShape',
-          geoFieldNames: ['geo.coordinates'],
-        }),
-      ],
-      embeddableSearchContext,
+      [],
+      undefined,
       {
         ...getDefaultMapSettings(),
         showSpatialFilters: false,
