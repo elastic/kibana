@@ -8,6 +8,7 @@
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import type {
+  CaseConnectors,
   Cases,
   CaseUpdateRequest,
   FetchCasesProps,
@@ -27,6 +28,7 @@ import type {
   User,
   SingleCaseMetricsResponse,
   CasesFindResponse,
+  GetCaseConnectorsResponse,
 } from '../../common/api';
 import {
   CommentType,
@@ -36,6 +38,7 @@ import {
   getCasePushUrl,
   getCaseFindUserActionsUrl,
   getCaseCommentDeleteUrl,
+  getCaseConnectorsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -376,5 +379,30 @@ export const getFeatureIds = async (
       signal,
       query,
     }
+  );
+};
+
+export const getCaseConnectors = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<CaseConnectors> => {
+  const res = await KibanaServices.get().http.fetch<GetCaseConnectorsResponse>(
+    getCaseConnectorsUrl(caseId),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+  return Object.keys(res).reduce(
+    (acc, connectorId) => ({
+      ...acc,
+      [connectorId]: {
+        ...convertToCamelCase<GetCaseConnectorsResponse[string], CaseConnectors[string]>(
+          res[connectorId]
+        ),
+      },
+    }),
+    {}
   );
 };
