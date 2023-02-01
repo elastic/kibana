@@ -206,13 +206,19 @@ export class MapsPlugin implements Plugin {
       storage: new MapsStorage(),
       toSearchContentSerializer: savedObjectToKibanaContent,
       schemas: {
-        rpc: {
+        content: {
           get: {
-            out: schema.any(), // This will have to be a proper Maps Saved object schema
+            out: {
+              result: schema.any(), // This will have to be a proper Maps Saved object schema
+            },
           },
           create: {
-            in: schema.any(), // This will be a proper schema to create a map
-            out: schema.any(), // This will be a proper schema of a map created
+            in: {
+              data: schema.any(), // This will be a proper schema to create a map
+            },
+            out: {
+              result: schema.any(), // This will be a proper schema of a map created
+            },
           },
         },
       },

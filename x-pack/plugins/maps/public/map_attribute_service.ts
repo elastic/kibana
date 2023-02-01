@@ -10,6 +10,7 @@ import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
 import { checkForDuplicateTitle, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-browser';
+import { CreateIn } from '@kbn/content-management-plugin/common';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
@@ -43,6 +44,12 @@ export type MapAttributeService = AttributeService<
   MapUnwrapMetaInfo
 >;
 
+// --- POC Content management ---
+type MapContentType = 'map';
+
+type MapCreateIn = CreateIn<MapContentType, MapSavedObjectAttributes, SavedObjectsCreateOptions>;
+// --- End POC ---
+
 let mapAttributeService: MapAttributeService | null = null;
 
 export function getMapAttributeService(): MapAttributeService {
@@ -75,12 +82,8 @@ export function getMapAttributeService(): MapAttributeService {
             updatedAttributes,
             { references }
           )
-        : getContentManagement().rpc.create<
-            MapSavedObjectAttributes,
-            any, // We probably want to type the response
-            SavedObjectsCreateOptions
-          >({
-            type: 'map',
+        : getContentManagement().rpc.create<MapCreateIn>({
+            contentType: 'map',
             data: updatedAttributes,
             options: {
               references,
