@@ -10,7 +10,13 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { formatBytes } from './use_object_metrics';
 import { formatMillisecond } from '../step_metrics/step_metrics';
-import { CLS_HELP_LABEL, DCL_TOOLTIP, FCP_TOOLTIP, LCP_HELP_LABEL } from '../step_metrics/labels';
+import {
+  CLS_HELP_LABEL,
+  DCL_TOOLTIP,
+  FCP_TOOLTIP,
+  LCP_HELP_LABEL,
+  TRANSFER_SIZE_HELP,
+} from '../step_metrics/labels';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 
@@ -173,7 +179,7 @@ export const useStepMetrics = (step?: JourneyStep) => {
         value: metrics?.cls.value,
         label: CLS_LABEL,
         helpText: CLS_HELP_LABEL,
-        formatted: formatMillisecond((metrics?.cls.value ?? 0) / 1000),
+        formatted: metrics?.cls.value ?? 0,
       },
       {
         value: metrics?.dcl.value,
@@ -184,7 +190,7 @@ export const useStepMetrics = (step?: JourneyStep) => {
       {
         value: transferDataVal,
         label: TRANSFER_SIZE,
-        helpText: '',
+        helpText: TRANSFER_SIZE_HELP,
         formatted: formatBytes(transferDataVal ?? 0),
       },
     ],
