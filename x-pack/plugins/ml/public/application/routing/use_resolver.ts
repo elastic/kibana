@@ -108,7 +108,7 @@ export const useResolver = (
           combinedQuery,
           currentDataView: dataView,
           currentSavedSearch: savedSearchSimpleObj,
-          savedSearch,
+          selectedSavedSearch: savedSearch,
           dataViewsContract,
           kibanaConfig: config,
         });

@@ -25,7 +25,7 @@ export const LogCategorizationPage: FC = () => {
 
   const context = useMlContext();
   const dataView = context.currentDataView;
-  const savedSearch = context.savedSearch;
+  const savedSearch = context.selectedSavedSearch;
 
   return (
     <>

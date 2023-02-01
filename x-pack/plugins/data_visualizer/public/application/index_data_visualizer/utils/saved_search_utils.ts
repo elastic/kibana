@@ -174,11 +174,6 @@ export function getEsQueryFromSavedSearch({
     };
   }
 
-  // @TODO: remove
-  // If saved search is an json object with the original query and filter
-  // retrieve the parsed query and filter
-  // const savedSearchData = savedSearch; // getQueryFromSavedSearchObject(savedSearch);
-
   // If no saved search available, use user's query and filters
   if (!savedSearch && userQuery) {
     if (filterManager && userFilters) filterManager.addFilters(userFilters);
@@ -201,7 +196,8 @@ export function getEsQueryFromSavedSearch({
   // which might differ from extracted saved search data
   if (savedSearchSource) {
     const globalFilters = filterManager?.getGlobalFilters();
-    // @TODO: Add support for AggregateQuery type
+    // FIXME: Add support for AggregateQuery type
+    // https://github.com/elastic/kibana/issues/150091
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
     const currentFilters =
       userFilters ?? mapAndFlattenFilters(savedSearchSource.getField('filter') as Filter[]);

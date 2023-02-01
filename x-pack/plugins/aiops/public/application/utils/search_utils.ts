@@ -96,7 +96,7 @@ export function createMergedEsQuery(
 ) {
   let combinedQuery: QueryDslQueryContainer = getDefaultQuery();
 
-  // @TODO: add support for aggregate query
+  // FIXME: Add support for aggregate query #150091
   if (isQuery(query) && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
     if (query.query !== '') {
@@ -209,7 +209,7 @@ export function getEsQueryFromSavedSearch({
   // which might differ from extracted saved search data
   if (savedSearchSource) {
     const globalFilters = filterManager?.getGlobalFilters();
-    // @TODO: Add support for AggregateQuery type
+    // FIXME: Add support for aggregate query #150091
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
     const currentFilters =
       userFilters ?? mapAndFlattenFilters(savedSearchSource.getField('filter') as Filter[]);

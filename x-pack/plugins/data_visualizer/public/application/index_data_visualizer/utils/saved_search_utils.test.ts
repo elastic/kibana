@@ -57,17 +57,58 @@ const luceneSavedSearch: SavedSearch = {
     filter: [
       {
         meta: {
-          index: '90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0',
-          negate: false,
-          disabled: false,
           alias: null,
-          type: 'phrase',
-          key: 'airline',
-          value: 'ASA',
-          params: { query: 'ASA', type: 'phrase' },
+          disabled: false,
+          negate: false,
+          params: [
+            {
+              meta: {
+                alias: null,
+                disabled: false,
+                field: 'airline',
+                index: 'cb8808e0-9bfb-11ed-bb38-2b1bd55401e7',
+                key: 'airline',
+                negate: false,
+                params: {
+                  query: 'ACA',
+                },
+                type: 'phrase',
+              },
+              query: {
+                match_phrase: {
+                  airline: 'ACA',
+                },
+              },
+            },
+            {
+              meta: {
+                alias: null,
+                disabled: false,
+                field: 'airline',
+                index: 'cb8808e0-9bfb-11ed-bb38-2b1bd55401e7',
+                key: 'airline',
+                negate: false,
+                params: {
+                  query: 'FFT',
+                },
+                type: 'phrase',
+              },
+              query: {
+                match_phrase: {
+                  airline: 'FFT',
+                },
+              },
+            },
+          ],
+          // @ts-expect-error SavedSearch needs to be updated with CombinedFilterMeta
+          relation: 'OR',
+          type: 'combined',
+          index: 'cb8808e0-9bfb-11ed-bb38-2b1bd55401e7',
         },
-        query: { match: { airline: { query: 'ASA', type: 'phrase' } } },
-        $state: { store: FilterStateStore.APP_STATE },
+        query: {},
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
       },
     ],
   }),
@@ -274,7 +315,31 @@ describe('getEsQueryFromSavedSearch()', () => {
       },
       searchQuery: {
         bool: {
-          filter: [{ match_phrase: { airline: { query: 'ASA' } } }],
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [],
+                      filter: [{ match_phrase: { airline: 'ACA' } }],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [],
+                      filter: [{ match_phrase: { airline: 'FFT' } }],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
           must: [{ query_string: { query: 'responsetime > 49' } }],
           must_not: [],
           should: [],
@@ -299,7 +364,31 @@ describe('getEsQueryFromSavedSearch()', () => {
       queryOrAggregateQuery: { language: 'lucene', query: 'responsetime:>100' },
       searchQuery: {
         bool: {
-          filter: [{ match_phrase: { airline: { query: 'ASA' } } }],
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [],
+                      filter: [{ match_phrase: { airline: 'ACA' } }],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [],
+                      filter: [{ match_phrase: { airline: 'FFT' } }],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
           must: [{ query_string: { query: 'responsetime:>100' } }],
           must_not: [],
           should: [],

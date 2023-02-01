@@ -76,7 +76,7 @@ describe('useResolver', () => {
         currentSavedSearch: null,
         dataViewsContract: {},
         kibanaConfig: {},
-        savedSearch: undefined,
+        selectedSavedSearch: undefined,
       },
       results: {},
     });
