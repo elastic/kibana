@@ -16,7 +16,14 @@ import {
 import { tableDefaults } from '../store/data_table/defaults';
 import { useShallowEqualSelector } from './use_selector';
 
-export const useDataTableFilters = (tableId: TableId) => {
+export type UseDataTableFilters = (tableId: TableId) => {
+  showBuildingBlockAlerts: boolean;
+  setShowBuildingBlockAlerts: (value: boolean) => void;
+  showOnlyThreatIndicatorAlerts: boolean;
+  setShowOnlyThreatIndicatorAlerts: (value: boolean) => void;
+};
+
+export const useDataTableFilters: UseDataTableFilters = (tableId: TableId) => {
   const dispatch = useDispatch();
 
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { useDataTableFilters } from '../use_data_table_filters';
+import type { UseDataTableFilters } from '../use_data_table_filters';
 
-export const getUseDataTableFiltersMock = (): jest.Mocked<typeof useDataTableFilters> => () => ({
+export const useDataTableFilters: jest.Mocked<UseDataTableFilters> = jest.fn(() => ({
   showBuildingBlockAlerts: false,
   showOnlyThreatIndicatorAlerts: false,
   setShowBuildingBlockAlerts: jest.fn(),
   setShowOnlyThreatIndicatorAlerts: jest.fn(),
-});
+}));

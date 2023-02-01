@@ -40,7 +40,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     useGetFeatureIds(alertRegistrationContexts);
 
   const configId =
-    caseData.owner !== SECURITY_SOLUTION_OWNER ? caseData.owner : `${caseData.owner}-case`;
+    caseData.owner === SECURITY_SOLUTION_OWNER ? `${caseData.owner}-case` : caseData.owner;
 
   const alertStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
