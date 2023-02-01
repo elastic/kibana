@@ -9,9 +9,11 @@ export interface FieldType {
   field: string;
   type: string;
 }
+
 function shouldReadKeys(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
+
 const getNextPathWithoutProperties = ({
   key,
   pathWithoutProperties,
@@ -26,13 +28,18 @@ const getNextPathWithoutProperties = ({
   }
 
   if (shouldReadKeys(value) && key === 'properties') {
-    return `${pathWithoutProperties}`; // TODO: wrap required?
+    return `${pathWithoutProperties}`;
   } else {
     return `${pathWithoutProperties}.${key}`;
   }
 };
 
-export function getFieldTypes(mappingsProperties: Record<string, unknown>): FieldType[] {
+/**
+ * Obtain list of fields with types
+ * @param mappingsProperties ECS flat schema
+ * @returns collection of mappings
+ */
+export function getFieldsWithTypes(mappingsProperties: Record<string, unknown>): FieldType[] {
   if (!shouldReadKeys(mappingsProperties)) {
     throw new TypeError(`Root value is not flatten-able, received ${mappingsProperties}`);
   }

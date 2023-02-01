@@ -7,11 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import has from 'lodash/has';
-import { EcsFlat } from '@kbn/ecs';
 import type { GetUnallowedFieldValuesInputs } from './types';
 import { fetchMappings } from './fetch_mappings';
-import { getFieldTypes } from './field_types';
+import { getFieldsWithTypes as mappingToFieldTypes } from './field_types';
 import { getUnallowedFieldValues } from './create_data_quality_alert_type';
+import { extendFieldsWithAllowedValues } from './extend_fields_with_allowed_values';
 
 interface InvalidFieldsSummary {
   key: string;
@@ -19,6 +19,7 @@ interface InvalidFieldsSummary {
 }
 
 export type UnallowedFieldCheckResults = Array<[string, InvalidFieldsSummary[]]>;
+
 export const runDataQualityCheck = async (
   es: ElasticsearchClient,
   indexPatterns: string[],
@@ -26,9 +27,9 @@ export const runDataQualityCheck = async (
   to: string
 ) => {
   /*
-      TODO check schema types types like that
-       isEcsCompliant: type === ecsMetadata[field].type && indexInvalidValues.length === 0
-      */
+  TODO check schema types types like that
+    isEcsCompliant: type === ecsMetadata[field].type && indexInvalidValues.length === 0
+  */
 
   const mappingRequestResult = await fetchMappings(es, indexPatterns);
 
@@ -42,15 +43,9 @@ export const runDataQualityCheck = async (
         },
       } = mappingRequestResult;
 
-      const fields = getFieldTypes(properties as Record<string, unknown>);
+      const fieldsTypes = mappingToFieldTypes(properties as Record<string, unknown>);
 
-      const fieldsWithAllowedValuesSpecified = fields
-        .map((field) => ({
-          ...field,
-          allowedValues: (EcsFlat as Record<string, { allowed_values?: unknown[] }>)[field.field]
-            ?.allowed_values,
-        }))
-        .filter((field) => field.allowedValues);
+      const fieldsWithAllowedValuesSpecified = extendFieldsWithAllowedValues(fieldsTypes);
 
       inputs.push(
         ...(fieldsWithAllowedValuesSpecified.map((field) => ({

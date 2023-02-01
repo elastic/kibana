@@ -22,6 +22,7 @@ import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { DATA_QUALITY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -57,7 +58,6 @@ import { useRiskScoreData } from './use_risk_score_data';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { DATA_QUALITY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 

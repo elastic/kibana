@@ -122,8 +122,6 @@ export const createDataQualityAlertType = (
 
           ruleExecutionLogger.info(`${alertCreationResult.createdItemsCount} alerts created`);
         }
-
-        // TODO remove changes to x-pack/plugins/threat_intelligence folder
       } catch (error: unknown) {
         if (error instanceof Error) {
           ruleExecutionLogger.error(error.message);

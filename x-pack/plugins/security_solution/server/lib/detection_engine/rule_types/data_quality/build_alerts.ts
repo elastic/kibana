@@ -9,7 +9,7 @@ import { ALERT_UUID } from '@kbn/rule-data-utils';
 import objectHash from 'object-hash';
 import type { CompleteRule, RuleParams } from '../../rule_schema';
 import { buildAlert } from '../factories/utils/build_alert';
-import { UnallowedFieldCheckResults } from './run_data_quality_check';
+import type { UnallowedFieldCheckResults } from './run_data_quality_check';
 
 interface BuildAlertsParams {
   spaceId: string;
@@ -31,7 +31,7 @@ export const buildAlerts = (
       [],
       completeRule,
       spaceId,
-      `ecs integrity issues found: ${invalidFieldsSummary}`,
+      `issues found: ${invalidFieldsSummary}`,
       index,
       undefined
     );
