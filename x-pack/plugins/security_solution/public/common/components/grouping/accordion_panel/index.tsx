@@ -8,7 +8,7 @@
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { isArray } from 'lodash/fp';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { RawBucket } from '../types';
 import { createGroupFilter } from './helpers';
 
@@ -61,8 +61,6 @@ const GroupPanelComponent = ({
   renderChildComponent,
   selectedGroup,
 }: GroupPanelProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   const groupFieldValue = useMemo(
     () => (groupBucket.key && isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key),
     [groupBucket.key]
@@ -75,7 +73,6 @@ const GroupPanelComponent = ({
 
   const onToggle = useCallback(
     (isOpen) => {
-      setIsExpanded(isOpen);
       if (onToggleGroup) {
         onToggleGroup(isOpen, groupBucket);
       }
