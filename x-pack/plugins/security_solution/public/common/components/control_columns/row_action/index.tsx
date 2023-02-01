@@ -103,6 +103,13 @@ const RowActionComponent = ({
       dispatch(
         openFlyout({
           scope: 'global',
+          right: {
+            id: 'right',
+            params: {
+              id: '',
+              indexName,
+            },
+          },
         })
       );
     } else {
