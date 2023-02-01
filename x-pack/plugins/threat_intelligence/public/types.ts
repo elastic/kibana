@@ -106,14 +106,17 @@ export interface SecuritySolutionPluginContext {
    * Get the user's license to drive the Threat Intelligence plugin's visibility.
    */
   licenseService: LicenseAware;
+
   /**
    * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView.
    */
   sourcererDataView: SourcererDataView;
+
   /**
    * Security Solution store
    */
   securitySolutionStore: Store;
+
   /**
    * Pass UseInvestigateInTimeline functionality to TI plugin
    */
@@ -124,7 +127,9 @@ export interface SecuritySolutionPluginContext {
   }: UseInvestigateInTimelineProps) => () => Promise<void>;
 
   useQuery: () => Query;
+
   useFilters: () => Filter[];
+
   useGlobalTime: () => TimeRange;
 
   SiemSearchBar: VFC<any>;
@@ -139,7 +144,11 @@ export interface SecuritySolutionPluginContext {
    */
   deregisterQuery: (query: { id: string }) => void;
 
+  /**
+   * Add to blocklist feature
+   */
   blockList: {
+    canWriteBlocklist: boolean;
     exceptionListApiClient: unknown;
     useSetUrlParams: () => (
       params: Record<string, string | number | null | undefined>,

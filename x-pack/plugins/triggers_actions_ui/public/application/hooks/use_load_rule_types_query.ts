@@ -54,6 +54,7 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     queryKey: ['loadRuleTypes'],
     queryFn,
     onError: onErrorFn,
+    refetchOnWindowFocus: false,
   });
 
   const filteredIndex = data ? getFilteredIndex(data, filteredRuleTypes) : new Map();
