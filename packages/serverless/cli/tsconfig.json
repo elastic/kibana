@@ -13,5 +13,10 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/dev-cli-runner",
+    "@kbn/repo-info",
+    "@kbn/tooling-log",
+    "@kbn/dev-proc-runner",
+  ]
 }
