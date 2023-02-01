@@ -45,7 +45,6 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
   describe('set route', () => {
     it('creates doc, returns a 200 with value set', async () => {
       const { supertest } = getServices();
-
       const defaultIndex = chance.word();
 
       const { body } = await supertest('post', '/api/kibana/settings/defaultIndex')

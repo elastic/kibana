@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { takeLatest, takeLeading } from 'redux-saga/effects';
+import { takeLatest, debounce } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   fetchMonitorOverviewAction,
@@ -16,7 +16,8 @@ import {
 import { fetchMonitorOverview, fetchOverviewStatus } from './api';
 
 export function* fetchMonitorOverviewEffect() {
-  yield takeLeading(
+  yield debounce(
+    300, // Only take the latest while ignoring any intermediate triggers
     [fetchMonitorOverviewAction.get, quietFetchOverviewAction.get],
     fetchEffectFactory(
       fetchMonitorOverview,
