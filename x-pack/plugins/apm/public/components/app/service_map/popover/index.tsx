@@ -24,6 +24,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { i18n } from '@kbn/i18n';
 import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import { Environment } from '../../../../../common/environment_rt';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -212,13 +213,15 @@ export function Popover({
               {kuery && (
                 <EuiToolTip
                   position="bottom"
-                  content="The KQL filter is not applied in the displayed stats."
+                  content={i18n.translate(
+                    'xpack.apm.serviceMap.kqlFilterInfo',
+                    {
+                      defaultMessage:
+                        'The KQL filter is not applied in the displayed stats.',
+                    }
+                  )}
                 >
-                  <EuiIcon
-                    tabIndex={0}
-                    type="iInCircle"
-                    title="Icon with tooltip"
-                  />
+                  <EuiIcon tabIndex={0} type="iInCircle" />
                 </EuiToolTip>
               )}
             </h3>

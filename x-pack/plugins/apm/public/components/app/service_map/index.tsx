@@ -142,7 +142,7 @@ export function ServiceMap({
         },
       });
     },
-    [license, serviceName, environment, start, end, serviceGroupId]
+    [license, serviceName, environment, start, end, serviceGroupId, kuery]
   );
 
   const { ref, height } = useRefDimensions();

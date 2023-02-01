@@ -12,14 +12,13 @@ import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
 import { getInfraHref } from '../links/infra_link';
 import { fromQuery } from '../links/url_helpers';
 import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { TRACE_ID } from '../../../../common/es_fields/apm';
+import { ApmRouter } from '../../routing/apm_route_config';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();
@@ -35,15 +34,13 @@ export const getSections = ({
   transaction,
   basePath,
   location,
-  urlParams,
+  apmRouter,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
   location: Location;
-  urlParams: ApmUrlParams;
+  apmRouter: ApmRouter;
 }) => {
-  const apmRouter = useApmRouter();
-
   if (!transaction) return [];
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
@@ -52,13 +49,19 @@ export const getSections = ({
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
 
+  const routeParams = apmRouter.getParams(
+    '/services/{serviceName}/transactions/view',
+    location
+  );
+  const { rangeFrom, rangeTo, environment } = routeParams.query;
+
   const uptimeLink = url.format({
     pathname: basePath.prepend('/app/uptime'),
     search: `?${fromQuery(
       pickBy(
         {
-          dateRangeStart: urlParams.rangeFrom,
-          dateRangeEnd: urlParams.rangeTo,
+          dateRangeStart: rangeFrom,
+          dateRangeEnd: rangeTo,
           search: `url.domain:"${transaction.url?.domain}"`,
         },
         (val) => !isEmpty(val)
@@ -210,10 +213,10 @@ export const getSections = ({
 
   const serviceMapHref = apmRouter.link('/service-map', {
     query: {
-      rangeFrom: urlParams.rangeFrom ?? 'now-15m',
-      rangeTo: urlParams.rangeTo ?? 'now',
-      environment: ENVIRONMENT_ALL.value,
-      kuery: `trace.id : "${transaction.trace.id}"`,
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery: `${TRACE_ID} : "${transaction.trace.id}"`,
       serviceGroup: '',
       comparisonEnabled: false,
     },
