@@ -64,6 +64,13 @@ type ProcessableNodeWithPathPartsOrLiteral = ProcessableNode & {
   path: hbs.AST.PathExpression | hbs.AST.Literal;
 };
 
+interface Helper {
+  fn?: Handlebars.HelperDelegate;
+  context: any[];
+  params: any[];
+  options: AmbiguousHelperOptions;
+}
+
 export type NonBlockHelperOptions = Omit<Handlebars.HelperOptions, 'fn' | 'inverse'>;
 export type AmbiguousHelperOptions = Handlebars.HelperOptions | NonBlockHelperOptions;
 
@@ -290,7 +297,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   render(context: any, options: ExtendedRuntimeOptions = {}): string {
     this.contexts = [context];
     this.output = [];
-    this.runtimeOptions = options;
+    this.runtimeOptions = Object.assign({}, options);
     this.container.helpers = Object.assign(this.initialHelpers, options.helpers);
     this.container.decorators = Object.assign(
       this.initialDecorators,
@@ -312,9 +319,46 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       this.ast = Handlebars.parse(this.template!);
     }
 
-    this.accept(this.ast);
+    // The `defaultMain` function contains the default behavior:
+    //
+    // Generate a "program" function based on the root `Program` in the AST and
+    // call it. This will start the processing of all the child nodes in the
+    // AST.
+    const defaultMain: Handlebars.TemplateDelegate = (_context) => {
+      const prog = this.generateProgramFunction(this.ast!);
+      return prog(_context, this.runtimeOptions);
+    };
 
-    return this.output.join('');
+    // Run any decorators that might exist on the root:
+    //
+    // The `defaultMain` function is passed in, and if there are no root
+    // decorators, or if the decorators chooses to do so, the same function is
+    // returned from `processDecorators` and the default behavior is retained.
+    //
+    // Alternatively any of the root decorators might call the `defaultMain`
+    // function themselves, process its return value, and return a completely
+    // different `main` function.
+    const main = this.processDecorators(this.ast, defaultMain);
+    this.processedRootDecorators = true;
+
+    // Call the `main` function and add the result to the final output.
+    const result = main(this.context, options);
+
+    if (main === defaultMain) {
+      this.output.push(result);
+      return this.output.join('');
+    } else {
+      // We normally expect the return value of `main` to be a string. However,
+      // if a decorator is used to override the `defaultMain` function, the
+      // return value can be any type. To match the upstream handlebars project
+      // behavior, we want the result of rendering the template to be the
+      // literal value returned by the decorator.
+      //
+      // Since the output array in this case always will be empty, we just
+      // return that single value instead of attempting to join all the array
+      // elements as strings.
+      return result;
+    }
   }
 
   // ********************************************** //
@@ -323,11 +367,6 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   Program(program: hbs.AST.Program) {
     this.blockParamNames.unshift(program.blockParams);
-
-    // Run any decorators that might exist on the root
-    this.processDecorators(program, this.generateProgramFunction(program));
-    this.processedRootDecorators = true;
-
     super.Program(program);
     this.blockParamNames.shift();
   }
@@ -340,14 +379,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.processStatementOrExpression(block);
   }
 
-  // This space intentionally left blank: We want to override the Visitor class implementation
-  // of this method, but since we handle decorators separately before traversing the nodes, we
-  // just want to make this a no-op.
+  // This space is intentionally left blank: We want to override the Visitor
+  // class implementation of this method, but since we handle decorators
+  // separately before traversing the nodes, we just want to make this a no-op.
   DecoratorBlock(decorator: hbs.AST.DecoratorBlock) {}
 
-  // This space intentionally left blank: We want to override the Visitor class implementation
-  // of this method, but since we handle decorators separately before traversing the nodes, we
-  // just want to make this a no-op.
+  // This space is intentionally left blank: We want to override the Visitor
+  // class implementation of this method, but since we handle decorators
+  // separately before traversing the nodes, we just want to make this a no-op.
   Decorator(decorator: hbs.AST.Decorator) {}
 
   SubExpression(sexpr: hbs.AST.SubExpression) {
@@ -405,20 +444,23 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
    */
   private processDecorators(program: hbs.AST.Program, prog: Handlebars.TemplateDelegate) {
     if (!this.processedDecoratorsForProgram.has(program)) {
+      this.processedDecoratorsForProgram.add(program);
+      const props = {};
       for (const node of program.body) {
         if (isDecorator(node)) {
-          this.processDecorator(node, prog);
+          prog = this.processDecorator(node, prog, props);
         }
       }
-      this.processedDecoratorsForProgram.add(program);
     }
+
+    return prog;
   }
 
   private processDecorator(
     decorator: hbs.AST.DecoratorBlock | hbs.AST.Decorator,
-    prog: Handlebars.TemplateDelegate
+    prog: Handlebars.TemplateDelegate,
+    props: Record<string, any>
   ) {
-    const props = {};
     const options = this.setupDecoratorOptions(decorator);
 
     const result = this.container.lookupProperty<DecoratorFunction>(
@@ -426,7 +468,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       options.name
     )(prog, props, this.container, options);
 
-    Object.assign(result || prog, props);
+    return Object.assign(result || prog, props);
   }
 
   private processStatementOrExpression(node: ProcessableNodeWithPathPartsOrLiteral) {
@@ -590,10 +632,34 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   private processAmbiguousNode(node: ProcessableNodeWithPathParts) {
-    const invokeResult = this.invokeAmbiguous(node);
+    const name = node.path.parts[0];
+    const helper = this.setupHelper(node, name);
+    let { fn: helperFn } = helper;
+
+    const loc = helperFn ? node.loc : node.path.loc;
+    helperFn = helperFn ?? this.resolveNodes(node.path)[0];
+
+    if (helperFn === undefined) {
+      if (this.compileOptions.strict) {
+        helperFn = this.container.strict(helper.context, name, loc);
+      } else {
+        helperFn =
+          helper.context != null
+            ? this.container.lookupProperty(helper.context, name)
+            : helper.context;
+        if (helperFn == null) helperFn = this.container.hooks.helperMissing;
+      }
+    }
+
+    const helperResult =
+      typeof helperFn === 'function'
+        ? helperFn.call(helper.context, ...helper.params, helper.options)
+        : helperFn;
 
     if (isBlock(node)) {
-      const result = this.ambiguousBlockValue(node, invokeResult);
+      const result = helper.fn
+        ? helperResult
+        : this.container.hooks.blockHelperMissing!.call(this.context, helperResult, helper.options);
       if (result != null) {
         this.output.push(result);
       }
@@ -601,66 +667,16 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       if (
         (node as hbs.AST.MustacheStatement).escaped === false ||
         this.compileOptions.noEscape === true ||
-        typeof invokeResult !== 'string'
+        typeof helperResult !== 'string'
       ) {
-        this.output.push(invokeResult);
+        this.output.push(helperResult);
       } else {
-        this.output.push(Handlebars.escapeExpression(invokeResult));
+        this.output.push(Handlebars.escapeExpression(helperResult));
       }
     }
   }
 
-  // This operation is used when an expression like `{{foo}}`
-  // is provided, but we don't know at compile-time whether it
-  // is a helper or a path.
-  //
-  // This operation emits more code than the other options,
-  // and can be avoided by passing the `knownHelpers` and
-  // `knownHelpersOnly` flags at compile-time.
-  private invokeAmbiguous(node: ProcessableNodeWithPathParts) {
-    const name = node.path.parts[0];
-    const helper = this.setupHelper(node, name);
-
-    const loc = helper.fn ? node.loc : node.path.loc;
-    helper.fn = helper.fn ?? this.resolveNodes(node.path)[0];
-
-    if (helper.fn === undefined) {
-      if (this.compileOptions.strict) {
-        helper.fn = this.container.strict(helper.context, name, loc);
-      } else {
-        helper.fn =
-          helper.context != null
-            ? this.container.lookupProperty(helper.context, name)
-            : helper.context;
-        if (helper.fn == null) helper.fn = this.container.hooks.helperMissing;
-      }
-    }
-
-    return typeof helper.fn === 'function'
-      ? helper.fn.call(helper.context, ...helper.params, helper.options)
-      : helper.fn;
-  }
-
-  private ambiguousBlockValue(block: hbs.AST.BlockStatement, value: any) {
-    const name = block.path.parts[0];
-    const helper = this.setupHelper(block, name);
-
-    if (!helper.fn) {
-      value = this.container.hooks.blockHelperMissing!.call(this.context, value, helper.options);
-    }
-
-    return value;
-  }
-
-  private setupHelper(
-    node: ProcessableNode,
-    helperName: string
-  ): {
-    fn?: Handlebars.HelperDelegate;
-    context: any[];
-    params: any[];
-    options: AmbiguousHelperOptions;
-  } {
+  private setupHelper(node: ProcessableNode, helperName: string): Helper {
     return {
       fn: this.container.lookupProperty(this.container.helpers, helperName),
       context: this.context,
@@ -683,6 +699,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       } else {
         options.args = this.resolveNodes(decorator.params);
       }
+    } else {
+      options.args = [];
     }
 
     return options;
@@ -701,13 +719,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     };
 
     if (isBlock(node)) {
-      // TODO: Is there a way in TypeScript to infer that `options` is `Handlebars.HelperOptions` inside this if-statement. If not, is there a way to just cast once?
-      (options as Handlebars.HelperOptions).fn = this.generateProgramFunction(node.program);
-      if (node.program)
-        this.processDecorators(node.program, (options as Handlebars.HelperOptions).fn);
-      (options as Handlebars.HelperOptions).inverse = this.generateProgramFunction(node.inverse);
-      if (node.inverse)
-        this.processDecorators(node.inverse, (options as Handlebars.HelperOptions).inverse);
+      (options as Handlebars.HelperOptions).fn = node.program
+        ? this.processDecorators(node.program, this.generateProgramFunction(node.program))
+        : noop;
+      (options as Handlebars.HelperOptions).inverse = node.inverse
+        ? this.processDecorators(node.inverse, this.generateProgramFunction(node.inverse))
+        : noop;
     }
 
     return options;
