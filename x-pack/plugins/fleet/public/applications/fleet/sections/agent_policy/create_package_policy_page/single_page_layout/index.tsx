@@ -297,16 +297,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         <Loading />
       ) : packageInfo ? (
         <>
-          {packageInfo.name !== 'cloud_security_posture' && (
-            <StepDefinePackagePolicy
-              agentPolicy={agentPolicy}
-              packageInfo={packageInfo}
-              packagePolicy={packagePolicy}
-              updatePackagePolicy={updatePackagePolicy}
-              validationResults={validationResults!}
-              submitAttempted={formState === 'INVALID'}
-            />
-          )}
+          <StepDefinePackagePolicy
+            agentPolicy={agentPolicy}
+            packageInfo={packageInfo}
+            packagePolicy={packagePolicy}
+            updatePackagePolicy={updatePackagePolicy}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
+          />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!extensionView && (

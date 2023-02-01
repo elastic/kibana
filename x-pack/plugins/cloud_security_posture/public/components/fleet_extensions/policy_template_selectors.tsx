@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
@@ -13,6 +13,40 @@ import type { PostureInput, PosturePolicyTemplate } from '../../../common/types'
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { AwsCredentialsForm } from './aws_credentials_form';
+
+interface PolicyTemplateSelectorProps {
+  selectedTemplate: PosturePolicyTemplate;
+  policy: NewPackagePolicy;
+  setPolicyTemplate(template: PosturePolicyTemplate): void;
+  disabled: boolean;
+}
+
+export const PolicyTemplateSelector = ({
+  policy,
+  selectedTemplate,
+  setPolicyTemplate,
+  disabled,
+}: PolicyTemplateSelectorProps) => {
+  const policyTemplates = new Set(policy.inputs.map((input) => input.policy_template!));
+
+  return (
+    <div>
+      <EuiText color={'subdued'} size="s">
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.selectIntegrationTypeTitle"
+          defaultMessage="Select the type of security posture management integration you want to configure"
+        />
+      </EuiText>
+      <EuiSpacer size="m" />
+      <RadioGroup
+        options={Array.from(policyTemplates, (v) => ({ id: v, label: v.toUpperCase() }))}
+        idSelected={selectedTemplate}
+        onChange={(id) => setPolicyTemplate(id as PosturePolicyTemplate)}
+        disabled={disabled}
+      />
+    </div>
+  );
+};
 
 interface PolicyTemplateVarsFormProps {
   newPolicy: NewPackagePolicy;

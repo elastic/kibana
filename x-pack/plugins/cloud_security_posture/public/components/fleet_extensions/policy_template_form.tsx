@@ -5,30 +5,25 @@
  * 2.0.
  */
 import React, { memo, useEffect } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import type {
-  NewPackagePolicy,
-  PackagePolicyCreateExtensionComponentProps,
-} from '@kbn/fleet-plugin/public';
+import { EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { PostureInput } from '../../../common/types';
+import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
+import { useParams } from 'react-router-dom';
+import type { PostureInput, PosturePolicyTemplate } from '../../../common/types';
 import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA } from '../../../common/constants';
 import { getPosturePolicy, getEnabledPostureInput, getPostureInputHiddenVars } from './utils';
 import {
   PolicyTemplateInfo,
   PolicyTemplateInputSelector,
+  PolicyTemplateSelector,
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
-import { IntegrationSettings } from './integration_settings';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
   cspm: CLOUDBEAT_AWS,
 } as const;
-
-interface Props extends PackagePolicyCreateExtensionComponentProps {
-  edit?: boolean;
-}
 
 const EditScreenStepTitle = () => (
   <>
@@ -44,61 +39,123 @@ const EditScreenStepTitle = () => (
   </>
 );
 
-export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit }) => {
-  const input = getEnabledPostureInput(newPolicy);
+interface IntegrationInfoFieldsProps {
+  fields: Array<{ id: string; value: string; label: JSX.Element; error: string[] | null }>;
+  onChange(field: string, value: string): void;
+}
 
-  const updatePolicy = (updatedPolicy: NewPackagePolicy) =>
-    onChange({
-      isValid: true,
-      updatedPolicy,
-    });
+const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) => (
+  <div>
+    {fields.map(({ value, id, label, error }) => (
+      <EuiFormRow key={id} id={id} fullWidth label={label} isInvalid={!!error} error={error}>
+        <EuiFieldText
+          isInvalid={!!error}
+          fullWidth
+          value={value}
+          onChange={(event) => onChange(id, event.target.value)}
+        />
+      </EuiFormRow>
+    ))}
+  </div>
+);
 
-  /**
-   * - Updates policy inputs by user selection
-   * - Updates hidden policy vars
-   */
-  const setEnabledPolicyInput = (inputType: PostureInput) => {
-    const inputVars = getPostureInputHiddenVars(inputType);
-    const policy = getPosturePolicy(newPolicy, inputType, inputVars);
-    updatePolicy(policy);
-  };
+export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
+  ({ newPolicy, onChange, validationResults, isEditPage: edit }) => {
+    const { integration } = useParams<{ integration: PosturePolicyTemplate }>();
+    const input = getEnabledPostureInput(newPolicy);
 
-  useEffect(() => {
-    if (edit) return;
+    const updatePolicy = (updatedPolicy: NewPackagePolicy) =>
+      onChange({ isValid: true, updatedPolicy });
 
-    // Pick default input type for policy template.
-    // Only 1 enabled input is supported when all inputs are initially enabled.
-    setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+    /**
+     * - Updates policy inputs by user selection
+     * - Updates hidden policy vars
+     */
+    const setEnabledPolicyInput = (inputType: PostureInput) => {
+      const inputVars = getPostureInputHiddenVars(inputType);
+      const policy = getPosturePolicy(newPolicy, inputType, inputVars);
+      updatePolicy(policy);
+    };
 
-    // Required for mount only to ensure a single input type is selected
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [edit]);
+    const integrationFields = [
+      {
+        id: 'name',
+        value: newPolicy.name,
+        error: validationResults?.name || null,
+        label: (
+          <FormattedMessage
+            id="xpack.csp.fleetIntegration.integrationNameLabel"
+            defaultMessage="Name"
+          />
+        ),
+      },
+      {
+        id: 'description',
+        value: newPolicy.description || '',
+        error: validationResults?.description || null,
+        label: (
+          <FormattedMessage
+            id="xpack.csp.fleetIntegration.integrationDescriptionLabel"
+            defaultMessage="Description"
+          />
+        ),
+      },
+    ];
 
-  return (
-    <div>
-      {!!edit && <EditScreenStepTitle />}
+    useEffect(() => {
+      if (edit) return;
 
-      {/* Shows info on the active policy template */}
-      <PolicyTemplateInfo postureType={input.policy_template} />
-      <EuiSpacer size="l" />
+      // Pick default input type for policy template.
+      // Only 1 enabled input is supported when all inputs are initially enabled.
+      setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
 
-      {/* Defines the single enabled input of the active policy template */}
-      <PolicyTemplateInputSelector
-        input={input}
-        setInput={setEnabledPolicyInput}
-        disabled={!!edit}
-      />
-      <EuiSpacer size="l" />
+      // Required for mount only to ensure a single input type is selected
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [edit]);
 
-      {/* Defines the name/description */}
-      <IntegrationSettings
-        name={newPolicy.name}
-        description={newPolicy.description || ''}
-        onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
-      />
-      {/* Defines the vars of the enabled input of the active policy template */}
-      <PolicyTemplateVarsForm input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
-      <EuiSpacer />
-    </div>
-  );
-});
+    return (
+      <div>
+        {edit && <EditScreenStepTitle />}
+
+        {/* Defines the enabled policy template */}
+        {!integration && (
+          <>
+            <PolicyTemplateSelector
+              selectedTemplate={input.policy_template!}
+              policy={newPolicy}
+              setPolicyTemplate={(template) => setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template])}
+              disabled={edit}
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {/* Shows info on the active policy template */}
+        <PolicyTemplateInfo postureType={input.policy_template} />
+        <EuiSpacer size="l" />
+
+        {/* Defines the single enabled input of the active policy template */}
+        <PolicyTemplateInputSelector
+          input={input}
+          setInput={setEnabledPolicyInput}
+          disabled={edit}
+        />
+        <EuiSpacer size="l" />
+
+        {/* Defines the name/description */}
+        <IntegrationSettings
+          fields={integrationFields}
+          onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
+        />
+        {/* Defines the vars of the enabled input of the active policy template */}
+        <PolicyTemplateVarsForm input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
+        <EuiSpacer />
+      </div>
+    );
+  }
+);
+
+CspPolicyTemplateForm.displayName = 'CspPolicyTemplateForm';
+
+// eslint-disable-next-line import/no-default-export
+export { CspPolicyTemplateForm as default };

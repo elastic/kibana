@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import { CspPolicyTemplateForm } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import { getMockPolicyAWS, getMockPolicyEKS, getMockPolicyK8s } from './mocks';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
 import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
@@ -25,7 +25,23 @@ describe('<CspPolicyTemplateForm />', () => {
     newPolicy: NewPackagePolicy;
   }) => (
     <TestProvider>
-      <CspPolicyTemplateForm newPolicy={newPolicy} onChange={onChange} edit={edit} />
+      {edit && (
+        <CspPolicyTemplateForm
+          policy={newPolicy as PackagePolicy}
+          newPolicy={newPolicy}
+          onChange={onChange}
+          packageInfo={{} as any}
+          isEditPage={true}
+        />
+      )}
+      {!edit && (
+        <CspPolicyTemplateForm
+          newPolicy={newPolicy}
+          onChange={onChange}
+          packageInfo={{} as any}
+          isEditPage={false}
+        />
+      )}
     </TestProvider>
   );
 
