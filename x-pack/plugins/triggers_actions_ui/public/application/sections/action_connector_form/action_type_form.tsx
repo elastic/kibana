@@ -126,7 +126,7 @@ export const ActionTypeForm = ({
     errors: {},
   });
   const [actionParamsWarnings, setActionParamsWarnings] = useState<{
-    warnings: { [key: string]: string };
+    warnings: Record<string, string>;
   }>({
     warnings: {},
   });
