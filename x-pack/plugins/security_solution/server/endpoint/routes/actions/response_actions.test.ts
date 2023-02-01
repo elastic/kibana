@@ -41,6 +41,7 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   GET_FILE_ROUTE,
+  EXECUTE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   ActionDetails,
@@ -49,6 +50,7 @@ import type {
   HostMetadata,
   LogsEndpointAction,
   ResponseActionRequestBody,
+  ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
@@ -558,6 +560,65 @@ describe('Response actions', () => {
         expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
         expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('get-file');
         expect(actionDocs[1].body!.data.command).toEqual('get-file');
+
+        expect(mockResponse.ok).toBeCalled();
+        const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
+        expect(responseBody.action).toBeUndefined();
+      });
+
+      it('handles execute', async () => {
+        const ctx = await callRoute(
+          EXECUTE_ROUTE,
+          {
+            body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al', timeout: 1000 } },
+          },
+          { endpointDsExists: true }
+        );
+        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
+        const actionDocs: [
+          { index: string; body?: LogsEndpointAction },
+          { index: string; body?: EndpointAction }
+        ] = [
+          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
+          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
+        ];
+
+        expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
+        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
+        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
+        const parameters = actionDocs[1].body!.data.parameters as ResponseActionsExecuteParameters;
+        expect(parameters.command).toEqual('ls -al');
+        expect(parameters.timeout).toEqual(1000);
+        expect(actionDocs[1].body!.data.command).toEqual('execute');
+
+        expect(mockResponse.ok).toBeCalled();
+        const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
+        expect(responseBody.action).toBeUndefined();
+      });
+
+      it('handles execute without optional `timeout`', async () => {
+        const ctx = await callRoute(
+          EXECUTE_ROUTE,
+          {
+            body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al' } },
+          },
+          { endpointDsExists: true }
+        );
+        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
+        const actionDocs: [
+          { index: string; body?: LogsEndpointAction },
+          { index: string; body?: EndpointAction }
+        ] = [
+          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
+          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
+        ];
+
+        expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
+        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
+        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
+        const parameters = actionDocs[1].body!.data.parameters as ResponseActionsExecuteParameters;
+        expect(parameters.command).toEqual('ls -al');
+        expect(actionDocs[1].body!.data.command).toEqual('execute');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;

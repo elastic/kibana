@@ -27,7 +27,7 @@ import {
   tags,
   findCaseUserActionsResponse,
 } from '../mock';
-import type { CaseUpdateRequest, ResolvedCase } from '../../../common/ui/types';
+import type { CaseConnectors, CaseUpdateRequest, ResolvedCase } from '../../../common/ui/types';
 import { SeverityAll } from '../../../common/ui/types';
 import type {
   CasePatchRequest,
@@ -39,6 +39,7 @@ import { CaseStatuses } from '../../../common/api';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
 export const getCase = async (
   caseId: string,
@@ -140,3 +141,8 @@ export const getFeatureIds = async (
   _query: { registrationContext: string[] },
   _signal: AbortSignal
 ): Promise<ValidFeatureId[]> => Promise.resolve(['siem', 'observability']);
+
+export const getCaseConnectors = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<CaseConnectors> => Promise.resolve(getCaseConnectorsMockResponse());
