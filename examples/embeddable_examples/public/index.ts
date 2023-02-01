@@ -20,6 +20,7 @@ export { TODO_EMBEDDABLE } from './todo';
 export { BOOK_EMBEDDABLE } from './book';
 
 export { SIMPLE_EMBEDDABLE } from './migrations';
+export { FILTER_DEBUGGER_EMBEDDABLE } from './filter_debugger';
 
 import { EmbeddableExamplesPlugin } from './plugin';
 
