@@ -245,21 +245,20 @@ export interface ThreatEnrichment {
   matched: { id: string; index: string; field: string; atomic?: string; type: string };
 }
 
-export interface ThreatMatchNamedQuery {
+interface BaseThreatNamedQuery {
+  field: string;
+  value: string;
+  queryType: string;
+}
+export interface ThreatMatchNamedQuery extends BaseThreatNamedQuery {
   id: string;
   index: string;
-  field: string;
-  value: string;
-  queryType?: string;
 }
 
-export interface ThreatTermNamedQuery {
-  id?: string;
-  index?: string;
-  field: string;
-  value: string;
-  queryType?: string;
-}
+export type ThreatTermNamedQuery = BaseThreatNamedQuery;
+
+export type DecodedThreatNamedQuery = BaseThreatNamedQuery & { id?: string; index?: string };
+
 export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
 
 export interface BuildThreatEnrichmentOptions {

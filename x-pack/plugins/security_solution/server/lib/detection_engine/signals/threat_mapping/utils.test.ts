@@ -707,6 +707,7 @@ describe('utils', () => {
           index: 'index',
           field: 'field',
           value: 'value',
+          queryType: 'mq',
         });
 
         expect(typeof encoded).toEqual('string');
@@ -742,6 +743,44 @@ describe('utils', () => {
 
         expect(decoded).not.toBe(query);
         expect(decoded).toEqual({ ...query, id: '', index: '' });
+      });
+
+      it('raises an error if the input is invalid', () => {
+        const badInput = 'nope';
+
+        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
+          'Decoded query is invalid. Decoded value: {"id":"nope"}'
+        );
+      });
+
+      it('raises an error if the query is missing a value for match query', () => {
+        const badQuery: ThreatMatchNamedQuery = {
+          id: 'my_id',
+          index: 'index',
+          // @ts-expect-error field intentionally undefined
+          field: undefined,
+          value: 'host.name',
+          queryType: 'mq',
+        };
+        const badInput = encodeThreatMatchNamedQuery(badQuery);
+
+        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
+          'Decoded query is invalid. Decoded value: {"id":"my_id","index":"index","field":"","value":"host.name","queryType":"mq"}'
+        );
+      });
+
+      it('raises an error if the query is invalid a value for term query', () => {
+        const badQuery: ThreatTermNamedQuery = {
+          // @ts-expect-error field intentionally undefined
+          field: undefined,
+          value: 'host.name',
+          queryType: 'tq',
+        };
+        const badInput = encodeThreatMatchNamedQuery(badQuery);
+
+        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
+          'Decoded query is invalid. Decoded value: {"id":"","index":"","field":"","value":"host.name","queryType":"tq"}'
+        );
       });
     });
   });
@@ -816,7 +855,7 @@ describe('utils', () => {
   });
 
   describe('getSignalValueMap', () => {
-    it('return empy object if there no events', () => {
+    it('return empty object if there no events', () => {
       const valueMap = getSignalValueMap({
         eventList: [],
         threatMatchedFields: {
@@ -827,7 +866,7 @@ describe('utils', () => {
       expect(valueMap).toEqual({});
     });
 
-    it('return empy object if there some events but no fields', () => {
+    it('return empty object if there some events but no fields', () => {
       const valueMap = getSignalValueMap({
         eventList: [
           {

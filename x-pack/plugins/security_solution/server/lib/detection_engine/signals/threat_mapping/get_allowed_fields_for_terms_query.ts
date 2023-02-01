@@ -38,7 +38,9 @@ export const getAllowedFieldForTermQueryFromMapping = (
   return result;
 };
 
-// Return map of fields allowed for term query for source and threat indices
+/**
+ * Return map of fields allowed for term query for source and threat indices
+ */
 export const getAllowedFieldsForTermQuery = async ({
   threatMatchedFields,
   services,
