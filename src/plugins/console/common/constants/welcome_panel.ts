@@ -58,6 +58,3 @@ GET $\{pathVariable}
  }
 }
 `;
-
-export const keyboardShortcutsImageUrl =
-  'https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt3e9d63b81228222c/639ba8008f1f170dcb41233d/auto-ident-command.gif';
