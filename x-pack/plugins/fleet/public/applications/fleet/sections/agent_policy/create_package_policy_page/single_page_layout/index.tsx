@@ -271,11 +271,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     packagePolicy.package?.name ?? '',
     'package-policy-replace-define-step'
   );
-
   if (replaceDefineStepView && extensionView) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      "'package-policy-create' is ignored when 'package-policy-replace-define-step' is defined"
+    throw new Error(
+      "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
 

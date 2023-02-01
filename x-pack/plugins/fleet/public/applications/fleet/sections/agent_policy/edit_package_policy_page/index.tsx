@@ -35,7 +35,7 @@ import {
 } from '../../../../integrations/hooks';
 import {
   Loading,
-  Error,
+  Error as ErrorComponent,
   ExtensionWrapper,
   EuiButtonWithTooltip,
   DevtoolsRequestFlyoutButton,
@@ -250,9 +250,8 @@ export const EditPackagePolicyForm = memo<{
   );
 
   if (replaceDefineStepView && extensionView) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      "'package-policy-edit' is ignored when 'package-policy-replace-define-step' is defined"
+    throw new Error(
+      "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
 
@@ -387,7 +386,7 @@ export const EditPackagePolicyForm = memo<{
         {isLoadingData ? (
           <Loading />
         ) : loadingError || !agentPolicy || !packageInfo ? (
-          <Error
+          <ErrorComponent
             title={
               <FormattedMessage
                 id="xpack.fleet.editPackagePolicy.errorLoadingDataTitle"
