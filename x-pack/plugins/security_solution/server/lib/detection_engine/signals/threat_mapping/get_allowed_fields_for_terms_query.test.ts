@@ -79,7 +79,6 @@ describe('get_allowed_fields_for_terms_query copy', () => {
     });
     it('should disable fields if in one index type not supported', () => {
       const result = getAllowedFieldForTermQueryFromMapping({
-        ...indexMapping,
         'new-source-index': {
           mappings: {
             'host.name': {
@@ -92,6 +91,7 @@ describe('get_allowed_fields_for_terms_query copy', () => {
             },
           },
         },
+        ...indexMapping,
       } as IndicesGetFieldMappingResponse);
       expect(result).toEqual({
         'host.ip': true,
