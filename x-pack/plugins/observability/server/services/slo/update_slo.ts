@@ -49,6 +49,19 @@ export class UpdateSLO {
       hasBreakingChange = true;
     }
 
+    if (originalSlo.budgetingMethod !== updatedSlo.budgetingMethod) {
+      hasBreakingChange = true;
+    }
+
+    if (
+      originalSlo.budgetingMethod === 'timeslices' &&
+      updatedSlo.budgetingMethod === 'timeslices' &&
+      (originalSlo.objective.timesliceTarget !== updatedSlo.objective.timesliceTarget ||
+        !deepEqual(originalSlo.objective.timesliceWindow, updatedSlo.objective.timesliceWindow))
+    ) {
+      hasBreakingChange = true;
+    }
+
     if (!deepEqual(originalSlo.settings, updatedSlo.settings)) {
       hasBreakingChange = true;
     }
@@ -80,18 +93,6 @@ export class UpdateSLO {
   }
 
   private toResponse(slo: SLO): UpdateSLOResponse {
-    return updateSLOResponseSchema.encode({
-      id: slo.id,
-      name: slo.name,
-      description: slo.description,
-      indicator: slo.indicator,
-      budgetingMethod: slo.budgetingMethod,
-      timeWindow: slo.timeWindow,
-      objective: slo.objective,
-      settings: slo.settings,
-      revision: slo.revision,
-      createdAt: slo.createdAt,
-      updatedAt: slo.updatedAt,
-    });
+    return updateSLOResponseSchema.encode(slo);
   }
 }

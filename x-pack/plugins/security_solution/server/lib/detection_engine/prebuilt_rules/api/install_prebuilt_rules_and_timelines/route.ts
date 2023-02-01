@@ -27,7 +27,7 @@ import { createPrebuiltRules } from '../../logic/create_prebuilt_rules';
 import { updatePrebuiltRules } from '../../logic/update_prebuilt_rules';
 import { getRulesToInstall } from '../../logic/get_rules_to_install';
 import { getRulesToUpdate } from '../../logic/get_rules_to_update';
-import { ruleAssetSavedObjectsClientFactory } from '../../logic/rule_asset/rule_asset_saved_objects_client';
+import { ruleAssetsClientFactory } from '../../logic/rule_asset/rule_asset_saved_objects_client';
 import { rulesToMap } from '../../logic/utils';
 
 import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
@@ -90,7 +90,7 @@ export const createPrepackagedRules = async (
   const savedObjectsClient = context.core.savedObjects.client;
   const siemClient = context.getAppClient();
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
-  const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
+  const ruleAssetsClient = ruleAssetsClientFactory(savedObjectsClient);
 
   const { maxTimelineImportExportSize } = config;
 

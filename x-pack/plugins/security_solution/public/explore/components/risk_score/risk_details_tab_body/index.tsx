@@ -32,6 +32,7 @@ import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/
 import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { useDashboardButtonHref } from '../../../../common/hooks/use_dashboard_button_href';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -85,11 +86,12 @@ const RiskDetailsTabBodyComponent: React.FC<
     () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
     [entityName, riskEntity]
   );
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
   const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore({
     filterQuery,
     onlyLatest: false,
     riskEntity,
-    skip: !overTimeToggleStatus && !contributorsToggleStatus,
+    skip: (!overTimeToggleStatus && !contributorsToggleStatus) || isChartEmbeddablesEnabled,
     timerange,
   });
 
@@ -152,13 +154,14 @@ const RiskDetailsTabBodyComponent: React.FC<
         <EuiFlexItem grow={2}>
           <RiskScoreOverTime
             from={startDate}
-            to={endDate}
             loading={loading}
-            riskScore={data}
             queryId={queryId}
+            riskEntity={riskEntity}
+            riskScore={data}
             title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
-            toggleStatus={overTimeToggleStatus}
+            to={endDate}
             toggleQuery={toggleOverTimeQuery}
+            toggleStatus={overTimeToggleStatus}
           />
         </EuiFlexItem>
 

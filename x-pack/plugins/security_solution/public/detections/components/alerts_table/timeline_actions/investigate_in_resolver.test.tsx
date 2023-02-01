@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isInvestigateInResolverActionEnabled } from './investigate_in_resolver';
 
 describe('InvestigateInResolverAction', () => {

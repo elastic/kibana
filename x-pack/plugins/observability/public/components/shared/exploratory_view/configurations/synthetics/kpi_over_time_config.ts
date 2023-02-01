@@ -120,6 +120,18 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         ],
       },
       {
+        label: 'Total runs',
+        id: 'monitor.check_group',
+        field: 'monitor.check_group',
+        columnType: OPERATION_COLUMN,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `summary: *`,
+          },
+        ],
+      },
+      {
         field: SUMMARY_UP,
         id: SUMMARY_UP,
         label: UP_LABEL,

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { mergeWith, uniqBy, isEqual } from 'lodash';
+import { mergeWith, uniqWith, isEqual } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -45,6 +45,16 @@ export interface CreateState {
   datafeedCreated: CreationState;
   jobOpened: CreationState;
   datafeedStarted: CreationState;
+}
+
+function mergeQueriesCheck(
+  objValue: estypes.QueryDslQueryContainer,
+  srcValue: estypes.QueryDslQueryContainer
+) {
+  if (Array.isArray(objValue)) {
+    const combinedQuery = objValue.concat(srcValue);
+    return uniqWith(combinedQuery, isEqual);
+  }
 }
 
 export class QuickJobCreatorBase {
@@ -176,8 +186,11 @@ export class QuickJobCreatorBase {
   protected combineQueriesAndFilters(
     dashboard: { query: Query; filters: Filter[] },
     vis: { query: Query; filters: Filter[] },
-    dataView: DataViewBase
+    dataView: DataViewBase,
+    layerQuery?: { query: Query; filters: Filter[] }
   ): estypes.QueryDslQueryContainer {
+    let mergedVisAndLayerQueries;
+
     const { combinedQuery: dashboardQueries } = createQueries(
       {
         query: dashboard.query,
@@ -196,15 +209,23 @@ export class QuickJobCreatorBase {
       this.kibanaConfig
     );
 
+    if (layerQuery) {
+      const { combinedQuery: layerQueries } = createQueries(
+        {
+          query: layerQuery.query,
+          filter: layerQuery.filters,
+        },
+        dataView,
+        this.kibanaConfig
+      );
+      // combine vis and layer queries if layer-level query exists
+      mergedVisAndLayerQueries = mergeWith(visQueries, layerQueries, mergeQueriesCheck);
+    }
+
     const mergedQueries = mergeWith(
       dashboardQueries,
-      visQueries,
-      (objValue: estypes.QueryDslQueryContainer, srcValue: estypes.QueryDslQueryContainer) => {
-        if (Array.isArray(objValue)) {
-          const combinedQuery = objValue.concat(srcValue);
-          return uniqBy(combinedQuery, isEqual);
-        }
-      }
+      mergedVisAndLayerQueries ? mergedVisAndLayerQueries : visQueries,
+      mergeQueriesCheck
     );
 
     return mergedQueries;

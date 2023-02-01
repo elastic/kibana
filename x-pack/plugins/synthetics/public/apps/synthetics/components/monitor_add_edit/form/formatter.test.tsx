@@ -294,17 +294,15 @@ describe('format', () => {
     }
   );
 
-  it.each([
-    ['testCA', true],
-    ['', false],
-  ])('correctly formats form fields to monitor type', (certificateAuthorities, isTLSEnabled) => {
+  it.each([true, false])('correctly formats isTLSEnabled', (isTLSEnabled) => {
     expect(
       format({
         ...formValues,
+        isTLSEnabled,
         ssl: {
           // @ts-ignore next
           ...formValues.ssl,
-          certificate_authorities: certificateAuthorities,
+          certificate_authorities: 'mockCA',
         },
       })
     ).toEqual({
@@ -346,7 +344,7 @@ describe('format', () => {
       },
       'service.name': '',
       'ssl.certificate': '',
-      'ssl.certificate_authorities': certificateAuthorities,
+      'ssl.certificate_authorities': 'mockCA',
       'ssl.key': '',
       'ssl.key_passphrase': '',
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],

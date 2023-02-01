@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
@@ -70,7 +70,7 @@ export class MapContainer extends Component<Props, State> {
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
-    domId: uuid(),
+    domId: uuidv4(),
     showFitToBoundsButton: false,
     showTimesliderButton: false,
   };

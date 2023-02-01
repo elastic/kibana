@@ -117,6 +117,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'icons',
   'policy_templates',
   'release',
+  'elasticsearch',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
@@ -214,6 +215,9 @@ function parseAndVerifyArchive(
   // at least have all required properties
   // get optional values and combine into one object for the remaining operations
   const optGiven = pick(manifest, optionalArchivePackageProps);
+  if (optGiven.elasticsearch) {
+    optGiven.elasticsearch = parseTopLevelElasticsearchEntry(optGiven.elasticsearch);
+  }
   const parsed: ArchivePackage = { ...reqGiven, ...optGiven };
 
   // Package name and version from the manifest must match those from the toplevel directory
@@ -554,10 +558,38 @@ export function parseDataStreamElasticsearchEntry(
     );
   }
 
+  if (expandedElasticsearch?.index_template?.data_stream) {
+    parsedElasticsearchEntry['index_template.data_stream'] = expandDottedEntries(
+      expandedElasticsearch.index_template.data_stream
+    );
+  }
+
   if (expandedElasticsearch?.index_mode) {
     parsedElasticsearchEntry.index_mode = expandedElasticsearch.index_mode;
   }
 
+  return parsedElasticsearchEntry;
+}
+
+export function parseTopLevelElasticsearchEntry(elasticsearch?: Record<string, any>) {
+  const parsedElasticsearchEntry: Record<string, any> = {};
+  const expandedElasticsearch = expandDottedObject(elasticsearch);
+
+  if (expandedElasticsearch?.privileges) {
+    parsedElasticsearchEntry.privileges = expandedElasticsearch.privileges;
+  }
+
+  if (expandedElasticsearch?.index_template?.mappings) {
+    parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
+      expandedElasticsearch.index_template.mappings
+    );
+  }
+
+  if (expandedElasticsearch?.index_template?.settings) {
+    parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
+      expandedElasticsearch.index_template.settings
+    );
+  }
   return parsedElasticsearchEntry;
 }
 

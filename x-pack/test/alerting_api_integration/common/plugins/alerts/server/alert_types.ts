@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/logging';
 import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -92,6 +92,27 @@ function getAlwaysFiringAlertType() {
       context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
     },
     executor: curry(alwaysFiringExecutor)(),
+    alerts: {
+      context: 'test.always-firing',
+      fieldMap: {
+        instance_state_value: {
+          required: false,
+          type: 'boolean',
+        },
+        instance_params_value: {
+          required: false,
+          type: 'boolean',
+        },
+        instance_context_value: {
+          required: false,
+          type: 'boolean',
+        },
+        group_in_series_index: {
+          required: false,
+          type: 'long',
+        },
+      },
+    },
   };
   return result;
 }
@@ -293,7 +314,7 @@ function getExceedsAlertLimitRuleType() {
       const alertsToCreate = limit ? limit : 25;
 
       range(alertsToCreate)
-        .map(() => uuid.v4())
+        .map(() => uuidv4())
         .forEach((id: string) => {
           services.alertFactory.create(id).scheduleActions('default');
         });
@@ -541,6 +562,80 @@ function getPatternSuccessOrFailureAlertType() {
 
       if (!pattern[patternIndex]) {
         throw new Error('Failed to execute alert type');
+      }
+
+      return {
+        state: {
+          patternIndex: patternIndex + 1,
+        },
+      };
+    },
+  };
+  return result;
+}
+
+function getPatternFiringAutoRecoverFalseAlertType() {
+  const paramsSchema = schema.object({
+    pattern: schema.recordOf(
+      schema.string(),
+      schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
+    ),
+    reference: schema.maybe(schema.string()),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State extends RuleTypeState {
+    patternIndex?: number;
+  }
+  const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
+    id: 'test.patternFiringAutoRecoverFalse',
+    name: 'Test: Firing on a Pattern with Auto Recover: false',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    autoRecoverAlerts: false,
+    async executor(alertExecutorOptions) {
+      const { services, state, params } = alertExecutorOptions;
+      const pattern = params.pattern;
+      if (typeof pattern !== 'object') throw new Error('pattern is not an object');
+      let maxPatternLength = 0;
+      for (const [instanceId, instancePattern] of Object.entries(pattern)) {
+        if (!Array.isArray(instancePattern)) {
+          throw new Error(`pattern for instance ${instanceId} is not an array`);
+        }
+        maxPatternLength = Math.max(maxPatternLength, instancePattern.length);
+      }
+
+      if (params.reference) {
+        await services.scopedClusterClient.asCurrentUser.index({
+          index: ES_TEST_INDEX_NAME,
+          refresh: 'wait_for',
+          body: {
+            reference: params.reference,
+            source: 'alert:test.patternFiringAutoRecoverFalse',
+            ...alertExecutorOptions,
+          },
+        });
+      }
+
+      // get the pattern index, return if past it
+      const patternIndex = state.patternIndex ?? 0;
+      if (patternIndex >= maxPatternLength) {
+        return { state: { patternIndex } };
+      }
+
+      // fire if pattern says to
+      for (const [instanceId, instancePattern] of Object.entries(pattern)) {
+        const scheduleByPattern = instancePattern[patternIndex];
+        if (scheduleByPattern === true) {
+          services.alertFactory.create(instanceId).scheduleActions('default', {
+            ...EscapableStrings,
+            deep: DeepContextVariables,
+          });
+        } else if (typeof scheduleByPattern === 'string') {
+          services.alertFactory.create(instanceId).scheduleActions('default', scheduleByPattern);
+        }
       }
 
       return {
@@ -925,4 +1020,5 @@ export function defineAlertTypes(
   alerting.registerType(getPatternSuccessOrFailureAlertType());
   alerting.registerType(getExceedsAlertLimitRuleType());
   alerting.registerType(getAlwaysFiringAlertAsDataRuleType(logger, { ruleRegistry }));
+  alerting.registerType(getPatternFiringAutoRecoverFalseAlertType());
 }

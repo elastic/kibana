@@ -29,6 +29,9 @@ export const getSLOMappingsTemplate = (name: string) => ({
             denominator: {
               type: 'long',
             },
+            isGoodSlice: {
+              type: 'byte',
+            },
             context: {
               type: 'flattened',
             },

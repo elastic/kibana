@@ -528,6 +528,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 <DatePickerWrapper
                   isAutoRefreshOnly={!hasValidTimeField}
                   showRefresh={!hasValidTimeField}
+                  width="full"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -1,5 +1,5 @@
 post:
-  summary: Mute all alerts.
+  summary: Mutes all alerts.
   operationId: muteAllAlerts
   description: >
     This API snoozes the notifications for the rule indefinitely. The rule
@@ -19,6 +19,12 @@ post:
   responses:
     '204':
       description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

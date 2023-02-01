@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/content-management-content-editor",
-  "owner": "@elastic/kibana-global-experience",
+  "owner": "@elastic/appex-sharedux",
 }

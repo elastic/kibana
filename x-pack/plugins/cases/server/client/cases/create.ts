@@ -102,7 +102,7 @@ export const create = async (
       refresh: false,
     });
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.create_case,
       caseId: newCase.id,
       user,

@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
-import type { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { MapApp } from './map_app';
 import {
@@ -25,7 +25,7 @@ interface Props {
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
   originatingPath?: string;
-  history: AppMountParameters['history'];
+  history: ScopedHistory;
 }
 
 interface State {

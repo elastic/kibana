@@ -8,15 +8,16 @@
 import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { RawRule } from '../../types';
+import { RawRule, RuleNotifyWhen } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { NormalizedAlertAction } from '../types';
 import { RulesClientContext } from '../types';
+import { parseDuration } from '../../lib';
 
 export async function validateActions(
   context: RulesClientContext,
   alertType: UntypedNormalizedRuleType,
-  data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertAction[] }
+  data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & { actions: NormalizedAlertAction[] }
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
   const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
@@ -24,6 +25,8 @@ export async function validateActions(
   if (actions.length === 0) {
     return;
   }
+
+  const errors = [];
 
   // check for actions using connectors with missing secrets
   const actionsClient = await context.getActionsClient();
@@ -34,7 +37,7 @@ export async function validateActions(
   );
 
   if (actionsUsingConnectorsWithMissingSecrets.length) {
-    throw Boom.badRequest(
+    errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.misconfiguredConnector', {
         defaultMessage: 'Invalid connectors: {groups}',
         values: {
@@ -54,7 +57,7 @@ export async function validateActions(
     (group) => !availableAlertTypeActionGroups.has(group)
   );
   if (invalidActionGroups.length) {
-    throw Boom.badRequest(
+    errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.invalidGroups', {
         defaultMessage: 'Invalid action groups: {groups}',
         values: {
@@ -68,7 +71,7 @@ export async function validateActions(
   if (hasRuleLevelNotifyWhen || hasRuleLevelThrottle) {
     const actionsWithFrequency = actions.filter((action) => Boolean(action.frequency));
     if (actionsWithFrequency.length) {
-      throw Boom.badRequest(
+      errors.push(
         i18n.translate('xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams', {
           defaultMessage:
             'Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: {groups}',
@@ -81,7 +84,7 @@ export async function validateActions(
   } else {
     const actionsWithoutFrequency = actions.filter((action) => !action.frequency);
     if (actionsWithoutFrequency.length) {
-      throw Boom.badRequest(
+      errors.push(
         i18n.translate('xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq', {
           defaultMessage: 'Actions missing frequency parameters: {groups}',
           values: {
@@ -90,5 +93,41 @@ export async function validateActions(
         })
       );
     }
+  }
+
+  // check for actions throttled shorter than the rule schedule
+  const scheduleInterval = parseDuration(data.schedule.interval);
+  const actionsWithInvalidThrottles = actions.filter(
+    (action) =>
+      action.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
+      parseDuration(action.frequency.throttle!) < scheduleInterval
+  );
+  if (actionsWithInvalidThrottles.length) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidThrottles', {
+        defaultMessage:
+          'Action throttle cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
+        values: {
+          scheduleIntervalText: data.schedule.interval,
+          groups: actionsWithInvalidThrottles
+            .map((a) => `${a.group} (${a.frequency?.throttle})`)
+            .join(', '),
+        },
+      })
+    );
+  }
+
+  // Finalize and throw any errors present
+  if (errors.length) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.errorSummary', {
+        defaultMessage:
+          'Failed to validate actions due to the following {errorNum, plural, one {error:} other {# errors:\n-}} {errorList}',
+        values: {
+          errorNum: errors.length,
+          errorList: errors.join('\n- '),
+        },
+      })
+    );
   }
 }

@@ -204,7 +204,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 endDate={to}
                 skip={isInitializing}
               >
-                {({ isLoadingAnomaliesData, anomaliesData }) => (
+                {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
                   <HostOverviewManage
                     id={id}
                     isInDetailsSidePanel={false}
@@ -220,6 +220,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     inspect={inspect}
                     hostName={detailName}
                     indexNames={selectedPatterns}
+                    jobNameById={jobNameById}
                   />
                 )}
               </AnomalyTableProvider>

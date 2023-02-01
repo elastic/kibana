@@ -23,7 +23,9 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   hideExclude?: boolean;
   hideExists?: boolean;
   hideSort?: boolean;
+  hideActionBar?: boolean;
   exclude?: boolean;
+  placeholder?: string;
 }
 
 export type OptionsListField = FieldSpec & {
@@ -40,6 +42,7 @@ export interface OptionsListSuggestions {
  * The Options list response is returned from the serverside Options List route.
  */
 export interface OptionsListResponse {
+  rejected: boolean;
   suggestions: OptionsListSuggestions;
   totalCardinality: number;
   invalidSelections?: string[];

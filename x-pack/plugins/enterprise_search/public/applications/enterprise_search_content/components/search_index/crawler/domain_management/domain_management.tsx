@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useParams } from 'react-router-dom';
+
 import { useValues } from 'kea';
 
 import { EuiSpacer } from '@elastic/eui';
@@ -15,6 +17,8 @@ import { Loading } from '../../../../../shared/loading';
 
 import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import { GetCrawlerDomainsApiLogic } from '../../../../api/crawler/get_crawler_domains_api_logic';
+
+import { CrawlerDomainDetail } from '../crawler_domain_detail/crawler_domain_detail';
 
 import { AddDomainFlyout } from './add_domain/add_domain_flyout';
 import { CrawlerStatusBanner } from './crawler_status_banner';
@@ -28,11 +32,17 @@ export const SearchIndexDomainManagement: React.FC = () => {
   GetCrawlerDomainsApiLogic.mount();
   const { domains, isLoading } = useValues(DomainManagementLogic);
 
+  const { detailId } = useParams<{
+    detailId?: string;
+  }>();
+
   if (isLoading) {
     return <Loading />;
   }
 
-  return (
+  return detailId ? (
+    <CrawlerDomainDetail domainId={detailId} />
+  ) : (
     <>
       <EuiSpacer />
       <CrawlerStatusBanner />
