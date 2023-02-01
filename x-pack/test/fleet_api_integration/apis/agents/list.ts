@@ -17,7 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   let elasticAgentpkgVersion: string;
-  describe('fleet_list_agent', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/149937
+  describe.skip('fleet_list_agent', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       const getPkRes = await supertest
@@ -196,6 +197,26 @@ export default function ({ getService }: FtrProviderContext) {
       const agent2: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent2');
       expect(agent2.metrics?.memory_size_byte_avg).equal(undefined);
       expect(agent2.metrics?.cpu_avg).equal(undefined);
+    });
+
+    it('should return a status summary if getStatusSummary provided', async () => {
+      const { body: apiResponse } = await supertest
+        .get('/api/fleet/agents?getStatusSummary=true&perPage=0')
+        .expect(200);
+
+      expect(apiResponse.items).to.eql([]);
+
+      expect(apiResponse.statusSummary).to.eql({
+        degraded: 0,
+        enrolling: 0,
+        error: 0,
+        inactive: 0,
+        offline: 4,
+        online: 0,
+        unenrolled: 0,
+        unenrolling: 0,
+        updating: 0,
+      });
     });
   });
 }
