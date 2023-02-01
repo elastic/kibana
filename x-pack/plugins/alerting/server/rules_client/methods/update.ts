@@ -38,23 +38,23 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
   };
-  skipActionConnectorsValidations?: boolean;
+  skipMissingSecretsValidation?: boolean;
 }
 
 export async function update<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { id, data, skipActionConnectorsValidations }: UpdateOptions<Params>
+  { id, data, skipMissingSecretsValidation }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   return await retryIfConflicts(
     context.logger,
     `rulesClient.update('${id}')`,
-    async () => await updateWithOCC<Params>(context, { id, data, skipActionConnectorsValidations })
+    async () => await updateWithOCC<Params>(context, { id, data, skipMissingSecretsValidation })
   );
 }
 
 async function updateWithOCC<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data, skipActionConnectorsValidations }: UpdateOptions<Params>
+  { id, data, skipMissingSecretsValidation }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   let alertSavedObject: SavedObject<RawRule>;
 
@@ -102,7 +102,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   const updateResult = await updateAlert<Params>(
     context,
-    { id, data, skipActionConnectorsValidations },
+    { id, data, skipMissingSecretsValidation },
     alertSavedObject
   );
 
@@ -143,7 +143,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data, skipActionConnectorsValidations }: UpdateOptions<Params>,
+  { id, data, skipMissingSecretsValidation }: UpdateOptions<Params>,
   { attributes, version }: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
@@ -161,7 +161,7 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   // Validate
   const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
-  if (!skipActionConnectorsValidations) await validateActions(context, ruleType, data);
+  await validateActions(context, ruleType, data, skipMissingSecretsValidation);
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);

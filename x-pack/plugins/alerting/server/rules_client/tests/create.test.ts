@@ -3047,7 +3047,7 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
-  test('should create a rule and not throw an error when skipActionConnectorsValidations is true even when some actions are missing frequency params', async () => {
+  test('should create a rule even if action is missing secret when skipMissingSecretsValidation is true', async () => {
     const data = getMockData({
       actions: [
         {
@@ -3077,33 +3077,10 @@ describe('create()', () => {
     actionsClient.getBulk.mockResolvedValue([
       {
         id: '1',
-        actionTypeId: 'test',
-        config: {
-          from: 'me@me.com',
-          hasAuth: false,
-          host: 'hello',
-          port: 22,
-          secure: null,
-          service: null,
-        },
+        actionTypeId: '.slack',
+        config: {},
         isMissingSecrets: true,
-        name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-      },
-      {
-        id: '2',
-        actionTypeId: 'test',
-        config: {
-          from: 'me@me.com',
-          hasAuth: false,
-          host: 'hello',
-          port: 22,
-          secure: null,
-          service: null,
-        },
-        isMissingSecrets: false,
-        name: 'email connector',
+        name: 'Slack connector',
         isPreconfigured: false,
         isDeprecated: false,
       },
@@ -3124,23 +3101,7 @@ describe('create()', () => {
           {
             group: 'default',
             actionRef: 'action_0',
-            actionTypeId: 'test',
-            params: {
-              foo: true,
-            },
-          },
-          {
-            group: 'default',
-            actionRef: 'action_1',
-            actionTypeId: 'test',
-            params: {
-              foo: true,
-            },
-          },
-          {
-            group: 'default',
-            actionRef: 'action_2',
-            actionTypeId: 'test2',
+            actionTypeId: '.slack',
             params: {
               foo: true,
             },
@@ -3174,30 +3135,14 @@ describe('create()', () => {
       },
       references: [],
     });
-    const result = await rulesClient.create({ data, skipActionConnectorsValidations: true });
+    const result = await rulesClient.create({ data, skipMissingSecretsValidation: true });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
-            "actionTypeId": "test",
+            "actionTypeId": ".slack",
             "group": "default",
             "id": "1",
-            "params": Object {
-              "foo": true,
-            },
-          },
-          Object {
-            "actionTypeId": "test",
-            "group": "default",
-            "id": "1",
-            "params": Object {
-              "foo": true,
-            },
-          },
-          Object {
-            "actionTypeId": "test2",
-            "group": "default",
-            "id": "2",
             "params": Object {
               "foo": true,
             },

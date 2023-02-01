@@ -46,12 +46,12 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'nextRun'
   > & { actions: NormalizedAlertAction[] };
   options?: SavedObjectOptions;
-  skipActionConnectorsValidations?: boolean;
+  skipMissingSecretsValidation?: boolean;
 }
 
 export async function create<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { data, options, skipActionConnectorsValidations }: CreateOptions<Params>
+  { data, options, skipMissingSecretsValidation }: CreateOptions<Params>
 ): Promise<SanitizedRule<Params>> {
   const id = options?.id || SavedObjectsUtils.generateId();
 
@@ -105,12 +105,11 @@ export async function create<Params extends RuleTypeParams = never>(
     }
   }
 
-  if (!skipActionConnectorsValidations) {
-    await validateActions(context, ruleType, data);
-    await withSpan({ name: 'validateActions', type: 'rules' }, () =>
-      validateActions(context, ruleType, data)
-    );
-  }
+  await validateActions(context, ruleType, data, skipMissingSecretsValidation);
+  await withSpan({ name: 'validateActions', type: 'rules' }, () =>
+    validateActions(context, ruleType, data, skipMissingSecretsValidation)
+  );
+
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
   if (

@@ -2022,56 +2022,17 @@ describe('update()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
-  test('should not validate actions when skipActionConnectorsValidations is true even if connector has missing secrets and update the rule', async () => {
+  test('should update a rule even if action is missing secret when skipMissingSecretsValidation is true', async () => {
     // Reset from default behaviour
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
       {
         id: '1',
-        actionTypeId: 'test',
-        config: {
-          from: 'me@me.com',
-          hasAuth: false,
-          host: 'hello',
-          port: 22,
-          secure: null,
-          service: null,
-        },
+        actionTypeId: '.slack',
+        config: {},
         isMissingSecrets: true,
-        name: 'email connector',
+        name: 'slack connector',
         isPreconfigured: false,
-        isDeprecated: false,
-      },
-      {
-        id: '2',
-        actionTypeId: 'test2',
-        config: {
-          from: 'me@me.com',
-          hasAuth: false,
-          host: 'hello',
-          port: 22,
-          secure: null,
-          service: null,
-        },
-        isMissingSecrets: false,
-        name: 'another email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-      },
-      {
-        id: 'preconfigured',
-        actionTypeId: 'test',
-        config: {
-          from: 'me@me.com',
-          hasAuth: false,
-          host: 'hello',
-          port: 22,
-          secure: null,
-          service: null,
-        },
-        isMissingSecrets: false,
-        name: 'preconfigured email connector',
-        isPreconfigured: true,
         isDeprecated: false,
       },
     ]);
@@ -2092,23 +2053,7 @@ describe('update()', () => {
           {
             group: 'default',
             actionRef: 'action_0',
-            actionTypeId: 'test',
-            params: {
-              foo: true,
-            },
-          },
-          {
-            group: 'default',
-            actionRef: 'preconfigured:preconfigured',
-            actionTypeId: 'test',
-            params: {
-              foo: true,
-            },
-          },
-          {
-            group: 'custom',
-            actionRef: 'preconfigured:preconfigured',
-            actionTypeId: 'test',
+            actionTypeId: '.slack',
             params: {
               foo: true,
             },
@@ -2151,23 +2096,9 @@ describe('update()', () => {
               foo: true,
             },
           },
-          {
-            group: 'default',
-            id: 'preconfigured',
-            params: {
-              foo: true,
-            },
-          },
-          {
-            group: 'custom',
-            id: 'preconfigured',
-            params: {
-              foo: true,
-            },
-          },
         ],
       },
-      skipActionConnectorsValidations: true,
+      skipMissingSecretsValidation: true,
     });
 
     expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
@@ -2178,23 +2109,7 @@ describe('update()', () => {
           {
             group: 'default',
             actionRef: 'action_0',
-            actionTypeId: 'test',
-            params: {
-              foo: true,
-            },
-          },
-          {
-            group: 'default',
-            actionRef: 'preconfigured:preconfigured',
-            actionTypeId: 'test',
-            params: {
-              foo: true,
-            },
-          },
-          {
-            group: 'custom',
-            actionRef: 'preconfigured:preconfigured',
-            actionTypeId: 'test',
+            actionTypeId: '.slack',
             params: {
               foo: true,
             },
@@ -2228,25 +2143,9 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionTypeId": "test",
+            "actionTypeId": ".slack",
             "group": "default",
             "id": "1",
-            "params": Object {
-              "foo": true,
-            },
-          },
-          Object {
-            "actionTypeId": "test",
-            "group": "default",
-            "id": "preconfigured",
-            "params": Object {
-              "foo": true,
-            },
-          },
-          Object {
-            "actionTypeId": "test",
-            "group": "custom",
-            "id": "preconfigured",
             "params": Object {
               "foo": true,
             },
@@ -2270,7 +2169,7 @@ describe('update()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(3);
+    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(1);
   });
 
   test('logs warning when creating with an interval less than the minimum configured one when enforce = false', async () => {
