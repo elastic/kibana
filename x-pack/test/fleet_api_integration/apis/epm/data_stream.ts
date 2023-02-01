@@ -176,23 +176,6 @@ export default function (providerContext: FtrProviderContext) {
       let packagePolicyData: any;
 
       beforeEach(async () => {
-        await installPackage('nginx', '1.5.0');
-        await es.transport.request(
-          {
-            method: 'POST',
-            path: `/logs-nginx.access-default/_doc`,
-            body: {
-              '@timestamp': '2015-01-01',
-              message: 'test',
-              data_stream: {
-                dataset: `logs-nginx.access.test_logs`,
-                namespace: 'default',
-                type: 'logs',
-              },
-            },
-          },
-          { meta: true }
-        );
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
@@ -218,19 +201,7 @@ export default function (providerContext: FtrProviderContext) {
         const { body: responseWithForce } = await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
-          .send({
-            force: true,
-            name: `test-package-experimental-feature-${uuidv4()}`,
-            description: '',
-            namespace: 'default',
-            policy_id: agentPolicyId,
-            enabled: true,
-            inputs: [],
-            package: {
-              name: 'nginx',
-              version: '1.5.0',
-            },
-          })
+          .send(packagePolicyData)
           .expect(200);
 
         packagePolicyId = responseWithForce.item.id;
@@ -243,21 +214,13 @@ export default function (providerContext: FtrProviderContext) {
           })
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-        await uninstallPackage('nginx', '1.5.0');
-        await es.transport.request(
-          {
-            method: 'DELETE',
-            path: `/_data_stream/logs-nginx.access-default`,
-          },
-          { meta: true }
-        );
       });
 
-      async function getLogsNginxAccessDefaultBackingIndicesLength() {
+      async function getLogsDefaultBackingIndicesLength() {
         const resLogsDatastream = await es.transport.request<any>(
           {
             method: 'GET',
-            path: `/_data_stream/logs-nginx.access-default`,
+            path: `/_data_stream/${logsTemplateName}-${namespaces[0]}`,
           },
           { meta: true }
         );
@@ -266,7 +229,7 @@ export default function (providerContext: FtrProviderContext) {
       }
 
       it('should rollover datstream after enabling a expiremental datastream feature that need a rollover', async () => {
-        expect(await getLogsNginxAccessDefaultBackingIndicesLength()).to.be(1);
+        expect(await getLogsDefaultBackingIndicesLength()).to.be(1);
 
         await supertest
           .put(`/api/fleet/package_policies/${packagePolicyId}`)
@@ -277,7 +240,7 @@ export default function (providerContext: FtrProviderContext) {
               ...packagePolicyData.package,
               experimental_data_stream_features: [
                 {
-                  data_stream: 'logs-nginx.access',
+                  data_stream: logsTemplateName,
                   features: {
                     synthetic_source: false,
                     tsdb: false,
@@ -291,7 +254,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         // Datastream should have been rolled over
-        expect(await getLogsNginxAccessDefaultBackingIndicesLength()).to.be(2);
+        expect(await getLogsDefaultBackingIndicesLength()).to.be(2);
       });
     });
   });
