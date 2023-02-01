@@ -25,7 +25,7 @@ or a similar tool that can generate HTML output from OAS.
 
 . Rename the output files. For example:
   ```
-   mv $GIT_HOME/kibana/docs/api-generated/rules/index.html $GIT_HOME/kibana/docs/api-generated/rules/rule-apis-passthru.asciidoc
+  mv $GIT_HOME/kibana/docs/api-generated/rules/index.html $GIT_HOME/kibana/docs/api-generated/rules/rule-apis-passthru.asciidoc
   mv $GIT_HOME/kibana/docs/api-generated/cases/index.html $GIT_HOME/kibana/docs/api-generated/cases/case-apis-passthru.asciidoc
   mv $GIT_HOME/kibana/docs/api-generated/connectors/index.html $GIT_HOME/kibana/docs/api-generated/connectors/connector-apis-passthru.asciidoc
   mv $GIT_HOME/kibana/docs/api-generated/machine-learning/index.html $GIT_HOME/kibana/docs/api-generated/machine-learning/ml-apis-passthru.asciidoc

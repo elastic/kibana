@@ -33,6 +33,8 @@ export const SERVICE_RUNTIME_VERSION = 'service.runtime.version';
 export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
 export const SERVICE_TARGET_TYPE = 'service.target.type';
+export const SERVICE_OVERFLOW_COUNT =
+  'service_transaction.aggregation.overflow_count';
 
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
@@ -56,6 +58,8 @@ export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 export const TRANSACTION_FAILURE_COUNT = 'transaction.failure_count';
 export const TRANSACTION_SUCCESS_COUNT = 'transaction.success_count';
+export const TRANSACTION_OVERFLOW_COUNT =
+  'transaction.aggregation.overflow_count';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
 
