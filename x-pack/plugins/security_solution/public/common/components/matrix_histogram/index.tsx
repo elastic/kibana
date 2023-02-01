@@ -307,6 +307,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                 height={CHART_HEIGHT}
                 id={`${id}-embeddable`}
                 inspectTitle={title as string}
+                lensAttributes={lensAttributes}
                 stackByField={selectedStackByOption.value}
                 timerange={timerange}
               />
