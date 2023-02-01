@@ -38,8 +38,8 @@ export const ThresholdIndicator = ({
   loading: boolean;
   current: number;
   previous?: number | null;
-  previousFormatted: string;
-  currentFormatted: string;
+  previousFormatted?: string | number;
+  currentFormatted: string | number;
   setHasAnyDelta?: (hasDelta: boolean) => void;
   asStat?: boolean;
 }) => {
