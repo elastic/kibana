@@ -26,7 +26,7 @@ import type {
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-common';
+import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
   SavedObjectsSerializer,

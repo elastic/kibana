@@ -33,9 +33,3 @@ export type {
 } from './src/saved_objects_imports';
 
 export type { SavedObjectTypeIdTuple, LegacyUrlAliasTarget } from './src/types';
-
-export {
-  SavedObjectsErrorHelpers,
-  type DecoratedError,
-  type BulkResolveError,
-} from './src/saved_objects_error_helpers';

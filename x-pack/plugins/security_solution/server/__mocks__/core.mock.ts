@@ -9,7 +9,7 @@
 
 // We _must_ import from the restricted path or we pull in _everything_ including memory leaks from Kibana core
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 module.exports = {
   SavedObjectsUtils,

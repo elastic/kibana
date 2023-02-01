@@ -11,9 +11,9 @@ import {
   SavedObjectsFindResult,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { BulkResolveError, LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { EcsEvent } from '@kbn/ecs';
-import { SavedObject } from '../..';
+import { SavedObject, BulkResolveError } from '../..';
 
 /**
  * The MultiNamespaceReferencesOptions interface contains options

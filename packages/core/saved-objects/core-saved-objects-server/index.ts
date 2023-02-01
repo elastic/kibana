@@ -110,7 +110,11 @@ export {
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
 } from './src/extensions/extensions';
-
+export {
+  SavedObjectsErrorHelpers,
+  type DecoratedError,
+  type BulkResolveError,
+} from './src/saved_objects_error_helpers';
 export type {
   SavedObject,
   SavedObjectAttribute,

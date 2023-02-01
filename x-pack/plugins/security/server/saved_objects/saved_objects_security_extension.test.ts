@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { BulkResolveError, LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
-import type { AuthorizeCreateObject, AuthorizeUpdateObject } from '@kbn/core-saved-objects-server';
+import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { AuditAction } from '@kbn/core-saved-objects-server';
 import type {
   AuthorizeBulkGetObject,
+  AuthorizeCreateObject,
   AuthorizeObjectWithExistingSpaces,
-} from '@kbn/core-saved-objects-server/src/extensions/security';
+  AuthorizeUpdateObject,
+  BulkResolveError,
+} from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectReferenceWithContext,
   SavedObjectsClient,

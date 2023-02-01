@@ -13,9 +13,8 @@ import type {
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
-import type { BulkResolveError, LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
-import { AuditAction } from '@kbn/core-saved-objects-server';
+import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import { AuditAction, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   AddAuditEventParams,
   AuditHelperParams,
@@ -37,6 +36,7 @@ import type {
   AuthorizeOpenPointInTimeParams,
   AuthorizeUpdateParams,
   AuthorizeUpdateSpacesParams,
+  BulkResolveError,
   CheckAuthorizationParams,
   CheckAuthorizationResult,
   GetFindRedactTypeMapParams,
@@ -1057,13 +1057,13 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     for (const result of objects) {
       let auditableObject: { type: string; id: string } | undefined;
       if (isBulkResolveError(result)) {
-        const { type, id, error } = result;
+        const { type, id, error } = result as BulkResolveError;
         if (!SavedObjectsErrorHelpers.isBadRequestError(error)) {
           // Only "not found" errors should show up as audit events (not "unsupported type" errors)
           auditableObject = { type, id };
         }
       } else {
-        const { type, id, namespaces = [] } = result.saved_object;
+        const { type, id, namespaces = [] } = (result as SavedObjectsResolveResponse).saved_object;
         auditableObject = { type, id };
         for (const space of namespaces) {
           spacesToAuthorize.add(space);

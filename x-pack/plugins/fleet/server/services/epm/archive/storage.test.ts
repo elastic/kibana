@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 import { getAsset } from './storage';
 

@@ -23,7 +23,6 @@ import {
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { BulkResolveError } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -54,9 +53,10 @@ import type {
   SavedObjectUnsanitizedDoc,
   SavedObject,
   SavedObjectReference,
+  BulkResolveError,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { SavedObjectsRepository } from './repository';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { loggerMock } from '@kbn/logging-mocks';

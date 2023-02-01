@@ -37,8 +37,6 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
-
 import {
   encodeHitVersion,
   SavedObjectsSerializer,
@@ -63,6 +61,7 @@ import {
   AuthorizeUpdateSpacesParams,
   AuthorizeFindParams,
   AuthorizationTypeMap,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
 import { SavedObjectsRepository } from '../lib/repository';

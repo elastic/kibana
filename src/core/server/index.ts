@@ -255,7 +255,6 @@ export type {
   SavedObjectsImportWarning,
   SavedObjectTypeIdTuple,
 } from '@kbn/core-saved-objects-common';
-export { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 
 export type {
   SavedObjectsBulkCreateObject,
@@ -363,7 +362,6 @@ export type {
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
-  EnforceAuthorizationParams,
   AddAuditEventParams,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
@@ -374,6 +372,7 @@ export {
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 export {
   SavedObjectsUtils,

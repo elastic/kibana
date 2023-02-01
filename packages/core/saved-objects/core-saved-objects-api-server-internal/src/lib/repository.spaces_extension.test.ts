@@ -32,8 +32,8 @@ import {
   ISavedObjectsSecurityExtension,
   ISavedObjectsEncryptionExtension,
   SavedObject,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
 import { kibanaMigratorMock } from '../mocks';
 import {
   createRegistry,
