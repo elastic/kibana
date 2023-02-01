@@ -7,17 +7,23 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FilterGroup } from './filter_group';
-import { SearchField } from '../../common/search_field';
 
-export function ListFilters() {
+import { FilterGroup } from './filter_group';
+import { SearchField } from '../search_field';
+import { SyntheticsMonitorFilterChangeHandler } from './filter_fields';
+
+export function ListFilters({
+  handleFilterChange,
+}: {
+  handleFilterChange: SyntheticsMonitorFilterChangeHandler;
+}) {
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" wrap={true}>
       <EuiFlexItem grow={2}>
         <SearchField />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
-        <FilterGroup />
+        <FilterGroup handleFilterChange={handleFilterChange} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
