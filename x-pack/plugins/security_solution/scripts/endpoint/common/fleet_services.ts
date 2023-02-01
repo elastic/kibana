@@ -215,7 +215,7 @@ export const fetchAgentPolicyList = async (
 };
 
 /**
- * Returns the an Agent Version that matches the current stack version. Will use `SNAPSHOT` if
+ * Returns the Agent Version that matches the current stack version. Will use `SNAPSHOT` if
  * appropriate too.
  * @param kbnClient
  */

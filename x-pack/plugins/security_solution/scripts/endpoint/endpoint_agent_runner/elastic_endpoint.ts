@@ -142,7 +142,7 @@ export const enrollEndpointHost = async () => {
       }
     });
 
-    log.info(`Waiting for Agent to checkin with Fleet`);
+    log.info(`Waiting for Agent to check-in with Fleet`);
     await waitForHostToEnroll(kbnClient, vmName);
 
     log.info(`VM created using Multipass.

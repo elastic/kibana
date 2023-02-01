@@ -38,7 +38,7 @@ export const cli = () => {
       description: `
   Enrolls a new host running Elastic Agent with Fleet. It will (if necessary) first create a
   Fleet Server instance using Docker, and then it will initialize a new Ubuntu VM using
-  'multipass', installs Elastic Agent and enrolls it with Fleet. Can be used multiple times
+  'multipass', install Elastic Agent and enroll it with Fleet. Can be used multiple times
   against the same stack.`,
       flags: {
         string: ['kibana', 'elastic', 'username', 'password', 'version', 'policy'],
