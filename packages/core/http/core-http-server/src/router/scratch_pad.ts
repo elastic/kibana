@@ -66,62 +66,62 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
  *
  * This is perhaps the most verbose approach.
  */
+{
+  type NewRouteRegistrar1<
+    P,
+    Q,
+    B,
+    Context extends RequestHandlerContextBase = RequestHandlerContextBase,
+    Method extends RouteMethod = 'get'
+  > = (
+    route: RouteConfig<P, Q, B, Method> & { version: Version },
+    handler: RequestHandler<P, Q, B, Context, Method>
+  ) => void;
 
-type NewRouteRegistrar1<
-  P,
-  Q,
-  B,
-  Context extends RequestHandlerContextBase = RequestHandlerContextBase,
-  Method extends RouteMethod = 'get'
-> = (
-  route: RouteConfig<P, Q, B, Method> & { version: Version },
-  handler: RequestHandler<P, Q, B, Context, Method>
-) => void;
+  const examplePostRegistrar1: NewRouteRegistrar1<unknown, unknown, unknown> = {} as any;
 
-const examplePostRegistrar1: NewRouteRegistrar1<unknown, unknown, unknown> = {} as any;
+  /**
+   * EXAMPLE USAGE:
+   */
 
-/**
- * EXAMPLE USAGE:
- */
+  const common = {
+    path: '/api/my-plugin/my-route',
+    options: {},
+  };
 
-const common = {
-  path: '/api/my-plugin/my-route',
-  options: {},
-};
-
-examplePostRegistrar1(
-  {
-    ...common,
-    version: '1',
-    validate: { body: schema.object({ name: schema.string() }) },
-  },
-  async (ctx, req, res) => res.ok()
-);
-
-examplePostRegistrar1(
-  {
-    ...common,
-    version: '2',
-    validate: { body: schema.object({ name: schema.string(), lastName: schema.string() }) },
-  },
-  async (ctx, req, res) => res.ok()
-);
-
-examplePostRegistrar1(
-  {
-    ...common,
-    version: '3',
-    validate: {
-      body: schema.object({
-        name: schema.string(),
-        lastName: schema.string(),
-        age: schema.number(),
-      }),
+  examplePostRegistrar1(
+    {
+      ...common,
+      version: '1',
+      validate: { body: schema.object({ name: schema.string() }) },
     },
-  },
-  async (ctx, req, res) => res.ok()
-);
+    async (ctx, req, res) => res.ok()
+  );
 
+  examplePostRegistrar1(
+    {
+      ...common,
+      version: '2',
+      validate: { body: schema.object({ name: schema.string(), lastName: schema.string() }) },
+    },
+    async (ctx, req, res) => res.ok()
+  );
+
+  examplePostRegistrar1(
+    {
+      ...common,
+      version: '3',
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          lastName: schema.string(),
+          age: schema.number(),
+        }),
+      },
+    },
+    async (ctx, req, res) => res.ok()
+  );
+}
 /**
  * ===================== End first design =====================
  */
@@ -139,64 +139,64 @@ examplePostRegistrar1(
  * One approach could be to tightly pair the validation and handler in the registrar's
  * API.
  */
+{
+  interface Handler<
+    P,
+    Q,
+    B,
+    Context extends RequestHandlerContextBase = RequestHandlerContextBase,
+    Method extends RouteMethod = 'get'
+  > {
+    validate: RouteValidatorFullConfig<P, Q, B> | false;
+    handler: RequestHandler<P, Q, B, Context, Method>;
+  }
 
-interface Handler<
-  P,
-  Q,
-  B,
-  Context extends RequestHandlerContextBase = RequestHandlerContextBase,
-  Method extends RouteMethod = 'get'
-> {
-  validate: RouteValidatorFullConfig<P, Q, B> | false;
-  handler: RequestHandler<P, Q, B, Context, Method>;
+  type NewRouteRegistrar2<
+    Method extends RouteMethod = 'get',
+    Context extends RequestHandlerContextBase = RequestHandlerContextBase
+  > = (
+    route: Omit<RouteConfig<unknown, unknown, unknown, Method>, 'validate'>,
+    handlers: {
+      [version in Version]?: Handler<unknown, unknown, unknown, Context, Method>;
+    }
+  ) => void;
+
+  const examplePostRegistrar2: NewRouteRegistrar2 = {} as any;
+
+  /**
+   * EXAMPLE USAGE:
+   */
+
+  const v1Route: Handler<unknown, unknown, unknown> = {
+    validate: {
+      body: schema.object({
+        name: schema.string(),
+      }),
+    },
+    handler: async (ctx, req, res) => res.ok(),
+  };
+
+  const v2Route: Handler<unknown, unknown, unknown> = {
+    validate: {
+      body: schema.object({
+        name: schema.string(),
+        lastName: schema.string(),
+      }),
+    },
+    handler: async (ctx, req, res) => res.ok(),
+  };
+
+  examplePostRegistrar2(
+    {
+      path: '/api/my-plugin/my-route',
+      options: {},
+    },
+    {
+      '1': v1Route,
+      '2': v2Route,
+    }
+  );
 }
-
-type NewRouteRegistrar2<
-  Method extends RouteMethod = 'get',
-  Context extends RequestHandlerContextBase = RequestHandlerContextBase
-> = (
-  route: Omit<RouteConfig<unknown, unknown, unknown, Method>, 'validate'>,
-  handlers: {
-    [version in Version]?: Handler<unknown, unknown, unknown, Context, Method>;
-  }
-) => void;
-
-const examplePostRegistrar2: NewRouteRegistrar2 = {} as any;
-
-/**
- * EXAMPLE USAGE:
- */
-
-const v1Route: Handler<unknown, unknown, unknown> = {
-  validate: {
-    body: schema.object({
-      name: schema.string(),
-    }),
-  },
-  handler: async (ctx, req, res) => res.ok(),
-};
-
-const v2Route: Handler<unknown, unknown, unknown> = {
-  validate: {
-    body: schema.object({
-      name: schema.string(),
-      lastName: schema.string(),
-    }),
-  },
-  handler: async (ctx, req, res) => res.ok(),
-};
-
-examplePostRegistrar2(
-  {
-    path: '/api/my-plugin/my-route',
-    options: {},
-  },
-  {
-    '1': v1Route,
-    '2': v2Route,
-  }
-);
-
 /**
  * ===================== End second design =====================
  */
@@ -207,47 +207,57 @@ examplePostRegistrar2(
  *
  * For example:
  */
+{
+  const http: HttpServiceSetup & {
+    createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(opt: {
+      version: Version;
+    }) => IRouter<Context>;
+  } = {} as any;
 
-const http: HttpServiceSetup & {
-  createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(opt: {
-    version: Version;
-  }) => IRouter<Context>;
-} = {} as any;
+  const v1Router = http.createRouter(); // defaults to creating v1 router
+  const v2Router = http.createRouter({ version: '2' });
+  const v3Router = http.createRouter({ version: '3' });
 
-const v1Router = http.createRouter(); // defaults to creating v1 router
-const v2Router = http.createRouter({ version: '2' });
-const v3Router = http.createRouter({ version: '3' });
+  const common = {
+    path: '/api/my-plugin/my-route',
+    options: {},
+  };
 
-v1Router.post(
-  {
-    ...common,
-    validate: { body: schema.object({ name: schema.string() }) },
-  },
-  async (ctx, req, res) => res.ok()
-);
-
-v2Router.post(
-  {
-    ...common,
-    validate: { body: schema.object({ name: schema.string() }) },
-  },
-  async (ctx, req, res) => res.ok()
-);
-
-v3Router.post(
-  {
-    ...common,
-    validate: {
-      body: schema.object({
-        name: schema.string(),
-        lastName: schema.string(),
-        age: schema.number(),
-      }),
+  v1Router.post(
+    {
+      ...common,
+      validate: { body: schema.object({ name: schema.string() }) },
     },
-  },
-  async (ctx, req, res) => res.ok()
-);
+    async (ctx, req, res) => res.ok()
+  );
 
+  v2Router.post(
+    {
+      ...common,
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          lastName: schema.string(),
+        }),
+      },
+    },
+    async (ctx, req, res) => res.ok()
+  );
+
+  v3Router.post(
+    {
+      ...common,
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          lastName: schema.string(),
+          age: schema.number(),
+        }),
+      },
+    },
+    async (ctx, req, res) => res.ok()
+  );
+}
 /**
  * ===================== End third design =====================
  */
