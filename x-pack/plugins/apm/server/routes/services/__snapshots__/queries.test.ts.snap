@@ -99,6 +99,11 @@ Array [
       "aggs": Object {
         "sample": Object {
           "aggs": Object {
+            "service_overflow_count": Object {
+              "sum": Object {
+                "field": "service_transaction.aggregation.overflow_count",
+              },
+            },
             "services": Object {
               "aggs": Object {
                 "transactionType": Object {
@@ -142,7 +147,7 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 500,
+                "size": 1000,
               },
             },
           },
@@ -204,7 +209,7 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 500,
+                "size": 1000,
               },
             },
           },

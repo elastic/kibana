@@ -61,6 +61,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     chainingSystem = 'HIERARCHICAL',
     initialControls,
     spaceId,
+    onInit,
   } = props;
 
   const filterChangedSubscription = useRef<Subscription>();
@@ -157,10 +158,13 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     });
   }, [controlGroup, debouncedFilterUpdates, debouncedInputUpdatesHandler]);
 
-  const onControlGroupLoadHandler = useCallback((controlGroupContainer: ControlGroupAPI) => {
-    if (!controlGroupContainer) return;
-    setControlGroup(controlGroupContainer);
-  }, []);
+  const onControlGroupLoadHandler = useCallback(
+    (controlGroupContainer: ControlGroupAPI) => {
+      if (onInit) onInit(controlGroupContainer);
+      setControlGroup(controlGroupContainer);
+    },
+    [onInit]
+  );
 
   const selectControlsWithPriority = useCallback(() => {
     /*
@@ -259,6 +263,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
           hideExclude: true,
           hideSort: true,
           hidePanelTitles: true,
+          placeholder: '',
           // option List controls will handle an invalid dataview
           // & display an appropriate message
           dataViewId: dataViewId ?? '',

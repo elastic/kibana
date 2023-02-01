@@ -74,13 +74,54 @@ describe('AlertSummaryWidget', () => {
     expect(alertSummaryWidget.queryByTestId(TITLE_DATA_TEST_SUBJ)).toBeTruthy();
   });
 
+  it('should render AlertSummaryWidget when there is only active alerts', async () => {
+    useLoadAlertSummaryMock.mockImplementation(() => ({
+      alertSummary: {
+        activeAlertCount: 1,
+        activeAlerts: [{ key: 1671408000000, doc_count: 1 }],
+        recoveredAlertCount: 0,
+      },
+      isLoading: false,
+    }));
+    const alertSummaryWidget = renderComponent();
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
+  });
+
+  it('should render AlertSummaryWidget compact version even when there is no active and recovered alerts', async () => {
+    useLoadAlertSummaryMock.mockImplementation(() => ({
+      alertSummary: {
+        activeAlertCount: 0,
+        activeAlerts: [],
+        recoveredAlertCount: 0,
+      },
+      isLoading: false,
+    }));
+    const alertSummaryWidget = renderComponent();
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
+  });
+
+  it('should not render AlertSummaryWidget full-size version when there is no active and recovered alerts', async () => {
+    useLoadAlertSummaryMock.mockImplementation(() => ({
+      alertSummary: {
+        activeAlertCount: 0,
+        activeAlerts: [],
+        recoveredAlertCount: 0,
+      },
+      isLoading: false,
+    }));
+    const alertSummaryWidget = renderComponent({ fullSize: true });
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSzie')).toBeFalsy();
+  });
+
   it('should render AlertSummaryWidgetError when API call fails', async () => {
     useLoadAlertSummaryMock.mockImplementation(() => ({
       alertSummary: {
         activeAlertCount: 0,
         activeAlerts: [],
         recoveredAlertCount: 0,
-        recoveredAlerts: [],
       },
       isLoading: false,
       error: 'Fetch Alert Summary Failed',
@@ -96,7 +137,6 @@ describe('AlertSummaryWidget', () => {
         activeAlertCount: 0,
         activeAlerts: [],
         recoveredAlertCount: 0,
-        recoveredAlerts: [],
       },
       isLoading: true,
     }));

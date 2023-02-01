@@ -17,7 +17,7 @@ import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefi
 import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_unified_search_url_state';
 
 export const useUnifiedSearch = () => {
-  const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
+  const { state, dispatch, getTime, getDateRangeAsTimestamp } = useHostsUrlState();
   const { metricsDataView } = useMetricsDataViewContext();
   const { services } = useKibana<InfraClientStartDeps>();
   const {
@@ -78,12 +78,11 @@ export const useUnifiedSearch = () => {
           query,
           filters,
           dateRange: newDateRange,
-          dateRangeTimestamp: getRangeInTimestamp(newDateRange),
           panelFilters,
         },
       });
     },
-    [getTime, dispatch, getRangeInTimestamp]
+    [getTime, dispatch]
   );
 
   // This won't prevent onSubmit from being fired twice when `clear filters` is clicked,
@@ -131,9 +130,9 @@ export const useUnifiedSearch = () => {
     buildQuery,
     clearSavedQuery,
     controlPanelFilters: state.panelFilters,
-    dateRangeTimestamp: state.dateRangeTimestamp,
     onSubmit: debounceOnSubmit,
     saveQuery,
+    getDateRangeAsTimestamp,
     unifiedSearchQuery: state.query,
     unifiedSearchDateRange: state.dateRange,
     unifiedSearchFilters: state.filters,
