@@ -98,7 +98,7 @@ export class DashboardContainerFactoryDefinition
     const { createDashboard } = await import('./create/create_dashboard');
     try {
       return Promise.resolve(
-        createDashboard(creationOptions, dashboardCreationStartTime, savedObjectId)
+        createDashboard(initialInput.id, creationOptions, dashboardCreationStartTime, savedObjectId)
       );
     } catch (e) {
       return new ErrorEmbeddable(e.text, { id: e.id });

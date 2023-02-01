@@ -13,7 +13,7 @@ import { FilterableEmbeddable, isErrorEmbeddable, ViewMode } from '@kbn/embeddab
 
 import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { getSampleDashboardInput } from '../mocks';
+import { buildMockDashboard } from '../mocks';
 import { EuiPopover } from '@elastic/eui';
 import {
   FiltersNotificationPopover,
@@ -40,7 +40,7 @@ describe('filters notification popover', () => {
   let defaultProps: FiltersNotificationProps;
 
   beforeEach(async () => {
-    container = new DashboardContainer(getSampleDashboardInput());
+    container = buildMockDashboard();
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,
       ContactCardEmbeddableOutput,

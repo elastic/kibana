@@ -33,6 +33,7 @@ import { startDashboardSearchSessionIntegration } from './search_sessions/start_
  * @param creationOptions
  */
 export const createDashboard = async (
+  embeddableId: string,
   creationOptions?: DashboardCreationOptions,
   dashboardCreationStartTime?: number,
   savedObjectId?: string
@@ -61,6 +62,7 @@ export const createDashboard = async (
     searchSessionSettings,
     unifiedSearchSettings,
     validateLoadedSavedObject,
+    useControlGroupIntegration,
     useUnifiedSearchIntegration,
     initialInput: overrideInput,
     useSessionStorageIntegration,
@@ -125,6 +127,7 @@ export const createDashboard = async (
     ...(savedObjectResult?.dashboardInput ?? {}),
     ...sessionStorageInput,
     ...overrideInput,
+    id: embeddableId,
   });
 
   initialInput.executionContext = {
@@ -145,18 +148,21 @@ export const createDashboard = async (
 
     /**
      * If a global time range is not set explicitly and the time range was saved with the dashboard, apply
-     * time range and refresh interval to the query service.
+     * time range and refresh interval to the query service. Otherwise, set the current dashboard time range
+     * from the query service.
      */
     if (timeRestore) {
       if (timeRange) timefilterService.setTime(timeRange);
       if (refreshInterval) timefilterService.setRefreshInterval(refreshInterval);
+    } else {
+      initialInput.timeRange = timefilterService.getTime();
     }
+
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
       queryService,
       kbnUrlStateStorage
     );
 
-    const initialTimeRange = initialInput.timeRestore ? undefined : timefilterService.getTime();
     untilDashboardReady().then((dashboardContainer) => {
       const stopSyncingUnifiedSearchState =
         syncUnifiedSearchState.bind(dashboardContainer)(kbnUrlStateStorage);
@@ -165,7 +171,6 @@ export const createDashboard = async (
         stopSyncingQueryServiceStateWithUrl();
       };
     });
-    if (initialTimeRange) initialInput.timeRange = initialTimeRange;
   }
 
   // --------------------------------------------------------------------------------------
@@ -231,30 +236,32 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Start the control group integration.
   // --------------------------------------------------------------------------------------
-  const controlsGroupFactory = getEmbeddableFactory<
-    ControlGroupInput,
-    ControlGroupOutput,
-    ControlGroupContainer
-  >(CONTROL_GROUP_TYPE);
-  const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
-  const controlGroup = await controlsGroupFactory?.create({
-    id: `control_group_${id ?? 'new_dashboard'}`,
-    ...getDefaultControlGroupInput(),
-    ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
-    timeRange,
-    viewMode,
-    filters,
-    query,
-  });
-  if (!controlGroup || isErrorEmbeddable(controlGroup)) {
-    throw new Error('Error in control group startup');
-  }
+  if (useControlGroupIntegration) {
+    const controlsGroupFactory = getEmbeddableFactory<
+      ControlGroupInput,
+      ControlGroupOutput,
+      ControlGroupContainer
+    >(CONTROL_GROUP_TYPE);
+    const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
+    const controlGroup = await controlsGroupFactory?.create({
+      id: `control_group_${id ?? 'new_dashboard'}`,
+      ...getDefaultControlGroupInput(),
+      ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
+      timeRange,
+      viewMode,
+      filters,
+      query,
+    });
+    if (!controlGroup || isErrorEmbeddable(controlGroup)) {
+      throw new Error('Error in control group startup');
+    }
 
-  untilDashboardReady().then((dashboardContainer) => {
-    dashboardContainer.controlGroup = controlGroup;
-    startSyncingDashboardControlGroup.bind(dashboardContainer)();
-  });
-  await controlGroup.untilInitialized();
+    untilDashboardReady().then((dashboardContainer) => {
+      dashboardContainer.controlGroup = controlGroup;
+      startSyncingDashboardControlGroup.bind(dashboardContainer)();
+    });
+    await controlGroup.untilInitialized();
+  }
 
   // --------------------------------------------------------------------------------------
   // Start the data views integration.

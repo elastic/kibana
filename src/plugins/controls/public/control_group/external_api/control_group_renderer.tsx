@@ -29,7 +29,7 @@ import { ControlGroupInputBuilder, controlGroupInputBuilder } from './control_gr
 
 export interface ControlGroupRendererProps {
   filters?: Filter[];
-  getInitialInput: (
+  getInitialInput?: (
     initialInput: Partial<ControlGroupInput>,
     builder: ControlGroupInputBuilder
   ) => Promise<Partial<ControlGroupInput>>;
@@ -48,6 +48,7 @@ export const ControlGroupRenderer = forwardRef<ControlGroupAPI, ControlGroupRend
     // onMount
     useEffect(() => {
       let canceled = false;
+      let destroyControlGroup: () => void;
 
       (async () => {
         // Lazy loading all services is required in this component because it is exported and contributes to the bundle size.
@@ -62,7 +63,7 @@ export const ControlGroupRenderer = forwardRef<ControlGroupAPI, ControlGroupRend
         const newControlGroup = (await factory?.create({
           id,
           ...getDefaultControlGroupInput(),
-          ...(await getInitialInput(getDefaultControlGroupInput(), controlGroupInputBuilder)),
+          ...(await getInitialInput?.(getDefaultControlGroupInput(), controlGroupInputBuilder)),
         })) as ControlGroupContainer;
 
         if (canceled) {
@@ -75,12 +76,11 @@ export const ControlGroupRenderer = forwardRef<ControlGroupAPI, ControlGroupRend
           newControlGroup.render(controlGroupDomRef.current);
         }
         setControlGroup(newControlGroup);
+        destroyControlGroup = () => newControlGroup.destroy();
       })();
-
-      // onUnmount
       return () => {
         canceled = true;
-        controlGroup?.destroy();
+        destroyControlGroup?.();
       };
       // exhaustive deps disabled because we want the control group to be created only on first render.
       // eslint-disable-next-line react-hooks/exhaustive-deps

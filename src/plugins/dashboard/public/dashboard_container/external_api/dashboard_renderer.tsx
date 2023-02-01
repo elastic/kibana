@@ -56,7 +56,7 @@ export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardR
         } = pluginServices.getServices();
         setScreenshotMode(isScreenshotMode());
       })();
-    });
+    }, []);
 
     useEffect(() => {
       // check if dashboard container is expecting id change... if not, update dashboardIdToBuild to force it to rebuild the container.
@@ -71,6 +71,7 @@ export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardR
 
     useEffect(() => {
       let canceled = false;
+      let destroyContainer: () => void;
 
       (async () => {
         const creationOptions = getCreationOptions?.();
@@ -98,11 +99,13 @@ export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardR
         if (dashboardRoot.current) {
           container.render(dashboardRoot.current);
         }
+
         setDashboardContainer(container);
+        destroyContainer = () => container.destroy();
       })();
       return () => {
         canceled = true;
-        dashboardContainer?.destroy();
+        destroyContainer?.();
       };
       // Disabling exhaustive deps because embeddable should only be created when the dashboardIdToBuild changes.
       // eslint-disable-next-line react-hooks/exhaustive-deps
