@@ -36,16 +36,18 @@ describe('Autocomplete entities', () => {
   let dataStream;
   let autocompleteInfo;
   let settingsMock;
+  let httpMock;
 
   beforeEach(() => {
     autocompleteInfo = new AutocompleteInfo();
     setAutocompleteInfo(autocompleteInfo);
     mapping = autocompleteInfo.mapping;
 
+    httpMock = httpServiceMock.createSetupContract();
     const storage = new StorageMock({}, 'test');
     settingsMock = new SettingsMock(storage);
 
-    mapping.setup(httpServiceMock.createSetupContract(), settingsMock);
+    mapping.setup(httpMock, settingsMock);
 
     alias = autocompleteInfo.alias;
     legacyTemplate = autocompleteInfo.legacyTemplate;
@@ -59,9 +61,62 @@ describe('Autocomplete entities', () => {
   });
 
   describe('Mappings', function () {
+    describe('When fields autocomplete is disabled', () => {
+      beforeEach(() => {
+        settingsMock.getAutocomplete.mockReturnValue({ fields: false });
+      });
+
+      test('does not return any suggestions', function () {
+        mapping.loadMappings({
+          index: {
+            properties: {
+              first_name: {
+                type: 'string',
+                index: 'analyzed',
+                path: 'just_name',
+                fields: {
+                  any_name: { type: 'string', index: 'analyzed' },
+                },
+              },
+            },
+          },
+        });
+
+        expect(mapping.getMappings('index').sort(fc)).toEqual([]);
+      });
+    });
+
     describe('When fields autocomplete is enabled', () => {
       beforeEach(() => {
         settingsMock.getAutocomplete.mockReturnValue({ fields: true });
+        httpMock.get.mockReturnValue(
+          Promise.resolve({
+            mappings: { index: { mappings: { properties: { '@timestamp': { type: 'date' } } } } },
+          })
+        );
+      });
+
+      test('attempts to fetch mappings if not loaded', async () => {
+        const autoCompleteContext = {};
+        let loadingIndicator;
+
+        mapping.isLoading$.subscribe((v) => {
+          loadingIndicator = v;
+        });
+
+        // act
+        mapping.getMappings('index', [], autoCompleteContext);
+
+        expect(autoCompleteContext.asyncResultsState.isLoading).toBe(true);
+        expect(loadingIndicator).toBe(true);
+
+        expect(httpMock.get).toHaveBeenCalled();
+
+        const fields = await autoCompleteContext.asyncResultsState.results;
+
+        expect(loadingIndicator).toBe(false);
+        expect(autoCompleteContext.asyncResultsState.isLoading).toBe(false);
+        expect(fields).toEqual([{ name: '@timestamp', type: 'date' }]);
       });
 
       test('Multi fields 1.0 style', function () {

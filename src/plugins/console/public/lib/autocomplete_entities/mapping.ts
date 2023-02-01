@@ -85,9 +85,9 @@ export interface BaseMapping {
    * Retrieves mappings definition from cache, fetches if necessary.
    */
   getMappings(
-    autoCompleteContext: AutoCompleteContext,
     indices: string | string[],
-    types?: string | string[]
+    types?: string | string[],
+    autoCompleteContext?: AutoCompleteContext
   ): Field[];
 
   /**
@@ -142,9 +142,9 @@ export class Mapping implements BaseMapping {
   }
 
   getMappings = (
-    autoCompleteContext: AutoCompleteContext,
     indices: string | string[],
-    types?: string | string[]
+    types?: string | string[],
+    autoCompleteContext?: AutoCompleteContext
   ) => {
     // get fields for indices and types. Both can be a list, a string or null (meaning all).
     let ret: Field[] = [];
@@ -157,8 +157,10 @@ export class Mapping implements BaseMapping {
       const typeDict = this.perIndexTypes[indices] as Record<string, unknown>;
 
       if (!typeDict) {
+        if (!autoCompleteContext) return ret;
+
         // Mappings fetching for the index is already in progress
-        if (this.loadingState[indices]) return [];
+        if (this.loadingState[indices]) return ret;
 
         this.loadingState[indices] = true;
 
@@ -182,7 +184,7 @@ export class Mapping implements BaseMapping {
                 // cache mappings
                 this.loadMappings(mapping);
 
-                const mappings = this.getMappings(autoCompleteContext, indices, types);
+                const mappings = this.getMappings(indices, types, autoCompleteContext);
                 delete this.loadingState[indices as string];
                 resolve(mappings);
               })
@@ -217,7 +219,7 @@ export class Mapping implements BaseMapping {
       // multi index mode.
       Object.keys(this.perIndexTypes).forEach((index) => {
         if (!indices || indices.length === 0 || indices.includes(index)) {
-          ret.push(this.getMappings(autoCompleteContext, index, types) as unknown as Field);
+          ret.push(this.getMappings(index, types, autoCompleteContext) as unknown as Field);
         }
       });
 
