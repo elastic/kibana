@@ -26,6 +26,7 @@ import {
   CELL_ACTIONS_DEFAULT_TRIGGER,
   CELL_ACTIONS_TIMELINE_TRIGGER,
 } from '../../common/constants';
+import { createDefaultToggleColumnAction } from './toggle_column';
 
 export const registerUIActions = (
   plugins: StartPlugins,
@@ -58,9 +59,10 @@ const registerDefaultActions = (
   const filterOutAction = createDefaultFilterOutAction({
     order: 2,
   });
-  const addToTimeline = createDefaultAddToTimelineAction({ store, order: 3 });
-  const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 4 });
-  const copyAction = createDefaultCopyToClipboardAction({ order: 5 });
+  const toggleAction = createDefaultToggleColumnAction({ store, order: 3 });
+  const addToTimeline = createDefaultAddToTimelineAction({ store, order: 4 });
+  const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 5 });
+  const copyAction = createDefaultCopyToClipboardAction({ order: 6 });
 
   uiActions.registerTrigger({
     id: CELL_ACTIONS_DEFAULT_TRIGGER,
@@ -71,6 +73,7 @@ const registerDefaultActions = (
   uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, filterOutAction);
   uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, showTopNAction);
   uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, addToTimeline);
+  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, toggleAction);
 };
 
 const registerTimelineActions = (
@@ -87,9 +90,10 @@ const registerTimelineActions = (
     store,
     order: 2,
   });
-  const addToTimeline = createDefaultAddToTimelineAction({ store, order: 3 });
-  const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 4 });
-  const copyAction = createDefaultCopyToClipboardAction({ order: 5 });
+  const toggleAction = createDefaultToggleColumnAction({ store, order: 3 });
+  const addToTimeline = createDefaultAddToTimelineAction({ store, order: 4 });
+  const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 5 });
+  const copyAction = createDefaultCopyToClipboardAction({ order: 6 });
 
   uiActions.registerTrigger({
     id: CELL_ACTIONS_TIMELINE_TRIGGER,
@@ -100,4 +104,5 @@ const registerTimelineActions = (
   uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, filterOutAction);
   uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, showTopNAction);
   uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, addToTimeline);
+  uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, toggleAction);
 };

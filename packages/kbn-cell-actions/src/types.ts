@@ -91,6 +91,8 @@ export interface CellActionsProps {
   className?: string;
 }
 
+type Metadata = Record<string, unknown> | undefined;
+
 export interface CellActionExecutionContext extends ActionExecutionContext {
   field: CellActionField;
   /**
@@ -106,10 +108,11 @@ export interface CellActionExecutionContext extends ActionExecutionContext {
   /**
    * Extra configurations for actions.
    */
-  metadata?: Record<string, unknown>;
+  metadata?: Metadata;
 }
 
-export interface CellActionCompatibilityContext extends ActionExecutionContext {
+export interface CellActionCompatibilityContext<M extends Metadata = Metadata>
+  extends ActionExecutionContext {
   /**
    * The object containing the field name and type, needed for the compatibility check
    */
@@ -117,7 +120,7 @@ export interface CellActionCompatibilityContext extends ActionExecutionContext {
   /**
    * Extra configurations for actions.
    */
-  metadata?: Record<string, unknown>;
+  metadata?: M;
 }
 
 export interface CellAction<C extends CellActionExecutionContext = CellActionExecutionContext>
@@ -126,7 +129,7 @@ export interface CellAction<C extends CellActionExecutionContext = CellActionExe
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: CellActionCompatibilityContext): Promise<boolean>;
+  isCompatible(context: CellActionCompatibilityContext<C['metadata']>): Promise<boolean>;
 }
 
 export type GetActions = (context: CellActionCompatibilityContext) => Promise<CellAction[]>;
