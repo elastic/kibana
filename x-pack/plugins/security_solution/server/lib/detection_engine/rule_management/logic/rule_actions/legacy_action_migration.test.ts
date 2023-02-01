@@ -241,6 +241,7 @@ describe('Legacy rule action migration logic', () => {
             to: ['test@test.com'],
             subject: 'Test Actions',
           },
+          uuid: expect.any(String),
         },
       ]);
       expect(migratedRule?.throttle).toEqual('1d');
@@ -288,6 +289,7 @@ describe('Legacy rule action migration logic', () => {
             to: ['test@test.com'],
             subject: 'Test Actions',
           },
+          uuid: expect.any(String),
         },
       ]);
       expect(migratedRule?.throttle).toEqual('1h');
@@ -335,6 +337,7 @@ describe('Legacy rule action migration logic', () => {
             to: ['test@test.com'],
             subject: 'Test Actions',
           },
+          uuid: expect.any(String),
         },
       ]);
       expect(migratedRule?.throttle).toEqual('7d');
@@ -397,6 +400,7 @@ describe('Legacy rule action migration logic', () => {
               subject: 'Test Actions',
               to: ['a@a.com'],
             },
+            uuid: expect.any(String),
           },
         ],
         throttle: '1h',
@@ -470,6 +474,7 @@ describe('Legacy rule action migration logic', () => {
               subject: 'Rule email',
               to: ['test@test.com'],
             },
+            uuid: expect.any(String),
           },
           {
             actionTypeId: '.slack',
@@ -478,6 +483,7 @@ describe('Legacy rule action migration logic', () => {
             params: {
               message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            uuid: expect.any(String),
           },
         ],
         throttle: '1h',

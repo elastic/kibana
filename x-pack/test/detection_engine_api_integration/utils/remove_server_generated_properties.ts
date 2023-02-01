@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type {
+  RuleResponse,
+  LegacyRuleResponse,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { omit, pickBy } from 'lodash';
 
 const serverGeneratedProperties = ['id', 'created_at', 'updated_at', 'execution_summary'] as const;
 
 type ServerGeneratedProperties = typeof serverGeneratedProperties[number];
 export type RuleWithoutServerGeneratedProperties = Omit<RuleResponse, ServerGeneratedProperties>;
+
+export type LegacyRuleWithoutServerGeneratedProperties = Omit<
+  LegacyRuleResponse,
+  ServerGeneratedProperties
+>;
 
 /**
  * This will remove server generated properties such as date times, etc...

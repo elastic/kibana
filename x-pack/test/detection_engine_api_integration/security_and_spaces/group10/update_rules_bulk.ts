@@ -24,6 +24,7 @@ import {
   createRule,
   getSimpleRule,
   createLegacyRuleAction,
+  LegacyRuleWithoutServerGeneratedProperties,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -166,7 +167,9 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         body.forEach((response) => {
-          const outputRule = getSimpleRuleOutput(response.rule_id);
+          const outputRule: LegacyRuleWithoutServerGeneratedProperties = getSimpleRuleOutput(
+            response.rule_id
+          );
           outputRule.name = 'some other name';
           outputRule.version = 2;
           outputRule.actions = [

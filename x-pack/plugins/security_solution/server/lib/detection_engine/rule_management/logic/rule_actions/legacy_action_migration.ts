@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-
+import { v4 as uuidv4 } from 'uuid';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
@@ -120,7 +120,7 @@ export const legacyMigrate = async ({
         data: migratedRule,
       });
 
-      return { id: rule.id, ...migratedRule } as RuleAlertType;
+      return { id: rule.id, ...migratedRule };
     }
   });
 
@@ -137,9 +137,7 @@ export const getUpdatedActionsParams = ({
   ruleThrottle: string | null;
   actions: LegacyRuleAlertSavedObjectAction[];
   references: SavedObjectReference[];
-}): Omit<RuleAlertType, 'id' | 'actions'> & {
-  actions: Array<Omit<RuleAction, 'uuid'>>;
-} => {
+}): Omit<RuleAlertType, 'id'> => {
   const { id, ...restOfRule } = rule;
 
   const actionReference = references.reduce<Record<string, SavedObjectReference>>(
@@ -160,7 +158,7 @@ export const getUpdatedActionsParams = ({
   // into the rule itself
   return {
     ...restOfRule,
-    actions: actions.reduce<Array<Omit<RuleAction, 'uuid'>>>((acc, action) => {
+    actions: actions.reduce<RuleAction[]>((acc, action) => {
       const { actionRef, action_type_id: actionTypeId, ...resOfAction } = action;
       if (!actionReference[actionRef]) {
         return acc;
@@ -171,6 +169,7 @@ export const getUpdatedActionsParams = ({
           ...resOfAction,
           id: actionReference[actionRef].id,
           actionTypeId,
+          uuid: uuidv4(),
         },
       ];
     }, []),

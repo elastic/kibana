@@ -8,10 +8,8 @@
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
-import {
-  LegacyRuleResponse,
-  RuleResponse,
-} from '../../../../../common/detection_engine/rule_schema';
+import type { LegacyRuleResponse } from '../../../../../common/detection_engine/rule_schema';
+import { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
 import type { RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError } from '../../routes/utils';
@@ -38,17 +36,7 @@ export const transformValidateBulkError = (
   rule: PartialRule<RuleParams>
 ): RuleResponse | LegacyRuleResponse | BulkError => {
   if (isAlertType(rule)) {
-    const transformed = internalRuleToAPIResponse(rule);
-    const [validated, errors] = validateNonExact(transformed, LegacyRuleResponse);
-    if (errors != null || validated == null) {
-      return createBulkErrorObject({
-        ruleId,
-        statusCode: 500,
-        message: errors ?? 'Internal error transforming',
-      });
-    } else {
-      return validated;
-    }
+    return internalRuleToAPIResponse(rule);
   } else {
     return createBulkErrorObject({
       ruleId,

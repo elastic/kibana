@@ -22,6 +22,7 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   createRule,
   createLegacyRuleAction,
+  LegacyRuleWithoutServerGeneratedProperties,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -181,7 +182,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         // @ts-expect-error
         body.forEach((response) => {
-          const outputRule = getSimpleRuleOutput(response.rule_id, false);
+          const outputRule: LegacyRuleWithoutServerGeneratedProperties = getSimpleRuleOutput(
+            response.rule_id,
+            false
+          );
           outputRule.actions = [
             {
               action_type_id: '.slack',

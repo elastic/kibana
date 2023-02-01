@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -20,6 +19,7 @@ import {
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
+  LegacyRuleWithoutServerGeneratedProperties,
   removeServerGeneratedProperties,
 } from '../../utils';
 
@@ -229,7 +229,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
 
-        const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
+        const ruleWithActions: LegacyRuleWithoutServerGeneratedProperties = {
           ...getSimpleRuleOutput(),
           actions: [
             {
@@ -241,7 +241,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               action_type_id: hookAction.actionTypeId,
             },
-          ] as unknown as RuleAction[],
+          ],
           throttle: '1h',
         };
 
