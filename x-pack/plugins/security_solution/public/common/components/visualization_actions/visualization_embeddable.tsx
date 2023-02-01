@@ -118,6 +118,10 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
     };
   }, [dispatch, id, inputId]);
 
+  if ((!lensProps.getLensAttributes && !lensProps.lensAttributes) || !lensProps.timerange) {
+    return null;
+  }
+
   if (isDonut) {
     return (
       <DonutChartWrapper

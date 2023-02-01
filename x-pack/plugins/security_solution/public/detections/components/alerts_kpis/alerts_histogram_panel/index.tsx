@@ -416,7 +416,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           </HeaderSection>
 
           {toggleStatus ? (
-            isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
+            isChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
                 extraActions={extraActions}

@@ -300,7 +300,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             </EuiFlexGroup>
           </HeaderSection>
           {toggleStatus ? (
-            isChartEmbeddablesEnabled && (getLensAttributes || lensAttributes) && timerange ? (
+            isChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
                 getLensAttributes={getLensAttributes}
