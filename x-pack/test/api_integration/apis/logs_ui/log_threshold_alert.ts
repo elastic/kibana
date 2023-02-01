@@ -166,7 +166,11 @@ export default function ({ getService }: FtrProviderContext) {
             getValue: sinon.fake.returns(1),
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
-          const ruleParams = {
+          const ruleParams: RuleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 1,
@@ -236,7 +240,11 @@ export default function ({ getService }: FtrProviderContext) {
             getValue: sinon.fake.returns(1),
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
-          const ruleParams = {
+          const ruleParams: RuleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 1,
