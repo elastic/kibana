@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('transform - permissions', function () {
+  describe('transform  - creation - runtime mappings & saved search', function () {
     this.tags('transform');
 
     before(async () => {
@@ -32,7 +32,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./full_transform_access'));
-    loadTestFile(require.resolve('./read_transform_access'));
+    loadTestFile(require.resolve('./creation_saved_search'));
+    loadTestFile(require.resolve('./creation_runtime_mappings'));
   });
 }

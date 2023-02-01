@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('transform - permissions', function () {
+  describe('transform - start reset & delete', function () {
     this.tags('transform');
 
     before(async () => {
@@ -32,7 +32,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./full_transform_access'));
-    loadTestFile(require.resolve('./read_transform_access'));
+    loadTestFile(require.resolve('./deleting'));
+    loadTestFile(require.resolve('./resetting'));
+    loadTestFile(require.resolve('./starting'));
   });
 }
