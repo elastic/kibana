@@ -325,7 +325,11 @@ Object {
                     color="inherit"
                     data-euiicon-type="alert"
                   />
-                  1 connector imported
+                  <span
+                    data-test-subj="actionConnectorsWarningsCallOutTitle"
+                  >
+                    1 connector imported
+                  </span>
                 </h2>
                 <div
                   class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
@@ -335,11 +339,12 @@ Object {
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
+                      data-test-subj="actionConnectorsWarningsCallOutMessage"
                     >
                       <div
                         class="euiText emotion-euiText-xs"
                       >
-                        1 connector has sensitive information that requires updates, review in 
+                        1 connector has sensitive information that requires updates. review in 
                         <button
                           class="euiLink emotion-euiLink-primary"
                           type="button"

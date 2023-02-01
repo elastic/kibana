@@ -235,7 +235,11 @@ describe('ImportDataModal', () => {
     const importWithWarning = jest.fn().mockReturnValue({
       ...importData(),
       action_connectors_warnings: [
-        { message: 'message', actionPath: 'path', buttonLabel: 'buttonLabel' },
+        {
+          message: '1 connector has sensitive information that requires updates.',
+          actionPath: 'path',
+          buttonLabel: 'buttonLabel',
+        },
       ],
       action_connectors_success_count: 1,
     });
