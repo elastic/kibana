@@ -40,7 +40,7 @@ export const fillAddFilterForm = ({ key, value, operator }: SearchBarFilter) => 
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('be.visible');
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(`${key}{downarrow}`);
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).click();
-  cy.get(ADD_FILTER_FORM_FIELD_OPTION(key)).click({ force: true });
+  cy.get(ADD_FILTER_FORM_FIELD_OPTION(key)).click();
   if (!operator) {
     cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).click();
     cy.get(ADD_FILTER_FORM_OPERATOR_OPTION_IS).click();

@@ -318,8 +318,11 @@ export const DataTableComponent = React.memo<DataTableProps>(
       return {
         triggerId: CELL_ACTIONS_DEFAULT_TRIGGER,
         fields,
+        metadata: {
+          scopeId: id,
+        },
       };
-    }, [disableCellActions, columnHeaders, data]);
+    }, [disableCellActions, columnHeaders, data, id]);
 
     const columnsCellActions = useDataGridColumnsCellActions(columnsCellActionsProps);
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
