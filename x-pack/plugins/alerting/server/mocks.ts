@@ -167,9 +167,6 @@ const createRuleExecutorServicesMock = <
     ruleMonitoringService: createRuleMonitoringServiceMock(),
     share: createShareStartMock(),
     dataViews: dataViewPluginMocks.createStartContract(),
-    indices: {
-      getFieldMapping: jest.fn(),
-    },
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
