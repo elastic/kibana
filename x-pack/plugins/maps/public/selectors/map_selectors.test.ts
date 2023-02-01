@@ -338,14 +338,10 @@ describe('getSpatialFiltersLayer', () => {
   });
 
   test('should not show layer when showSpatialFilters is false', () => {
-    const geoJsonVectorLayer = getSpatialFiltersLayer.resultFunc(
-      [],
-      undefined,
-      {
-        ...getDefaultMapSettings(),
-        showSpatialFilters: false,
-      }
-    );
+    const geoJsonVectorLayer = getSpatialFiltersLayer.resultFunc([], undefined, {
+      ...getDefaultMapSettings(),
+      showSpatialFilters: false,
+    });
     expect(geoJsonVectorLayer.isVisible()).toBe(false);
   });
 });
