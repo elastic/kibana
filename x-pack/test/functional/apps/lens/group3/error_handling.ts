@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Dashboard with missing field Lens');
       await PageObjects.lens.assertMessageListContains(
-        'Field missing field was not found',
+        'Field missing field was not found.',
         'error'
       );
       await PageObjects.lens.waitForVisualization('mtrVis');
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.switchToEditMode();
       await dashboardPanelActions.editPanelByTitle();
       await PageObjects.lens.assertMessageListContains(
-        'Field missing field was not found',
+        'Field missing field was not found.',
         'error'
       );
       await PageObjects.lens.waitForVisualization('mtrVis');
