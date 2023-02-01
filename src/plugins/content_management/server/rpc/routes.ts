@@ -8,28 +8,28 @@
 import { schema } from '@kbn/config-schema';
 import type { Logger, IRouter, ResponseError, CustomHttpResponseOptions } from '@kbn/core/server';
 
-import { procedureNames } from '../../common';
 import type { FunctionHandler } from './function_handler';
 import type { Context } from './types';
 
-// @ts-expect-error We add this if condition so we can ignore in our "params" validation below
-if (procedureNames.length === 0) {
-  throw new Error(`No function names declared to validate RPC routes.`);
-}
-
 export function initRpcRoutes(
-  router: IRouter,
+  procedureNames: readonly string[],
   {
+    router,
     wrapError,
     fnHandler,
     context: rpcContext,
   }: {
+    router: IRouter;
     logger: Logger;
     wrapError: (error: any) => CustomHttpResponseOptions<ResponseError>;
     fnHandler: FunctionHandler<Context>;
     context: Context;
   }
 ) {
+  if (procedureNames.length === 0) {
+    throw new Error(`No function names declared to validate RPC routes.`);
+  }
+
   /**
    * @apiGroup ContentManagement
    *

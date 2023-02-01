@@ -19,6 +19,7 @@ import { wrapError } from './error_wrapper';
 import { initRpcRoutes, FunctionHandler, initRpcHandlers } from './rpc';
 import type { Context as RpcContext } from './rpc';
 import { FooStorage } from './demo';
+import { procedureNames } from '../common';
 
 export class ContentManagementPlugin implements Plugin {
   private readonly logger: Logger;
@@ -39,7 +40,8 @@ export class ContentManagementPlugin implements Plugin {
 
     const router = core.http.createRouter();
 
-    initRpcRoutes(router, {
+    initRpcRoutes(procedureNames, {
+      router,
       logger: this.logger,
       wrapError,
       fnHandler,
