@@ -10,7 +10,7 @@ value:
     timeWindowUnit: m
     thresholdComparator: ">"
     threshold: [1000]
-    aggField : sheet.version
+    aggField: sheet.version
     termField: name.keyword
     termSize: 6
   schedule:

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EcsEventOutcome } from '@kbn/ecs';
+import { EcsEvent } from '@kbn/ecs';
 import { AuditEvent } from '@kbn/security-plugin/server';
 
 export type AuditAction = 'create' | 'delete';
@@ -15,7 +15,7 @@ interface CreateAuditEventArgs {
   message: string;
   action: AuditAction;
   error?: Error;
-  outcome?: EcsEventOutcome;
+  outcome?: EcsEvent['outcome'];
 }
 
 export function createAuditEvent({

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './src/ecs';
+export * from './generated';

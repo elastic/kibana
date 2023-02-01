@@ -39,6 +39,7 @@ import {
   FramePublicAPI,
   isLensBrushEvent,
   isLensFilterEvent,
+  isLensMultiFilterEvent,
   isLensEditEvent,
   VisualizationMap,
   DatasourceMap,
@@ -398,7 +399,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           },
         });
       }
-      if (isLensFilterEvent(event)) {
+      if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
@@ -424,7 +425,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         // ui actions not available, not handling event...
         return false;
       }
-      if (!isLensFilterEvent(event)) {
+      if (!isLensFilterEvent(event) && !isLensMultiFilterEvent(event)) {
         return false;
       }
       return (
