@@ -52,7 +52,7 @@
     "@kbn/ml-query-utils",
     "@kbn/charts-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/unified-field-list-plugin",
+    "@kbn/unified-field-list-plugin"
   ],
   "exclude": [
     "target/**/*",

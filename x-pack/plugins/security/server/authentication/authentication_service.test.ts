@@ -12,9 +12,11 @@ import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import type {
   AuthenticationHandler,
   AuthToolkit,
+  CustomBrandingSetup,
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
@@ -62,6 +64,7 @@ describe('AuthenticationService', () => {
     config: ConfigType;
     license: jest.Mocked<SecurityLicense>;
     buildNumber: number;
+    customBranding: jest.Mocked<CustomBrandingSetup>;
   };
   let mockStartAuthenticationParams: {
     audit: jest.Mocked<AuditServiceSetup>;
@@ -93,6 +96,7 @@ describe('AuthenticationService', () => {
       }),
       license: licenseMock.create(),
       buildNumber: 100500,
+      customBranding: customBrandingServiceMock.createSetupContract(),
     };
     mockCanRedirectRequest.mockReturnValue(false);
 

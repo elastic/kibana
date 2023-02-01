@@ -34,10 +34,12 @@ type ResourceFindingsResponse = IKibanaSearchResponse<
   estypes.SearchResponse<CspFinding, ResourceFindingsResponseAggs>
 >;
 
-export type ResourceFindingsResponseAggs = Record<
-  'count' | 'clusterId' | 'resourceSubType' | 'resourceName',
-  estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>
->;
+export interface ResourceFindingsResponseAggs {
+  count?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+  clusterId?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+  resourceSubType?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+  resourceName?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+}
 
 const getResourceFindingsQuery = ({
   query,
@@ -92,19 +94,18 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
       keepPreviousData: true,
       select: ({ rawResponse: { hits, aggregations } }: ResourceFindingsResponse) => {
         if (!aggregations) throw new Error('expected aggregations to exists');
-
-        assertNonEmptyArray(aggregations.count.buckets);
-        assertNonEmptyArray(aggregations.clusterId.buckets);
-        assertNonEmptyArray(aggregations.resourceSubType.buckets);
-        assertNonEmptyArray(aggregations.resourceName.buckets);
+        assertNonBucketsArray(aggregations.count?.buckets);
+        assertNonBucketsArray(aggregations.clusterId?.buckets);
+        assertNonBucketsArray(aggregations.resourceSubType?.buckets);
+        assertNonBucketsArray(aggregations.resourceName?.buckets);
 
         return {
           page: hits.hits.map((hit) => hit._source!),
           total: number.is(hits.total) ? hits.total : 0,
-          count: getAggregationCount(aggregations.count.buckets),
-          clusterId: getFirstBucketKey(aggregations.clusterId.buckets),
-          resourceSubType: getFirstBucketKey(aggregations.resourceSubType.buckets),
-          resourceName: getFirstBucketKey(aggregations.resourceName.buckets),
+          count: getAggregationCount(aggregations.count?.buckets),
+          clusterId: getFirstBucketKey(aggregations.clusterId?.buckets),
+          resourceSubType: getFirstBucketKey(aggregations.resourceSubType?.buckets),
+          resourceName: getFirstBucketKey(aggregations.resourceName?.buckets),
         };
       },
       onError: (err: Error) => showErrorToast(toasts, err),
@@ -112,11 +113,11 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
   );
 };
 
-function assertNonEmptyArray<T>(arr: unknown): asserts arr is T[] {
-  if (!Array.isArray(arr) || arr.length === 0) {
-    throw new Error('expected a non empty array');
+function assertNonBucketsArray<T>(arr: unknown): asserts arr is T[] {
+  if (!Array.isArray(arr)) {
+    throw new Error('expected buckets to be an array');
   }
 }
 
-const getFirstBucketKey = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) =>
-  buckets[0].key;
+const getFirstBucketKey = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]): string =>
+  buckets[0]?.key;

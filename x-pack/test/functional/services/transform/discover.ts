@@ -27,7 +27,7 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
     },
 
     async assertNoResults(expectedDestinationIndex: string) {
-      await testSubjects.existOrFail('unifiedHistogramQueryHits');
+      await testSubjects.missingOrFail('unifiedHistogramQueryHits');
 
       // Discover should use the destination index pattern
       const actualIndexPatternSwitchLinkText = await (

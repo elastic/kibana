@@ -9,10 +9,11 @@ import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { parse } from 'query-string';
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute } from '../..';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { PageLoader, PageProps } from '../../router';
+import { createPath, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { checkBasicLicense } from '../../../license';
 import { cacheDataViewsContract } from '../../../util/index_utils';
@@ -23,7 +24,7 @@ export const changePointDetectionRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'change_point_detection',
-  path: '/aiops/change_point_detection',
+  path: createPath(ML_PAGES.AIOPS_CHANGE_POINT_DETECTION),
   title: i18n.translate('xpack.ml.aiops.changePointDetection.docTitle', {
     defaultMessage: 'Change point detection',
   }),

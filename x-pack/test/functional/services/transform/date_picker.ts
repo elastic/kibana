@@ -20,11 +20,13 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
     },
 
     async openSuperDatePicker() {
+      await this.assertSuperDatePickerToggleQuickMenuButtonExists();
       await testSubjects.click('superDatePickerToggleQuickMenuButton');
       await testSubjects.existOrFail('superDatePickerQuickMenu');
     },
 
     async quickSelect(timeValue: number = 15, timeUnit: string = 'y') {
+      await this.openSuperDatePicker();
       const quickMenuElement = await testSubjects.find('superDatePickerQuickMenu');
 
       // No test subject, defaults to select `"Years"` to look back 15 years instead of 15 minutes.
@@ -37,6 +39,7 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
       expect(actualApplyButtonText).to.be('Apply');
 
       await applyButton.click();
+      await testSubjects.missingOrFail('superDatePickerQuickMenu');
     },
 
     async setTimeRange(fromTime: string, toTime: string) {

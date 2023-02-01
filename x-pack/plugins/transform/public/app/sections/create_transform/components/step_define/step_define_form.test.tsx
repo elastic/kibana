@@ -13,6 +13,7 @@ import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
@@ -34,41 +35,11 @@ jest.mock('../../../../app_dependencies');
 
 const startMock = coreMock.createStart();
 
-const getMockedTimefilter = () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { of } = require('rxjs');
-  return {
-    timefilter: {
-      disableTimeRangeSelector: jest.fn(),
-      disableAutoRefreshSelector: jest.fn(),
-      enableTimeRangeSelector: jest.fn(),
-      enableAutoRefreshSelector: jest.fn(),
-      getRefreshInterval: jest.fn(),
-      setRefreshInterval: jest.fn(),
-      getActiveBounds: jest.fn(),
-      getTime: jest.fn(),
-      isAutoRefreshSelectorEnabled: jest.fn(),
-      isTimeRangeSelectorEnabled: jest.fn(),
-      getRefreshIntervalUpdate$: jest.fn(),
-      getAutoRefreshFetch$: jest.fn(() => {
-        return of();
-      }),
-      getTimeUpdate$: jest.fn(() => {
-        return of();
-      }),
-      getEnabledUpdated$: jest.fn(() => ({
-        subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
-      })),
-    },
-    history: { get: jest.fn() },
-  };
-};
-
 const getMockedDatePickerDependencies = () => {
   return {
     data: {
       query: {
-        timefilter: getMockedTimefilter(),
+        timefilter: timefilterServiceMock.createStartContract(),
       },
     },
     notifications: {},

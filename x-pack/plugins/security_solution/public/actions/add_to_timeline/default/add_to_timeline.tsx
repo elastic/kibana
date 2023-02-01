@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/cell-actions';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { CellAction } from '@kbn/cell-actions';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 import { TimelineId } from '../../../../common/types';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { SecurityAppStore } from '../../../common/store';
-import { isInSecurityApp } from '../../utils';
+import { fieldHasCellActions, isInSecurityApp } from '../../utils';
 import {
   ADD_TO_TIMELINE,
   ADD_TO_TIMELINE_FAILED_TEXT,
@@ -29,7 +28,7 @@ export const createAddToTimelineAction = ({
 }: {
   store: SecurityAppStore;
   order?: number;
-}) => {
+}): CellAction => {
   const { application: applicationService, notifications: notificationsService } =
     KibanaServices.get();
   let currentAppId: string | undefined;
@@ -37,7 +36,7 @@ export const createAddToTimelineAction = ({
     currentAppId = appId;
   });
 
-  return createAction<CellActionExecutionContext>({
+  return {
     id: ACTION_ID,
     type: ACTION_ID,
     order,
@@ -45,7 +44,7 @@ export const createAddToTimelineAction = ({
     getDisplayName: () => ADD_TO_TIMELINE,
     getDisplayNameTooltip: () => ADD_TO_TIMELINE,
     isCompatible: async ({ field }) =>
-      isInSecurityApp(currentAppId) && field.name != null && field.value != null,
+      isInSecurityApp(currentAppId) && fieldHasCellActions(field.name),
     execute: async ({ field }) => {
       const dataProviders =
         createDataProviders({
@@ -62,7 +61,6 @@ export const createAddToTimelineAction = ({
         if (field.value != null) {
           messageValue = Array.isArray(field.value) ? field.value.join(', ') : field.value;
         }
-
         notificationsService.toasts.addSuccess({
           title: ADD_TO_TIMELINE_SUCCESS_TITLE(messageValue),
         });
@@ -73,5 +71,5 @@ export const createAddToTimelineAction = ({
         });
       }
     },
-  });
+  };
 };
