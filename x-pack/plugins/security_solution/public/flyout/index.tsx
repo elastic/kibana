@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { closeFlyout, ExpandableFlyout } from '@kbn/expandable-flyout';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectSecurityFlyoutLayout } from '../common/store/flyout/selectors';
 import { ExpandableFlyoutProvider } from './context';
-import { closeSecurityFlyout, selectFlyoutLayout } from '../common/store/flyout/reducers';
-import { ExpandableFlyout } from '../common/components/expandable_flyout';
 
 export interface SecurityFlyoutProps {
   /**
@@ -37,18 +37,24 @@ export interface SecurityFlyoutProps {
 export const SecurityFlyout = React.memo(
   ({ className, scope, handleOnClose }: SecurityFlyoutProps) => {
     const dispatch = useDispatch();
-    const flyouts = useSelector(selectFlyoutLayout(scope));
+    const flyoutLayout = useSelector(selectSecurityFlyoutLayout(scope));
 
     const close = useCallback(() => {
       if (handleOnClose) handleOnClose();
-      dispatch(closeSecurityFlyout({ scope }));
+      dispatch(closeFlyout({ scope }));
     }, [dispatch, handleOnClose, scope]);
 
-    if (!flyouts) return null;
+    if (!flyoutLayout) return null;
 
     return (
-      <ExpandableFlyoutProvider close={close} layout={flyouts} scope={scope}>
-        <ExpandableFlyout className={className} panels={[]} onClose={close} />
+      <ExpandableFlyoutProvider close={close} layout={flyoutLayout} scope={scope}>
+        <ExpandableFlyout
+          className={className}
+          layout={flyoutLayout}
+          registeredPanels={[]}
+          scope={scope}
+          onClose={close}
+        />
       </ExpandableFlyoutProvider>
     );
   }

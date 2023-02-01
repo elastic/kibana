@@ -928,6 +928,7 @@ packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
+packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations
 packages/kbn-field-types @elastic/kibana-data-discovery

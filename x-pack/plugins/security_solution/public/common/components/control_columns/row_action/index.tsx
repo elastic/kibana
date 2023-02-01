@@ -8,6 +8,7 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { openFlyout } from '@kbn/expandable-flyout';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -20,7 +21,6 @@ import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/sea
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
 import { dataTableActions } from '../../../store/data_table';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
-import { openSecurityFlyout } from '../../../store/flyout/reducers';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -101,7 +101,7 @@ const RowActionComponent = ({
 
     if (isSecurityFlyoutEnabled) {
       dispatch(
-        openSecurityFlyout({
+        openFlyout({
           scope: 'global',
         })
       );

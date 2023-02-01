@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
+import { FlyoutLayout } from '../models/layout';
 import { PreviewSection } from './preview_section';
 import { RightSection } from './right_section';
-import { useExpandableFlyoutContext } from '../../../flyout/context';
-import type { SecurityFlyoutPanel } from '../../store/flyout/model';
+import type { FlyoutPanel } from '../models/panel';
 import { LeftSection } from './left_section';
 
-export interface ExpandableFlyoutPanel {
+interface Panel {
   /**
    * Unique key used to identify the panel
    */
@@ -23,7 +24,7 @@ export interface ExpandableFlyoutPanel {
   /**
    * Component to be rendered
    */
-  component: (props: SecurityFlyoutPanel) => React.ReactElement; // TODO: generalize SecurityFlyoutPanel to allow it to work in any solution
+  component: (props: FlyoutPanel) => React.ReactElement; // TODO: generalize FlyoutPanel to allow it to work in any solution
   /**
    * Width used when rendering the panel
    */
@@ -32,28 +33,43 @@ export interface ExpandableFlyoutPanel {
 
 export interface ExpandableFlyoutProps extends EuiFlyoutProps {
   /**
-   * List of panels available for render
+   * Right, left and preview panels to render
    */
-  panels: ExpandableFlyoutPanel[];
+  layout: FlyoutLayout;
+  /**
+   * List of all registered panels available for render
+   */
+  registeredPanels: Panel[];
+  /**
+   * Scope
+   */
+  scope: string;
 }
 
-export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({ panels, ...flyoutProps }) => {
-  const context = useExpandableFlyoutContext();
-  const { left, right, preview: previewPanels } = context.panels;
+export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
+  layout,
+  registeredPanels,
+  scope,
+  ...flyoutProps
+}) => {
+  const { left, right, preview } = layout;
 
-  const leftSection = useMemo(() => panels.find((panel) => panel.key === left?.id), [left, panels]);
+  const leftSection = useMemo(
+    () => registeredPanels.find((panel) => panel.key === left?.id),
+    [left, registeredPanels]
+  );
 
   const rightSection = useMemo(
-    () => panels.find((panel) => panel.key === right?.id),
-    [right, panels]
+    () => registeredPanels.find((panel) => panel.key === right?.id),
+    [right, registeredPanels]
   );
 
   // retrieve the last preview panel (most recent)
-  const preview = previewPanels ? previewPanels[previewPanels.length - 1] : undefined;
-  const showBackButton = previewPanels.length > 1;
+  const mostRecentPreview = preview ? preview[preview.length - 1] : undefined;
+  const showBackButton = preview.length > 1;
   const previewSection = useMemo(
-    () => panels.find((panel) => panel.key === preview?.id),
-    [preview, panels]
+    () => registeredPanels.find((panel) => panel.key === mostRecentPreview?.id),
+    [mostRecentPreview, registeredPanels]
   );
 
   const width: number = (leftSection?.width ?? 0) + (rightSection?.width ?? 0);
@@ -74,11 +90,14 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({ panels, ...f
         style={{ height: '100%' }}
       >
         {leftSection && left ? (
-          <LeftSection component={leftSection.component({ ...left })} width={leftSection.width} />
+          <LeftSection
+            component={leftSection.component({ ...(left as FlyoutPanel) })}
+            width={leftSection.width}
+          />
         ) : null}
         {rightSection && right ? (
           <RightSection
-            component={rightSection.component({ ...right })}
+            component={rightSection.component({ ...(right as FlyoutPanel) })}
             width={rightSection.width}
           />
         ) : null}
@@ -86,11 +105,14 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({ panels, ...f
 
       {previewSection && preview ? (
         <PreviewSection
-          component={previewSection.component({ ...preview })}
+          component={previewSection.component({ ...(mostRecentPreview as FlyoutPanel) })}
           showBackButton={showBackButton}
           width={leftSection?.width}
+          scope={scope}
         />
       ) : null}
     </EuiFlyout>
   );
 };
+
+ExpandableFlyout.displayName = 'ExpandableFlyout';

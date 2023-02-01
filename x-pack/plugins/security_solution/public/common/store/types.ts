@@ -8,6 +8,7 @@
 import type { Store, Dispatch, Action, Middleware, CombinedState } from 'redux';
 
 import type { CoreStart } from '@kbn/core/public';
+import type { FlyoutState } from '@kbn/expandable-flyout';
 import type { StartPlugins } from '../../types';
 import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
@@ -22,7 +23,6 @@ import type { ManagementPluginState } from '../../management';
 import type { UsersPluginState } from '../../explore/users/store';
 import type { GlobalUrlParam } from './global_url_param';
 import type { DataTableState } from './data_table/types';
-import type { SecurityFlyoutState } from './flyout/reducers';
 
 export type State = HostsPluginState &
   UsersPluginState &
@@ -31,7 +31,7 @@ export type State = HostsPluginState &
   ManagementPluginState & {
     app: AppState;
     dragAndDrop: DragAndDropState;
-    flyout: SecurityFlyoutState;
+    flyout: FlyoutState;
     inputs: InputsState;
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;

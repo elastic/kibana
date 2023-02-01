@@ -8,19 +8,18 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { noop } from 'lodash/fp';
-import type { SecurityFlyoutPanel } from '../common/store/flyout/panel-model';
-import type { SecurityFlyoutLayout } from '../common/store/flyout/model';
+import type { FlyoutLayout, FlyoutPanel } from '@kbn/expandable-flyout';
 import {
-  closeSecurityFlyoutLeftPanel,
-  closeSecurityFlyout,
-  closeSecurityFlyoutPreviewPanel,
-  closeSecurityFlyoutRightPanel,
-  openSecurityFlyout,
-  openSecurityFlyoutLeftPanel,
-  openSecurityFlyoutPreviewPanel,
-  openSecurityFlyoutRightPanel,
-  previousSecurityFlyoutPreviewPanel,
-} from '../common/store/flyout/reducers';
+  closeFlyoutLeftPanel,
+  closeFlyout,
+  closeFlyoutPreviewPanel,
+  closeFlyoutRightPanel,
+  openFlyout,
+  openFlyoutLeftPanel,
+  openFlyoutPreviewPanel,
+  openFlyoutRightPanel,
+  previousFlyoutPreviewPanel,
+} from '@kbn/expandable-flyout';
 
 export interface ExpandableFlyoutContext {
   /**
@@ -30,7 +29,7 @@ export interface ExpandableFlyoutContext {
   /**
    *
    */
-  panels: SecurityFlyoutLayout;
+  panels: FlyoutLayout;
   /**
    *
    */
@@ -38,23 +37,19 @@ export interface ExpandableFlyoutContext {
   /**
    *
    */
-  openPanels: (panels: {
-    left?: SecurityFlyoutPanel;
-    right?: SecurityFlyoutPanel;
-    preview?: SecurityFlyoutPanel;
-  }) => void;
+  openPanels: (panels: { left?: FlyoutPanel; right?: FlyoutPanel; preview?: FlyoutPanel }) => void;
   /**
    *
    */
-  openRightPanel: (panel: SecurityFlyoutPanel) => void;
+  openRightPanel: (panel: FlyoutPanel) => void;
   /**
    *
    */
-  openLeftPanel: (panel: SecurityFlyoutPanel) => void;
+  openLeftPanel: (panel: FlyoutPanel) => void;
   /**
    *
    */
-  openPreviewPanel: (panel: SecurityFlyoutPanel) => void;
+  openPreviewPanel: (panel: FlyoutPanel) => void;
   /**
    *
    */
@@ -100,7 +95,7 @@ export interface ExpandableFlyoutProviderProps {
   /**
    *
    */
-  layout: SecurityFlyoutLayout;
+  layout: FlyoutLayout;
   /**
    *
    */
@@ -130,52 +125,49 @@ export const ExpandableFlyoutProvider = ({
       left,
       preview,
     }: {
-      right?: SecurityFlyoutPanel;
-      left?: SecurityFlyoutPanel;
-      preview?: SecurityFlyoutPanel;
-    }) => dispatch(openSecurityFlyout({ scope, left, right, preview })),
+      right?: FlyoutPanel;
+      left?: FlyoutPanel;
+      preview?: FlyoutPanel;
+    }) => dispatch(openFlyout({ scope, left, right, preview })),
     [dispatch, scope]
   );
 
   const openRightPanel = useCallback(
-    (panel: SecurityFlyoutPanel) => dispatch(openSecurityFlyoutRightPanel({ scope, panel })),
+    (panel: FlyoutPanel) => dispatch(openFlyoutRightPanel({ scope, panel })),
     [dispatch, scope]
   );
 
   const openLeftPanel = useCallback(
-    (panel: SecurityFlyoutPanel) => dispatch(openSecurityFlyoutLeftPanel({ scope, panel })),
+    (panel: FlyoutPanel) => dispatch(openFlyoutLeftPanel({ scope, panel })),
     [dispatch, scope]
   );
 
   const openPreviewPanel = useCallback(
-    (panel: SecurityFlyoutPanel) => dispatch(openSecurityFlyoutPreviewPanel({ scope, panel })),
+    (panel: FlyoutPanel) => dispatch(openFlyoutPreviewPanel({ scope, panel })),
     [dispatch, scope]
   );
 
   const closeRightPanel = useCallback(
-    () => dispatch(closeSecurityFlyoutRightPanel({ scope })),
+    () => dispatch(closeFlyoutRightPanel({ scope })),
     [dispatch, scope]
   );
 
   const closeLeftPanel = useCallback(
-    () => dispatch(closeSecurityFlyoutLeftPanel({ scope })),
+    () => dispatch(closeFlyoutLeftPanel({ scope })),
     [dispatch, scope]
   );
 
   const closePreviewPanel = useCallback(
-    () => dispatch(closeSecurityFlyoutPreviewPanel({ scope })),
+    () => dispatch(closeFlyoutPreviewPanel({ scope })),
     [dispatch, scope]
   );
 
   const previousPreviewPanel = useCallback(
-    () => dispatch(previousSecurityFlyoutPreviewPanel({ scope })),
+    () => dispatch(previousFlyoutPreviewPanel({ scope })),
     [dispatch, scope]
   );
 
-  const closePanels = useCallback(
-    () => dispatch(closeSecurityFlyout({ scope })),
-    [dispatch, scope]
-  );
+  const closePanels = useCallback(() => dispatch(closeFlyout({ scope })), [dispatch, scope]);
 
   useEffect(() => setPanels(layout), [layout]);
 

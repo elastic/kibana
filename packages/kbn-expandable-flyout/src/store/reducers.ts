@@ -1,28 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import { createSelector } from 'reselect';
-import type { State } from '..';
-import type { SecurityFlyoutLayout, SecurityFlyoutPanel } from './model';
+import { FlyoutPanel } from '../models/panel';
+import type { FlyoutLayout } from '../models/layout';
 
 /**
  * This state is normalized, which means it avoids having nested data.
  * The relation between each data is managed using id tables.
  * See https://redux.js.org/recipes/structuring-reducers/normalizing-state-shape
  *
- * IMPORTANT: the panels ids HAVE TO be unique!
+ * IMPORTANT: the panel ids HAVE TO be unique!
  */
-export interface SecurityFlyoutState {
+export interface FlyoutState {
   /**
    * Object storing all the panels with the panel id being the key
    */
-  byId: { [panelId: string]: SecurityFlyoutPanel };
+  byId: { [panelId: string]: FlyoutPanel };
   /**
    * Array storing ids of all the left panels
    */
@@ -45,7 +45,7 @@ export interface SecurityFlyoutState {
   allIds: string[];
 }
 
-export const initialFlyoutState: SecurityFlyoutState = {
+export const initialFlyoutState: FlyoutState = {
   byId: {},
   leftIds: [],
   rightIds: [],
@@ -59,23 +59,23 @@ export const flyoutSlice = createSlice({
   initialState: initialFlyoutState,
   reducers: {
     /**
-     * Top open the security flyout.
-     * Requires a scope (left, right and preview {@link SecurityFlyoutPanel} are optional).
+     * Top open the flyout.
+     * Requires a scope (left, right and preview {@link FlyoutPanel} are optional).
      *
      * Removes all prior left, right and preview panels for the scope.
      */
-    openSecurityFlyout: (
+    openFlyout: (
       state,
       action: PayloadAction<{
         scope: string;
-        right?: SecurityFlyoutPanel;
-        left?: SecurityFlyoutPanel;
-        preview?: SecurityFlyoutPanel;
+        right?: FlyoutPanel;
+        left?: FlyoutPanel;
+        preview?: FlyoutPanel;
       }>
     ) => {
       const { scope, left, right, preview } = action.payload;
 
-      const byId: { [panelId: string]: SecurityFlyoutPanel } = { ...state.byId };
+      const byId: { [panelId: string]: FlyoutPanel } = { ...state.byId };
       let leftIds: string[] = [...state.leftIds];
       let rightIds: string[] = [...state.rightIds];
       let previewIds: string[] = [...state.previewIds];
@@ -146,14 +146,11 @@ export const flyoutSlice = createSlice({
     },
     /**
      * To open a right panel.
-     * Requires a scope and a {@link SecurityFlyoutPanel}.
+     * Requires a scope and a {@link FlyoutPanel}.
      *
      * Removes the previous right panel for the scope and replaces it with the new one.
      */
-    openSecurityFlyoutRightPanel: (
-      state,
-      action: PayloadAction<{ scope: string; panel: SecurityFlyoutPanel }>
-    ) => {
+    openFlyoutRightPanel: (state, action: PayloadAction<{ scope: string; panel: FlyoutPanel }>) => {
       const { scope, panel } = action.payload;
 
       // retrieve previous right panel id for the scope
@@ -162,7 +159,7 @@ export const flyoutSlice = createSlice({
       ) as string;
 
       // delete previous id
-      const byId: { [panelId: string]: SecurityFlyoutPanel } = { ...state.byId };
+      const byId: { [panelId: string]: FlyoutPanel } = { ...state.byId };
       delete byId[previousRightId];
 
       let scopedIds: string[] = [...state.idsByScope[scope]];
@@ -186,14 +183,11 @@ export const flyoutSlice = createSlice({
     },
     /**
      * To open a left panel.
-     * Requires a scope and a {@link SecurityFlyoutPanel}.
+     * Requires a scope and a {@link FlyoutPanel}.
      *
      * Removes the previous left panel for the scope and replaces it with the new one.
      */
-    openSecurityFlyoutLeftPanel: (
-      state,
-      action: PayloadAction<{ scope: string; panel: SecurityFlyoutPanel }>
-    ) => {
+    openFlyoutLeftPanel: (state, action: PayloadAction<{ scope: string; panel: FlyoutPanel }>) => {
       const { scope, panel } = action.payload;
 
       // retrieve previous left panel id for the scope
@@ -202,7 +196,7 @@ export const flyoutSlice = createSlice({
       ) as string;
 
       // delete previous id
-      const byId: { [panelId: string]: SecurityFlyoutPanel } = { ...state.byId };
+      const byId: { [panelId: string]: FlyoutPanel } = { ...state.byId };
       delete byId[previousLeftId];
 
       let scopedIds: string[] = [...state.idsByScope[scope]];
@@ -226,13 +220,13 @@ export const flyoutSlice = createSlice({
     },
     /**
      * To open a preview panel.
-     * Requires a scope and a {@link SecurityFlyoutPanel}.
+     * Requires a scope and a {@link FlyoutPanel}.
      *
      * Adds to the array of preview panels.
      */
-    openSecurityFlyoutPreviewPanel: (
+    openFlyoutPreviewPanel: (
       state,
-      action: PayloadAction<{ scope: string; panel: SecurityFlyoutPanel }>
+      action: PayloadAction<{ scope: string; panel: FlyoutPanel }>
     ) => {
       const { scope, panel } = action.payload;
 
@@ -260,7 +254,7 @@ export const flyoutSlice = createSlice({
      *
      * Removes the right panel for the scope.
      */
-    closeSecurityFlyoutRightPanel: (state, action: PayloadAction<{ scope: string }>) => {
+    closeFlyoutRightPanel: (state, action: PayloadAction<{ scope: string }>) => {
       const { scope } = action.payload;
 
       if (!state.idsByScope[scope]) {
@@ -291,7 +285,7 @@ export const flyoutSlice = createSlice({
      *
      * Removes the left panel for the scope.
      */
-    closeSecurityFlyoutLeftPanel: (state, action: PayloadAction<{ scope: string }>) => {
+    closeFlyoutLeftPanel: (state, action: PayloadAction<{ scope: string }>) => {
       const { scope } = action.payload;
 
       if (!state.idsByScope[scope]) {
@@ -322,7 +316,7 @@ export const flyoutSlice = createSlice({
      *
      * Removes all the preview panels for the scope.
      */
-    closeSecurityFlyoutPreviewPanel: (state, action: PayloadAction<{ scope: string }>) => {
+    closeFlyoutPreviewPanel: (state, action: PayloadAction<{ scope: string }>) => {
       const { scope } = action.payload;
 
       if (!state.idsByScope[scope]) {
@@ -353,7 +347,7 @@ export const flyoutSlice = createSlice({
      *
      * Removes the last entry in the array of preview panels for the scope.
      */
-    previousSecurityFlyoutPreviewPanel: (state, action: PayloadAction<{ scope: string }>) => {
+    previousFlyoutPreviewPanel: (state, action: PayloadAction<{ scope: string }>) => {
       const { scope } = action.payload;
 
       if (!state.idsByScope[scope]) {
@@ -396,12 +390,12 @@ export const flyoutSlice = createSlice({
       };
     },
     /**
-     * To close the security flyout.
+     * To close the flyout.
      * Requires a scope.
      *
      * Removes all the panels for the scope.
      */
-    closeSecurityFlyout: (state, action: PayloadAction<{ scope: string }>) => {
+    closeFlyout: (state, action: PayloadAction<{ scope: string }>) => {
       const { scope } = action.payload;
 
       if (!state.idsByScope[scope]) {
@@ -432,48 +426,45 @@ export const flyoutSlice = createSlice({
 });
 
 export const {
-  openSecurityFlyout,
-  openSecurityFlyoutRightPanel,
-  openSecurityFlyoutLeftPanel,
-  openSecurityFlyoutPreviewPanel,
-  closeSecurityFlyoutRightPanel,
-  closeSecurityFlyoutLeftPanel,
-  closeSecurityFlyoutPreviewPanel,
-  previousSecurityFlyoutPreviewPanel,
-  closeSecurityFlyout,
+  openFlyout,
+  openFlyoutRightPanel,
+  openFlyoutLeftPanel,
+  openFlyoutPreviewPanel,
+  closeFlyoutRightPanel,
+  closeFlyoutLeftPanel,
+  closeFlyoutPreviewPanel,
+  previousFlyoutPreviewPanel,
+  closeFlyout,
 } = flyoutSlice.actions;
-
-const selectFlyout = (state: State): SecurityFlyoutState => state.flyout;
 
 /**
  * Takes a scope as input and returns an object with left, right and preview panels.
  */
-export const selectFlyoutLayout = (scope: string) =>
-  createSelector(selectFlyout, (flyout: SecurityFlyoutState): SecurityFlyoutLayout => {
-    const scopedPanelIds: string[] = flyout.idsByScope[scope];
-    if (!scopedPanelIds) {
-      return {
-        right: {},
-        left: {},
-        preview: [],
-      };
-    }
-
-    const leftPanelId: string = scopedPanelIds.find((id: string) =>
-      flyout.leftIds.includes(id)
-    ) as string;
-    const rightPanelId: string = scopedPanelIds.find((id: string) =>
-      flyout.rightIds.includes(id)
-    ) as string;
-    const previewPanelIds: string[] = scopedPanelIds.filter((id: string) =>
-      flyout.previewIds.includes(id)
-    );
-
+export const selectFlyoutLayout = (state: FlyoutState, scope: string): FlyoutLayout => {
+  const scopedPanelIds: string[] = state.idsByScope[scope];
+  if (!scopedPanelIds) {
     return {
-      left: flyout.byId[leftPanelId],
-      right: flyout.byId[rightPanelId],
-      preview: previewPanelIds.map((id: string) => flyout.byId[id]),
+      right: {},
+      left: {},
+      preview: [],
     };
-  });
+  }
+
+  const leftPanelId: string = scopedPanelIds.find((id: string) =>
+    state.leftIds.includes(id)
+  ) as string;
+  const rightPanelId: string = scopedPanelIds.find((id: string) =>
+    state.rightIds.includes(id)
+  ) as string;
+  const previewPanelIds: string[] = scopedPanelIds.filter((id: string) =>
+    state.previewIds.includes(id)
+  );
+
+  return {
+    left: state.byId[leftPanelId],
+    right: state.byId[rightPanelId],
+    preview: previewPanelIds.map((id: string) => state.byId[id]),
+  };
+};
 
 export const flyoutReducer = flyoutSlice.reducer;
