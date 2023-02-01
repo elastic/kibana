@@ -135,6 +135,15 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       }),
     });
   };
+  function resourceFindingsPageTitleTranslation(resourceName: string | undefined) {
+    return i18n.translate('xpack.csp.findings.resourceFindings.resourceFindingsPageTitle', {
+      defaultMessage: '{resourceName} {hyphen} Findings',
+      values: {
+        resourceName,
+        hyphen: resourceFindings.data?.resourceName ? '-' : '',
+      },
+    });
+  }
 
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
@@ -150,13 +159,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         <PageTitleText
           title={
             <CloudPosturePageTitle
-              title={i18n.translate(
-                'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
-                {
-                  defaultMessage: '{resourceName} - Findings',
-                  values: { resourceName: resourceFindings.data?.resourceName },
-                }
-              )}
+              title={resourceFindingsPageTitleTranslation(resourceFindings.data?.resourceName)}
             />
           }
         />
