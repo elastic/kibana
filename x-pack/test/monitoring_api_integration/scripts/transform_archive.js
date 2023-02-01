@@ -56,6 +56,8 @@ const {
           ? 'kibana'
           : source.beat
           ? 'beats'
+          : source.enterprisesearch
+          ? 'ent-search'
           : source.elasticsearch
           ? 'es'
           : null;
