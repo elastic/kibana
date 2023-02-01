@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { css } from 'styled-components';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
@@ -28,7 +28,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
     label,
     donutTextWrapperClassName,
     onLoad,
-    ...lensPorps
+    ...lensProps
   } = props;
   const { session, refetchByRestartingSession, refetchByDeletingSession } =
     useRefetchByRestartingSession({
@@ -113,12 +113,12 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         donutTextWrapperClassName={donutTextWrapperClassName}
         donutTextWrapperStyles={donutTextWrapperStyles}
       >
-        <LensEmbeddable {...lensPorps} id={id} onLoad={onEmbeddableLoad} />
+        <LensEmbeddable {...lensProps} id={id} onLoad={onEmbeddableLoad} />
       </DonutChartWrapper>
     );
   }
 
-  return <LensEmbeddable {...lensPorps} id={id} onLoad={onEmbeddableLoad} />;
+  return <LensEmbeddable {...lensProps} id={id} onLoad={onEmbeddableLoad} />;
 };
 
 export const VisualizationEmbeddable = React.memo(VisualizationEmbeddableComponent);
