@@ -16,6 +16,7 @@ import {
   findMathNodes,
   findVariables,
   getOperationParams,
+  getTypeI18n,
   getValueOrName,
   groupArgsByType,
   isMathNode,
@@ -114,6 +115,8 @@ export interface ErrorWrapper {
   severity?: 'error' | 'warning';
 }
 
+const DEFAULT_RETURN_TYPE = getTypeI18n('number');
+
 function getNodeLocation(node: TinymathFunction): TinymathLocation[] {
   return [node.location].filter(nonNullable);
 }
@@ -124,11 +127,11 @@ function getArgumentType(arg: TinymathAST, operations: Record<string, GenericOpe
   }
   if (arg.type === 'function') {
     if (tinymathFunctions[arg.name]) {
-      return tinymathFunctions[arg.name].outputType ?? 'number';
+      return tinymathFunctions[arg.name].outputType ?? DEFAULT_RETURN_TYPE;
     }
     // Assume it's a number for now
     if (operations[arg.name]) {
-      return 'number';
+      return DEFAULT_RETURN_TYPE;
     }
   }
   // leave for now other argument types
@@ -659,7 +662,6 @@ function validateNameArguments(
   return errors;
 }
 
-const DEFAULT_RETURN_TYPE = 'number';
 function checkTopNodeReturnType(ast: TinymathAST): ErrorWrapper[] {
   if (
     isObject(ast) &&
@@ -1123,7 +1125,7 @@ export function validateMathNodes(
           values: {
             operation: node.name,
             name: positionalArguments[wrongTypeArgumentIndex].name,
-            type: getArgumentType(arg, operations) || 'number',
+            type: getArgumentType(arg, operations) || DEFAULT_RETURN_TYPE,
             expectedType: positionalArguments[wrongTypeArgumentIndex].type || '',
           },
           locations: getNodeLocation(node),
