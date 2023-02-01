@@ -497,7 +497,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
             'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multimodalTooltip',
             {
               defaultMessage:
-                'Indicates whether the prior distribution of the observed time series is multi-modal or has a single mode',
+                'Indicates whether the prior distribution of the time series is multi-modal or has a single mode.',
             }
           )}
         >
