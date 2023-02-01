@@ -65,36 +65,11 @@ export function getInvalidFieldMessage(
     // Missing fields have priority over wrong type
     // This has been moved as some transferable checks also perform exist checks internally and fail eventually
     // but that would make type mismatch error appear in place of missing fields scenarios
-    const missingFields = fields.map((field, i) => (field ? null : fieldNames[i])).filter(Boolean);
+    const missingFields = fields
+      .map((field, i) => (field ? null : fieldNames[i]))
+      .filter(Boolean) as string[];
     if (missingFields.length) {
-      return [
-        {
-          message: (
-            <FormattedMessage
-              id="xpack.lens.indexPattern.fieldsNotFound"
-              defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
-              values={{
-                count: missingFields.length,
-                missingFields: (
-                  <>
-                    {missingFields.map((field, index) => (
-                      <>
-                        <EuiCode>{field}</EuiCode>
-                        {index + 1 === missingFields.length ? '' : ', '}
-                      </>
-                    ))}
-                  </>
-                ),
-              }}
-            />
-          ),
-          displayLocations: [
-            { id: 'toolbar' },
-            { id: 'dimensionButton', dimensionId: columnId },
-            { id: 'embeddableBadge' },
-          ],
-        },
-      ];
+      return [generateMissingFieldMessage(missingFields, columnId)];
     }
     if (isWrongType) {
       // as fallback show all the fields as invalid?
@@ -115,6 +90,36 @@ export function getInvalidFieldMessage(
 
   return undefined;
 }
+
+export const generateMissingFieldMessage = (
+  missingFields: string[],
+  columnId: string
+): FieldBasedOperationErrorMessage => ({
+  message: (
+    <FormattedMessage
+      id="xpack.lens.indexPattern.fieldsNotFound"
+      defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
+      values={{
+        count: missingFields.length,
+        missingFields: (
+          <>
+            {missingFields.map((field, index) => (
+              <>
+                <EuiCode>{field}</EuiCode>
+                {index + 1 === missingFields.length ? '' : ', '}
+              </>
+            ))}
+          </>
+        ),
+      }}
+    />
+  ),
+  displayLocations: [
+    { id: 'toolbar' },
+    { id: 'dimensionButton', dimensionId: columnId },
+    { id: 'embeddableBadge' },
+  ],
+});
 
 export function combineErrorMessages(
   errorMessages: Array<FieldBasedOperationErrorMessage[] | undefined>
