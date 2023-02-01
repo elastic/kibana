@@ -60,9 +60,24 @@ export class UnifiedSearchPageObject extends FtrService {
     await (await this.find.byClassName('indexPatternEditor__form')).click();
   }
 
-  public async createNewDataView(dataViewName: string, adHoc = false, hasTimeField = false) {
+  public async clickEditDataView() {
+    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
+      return await this.testSubjects.isDisplayed('indexPattern-manage-field');
+    });
+    await this.testSubjects.click('indexPattern-manage-field');
+    await this.retry.waitForWithTimeout(
+      'index pattern editor form to be visible',
+      15000,
+      async () => {
+        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
+      }
+    );
+    await (await this.find.byClassName('indexPatternEditor__form')).click();
+  }
+
+  public async createNewDataView(dataViewPattern: string, adHoc = false, hasTimeField = false) {
     await this.clickCreateNewDataView();
-    await this.testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
+    await this.testSubjects.setValue('createIndexPatternTitleInput', dataViewPattern, {
       clearWithKeyboard: true,
       typeCharByChar: true,
     });
@@ -73,6 +88,15 @@ export class UnifiedSearchPageObject extends FtrService {
         : true;
     });
     await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
+  }
+
+  public async editDataView(newPattern: string) {
+    await this.clickCreateNewDataView();
+    await this.testSubjects.setValue('createIndexPatternTitleInput', newPattern, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
+    await this.testSubjects.click('saveIndexPatternButton');
   }
 
   public async isAdHocDataView() {
