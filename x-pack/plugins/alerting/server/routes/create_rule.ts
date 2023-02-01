@@ -16,7 +16,7 @@ import {
   handleDisabledApiKeysError,
   verifyAccessAndContext,
   countUsageOfPredefinedIds,
-  actionsSchemaCreate,
+  actionsSchema,
   rewriteRuleLastRun,
 } from './lib';
 import {
@@ -39,7 +39,7 @@ export const bodySchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDurationSchema }),
   }),
-  actions: actionsSchemaCreate,
+  actions: actionsSchema,
   notify_when: schema.maybe(schema.nullable(schema.string({ validate: validateNotifyWhenType }))),
 });
 

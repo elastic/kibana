@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { v4 } from 'uuid';
 import {
   PartialRule,
   RawRule,
@@ -29,7 +28,13 @@ import {
   NormalizedAlertAction,
   RulesClientContext,
 } from '../types';
-import { validateActions, extractReferences, updateMeta, getPartialRuleFromRaw } from '../lib';
+import {
+  validateActions,
+  extractReferences,
+  updateMeta,
+  getPartialRuleFromRaw,
+  addUuid,
+} from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 
 export interface UpdateOptions<
@@ -113,10 +118,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
       id,
       data: {
         ...data,
-        actions: (data.actions || []).map((action) => ({
-          ...action,
-          uuid: action.uuid || v4(),
-        })),
+        actions: addUuid(data.actions),
       },
     },
     alertSavedObject

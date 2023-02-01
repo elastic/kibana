@@ -31,6 +31,8 @@ export const RuleActionOptionalUuid = t.union([RuleActionUuid, t.undefined]);
 export type RuleActionParams = t.TypeOf<typeof RuleActionParams>;
 export const RuleActionParams = saved_object_attributes;
 
+// RuleAction
+
 const BaseRuleAction = t.type({
   group: RuleActionGroup,
   id: RuleActionId,
@@ -49,10 +51,7 @@ const RuleActionWithOptionalUuid = t.exact(
 
 export type RuleActionWithoutUuid = t.TypeOf<typeof BaseRuleAction>;
 
-export type RuleActionArray = t.TypeOf<typeof RuleActionArray>;
-export const RuleActionArray = t.array(RuleAction);
-
-// --------
+// RuleActionCamel
 
 const BaseRuleActionCamel = t.type({
   group: RuleActionGroup,
@@ -71,16 +70,17 @@ const RuleActionWithOptionalUuidCamel = t.exact(
   t.intersection([BaseRuleActionCamel, t.partial({ uuid: RuleActionOptionalUuid })])
 );
 
+// Arrays
+
+export type RuleActionArray = t.TypeOf<typeof RuleActionArray>;
+export const RuleActionArray = t.array(RuleAction);
+
 export type RuleActionArrayCamel = t.TypeOf<typeof RuleActionArrayCamel>;
 export const RuleActionArrayCamel = t.array(RuleActionCamel);
 
-// --------
-
 export const RuleActionWithOptionalUuidArray = t.array(RuleActionWithOptionalUuid);
-
 export const RuleActionWithOptionalUuidArrayCamel = t.array(RuleActionWithOptionalUuidCamel);
 
 export type RuleActionWithoutUuidArray = t.TypeOf<typeof RuleActionWithoutUuidArray>;
 export const RuleActionWithoutUuidArray = t.array(t.exact(BaseRuleAction));
-
 export const RuleActionWithoutUuidArrayCamel = t.array(t.exact(BaseRuleActionCamel));

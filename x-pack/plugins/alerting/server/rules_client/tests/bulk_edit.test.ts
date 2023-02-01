@@ -30,9 +30,10 @@ jest.mock('../../lib/snooze/is_snooze_active', () => ({
   isSnoozeActive: jest.fn(),
 }));
 
-jest.mock('uuid', () => ({
-  v4: () => 'generated-uuid',
-}));
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `${uuid++}` };
+});
 
 const { isSnoozeActive } = jest.requireMock('../../lib/snooze/is_snooze_active');
 
@@ -482,6 +483,16 @@ describe('bulkEdit()', () => {
         id: '2',
         params: {},
       };
+      const newAction2 = {
+        frequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '3',
+        params: {},
+      };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
@@ -523,7 +534,7 @@ describe('bulkEdit()', () => {
           {
             field: 'actions',
             operation: 'add',
-            value: [existingAction, newAction] as NormalizedAlertActionOptionalUuid[],
+            value: [existingAction, newAction, newAction2] as NormalizedAlertActionOptionalUuid[],
           },
         ],
       });
@@ -549,7 +560,15 @@ describe('bulkEdit()', () => {
                   frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
                   group: 'default',
                   params: {},
-                  uuid: 'generated-uuid',
+                  uuid: '100',
+                },
+                {
+                  actionRef: '',
+                  actionTypeId: '',
+                  frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+                  group: 'default',
+                  params: {},
+                  uuid: '101',
                 },
               ],
               apiKey: null,

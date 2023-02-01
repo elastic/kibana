@@ -10,7 +10,7 @@ import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { RawRule, RuleNotifyWhen } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { NormalizedAlertActionOptionalUuid } from '../types';
+import { NormalizedAlertAction } from '../types';
 import { RulesClientContext } from '../types';
 import { parseDuration } from '../../lib';
 
@@ -18,7 +18,7 @@ export async function validateActions(
   context: RulesClientContext,
   alertType: UntypedNormalizedRuleType,
   data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
-    actions: NormalizedAlertActionOptionalUuid[];
+    actions: NormalizedAlertAction[];
   }
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
@@ -29,6 +29,15 @@ export async function validateActions(
   }
 
   const errors = [];
+
+  const uniqueActions = new Set(actions.map((action) => action.uuid));
+  if (uniqueActions.size < actions.length) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.hasDuplicatedUuid', {
+        defaultMessage: 'Connectors has duplicated UUIDs',
+      })
+    );
+  }
 
   // check for actions using connectors with missing secrets
   const actionsClient = await context.getActionsClient();

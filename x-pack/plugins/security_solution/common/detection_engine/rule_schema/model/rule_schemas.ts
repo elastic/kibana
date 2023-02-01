@@ -171,7 +171,7 @@ const responseOptionalFields = {
 export type BaseCreateProps = t.TypeOf<typeof BaseCreateProps>;
 export const BaseCreateProps = t.intersection([
   baseSchema.create,
-  t.exact(t.partial({ actions: RuleActionWithoutUuidArray })),
+  t.exact(t.partial({ actions: RuleActionWithOptionalUuidArray })),
 ]);
 
 // -------------------------------------------------------------------------------------------------
@@ -185,7 +185,7 @@ type SharedCreateProps = t.TypeOf<typeof SharedCreateProps>;
 const SharedCreateProps = t.intersection([
   baseSchema.create,
   t.exact(t.partial({ rule_id: RuleSignatureId })),
-  t.exact(t.partial({ actions: RuleActionWithoutUuidArray })),
+  t.exact(t.partial({ actions: RuleActionWithOptionalUuidArray })),
 ]);
 
 type SharedUpdateProps = t.TypeOf<typeof SharedUpdateProps>;

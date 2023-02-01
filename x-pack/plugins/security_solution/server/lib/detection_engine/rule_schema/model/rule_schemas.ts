@@ -15,7 +15,6 @@ import {
   RiskScoreMapping,
   RuleActionThrottle,
   RuleActionWithOptionalUuidArrayCamel,
-  RuleActionWithoutUuidArrayCamel,
   RuleIntervalFrom,
   RuleIntervalTo,
   Severity,
@@ -287,7 +286,7 @@ const internalRuleCreateRequired = t.type({
     interval: t.string,
   }),
   enabled: IsRuleEnabled,
-  actions: RuleActionWithoutUuidArrayCamel,
+  actions: RuleActionWithOptionalUuidArrayCamel,
   params: ruleParams,
 });
 const internalRuleCreateOptional = t.partial({

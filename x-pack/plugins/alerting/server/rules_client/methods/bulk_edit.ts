@@ -15,7 +15,7 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { v4 } from 'uuid';
+
 import { BulkActionSkipResult } from '../../../common/bulk_edit';
 import {
   RawRule,
@@ -55,13 +55,14 @@ import {
   API_KEY_GENERATE_CONCURRENCY,
 } from '../common/constants';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { getAlertFromRaw, extractReferences, validateActions, updateMeta } from '../lib';
+import { getAlertFromRaw, extractReferences, validateActions, updateMeta, addUuid } from '../lib';
 import {
   BulkOperationError,
   RuleBulkOperationAggregation,
   RulesClientContext,
   CreateAPIKeyResult,
   NormalizedAlertActionOptionalUuid,
+  NormalizedAlertAction,
 } from '../types';
 
 export type BulkEditFields = keyof Pick<
@@ -545,23 +546,28 @@ async function getUpdatedAttributesFromOperations(
     // the `isAttributesUpdateSkipped` flag to false.
     switch (operation.field) {
       case 'actions': {
+        const updatedOperation = {
+          ...operation,
+          value: addUuid(operation.value),
+        };
+
         try {
           await validateActions(context, ruleType, {
             ...attributes,
-            actions: operation.value,
+            actions: updatedOperation.value,
           });
         } catch (e) {
           // If validateActions fails on the first attempt, it may be because of legacy rule-level frequency params
           attributes = await attemptToMigrateLegacyFrequency(
             context,
-            operation,
+            updatedOperation,
             attributes,
             ruleType
           );
         }
 
         const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
-          operation,
+          updatedOperation,
           ruleActions
         );
         if (isAttributeModified) {
@@ -571,7 +577,7 @@ async function getUpdatedAttributesFromOperations(
 
         // TODO https://github.com/elastic/kibana/issues/148414
         // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-        const firstFrequency = operation.value[0]?.frequency;
+        const firstFrequency = updatedOperation.value[0]?.frequency;
         if (rule.attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
           ruleActions.actions = ruleActions.actions.map((action) => omit(action, 'frequency'));
           if (!attributes.notifyWhen) {
@@ -645,14 +651,7 @@ async function getUpdatedAttributesFromOperations(
 
   return {
     attributes,
-    ruleActions: {
-      actions: (ruleActions.actions || []).map((action) => {
-        return {
-          ...action,
-          uuid: action.uuid || v4(),
-        };
-      }),
-    },
+    ruleActions,
     hasUpdateApiKeyOperation,
     isAttributesUpdateSkipped,
   };
@@ -795,7 +794,11 @@ async function saveBulkUpdatedRules(
 
 async function attemptToMigrateLegacyFrequency(
   context: RulesClientContext,
-  operation: BulkEditOperation,
+  operation: {
+    operation: 'add' | 'set';
+    field: Extract<BulkEditFields, 'actions'>;
+    value: NormalizedAlertAction[];
+  },
   attributes: SavedObjectsFindResult<RawRule>['attributes'],
   ruleType: RuleType
 ) {

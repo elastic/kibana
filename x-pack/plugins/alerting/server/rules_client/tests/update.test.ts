@@ -37,7 +37,10 @@ jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
-jest.mock('uuid', () => ({ v4: () => '111-111' }));
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `${uuid++}` };
+});
 
 const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as jest.Mock;
 const taskManager = taskManagerMock.createStart();
@@ -352,7 +355,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "111-111",
+            "uuid": "100",
           },
           Object {
             "actionRef": "action_1",
@@ -361,7 +364,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "111-111",
+            "uuid": "101",
           },
           Object {
             "actionRef": "action_2",
@@ -370,7 +373,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "111-111",
+            "uuid": "102",
           },
         ],
         "alertTypeId": "myType",
@@ -590,7 +593,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '111-111',
+            uuid: '103',
           },
           {
             group: 'default',
@@ -599,7 +602,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '111-111',
+            uuid: '104',
           },
           {
             group: 'custom',
@@ -608,7 +611,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '111-111',
+            uuid: '105',
           },
         ],
         alertTypeId: 'myType',
@@ -792,7 +795,7 @@ describe('update()', () => {
             actionTypeId: 'test',
             group: 'default',
             params: { foo: true },
-            uuid: '111-111',
+            uuid: '106',
           },
         ],
         alertTypeId: 'myType',
@@ -967,7 +970,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "111-111",
+            "uuid": "107",
           },
         ],
         "alertTypeId": "myType",
@@ -1116,7 +1119,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "111-111",
+            "uuid": "108",
           },
         ],
         "alertTypeId": "myType",
@@ -2524,7 +2527,7 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '111-111',
+            uuid: '150',
           },
         ],
         alertTypeId: 'myType',

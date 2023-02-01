@@ -24,7 +24,6 @@ import {
   createRule,
   getSimpleRule,
   createLegacyRuleAction,
-  LegacyRuleWithoutServerGeneratedProperties,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -167,9 +166,8 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         body.forEach((response) => {
-          const outputRule: LegacyRuleWithoutServerGeneratedProperties = getSimpleRuleOutput(
-            response.rule_id
-          );
+          const bodyToCompare = removeServerGeneratedProperties(response);
+          const outputRule = getSimpleRuleOutput(response.rule_id);
           outputRule.name = 'some other name';
           outputRule.version = 2;
           outputRule.actions = [
@@ -181,10 +179,11 @@ export default ({ getService }: FtrProviderContext) => {
                 message:
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
+              uuid: bodyToCompare.actions[0].uuid,
             },
           ];
           outputRule.throttle = '1d';
-          const bodyToCompare = removeServerGeneratedProperties(response);
+
           expect(bodyToCompare).to.eql(outputRule);
         });
       });

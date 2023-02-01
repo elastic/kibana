@@ -9,7 +9,6 @@ import type { RuleActionWithOptionalUuidCamel } from '@kbn/securitysolution-io-t
 import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
 import type { RuleAlertAction } from './types';
 
-// update - patch - create
 export const transformRuleToAlertAction = ({
   group,
   id,

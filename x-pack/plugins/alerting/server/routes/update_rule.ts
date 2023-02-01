@@ -17,7 +17,7 @@ import {
   handleDisabledApiKeysError,
   rewriteActionsReq,
   rewriteActionsRes,
-  actionsSchemaUpdate,
+  actionsSchema,
   rewriteRuleLastRun,
 } from './lib';
 import {
@@ -40,7 +40,7 @@ const bodySchema = schema.object({
   }),
   throttle: schema.nullable(schema.maybe(schema.string({ validate: validateDurationSchema }))),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  actions: actionsSchemaUpdate,
+  actions: actionsSchema,
   notify_when: schema.maybe(schema.string({ validate: validateNotifyWhenType })),
 });
 

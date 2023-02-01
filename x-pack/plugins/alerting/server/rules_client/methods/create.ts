@@ -10,16 +10,19 @@ import { omit } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { v4 } from 'uuid';
 import { parseDuration } from '../../../common/parse_duration';
 import { RawRule, SanitizedRule, RuleTypeParams, Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../../lib';
 import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
-import { createRuleSavedObject, extractReferences, validateActions } from '../lib';
+import { createRuleSavedObject, extractReferences, validateActions, addUuid } from '../lib';
 import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { NormalizedAlertAction, RulesClientContext } from '../types';
+import {
+  NormalizedAlertAction,
+  NormalizedAlertActionOptionalUuid,
+  RulesClientContext,
+} from '../types';
 
 interface SavedObjectOptions {
   id?: string;
@@ -44,14 +47,16 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'isSnoozedUntil'
     | 'lastRun'
     | 'nextRun'
-  > & { actions: Array<Omit<NormalizedAlertAction, 'uuid'>> };
+  > & { actions: NormalizedAlertActionOptionalUuid[] };
   options?: SavedObjectOptions;
 }
 
 export async function create<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { data, options }: CreateOptions<Params>
+  { data: initialData, options }: CreateOptions<Params>
 ): Promise<SanitizedRule<Params>> {
+  const data = { ...initialData, actions: addUuid(initialData.actions) };
+
   const id = options?.id || SavedObjectsUtils.generateId();
 
   try {
@@ -127,10 +132,7 @@ export async function create<Params extends RuleTypeParams = never>(
     extractReferences(
       context,
       ruleType,
-      (data.actions || []).map((action) => ({
-        ...action,
-        uuid: v4(),
-      })),
+      data.actions as NormalizedAlertAction[],
       validatedAlertTypeParams
     )
   );
