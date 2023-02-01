@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import React, { FC, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
 
 import {
-  useEuiBreakpoint,
-  useIsWithinMaxBreakpoint,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
@@ -22,6 +19,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiTitle,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -474,20 +472,17 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     [currentDataView.timeFieldName]
   );
 
-  const dvPageHeader = css({
-    [useEuiBreakpoint(['xs', 's', 'm', 'l', 'xl'])]: {
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-    },
-  });
-
-  const isWithinXl = useIsWithinMaxBreakpoint('xl');
-
+  const isWithinLargeBreakpoint = useIsWithinMaxBreakpoint('l');
   return (
     <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
-          <EuiPageContentHeader data-test-subj="dataVisualizerPageHeader" css={dvPageHeader}>
+          <EuiPageContentHeader
+            data-test-subj="dataVisualizerPageHeader"
+            css={
+              isWithinLargeBreakpoint ? { flexDirection: 'column', alignItems: 'flex-start' } : null
+            }
+          >
             <EuiPageContentHeaderSection>
               <EuiFlexGroup
                 data-test-subj="dataViewTitleHeader"
@@ -505,7 +500,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>
 
-            {isWithinXl ? <EuiSpacer size="m" /> : null}
+            {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
             <EuiFlexGroup
               alignItems="center"
               justifyContent="flexEnd"
@@ -537,7 +532,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiPageContentBody>
-        <EuiFlexGroup gutterSize="m" direction={isWithinXl ? 'column' : 'row'}>
+        <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder>
               <SearchPanel
@@ -599,7 +594,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               />
             </EuiPanel>
           </EuiFlexItem>
-          {isWithinXl ? <EuiSpacer size="m" /> : null}
+          {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
           <EuiFlexItem grow={false}>
             <ActionsPanel
               dataView={currentDataView}
