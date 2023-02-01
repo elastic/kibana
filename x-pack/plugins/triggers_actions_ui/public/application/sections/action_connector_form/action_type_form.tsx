@@ -212,7 +212,13 @@ export const ActionTypeForm = ({
         .get(actionItem.actionTypeId)
         ?.validateParams(actionItem.params);
       setActionParamsErrors(res);
-      setActionParamsWarnings(validateParamsForWarnings(actionItem.params, basePath.publicBaseUrl));
+      setActionParamsWarnings(
+        validateParamsForWarnings(
+          actionItem.params,
+          basePath.publicBaseUrl,
+          availableActionVariables
+        )
+      );
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem]);

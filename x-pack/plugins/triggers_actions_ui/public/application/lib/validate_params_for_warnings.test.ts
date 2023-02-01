@@ -5,21 +5,35 @@
  * 2.0.
  */
 
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { validateParamsForWarnings } from './validate_params_for_warnings';
 
 describe('validateParamsForWarnings', () => {
+  const actionVariables: ActionVariable[] = [
+    {
+      name: 'context.url',
+      description: 'Test url',
+      usesPublicBaseUrl: true,
+    },
+    {
+      name: 'context.name',
+      description: 'Test name',
+    },
+  ];
+
   test('returns warnings when publicUrl is not set and there are publicUrl variables used', () => {
     expect(
       validateParamsForWarnings(
         {
           subActionParams: {
-            message: 'Test for {{context.alertDetailsUrl}}',
-            note: 'Test for {{context.alertDetailsUrl}}',
-            comments: 'Test for {{context.alertDetailsUrl}}',
-            description: 'Test for {{context.alertDetailsUrl}}',
+            message: 'Test for {{context.url}}',
+            note: 'Test for {{context.url}}',
+            comments: 'Test for {{context.url}}',
+            description: 'Test for {{context.url}}',
           },
         },
-        undefined
+        undefined,
+        actionVariables
       )
     ).toEqual({
       warnings: {
@@ -34,12 +48,13 @@ describe('validateParamsForWarnings', () => {
     expect(
       validateParamsForWarnings(
         {
-          message: 'Test for {{context.alertDetailsUrl}}',
-          note: 'Test for {{context.alertDetailsUrl}}',
-          comments: 'Test for {{context.alertDetailsUrl}}',
-          description: 'Test for {{context.alertDetailsUrl}}',
+          message: 'Test for {{context.url}}',
+          note: 'Test for {{context.url}}',
+          comments: 'Test for {{context.url}}',
+          description: 'Test for {{context.url}}',
         },
-        undefined
+        undefined,
+        actionVariables
       )
     ).toEqual({
       warnings: {
@@ -57,13 +72,14 @@ describe('validateParamsForWarnings', () => {
       validateParamsForWarnings(
         {
           subActionParams: {
-            message: 'Test for {{context.test}}',
-            note: 'Test for {{context.test}}',
-            comments: 'Test for {{context.test}}',
-            description: 'Test for {{context.test}}',
+            message: 'Test for {{context.name}}',
+            note: 'Test for {{context.name}}',
+            comments: 'Test for {{context.name}}',
+            description: 'Test for {{context.name}}',
           },
         },
-        undefined
+        undefined,
+        actionVariables
       )
     ).toEqual({
       warnings: {},
@@ -72,12 +88,13 @@ describe('validateParamsForWarnings', () => {
     expect(
       validateParamsForWarnings(
         {
-          message: 'Test for {{context.test}}',
-          note: 'Test for {{context.test}}',
-          comments: 'Test for {{context.test}}',
-          description: 'Test for {{context.test}}',
+          message: 'Test for {{context.name}}',
+          note: 'Test for {{context.name}}',
+          comments: 'Test for {{context.name}}',
+          description: 'Test for {{context.name}}',
         },
-        undefined
+        undefined,
+        actionVariables
       )
     ).toEqual({
       warnings: {},
@@ -89,13 +106,14 @@ describe('validateParamsForWarnings', () => {
       validateParamsForWarnings(
         {
           subActionParams: {
-            message: 'Test for {{context.viewInAppUrl}}',
-            note: 'Test for {{context.viewInAppUrl}}',
-            comments: 'Test for {{context.viewInAppUrl}}',
-            description: 'Test for {{context.viewInAppUrl}}',
+            message: 'Test for {{context.url}}',
+            note: 'Test for {{context.url}}',
+            comments: 'Test for {{context.url}}',
+            description: 'Test for {{context.url}}',
           },
         },
-        'http://test'
+        'http://test',
+        actionVariables
       )
     ).toEqual({
       warnings: {},
@@ -104,12 +122,13 @@ describe('validateParamsForWarnings', () => {
     expect(
       validateParamsForWarnings(
         {
-          message: 'Test for {{context.viewInAppUrl}}',
-          note: 'Test for {{context.viewInAppUrl}}',
-          comments: 'Test for {{context.viewInAppUrl}}',
-          description: 'Test for {{context.viewInAppUrl}}',
+          message: 'Test for {{context.url}}',
+          note: 'Test for {{context.url}}',
+          comments: 'Test for {{context.url}}',
+          description: 'Test for {{context.url}}',
         },
-        'http://test'
+        'http://test',
+        actionVariables
       )
     ).toEqual({
       warnings: {},

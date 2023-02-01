@@ -7,6 +7,7 @@
 
 import { intersection, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 
 const publicUrlWarning = i18n.translate(
   'xpack.triggersActionsUI.sections.actionTypeForm.warning.publicUrl',
@@ -17,11 +18,12 @@ const publicUrlWarning = i18n.translate(
 
 export function validateParamsForWarnings(
   actionParams: Record<string, unknown>,
-  publicBaseUrl: string | undefined
+  publicBaseUrl: string | undefined,
+  actionVariables: ActionVariable[]
 ): {
   warnings: Record<string, any>;
 } {
-  const publicUrlFields = ['context.alertDetailsUrl', 'context.viewInAppUrl'];
+  const publicUrlFields = actionVariables.filter((v) => v.usesPublicBaseUrl).map((v) => v.name);
   const warningFields = ['message', 'comments', 'description', 'note'];
   const mustacheRegex = /[^{\}]+(?=}})/g;
   const warnings: Record<string, any> = {};

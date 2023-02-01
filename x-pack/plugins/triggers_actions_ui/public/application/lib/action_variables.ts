@@ -113,6 +113,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
       defaultMessage:
         'The URL to the Stack Management rule page that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
     }),
+    usesPublicBaseUrl: true,
   });
 
   result.push({
