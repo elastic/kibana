@@ -44,6 +44,7 @@ describe('createStatusUserActionBuilder ', () => {
       </TestProviders>
     );
 
+    expect(screen.getByTestId('status-update-user-action-status-title')).toBeInTheDocument();
     expect(screen.getByText('marked case as')).toBeInTheDocument();
     expect(screen.getByText(label)).toBeInTheDocument();
   });

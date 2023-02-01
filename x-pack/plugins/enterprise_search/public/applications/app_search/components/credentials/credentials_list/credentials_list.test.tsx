@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBasicTable, EuiCopy } from '@elastic/eui';
 
 import { HiddenText } from '../../../../shared/hidden_text';
 import { ApiTokenTypes } from '../constants';
@@ -93,10 +93,8 @@ describe('CredentialsList', () => {
         apiTokens: [],
       });
 
-      const wrapper = shallow(<CredentialsList />)
-        .find(EuiBasicTable)
-        .dive();
-      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+      const wrapper = shallow(<CredentialsList />);
+      expect(wrapper.render().find('.euiEmptyPrompt')).toHaveLength(1);
     });
   });
 

@@ -31,7 +31,7 @@ export const convertValueToString = ({
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
   options?: {
-    disableMultiline?: boolean;
+    compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
   };
 }): ConvertedResult => {
   if (!rows[rowIndex]) {
@@ -44,7 +44,8 @@ export const convertValueToString = ({
   const value = rowFlattened?.[columnId];
   const field = dataView.fields.getByName(columnId);
   const valuesArray = Array.isArray(value) ? value : [value];
-  const disableMultiline = options?.disableMultiline ?? false;
+  const disableMultiline = options?.compatibleWithCSV ?? false;
+  const enableEscapingForValue = options?.compatibleWithCSV ?? false;
 
   if (field?.type === '_source') {
     return {
@@ -71,7 +72,7 @@ export const convertValueToString = ({
 
       if (typeof formattedValue === 'string') {
         withFormula = withFormula || cellHasFormulas(formattedValue);
-        return escapeFormattedValue(formattedValue);
+        return enableEscapingForValue ? escapeFormattedValue(formattedValue) : formattedValue;
       }
 
       return stringify(formattedValue, disableMultiline) || '';

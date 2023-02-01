@@ -23,6 +23,8 @@ import {
   labelsActionVariableDescription,
   metricActionVariableDescription,
   orchestratorActionVariableDescription,
+  originalAlertStateActionVariableDescription,
+  originalAlertStateWasActionVariableDescription,
   reasonActionVariableDescription,
   tagsActionVariableDescription,
   thresholdActionVariableDescription,
@@ -68,12 +70,42 @@ export async function registerMetricThresholdRuleType(
     ...baseCriterion,
     metric: schema.string(),
     aggType: oneOfLiterals(METRIC_EXPLORER_AGGREGATIONS),
+    customMetrics: schema.never(),
+    equation: schema.never(),
+    label: schema.never(),
   });
 
   const countCriterion = schema.object({
     ...baseCriterion,
     aggType: schema.literal('count'),
     metric: schema.never(),
+    customMetrics: schema.never(),
+    equation: schema.never(),
+    label: schema.never(),
+  });
+
+  const customCriterion = schema.object({
+    ...baseCriterion,
+    aggType: schema.literal('custom'),
+    metric: schema.never(),
+    customMetrics: schema.arrayOf(
+      schema.oneOf([
+        schema.object({
+          name: schema.string(),
+          aggType: oneOfLiterals(['avg', 'sum', 'max', 'min', 'cardinality']),
+          field: schema.string(),
+          filter: schema.never(),
+        }),
+        schema.object({
+          name: schema.string(),
+          aggType: schema.literal('count'),
+          filter: schema.maybe(schema.string()),
+          field: schema.never(),
+        }),
+      ])
+    ),
+    equation: schema.maybe(schema.string()),
+    label: schema.maybe(schema.string()),
   });
 
   alertingPlugin.registerType({
@@ -84,7 +116,9 @@ export async function registerMetricThresholdRuleType(
     validate: {
       params: schema.object(
         {
-          criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
+          criteria: schema.arrayOf(
+            schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
+          ),
           groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filterQuery: schema.maybe(
             schema.string({
@@ -124,6 +158,19 @@ export async function registerMetricThresholdRuleType(
         { name: 'orchestrator', description: orchestratorActionVariableDescription },
         { name: 'labels', description: labelsActionVariableDescription },
         { name: 'tags', description: tagsActionVariableDescription },
+        { name: 'originalAlertState', description: originalAlertStateActionVariableDescription },
+        {
+          name: 'originalAlertStateWasALERT',
+          description: originalAlertStateWasActionVariableDescription,
+        },
+        {
+          name: 'originalAlertStateWasWARNING',
+          description: originalAlertStateWasActionVariableDescription,
+        },
+        {
+          name: 'originalAlertStateWasNO_DATA',
+          description: originalAlertStateWasActionVariableDescription,
+        },
       ],
     },
     producer: 'infrastructure',
