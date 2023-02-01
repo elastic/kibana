@@ -13,6 +13,8 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
@@ -26,13 +28,16 @@ import { indexHealthToHealthColor } from '../../../shared/constants/health_color
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
+
 import { SEARCH_INDEX_PATH, EngineViewTabs } from '../../routes';
 import { IngestionMethod } from '../../types';
 import { ingestionMethodToText } from '../../utils/indices';
+
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
+import { EngineViewHeaderActions } from './engine_view_header_actions';
 
 export const EngineIndices: React.FC = () => {
   const { engineData, engineName, isLoadingEngine, addIndicesFlyoutOpen } =
@@ -172,16 +177,26 @@ export const EngineIndices: React.FC = () => {
           defaultMessage: 'Indices',
         }),
         rightSideItems: [
-          <EuiButton
-            data-test-subj="engine-add-new-indices-btn"
-            iconType="plusInCircle"
-            fill
-            onClick={openAddIndicesFlyout}
-          >
-            {i18n.translate('xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton', {
-              defaultMessage: 'Add new indices',
-            })}
-          </EuiButton>,
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem>
+              <EuiButton
+                data-test-subj="engine-add-new-indices-btn"
+                iconType="plusInCircle"
+                fill
+                onClick={openAddIndicesFlyout}
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton',
+                  {
+                    defaultMessage: 'Add new indices',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EngineViewHeaderActions />
+            </EuiFlexItem>
+          </EuiFlexGroup>,
         ],
       }}
       engineName={engineName}
