@@ -9,24 +9,13 @@ KIBANA_DIR=$(cd "$(dirname "$0")"/.. && pwd)
 WORKSPACE=$(cd "$KIBANA_DIR/.." && pwd)/kibana-docs
 export NVM_DIR="$WORKSPACE/.nvm"
 
-DOCS_DIR="$WORKSPACE/docs.elastic.dev"
-
-# These are the other repos with docs currently required to build the docs in this repo and not get errors
-# For example, kibana docs link to docs in these repos, and if they aren't built, you'll get errors
-DEV_DIR="$WORKSPACE/dev"
-TEAM_DIR="$WORKSPACE/kibana-team"
+DOCS_DIR="$WORKSPACE/repos/elastic/docs.elastic.dev"
 
 cd "$KIBANA_DIR"
-origin=$(git remote get-url origin || true)
-GIT_PREFIX="git@github.com:"
-if [[ "$origin" == "https"* ]]; then
-  GIT_PREFIX="https://github.com/"
-fi
 
 mkdir -p "$WORKSPACE"
 cd "$WORKSPACE"
 touch "$WORKSPACE/.version"
-RESET_VERSION_FROM_FILE=$(cat "$WORKSPACE/.version")
 
 if [[ ! -d "$NVM_DIR" ]]; then
   echo "Installing a separate copy of nvm"
@@ -37,39 +26,33 @@ if [[ ! -d "$NVM_DIR" ]]; then
 fi
 source "$NVM_DIR/nvm.sh"
 
-if [[ ! -d "$DOCS_DIR" ]]; then
-  echo "Cloning docs.elastic.dev repo..."
-  git clone --depth 1 "${GIT_PREFIX}elastic/docs.elastic.dev.git"
-else
-  cd "$DOCS_DIR"
-  git pull
-  if [[ "$RESET_VERSION" != "$RESET_VERSION_FROM_FILE" ]]; then
-    echo "Resetting docs.elastic.dev repo..."
-    git clean -fdxq
+function clone {
+  dir="${WORKSPACE}/repos/elastic/${1}"
+  if [ ! -d "$dir" ]; then
+    echo "cloning elastic/${1}"
+    git clone "git@github.com:elastic/${1}.git" "$dir" 1> /dev/null 2>&1
+  else
+    cd "$dir"
+    echo "updating elastic/${1}"
+    git pull 1> /dev/null 2>&1
+    cd "$WORKSPACE"
   fi
-  cd "$WORKSPACE"
-fi
+}
 
-if [[ ! -d "$DEV_DIR" ]]; then
-  echo "Cloning dev repo..."
-  git clone --depth 1 "${GIT_PREFIX}elastic/dev.git"
-else
-  cd "$DEV_DIR"
-  git pull
-  cd "$WORKSPACE"
-fi
-
-if [[ ! -d "$TEAM_DIR" ]]; then
-  echo "Cloning kibana-team repo..."
-  git clone --depth 1 "${GIT_PREFIX}elastic/kibana-team.git"
-else
-  cd "$TEAM_DIR"
-  git pull
-  cd "$WORKSPACE"
-fi
+clone "ci" &
+clone "dev" &
+clone "docs.elastic.dev" &
+clone "docs-eng-team" &
+clone "docsmobile" &
+clone "kibana-team" &
+clone "platform-engineering-productivity" &
+clone "tech-writing-guidelines" &
+clone "platform-docs-team" &
+clone "release-eng" &
+wait
 
 # The minimum sources required to build kibana docs
-cat << EOF > "$DOCS_DIR/config/content-dev.js"
+cat << EOF > "$DOCS_DIR/config/content.js"
 module.exports = {
   "content": {
     "sources": [
@@ -79,12 +62,40 @@ module.exports = {
       },
       {
         "type": "file",
-        "location": "$DEV_DIR"
+        "location": "${WORKSPACE}/repos/elastic/dev"
       },
       {
         "type": "file",
-        "location": "$TEAM_DIR"
-      }
+        "location": "${WORKSPACE}/repos/elastic/kibana-team"
+      },
+      {
+        "type": "file",
+        "location": "${WORKSPACE}/repos/elastic/ci"
+      },
+      {
+        "type": "file",
+        "location": "${WORKSPACE}/repos/elastic/docsmobile/doc-site"
+      },
+      {
+        "type": "file",
+        "location": "${WORKSPACE}/repos/elastic/docs-eng-team"
+      },
+      {
+        "type": "file",
+        "location": "${WORKSPACE}/repos/elastic/platform-engineering-productivity"
+      },
+      {
+        "type": "file",
+        "location": "${WORKSPACE}/repos/elastic/tech-writing-guidelines"
+      },
+      {
+        "type": "file",
+        "location": "${WORKSPACE}/repos/elastic/platform-docs-team"
+      },
+      {
+        "type": "file",
+        "location": "${WORKSPACE}/repos/elastic/release-eng"
+      },
     ],
     "nav": {
       "structure": [

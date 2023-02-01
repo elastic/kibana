@@ -1284,6 +1284,8 @@
       "@kbn/utils/*": ["packages/kbn-utils/*"],
       "@kbn/ux-plugin": ["x-pack/plugins/ux"],
       "@kbn/ux-plugin/*": ["x-pack/plugins/ux/*"],
+      "@kbn/validate-next-docs-cli": ["packages/kbn-validate-next-docs-cli"],
+      "@kbn/validate-next-docs-cli/*": ["packages/kbn-validate-next-docs-cli/*"],
       "@kbn/vis-default-editor-plugin": ["src/plugins/vis_default_editor"],
       "@kbn/vis-default-editor-plugin/*": ["src/plugins/vis_default_editor/*"],
       "@kbn/vis-type-gauge-plugin": ["src/plugins/vis_types/gauge"],

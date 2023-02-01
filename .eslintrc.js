@@ -1721,7 +1721,10 @@ module.exports = {
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
-      files: 'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+      files: [
+        'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+        'packages/kbn-validate-next-docs-cli/**/*',
+      ],
       rules: {
         'max-classes-per-file': 'off',
       },

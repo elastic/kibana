@@ -4333,6 +4333,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/validate-next-docs-cli@link:packages/kbn-validate-next-docs-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/web-worker-stub@link:packages/kbn-web-worker-stub":
   version "0.0.0"
   uid ""

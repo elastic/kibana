@@ -825,6 +825,7 @@
     "@kbn/tooling-log": "link:packages/kbn-tooling-log",
     "@kbn/ts-projects": "link:packages/kbn-ts-projects",
     "@kbn/ts-type-check-cli": "link:packages/kbn-ts-type-check-cli",
+    "@kbn/validate-next-docs-cli": "link:packages/kbn-validate-next-docs-cli",
     "@kbn/web-worker-stub": "link:packages/kbn-web-worker-stub",
     "@kbn/whereis-pkg-cli": "link:packages/kbn-whereis-pkg-cli",
     "@kbn/yarn-lock-validator": "link:packages/kbn-yarn-lock-validator",
