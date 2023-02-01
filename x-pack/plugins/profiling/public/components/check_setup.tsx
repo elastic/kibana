@@ -59,11 +59,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   }
 
   if (displayNoDataScreen) {
-    return (
-      <ProfilingAppPageTemplate tabs={[]} hideSearchBar>
-        <NoDataPage />
-      </ProfilingAppPageTemplate>
-    );
+    return <NoDataPage />;
   }
 
   if (displaySetupScreen) {

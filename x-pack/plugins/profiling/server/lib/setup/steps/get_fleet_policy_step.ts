@@ -51,6 +51,7 @@ export function getFleetPolicyStep({
         const apmPolicies = await packagePolicyClient.list(soClient, {
           kuery: 'ingest-package-policies.package.name:apm',
         });
+
         return (
           apmPolicies.items.length > 0 &&
           apmPolicies.items.every(
