@@ -50,16 +50,16 @@ export const getAllowedFieldsForTermQuery = async ({
 }: GetAllowedFieldsForTermQuery): Promise<AllowedFieldsForTermsQuery> => {
   let allowedFieldsForTermsQuery = { source: {}, threat: {} };
   try {
-    const sourceFieldsMapping =
-      await services.scopedClusterClient.asCurrentUser.indices.getFieldMapping({
+    const [sourceFieldsMapping, threatFieldsMapping] = await Promise.all([
+      services.scopedClusterClient.asCurrentUser.indices.getFieldMapping({
         index: inputIndex,
         fields: threatMatchedFields.source,
-      });
-    const threatFieldsMapping =
-      await services.scopedClusterClient.asCurrentUser.indices.getFieldMapping({
+      }),
+      services.scopedClusterClient.asCurrentUser.indices.getFieldMapping({
         index: threatIndex,
         fields: threatMatchedFields.threat,
-      });
+      }),
+    ]);
 
     allowedFieldsForTermsQuery = {
       source: getAllowedFieldForTermQueryFromMapping(sourceFieldsMapping),
