@@ -55,6 +55,7 @@ export const getConnectors = async (
       connectors,
       latestUserAction,
       userActionService,
+      logger,
     });
 
     return GetCaseConnectorsResponseRt.encode(results);
@@ -121,21 +122,37 @@ const getConnectorsInfo = async ({
   latestUserAction,
   actionsClient,
   userActionService,
+  logger,
 }: {
   caseId: string;
   connectors: CaseConnectorActivity[];
   latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
   actionsClient: PublicMethodsOf<ActionsClient>;
   userActionService: CaseUserActionService;
+  logger: CasesClientArgs['logger'];
 }): Promise<GetCaseConnectorsResponse> => {
   const connectorIds = connectors.map((connector) => connector.connectorId);
 
   const [pushInfo, actionConnectors] = await Promise.all([
     getEnrichedPushInfo({ caseId, activity: connectors, userActionService }),
-    actionsClient.getBulk(connectorIds),
+    await getActionConnectors(actionsClient, logger, connectorIds),
   ]);
 
   return createConnectorInfoResult({ actionConnectors, connectors, pushInfo, latestUserAction });
+};
+
+const getActionConnectors = async (
+  actionsClient: PublicMethodsOf<ActionsClient>,
+  logger: CasesClientArgs['logger'],
+  ids: string[]
+): Promise<ActionResult[]> => {
+  try {
+    return await actionsClient.getBulk(ids);
+  } catch (error) {
+    // silent error and log it
+    logger.error(`Failed to retrieve action connectors in the get case connectors route: ${error}`);
+    return [];
+  }
 };
 
 interface PushDetails {
@@ -253,10 +270,12 @@ const createConnectorInfoResult = ({
   latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
 }) => {
   const results: GetCaseConnectorsResponse = {};
+  const actionConnectorsMap = new Map(
+    actionConnectors.map((actionConnector) => [actionConnector.id, { ...actionConnector }])
+  );
 
-  for (let i = 0; i < connectors.length; i++) {
-    const connectorDetails = actionConnectors[i];
-    const aggregationConnector = connectors[i];
+  for (const aggregationConnector of connectors) {
+    const connectorDetails = actionConnectorsMap.get(aggregationConnector.connectorId);
     const connector = getConnectorInfoFromSavedObject(aggregationConnector.fields);
 
     const latestUserActionCreatedAt = getDate(latestUserAction?.attributes.created_at);
@@ -271,7 +290,7 @@ const createConnectorInfoResult = ({
 
       results[connector.id] = {
         ...connector,
-        name: connectorDetails.name,
+        name: connectorDetails?.name ?? connector.name,
         push: {
           needsToBePushed,
           hasBeenPushed: hasBeenPushed(enrichedPushInfo),

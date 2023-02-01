@@ -505,7 +505,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       throw new Error('Package policy not found');
     }
 
-    if (!options?.skipUniqueNameVerification) {
+    if (
+      packagePolicy.name &&
+      packagePolicy.name !== oldPackagePolicy.name &&
+      !options?.skipUniqueNameVerification
+    ) {
       // Check that the name does not exist already but exclude the current package policy
       const existingPoliciesWithName = await this.list(soClient, {
         perPage: SO_SEARCH_LIMIT,

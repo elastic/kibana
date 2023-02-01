@@ -11208,17 +11208,6 @@
         "children": [
           {
             "parentPluginId": "fleet",
-            "id": "def-common.GetAgentsResponse.totalInactive",
-            "type": "number",
-            "tags": [],
-            "label": "totalInactive",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
             "id": "def-common.GetAgentsResponse.list",
             "type": "Array",
             "tags": [],
