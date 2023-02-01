@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { cloneDeep } from 'lodash';
 
 import type { PackagePolicy } from '../../../../common';
 
@@ -13,14 +14,15 @@ export const migrateEndpointPackagePolicyToV7140: SavedObjectMigrationFn<
   PackagePolicy,
   PackagePolicy
 > = (packagePolicyDoc) => {
-  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = packagePolicyDoc;
+  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> =
+    cloneDeep(packagePolicyDoc);
   if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
     const input = updatedPackagePolicyDoc.attributes.inputs[0];
     if (input && input.config) {
       const policy = input.config.policy.value;
-      const linuxMalware = input.config.policy.value.windows.malware;
+      const linuxMalware = cloneDeep(input.config.policy.value.windows.malware);
       const linuxMalwarePopup = {
-        malware: input.config.policy.value.windows.popup.malware,
+        malware: cloneDeep(input.config.policy.value.windows.popup.malware),
       };
 
       policy.linux.malware = linuxMalware;
