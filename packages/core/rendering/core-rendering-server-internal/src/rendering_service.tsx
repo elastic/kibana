@@ -113,15 +113,18 @@ export class RenderingService {
     let branding: CustomBranding = {};
     try {
       // Only provide the clusterInfo if the request is authenticated and the elasticsearch service is available.
-      if (isAuthenticated(http.auth, request) && elasticsearch) {
+      const authenticated = isAuthenticated(http.auth, request);
+      if (authenticated && elasticsearch) {
         clusterInfo = await firstValueFrom(
           elasticsearch.clusterInfo$.pipe(
             timeout(50), // If not available, just return undefined
             catchError(() => of({}))
           )
         );
-        branding = await customBranding?.getBrandingFor(request);
       }
+      branding = await customBranding?.getBrandingFor(request, {
+        unauthenticated: !authenticated,
+      })!;
     } catch (err) {
       // swallow error
     }
@@ -151,6 +154,7 @@ export class RenderingService {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,
         pageTitle: branding?.pageTitle,
+        logo: branding?.logo,
       },
       injectedMetadata: {
         version: env.packageInfo.version,

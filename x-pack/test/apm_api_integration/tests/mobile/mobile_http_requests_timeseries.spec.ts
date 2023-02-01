@@ -47,18 +47,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('without data loaded', { config: 'basic', archives: [] }, () => {
-    describe('when no data', () => {
-      it('handles empty state', async () => {
-        const response = await getHttpRequestsChart({ serviceName: 'foo' });
-        expect(response.body.currentPeriod.timeseries).to.eql([]);
-        expect(response.body.previousPeriod.timeseries).to.eql([]);
-        expect(response.status).to.be(200);
+  registry.when(
+    'Mobile HTTP requests without data loaded',
+    { config: 'basic', archives: [] },
+    () => {
+      describe('when no data', () => {
+        it('handles empty state', async () => {
+          const response = await getHttpRequestsChart({ serviceName: 'foo' });
+          expect(response.body.currentPeriod.timeseries).to.eql([]);
+          expect(response.body.previousPeriod.timeseries).to.eql([]);
+          expect(response.status).to.be(200);
+        });
       });
-    });
-  });
+    }
+  );
 
-  registry.when('with data loaded', { config: 'basic', archives: [] }, () => {
+  registry.when('Mobile HTTP requests with data loaded', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateMobileData({
         synthtraceEsClient,

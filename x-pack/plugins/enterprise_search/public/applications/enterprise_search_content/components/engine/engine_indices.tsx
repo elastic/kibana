@@ -35,16 +35,19 @@ import { ingestionMethodToText } from '../../utils/indices';
 
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
+import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
 import { EngineViewHeaderActions } from './engine_view_header_actions';
 import { EngineViewLogic } from './engine_view_logic';
 
 export const EngineIndices: React.FC = () => {
-  const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
-  const { engineData } = useValues(EngineIndicesLogic);
-  const { removeIndexFromEngine } = useActions(EngineIndicesLogic);
+  const { engineData, engineName, isLoadingEngine, addIndicesFlyoutOpen } =
+    useValues(EngineIndicesLogic);
+  const { removeIndexFromEngine, openAddIndicesFlyout, closeAddIndicesFlyout } =
+    useActions(EngineIndicesLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
   const [removeIndexConfirm, setConfirmRemoveIndex] = useState<string | null>(null);
+
   if (!engineData) return null;
   const { indices } = engineData;
 
@@ -177,7 +180,12 @@ export const EngineIndices: React.FC = () => {
         rightSideItems: [
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem>
-              <EuiButton data-test-subj="engine-add-new-indices-btn" iconType="plusInCircle" fill>
+              <EuiButton
+                data-test-subj="engine-add-new-indices-btn"
+                iconType="plusInCircle"
+                fill
+                onClick={openAddIndicesFlyout}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton',
                   {
@@ -246,6 +254,7 @@ export const EngineIndices: React.FC = () => {
             </EuiText>
           </EuiConfirmModal>
         )}
+        {addIndicesFlyoutOpen && <AddIndicesFlyout onClose={closeAddIndicesFlyout} />}
       </>
     </EnterpriseSearchEnginesPageTemplate>
   );

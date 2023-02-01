@@ -35,6 +35,7 @@ export const cspRuleTemplateMetadataSchemaV870 = rt.object({
     id: rt.string(),
     version: rt.string(),
     rule_number: rt.maybe(rt.string()),
+    posture_type: rt.maybe(rt.string()),
   }),
   default_value: rt.maybe(rt.string()),
   description: rt.string(),
