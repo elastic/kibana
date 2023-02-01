@@ -11,7 +11,7 @@ import { CspFinding } from '../../../common/schemas/csp_finding';
 
 const chance = new Chance();
 
-export const getResourceFindingsTableFixture = (): CspFinding & { id: string } => ({
+export const getFindingsFixture = (): CspFinding & { id: string } => ({
   cluster_id: chance.guid(),
   id: chance.word(),
   result: {
