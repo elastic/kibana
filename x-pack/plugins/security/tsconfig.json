@@ -55,6 +55,7 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-custom-branding-common",
     "@kbn/core-custom-branding-server-mocks",
+    "@kbn/ecs",
   ],
   "exclude": [
     "target/**/*",
