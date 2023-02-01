@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../../types';
+import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../types';
 
 export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };

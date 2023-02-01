@@ -18,8 +18,11 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
-import { getDefaultRuleAggregation, formatDefaultAggregationResult } from '../lib';
-import { RuleAggregation } from '../types';
+import {
+  getDefaultRuleAggregation,
+  formatDefaultAggregationResult,
+  RuleAggregation,
+} from '../../lib';
 import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 
 const taskManager = taskManagerMock.createStart();

@@ -9,8 +9,13 @@ import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../lib';
-import { AggregateResult, AggregateOptions, RuleAggregation } from '../rules_client';
-import { getDefaultRuleAggregation, formatDefaultAggregationResult } from '../rules_client/lib';
+import { AggregateOptions } from '../rules_client';
+import {
+  AggregateResult,
+  RuleAggregation,
+  getDefaultRuleAggregation,
+  formatDefaultAggregationResult,
+} from '../lib';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';

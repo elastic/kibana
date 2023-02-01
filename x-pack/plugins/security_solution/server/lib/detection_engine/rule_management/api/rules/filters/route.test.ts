@@ -57,9 +57,19 @@ describe('Rule management filters route', () => {
     test('1 rule installed, 1 custom rule and 3 tags', async () => {
       clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       clients.rulesClient.aggregate.mockResolvedValue({
-        alertExecutionStatus: {},
-        ruleLastRunOutcome: {},
-        ruleTags: ['a', 'b', 'c'],
+        status: {
+          buckets: [],
+        },
+        outcome: {
+          buckets: [],
+        },
+        tags: {
+          buckets: [
+            { key: 'a', doc_count: 1 },
+            { key: 'b', doc_count: 1 },
+            { key: 'c', doc_count: 1 },
+          ],
+        },
       });
       const request = getRuleManagementFiltersRequest();
       const response = await server.inject(request, requestContextMock.convertContext(context));

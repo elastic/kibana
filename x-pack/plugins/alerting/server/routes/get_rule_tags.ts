@@ -11,11 +11,12 @@ import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '
 import { ILicenseState } from '../lib';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
 import {
+  getRuleTagsAggregation,
+  formatRuleTagsAggregationResult,
   RuleTagsAggregationOptions,
   RuleTagsAggregateResult,
   RuleTagsAggregation,
-} from '../rules_client';
-import { getRuleTagsAggregation, formatRuleTagsAggregationResult } from '../rules_client/lib';
+} from '../lib';
 
 const querySchema = schema.object({
   filter: schema.maybe(schema.string()),

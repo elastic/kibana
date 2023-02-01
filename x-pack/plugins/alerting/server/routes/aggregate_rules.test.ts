@@ -26,8 +26,8 @@ jest.mock('./lib/track_legacy_terminology', () => ({
   trackLegacyTerminology: jest.fn(),
 }));
 
-jest.mock('../rules_client/lib/default_rule_aggregation', () => ({
-  ...jest.requireActual('../rules_client/lib/default_rule_aggregation'),
+jest.mock('../lib/default_rule_aggregation', () => ({
+  ...jest.requireActual('../lib/default_rule_aggregation'),
   formatDefaultAggregationResult: jest.fn(),
 }));
 
@@ -35,9 +35,7 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-const { formatDefaultAggregationResult } = jest.requireMock(
-  '../rules_client/lib/default_rule_aggregation'
-);
+const { formatDefaultAggregationResult } = jest.requireMock('../lib/default_rule_aggregation');
 
 describe('aggregateRulesRoute', () => {
   it('aggregate rules with proper parameters', async () => {

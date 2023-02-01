@@ -6,7 +6,7 @@
  */
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AggregateOptions } from '../types';
+import type { AggregateOptions } from '../rules_client/types';
 
 export type RuleTagsAggregationOptions = Pick<
   AggregateOptions,
