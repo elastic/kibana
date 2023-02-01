@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { Content } from '../../common';
-import { schemas } from '../../common';
+import { contentSchema } from '../../common';
 import type { EventBus } from './event_bus';
 import type { ContentRegistry } from './registry';
 import type { CreateItemSuccess } from './event_types';
@@ -26,7 +26,7 @@ export const init = ({
     const serializer = contentRegistry.getConfig(event.contentType)?.toSearchContentSerializer;
 
     const content: Content = serializer ? serializer(event.data) : (event.data as Content);
-    const validation = schemas.content.searchIndex.getSchema().validate(content);
+    const validation = contentSchema.getSchema().validate(content);
 
     if (validation.error) {
       throw new Error(`Can't index content [${event.contentType}] created, invalid Content.`);

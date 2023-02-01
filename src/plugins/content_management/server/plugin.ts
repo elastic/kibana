@@ -14,7 +14,6 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
-import { PLUGIN_ID } from '../common';
 import { ContentCore, ContentCoreApi } from './core';
 import { wrapError } from './error_wrapper';
 import { initRpcRoutes, FunctionHandler, initRpcHandlers } from './rpc';
@@ -32,9 +31,7 @@ export class ContentManagementPlugin implements Plugin {
   }
 
   public setup(core: CoreSetup) {
-    this.logger.info(`>>>> [${PLUGIN_ID}] setup...`);
-
-    const { api } = this.contentCore.setup();
+    const { api, contentRegistry } = this.contentCore.setup();
     this.coreApi = api;
 
     const fnHandler = new FunctionHandler<RpcContext>();
@@ -46,7 +43,7 @@ export class ContentManagementPlugin implements Plugin {
       logger: this.logger,
       wrapError,
       fnHandler,
-      context: { core: this.coreApi },
+      context: { core: this.coreApi, contentRegistry },
     });
 
     // --------------- DEMO -------------------
@@ -55,27 +52,33 @@ export class ContentManagementPlugin implements Plugin {
     this.coreApi.register('foo', {
       storage,
       schemas: {
-        rpc: {
+        content: {
           get: {
-            out: schema.any(),
+            out: {
+              result: schema.any(),
+            },
           },
           create: {
-            in: schema.any(),
-            out: schema.any(),
+            in: {
+              data: schema.any(),
+            },
+            out: {
+              result: schema.any(),
+            },
           },
         },
       },
     });
 
-    const addContent = async () => {
-      // Add dummy content
-      await storage.create({
-        title: 'Foo',
-        description: 'Some description',
-        foo: false,
-      });
-    };
-    addContent();
+    // const addContent = async () => {
+    //   // Add dummy content
+    //   await storage.create({
+    //     title: 'Foo',
+    //     description: 'Some description',
+    //     foo: false,
+    //   });
+    // };
+    // addContent();
     // ----------------------------------------
 
     return {

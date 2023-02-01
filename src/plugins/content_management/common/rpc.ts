@@ -56,11 +56,12 @@ const createSchemas: ProcedureSchemas = {
 };
 
 export interface CreateIn<
-  T extends object = Record<string, unknown>,
+  T extends string = string,
+  Data extends object = Record<string, unknown>,
   Options extends object = any
 > {
-  contentType: string;
-  data: T;
+  contentType: T;
+  data: Data;
   options?: Options;
 }
 

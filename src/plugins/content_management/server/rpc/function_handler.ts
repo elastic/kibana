@@ -5,43 +5,66 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Type } from '@kbn/config-schema';
-import { Calls } from '../../common';
+import type { ProcedureSchemas } from '../../common';
 
-interface CallConfig<Context> {
-  fn: (ctx: Context, input: any) => Promise<any>;
-  schemas: {
-    in: Type<any>;
-    out: Type<any>;
-  };
+export interface ProcedureConfig<Context, I extends object = any, O extends any = any> {
+  fn: (context: Context, input?: I) => Promise<O>;
+  schemas?: ProcedureSchemas;
 }
 
 interface Registry<Context> {
-  [fnName: string]: CallConfig<Context>;
+  [name: string]: ProcedureConfig<Context>;
 }
 
-export class FunctionHandler<Context> {
+export class FunctionHandler<Context, Names extends string = string> {
   private registry: Registry<Context> = {};
 
-  // constructor(private contentRegistry: ContentRegistry) {}
-
-  register(fnName: Calls, config: CallConfig<Context>) {
-    this.registry[fnName] = config;
+  register<Config extends ProcedureConfig<any> = ProcedureConfig<Context>>(
+    name: Names,
+    config: Config
+  ) {
+    this.registry[name] = config;
   }
 
-  async call(
-    context: Context,
-    fnName: Calls,
-    input: any
-  ): Promise<{ token?: string; result?: any }> {
-    // TODO: validate input
-    // const config = this.contentRegistry.getConfig(); // TODO: we need a way to know the content type here
+  async call<I extends object = any, O = any>(
+    {
+      name,
+      input,
+    }: {
+      name: Names;
+      input?: I;
+    },
+    context: Context
+  ): Promise<{ result: O }> {
+    const handler: ProcedureConfig<Context, I, O> = this.registry[name];
 
-    const handler = this.registry[fnName];
-    if (!handler) throw new Error(`Handler missing for ${fnName}`);
+    if (!handler) throw new Error(`Handler missing for ${name}`);
 
-    const result = await handler.fn(context, input);
-    // TODO: validate result
+    const { fn, schemas } = handler;
+
+    // 1. Validate input
+    if (schemas?.in) {
+      const validation = schemas.in.getSchema().validate(input);
+      if (validation.error) {
+        throw validation.error;
+      }
+    } else if (input !== undefined) {
+      throw new Error(`Input schema missing for [${name}] procedure.`);
+    }
+
+    // 2. Execute procedure
+    const result = await fn(context, input);
+
+    // 3. Validate output
+    if (handler.schemas?.out) {
+      const validation = handler.schemas.out.getSchema().validate(result);
+      if (validation.error) {
+        throw validation.error;
+      }
+    } else {
+      // TO DISCUSS: Here we could also enforce that a schema is provided when
+      // the result is not undefined.
+    }
 
     return { result };
   }

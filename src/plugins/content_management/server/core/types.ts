@@ -7,7 +7,7 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import type { Content, schemas } from '../../common';
+import type { Content } from '../../common';
 
 export interface ContentStorage<T extends { id: string } = { id: string } & object> {
   /** Get a single item */
@@ -33,19 +33,49 @@ export interface ContentStorage<T extends { id: string } = { id: string } & obje
 
 export type SearchContentSerializer<T extends object = object> = (item: T) => Content;
 
-type CallsWithOutSchema = keyof Pick<typeof schemas['api'], 'get'>;
-type CallsWithInOutSchema = keyof Pick<typeof schemas['api'], 'create'>;
-
-type RpcSchemas = { [key in CallsWithOutSchema]: { out: Type<any> } } & {
-  [key in CallsWithInOutSchema]: { in: Type<any>; out: Type<any> };
-};
-
 export interface ContentConfig<S extends ContentStorage> {
   /** The storage layer for the content.*/
   storage: S;
   /** Optional handler to convert the DB item to a KibanaContent */
   toSearchContentSerializer?: SearchContentSerializer<any>;
   schemas: {
-    rpc: RpcSchemas;
+    content: {
+      // TODO
+      // list: {
+      //   in: {
+      //     options?: Type<any>;
+      //   };
+      //   out: {
+      //     result: Type<any>;
+      //   };
+      // };
+      get: {
+        in?: {
+          options?: Type<any>;
+        };
+        out: {
+          result: Type<any>;
+        };
+      };
+      create: {
+        in: {
+          data: Type<any>;
+          options?: Type<any>;
+        };
+        out: {
+          result: Type<any>;
+        };
+      };
+      // TODO
+      // update: {
+      //   in: {
+      //     data: Type<any>;
+      //     options?: Type<any>;
+      //   };
+      //   out: {
+      //     result: Type<any>;
+      //   };
+      // };
+    };
   };
 }
