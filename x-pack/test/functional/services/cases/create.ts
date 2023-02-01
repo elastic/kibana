@@ -7,9 +7,9 @@
 
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { v4 as uuidv4 } from 'uuid';
+import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CasesCommon } from './common';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
 
 export interface CreateCaseParams {
   title?: string;
@@ -121,14 +121,13 @@ export function CasesCreateViewServiceProvider(
       await casesCommon.assertCaseModalVisible(true);
       const createCaseBtnExists = await testSubjects.exists('cases-table-add-case');
 
-      if(createCaseBtnExists) {
+      if (createCaseBtnExists) {
         await testSubjects.click('cases-table-add-case');
-      }
-      else {
+      } else {
         await casesCommon.filterCaseByStatusFromModal(CaseStatuses['in-progress']);
         await testSubjects.click('cases-table-add-case');
       }
-      
+
       await casesCommon.assertCaseModalVisible(false);
       await this.creteCaseFromFlyout(params);
     },
