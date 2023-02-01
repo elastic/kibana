@@ -13,14 +13,13 @@ import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
 import type { Case } from '../../../common/ui/types';
-import type { CaseService } from '../../containers/use_find_case_user_actions';
 import { useAllCasesNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesToast } from '../../common/use_cases_toast';
 
 interface CaseViewActions {
   caseData: Case;
-  currentExternalIncident: CaseService | null;
+  currentExternalIncident: Case['externalService'];
 }
 
 const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternalIncident }) => {
@@ -48,6 +47,15 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
           showSuccessToast(i18n.COPY_ID_ACTION_SUCCESS);
         },
       },
+      ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
+        ? [
+            {
+              iconType: 'popout',
+              label: i18n.VIEW_INCIDENT(currentExternalIncident?.externalTitle ?? ''),
+              onClick: () => window.open(currentExternalIncident?.externalUrl, '_blank'),
+            },
+          ]
+        : []),
       ...(permissions.delete
         ? [
             {
@@ -55,15 +63,6 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
               label: i18n.DELETE_CASE(),
               color: 'danger' as const,
               onClick: openModal,
-            },
-          ]
-        : []),
-      ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
-        ? [
-            {
-              iconType: 'popout',
-              label: i18n.VIEW_INCIDENT(currentExternalIncident?.externalTitle ?? ''),
-              onClick: () => window.open(currentExternalIncident?.externalUrl, '_blank'),
             },
           ]
         : []),

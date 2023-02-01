@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RawRule, RawRuleAction } from '@kbn/alerting-plugin/server/types';
 import { FILEBEAT_7X_INDICATOR_PATH } from '@kbn/alerting-plugin/server/saved_objects/migrations';
+import { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -607,6 +608,34 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         expect((hit?._source?.alert as RawRule)?.params?.aggType).to.eql('count');
         expect((hit?._source?.alert as RawRule)?.params?.groupBy).to.eql('all');
       });
+    });
+
+    it('8.7.0 adds logView param and its reference to Log Threshold rule', async () => {
+      const logViewId = 'log-view-reference-0';
+
+      const logView = {
+        logViewId,
+        type: 'log-view-reference',
+      };
+
+      const references = [
+        {
+          name: `param:${logViewId}`,
+          type: 'infrastructure-monitoring-log-view',
+          id: 'default',
+        },
+      ];
+
+      const response = await es.get<{ alert: RawRule; references: SavedObjectReference[] }>(
+        {
+          index: '.kibana',
+          id: 'alert:8bd01ff0-9d84-11ed-994d-f1971f849da5',
+        },
+        { meta: true }
+      );
+
+      expect(response.body._source?.alert?.params.logView).to.eql(logView);
+      expect(response.body._source?.references).to.eql(references);
     });
   });
 }

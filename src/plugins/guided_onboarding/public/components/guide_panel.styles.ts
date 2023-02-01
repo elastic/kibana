@@ -30,6 +30,9 @@ export const getGuidePanelStyles = ({
   setupButton: css`
     margin-right: ${euiTheme.size.m};
   `,
+  wellDoneAnimatedPrompt: css`
+    text-align: left;
+  `,
   flyoutOverrides: {
     flyoutHeader: css`
       background: url(${isDarkTheme ? panelBgTopDark : panelBgTop}) top right no-repeat;
