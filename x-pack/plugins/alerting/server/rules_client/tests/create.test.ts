@@ -3047,7 +3047,7 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
-   test('should create a rule and not throw an error when skipActionConnectorsValidations is true even when some actions are missing frequency params', async () => {
+  test('should create a rule and not throw an error when skipActionConnectorsValidations is true even when some actions are missing frequency params', async () => {
     const data = getMockData({
       actions: [
         {
@@ -3218,5 +3218,4 @@ describe('create()', () => {
       }
     `);
   });
-
 });
