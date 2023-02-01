@@ -59,7 +59,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const timelineUi = useTimelineContext()?.ui;
 
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
-      caseId,
       caseData,
     });
 

@@ -21,9 +21,10 @@ import type { SuppressionBuckets } from '../../rule_types/factories/utils/wrap_s
 import { wrapSuppressedAlerts } from '../../rule_types/factories/utils/wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
 import { singleSearchAfter } from '../single_search_after';
+import { bulkCreateWithSuppression } from '../../rule_types/factories/bulk_create_with_suppression';
 
 export interface BucketHistory {
-  key: Record<string, string | number>;
+  key: Record<string, string | number | null>;
   endDate: string;
 }
 
@@ -50,11 +51,21 @@ export const buildBucketHistoryFilter = ({
         must_not: bucketHistory.map((bucket) => ({
           bool: {
             filter: [
-              ...Object.entries(bucket.key).map(([field, value]) => ({
-                term: {
-                  [field]: value,
-                },
-              })),
+              ...Object.entries(bucket.key).map(([field, value]) =>
+                value != null
+                  ? {
+                      term: {
+                        [field]: value,
+                      },
+                    }
+                  : {
+                      must_not: {
+                        exists: {
+                          field,
+                        },
+                      },
+                    }
+              ),
               buildTimeRangeFilter({
                 to: bucket.endDate,
                 from: from.toISOString(),
@@ -188,25 +199,33 @@ export const groupAndBulkCreate = async ({
         ruleExecutionLogger: runOpts.ruleExecutionLogger,
       });
 
-      const bulkCreateResult = await runOpts.bulkCreate(wrappedAlerts);
+      const suppressionDuration = runOpts.completeRule.ruleParams.alertSuppression?.duration;
 
-      addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
-
-      runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
-
-      const newBucketHistory: BucketHistory[] = buckets
-        .filter((bucket) => {
-          return !Object.values(bucket.key).includes(null);
-        })
-        .map((bucket) => {
-          return {
-            // This cast should be safe as we just filtered out buckets where any key has a null value.
-            key: bucket.key as Record<string, string | number>,
-            endDate: bucket.max_timestamp.value_as_string
-              ? bucket.max_timestamp.value_as_string
-              : tuple.to.toISOString(),
-          };
+      if (suppressionDuration) {
+        const suppressionWindow = `now-${suppressionDuration.value}${suppressionDuration.unit}`;
+        const bulkCreateResult = await bulkCreateWithSuppression({
+          alertWithSuppression: runOpts.alertWithSuppression,
+          ruleExecutionLogger: runOpts.ruleExecutionLogger,
+          wrappedDocs: wrappedAlerts,
+          services,
+          suppressionWindow,
+          alertTimestampOverride: runOpts.alertTimestampOverride,
         });
+        addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+      } else {
+        const bulkCreateResult = await runOpts.bulkCreate(wrappedAlerts);
+        addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+        runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
+      }
+
+      const newBucketHistory: BucketHistory[] = buckets.map((bucket) => {
+        return {
+          key: bucket.key,
+          endDate: bucket.max_timestamp.value_as_string
+            ? bucket.max_timestamp.value_as_string
+            : tuple.to.toISOString(),
+        };
+      });
 
       toReturn.state.suppressionGroupHistory.push(...newBucketHistory);
     } catch (exc) {

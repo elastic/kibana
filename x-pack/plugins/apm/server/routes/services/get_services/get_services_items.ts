@@ -10,8 +10,8 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
-import { getServiceTransactionStats } from './get_service_transaction_stats';
-import { getServiceAggregatedTransactionStats } from './get_service_aggregated_transaction_stats';
+import { getServiceStats } from './get_service_stats';
+import { getServiceStatsForServiceMetrics } from './get_service_stats_for_service_metric';
 import { mergeServiceStats } from './merge_service_stats';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
@@ -19,7 +19,7 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { getServicesAlerts } from './get_service_alerts';
 import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 
-export const MAX_NUMBER_OF_SERVICES = 500;
+export const MAX_NUMBER_OF_SERVICES = 1_000;
 
 export async function getServicesItems({
   environment,
@@ -62,17 +62,17 @@ export async function getServicesItems({
     };
 
     const [
-      transactionStats,
-      servicesFromErrorAndMetricDocuments,
+      { serviceStats, serviceOverflowCount },
+      { services, maxServiceCountExceeded },
       healthStatuses,
       alertCounts,
     ] = await Promise.all([
       searchAggregatedServiceMetrics
-        ? getServiceAggregatedTransactionStats({
+        ? getServiceStatsForServiceMetrics({
             ...commonParams,
             apmEventClient,
           })
-        : getServiceTransactionStats({
+        : getServiceStats({
             ...commonParams,
             apmEventClient,
           }),
@@ -90,11 +90,16 @@ export async function getServicesItems({
       }),
     ]);
 
-    return mergeServiceStats({
-      transactionStats,
-      servicesFromErrorAndMetricDocuments,
-      healthStatuses,
-      alertCounts,
-    });
+    return {
+      items:
+        mergeServiceStats({
+          serviceStats,
+          servicesFromErrorAndMetricDocuments: services,
+          healthStatuses,
+          alertCounts,
+        }) ?? [],
+      maxServiceCountExceeded,
+      serviceOverflowCount,
+    };
   });
 }

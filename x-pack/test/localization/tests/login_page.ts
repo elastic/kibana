@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { getI18nLocaleFromServerArgs } from './utils';
 
 /**
  * Strings Needs to be hardcoded since getting it from the i18n.translate
@@ -26,19 +27,6 @@ function getExpectedI18nTranslation(locale: string): string | undefined {
     default:
       return;
   }
-}
-
-function getI18nLocaleFromServerArgs(kbnServerArgs: string[]): string {
-  const re = /--i18n\.locale=(?<locale>.*)/;
-  for (const serverArg of kbnServerArgs) {
-    const match = re.exec(serverArg);
-    const locale = match?.groups?.locale;
-    if (locale) {
-      return locale;
-    }
-  }
-
-  throw Error('i18n.locale is not set in the server arguments');
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

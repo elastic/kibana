@@ -27,7 +27,7 @@ import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { waitFor } from '@testing-library/react';
-import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -123,6 +123,7 @@ jest.mock('../../hooks/endpoint/use_get_endpoints_list');
 jest.mock('../../../common/experimental_features_service');
 
 jest.mock('../../../common/components/user_privileges');
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 let mockUseGetFileInfo: {
   isFetching?: boolean;
@@ -139,12 +140,13 @@ jest.mock('../../hooks/response_actions/use_get_file_info', () => {
 
 const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 
-// FLAKY https://github.com/elastic/kibana/issues/145635
-describe.skip('Response actions history', () => {
-  const useUserPrivilegesMock = _useUserPrivileges as jest.Mock<
-    ReturnType<typeof _useUserPrivileges>
-  >;
-
+const getBaseMockedActionList = () => ({
+  isFetched: true,
+  isFetching: false,
+  error: null,
+  refetch: jest.fn(),
+});
+describe('Response actions history', () => {
   const testPrefix = 'response-actions-list';
 
   let render: (
@@ -154,14 +156,6 @@ describe.skip('Response actions history', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
-
-  const refetchFunction = jest.fn();
-  const baseMockedActionList = {
-    isFetched: true,
-    isFetching: false,
-    error: null,
-    refetch: refetchFunction,
-  };
 
   beforeEach(async () => {
     mockedContext = createAppRootMockRenderer();
@@ -173,7 +167,7 @@ describe.skip('Response actions history', () => {
     });
 
     mockUseGetEndpointActionList = {
-      ...baseMockedActionList,
+      ...getBaseMockedActionList(),
       data: await getActionListMock({ actionCount: 13 }),
     };
 
@@ -189,20 +183,20 @@ describe.skip('Response actions history', () => {
       pageSize: 50,
       total: 50,
     });
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: getEndpointAuthzInitialStateMock(),
+    });
   });
 
   afterEach(() => {
-    mockUseGetEndpointActionList = {
-      ...baseMockedActionList,
-    };
-    jest.clearAllMocks();
-    useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
+    mockUseGetEndpointActionList = getBaseMockedActionList();
+    useUserPrivilegesMock.mockReset();
   });
 
   describe('When index does not exist yet', () => {
     it('should show global loader when waiting for response', () => {
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         isFetched: false,
         isFetching: true,
       };
@@ -211,7 +205,7 @@ describe.skip('Response actions history', () => {
     });
     it('should show empty page when there is no index', () => {
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         error: {
           body: { statusCode: 404, message: 'index_not_found_exception' },
         },
@@ -234,7 +228,7 @@ describe.skip('Response actions history', () => {
 
     it('should show empty state when there is no data', async () => {
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 0 }),
       };
       render();
@@ -295,7 +289,7 @@ describe.skip('Response actions history', () => {
       };
 
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data,
       };
       render({ showHostNames: true });
@@ -316,7 +310,7 @@ describe.skip('Response actions history', () => {
       };
 
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data,
       };
       render({ showHostNames: true });
@@ -339,7 +333,7 @@ describe.skip('Response actions history', () => {
       };
 
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data,
       };
       render({ showHostNames: true });
@@ -367,7 +361,7 @@ describe.skip('Response actions history', () => {
 
     it('should update per page rows on the table', async () => {
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 33 }),
       };
 
@@ -398,7 +392,7 @@ describe.skip('Response actions history', () => {
 
     it('should show 1-1 record label when only 1 record', async () => {
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 1 }),
       };
       render();
@@ -446,7 +440,7 @@ describe.skip('Response actions history', () => {
 
     it('should contain download link in expanded row for `get-file` action WITH file operation permission', async () => {
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
       };
 
@@ -475,7 +469,7 @@ describe.skip('Response actions history', () => {
 
     it('should show file unavailable for download for `get-file` action WITH file operation permission when file is deleted', async () => {
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
       };
 
@@ -507,20 +501,14 @@ describe.skip('Response actions history', () => {
     });
 
     it('should not contain download link in expanded row for `get-file` action when NO file operation permission', async () => {
-      const privileges = useUserPrivilegesMock();
-
-      useUserPrivilegesMock.mockImplementationOnce(() => {
-        return {
-          ...privileges,
-          endpointPrivileges: {
-            ...privileges.endpointPrivileges,
-            canWriteFileOperations: false,
-          },
-        };
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointAuthzInitialStateMock({
+          canWriteFileOperations: false,
+        }),
       });
 
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
       };
 
@@ -536,6 +524,7 @@ describe.skip('Response actions history', () => {
     });
 
     it('should refresh data when autoRefresh is toggled on', async () => {
+      mockUseGetEndpointActionList = getBaseMockedActionList();
       render();
       const { getByTestId } = renderResult;
 
@@ -550,16 +539,19 @@ describe.skip('Response actions history', () => {
       reactTestingLibrary.fireEvent.change(intervalInput, { target: { value: 1 } });
 
       await reactTestingLibrary.waitFor(() => {
-        expect(refetchFunction).toHaveBeenCalledTimes(3);
+        expect(mockUseGetEndpointActionList.refetch).toHaveBeenCalledTimes(3);
       });
     });
 
     it('should refresh data when super date picker refresh button is clicked', async () => {
+      mockUseGetEndpointActionList = getBaseMockedActionList();
       render();
 
       const superRefreshButton = renderResult.getByTestId(`${testPrefix}-super-refresh-button`);
       userEvent.click(superRefreshButton);
-      expect(refetchFunction).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(mockUseGetEndpointActionList.refetch).toHaveBeenCalled();
+      });
     });
 
     it('should set date picker with relative dates', async () => {
@@ -592,7 +584,7 @@ describe.skip('Response actions history', () => {
 
     it('shows completed status badge for successfully completed actions', async () => {
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 2 }),
       };
       render();
@@ -609,7 +601,7 @@ describe.skip('Response actions history', () => {
 
     it('shows Failed status badge for failed actions', async () => {
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 2, wasSuccessful: false, status: 'failed' }),
       };
       render();
@@ -623,7 +615,7 @@ describe.skip('Response actions history', () => {
 
     it('shows Failed status badge for expired actions', async () => {
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data: await getActionListMock({
           actionCount: 2,
           isCompleted: false,
@@ -645,7 +637,7 @@ describe.skip('Response actions history', () => {
 
     it('shows Pending status badge for pending actions', async () => {
       mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
+        ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 2, isCompleted: false, status: 'pending' }),
       };
       render();
@@ -693,6 +685,7 @@ describe.skip('Response actions history', () => {
         'suspend-process',
         'processes',
         'get-file',
+        'execute',
       ]);
     });
 
