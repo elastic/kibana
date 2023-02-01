@@ -78,7 +78,8 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     handler: RequestHandler<P, Q, B, Context, Method>
   ) => void;
 
-  const examplePostRegistrar1: NewRouteRegistrar1<unknown, unknown, unknown> = {} as any;
+  const newRouter: Omit<IRouter, 'post'> & { post: NewRouteRegistrar1<unknown, unknown, unknown> } =
+    {} as any;
 
   /**
    * EXAMPLE USAGE:
@@ -89,7 +90,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     options: {},
   };
 
-  examplePostRegistrar1(
+  newRouter.post(
     {
       ...common,
       version: '1',
@@ -98,7 +99,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     async (ctx, req, res) => res.ok()
   );
 
-  examplePostRegistrar1(
+  newRouter.post(
     {
       ...common,
       version: '2',
@@ -107,7 +108,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     async (ctx, req, res) => res.ok()
   );
 
-  examplePostRegistrar1(
+  newRouter.post(
     {
       ...common,
       version: '3',
@@ -161,7 +162,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     }
   ) => void;
 
-  const examplePostRegistrar2: NewRouteRegistrar2 = {} as any;
+  const newRouter: Omit<IRouter, 'post'> & { post: NewRouteRegistrar2 } = {} as any;
 
   /**
    * EXAMPLE USAGE:
@@ -186,7 +187,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     handler: async (ctx, req, res) => res.ok(),
   };
 
-  examplePostRegistrar2(
+  newRouter.post(
     {
       path: '/api/my-plugin/my-route',
       options: {},
@@ -228,7 +229,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
       ...common,
       validate: { body: schema.object({ name: schema.string() }) },
     },
-    async (ctx, req, res) => res.ok()
+    async (ctx /* version can be added to ctx */, req, res) => res.ok()
   );
 
   v2Router.post(
