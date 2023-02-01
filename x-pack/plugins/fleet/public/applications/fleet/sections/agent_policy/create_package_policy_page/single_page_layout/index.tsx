@@ -271,6 +271,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     packagePolicy.package?.name ?? '',
     'package-policy-replace-define-step'
   );
+
   if (replaceDefineStepView && extensionView) {
     throw new Error(
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
