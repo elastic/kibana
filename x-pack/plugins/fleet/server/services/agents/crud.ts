@@ -13,7 +13,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
-import type { FleetServerAgent } from '../../../common/types';
+import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { isAgentUpgradeable } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
@@ -194,6 +194,7 @@ export async function getAgentsByKuery(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
+    getStatusSummary?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
     pitId?: string;
@@ -204,6 +205,7 @@ export async function getAgentsByKuery(
   total: number;
   page: number;
   perPage: number;
+  statusSummary?: Record<AgentStatus, number>;
 }> {
   const {
     page = 1,
@@ -212,6 +214,7 @@ export async function getAgentsByKuery(
     sortOrder = options.sortOrder ?? 'desc',
     kuery,
     showInactive = false,
+    getStatusSummary = false,
     showUpgradeable,
     searchAfter,
     pitId,
@@ -235,8 +238,24 @@ export async function getAgentsByKuery(
   const secondarySort: estypes.Sort = isDefaultSort
     ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
     : [];
+
+  const statusSummary: Record<AgentStatus, number> = {
+    online: 0,
+    error: 0,
+    inactive: 0,
+    offline: 0,
+    updating: 0,
+    unenrolled: 0,
+    degraded: 0,
+    enrolling: 0,
+    unenrolling: 0,
+  };
+
   const queryAgents = async (from: number, size: number) =>
-    esClient.search<FleetServerAgent>({
+    esClient.search<
+      FleetServerAgent,
+      { status: { buckets: Array<{ key: AgentStatus; doc_count: number }> } }
+    >({
       from,
       size,
       track_total_hits: true,
@@ -244,7 +263,7 @@ export async function getAgentsByKuery(
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
-      post_filter: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
+      query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
       ...(pitId
         ? {
             pit: {
@@ -257,6 +276,7 @@ export async function getAgentsByKuery(
             ignore_unavailable: true,
           }),
       ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
+      ...(getStatusSummary && { aggs: { status: { terms: { field: 'status' } } } }),
     });
   let res;
   try {
@@ -289,11 +309,18 @@ export async function getAgentsByKuery(
     }
   }
 
+  if (getStatusSummary) {
+    res.aggregations?.status.buckets.forEach((bucket) => {
+      statusSummary[bucket.key] = bucket.doc_count;
+    });
+  }
+
   return {
     agents,
     total,
     page,
     perPage,
+    ...(getStatusSummary ? { statusSummary } : {}),
   };
 }
 
