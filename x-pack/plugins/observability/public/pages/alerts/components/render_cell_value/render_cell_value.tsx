@@ -17,7 +17,6 @@ import {
 } from '@kbn/rule-data-utils';
 import type { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
-import { css } from '@emotion/react';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { TimestampTooltip } from '../../../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../../../common/utils/formatters';
