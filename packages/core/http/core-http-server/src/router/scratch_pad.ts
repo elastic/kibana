@@ -12,6 +12,7 @@ import { RequestHandlerContextBase } from './request_handler_context';
 import { RouteConfig, RouteMethod } from './route';
 import { IRouter } from './router';
 import { RouteValidatorFullConfig } from './route_validator';
+import { HttpServiceSetup } from '../..';
 
 /**
  * Constituents of a route in Kibana
@@ -184,7 +185,59 @@ examplePostRegistrar2(
  */
 
 /**
- * Open questions:
+ * ===================== Third proposal =====================
+ * We make the assumption that version is decided at the "router" API level.
  *
- * 1. What is the default behaviour when we don't have a version specified? Latest stable?
+ * For example:
+ */
+
+const http: HttpServiceSetup & {
+  createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(opt: {
+    version: Version;
+  }) => IRouter<Context>;
+} = {} as any;
+
+const v1Router = http.createRouter(); // defaults to creating v1 router
+const v2Router = http.createRouter({ version: '2' });
+const v3Router = http.createRouter({ version: '3' });
+
+v1Router.post(
+  {
+    ...common,
+    validate: { body: schema.object({ name: schema.string() }) },
+  },
+  async (ctx, req, res) => res.ok()
+);
+
+v2Router.post(
+  {
+    ...common,
+    validate: { body: schema.object({ name: schema.string() }) },
+  },
+  async (ctx, req, res) => res.ok()
+);
+
+v3Router.post(
+  {
+    ...common,
+    validate: {
+      body: schema.object({
+        name: schema.string(),
+        lastName: schema.string(),
+        age: schema.number(),
+      }),
+    },
+  },
+  async (ctx, req, res) => res.ok()
+);
+
+/**
+ * Open questions:
+ * 1. Are individual APIs versioned or the entire API surface versioned?
+ */
+
+/**
+ * Additional notes:
+ * * When no API version is specified we will need to adopt the default behaviour of
+ *   other Elastic APIs and this is TBD.
  */
