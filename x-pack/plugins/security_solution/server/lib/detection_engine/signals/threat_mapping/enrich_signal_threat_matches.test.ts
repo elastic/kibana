@@ -868,6 +868,7 @@ describe('getSignalMatchesFromThreatList', () => {
         value: 'threat.indicator.domain',
         index: 'threat_index',
         id: 'threatId',
+        queryType: 'mq',
       },
     ];
 
@@ -939,6 +940,7 @@ describe('getSignalMatchesFromThreatList', () => {
         value: 'threat.indicator.domain',
         index: 'threat_index',
         id: 'threatId',
+        queryType: 'mq',
       },
     ];
 
@@ -981,6 +983,7 @@ describe('getSignalMatchesFromThreatList', () => {
       value: 'threat.indicator.domain',
       index: 'threat_index',
       id: 'threatId',
+      queryType: 'mq',
     };
 
     expect(signalMatches).toEqual([
