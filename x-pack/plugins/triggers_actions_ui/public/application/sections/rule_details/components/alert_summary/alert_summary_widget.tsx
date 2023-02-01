@@ -37,13 +37,16 @@ export const AlertSummaryWidget = ({
   if (error) return <AlertSummaryWidgetError />;
 
   return fullSize ? (
-    <AlertsSummaryWidgetFullSize
-      activeAlertCount={activeAlertCount}
-      activeAlerts={activeAlerts}
-      recoveredAlertCount={recoveredAlertCount}
-      dateFormat={timeRange.dateFormat}
-      chartThemes={chartThemes}
-    />
+    // Only show full size version if there is data
+    activeAlertCount || recoveredAlertCount ? (
+      <AlertsSummaryWidgetFullSize
+        activeAlertCount={activeAlertCount}
+        activeAlerts={activeAlerts}
+        recoveredAlertCount={recoveredAlertCount}
+        dateFormat={timeRange.dateFormat}
+        chartThemes={chartThemes}
+      />
+    ) : null
   ) : (
     <AlertsSummaryWidgetCompact
       activeAlertCount={activeAlertCount}

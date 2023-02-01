@@ -28,6 +28,8 @@ import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/
 import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
 import { FetchIndicesForEnginesAPILogic } from '../../../api/engines/fetch_indices_api_logic';
 
+export type IndicesSelectComboBoxOption = EuiComboBoxOptionOption<ElasticsearchIndexWithIngestion>;
+
 export type IndicesSelectComboBoxProps = Omit<
   EuiComboBoxProps<ElasticsearchIndexWithIngestion>,
   'onCreateOption' | 'onSearchChange' | 'noSuggestions' | 'async'
@@ -83,7 +85,7 @@ export const IndicesSelectComboBox = (props: IndicesSelectComboBoxProps) => {
 
 export const indexToOption = (
   index: ElasticsearchIndexWithIngestion
-): EuiComboBoxOptionOption<ElasticsearchIndexWithIngestion> => ({
+): IndicesSelectComboBoxOption => ({
   label: index.name,
   value: index,
 });
