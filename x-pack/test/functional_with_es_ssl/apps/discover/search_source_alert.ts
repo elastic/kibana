@@ -410,13 +410,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
-      await retry.waitFor('filters modal to become hidden', async () => {
-        const exists = await testSubjects.exists('saveFilter');
-        if (exists) {
-          await testSubjects.click('saveFilter');
-        }
-        return !exists;
-      });
 
       await testSubjects.click('thresholdPopover');
       await testSubjects.setValue('alertThresholdInput', '1');
