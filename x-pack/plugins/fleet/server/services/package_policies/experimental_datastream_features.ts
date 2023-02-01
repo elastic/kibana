@@ -142,9 +142,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     if (isSyntheticSourceOptInChanged) {
       sourceModeSettings = {
         _source: {
-          ...(featureMapEntry.features.synthetic_source
-            ? { mode: 'synthetic' }
-            : { mode: 'stored' }),
+          ...(featureMapEntry.features.synthetic_source ? { mode: 'synthetic' } : {}),
         },
       };
     }
