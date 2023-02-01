@@ -9,10 +9,15 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiCode } from '@elastic/eui';
-import { useInternalStateSelector } from '../../../services/discover_internal_state_container';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
-export function NoResultsSuggestionDefault() {
-  const dataView = useInternalStateSelector((state) => state.dataView);
+export interface NoResultsSuggestionDefaultProps {
+  dataView: DataView;
+}
+
+export const NoResultsSuggestionDefault: React.FC<NoResultsSuggestionDefaultProps> = ({
+  dataView,
+}) => {
   const dataViewName = dataView?.getName();
   const dataViewPattern = dataView?.getIndexPattern();
 
@@ -35,4 +40,4 @@ export function NoResultsSuggestionDefault() {
       )}
     </EuiText>
   );
-}
+};
