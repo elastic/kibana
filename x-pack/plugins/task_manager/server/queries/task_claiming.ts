@@ -320,10 +320,10 @@ export class TaskClaiming {
         },
         {
           max_docs: size,
-          refresh: false,
+          refresh: true,
         }
       );
-      await this.taskStore.waitForRefresh();
+      this.taskStore.waitForRefresh();
       apmTrans?.end('success');
       return result;
     } catch (err) {
