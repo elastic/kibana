@@ -137,8 +137,8 @@ export async function getPipeline(
   // Determine metrics' timeseries interval based on version's timespan
   const minIntervalSeconds = Math.max(config.ui.min_interval_seconds, 30);
   const timeseriesInterval = calculateTimeseriesInterval(
-    Number(req.payload.timeRange.min),
-    Number(req.payload.timeRange.max),
+    req.payload.timeRange.min,
+    req.payload.timeRange.max,
     Number(minIntervalSeconds)
   );
 
