@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import Boom from '@hapi/boom';
 import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import moment from 'moment';
 
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
@@ -24,8 +21,6 @@ export const getAlertsCountRoute = (router: IRouter<RacRequestHandlerContext>) =
           t.intersection([
             t.exact(
               t.type({
-                gte: t.string,
-                lte: t.string,
                 featureIds: t.array(t.string),
               })
             ),
@@ -45,22 +40,10 @@ export const getAlertsCountRoute = (router: IRouter<RacRequestHandlerContext>) =
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { gte, lte, featureIds, filter } = request.body;
-        if (
-          !(
-            moment(gte, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true).isValid() &&
-            moment(lte, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true).isValid()
-          )
-        ) {
-          throw Boom.badRequest('gte and/or lte are not following the UTC format');
-        }
+        const { featureIds, filter } = request.body;
 
-        const aggs = await alertsClient.getAlertsCount({
-          gte,
-          lte,
-          featureIds,
-          filter,
-        });
+        const aggs = await alertsClient.getAlertsCount({ featureIds, filter });
+
         return response.ok({
           body: aggs,
         });

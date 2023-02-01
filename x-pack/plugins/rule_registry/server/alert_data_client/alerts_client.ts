@@ -100,8 +100,6 @@ interface GetAlertParams {
 
 interface GetAlertsCountParams {
   id?: string;
-  gte: string;
-  lte: string;
   featureIds: string[];
   filter?: estypes.QueryDslQueryContainer[];
 }
@@ -538,7 +536,7 @@ export class AlertsClient {
     }
   }
 
-  public async getAlertsCount({ gte, lte, featureIds, filter }: GetAlertsCountParams) {
+  public async getAlertsCount({ featureIds, filter }: GetAlertsCountParams) {
     try {
       const indexToUse = await this.getAuthorizedAlertsIndices(featureIds);
 
@@ -557,17 +555,7 @@ export class AlertsClient {
         },
         query: {
           bool: {
-            filter: [
-              {
-                range: {
-                  [ALERT_TIME_RANGE]: {
-                    gt: gte,
-                    lt: lte,
-                  },
-                },
-              },
-              ...(filter ? filter : []),
-            ],
+            filter: [...(filter ? filter : [])],
           },
         },
         size: 0,

@@ -19,11 +19,6 @@ const mockedAlertsCountResponse = {
   recoveredAlertCount: 20,
 };
 
-const mockedAlertsCountTimeRange = {
-  utcFrom: 'mockedUtcFrom',
-  utcTo: 'mockedUtcTo',
-};
-
 jest.mock('@kbn/kibana-react-plugin/public');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
@@ -52,12 +47,7 @@ describe('useAlertsCount', () => {
   it('should return the mocked data from API', async () => {
     mockedPostAPI.mockResolvedValue(mockedAlertsCountResponse);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useAlertsCount({
-        featureIds,
-        timeRange: mockedAlertsCountTimeRange,
-      })
-    );
+    const { result, waitForNextUpdate } = renderHook(() => useAlertsCount({ featureIds }));
 
     expect(result.current.loading).toBe(true);
     expect(result.current.alertsCount).toEqual(undefined);
@@ -72,7 +62,6 @@ describe('useAlertsCount', () => {
 
   it('should call API with correct input', async () => {
     const ruleId = 'c95bc120-1d56-11ed-9cc7-e7214ada1128';
-    const { utcFrom, utcTo } = mockedAlertsCountTimeRange;
     const filter = {
       term: {
         'kibana.alert.rule.uuid': ruleId,
@@ -83,19 +72,14 @@ describe('useAlertsCount', () => {
     const { waitForNextUpdate } = renderHook(() =>
       useAlertsCount({
         featureIds,
-        timeRange: mockedAlertsCountTimeRange,
         filter,
       })
     );
 
     await waitForNextUpdate();
 
-    const body = JSON.stringify({
-      gte: utcFrom,
-      lte: utcTo,
-      featureIds,
-      filter: [filter],
-    });
+    const body = JSON.stringify({ featureIds, filter: [filter] });
+
     expect(mockedPostAPI).toHaveBeenCalledWith(
       '/internal/rac/alerts/_alerts_count',
       expect.objectContaining({ body })
@@ -106,12 +90,7 @@ describe('useAlertsCount', () => {
     const error = new Error('Fetch Alerts Count Failed');
     mockedPostAPI.mockRejectedValueOnce(error);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useAlertsCount({
-        featureIds,
-        timeRange: mockedAlertsCountTimeRange,
-      })
-    );
+    const { result, waitForNextUpdate } = renderHook(() => useAlertsCount({ featureIds }));
 
     await waitForNextUpdate();
 

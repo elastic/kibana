@@ -34,19 +34,32 @@ const Wrapper = ({ children }: WrapperProps) => {
 };
 
 const AlertsTabBadge = () => {
-  const { dateRangeTimestamp } = useUnifiedSearchContext();
+  const { unifiedSearchDateRange } = useUnifiedSearchContext();
 
-  const timeRange = useMemo(
+  const filter = useMemo(
     () => ({
-      utcFrom: new Date(dateRangeTimestamp.from).toISOString(),
-      utcTo: new Date(dateRangeTimestamp.to).toISOString(),
+      bool: {
+        must: [],
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: unifiedSearchDateRange.from,
+                lte: unifiedSearchDateRange.to,
+              },
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
     }),
-    [dateRangeTimestamp.from, dateRangeTimestamp.to]
+    [unifiedSearchDateRange]
   );
 
   const { alertsCount, loading } = useAlertsCount({
     featureIds: infraAlertFeatureIds,
-    timeRange,
+    filter,
   });
 
   if (loading) {

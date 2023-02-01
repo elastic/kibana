@@ -34,10 +34,12 @@ export const AlertsTabContent = () => {
 
   const CasesContext = cases.ui.getCasesContext();
 
-  const { dateRangeTimestamp } = useUnifiedSearchContext();
+  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
-  const from = new Date(dateRangeTimestamp.from).toISOString();
-  const to = new Date(dateRangeTimestamp.to).toISOString();
+  const dateRange = getDateRangeAsTimestamp();
+
+  const from = new Date(dateRange.from).toISOString();
+  const to = new Date(dateRange.to).toISOString();
 
   const chartThemes = {
     theme: charts.theme.useChartsTheme(),
