@@ -143,7 +143,9 @@ describe('agent_list_page', () => {
       jest.advanceTimersByTime(65000);
     });
 
-    expect(mockedSendGetAgentStatus).toHaveBeenCalledTimes(1);
+    // we call the status endpoint twice on page load,
+    // once for all inactive agents and one for the current kuery
+    expect(mockedSendGetAgentStatus).toHaveBeenCalledTimes(2);
   });
 
   describe('selection change', () => {
