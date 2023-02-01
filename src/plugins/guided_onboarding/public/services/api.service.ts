@@ -198,12 +198,11 @@ export class ApiService implements GuidedOnboardingApi {
     const guideConfig = await this.configService.getGuideConfig(guideId);
 
     if (guideConfig) {
-      const updatedSteps: GuideStep[] = guideConfig.steps.map((step, stepIndex) => {
-        const isFirstStep = stepIndex === 0;
+      const updatedSteps: GuideStep[] = guideConfig.steps.map((step) => {
         return {
           id: step.id,
-          // Only the first step should be activated when activating a new guide
-          status: isFirstStep ? 'active' : 'inactive',
+          // Set all steps to inactive by default when activating a new guide
+          status: 'inactive',
         };
       });
 

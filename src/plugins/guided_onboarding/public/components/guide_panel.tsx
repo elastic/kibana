@@ -111,8 +111,27 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
   const isDarkTheme = uiSettings.get('theme:darkMode');
   const styles = getGuidePanelStyles({ euiTheme, isDarkTheme });
 
+  const hasActiveStep = (steps: GuideStepStatus[]) => {
+    return (
+      steps.filter((step) => {
+        return step.status === 'active';
+      }).length < 0
+    );
+  };
+
   const toggleGuide = () => {
-    setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
+    setIsGuideOpen((prevIsGuideOpen) => {
+      if (pluginState && pluginState.activeGuide) {
+        const { steps, status } = pluginState.activeGuide;
+
+        if (status === 'not_started' && !hasActiveStep(steps) && !prevIsGuideOpen) {
+          navigateToLandingPage();
+          return false;
+        }
+      }
+
+      return !prevIsGuideOpen;
+    });
   };
 
   const handleStepButtonClick = useCallback(
@@ -120,13 +139,18 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
       if (pluginState) {
         const { id, status } = step;
         const guideId: GuideId = pluginState!.activeGuide!.guideId!;
+        const steps = pluginState.activeGuide!.steps;
 
         try {
           if (status === 'ready_to_complete') {
             return await api.completeGuideStep(guideId, id);
           }
 
-          if (status === 'active' || status === 'in_progress') {
+          if (
+            status === 'active' ||
+            status === 'in_progress' ||
+            (status === 'inactive' && !hasActiveStep(steps))
+          ) {
             await api.startGuideStep(guideId, id);
 
             if (stepConfig.location) {

@@ -83,14 +83,27 @@ export const GuideStep = ({
     </EuiFlexGroup>
   );
   const isAccordionOpen =
-    stepStatus === 'in_progress' || stepStatus === 'active' || stepStatus === 'ready_to_complete';
+    stepStatus === 'in_progress' ||
+    stepStatus === 'active' ||
+    stepNumber === 1 ||
+    stepStatus === 'ready_to_complete';
+
+  const getStartStepButtonLabel = ({ isInactive }: { isInactive: boolean }) => {
+    if (!isInactive || (isInactive && stepNumber === 1)) {
+      return i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
+        defaultMessage: 'Start',
+      });
+    }
+
+    return '';
+  };
 
   const getStepButtonLabel = (): string => {
     switch (stepStatus) {
+      case 'inactive':
+        return getStartStepButtonLabel({ isInactive: true });
       case 'active':
-        return i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
-          defaultMessage: 'Start',
-        });
+        return getStartStepButtonLabel({ isInactive: false });
       case 'in_progress':
         return i18n.translate('guidedOnboarding.dropdownPanel.continueStepButtonLabel', {
           defaultMessage: 'Continue',
