@@ -259,6 +259,7 @@ describe('Discover grid cell rendering', function () {
           <EuiFlexGroup
             gutterSize="none"
             justifyContent="flexEnd"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -490,6 +491,7 @@ describe('Discover grid cell rendering', function () {
           <EuiFlexGroup
             gutterSize="none"
             justifyContent="flexEnd"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -653,6 +655,7 @@ describe('Discover grid cell rendering', function () {
           <EuiFlexGroup
             gutterSize="none"
             justifyContent="flexEnd"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}

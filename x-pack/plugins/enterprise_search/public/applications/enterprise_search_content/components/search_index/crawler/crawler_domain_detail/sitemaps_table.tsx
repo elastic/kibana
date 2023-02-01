@@ -112,9 +112,7 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, indexName,
         updateSitemaps(newSitemaps as Sitemap[]);
         clearFlashMessages();
       }}
-      title={i18n.translate('xpack.enterpriseSearch.crawler.sitemapsTable.title', {
-        defaultMessage: 'Sitemaps',
-      })}
+      title=""
       disableReordering
     />
   );

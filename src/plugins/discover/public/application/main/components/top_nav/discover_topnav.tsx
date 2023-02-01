@@ -181,6 +181,16 @@ export const DiscoverTopNav = ({
     ]
   );
 
+  const onEditDataView = async (editedDataView: DataView) => {
+    if (!editedDataView.isPersisted()) {
+      await updateAdHocDataViewId(editedDataView);
+    } else {
+      stateContainer.actions.setDataView(editedDataView);
+    }
+    stateContainer.actions.loadDataViewList();
+    stateContainer.dataState.fetch();
+  };
+
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     const { appState, setAppState } = stateContainer;
     if (newSavedQueryId) {
@@ -216,6 +226,7 @@ export const DiscoverTopNav = ({
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews,
     savedDataViews,
+    onEditDataView,
   };
 
   const onTextBasedSavedAndExit = useCallback(
