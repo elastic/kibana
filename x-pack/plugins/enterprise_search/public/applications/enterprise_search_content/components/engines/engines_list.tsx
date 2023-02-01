@@ -70,12 +70,6 @@ export const EnginesList: React.FC = () => {
     searchQuery,
   } = useValues(EnginesListLogic);
 
-  useEffect(() => {
-    // We don't want to trigger loading for each search query change, so we need this
-    // flag to set if the call to backend is first request.
-    setIsFirstRequest();
-  }, []);
-
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
   useEffect(() => {
