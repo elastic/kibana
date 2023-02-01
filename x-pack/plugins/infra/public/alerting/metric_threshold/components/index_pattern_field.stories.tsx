@@ -25,7 +25,7 @@ export default {
     layout: 'padded',
   },
   argTypes: {
-    onChange: { action: 'changed' },
+    onChange: { action: 'index pattern changed' },
     onDataViewChange: { action: 'dataView changed' },
   },
 } as Meta;
