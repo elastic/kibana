@@ -6,13 +6,12 @@
  */
 
 import type {
-  KibanaRequest,
-  RequestHandlerContext,
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { DeepReadonly } from 'utility-types';
 import type {
@@ -107,11 +106,7 @@ export class CspPlugin
 
       plugins.fleet.registerExternalCallback(
         'packagePolicyCreate',
-        async (
-          packagePolicy: NewPackagePolicy,
-          _context: RequestHandlerContext,
-          _request: KibanaRequest
-        ): Promise<NewPackagePolicy> => {
+        async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
           const license = await plugins.licensing.refresh();
           if (isCspPackage(packagePolicy.package?.name)) {
             if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
@@ -129,12 +124,10 @@ export class CspPlugin
         'packagePolicyPostCreate',
         async (
           packagePolicy: PackagePolicy,
-          context: RequestHandlerContext,
-          _: KibanaRequest
+          soClient: SavedObjectsClientContract
         ): Promise<PackagePolicy> => {
           if (isCspPackage(packagePolicy.package?.name)) {
             await this.initialize(core, plugins.taskManager);
-            const soClient = (await context.core).savedObjects.client;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
 
             return packagePolicy;
