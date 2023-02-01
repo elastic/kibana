@@ -306,9 +306,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/148388
-  // Failing: See https://github.com/elastic/kibana/issues/148386
-  describe.skip('Search source Alert', () => {
+  describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
 
@@ -413,7 +411,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
       await retry.waitFor('filters modal to become hidden', async () => {
-        return !(await testSubjects.exists('saveFilter'));
+        const exists = await testSubjects.exists('saveFilter');
+        if (exists) {
+          await testSubjects.click('saveFilter');
+        }
+        return !exists;
       });
 
       await testSubjects.click('thresholdPopover');
