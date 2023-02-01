@@ -8,17 +8,25 @@
 // No bueno, I know! Encountered when reverting RBAC work post initial BCs
 // Don't want to include large amounts of refactor in this temporary workaround
 // TODO: Refactor code - component can be broken apart
-import { EuiFlexGroup, EuiLoadingSpinner, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DocLinks } from '@kbn/doc-links';
-import { TableId } from '../../../../common/types';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { FILTER_OPEN, TableId } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
@@ -50,6 +58,7 @@ import {
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
 import {
+  buildAlertStatusFilter,
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
@@ -65,7 +74,9 @@ import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
-
+import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -77,13 +88,21 @@ const StyledFullHeightContainer = styled.div`
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
-const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = () => {
+const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
+  clearEventsLoading,
+  clearEventsDeleted,
+}) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).graphEventId
   );
+
+  const isTableLoading = useShallowEqualSelector(
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
+  );
+
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -109,7 +128,20 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
+  const arePageFiltersEnabled = useIsExperimentalFeatureEnabled('alertsPageFiltersEnabled');
+
+  // when arePageFiltersEnabled === false
+  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+
+  const updatedAt = useShallowEqualSelector(
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).updated
+  );
+
+  // when arePageFiltersEnabled === true
   const [detectionPageFilters, setDetectionPageFilters] = useState<Filter[]>();
+  const [detectionPageFilterHandler, setDetectionPageFilterHandler] = useState<
+    FilterGroupHandler | undefined
+  >();
 
   const {
     indexPattern,
@@ -124,10 +156,25 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const loading = userInfoLoading || listsConfigLoading;
   const {
     application: { navigateToUrl },
+    timelines: timelinesUi,
     data,
   } = useKibana().services;
 
   const { filterManager } = data.query;
+
+  const alertPageFilters = useMemo(() => {
+    if (arePageFiltersEnabled) {
+      return detectionPageFilters;
+    }
+    return buildAlertStatusFilter(filterGroup);
+  }, [filterGroup, detectionPageFilters, arePageFiltersEnabled]);
+
+  useEffect(() => {
+    if (!detectionPageFilterHandler) return;
+    // if Alert is reloaded because of action by the user.
+    // We want reload the values in the detection Page filters
+    if (!isTableLoading) detectionPageFilterHandler.reload();
+  }, [isTableLoading, detectionPageFilterHandler]);
 
   const addFilter = useCallback(
     ({ field, value }: { field: string; value: string | number }) => {
@@ -175,9 +222,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
       ...filters,
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-      ...(detectionPageFilters ?? []),
+      ...(alertPageFilters ?? []),
     ],
-    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, detectionPageFilters]
+    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
@@ -185,9 +232,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     () => [
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-      ...(detectionPageFilters ?? []),
+      ...(alertPageFilters ?? []),
     ],
-    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, detectionPageFilters]
+    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
   );
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
@@ -232,13 +279,90 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     setDetectionPageFilters(newFilters);
   }, []);
 
+  // Callback for when open/closed filter changes
+  const onFilterGroupChangedCallback = useCallback(
+    (newFilterGroup: Status) => {
+      const timelineId = TableId.alertsOnAlertsPage;
+      clearEventsLoading({ id: timelineId });
+      clearEventsDeleted({ id: timelineId });
+      setFilterGroup(newFilterGroup);
+    },
+    [clearEventsLoading, clearEventsDeleted, setFilterGroup]
+  );
+
+  const areDetectionPageFiltersLoading = useMemo(() => {
+    if (arePageFiltersEnabled) {
+      return !Array.isArray(detectionPageFilters);
+    }
+    return false;
+  }, [detectionPageFilters, arePageFiltersEnabled]);
+
   const isAlertTableLoading = useMemo(
-    () => loading || !Array.isArray(detectionPageFilters),
-    [loading, detectionPageFilters]
+    () => loading || areDetectionPageFiltersLoading,
+    [loading, areDetectionPageFiltersLoading]
   );
   const isChartPanelLoading = useMemo(
-    () => isLoadingIndexPattern || !Array.isArray(detectionPageFilters),
-    [isLoadingIndexPattern, detectionPageFilters]
+    () => isLoadingIndexPattern || areDetectionPageFiltersLoading,
+    [isLoadingIndexPattern, areDetectionPageFiltersLoading]
+  );
+
+  const showUpdating = useMemo(
+    () => isAlertTableLoading || loading,
+    [isAlertTableLoading, loading]
+  );
+
+  const AlertPageFilters = useMemo(
+    () =>
+      !arePageFiltersEnabled ? (
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <AlertsTableFilterGroup
+              status={filterGroup}
+              onFilterGroupChanged={onFilterGroupChangedCallback}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                {updatedAt &&
+                  timelinesUi.getLastUpdated({
+                    updatedAt: updatedAt || Date.now(),
+                    showUpdating,
+                  })}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <DetectionPageFilterSet
+          dataViewId={dataViewId}
+          onFilterChange={pageFiltersUpdateHandler}
+          filters={filters}
+          query={query}
+          timeRange={{
+            from,
+            to,
+            mode: 'absolute',
+          }}
+          chainingSystem="NONE"
+          onInit={setDetectionPageFilterHandler}
+        />
+      ),
+    [
+      arePageFiltersEnabled,
+      dataViewId,
+      filterGroup,
+      filters,
+      onFilterGroupChangedCallback,
+      pageFiltersUpdateHandler,
+      showUpdating,
+      from,
+      query,
+      timelinesUi,
+      to,
+      updatedAt,
+    ]
   );
 
   if (loading) {
@@ -307,20 +431,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                   {i18n.BUTTON_MANAGE_RULES}
                 </SecuritySolutionLinkButton>
               </HeaderPage>
-              <DetectionPageFilterSet
-                dataViewId={dataViewId}
-                onFilterChange={pageFiltersUpdateHandler}
-                filters={filters}
-                query={query}
-                timeRange={{
-                  from,
-                  to,
-                  mode: 'absolute',
-                }}
-                chainingSystem="HIERARCHICAL"
-              />
-
-              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="l" />
+              {AlertPageFilters}
+              <EuiSpacer size="l" />
               <ChartPanels
                 addFilter={addFilter}
                 alertsHistogramDefaultFilters={alertsHistogramDefaultFilters}
