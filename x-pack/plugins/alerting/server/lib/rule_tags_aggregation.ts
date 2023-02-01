@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  AggregationsAggregationContainer,
+  AggregationsCompositeAggregation,
+  AggregationsAggregateOrder,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AggregateOptions } from '../rules_client/types';
 
 export type RuleTagsAggregationOptions = Pick<
   AggregateOptions,
-  'filter' | 'perPage' | 'page' | 'maxTags'
->;
+  'filter' | 'maxTags' | 'search' | 'searchFields' | 'defaultSearchOperator'
+> & {
+  after?: AggregationsCompositeAggregation['after'];
+};
 
 export interface RuleTagsAggregateResult {
   ruleTags: string[];
@@ -20,18 +26,39 @@ export interface RuleTagsAggregateResult {
 export interface RuleTagsAggregation extends Record<string, unknown> {
   tags: {
     buckets: Array<{
-      key: string;
+      key: {
+        tags: string;
+      };
       doc_count: number;
     }>;
   };
 }
 
-export const getRuleTagsAggregation = (
-  maxTags: number = 50
-): Record<string, AggregationsAggregationContainer> => {
+interface GetRuleTagsAggregationParams {
+  maxTags?: number;
+  after?: AggregationsCompositeAggregation['after'];
+}
+
+export const getRuleTagsAggregation = ({
+  maxTags = 50,
+  after,
+}: GetRuleTagsAggregationParams): Record<string, AggregationsAggregationContainer> => {
   return {
     tags: {
-      terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: maxTags },
+      composite: {
+        ...(after ? { after } : {}),
+        size: maxTags,
+        sources: [
+          {
+            tags: {
+              terms: {
+                field: 'alert.attributes.tags',
+                order: 'asc' as unknown as AggregationsAggregateOrder,
+              },
+            },
+          },
+        ],
+      },
     },
   };
 };
@@ -44,8 +71,8 @@ export const formatRuleTagsAggregationResult = (
       ruleTags: [],
     };
   }
-  const tagsBuckets = aggregations.tags?.buckets || [];
+  const tagsBuckets = aggregations.tags.buckets || [];
   return {
-    ruleTags: tagsBuckets.map((bucket) => bucket.key),
+    ruleTags: tagsBuckets.map((bucket) => bucket.key.tags),
   };
 };

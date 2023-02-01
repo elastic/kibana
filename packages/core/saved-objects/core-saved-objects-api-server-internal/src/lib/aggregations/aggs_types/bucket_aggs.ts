@@ -162,6 +162,8 @@ const histogramSchema = s.object({
 });
 
 const compositeSchema = s.object({
+  size: s.maybe(s.number()),
+  after: s.maybe(s.recordOf(s.string(), s.nullable(s.oneOf([s.string(), s.number()])))),
   sources: s.arrayOf(
     s.recordOf(
       s.string(),

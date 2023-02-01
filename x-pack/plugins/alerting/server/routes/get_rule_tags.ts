@@ -20,19 +20,30 @@ import {
 
 const querySchema = schema.object({
   filter: schema.maybe(schema.string()),
-  per_page: schema.number({ defaultValue: 10, min: 0 }),
-  page: schema.number({ defaultValue: 1, min: 1 }),
+  search: schema.maybe(schema.string()),
+  default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
+    defaultValue: 'OR',
+  }),
+  search_fields: schema.maybe(schema.arrayOf(schema.string())),
+  after: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.nullable(schema.oneOf([schema.string(), schema.number()]))
+    )
+  ),
   max_tags: schema.maybe(schema.number()),
 });
 
 const rewriteQueryReq: RewriteRequestCase<RuleTagsAggregationOptions> = ({
-  per_page: perPage,
   max_tags: maxTags,
+  default_search_operator: defaultSearchOperator,
+  search_fields: searchFields,
   ...rest
 }) => ({
   ...rest,
-  ...(perPage ? { perPage } : {}),
+  defaultSearchOperator,
   ...(maxTags ? { maxTags } : {}),
+  ...(searchFields ? { searchFields } : {}),
 });
 
 const rewriteBodyRes: RewriteResponseCase<RuleTagsAggregateResult> = ({ ruleTags, ...rest }) => ({
@@ -40,7 +51,7 @@ const rewriteBodyRes: RewriteResponseCase<RuleTagsAggregateResult> = ({ ruleTags
   rule_tags: ruleTags,
 });
 
-export const getRuleTags = (
+export const getRuleTagsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
@@ -58,7 +69,10 @@ export const getRuleTags = (
 
         const aggregateResult = await rulesClient.aggregate<RuleTagsAggregation>({
           options,
-          aggs: getRuleTagsAggregation(options.maxTags),
+          aggs: getRuleTagsAggregation({
+            maxTags: options.maxTags,
+            after: options.after,
+          }),
         });
 
         return res.ok({

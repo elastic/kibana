@@ -25,7 +25,9 @@ export const readTags = async ({
     options: {
       filter: enrichFilterWithRuleTypeMapping(undefined),
     },
-    aggs: getRuleTagsAggregation(EXPECTED_MAX_TAGS),
+    aggs: getRuleTagsAggregation({
+      maxTags: EXPECTED_MAX_TAGS,
+    }),
   });
 
   return formatRuleTagsAggregationResult(res).ruleTags;
