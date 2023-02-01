@@ -4,10 +4,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.004019,
+    "consumed": 0.004449,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.995981,
+    "remaining": 0.995551,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -18,10 +18,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.023374,
+    "consumed": 0.025879,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.976626,
+    "remaining": 0.974121,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -32,10 +32,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.042725,
+    "consumed": 0.047306,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.957275,
+    "remaining": 0.952694,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -46,10 +46,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.06208,
+    "consumed": 0.068729,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.93792,
+    "remaining": 0.931271,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -60,10 +60,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.081433,
+    "consumed": 0.090171,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.918567,
+    "remaining": 0.909829,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -74,10 +74,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.100784,
+    "consumed": 0.111593,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.899216,
+    "remaining": 0.888407,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -88,10 +88,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.120137,
+    "consumed": 0.133038,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.879863,
+    "remaining": 0.866962,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -102,10 +102,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.139494,
+    "consumed": 0.15444,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.860506,
+    "remaining": 0.84556,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -116,10 +116,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.15887,
+    "consumed": 0.175896,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.84113,
+    "remaining": 0.824104,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -130,10 +130,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.1782,
+    "consumed": 0.197304,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.8218,
+    "remaining": 0.802696,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -144,10 +144,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.197546,
+    "consumed": 0.21876,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.802454,
+    "remaining": 0.78124,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -158,10 +158,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.216933,
+    "consumed": 0.24016,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.783067,
+    "remaining": 0.75984,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -172,10 +172,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.236292,
+    "consumed": 0.261569,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.763708,
+    "remaining": 0.738431,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -186,10 +186,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.25563,
+    "consumed": 0.283019,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.74437,
+    "remaining": 0.716981,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -200,10 +200,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.274977,
+    "consumed": 0.304465,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.725023,
+    "remaining": 0.695535,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -214,10 +214,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.294298,
+    "consumed": 0.325866,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.705702,
+    "remaining": 0.674134,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -228,10 +228,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.313653,
+    "consumed": 0.347293,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.686347,
+    "remaining": 0.652707,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -242,10 +242,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns th
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.333025,
+    "consumed": 0.368727,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.666975,
+    "remaining": 0.631273,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -256,10 +256,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.001344,
+    "consumed": 0.001488,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.998656,
+    "remaining": 0.998512,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -270,10 +270,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.002688,
+    "consumed": 0.002976,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.997312,
+    "remaining": 0.997024,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -284,10 +284,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.004032,
+    "consumed": 0.004464,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.995968,
+    "remaining": 0.995536,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -298,10 +298,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.005376,
+    "consumed": 0.005952,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.994624,
+    "remaining": 0.994048,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -312,10 +312,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.00672,
+    "consumed": 0.00744,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.99328,
+    "remaining": 0.99256,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -326,10 +326,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.008065,
+    "consumed": 0.008929,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.991935,
+    "remaining": 0.991071,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -340,10 +340,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.009409,
+    "consumed": 0.010417,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.990591,
+    "remaining": 0.989583,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -354,10 +354,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.010753,
+    "consumed": 0.011905,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.989247,
+    "remaining": 0.988095,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -368,10 +368,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.012097,
+    "consumed": 0.013393,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.987903,
+    "remaining": 0.986607,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -382,10 +382,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.013441,
+    "consumed": 0.014881,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.986559,
+    "remaining": 0.985119,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -396,10 +396,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.014785,
+    "consumed": 0.016369,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.985215,
+    "remaining": 0.983631,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -410,10 +410,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.016129,
+    "consumed": 0.017857,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.983871,
+    "remaining": 0.982143,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -424,10 +424,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.017473,
+    "consumed": 0.019345,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.982527,
+    "remaining": 0.980655,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -438,10 +438,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.018817,
+    "consumed": 0.020833,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.981183,
+    "remaining": 0.979167,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -452,10 +452,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.020161,
+    "consumed": 0.022321,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.979839,
+    "remaining": 0.977679,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -466,10 +466,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.021505,
+    "consumed": 0.02381,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.978495,
+    "remaining": 0.97619,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -480,10 +480,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.022849,
+    "consumed": 0.025298,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.977151,
+    "remaining": 0.974702,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -494,10 +494,10 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<Date>,
   "errorBudget": Object {
-    "consumed": 0.024194,
+    "consumed": 0.026786,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.975806,
+    "remaining": 0.973214,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
