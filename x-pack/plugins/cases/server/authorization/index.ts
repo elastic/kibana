@@ -230,6 +230,14 @@ const AttachmentOperations = {
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
+  [ReadOperations.BulkGetAttachments]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_COMMENT_OPERATION,
+    action: 'case_comment_bulk_get',
+    verbs: accessVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
   [ReadOperations.GetAllComments]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_COMMENT_OPERATION,

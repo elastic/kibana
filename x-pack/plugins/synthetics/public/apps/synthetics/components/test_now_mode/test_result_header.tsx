@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
+import { getTestRunDetailLink } from '../common/links/test_details_link';
+import { useLocations } from '../../hooks';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { JourneyStep, Ping } from '../../../../../common/runtime_types';
 import { formatDuration } from '../../utils/formatting';
@@ -44,6 +46,8 @@ export function TestResultHeader({
       duration += sDoc.monitor.duration?.us ?? 0;
     });
   }
+
+  const { getLocationByLabel } = useLocations();
 
   const summaryDoc = summaryDocs?.[0] as Ping;
 
@@ -84,11 +88,15 @@ export function TestResultHeader({
           </EuiFlexGroup>
         )}
       </EuiFlexItem>
-      {checkGroupId && (
+      {checkGroupId && configId && isCompleted && (
         <EuiFlexItem grow={false}>
           <EuiLink
-            href={`${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroupId}`}
-            target="_blank"
+            href={getTestRunDetailLink({
+              basePath,
+              monitorId: configId,
+              checkGroup: checkGroupId,
+              locationId: getLocationByLabel(summaryDoc?.observer?.geo?.name!)?.id,
+            })}
           >
             {VIEW_DETAILS}
           </EuiLink>
