@@ -21,13 +21,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { CreateOut } from '../../../common';
 import { useApp } from '../context';
 
 export const CreateContentSection: FC = () => {
   const [title, setContentType] = useState('');
   const [description, setContentId] = useState('');
-  const [contentCreated, setContentCreated] = useState<CreateOut | null>(null);
+  const [contentCreated, setContentCreated] = useState<{
+    id: string;
+    title: string;
+    description: string;
+  } | null>(null);
 
   const { rpc } = useApp();
 
@@ -35,7 +38,7 @@ export const CreateContentSection: FC = () => {
     const content = { title, description };
 
     setContentCreated(null);
-    const created = await rpc.create({ type: 'foo', data: content });
+    const created = await rpc.create({ contentType: 'foo', data: content });
     setContentCreated(created as any);
   };
 

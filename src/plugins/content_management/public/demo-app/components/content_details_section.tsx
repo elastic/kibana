@@ -31,7 +31,7 @@ export const ContentDetailsSection: FC = () => {
   useDebounce(
     () => {
       const load = async () => {
-        const res = await rpc.get({ type: contentType, id: contentId });
+        const res = await rpc.get({ contentType, id: contentId });
         setContent(res as Record<string, unknown>);
       };
 

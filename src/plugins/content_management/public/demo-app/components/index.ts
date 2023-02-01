@@ -8,8 +8,8 @@
 
 export { ContentDetailsSection } from './content_details_section';
 
-export { ContentPreviewSection } from './content_preview_section';
+// export { ContentPreviewSection } from './content_preview_section';
 
 export { CreateContentSection } from './create_content_section';
 
-export { SearchContentSection } from './search_content_section';
+// export { SearchContentSection } from './search_content_section';
