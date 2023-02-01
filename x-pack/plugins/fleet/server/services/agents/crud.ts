@@ -194,7 +194,6 @@ export async function getAgentsByKuery(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
-    getTotalInactive?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
     pitId?: string;
@@ -205,7 +204,6 @@ export async function getAgentsByKuery(
   total: number;
   page: number;
   perPage: number;
-  totalInactive?: number;
 }> {
   const {
     page = 1,
@@ -217,7 +215,6 @@ export async function getAgentsByKuery(
     showUpgradeable,
     searchAfter,
     pitId,
-    getTotalInactive = false,
   } = options;
   const filters = [];
 
@@ -239,7 +236,7 @@ export async function getAgentsByKuery(
     ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
     : [];
   const queryAgents = async (from: number, size: number) =>
-    esClient.search<FleetServerAgent, { totalInactive?: { doc_count: number } }>({
+    esClient.search<FleetServerAgent>({
       from,
       size,
       track_total_hits: true,
@@ -260,13 +257,6 @@ export async function getAgentsByKuery(
             ignore_unavailable: true,
           }),
       ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
-      ...(getTotalInactive && {
-        aggregations: {
-          totalInactive: {
-            filter: { bool: { must: { terms: { status: ['inactive', 'unenrolled'] } } } },
-          },
-        },
-      }),
     });
   let res;
   try {
@@ -278,10 +268,6 @@ export async function getAgentsByKuery(
 
   let agents = res.hits.hits.map(searchHitToAgent);
   let total = res.hits.total as number;
-  let totalInactive = 0;
-  if (getTotalInactive && res.aggregations) {
-    totalInactive = res.aggregations?.totalInactive?.doc_count ?? 0;
-  }
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
@@ -308,7 +294,6 @@ export async function getAgentsByKuery(
     total,
     page,
     perPage,
-    ...(getTotalInactive && { totalInactive }),
   };
 }
 
