@@ -75,7 +75,7 @@ const condition = schema.object({
 });
 
 const groupActionVariableDescription = i18n.translate(
-  'xpack.infra.metrics.alerting.groupActionVariableDescription',
+  'xpack.infra.inventory.alerting.groupActionVariableDescription',
   {
     defaultMessage: 'Name of the group reporting data',
   }
