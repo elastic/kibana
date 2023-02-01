@@ -8,20 +8,10 @@
 
 export { PLUGIN_ID, API_ENDPOINT } from './constants';
 
-export { schemas } from './rpc';
+export { schemas as rpcSchemas, procedureNames } from './rpc';
 
-export type {
-  Calls,
-  GetDetailsIn,
-  GetDetailsOut,
-  GetPreviewIn,
-  GetPreviewOut,
-  CreateIn,
-  CreateOut,
-  SearchIn,
-  SearchOut,
-  Ref,
-  Content,
-  InternalFields,
-  CommonFields,
-} from './rpc';
+export { contentSchema } from './schemas';
+
+export type { GetIn, CreateIn, ProcedureName, ProcedureSchemas } from './rpc';
+
+export type { Ref, Content, InternalFields, CommonFields } from './schemas';

@@ -5,156 +5,68 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 
-/** Interface to represent a reference field (allows to populate() content) */
-const refSchema = schema.object(
-  {
-    $id: schema.string(),
-  },
-  { unknowns: 'forbid' }
-);
-export type Ref = TypeOf<typeof refSchema>;
+export interface ProcedureSchemas {
+  in?: Type<any> | false;
+  out?: Type<any> | false;
+}
 
-/** Fields that _all_ content must have (fields editable by the user) */
-const commonFieldsProps = {
-  title: schema.string(),
-  description: schema.maybe(schema.string()),
-};
-const commonFieldsSchema = schema.object({ ...commonFieldsProps }, { unknowns: 'forbid' });
-export type CommonFields = TypeOf<typeof commonFieldsSchema>;
+export const procedureNames = ['get', 'create'] as const;
 
-/** Fields that all content must have (fields *not* editable by the user) */
-const internalFieldsProps = {
-  id: schema.string(),
-  type: schema.string(),
-  meta: schema.object(
-    {
-      updatedAt: schema.string(),
-      createdAt: schema.string(),
-      updatedBy: refSchema,
-      createdBy: refSchema,
-    },
-    { unknowns: 'forbid' }
-  ),
-};
-const internalFieldsSchema = schema.object({ ...internalFieldsProps }, { unknowns: 'forbid' });
-export type InternalFields = TypeOf<typeof internalFieldsSchema>;
-
-/** Base type for all content (in the search index) */
-const contentSchema = schema.object(
-  {
-    ...internalFieldsProps,
-    ...commonFieldsProps,
-  },
-  { unknowns: 'forbid' }
-);
-export type Content = TypeOf<typeof contentSchema>;
+export type ProcedureName = typeof procedureNames[number];
 
 // ---------------------------------
 // API
 // ---------------------------------
 
-// -- Get preview
-const getPreviewInSchema = schema.object(
-  {
-    type: schema.string(),
-    id: schema.string(),
-  },
-  { unknowns: 'forbid' }
-);
-export type GetPreviewIn = TypeOf<typeof getPreviewInSchema>;
+// ------- GET --------
+const getSchemas: ProcedureSchemas = {
+  in: schema.object(
+    {
+      contentType: schema.string(),
+      id: schema.string(),
+      options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    },
+    { unknowns: 'forbid' }
+  ),
+  // --> "out" will be specified by each storage layer
+  out: false,
+};
 
-const getPreviewOutSchema = contentSchema;
-export type GetPreviewOut = TypeOf<typeof getPreviewOutSchema>;
-
-// -- Get details
-const getDetailsInSchema = schema.object(
-  {
-    type: schema.string(),
-    id: schema.string(),
-    options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  },
-  { unknowns: 'forbid' }
-);
-export type GetDetailsIn<Options extends object | undefined = undefined> = TypeOf<
-  typeof getDetailsInSchema
-> & { options?: Options };
-export type GetDetailsOut = object;
+export interface GetIn<Options extends object | undefined = undefined> {
+  id: string;
+  contentType: string;
+  options?: Options;
+}
 
 // -- Create content
-const createInSchema = schema.object(
-  {
-    type: schema.string(),
-    // The create data will be specified for each content when they register
-    data: schema.object({}, { unknowns: 'allow' }),
-  },
-  { unknowns: 'forbid' }
-);
+const createSchemas: ProcedureSchemas = {
+  in: schema.object(
+    {
+      contentType: schema.string(),
+      // Each content type must provide a schema to validate the data. Here we make it generic
+      // to allow any object when validating the HTTP body payload.
+      data: schema.object({}, { unknowns: 'allow' }),
+      options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    },
+    { unknowns: 'forbid' }
+  ),
+  out: false,
+};
+
 export interface CreateIn<
   T extends object = Record<string, unknown>,
-  Options extends object | undefined = undefined
+  Options extends object = any
 > {
-  type: string;
+  contentType: string;
   data: T;
   options?: Options;
 }
-export interface CreateOut {
-  id: string;
-  [key: string]: unknown;
-}
 
-// -- Search (search index)
-const searchInSchema = schema.maybe(
-  schema.object(
-    {
-      type: schema.maybe(schema.string()),
-      term: schema.maybe(schema.string()),
-      id: schema.maybe(schema.string()), // Search by Id, discards all other parameters
-      ids: schema.maybe(schema.arrayOf(schema.string())), // Search by multiple ids, discards all other parameters
-      // More will come here...
-    },
-    { unknowns: 'forbid' }
-  )
-);
-export type SearchIn = TypeOf<typeof searchInSchema>;
-
-const searchOutSchema = schema.object(
-  {
-    hits: schema.arrayOf(contentSchema),
-    total: schema.number(),
-  },
-  { unknowns: 'forbid' }
-);
-export type SearchOut = TypeOf<typeof searchOutSchema>;
-
-export const schemas = {
-  content: {
-    ref: refSchema,
-    searchIndex: contentSchema,
-    internalFields: internalFieldsSchema,
-    commonFields: commonFieldsSchema,
-  },
-  api: {
-    getPreview: {
-      in: getPreviewInSchema,
-      out: getPreviewOutSchema,
-    },
-    get: {
-      in: getDetailsInSchema,
-      // The response will be specified for each content when they register
-      out: schema.object({}),
-    },
-    create: {
-      in: createInSchema,
-      // The response will be specified for each content when they register
-      out: schema.object({}),
-    },
-    search: {
-      in: searchInSchema,
-      out: searchOutSchema,
-    },
-  },
+export const schemas: {
+  [key in ProcedureName]: ProcedureSchemas;
+} = {
+  get: getSchemas,
+  create: createSchemas,
 };
-
-export type Calls = keyof typeof schemas.api;
