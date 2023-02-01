@@ -186,9 +186,10 @@ export const getAgentsHandler: RequestHandler<
       kuery: request.query.kuery,
       sortField: request.query.sortField,
       sortOrder: request.query.sortOrder,
+      getStatusSummary: request.query.getStatusSummary,
     });
 
-    const { total, page, perPage } = agentRes;
+    const { total, page, perPage, statusSummary } = agentRes;
     let { agents } = agentRes;
 
     // Assign metrics
@@ -202,6 +203,7 @@ export const getAgentsHandler: RequestHandler<
       total,
       page,
       perPage,
+      ...(statusSummary ? { statusSummary } : {}),
     };
     return response.ok({ body });
   } catch (error) {
