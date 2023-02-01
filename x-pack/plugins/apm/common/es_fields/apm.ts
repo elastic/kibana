@@ -149,6 +149,7 @@ export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
+export const CLIENT_GEO_REGION_ISO_CODE = 'client.geo.region_iso_code';
 
 export const FAAS_ID = 'faas.id';
 export const FAAS_NAME = 'faas.name';

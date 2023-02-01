@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Fragment, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +15,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
+import { EuiSuperSelect, EuiText } from '@elastic/eui';
+
 import { EmbeddedMap } from './embedded_map';
+
+export enum MapTypes {
+  HTTP = 'http_requests',
+  SESSIONS = 'unique_sessions',
+}
 
 export function LatencyMap({
   start,
@@ -30,6 +37,77 @@ export function LatencyMap({
   filters: Filter[];
   comparisonEnabled: boolean;
 }) {
+  const [selectedMap, setMap] = useState(MapTypes.HTTP);
+
+  const options = [
+    {
+      value: MapTypes.HTTP,
+      inputDisplay: i18n.translate(
+        'xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests',
+        {
+          defaultMessage: 'HTTP requests',
+        }
+      ),
+      dropdownDisplay: (
+        <Fragment>
+          <strong>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests',
+              {
+                defaultMessage: 'HTTP requests',
+              }
+            )}
+          </strong>
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate(
+                'xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests.subtitle',
+                {
+                  defaultMessage:
+                    'HTTP defines a set of request methods to indicate the desired action to be performed for a given resource',
+                }
+              )}
+            </p>
+          </EuiText>
+        </Fragment>
+      ),
+    },
+    {
+      value: MapTypes.SESSIONS,
+      inputDisplay: i18n.translate(
+        'xpack.apm.serviceOverview.embeddedMap.dropdown.sessions',
+        {
+          defaultMessage: 'Sessions',
+        }
+      ),
+      dropdownDisplay: (
+        <Fragment>
+          <strong>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.embeddedMap.dropdown.sessions',
+              {
+                defaultMessage: 'Sessions',
+              }
+            )}
+          </strong>
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate(
+                'xpack.apm.serviceOverview.embeddedMap.dropdown.sessions.subtitle',
+                {
+                  defaultMessage:
+                    'An application session begins when a user starts an application and ends when the application exits.',
+                }
+              )}
+            </p>
+          </EuiText>
+        </Fragment>
+      ),
+    },
+  ];
+
+  console.log('selectedMap', selectedMap);
+
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -37,11 +115,20 @@ export function LatencyMap({
           <EuiTitle size="xs">
             <h2>
               {i18n.translate('xpack.apm.serviceOverview.embeddedMap.title', {
-                defaultMessage: 'Average latency per country',
+                defaultMessage: 'Geographic regions',
               })}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
+
+        <EuiSuperSelect
+          fullWidth
+          options={options}
+          valueOfSelected={selectedMap}
+          onChange={(value: MapTypes) => setMap(value)}
+          itemLayoutAlign="top"
+          hasDividers
+        />
         <EuiFlexItem grow={false}>
           {comparisonEnabled && (
             <EuiIconTip
@@ -56,7 +143,13 @@ export function LatencyMap({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EmbeddedMap start={start} end={end} kuery={kuery} filters={filters} />
+      <EmbeddedMap
+        selectedMap={selectedMap}
+        start={start}
+        end={end}
+        kuery={kuery}
+        filters={filters}
+      />
     </>
   );
 }

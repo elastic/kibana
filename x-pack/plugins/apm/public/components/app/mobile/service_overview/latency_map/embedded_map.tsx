@@ -24,13 +24,17 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
-import { getLayerList } from './get_layer_list';
+import { getSessionMapLayerList } from './get_session_map_layer_list';
+import { getHttpRequestsLayerList } from './get_http_requests_map_layer_list copy';
+import { MapTypes } from './index';
 function EmbeddedMapComponent({
+  selectedMap,
   start,
   end,
   kuery = '',
   filters,
 }: {
+  selectedMap: MapTypes;
   start: string;
   end: string;
   kuery?: string;
@@ -105,10 +109,6 @@ function EmbeddedMapComponent({
       };
 
       const embeddableObject = await factory.create(input);
-      if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
-        const layerList = await getLayerList(maps);
-        await embeddableObject.setLayerList(layerList);
-      }
 
       setEmbeddable(embeddableObject);
     }
@@ -126,6 +126,30 @@ function EmbeddedMapComponent({
   }, [embeddable, embeddableRoot]);
 
   useEffect(() => {
+    const setLayerList = async () => {
+      if (embeddable) {
+        let layerList;
+        switch (selectedMap) {
+          case MapTypes.HTTP:
+            layerList = await getHttpRequestsLayerList(maps);
+
+            break;
+          case MapTypes.SESSIONS:
+            layerList = await getSessionMapLayerList(maps);
+            break;
+          default:
+            layerList = await getHttpRequestsLayerList(maps);
+        }
+        // @ts-expect-error
+        await embeddable.setLayerList(layerList);
+        await embeddable.reload();
+      }
+    };
+    if (embeddable && !isErrorEmbeddable(embeddable)) {
+      setLayerList();
+    }
+  }, [embeddable, selectedMap]);
+  useEffect(() => {
     if (embeddable) {
       embeddable.updateInput({
         filters,
@@ -139,7 +163,7 @@ function EmbeddedMapComponent({
         },
       });
     }
-  }, [start, end, kuery, filters, embeddable]);
+  }, [start, end, kuery, filters, embeddable, selectedMap]);
 
   return (
     <>
