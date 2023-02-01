@@ -16,44 +16,6 @@ import { EcsEvent } from '@kbn/ecs';
 import { SavedObject } from '../..';
 
 /**
- * The SecurityAction enumeration contains values for all
- * valid shared object security actions. The string for
- * each value correlates to the ES operation.
- */
-export enum SecurityAction {
-  CHECK_CONFLICTS,
-  CLOSE_POINT_IN_TIME,
-  COLLECT_MULTINAMESPACE_REFERENCES,
-  COLLECT_MULTINAMESPACE_REFERENCES_UPDATE_SPACES,
-  CREATE,
-  BULK_CREATE,
-  DELETE,
-  BULK_DELETE,
-  FIND,
-  GET,
-  BULK_GET,
-  INTERNAL_BULK_RESOLVE,
-  OPEN_POINT_IN_TIME,
-  REMOVE_REFERENCES,
-  UPDATE,
-  BULK_UPDATE,
-  UPDATE_OBJECTS_SPACES,
-}
-
-/**
- * The InternalAuthorizeOptions interface contains basic options
- * for internal authorize methods of the ISavedObjectsSecurityExtension.
- */
-export interface InternalAuthorizeOptions {
-  /**
-   * Whether or not to force the use of the bulk action for the authorization.
-   * By default this will be based on the number of objects passed to the
-   * authorize method.
-   */
-  forceBulkAction: boolean;
-}
-
-/**
  * The MultiNamespaceReferencesOptions interface contains options
  * specific for authorizing CollectMultiNamespaceReferences actions.
  */
@@ -172,44 +134,6 @@ export interface UpdateSpacesAuditOptions extends AuditOptions {
 }
 
 /**
- * The InternalAuthorizeParams interface contains settings for checking
- * & enforcing authorization via the ISavedObjectsSecurityExtension. This
- * is used only for the private authorize method.
- */
-export interface InternalAuthorizeParams<A extends string> {
-  /**
-   * A set of actions to check.
-   */
-  actions: Set<SecurityAction>;
-  /**
-   * A set of types to check.
-   */
-  types: Set<string>;
-  /**
-   * A set of spaces to check.
-   */
-  spaces: Set<string>;
-  /**
-   * A map of types (key) to spaces (value) that will be affected by the action(s).
-   * If undefined, enforce with be bypassed.
-   */
-  enforceMap?: Map<string, Set<string>>;
-  /**
-   * Options for authorization
-   */
-  options?: {
-    /**
-     * allowGlobalResource - whether or not to allow global resources, false if options are undefined
-     */
-    allowGlobalResource?: boolean;
-  };
-  /**
-   * auditOptions - options for audit logging
-   */
-  auditOptions?: AuditOptions | UpdateSpacesAuditOptions;
-}
-
-/**
  * The CheckAuthorizationParams interface contains settings for checking
  * authorization via the ISavedObjectsSecurityExtension.
  */
@@ -275,32 +199,6 @@ export interface CheckAuthorizationResult<A extends string> {
    * of action/AuthorizationTypeEntry (spaces/globallyAuthz'd)
    */
   typeMap: AuthorizationTypeMap<A>;
-}
-
-/**
- * The EnforceAuthorizationParams interface contains settings for
- * enforcing a single action via the ISavedObjectsSecurityExtension.
- * This is used only for the private enforceAuthorization method.
- */
-export interface EnforceAuthorizationParams<A extends string> {
-  /**
-   * A map of types to spaces that will be affected by the action
-   */
-  typesAndSpaces: Map<string, Set<string>>;
-  /**
-   * The relevant security action (create, update, etc.)
-   */
-  action: SecurityAction;
-  /**
-   * The authorization map from CheckAuthorizationResult: a
-   * map of type to record of action/AuthorizationTypeEntry
-   * (spaces/globallyAuthz'd)
-   */
-  typeMap: AuthorizationTypeMap<A>;
-  /**
-   * auditOptions - options for audit logging
-   */
-  auditOptions?: AuditOptions | UpdateSpacesAuditOptions;
 }
 
 /**

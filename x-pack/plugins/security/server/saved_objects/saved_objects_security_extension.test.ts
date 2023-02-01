@@ -7,7 +7,7 @@
 
 import type { BulkResolveError, LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { AuthorizeCreateObject, AuthorizeUpdateObject } from '@kbn/core-saved-objects-server';
-import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
+import { AuditAction } from '@kbn/core-saved-objects-server';
 import type {
   AuthorizeBulkGetObject,
   AuthorizeObjectWithExistingSpaces,
@@ -23,7 +23,7 @@ import { auditLoggerMock } from '../audit/mocks';
 import type { CheckSavedObjectsPrivileges } from '../authorization';
 import { Actions } from '../authorization';
 import type { CheckPrivilegesResponse } from '../authorization/types';
-import { SavedObjectsSecurityExtension } from './saved_objects_security_extension';
+import { SavedObjectsSecurityExtension, SecurityAction } from './saved_objects_security_extension';
 
 const checkAuthorizationSpy = jest.spyOn(
   SavedObjectsSecurityExtension.prototype as any,

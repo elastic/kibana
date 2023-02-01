@@ -15,41 +15,37 @@ import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import type { BulkResolveError, LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-common';
-import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
+import { AuditAction } from '@kbn/core-saved-objects-server';
 import type {
   AddAuditEventParams,
   AuditHelperParams,
+  AuditOptions,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
+  AuthorizeAndRedactInternalBulkResolveParams,
   AuthorizeAndRedactMultiNamespaceReferencesParams,
+  AuthorizeBulkCreateParams,
+  AuthorizeBulkDeleteParams,
+  AuthorizeBulkGetParams,
+  AuthorizeBulkUpdateParams,
+  AuthorizeCheckConflictsParams,
   AuthorizeCreateParams,
+  AuthorizeDeleteParams,
+  AuthorizeFindParams,
+  AuthorizeGetParams,
+  AuthorizeObjectWithExistingSpaces,
+  AuthorizeOpenPointInTimeParams,
   AuthorizeUpdateParams,
+  AuthorizeUpdateSpacesParams,
   CheckAuthorizationParams,
   CheckAuthorizationResult,
-  EnforceAuthorizationParams,
+  GetFindRedactTypeMapParams,
   ISavedObjectsSecurityExtension,
   RedactNamespacesParams,
   SavedObject,
   UpdateSpacesAuditHelperParams,
   UpdateSpacesAuditOptions,
 } from '@kbn/core-saved-objects-server';
-import type {
-  AuthorizeAndRedactInternalBulkResolveParams,
-  AuthorizeBulkCreateParams,
-  AuthorizeBulkDeleteParams,
-  AuthorizeBulkGetParams,
-  AuthorizeBulkUpdateParams,
-  AuthorizeCheckConflictsParams,
-  AuthorizeDeleteParams,
-  AuthorizeFindParams,
-  AuthorizeGetParams,
-  AuthorizeObjectWithExistingSpaces,
-  AuthorizeOpenPointInTimeParams,
-  AuthorizeUpdateSpacesParams,
-  GetFindRedactTypeMapParams,
-  InternalAuthorizeOptions,
-  InternalAuthorizeParams,
-} from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
@@ -64,6 +60,89 @@ interface Params {
   auditLogger: AuditLogger;
   errors: SavedObjectsClient['errors'];
   checkPrivileges: CheckSavedObjectsPrivileges;
+}
+
+/**
+ * The SecurityAction enumeration contains values for all valid shared object
+ * security actions. The string for each value correlates to the ES operation.
+ */
+export enum SecurityAction {
+  CHECK_CONFLICTS,
+  CLOSE_POINT_IN_TIME,
+  COLLECT_MULTINAMESPACE_REFERENCES,
+  COLLECT_MULTINAMESPACE_REFERENCES_UPDATE_SPACES,
+  CREATE,
+  BULK_CREATE,
+  DELETE,
+  BULK_DELETE,
+  FIND,
+  GET,
+  BULK_GET,
+  INTERNAL_BULK_RESOLVE,
+  OPEN_POINT_IN_TIME,
+  REMOVE_REFERENCES,
+  UPDATE,
+  BULK_UPDATE,
+  UPDATE_OBJECTS_SPACES,
+}
+
+/**
+ * The InternalAuthorizeOptions interface contains basic options
+ * for internal authorize methods of the ISavedObjectsSecurityExtension.
+ */
+interface InternalAuthorizeOptions {
+  /**
+   * Whether or not to force the use of the bulk action for the authorization.
+   * By default this will be based on the number of objects passed to the
+   * authorize method.
+   */
+  forceBulkAction: boolean;
+}
+
+/**
+ * The InternalAuthorizeParams interface contains settings for checking
+ * & enforcing authorization via the ISavedObjectsSecurityExtension. This
+ * is used only for the private authorize method.
+ */
+interface InternalAuthorizeParams {
+  /** A set of actions to check */
+  actions: Set<SecurityAction>;
+  /** A set of types to check */
+  types: Set<string>;
+  /** A set of spaces to check */
+  spaces: Set<string>;
+  /**
+   * A map of types (key) to spaces (value) that will be affected by the action(s).
+   * If undefined, enforce with be bypassed.
+   */
+  enforceMap?: Map<string, Set<string>>;
+  /** Options for authorization*/
+  options?: {
+    /** allowGlobalResource - whether or not to allow global resources, false if options are undefined */
+    allowGlobalResource?: boolean;
+  };
+  /** auditOptions - options for audit logging */
+  auditOptions?: AuditOptions | UpdateSpacesAuditOptions;
+}
+
+/**
+ * The EnforceAuthorizationParams interface contains settings for
+ * enforcing a single action via the ISavedObjectsSecurityExtension.
+ * This is used only for the private enforceAuthorization method.
+ */
+interface EnforceAuthorizationParams<A extends string> {
+  /** A map of types to spaces that will be affected by the action */
+  typesAndSpaces: Map<string, Set<string>>;
+  /** The relevant security action (create, update, etc.) */
+  action: SecurityAction;
+  /**
+   * The authorization map from CheckAuthorizationResult: a
+   * map of type to record of action/AuthorizationTypeEntry
+   * (spaces/globallyAuthz'd)
+   */
+  typeMap: AuthorizationTypeMap<A>;
+  /** auditOptions - options for audit logging */
+  auditOptions?: AuditOptions | UpdateSpacesAuditOptions;
 }
 
 export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExtension {
@@ -357,7 +436,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
    * @returns CheckAuthorizationResult - the result from the authorizations check
    */
   async authorize<A extends string>(
-    params: InternalAuthorizeParams<A>
+    params: InternalAuthorizeParams
   ): Promise<CheckAuthorizationResult<string>> {
     if (params.actions.size === 0) {
       throw new Error('No actions specified for authorization');
