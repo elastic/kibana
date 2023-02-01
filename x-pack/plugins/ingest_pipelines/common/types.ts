@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 export interface ESProcessorConfig {
   on_failure?: Processor[];
   ignore_failure?: boolean;
@@ -24,7 +22,7 @@ export interface Pipeline {
   description?: string;
   version?: number;
   processors: Processor[];
-  _meta?: Metadata;
+  _meta?: { [key: string]: any };
   on_failure?: Processor[];
   isManaged?: boolean;
 }
