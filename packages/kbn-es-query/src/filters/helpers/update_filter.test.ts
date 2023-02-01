@@ -133,7 +133,7 @@ describe('updateFilter', () => {
         type: 'phrase',
         value: undefined,
       },
-      query: { match_phrase: { 'test-field': 0 } },
+      query: { match_phrase: { 'test-field': undefined } },
     });
   });
 
