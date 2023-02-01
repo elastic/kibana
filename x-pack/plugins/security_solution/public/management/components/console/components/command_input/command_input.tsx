@@ -54,6 +54,26 @@ const CommandInputContainer = styled.div`
     border-top-left-radius: 0;
     border-top-right-radius: 0;
   }
+
+  &.hasFocus {
+    // Cursor is defined in '<InputDisplay>' component
+    .cursor {
+      background-color: ${({ theme: { eui } }) => eui.euiTextColor};
+      animation: cursor-blink-animation 1s steps(5, start) infinite;
+      -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;
+
+      @keyframes cursor-blink-animation {
+        to {
+          visibility: hidden;
+        }
+      }
+      @-webkit-keyframes cursor-blink-animation {
+        to {
+          visibility: hidden;
+        }
+      }
+    }
+  }
 `;
 
 export interface CommandInputProps extends CommonProps {
