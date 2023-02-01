@@ -12,7 +12,11 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
-import { CONTAINER_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
+import {
+  CONTAINER_ID,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+} from '../../../../common/es_fields/apm';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
@@ -54,24 +58,34 @@ export function ServiceLogs() {
       height={'60vh'}
       startTimestamp={moment(start).valueOf()}
       endTimestamp={moment(end).valueOf()}
-      query={getInfrastructureKQLFilter(data, serviceName)}
+      query={getInfrastructureKQLFilter({ data, serviceName, environment })}
       showFlyoutAction
     />
   );
 }
 
-export const getInfrastructureKQLFilter = (
+export function getInfrastructureKQLFilter({
+  data,
+  serviceName,
+  environment,
+}: {
   data:
     | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure_attributes'>
-    | undefined,
-  serviceName: string
-) => {
+    | undefined;
+  serviceName: string;
+  environment: string;
+}) {
   const containerIds: string[] = data?.containerIds ?? [];
   const containerIdKql = containerIds
     .map((id) => `${CONTAINER_ID}: "${id}"`)
     .join(' or ');
 
+  // correlate on service and (if available) environment
+  const serviceNameAndEnvironmentCorrelation = `(${SERVICE_NAME}: "${serviceName}" AND ${SERVICE_ENVIRONMENT}: "${environment}")`;
+  const serviceNameCorrelation = `(${SERVICE_NAME}: "${serviceName}" AND not ${SERVICE_ENVIRONMENT}: *)`;
+  const containerIdCorrelation = `((${containerIdKql}) and not ${SERVICE_NAME}: *)`;
+
   return containerIds.length
-    ? `${SERVICE_NAME}: "${serviceName}" or (not ${SERVICE_NAME} and (${containerIdKql}))`
-    : `${SERVICE_NAME}: "${serviceName}"`;
-};
+    ? `${serviceNameAndEnvironmentCorrelation} or ${serviceNameCorrelation} or ${containerIdCorrelation}`
+    : `${serviceNameAndEnvironmentCorrelation} or ${serviceNameCorrelation}`;
+}
