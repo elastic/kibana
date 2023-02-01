@@ -321,14 +321,6 @@
               },
               {
                 "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
@@ -5963,9 +5955,9 @@
             "signature": [
               "<T = unknown>() => Promise<Record<string, (",
               {
-                "pluginId": "@kbn/core-ui-settings-common",
+                "pluginId": "@kbn/core-ui-settings-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.PublicUiSettingsParams",
                 "text": "PublicUiSettingsParams"
               },
@@ -8526,14 +8518,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
                 "plugin": "unifiedFieldList",
@@ -15833,14 +15817,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
                 "plugin": "unifiedFieldList",
@@ -26125,6 +26101,18 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
           },
           {
+            "plugin": "@kbn/core-saved-objects-server",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server",
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
+          },
+          {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts"
           },
@@ -26223,6 +26211,14 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/so_references.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/so_references.ts"
           },
           {
             "plugin": "cases",

@@ -13,7 +13,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_type
 import type {
   GetCaseConnectorsResponse,
   CaseConnector,
-  CaseUserActionInjectedAttributesWithoutActionId,
+  CaseUserActionInjectedAttributes,
   CaseExternalServiceBasic,
 } from '../../../common/api';
 import { GetCaseConnectorsResponseRt } from '../../../common/api';
@@ -55,6 +55,7 @@ export const getConnectors = async (
       connectors,
       latestUserAction,
       userActionService,
+      logger,
     });
 
     return GetCaseConnectorsResponseRt.encode(results);
@@ -73,7 +74,7 @@ const checkConnectorsAuthorization = async ({
   authorization,
 }: {
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
   authorization: PublicMethodsOf<Authorization>;
 }) => {
   const entities: OwnerEntity[] = latestUserAction
@@ -121,21 +122,37 @@ const getConnectorsInfo = async ({
   latestUserAction,
   actionsClient,
   userActionService,
+  logger,
 }: {
   caseId: string;
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
   actionsClient: PublicMethodsOf<ActionsClient>;
   userActionService: CaseUserActionService;
+  logger: CasesClientArgs['logger'];
 }): Promise<GetCaseConnectorsResponse> => {
   const connectorIds = connectors.map((connector) => connector.connectorId);
 
   const [pushInfo, actionConnectors] = await Promise.all([
     getEnrichedPushInfo({ caseId, activity: connectors, userActionService }),
-    actionsClient.getBulk(connectorIds),
+    await getActionConnectors(actionsClient, logger, connectorIds),
   ]);
 
   return createConnectorInfoResult({ actionConnectors, connectors, pushInfo, latestUserAction });
+};
+
+const getActionConnectors = async (
+  actionsClient: PublicMethodsOf<ActionsClient>,
+  logger: CasesClientArgs['logger'],
+  ids: string[]
+): Promise<ActionResult[]> => {
+  try {
+    return await actionsClient.getBulk(ids);
+  } catch (error) {
+    // silent error and log it
+    logger.error(`Failed to retrieve action connectors in the get case connectors route: ${error}`);
+    return [];
+  }
 };
 
 interface PushDetails {
@@ -206,7 +223,7 @@ const getPushDetails = (activity: CaseConnectorActivity[]) => {
 };
 
 const getExternalServiceFromSavedObject = (
-  savedObject: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined
+  savedObject: SavedObject<CaseUserActionInjectedAttributes> | undefined
 ): CaseExternalServiceBasic | undefined => {
   if (savedObject != null && isPushedUserAction(savedObject.attributes)) {
     return savedObject.attributes.payload.externalService;
@@ -230,7 +247,7 @@ const isDateValid = (date: Date): boolean => {
 };
 
 const getConnectorInfoFromSavedObject = (
-  savedObject: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined
+  savedObject: SavedObject<CaseUserActionInjectedAttributes> | undefined
 ): CaseConnector | undefined => {
   if (
     savedObject != null &&
@@ -250,13 +267,15 @@ const createConnectorInfoResult = ({
   actionConnectors: ActionResult[];
   connectors: CaseConnectorActivity[];
   pushInfo: Map<string, EnrichedPushInfo>;
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
 }) => {
   const results: GetCaseConnectorsResponse = {};
+  const actionConnectorsMap = new Map(
+    actionConnectors.map((actionConnector) => [actionConnector.id, { ...actionConnector }])
+  );
 
-  for (let i = 0; i < connectors.length; i++) {
-    const connectorDetails = actionConnectors[i];
-    const aggregationConnector = connectors[i];
+  for (const aggregationConnector of connectors) {
+    const connectorDetails = actionConnectorsMap.get(aggregationConnector.connectorId);
     const connector = getConnectorInfoFromSavedObject(aggregationConnector.fields);
 
     const latestUserActionCreatedAt = getDate(latestUserAction?.attributes.created_at);
@@ -271,7 +290,7 @@ const createConnectorInfoResult = ({
 
       results[connector.id] = {
         ...connector,
-        name: connectorDetails.name,
+        name: connectorDetails?.name ?? connector.name,
         push: {
           needsToBePushed,
           hasBeenPushed: hasBeenPushed(enrichedPushInfo),

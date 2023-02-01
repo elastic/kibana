@@ -116,13 +116,6 @@ class Package {
     this.id = manifest.id;
 
     /**
-     * Does this package expose a plugin, is it of one of the plugin types?
-     * @type {boolean}
-     * @readonly
-     */
-    this.isPlugin = manifest.type === 'plugin-browser' || manifest.type === 'plugin-server';
-
-    /**
      * Is this package highlighted as a "dev only" package? If so it will always
      * be listed in the devDependencies and will never end up in the build
      * @type {boolean}
@@ -132,11 +125,19 @@ class Package {
   }
 
   /**
-   * Returns true if the package represents some type of plugin
-   * @returns {import('./types').PluginTypeInfo}
+   * Does this package expose a plugin, is it of one of the plugin types?
+   * @returns {this is import('./types').PluginPackageManifest}
    */
-  getPlguinType() {
-    if (!this.isPlugin) {
+  isPlugin() {
+    return this.manifest.type === 'plugin';
+  }
+
+  /**
+   * Returns true if the package represents some type of plugin
+   * @returns {import('./types').PluginCategoryInfo}
+   */
+  getPluginCategories() {
+    if (!this.isPlugin()) {
       throw new Error('package is not a plugin, check pkg.isPlugin before calling this method');
     }
 
@@ -156,7 +157,7 @@ class Package {
    * print all the BUILD.bazel files
    */
   [inspect.custom]() {
-    return `${this.isPlugin ? `PluginPackage` : `Package`}<${this.normalizedRepoRelativeDir}>`;
+    return `${this.isPlugin() ? `PluginPackage` : `Package`}<${this.normalizedRepoRelativeDir}>`;
   }
 }
 

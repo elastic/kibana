@@ -55,7 +55,6 @@ export default async function ({ readConfigFile }) {
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
         '--uiSettings.overrides.observability:enableNewSyntheticsView=true', // for OSS test management/_import_objects,
-        '--uiSettings.overrides.observability:enableInfrastructureHostsView=true', // for Infra/Hosts View test,
       ],
     },
     uiSettings: {
