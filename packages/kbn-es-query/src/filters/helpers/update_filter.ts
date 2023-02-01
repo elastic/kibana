@@ -90,7 +90,7 @@ function updateWithIsOperator(
         ...filter.meta,
         negate: operator?.negate,
         type: operator?.type,
-        params: { query: safeParams },
+        params: { query: params },
         value: undefined,
       },
       query: { match_phrase: { [filter.meta.key!]: safeParams ?? '' } },
