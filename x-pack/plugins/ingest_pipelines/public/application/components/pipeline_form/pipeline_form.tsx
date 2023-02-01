@@ -36,7 +36,7 @@ const defaultFormValue: Pipeline = Object.freeze({
   description: '',
   processors: [],
   on_failure: [],
-  _meta: '',
+  _meta: {},
 });
 
 export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({

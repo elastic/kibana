@@ -60,7 +60,7 @@ export const pipelineFormSchema: FormSchema = {
       defaultMessage: '_meta field data (optional)',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.form.metaHelpText', {
-      defaultMessage: 'Use JSON format',
+      defaultMessage: 'Use JSON format.',
     }),
     serializer: (value) => {
       const result = parseJson(value);
