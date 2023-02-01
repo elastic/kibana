@@ -41,12 +41,31 @@ router.get(
   }
 );
 
+// Dummy types
+
+/** Definitely subject to revision, just used for examples */
+type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
+
 /**
- * ===================== First proposal =====================
- * We ask consumers to restate all consituents for each route.
+ * ===================== General comments =====================
+ * - In all designs it is possible to pass the version number to the handler
+ *   function.
+ * - When no API version is specified we will need to adopt the default behaviour of
+ *   other Elastic APIs and this is TBD.
  */
 
-type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
+/**
+ * Open questions:
+ * 1. Are individual APIs versioned or the entire API surface versioned?
+ */
+
+/**
+ * ===================== First design =====================
+ * We ask consumers to restate all consituents for each route and they
+ * provide version number at the route level.
+ *
+ * This is perhaps the most verbose approach.
+ */
 
 type NewRouteRegistrar1<
   P,
@@ -91,6 +110,7 @@ examplePostRegistrar1(
 examplePostRegistrar1(
   {
     ...common,
+    version: '3',
     validate: {
       body: schema.object({
         name: schema.string(),
@@ -98,26 +118,23 @@ examplePostRegistrar1(
         age: schema.number(),
       }),
     },
-    version: '3',
   },
   async (ctx, req, res) => res.ok()
 );
 
 /**
- * ===================== End first proposal =====================
+ * ===================== End first design =====================
  */
 
 /**
- * ===================== Second proposal =====================
+ * ===================== Second design =====================
  *
- * See "Current API". We could also:
+ * See "Current API". Per route we registration we could:
  *
- * Change: 3, 5
- * Keep constant: 1, 2, 4
+ * Change: Validation, Handler
+ * Keep constant: Method, Path, Optional config
  *
- * If 3 & 5 change across versions it implies a coupling between these two. Specifically,
- * whenever a new version is added we know we need new validation (for the new API) and
- * we need to tite this to a handler.
+ * If only Validation & Handler change across versions it implies a coupling between these two.
  *
  * One approach could be to tightly pair the validation and handler in the registrar's
  * API.
@@ -181,11 +198,11 @@ examplePostRegistrar2(
 );
 
 /**
- * ===================== End second proposal =====================
+ * ===================== End second design =====================
  */
 
 /**
- * ===================== Third proposal =====================
+ * ===================== Third design =====================
  * We make the assumption that version is decided at the "router" API level.
  *
  * For example:
@@ -232,12 +249,5 @@ v3Router.post(
 );
 
 /**
- * Open questions:
- * 1. Are individual APIs versioned or the entire API surface versioned?
- */
-
-/**
- * Additional notes:
- * * When no API version is specified we will need to adopt the default behaviour of
- *   other Elastic APIs and this is TBD.
+ * ===================== End third design =====================
  */
