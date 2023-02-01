@@ -101,6 +101,10 @@ export const mockState: SyntheticsAppState = {
     flyoutConfig: null,
     status: null,
     statusError: null,
+    groupBy: {
+      field: 'none',
+      order: 'asc',
+    },
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),

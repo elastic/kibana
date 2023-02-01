@@ -20,12 +20,11 @@ import {
 } from '../../../../state';
 import { SyntheticsUrlParams } from '../../../../utils/url_params';
 import { useUrlParams } from '../../../../hooks';
-
 import {
-  SyntheticsMonitorFilterField,
   getMonitorFilterFields,
   getSyntheticsFilterKeyForLabel,
   SyntheticsMonitorFilterChangeHandler,
+  SyntheticsMonitorFilterField,
 } from './filter_fields';
 
 const aggs = {
