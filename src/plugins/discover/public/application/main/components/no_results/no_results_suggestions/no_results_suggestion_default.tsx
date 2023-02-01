@@ -31,7 +31,7 @@ export function NoResultsSuggestionDefault() {
         ) : (
           <FormattedMessage
             id="discover.noResults.noDocumentsOrCheckPermissionsDescription"
-            defaultMessage="Make sure you have permission to view the indices and that they contain documents."
+            defaultMessage="Make sure that you have permission to view the indices and that they contain documents."
           />
         )}
       </EuiDescriptionListDescription>
