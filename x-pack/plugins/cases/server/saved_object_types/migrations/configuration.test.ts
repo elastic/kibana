@@ -120,6 +120,13 @@ describe('configuration migrations', () => {
       expect(config.attributes).not.toHaveProperty('connector_id');
       expect(config.attributes).not.toHaveProperty('connector_name');
     });
+
+    it('sets the references to an empty array when it is initially undefined', () => {
+      const docWithoutRefs = { ...create_7_9_0_configSchema(), references: undefined };
+      const config = createConnectorAttributeMigration(docWithoutRefs);
+
+      expect(config.references).toEqual([]);
+    });
   });
 
   describe('7.15.0 connector ID migration', () => {
