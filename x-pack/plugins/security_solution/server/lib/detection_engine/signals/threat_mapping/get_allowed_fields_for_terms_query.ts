@@ -17,8 +17,8 @@ export const getAllowedFieldForTermQueryFromMapping = (
   const result: { [key: string]: boolean } = {};
   const notAllowedFields: string[] = [];
 
-  const indicies = Object.values(indexMapping);
-  indicies.forEach((index) => {
+  const indices = Object.values(indexMapping);
+  indices.forEach((index) => {
     Object.entries(index.mappings).forEach(([field, fieldValue]) => {
       Object.values(fieldValue.mapping).forEach((mapping) => {
         const fieldType = mapping?.type;
