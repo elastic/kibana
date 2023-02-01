@@ -97,7 +97,7 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
   const httpRequestsByRegionLayer: VectorLayerDescriptor = {
     joins: [
       {
-        leftField: 'iso2',
+        leftField: 'region_iso_code',
         right: {
           type: SOURCE_TYPES.ES_TERM_SOURCE,
           id: PER_REGION_LAYER_ID,
@@ -129,8 +129,8 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
         defaultMessage: 'HTTP requests per region',
       }
     ),
-    minZoom: 0,
-    maxZoom: 2,
+    minZoom: 1,
+    maxZoom: 24,
     alpha: 0.75,
     visible: true,
     type: LAYER_TYPE.GEOJSON_VECTOR,
