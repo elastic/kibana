@@ -240,7 +240,7 @@ export const CrawlDetailsSummary: React.FC<CrawlerDetailsSummaryProps> = ({
               'xpack.enterpriseSearch.crawler.crawlDetailsSummary.logsDisabledMessage',
               {
                 defaultMessage:
-                  'Enable Web Crawler logs in settings for more detailed crawl statistics.',
+                  'Enable web crawler logs in your enterprise-search.yml or user settings for more detailed crawl statistics.',
               }
             )}
           </p>
