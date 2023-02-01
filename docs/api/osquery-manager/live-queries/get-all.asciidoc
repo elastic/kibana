@@ -22,7 +22,8 @@ experimental[] Get live queries.
 (Optional, string) An identifier for the space. When `space_id` is not provided in the URL, the default space is used.
 
 
-=== Query parameters
+[[osquery-manager-live-queries-api-get-all-query-params]]
+==== Query parameters
 
 `page`::
 (Optional, integer) The page number to return. The default is `1`.

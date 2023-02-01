@@ -25,7 +25,7 @@ import type { EuiBasicTableOnChange, Solution } from './types';
 import { CasesTable } from './table';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CasesMetrics } from './cases_metrics';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { initialData, useGetCases } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
@@ -100,7 +100,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
       useGetCurrentUserProfile();
 
-    const { data: connectors = [] } = useGetConnectors();
+    const { data: connectors = [] } = useGetSupportedActionConnectors();
 
     const sorting = useMemo(
       () => ({
