@@ -30,7 +30,7 @@ export const buildStateSubscribe =
     setState: (state: AppState) => void;
   }) =>
   async (nextState: AppState) => {
-    addLog('📦 AppStateContainer.subscribe update', nextState);
+    addLog('[appstate] subscribe triggered', nextState);
     const { hideChart, interval, breakdownField, sort, index } =
       stateContainer.appState.getPrevious();
     // Cast to boolean to avoid false positives when comparing
@@ -70,7 +70,7 @@ export const buildStateSubscribe =
       breakdownFieldChanged ||
       docTableSortChanged
     ) {
-      addLog('📦 AppStateContainer update triggers data fetching');
+      addLog('[appstate] subscribe triggers data fetching');
       stateContainer.dataState.refetch$.next(undefined);
     }
 

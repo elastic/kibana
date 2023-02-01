@@ -157,18 +157,18 @@ export const getDiscoverAppStateContainer = (
   };
 
   const resetInitialState = () => {
-    addLog('🔗 [appState] reset initial state to the current state');
+    addLog('[appState] reset initial state to the current state');
     initialState = appStateContainer.getState();
   };
 
   const replaceUrlState = async (newPartial: AppState = {}, merge = true) => {
-    addLog('🔗 [appState] replaceUrlState', { newPartial, merge });
+    addLog('[appState] replaceUrlState', { newPartial, merge });
     const state = merge ? { ...appStateContainer.getState(), ...newPartial } : newPartial;
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 
   const startAppStateUrlSync = () => {
-    addLog('🔗 [appState] startUrlSync');
+    addLog('[appState] startAppStateUrlSync');
     return syncState({
       storageKey: APP_STATE_URL_KEY,
       stateContainer: enhancedAppContainer,
@@ -177,7 +177,7 @@ export const getDiscoverAppStateContainer = (
   };
 
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
-    addLog('🔗 [appState] initializeAndSync', currentSavedSearch);
+    addLog('[appState] initializeAndSync', currentSavedSearch);
     const dataView = currentSavedSearch.searchSource.getField('index')!;
     if (appStateContainer.getState().index !== dataView.id) {
       // used data view is different from the given by url/state which is invalid
@@ -230,13 +230,13 @@ export const getDiscoverAppStateContainer = (
   };
 
   const resetBySavedSearch = (nextSavedSearch: SavedSearch) => {
-    addLog('🔗 [appState] reset to saved search', { nextSavedSearch });
+    addLog('[appState] reset to saved search', { nextSavedSearch });
     const nextAppState = getInitialState(stateStorage, nextSavedSearch, services);
     appStateContainer.set(nextAppState);
   };
 
   const update = (newPartial: AppState, replace = false) => {
-    addLog('🔗 [appState] update', { new: newPartial, replace });
+    addLog('[appState] update', { newPartial, replace });
     if (replace) {
       return replaceUrlState(newPartial);
     } else {

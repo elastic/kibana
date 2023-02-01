@@ -33,7 +33,7 @@ export async function changeDataView(
     setUrlTracking: (dataView: DataView) => void;
   }
 ) {
-  addLog('changeDataView', { id });
+  addLog('[ui] changeDataView', { id });
   const { dataViews, uiSettings } = services;
   const dataView = discoverState.internalState.getState().dataView;
   const state = discoverState.appState.getState();

@@ -15,6 +15,7 @@
 export const addLog = (...args) => {
   // @ts-expect-error
   if (window?.ELASTIC_DISCOVER_LOGGER) {
+    args[0] = `[Discover] ${args[0]}`;
     // eslint-disable-next-line no-console
     console.log(...args);
   }

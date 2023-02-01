@@ -25,6 +25,7 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { addLog } from '../../../utils/add_log';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
@@ -298,6 +299,7 @@ export function getDiscoverStateContainer({
  * container
  */
 export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newState: AppState) {
+  addLog('[appstate] setState', { newState });
   const oldState = stateContainer.getState();
   const mergedState = { ...oldState, ...newState };
   if (!isEqualState(oldState, mergedState)) {
