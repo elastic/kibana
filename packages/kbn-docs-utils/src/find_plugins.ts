@@ -66,7 +66,7 @@ export function findPlugins(): PluginOrPackage[] {
     throw new Error('unable to find @kbn/core');
   }
 
-  return [core, ...plugins].map(toPluginOrPackage);
+  return [...[core, ...plugins].map(toPluginOrPackage), ...findPackages()];
 }
 
 /**
