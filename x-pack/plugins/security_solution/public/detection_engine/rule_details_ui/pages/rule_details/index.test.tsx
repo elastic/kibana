@@ -27,6 +27,7 @@ import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../common/mock/router';
 
 import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { getUseDataTableFiltersMock } from '../../../../common/hooks/__mocks__/use_data_table_filters';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -68,12 +69,7 @@ jest.mock('../../../../common/containers/sourcerer', () => {
 jest.mock('../../../../common/hooks/use_data_table_filters', () => {
   return {
     ...jest.requireActual('../../../../common/hooks/use_data_table_filters'),
-    useDataTableFilters: jest.fn().mockReturnValue({
-      showBuildingBlockAlerts: false,
-      showOnlyThreatIndicatorAlerts: false,
-      setShowBuildingBlockAlerts: jest.fn(),
-      setShowOnlyThreatIndicatorAlerts: jest.fn(),
-    }),
+    useDataTableFilters: getUseDataTableFiltersMock(),
   };
 });
 
