@@ -18,11 +18,17 @@ export function ProfilingAppPageTemplate({
   tabs,
   hideSearchBar = false,
   noDataConfig,
+  restrictWidth,
+  pageTitle = i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
+    defaultMessage: 'Universal Profiling',
+  }),
 }: {
   children: React.ReactElement;
   tabs: EuiPageHeaderContentProps['tabs'];
   hideSearchBar?: boolean;
   noDataConfig?: NoDataPageProps;
+  restrictWidth?: boolean;
+  pageTitle?: React.ReactNode;
 }) {
   const {
     start: { observability },
@@ -40,11 +46,10 @@ export function ProfilingAppPageTemplate({
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
       pageHeader={{
-        pageTitle: i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
-          defaultMessage: 'Universal Profiling',
-        }),
+        pageTitle,
         tabs,
       }}
+      restrictWidth={restrictWidth}
       pageSectionProps={{
         contentProps: {
           style: {
