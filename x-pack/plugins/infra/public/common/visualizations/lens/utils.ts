@@ -70,7 +70,7 @@ export const getXYVisualizationState = (
     showSingleSeries: false,
   },
   valueLabels: 'show',
-  fittingFunction: 'None',
+  fittingFunction: 'Zero',
   curveType: 'LINEAR',
   yLeftScale: 'linear',
   axisTitlesVisibilitySettings: {
