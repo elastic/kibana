@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
@@ -213,10 +213,23 @@ export function useAllCasesState(
     }
   }, [isModalView, updateLocation]);
 
+  const defaultFiltersSelected = useMemo(() => {
+    return !isEqual(filterOptions, {
+      ...DEFAULT_FILTER_OPTIONS,
+      ...initialFilterOptions,
+    });
+  }, [filterOptions, initialFilterOptions]);
+
+  const clearFilterOptions = useCallback(() => {
+    persistAndUpdateFilterOptions({ ...DEFAULT_FILTER_OPTIONS, ...initialFilterOptions });
+  }, [initialFilterOptions, persistAndUpdateFilterOptions]);
+
   return {
-    queryParams,
-    setQueryParams: persistAndUpdateQueryParams,
+    clearFilterOptions,
+    defaultFiltersSelected,
     filterOptions,
+    queryParams,
     setFilterOptions: persistAndUpdateFilterOptions,
+    setQueryParams: persistAndUpdateQueryParams,
   };
 }

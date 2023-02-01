@@ -35,6 +35,8 @@ interface CasesTableProps {
   tableRef: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<Case>['rowProps'];
   deselectCases: () => void;
+  defaultFiltersSelected: boolean;
+  clearFilters: () => void;
 }
 
 const Div = styled.div`
@@ -57,6 +59,8 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   tableRef,
   tableRowProps,
   deselectCases,
+  defaultFiltersSelected,
+  clearFilters,
 }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
@@ -83,6 +87,8 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         totalCases={data.total ?? 0}
         selectedCases={selectedCases}
         deselectCases={deselectCases}
+        shouldShowClearFilters={defaultFiltersSelected}
+        clearFilters={clearFilters}
       />
       <EuiBasicTable
         className={classnames({ isSelectorView })}

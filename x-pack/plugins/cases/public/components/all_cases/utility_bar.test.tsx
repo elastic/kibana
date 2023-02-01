@@ -27,6 +27,8 @@ describe('Severity form field', () => {
     totalCases: 5,
     selectedCases: [basicCase],
     deselectCases,
+    shouldShowClearFilters: false,
+    clearFilters: () => {},
   };
 
   beforeEach(() => {

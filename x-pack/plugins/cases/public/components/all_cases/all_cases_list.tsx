@@ -67,10 +67,14 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       owner: hasOwner ? owner : availableSolutions,
     };
 
-    const { queryParams, setQueryParams, filterOptions, setFilterOptions } = useAllCasesState(
-      isSelectorView,
-      initialFilterOptions
-    );
+    const {
+      queryParams,
+      setQueryParams,
+      filterOptions,
+      setFilterOptions,
+      clearFilterOptions,
+      defaultFiltersSelected,
+    } = useAllCasesState(isSelectorView, initialFilterOptions);
     const [selectedCases, setSelectedCases] = useState<Case[]>([]);
 
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
@@ -275,6 +279,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           tableRef={tableRef}
           tableRowProps={tableRowProps}
           deselectCases={deselectCases}
+          defaultFiltersSelected={defaultFiltersSelected}
+          clearFilters={clearFilterOptions}
         />
       </>
     );

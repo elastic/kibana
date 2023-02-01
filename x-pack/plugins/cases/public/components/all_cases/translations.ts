@@ -90,6 +90,10 @@ export const REFRESH = i18n.translate('xpack.cases.caseTable.refreshTitle', {
   defaultMessage: 'Refresh',
 });
 
+export const CLEAR_FILTERS = i18n.translate('xpack.cases.caseTable.clearFilters', {
+  defaultMessage: 'Clear filters',
+});
+
 export const PUSH_LINK_ARIA = (thirdPartyName: string): string =>
   i18n.translate('xpack.cases.caseTable.pushLinkAria', {
     values: { thirdPartyName },
@@ -118,7 +122,7 @@ export const FILTER_ASSIGNEES_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const CLEAR_FILTERS = i18n.translate(
+export const CLEAR_ASSIGNEES_FILTERS = i18n.translate(
   'xpack.cases.allCasesView.filterAssignees.clearFilters',
   {
     defaultMessage: 'Clear filters',

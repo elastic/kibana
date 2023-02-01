@@ -27,10 +27,19 @@ interface Props {
   totalCases: number;
   selectedCases: Case[];
   deselectCases: () => void;
+  shouldShowClearFilters: boolean;
+  clearFilters: () => void;
 }
 
 export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
-  ({ isSelectorView, totalCases, selectedCases, deselectCases }) => {
+  ({
+    isSelectorView,
+    totalCases,
+    selectedCases,
+    deselectCases,
+    shouldShowClearFilters,
+    clearFilters,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
@@ -131,6 +140,20 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                   {i18n.REFRESH}
                 </EuiButtonEmpty>
               </EuiFlexItem>
+              {shouldShowClearFilters && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={clearFilters}
+                    size="xs"
+                    iconSide="left"
+                    iconType="cross"
+                    flush="left"
+                    data-test-subj="all-cases-cross-link-icon"
+                  >
+                    {i18n.CLEAR_FILTERS}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
