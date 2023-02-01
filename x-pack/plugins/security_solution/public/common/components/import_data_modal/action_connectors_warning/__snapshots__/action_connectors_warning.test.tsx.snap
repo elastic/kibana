@@ -159,7 +159,7 @@ Object {
               <div
                 class="euiText emotion-euiText-xs"
               >
-                1 connector has sensitive information that requires updates, review in 
+                1 connector has sensitive information that requires updates. review in 
                 <button
                   class="euiLink emotion-euiLink-primary"
                   type="button"
@@ -206,7 +206,7 @@ Object {
             <div
               class="euiText emotion-euiText-xs"
             >
-              1 connector has sensitive information that requires updates, review in 
+              1 connector has sensitive information that requires updates. review in 
               <button
                 class="euiLink emotion-euiLink-primary"
                 type="button"
@@ -310,7 +310,7 @@ Object {
               <div
                 class="euiText emotion-euiText-xs"
               >
-                2 connectors have sensitive information that requires updates, review in 
+                2 connectors have sensitive information that requires updates. review in 
                 <button
                   class="euiLink emotion-euiLink-primary"
                   type="button"
@@ -357,7 +357,7 @@ Object {
             <div
               class="euiText emotion-euiText-xs"
             >
-              2 connectors have sensitive information that requires updates, review in 
+              2 connectors have sensitive information that requires updates. review in 
               <button
                 class="euiLink emotion-euiLink-primary"
                 type="button"

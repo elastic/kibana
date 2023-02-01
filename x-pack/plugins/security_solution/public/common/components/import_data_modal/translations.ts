@@ -56,13 +56,12 @@ export const ACTION_CONNECTORS_WARNING_TITLE = (totalConnectors: number) =>
     }
   );
 
-export const ACTION_CONNECTORS_WARNING_MESSAGE = (totalConnectors: number) =>
+export const ACTION_CONNECTORS_WARNING_MESSAGE = (message: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsWarningMessage',
     {
-      values: { totalConnectors },
-      defaultMessage:
-        '{totalConnectors} {totalConnectors, plural, =1 {connector has} other {connectors have}} sensitive information that requires updates, review in ',
+      values: { message },
+      defaultMessage: '{message} review in ',
     }
   );
 

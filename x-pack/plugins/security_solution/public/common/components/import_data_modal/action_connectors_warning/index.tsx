@@ -23,7 +23,7 @@ const ActionConnectorWarningsComponent: FC<ActionConnectorWarningsComponentProps
   const { http } = useKibana().services;
 
   if (!importedActionConnectorsCount || !actionConnectorsWarnings.length) return null;
-  const { actionPath } = actionConnectorsWarnings[0];
+  const { actionPath, message } = actionConnectorsWarnings[0];
 
   return (
     <EuiCallOut
@@ -41,8 +41,7 @@ const ActionConnectorWarningsComponent: FC<ActionConnectorWarningsComponentProps
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem data-test-subj="actionConnectorsWarningsCallOutMessage">
           <EuiText size="xs">
-            {i18n.ACTION_CONNECTORS_WARNING_MESSAGE(actionConnectorsWarnings.length)}
-
+            {i18n.ACTION_CONNECTORS_WARNING_MESSAGE(message)}
             <EuiLink href={http.basePath.prepend(actionPath)}>
               {i18n.ACTION_CONNECTORS_WARNING_LINK}
             </EuiLink>
