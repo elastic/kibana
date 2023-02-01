@@ -6,7 +6,7 @@
  */
 import React, { useReducer } from 'react';
 
-import { render, screen, within, fireEvent } from '@testing-library/react';
+import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
@@ -15,6 +15,7 @@ import { AlertsTable } from '../alerts_table';
 import {
   AlertsField,
   AlertsTableProps,
+  BulkActionsConfig,
   BulkActionsState,
   FetchAlertData,
   RowSelectionState,
@@ -114,15 +115,26 @@ describe('AlertsTable.BulkActions', () => {
     alertsTableConfiguration: {
       ...alertsTableConfiguration,
 
-      useBulkActions: () => [
-        {
-          label: 'Fake Bulk Action',
-          key: 'fakeBulkAction',
-          'data-test-subj': 'fake-bulk-action',
-          disableOnQuery: false,
-          onClick: () => {},
-        },
-      ],
+      useBulkActions: () =>
+        [
+          {
+            label: 'Fake Bulk Action',
+            key: 'fakeBulkAction',
+            'data-test-subj': 'fake-bulk-action',
+            disableOnQuery: false,
+            onClick: () => {},
+          },
+          {
+            label: 'Fake Bulk Action with loading and clear selection',
+            key: 'fakeBulkActionLoadingClear',
+            'data-test-subj': 'fake-bulk-action-loading-clear',
+            disableOnQuery: false,
+            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection) => {
+              setIsBulkActionLoading(true);
+              setTimeout(() => clearSelection(), 150);
+            },
+          },
+        ] as BulkActionsConfig[],
     },
   };
 
@@ -428,6 +440,8 @@ describe('AlertsTable.BulkActions', () => {
                 initialBulkActionsState={initialBulkActionsState}
               />
             );
+
+            screen.debug(undefined, 1000000);
             fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
@@ -619,6 +633,51 @@ describe('AlertsTable.BulkActions', () => {
             ]);
             expect(mockedFn.mock.calls[0][1]).toEqual(true);
             expect(mockedFn.mock.calls[0][2]).toBeDefined();
+          });
+
+          it('should first set all to loading, then clears the selection', async () => {
+            const props = {
+              ...tablePropsWithBulkActions,
+
+              initialBulkActionsState: {
+                ...defaultBulkActionsState,
+                areAllVisibleRowsSelected: true,
+                rowSelection: new Map(),
+              },
+            };
+            render(<AlertsTableWithBulkActionsContext {...props} />);
+
+            let bulkActionsCells = screen.getAllByTestId(
+              'bulk-actions-row-cell'
+            ) as HTMLInputElement[];
+
+            fireEvent.click(screen.getByTestId('bulk-actions-header'));
+
+            await waitFor(async () => {
+              bulkActionsCells = screen.getAllByTestId(
+                'bulk-actions-row-cell'
+              ) as HTMLInputElement[];
+              expect(bulkActionsCells[0].checked).toBeTruthy();
+              expect(bulkActionsCells[1].checked).toBeTruthy();
+              expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
+            });
+
+            fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            await waitForEuiPopoverOpen();
+
+            fireEvent.click(screen.getByTestId('fake-bulk-action-loading-clear'));
+
+            // initially rows are loading
+            await waitFor(() => {
+              expect(screen.queryAllByTestId('row-loader')).toHaveLength(2);
+              screen.debug(undefined, 100000);
+            });
+
+            // clear Selection happens after 150ms
+            await waitFor(() => {
+              expect(screen.queryAllByTestId('row-loader')).toHaveLength(0);
+              screen.debug(undefined, 100000);
+            });
           });
         });
       });

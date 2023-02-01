@@ -332,7 +332,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         dataGridRef: dataGridRef.current,
         pageSize: pagination.pageSize,
       })
-    : { getCellActions: () => null, visibleCellActions: 2, disabledCellActions: [] };
+    : { getCellActions: () => null, visibleCellActions: undefined, disabledCellActions: [] };
 
   const columnsWithCellActions = useMemo(() => {
     if (getCellActions) {

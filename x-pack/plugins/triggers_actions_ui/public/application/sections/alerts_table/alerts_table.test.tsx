@@ -6,7 +6,7 @@
  */
 import React, { useReducer } from 'react';
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
@@ -18,8 +18,9 @@ import {
   BulkActionsState,
   FetchAlertData,
   RowSelectionState,
+  UseCellActions,
 } from '../../../types';
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BulkActionsContext } from './bulk_actions/context';
 import { bulkActionsReducer } from './bulk_actions/reducer';
@@ -126,6 +127,35 @@ const ecsAlertsData = [
     },
   ],
 ] as FetchAlertData['ecsAlertsData'];
+
+const cellActionOnClickMockedFn = jest.fn();
+
+const TEST_ID = {
+  CELL_ACTIONS_POPOVER: 'euiDataGridExpansionPopover',
+  CELL_ACTIONS_EXPAND: 'euiDataGridCellExpandButton',
+};
+
+const mockedUseCellActions: UseCellActions = () => {
+  const mockedGetCellActions = (columnId: string): EuiDataGridColumnCellAction[] => {
+    const fakeCellAction: EuiDataGridColumnCellAction = ({ rowIndex, Component }) => {
+      const label = 'Fake Cell First Action';
+      return (
+        <Component
+          onClick={() => cellActionOnClickMockedFn(columnId, rowIndex)}
+          data-test-subj={'fake-cell-first-action'}
+          iconType="refresh"
+          aria-label={label}
+        />
+      );
+    };
+    return [fakeCellAction];
+  };
+  return {
+    getCellActions: mockedGetCellActions,
+    visibleCellActions: 2,
+    disabledCellActions: [],
+  };
+};
 
 describe('AlertsTable', () => {
   const fetchAlertsData = {
@@ -461,6 +491,48 @@ describe('AlertsTable', () => {
 
           expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
         });
+      });
+    });
+
+    describe('cell Actions', () => {
+      let customTableProps: AlertsTableProps;
+
+      beforeEach(() => {
+        customTableProps = {
+          ...tableProps,
+          pageSize: 2,
+          alertsTableConfiguration: {
+            ...alertsTableConfiguration,
+            useCellActions: mockedUseCellActions,
+          },
+        };
+      });
+
+      it('Should render cell actions on hover', async () => {
+        render(<AlertsTableWithLocale {...customTableProps} />);
+
+        const reasonFirstRow = (await screen.findAllByTestId('dataGridRowCell'))[3];
+
+        fireEvent.mouseOver(reasonFirstRow);
+
+        await waitFor(() => {
+          expect(screen.getByTestId('fake-cell-first-action')).toBeInTheDocument();
+        });
+
+        screen.debug(undefined, 100000);
+      });
+      it('cell Actions can be expanded', async () => {
+        render(<AlertsTableWithLocale {...customTableProps} />);
+        const reasonFirstRow = (await screen.findAllByTestId('dataGridRowCell'))[3];
+
+        fireEvent.mouseOver(reasonFirstRow);
+
+        expect(await screen.findByTestId(TEST_ID.CELL_ACTIONS_EXPAND)).toBeVisible();
+
+        fireEvent.click(await screen.findByTestId(TEST_ID.CELL_ACTIONS_EXPAND));
+
+        expect(await screen.findByTestId(TEST_ID.CELL_ACTIONS_POPOVER)).toBeVisible();
+        expect(await screen.findAllByLabelText(/fake cell first action/i)).toHaveLength(2);
       });
     });
   });
