@@ -11,7 +11,6 @@
  * @param args
  */
 // @ts-expect-error
-
 export const addLog = (...args) => {
   // @ts-expect-error
   if (window?.ELASTIC_DISCOVER_LOGGER) {
