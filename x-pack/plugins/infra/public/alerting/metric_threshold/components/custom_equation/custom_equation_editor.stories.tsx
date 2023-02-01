@@ -66,7 +66,6 @@ const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) =>
 
 export const CustomEquationEditorDefault = CustomEquationEditorTemplate.bind({});
 export const CustomEquationEditorWithEquationErrors = CustomEquationEditorTemplate.bind({});
-export const CustomEquationEditorWithFieldError = CustomEquationEditorTemplate.bind({});
 
 const BASE_ARGS = {
   expression: {
