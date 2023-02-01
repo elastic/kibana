@@ -261,7 +261,6 @@ describe('fleet usage telemetry', () => {
       monitoring_enabled: ['logs', 'metrics'],
       name: 'Another policy',
       description: 'Policy 2',
-      inactivity_timeout: 1209600,
       status: 'active',
       is_managed: false,
       revision: 2,
