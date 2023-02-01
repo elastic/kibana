@@ -24,7 +24,6 @@ import {
   obsOnly,
   obsOnlyRead,
 } from '../../../../common/lib/authentication/users';
-import { getCaseUserActionStats } from '../../../../common/lib/user_actions';
 import {
   getPostCaseRequest,
   persistableStateAttachment,
@@ -42,7 +41,8 @@ import {
   deleteAllCaseItems,
   updateCase,
   superUserSpace1Auth,
-} from '../../../../common/lib/utils';
+  getCaseUserActionStats,
+} from '../../../../common/lib/api';
 
 const getCaseUpdateData = (id: string, version: string) => ({
   status: CaseStatuses.open,
