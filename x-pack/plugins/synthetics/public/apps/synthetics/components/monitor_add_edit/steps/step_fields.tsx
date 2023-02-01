@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { useFormContext, FieldError } from 'react-hook-form';
 import { Step } from './step';
@@ -29,11 +29,16 @@ export const StepFields = ({
     formState: { errors },
   } = useFormContext();
   const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
+
+  const formConfig = useMemo(() => {
+    return FORM_CONFIG(readOnly)[type];
+  }, [readOnly, type]);
+
   return descriptionOnly ? (
     <EuiText size="m">{description}</EuiText>
   ) : (
     <Step description={description}>
-      {FORM_CONFIG(readOnly)[type][stepKey]?.map((field) => {
+      {formConfig[stepKey]?.map((field) => {
         return (
           <Field
             {...field}

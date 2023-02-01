@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescribedFormGroup, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useFormContext, FieldError } from 'react-hook-form';
@@ -21,7 +21,11 @@ export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
   } = useFormContext();
   const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
 
-  return FORM_CONFIG(readOnly)[type]?.advanced ? (
+  const formConfig = useMemo(() => {
+    return FORM_CONFIG(readOnly)[type];
+  }, [readOnly, type]);
+
+  return formConfig?.advanced ? (
     <EuiPanel hasBorder>
       <EuiAccordion
         id="syntheticsAdvancedPanel"
@@ -30,7 +34,7 @@ export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
         })}
       >
         <EuiSpacer />
-        {FORM_CONFIG(readOnly)[type].advanced?.map((configGroup) => {
+        {formConfig.advanced?.map((configGroup) => {
           return (
             <DescripedFormGroup
               description={configGroup.description}
