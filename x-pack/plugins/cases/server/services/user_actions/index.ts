@@ -710,6 +710,7 @@ export class CaseUserActionService {
       totals: {
         terms: {
           field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+          size: 100,
         },
       },
     };
