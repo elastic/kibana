@@ -21,9 +21,11 @@ import { debounce, cloneDeep } from 'lodash';
 import { Query } from '@kbn/data-plugin/common/query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
-import { ConfigurationStepDependentVariableRow } from './configuration_step_dependent_variables';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { FieldStatsFlyoutProvider } from '../../../../../components/field_stats_flyout';
+import {
+  EuiComboBoxWithFieldStats,
+  FieldStatsFlyoutProvider,
+} from '../../../../../components/field_stats_flyout';
 import { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
@@ -619,81 +621,95 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           <DataGrid {...indexPreviewProps} />
         </EuiFormRow>
         {isJobTypeWithDepVar && (
-          <ConfigurationStepDependentVariableRow
-            label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
-              defaultMessage: 'Dependent variable',
-            })}
-            helpText={
-              dependentVariableOptions.length === 0 &&
-              dependentVariableFetchFail === false &&
-              currentDataView
-                ? i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
-                    {
-                      defaultMessage: 'No numeric type fields were found for this data view.',
-                    }
-                  )
-                : undefined
-            }
-            isInvalid={maxDistinctValuesError !== undefined}
-            error={[
-              ...(dependentVariableFetchFail === true
-                ? [
-                    <Fragment>
-                      {i18n.translate(
-                        'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
+          <Fragment>
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
+                defaultMessage: 'Dependent variable',
+              })}
+              helpText={
+                dependentVariableOptions.length === 0 &&
+                dependentVariableFetchFail === false &&
+                currentDataView &&
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
+                  {
+                    defaultMessage: 'No numeric type fields were found for this data view.',
+                  }
+                )
+              }
+              isInvalid={maxDistinctValuesError !== undefined}
+              error={[
+                ...(dependentVariableFetchFail === true
+                  ? [
+                      <Fragment>
+                        {i18n.translate(
+                          'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
+                          {
+                            defaultMessage:
+                              'There was a problem fetching fields. Please refresh the page and try again.',
+                          }
+                        )}
+                      </Fragment>,
+                    ]
+                  : []),
+                ...(fieldOptionsFetchFail === true && maxDistinctValuesError !== undefined
+                  ? [
+                      <Fragment>
+                        {i18n.translate(
+                          'xpack.ml.dataframe.analytics.create.dependentVariableMaxDistictValuesError',
+                          {
+                            defaultMessage: 'Invalid. {message}',
+                            values: { message: maxDistinctValuesError },
+                          }
+                        )}
+                      </Fragment>,
+                    ]
+                  : []),
+              ]}
+            >
+              <EuiComboBoxWithFieldStats
+                fullWidth
+                aria-label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
+                  {
+                    defaultMessage: 'Enter field to be used as dependent variable.',
+                  }
+                )}
+                placeholder={
+                  jobType === ANALYSIS_CONFIG_TYPE.REGRESSION
+                    ? i18n.translate(
+                        'xpack.ml.dataframe.analytics.create.dependentVariableRegressionPlaceholder',
+                        {
+                          defaultMessage: 'Select the numeric field that you want to predict.',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.ml.dataframe.analytics.create.dependentVariableClassificationPlaceholder',
                         {
                           defaultMessage:
-                            'There was a problem fetching fields. Please refresh the page and try again.',
+                            'Select the numeric, categorical, or boolean field that you want to predict.',
                         }
-                      )}
-                    </Fragment>,
-                  ]
-                : []),
-              ...(fieldOptionsFetchFail === true && maxDistinctValuesError !== undefined
-                ? [
-                    <Fragment>
-                      {i18n.translate(
-                        'xpack.ml.dataframe.analytics.create.dependentVariableMaxDistictValuesError',
-                        {
-                          defaultMessage: 'Invalid. {message}',
-                          values: { message: maxDistinctValuesError },
-                        }
-                      )}
-                    </Fragment>,
-                  ]
-                : []),
-            ]}
-            placeholder={
-              jobType === ANALYSIS_CONFIG_TYPE.REGRESSION
-                ? i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.dependentVariableRegressionPlaceholder',
-                    {
-                      defaultMessage: 'Select the numeric field that you want to predict.',
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.dependentVariableClassificationPlaceholder',
-                    {
-                      defaultMessage:
-                        'Select the numeric, categorical, or boolean field that you want to predict.',
-                    }
-                  )
-            }
-            isDisabled={isJobCreated}
-            isLoading={loadingDepVarOptions}
-            dependentVariableOptions={dependentVariableOptions}
-            dependentVariable={dependentVariable}
-            loadingDepVarOptions={loadingDepVarOptions}
-            onChange={(selectedOptions) => {
-              setFormState({
-                dependentVariable: selectedOptions[0].label || '',
-              });
-            }}
-            data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
-              loadingDepVarOptions ? ' loading' : ' loaded'
-            }`}
-          />
+                      )
+                }
+                isDisabled={isJobCreated}
+                isLoading={loadingDepVarOptions}
+                singleSelection={true}
+                options={dependentVariableOptions}
+                selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
+                onChange={(selectedOptions) => {
+                  setFormState({
+                    dependentVariable: selectedOptions[0].label || '',
+                  });
+                }}
+                isClearable={false}
+                isInvalid={dependentVariable === ''}
+                data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
+                  loadingDepVarOptions ? ' loading' : ' loaded'
+                }`}
+              />
+            </EuiFormRow>
+          </Fragment>
         )}
         <AnalysisFieldsTable
           dependentVariable={dependentVariable}

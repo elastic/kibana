@@ -7,7 +7,7 @@
 
 import React, { ReactNode, useCallback } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { optionCss } from './eui_combo_box_with_field_stats';
 import { useFieldStatsFlyoutContext } from '.';
 import { FieldForStats, FieldStatsInfoButton } from './field_stats_info_button';
 import { Field } from '../../../../common/types/fields';
@@ -15,18 +15,6 @@ import { Field } from '../../../../common/types/fields';
 interface Option extends EuiComboBoxOptionOption<string> {
   field: Field;
 }
-const optionCss = css`
-  .euiComboBoxOption__enterBadge {
-    display: none;
-  }
-  .euiFlexGroup {
-    gap: 0px;
-  }
-  .euiComboBoxOption__content {
-    margin-left: 2px;
-  }
-`;
-
 export const useFieldStatsTrigger = () => {
   const { setIsFlyoutVisible, setFieldName } = useFieldStatsFlyoutContext();
 
