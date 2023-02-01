@@ -93,6 +93,16 @@ export type {
   AuthorizeAndRedactInternalBulkResolveParams,
   AuthorizeGetParams,
   AuthorizeBulkGetParams,
+  AuthorizeObjectWithExistingSpaces,
+  AuthorizeBulkCreateParams,
+  AuthorizeBulkDeleteParams,
+  AuthorizeBulkUpdateParams,
+  AuthorizeCheckConflictsParams,
+  AuthorizeDeleteParams,
+  GetFindRedactTypeMapParams,
+  AuthorizeOpenPointInTimeParams,
+  AuthorizeUpdateSpacesParams,
+  AuthorizeFindParams,
 } from './src/extensions/security';
 export { AuditAction, SecurityAction } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';

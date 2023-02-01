@@ -18,11 +18,12 @@ import type {
   SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from '@kbn/core-saved-objects-api-server';
-import {
+import type {
   SavedObject,
-  type ISavedObjectsSecurityExtension,
-  type ISavedObjectTypeRegistry,
-  type SavedObjectsRawDocSource,
+  AuthorizeObjectWithExistingSpaces,
+  ISavedObjectsSecurityExtension,
+  ISavedObjectTypeRegistry,
+  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-common';
@@ -30,7 +31,6 @@ import type {
   IndexMapping,
   SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { AuthorizeObjectWithExistingSpaces } from '@kbn/core-saved-objects-server/src/extensions/security';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,

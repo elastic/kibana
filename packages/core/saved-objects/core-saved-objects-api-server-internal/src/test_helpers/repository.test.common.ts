@@ -10,7 +10,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
 import { Payload } from 'elastic-apm-node';
-import {
+import type {
   AuthorizationTypeEntry,
   AuthorizeAndRedactMultiNamespaceReferencesParams,
   AuthorizeCreateParams,
@@ -24,7 +24,7 @@ import {
   SavedObject,
   SavedObjectReference,
 } from '@kbn/core-saved-objects-server';
-import {
+import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkDeleteObject,
@@ -46,7 +46,7 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   elasticsearchClientMock,
-  ElasticsearchClientMock,
+  type ElasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
 import {
@@ -63,7 +63,7 @@ import {
   AuthorizeUpdateSpacesParams,
   AuthorizeFindParams,
   AuthorizationTypeMap,
-} from '@kbn/core-saved-objects-server/src/extensions/security';
+} from '@kbn/core-saved-objects-server';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
 import { SavedObjectsRepository } from '../lib/repository';
 
