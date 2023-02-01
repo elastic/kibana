@@ -64,11 +64,11 @@ const supportedTypes = new Set([
   'date_range',
 ]);
 
-export function getInvalidSortFieldMessage(
+function getInvalidSortFieldMessage(
   sortField: string,
   columnId: string,
   indexPattern?: IndexPattern
-) {
+): FieldBasedOperationErrorMessage | undefined {
   if (!indexPattern) {
     return;
   }
@@ -219,19 +219,22 @@ export const lastValueOperation: OperationDefinition<
   },
   getErrorMessage(layer, columnId, indexPattern) {
     const column = layer.columns[columnId] as LastValueIndexPatternColumn;
-    let errorMessages: FieldBasedOperationErrorMessage[] = [];
+    const errorMessages: FieldBasedOperationErrorMessage[] = [];
+
     const invalidSourceFieldMessage = getInvalidFieldMessage(layer, columnId, indexPattern);
+    if (invalidSourceFieldMessage) {
+      errorMessages.push(...invalidSourceFieldMessage);
+    }
+
     const invalidSortFieldMessage = getInvalidSortFieldMessage(
       column.params.sortField,
       columnId,
       indexPattern
     );
     if (invalidSortFieldMessage) {
-      errorMessages = [invalidSortFieldMessage];
+      errorMessages.push(invalidSortFieldMessage);
     }
-    if (invalidSourceFieldMessage) {
-      errorMessages = [...invalidSourceFieldMessage];
-    }
+
     errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
     return errorMessages.length ? errorMessages : undefined;
   },

@@ -999,6 +999,24 @@ describe('last_value', () => {
         ]
       `);
     });
+
+    it('shows both messages if neither field exists in index pattern', () => {
+      errorLayer = {
+        ...errorLayer,
+        columns: {
+          col1: {
+            ...errorLayer.columns.col1,
+            sourceField: 'notExisting1',
+            params: {
+              ...(errorLayer.columns.col1 as LastValueIndexPatternColumn).params,
+              sortField: 'notExisting2',
+            },
+          } as LastValueIndexPatternColumn,
+        },
+      };
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toHaveLength(2);
+    });
+
     it('shows error message if the sourceField is of unsupported type', () => {
       indexPattern.getFieldByName('start_date')!.type = 'unsupported_type';
       errorLayer = {
