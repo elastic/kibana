@@ -115,9 +115,7 @@ export const DashboardContainerRenderer = ({
     <EuiLoadingElastic size="xxl" />
   );
   return (
-    <div className={viewportClasses}>
-      {loading ? { loadingSpinner } : <div ref={dashboardRoot} />}
-    </div>
+    <div className={viewportClasses}>{loading ? loadingSpinner : <div ref={dashboardRoot} />}</div>
   );
 };
 
