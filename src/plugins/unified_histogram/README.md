@@ -1,6 +1,7 @@
 # unifiedHistogram
 
-Unified Histogram is a UX Building Block including a layout with a resizable histogram and a main display. It manages its own state and data fetching, and can easily be dropped into pages with minimal setup.
+Unified Histogram is a UX Building Block including a layout with a resizable histogram and a main display.
+It manages its own state and data fetching, and can easily be dropped into pages with minimal setup.
 
 ## Example
 
@@ -8,7 +9,7 @@ Unified Histogram is a UX Building Block including a layout with a resizable his
 // Import the container component and API contract
 import {
   UnifiedHistogramContainer,
-  type UnifiedHistogramApi,
+  type UnifiedHistogramInitializedApi,
 } from '@kbn/unified-histogram-plugin/public';
 
 // Import modules required for your application
@@ -35,7 +36,7 @@ const {
 } = useRequestParams();
 
 // Use a state variable instead of a ref to preserve reactivity when the API is updated
-const [unifiedHistogram, setUnifiedHistogram] = useState<UnifiedHistogramApi>();
+const [unifiedHistogram, setUnifiedHistogram] = useState<UnifiedHistogramInitializedApi>();
 
 // Create a callback to set unifiedHistogram, and initialize it if needed
 const setUnifiedHistogramApi = useCallback((api: UnifiedHistogramApi | null) => {
@@ -44,8 +45,11 @@ const setUnifiedHistogramApi = useCallback((api: UnifiedHistogramApi | null) => 
     return;
   }
 
-  // Initialize if not yet initialized
-  if (!api.initialized) {
+  if (api.initialized) {
+    // Update our local reference to the API
+    setUnifiedHistogram(api);
+  } else {
+    // Initialize if not yet initialized
     api.initialize({
       // Pass the required services to Unified Histogram
       services,
@@ -59,6 +63,8 @@ const setUnifiedHistogramApi = useCallback((api: UnifiedHistogramApi | null) => 
       // changes from hidden to visible, Lens will automatically trigger a refetch
       // regardless of what this property is set to
       disableAutoFetching: true,
+      // If passing an absolute time range, provide a function to get the relative range
+      getRelativeTimeRange: services.data.query.timefilter.timefilter.getTime,
       // At minimum the initial state requires a data view, but additional
       // parameters can be passed to further customize the state
       initialState: {
@@ -71,27 +77,16 @@ const setUnifiedHistogramApi = useCallback((api: UnifiedHistogramApi | null) => 
       },
     });
   }
-
-  // Update our local reference to the API
-  setUnifiedHistogram(api);
 }, [...]);
 
 // Manually refetch if disableAutoFetching is true
 useManualRefetch(() => {
-  if (!unifiedHistogram?.initialized) {
-    return;
-  }
-
-  unifiedHistogram.refetch();
+  unifiedHistogram?.refetch();
 });
 
 // Update the Unified Histogram state when our request params change
 useEffect(() => {
-  if (!unifiedHistogram?.initialized) {
-    return;
-  }
-
-  unifiedHistogram.updateState({
+  unifiedHistogram?.setRequestParams({
     dataView,
     query,
     filters,
@@ -103,18 +98,12 @@ useEffect(() => {
 
 // Listen for state changes if your application requires it
 useEffect(() => {
-  if (!unifiedHistogram?.initialized) {
-    return;
-  }
-
-  // When passing a state selector, the observable will only
-  // be triggered when the selected part of the state changes
-  const subscription = unifiedHistogram
-    .getState$(({ chartHidden }) => chartHidden)
+  const subscription = unifiedHistogram?.state$
+    .pipe(map((state) => state.chartHidden), distinctUntilChanged())
     .subscribe(onChartHiddenChange);
 
   return () => {
-    subscription.unsubscribe();
+    subscription?.unsubscribe();
   };
 }, [...]);
 
@@ -123,16 +112,12 @@ useEffect(() => {
 // Instead you can get access to the one it's using by
 // listening for state changes
 useEffect(() => {
-  if (!unifiedHistogram?.initialized) {
-    return;
-  }
-
-  const subscription = unifiedHistogram
-    .getState$(({ lensRequestAdapter }) => lensRequestAdapter)
+  const subscription = unifiedHistogram?.state$
+    .pipe(map((state) => state.lensRequestAdapter), distinctUntilChanged())
     .subscribe(onLensRequestAdapterChange);
 
   return () => {
-    subscription.unsubscribe();
+    subscription?.unsubscribe();
   };
 }, [...]);
 
