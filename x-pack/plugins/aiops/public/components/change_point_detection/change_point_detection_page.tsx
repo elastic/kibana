@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiProgress,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -126,6 +127,15 @@ export const ChangePointDetectionPage: FC = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
+
+      <EuiText size={'s'}>
+        <FormattedMessage
+          id="xpack.aiops.changePointDetection.aggregationIntervalTitle"
+          defaultMessage="Aggregation interval: "
+        />
+        {requestParams.interval}
+      </EuiText>
+      <EuiSpacer size="xs" />
 
       {annotations.length === 0 && progress === 100 ? (
         <>
