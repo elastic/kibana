@@ -57,7 +57,7 @@ export const DeduplicationPanel: React.FC = () => {
       <EuiSpacer />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
+          <EuiTitle size="s">
             <h2>
               {i18n.translate('xpack.enterpriseSearch.crawler.deduplicationPanel.title', {
                 defaultMessage: 'Duplicate document handling',
