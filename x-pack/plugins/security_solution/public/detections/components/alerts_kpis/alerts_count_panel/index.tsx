@@ -147,6 +147,8 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       queryName: ALERTS_QUERY_NAMES.COUNT,
     });
 
+    const showVisualizationEmbeddable = isChartEmbeddablesEnabled && getLensAttributes && timerange;
+
     useEffect(() => {
       setAlertsQuery(
         getAlertsCountQuery({
@@ -215,7 +217,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
             />
           </HeaderSection>
           {toggleStatus ? (
-            isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
+            showVisualizationEmbeddable ? (
               <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
                 extraActions={extraActions}

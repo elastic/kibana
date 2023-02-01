@@ -71,6 +71,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   );
 
   useEffect(() => {
+    // This handles refetch when (alert) indices not found
     if (!searchSessionId) {
       setTimeout(() => {
         dispatch(

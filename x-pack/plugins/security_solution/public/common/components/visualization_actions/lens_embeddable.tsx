@@ -31,7 +31,7 @@ const LensComponentWrapper = styled.div<{ height?: string; width?: string }>`
     background-color: transparent;
   }
   .expExpressionRenderer__expression {
-    padding: 0 !important;
+    padding: 2px 0 0 0 !important;
   }
   .legacyMtrVis__container {
     padding: 0;
@@ -88,7 +88,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     stackByField,
     title: '',
   });
-
   const LensComponent = lens.EmbeddableComponent;
   const inspectActionProps = useMemo(
     () => ({

@@ -45,6 +45,7 @@ export const useRefetchByRestartingSession = ({
   );
 
   const refetchByRestartingSession = useCallback(() => {
+    const searchSessionId = session.current.start();
     dispatch(
       inputsActions.setInspectionParameter({
         id: queryId,
@@ -55,7 +56,7 @@ export const useRefetchByRestartingSession = ({
          * like most of our components, it refetches when receiving a new search
          * session ID.
          **/
-        searchSessionId: skip ? undefined : session.current.start(),
+        searchSessionId: skip ? undefined : searchSessionId,
       })
     );
   }, [dispatch, queryId, selectedInspectIndex, skip]);
