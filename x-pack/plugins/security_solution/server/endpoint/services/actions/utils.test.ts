@@ -72,7 +72,7 @@ describe('When using Actions service utilities', () => {
         )
       ).toEqual({
         agents: ['6e6796b0-af39-4f12-b025-fcb06db499e5'],
-        command: 'unisolate',
+        command: 'kill-process',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
         createdBy: 'elastic',
@@ -92,7 +92,7 @@ describe('When using Actions service utilities', () => {
         )
       ).toEqual({
         agents: ['90d62689-f72d-4a05-b5e3-500cad0dc366'],
-        command: 'unisolate',
+        command: 'kill-process',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
         createdBy: 'Shanel',
@@ -441,24 +441,7 @@ describe('When using Actions service utilities', () => {
           completedAt: COMPLETED_AT,
           wasSuccessful: true,
           errors: undefined,
-          outputs: {
-            '456': {
-              content: {
-                code: 'ra_get-file_success_done',
-                contents: [
-                  {
-                    file_name: 'bad_file.txt',
-                    path: '/some/path/bad_file.txt',
-                    sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
-                    size: 1234,
-                    type: 'file',
-                  },
-                ],
-                zip_size: 123,
-              },
-              type: 'json',
-            },
-          },
+          outputs: {},
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',

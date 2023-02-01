@@ -34,7 +34,7 @@ import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_setti
 const TABLE_PANEL_HEIGHT = 330; // px
 const TRENT_CHART_HEIGHT = 127; // px
 const TREND_CHART_PANEL_HEIGHT = 256; // px
-const ALERTS_CHARTS_PANEL_HEIGHT = 330; // px
+const ALERTS_CHARTS_PANEL_HEIGHT = 375; // px
 
 const FullHeightFlexItem = styled(EuiFlexItem)`
   height: 100%;
