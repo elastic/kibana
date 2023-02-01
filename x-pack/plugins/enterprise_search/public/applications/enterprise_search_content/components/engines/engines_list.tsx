@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
+
 import { DataPanel } from '../../../shared/data_panel/data_panel';
 
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
@@ -24,6 +25,8 @@ import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
 import { CreateEngineFlyout } from './create_engine_flyout';
 import { DeleteEngineModal } from './delete_engine_modal';
+import { EngineListIndicesFlyout } from './engines_list_flyout';
+import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
 
 const CreateButton: React.FC = () => {
@@ -44,10 +47,26 @@ const CreateButton: React.FC = () => {
 };
 
 export const EnginesList: React.FC = () => {
-  const { closeEngineCreate, fetchEngines, onPaginate, openDeleteEngineModal, setSearchQuery } =
-    useActions(EnginesListLogic);
-  const { isLoading, meta, results, createEngineFlyoutOpen, searchQuery } =
-    useValues(EnginesListLogic);
+  const {
+    closeDeleteEngineModal,
+    closeEngineCreate,
+    fetchEngines,
+    onPaginate,
+    openDeleteEngineModal,
+    setSearchQuery,
+  } = useActions(EnginesListLogic);
+
+  const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
+
+  const {
+    createEngineFlyoutOpen,
+    deleteModalEngineName,
+    isDeleteModalVisible,
+    isLoading,
+    meta,
+    results,
+    searchQuery,
+  } = useValues(EnginesListLogic);
 
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
@@ -57,7 +76,11 @@ export const EnginesList: React.FC = () => {
 
   return (
     <>
-      <DeleteEngineModal />
+      {isDeleteModalVisible ? (
+        <DeleteEngineModal engineName={deleteModalEngineName} onClose={closeDeleteEngineModal} />
+      ) : null}
+
+      <EngineListIndicesFlyout />
       {createEngineFlyoutOpen && <CreateEngineFlyout onClose={closeEngineCreate} />}
       <EnterpriseSearchEnginesPageTemplate
         pageChrome={[
@@ -164,6 +187,7 @@ export const EnginesList: React.FC = () => {
                 meta={meta}
                 onChange={onPaginate}
                 onDelete={openDeleteEngineModal}
+                viewEngineIndices={openFetchEngineFlyout}
                 loading={false}
               />
             </DataPanel>

@@ -79,7 +79,7 @@ describe('useHostTable hook', () => {
                     fallback: false,
                     type: 'alphabetical',
                   },
-                  orderDirection: 'desc',
+                  orderDirection: 'asc',
                   otherBucket: false,
                   parentFormat: {
                     id: 'terms',

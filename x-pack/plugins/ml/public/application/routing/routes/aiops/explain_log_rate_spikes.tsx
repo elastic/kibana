@@ -12,9 +12,10 @@ import { i18n } from '@kbn/i18n';
 
 import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
 
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { ExplainLogRateSpikesPage as Page } from '../../../aiops/explain_log_rate_spikes';
 
@@ -28,7 +29,7 @@ export const explainLogRateSpikesRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'explain_log_rate_spikes',
-  path: '/aiops/explain_log_rate_spikes',
+  path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES),
   title: i18n.translate('xpack.ml.aiops.explainLogRateSpikes.docTitle', {
     defaultMessage: 'Explain log rate spikes',
   }),

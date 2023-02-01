@@ -330,6 +330,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_LAST_DETECTED",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_LAST_DETECTED",
+        "description": [],
+        "signature": [
+          "\"kibana.alert.last_detected\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ALERT_NAMESPACE",
         "type": "string",
         "tags": [],
@@ -1296,7 +1311,7 @@
         "label": "DefaultAlertFieldName",
         "description": [],
         "signature": [
-          "\"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert\" | \"kibana.alert.rule\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.producer\" | \"kibana.space_ids\" | \"kibana.alert.uuid\" | \"kibana.alert.start\" | \"kibana.alert.time_range\" | \"kibana.alert.end\" | \"kibana.alert.duration.us\" | \"kibana.alert.status\" | \"kibana.alert.flapping\" | \"kibana.version\" | \"kibana.alert.workflow_status\" | \"kibana.alert.action_group\" | \"kibana.alert.reason\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.tags\" | \"kibana.alert.id\""
+          "\"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert\" | \"kibana.alert.rule\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.producer\" | \"kibana.space_ids\" | \"kibana.alert.uuid\" | \"kibana.alert.start\" | \"kibana.alert.time_range\" | \"kibana.alert.end\" | \"kibana.alert.duration.us\" | \"kibana.alert.status\" | \"kibana.alert.flapping\" | \"kibana.version\" | \"kibana.alert.workflow_status\" | \"kibana.alert.action_group\" | \"kibana.alert.reason\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.tags\" | \"kibana.alert.last_detected\" | \"kibana.alert.id\""
         ],
         "path": "packages/kbn-rule-data-utils/src/default_alerts_as_data.ts",
         "deprecated": false,
