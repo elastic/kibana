@@ -158,19 +158,13 @@ export const enrichSignalThreatMatches = async (
   signals: SignalSourceHit[],
   getMatchedThreats: GetMatchedThreats,
   indicatorPath: string,
-  signalMatchesArg?: SignalMatch[]
+  signalMatches: SignalMatch[]
 ): Promise<SignalSourceHit[]> => {
   if (signals.length === 0) {
     return signals;
   }
 
   const uniqueHits = groupAndMergeSignalMatches(signals);
-  const signalMatches: SignalMatch[] = signalMatchesArg
-    ? signalMatchesArg
-    : uniqueHits.map((signalHit) => ({
-        signalId: signalHit._id,
-        queries: extractNamedQueries(signalHit) as ThreatMatchNamedQuery[],
-      }));
 
   const matchedThreatIds = [
     ...new Set(
