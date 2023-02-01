@@ -18089,7 +18089,7 @@
     "xpack.lens.indexPattern.percentileOf": "{name} 的{percentile, selectordinal, one {第一个} two {第二个} few {第三个} other {第 #th 个}}百分位数",
     "xpack.lens.indexPattern.percentileRanksOf": "{name} 的百分位等级 ({value})",
     "xpack.lens.indexPattern.pinnedTopValuesLabel": "{field} 的筛选",
-    "xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled": "{name} 可能为近似值。可以启用准确性模式以获得更精确的结果，但请注意，这会增加 Elasticsearch 集群的负载。{learnMoreLink}",
+    "xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled": "{name} 可能为近似值。可以启用准确性模式以获得更精确的结果，但请注意，这会增加 Elasticsearch 集群的负载.",
     "xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled": "{name} 可能为近似值。要获得更精确的结果，请尝试增加 {topValues} 的数目或改用 {filters}。{learnMoreLink}",
     "xpack.lens.indexPattern.ranges.granularityPopoverExplanation": "时间间隔的大小是“好”值。滑块的粒度更改时，如果“好的”时间间隔不变，时间间隔也不变。最小粒度为 1，最大值为 {setting}。要更改最大粒度，请前往“高级设置”。",
     "xpack.lens.indexPattern.rareTermsOf": "{name} 的稀有值",
