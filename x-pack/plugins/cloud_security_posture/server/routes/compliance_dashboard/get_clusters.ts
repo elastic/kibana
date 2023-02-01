@@ -22,6 +22,7 @@ import {
 import type { FailedFindingsQueryResult } from './get_grouped_findings_evaluation';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
+import { getIdentifierRuntimeMapping } from '../../lib/get_identifier_runtime_mapping';
 
 export interface ClusterBucket extends FailedFindingsQueryResult, KeyDocCount {
   failed_findings: {
@@ -34,18 +35,19 @@ export interface ClusterBucket extends FailedFindingsQueryResult, KeyDocCount {
 }
 
 interface ClustersQueryResult {
-  aggs_by_cluster_id: Aggregation<ClusterBucket>;
+  aggs_by_asset_identifier: Aggregation<ClusterBucket>;
 }
 
 export type ClusterWithoutTrend = Omit<Cluster, 'trend'>;
 
 export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
   size: 0,
+  runtime_mappings: getIdentifierRuntimeMapping(),
   query,
   aggs: {
-    aggs_by_cluster_id: {
+    aggs_by_asset_identifier: {
       terms: {
-        field: 'cluster_id',
+        field: 'asset_identifier',
       },
       aggs: {
         latestFindingTopHit: {
@@ -71,10 +73,16 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
 
     const meta = {
       clusterId: cluster.key,
+      assetIdentifierId: cluster.key,
+      lastUpdate: latestFindingHit._source['@timestamp'],
+      cloud: latestFindingHit._source.cloud, // only available on CSPM findings
+      benchmark: latestFindingHit._source.rule.benchmark,
+      cluster: latestFindingHit._source.orchestrator?.cluster,
+
+      // TODO: deprecate in favour of `cluster` and `benchmark` fields
       clusterName: latestFindingHit._source.orchestrator?.cluster?.name,
       benchmarkName: latestFindingHit._source.rule.benchmark.name,
       benchmarkId: latestFindingHit._source.rule.benchmark.id,
-      lastUpdate: latestFindingHit._source['@timestamp'],
     };
 
     // get cluster's stats
@@ -104,7 +112,7 @@ export const getClusters = async (
     getClustersQuery(query, pitId)
   );
 
-  const clusters = queryResult.aggregations?.aggs_by_cluster_id.buckets;
+  const clusters = queryResult.aggregations?.aggs_by_asset_identifier.buckets;
   if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
 
   return getClustersFromAggs(clusters);

@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { getClusterIdQuery } from './benchmarks_section';
 import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import { Cluster } from '../../../../common/types';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
@@ -29,15 +30,20 @@ const defaultClusterTitle = i18n.translate(
   { defaultMessage: 'Cluster ID' }
 );
 
+const getClusterTitle = (cluster: Cluster) => {
+  if (cluster.meta.benchmark.posture_type === 'cspm') return cluster.meta.cloud?.account.name;
+  if (cluster.meta.benchmark.posture_type === 'kspm') return cluster.meta.cluster.name;
+};
+
 export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
-  const shortId = cluster.meta.clusterId.slice(0, 6);
-  const title = cluster.meta.clusterName || defaultClusterTitle;
+  const shortId = cluster.meta.assetIdentifierId.slice(0, 6);
+  const title = getClusterTitle(cluster) || defaultClusterTitle;
 
-  const handleClusterTitleClick = (clusterId: string) => {
-    navToFindings({ cluster_id: clusterId });
+  const handleClusterTitleClick = () => {
+    return navToFindings(getClusterIdQuery(cluster));
   };
 
   return (
@@ -64,7 +70,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
             </EuiText>
           }
         >
-          <EuiLink onClick={() => handleClusterTitleClick(cluster.meta.clusterId)} color="text">
+          <EuiLink onClick={handleClusterTitleClick} color="text">
             <EuiTitle css={{ fontSize: 20 }}>
               <h5>
                 <FormattedMessage

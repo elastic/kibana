@@ -7,20 +7,25 @@
 
 import React, { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { EuiIconProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type {
+  Cluster,
   ComplianceDashboardData,
   Evaluation,
   PosturePolicyTemplate,
 } from '../../../../common/types';
 import { LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY } from '../../../common/constants';
 import { RisksTable } from '../compliance_charts/risks_table';
-import { KSPM_POLICY_TEMPLATE, RULE_FAILED } from '../../../../common/constants';
+import {
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+  RULE_FAILED,
+} from '../../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { ClusterDetailsBox } from './cluster_details_box';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
@@ -30,6 +35,17 @@ import {
 } from '../../findings/test_subjects';
 
 const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
+
+export const getClusterIdQuery = (cluster: Cluster) => {
+  if (cluster.meta.benchmark.posture_type === CSPM_POLICY_TEMPLATE) {
+    return { 'cloud.account.name': cluster.meta.cloud?.account.name };
+  }
+  if (cluster.meta.benchmark.posture_type === 'kspm') {
+    return { cluster_id: cluster.meta.cluster.id };
+  }
+
+  return {};
+};
 
 export const BenchmarksSection = ({
   complianceData,
@@ -50,25 +66,25 @@ export const BenchmarksSection = ({
 
   const clusterSortingIcon: EuiIconProps['type'] = isClusterSortingAsc ? 'sortUp' : 'sortDown';
 
-  const navToFindingsByClusterAndEvaluation = (clusterId: string, evaluation: Evaluation) => {
+  const navToFindingsByClusterAndEvaluation = (cluster: Cluster, evaluation: Evaluation) => {
     navToFindings({
       ...getPolicyTemplateQuery(dashboardType),
-      cluster_id: clusterId,
+      ...getClusterIdQuery(cluster),
       'result.evaluation': evaluation,
     });
   };
 
-  const navToFailedFindingsByClusterAndSection = (clusterId: string, ruleSection: string) => {
+  const navToFailedFindingsByClusterAndSection = (cluster: Cluster, ruleSection: string) => {
     navToFindings({
       ...getPolicyTemplateQuery(dashboardType),
-      cluster_id: clusterId,
+      ...getClusterIdQuery(cluster),
       'rule.section': ruleSection,
       'result.evaluation': RULE_FAILED,
     });
   };
 
-  const navToFailedFindingsByCluster = (clusterId: string) => {
-    navToFindingsByClusterAndEvaluation(clusterId, RULE_FAILED);
+  const navToFailedFindingsByCluster = (cluster: Cluster) => {
+    navToFindingsByClusterAndEvaluation(cluster, RULE_FAILED);
   };
 
   const toggleClustersSortingDirection = () => {
@@ -163,7 +179,7 @@ export const BenchmarksSection = ({
               data={cluster.stats}
               trend={cluster.trend}
               onEvalCounterClick={(evaluation) =>
-                navToFindingsByClusterAndEvaluation(cluster.meta.clusterId, evaluation)
+                navToFindingsByClusterAndEvaluation(cluster, evaluation)
               }
             />
           </EuiFlexItem>
@@ -173,13 +189,13 @@ export const BenchmarksSection = ({
               data={cluster.groupedFindingsEvaluation}
               maxItems={3}
               onCellClick={(resourceTypeName) =>
-                navToFailedFindingsByClusterAndSection(cluster.meta.clusterId, resourceTypeName)
+                navToFailedFindingsByClusterAndSection(cluster, resourceTypeName)
               }
               viewAllButtonTitle={i18n.translate(
                 'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
                 { defaultMessage: 'View all failed findings for this cluster' }
               )}
-              onViewAllClick={() => navToFailedFindingsByCluster(cluster.meta.clusterId)}
+              onViewAllClick={() => navToFailedFindingsByCluster(cluster)}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
