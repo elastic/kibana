@@ -226,7 +226,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
-
   const getSortFieldForAPI = (field: keyof Agent): string => {
     if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
       return `${field}.keyword`;
@@ -275,7 +274,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         isLoadingVar.current = true;
         try {
           setIsLoading(true);
-          const [agentsResponse, agentsStatusResponse, agentTagsResponse] = await Promise.all([
+          const [
+            agentsResponse,
+            agentsStatusResponse,
+            totalInactiveAgentsResponse,
+            agentTagsResponse,
+          ] = await Promise.all([
             sendGetAgents({
               page: pagination.currentPage,
               perPage: pagination.pageSize,
@@ -288,6 +292,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             }),
             sendGetAgentStatus({
               kuery: kuery && kuery !== '' ? kuery : undefined,
+            }),
+            sendGetAgentStatus({
+              kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
             }),
             sendGetAgentTags({
               kuery: kuery && kuery !== '' ? kuery : undefined,
@@ -308,7 +315,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           if (agentsStatusResponse.error) {
             throw agentsStatusResponse.error;
           }
-          if (!agentsStatusResponse.data) {
+          if (!agentsStatusResponse.data || !totalInactiveAgentsResponse.data) {
             throw new Error('Invalid GET /agents_status response');
           }
           if (agentTagsResponse.error) {
@@ -339,7 +346,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
           setAgents(agentsResponse.data.items);
           setTotalAgents(agentsResponse.data.total);
-          setTotalInactiveAgents(agentsResponse.data.totalInactive);
+          setTotalInactiveAgents(totalInactiveAgentsResponse.data.results.inactive || 0);
         } catch (error) {
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {

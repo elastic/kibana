@@ -125,7 +125,11 @@ const expectedNegativeFilterClauses = [
   },
 ];
 
-const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit'> = {
+const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit' | 'logView'> = {
+  logView: {
+    logViewId: 'Default',
+    type: 'log-view-reference',
+  },
   count: {
     comparator: Comparator.GT,
     value: 5,

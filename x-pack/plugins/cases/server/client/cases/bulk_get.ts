@@ -11,13 +11,13 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pick, partition } from 'lodash';
 
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { MAX_BULK_GET_CASES } from '../../../common/constants';
 import type {
   CasesBulkGetResponse,
   CasesBulkGetResponseCertainFields,
   CasesBulkGetRequestCertainFields,
   CaseResponse,
+  CaseAttributes,
 } from '../../../common/api';
 import {
   CasesBulkGetRequestRt,
@@ -30,11 +30,12 @@ import {
 import { getTypeProps } from '../../../common/api/runtime_types';
 import { createCaseError } from '../../common/error';
 import { asArray, flattenCaseSavedObject } from '../../common/utils';
-import type { CasesClientArgs } from '../types';
+import type { CasesClientArgs, SOWithErrors } from '../types';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import type { CaseSavedObject } from '../../common/types';
+import { Operations } from '../../authorization';
 
-type SOWithErrors = Array<CaseSavedObject & { error: SavedObjectError }>;
+type CaseSavedObjectWithErrors = SOWithErrors<CaseAttributes>;
 
 /**
  * Retrieves multiple cases by ids.
@@ -47,7 +48,6 @@ export const bulkGet = async <Field extends keyof CaseResponse = keyof CaseRespo
     services: { caseService, attachmentService },
     logger,
     authorization,
-    unsecuredSavedObjectsClient,
   } = clientArgs;
 
   try {
@@ -66,18 +66,20 @@ export const bulkGet = async <Field extends keyof CaseResponse = keyof CaseRespo
     const [validCases, soBulkGetErrors] = partition(
       cases.saved_objects,
       (caseInfo) => caseInfo.error === undefined
-    ) as [CaseSavedObject[], SOWithErrors];
+    ) as [CaseSavedObject[], CaseSavedObjectWithErrors];
 
     const { authorized: authorizedCases, unauthorized: unauthorizedCases } =
-      await authorization.getAndEnsureAuthorizedEntities({ savedObjects: validCases });
+      await authorization.getAndEnsureAuthorizedEntities({
+        savedObjects: validCases,
+        operation: Operations.bulkGetCases,
+      });
 
     const requestForTotals = ['totalComment', 'totalAlerts'].some(
       (totalKey) => !fields || fields.includes(totalKey)
     );
 
     const commentTotals = requestForTotals
-      ? await attachmentService.getCaseCommentStats({
-          unsecuredSavedObjectsClient,
+      ? await attachmentService.getter.getCaseCommentStats({
           caseIds: authorizedCases.map((theCase) => theCase.id),
         })
       : new Map();
@@ -139,7 +141,7 @@ const throwErrorIfCaseIdsReachTheLimit = (ids: string[]) => {
 };
 
 const constructErrors = (
-  soBulkGetErrors: SOWithErrors,
+  soBulkGetErrors: CaseSavedObjectWithErrors,
   unauthorizedCases: CaseSavedObject[]
 ): CasesBulkGetResponse['errors'] => {
   const errors: CasesBulkGetResponse['errors'] = [];

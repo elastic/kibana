@@ -11,6 +11,7 @@ import {
   EndpointActionListRequestSchema,
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
+  ExecuteActionRequestSchema,
 } from './actions';
 
 describe('actions schemas', () => {
@@ -235,9 +236,33 @@ describe('actions schemas', () => {
   });
 
   describe('NoParametersRequestSchema', () => {
-    it('should require at least 1 Endpoint ID', () => {
+    it('should not accept when no endpoint_ids', () => {
       expect(() => {
         NoParametersRequestSchema.body.validate({});
+      }).toThrow();
+    });
+
+    it('should require at least 1 endpoint id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: [],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept empty endpoint id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: [''],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept any empty endpoint_ids in the array', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['x', ' ', 'y'],
+        });
       }).toThrow();
     });
 
@@ -258,6 +283,15 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
+    it('should not accept empty alert IDs', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          alert_ids: [' '],
+        });
+      }).toThrow();
+    });
+
     it('should accept alert IDs', () => {
       expect(() => {
         NoParametersRequestSchema.body.validate({
@@ -265,6 +299,15 @@ describe('actions schemas', () => {
           alert_ids: ['0000000-000-00'],
         });
       }).not.toThrow();
+    });
+
+    it('should not accept empty case IDs', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          case_ids: [' '],
+        });
+      }).toThrow();
     });
 
     it('should accept case IDs', () => {
@@ -278,9 +321,33 @@ describe('actions schemas', () => {
   });
 
   describe('KillOrSuspendProcessRequestSchema', () => {
-    it('should require at least 1 Endpoint ID', () => {
+    it('should not accept when no endpoint_ids', () => {
       expect(() => {
-        NoParametersRequestSchema.body.validate({});
+        KillOrSuspendProcessRequestSchema.body.validate({});
+      }).toThrow();
+    });
+
+    it('should not accept empty endpoint_ids array', () => {
+      expect(() => {
+        KillOrSuspendProcessRequestSchema.body.validate({
+          endpoint_ids: [],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept empty string as endpoint id', () => {
+      expect(() => {
+        KillOrSuspendProcessRequestSchema.body.validate({
+          endpoint_ids: [' '],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept any empty string in endpoint_ids array', () => {
+      expect(() => {
+        KillOrSuspendProcessRequestSchema.body.validate({
+          endpoint_ids: ['x', ' ', 'y'],
+        });
       }).toThrow();
     });
 
@@ -336,6 +403,108 @@ describe('actions schemas', () => {
           parameters: {
             pid: 1234,
           },
+        });
+      }).not.toThrow();
+    });
+  });
+
+  describe('ExecuteActionRequestSchema', () => {
+    it('should not accept when no endpoint_ids', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({});
+      }).toThrow();
+    });
+
+    it('should not accept empty endpoint_ids array', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: [],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept empty string as endpoint id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: [' '],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept any empty string in endpoint_ids array', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['x', ' ', 'y'],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept an empty command with a valid endpoint_id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: '  ',
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should accept at least 1 valid endpoint id and a command', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+          },
+        });
+      }).not.toThrow();
+    });
+
+    it('should accept at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+          },
+        });
+      }).not.toThrow();
+    });
+
+    it('should not accept optional invalid timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: '',
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should also accept a valid timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: 1000,
+          },
+        });
+      }).not.toThrow();
+    });
+
+    it('should also accept an optional comment', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: 1000,
+          },
+          comment: 'a user comment',
         });
       }).not.toThrow();
     });
