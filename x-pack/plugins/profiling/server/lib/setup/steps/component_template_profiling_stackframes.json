@@ -22,10 +22,6 @@
         "type": "keyword",
         "index": false
       },
-      "Stackframe.source.type": {
-        "type": "short",
-        "index": false
-      },
       "Stackframe.function.name": {
         "type": "keyword",
         "index": false
