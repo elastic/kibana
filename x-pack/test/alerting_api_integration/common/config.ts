@@ -26,6 +26,7 @@ interface CreateTestConfigOptions {
   rejectUnauthorized?: boolean; // legacy
   emailDomainsAllowed?: string[];
   testFiles?: string[];
+  reportName?: string;
   useDedicatedTaskRunner: boolean;
 }
 
@@ -47,6 +48,7 @@ const enabledActionTypes = [
   '.tines',
   '.webhook',
   '.xmatters',
+  '.torq',
   'test.sub-action-connector',
   'test.sub-action-connector-without-sub-actions',
   'test.authorization',
@@ -72,6 +74,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     rejectUnauthorized = true, // legacy
     emailDomainsAllowed = undefined,
     testFiles = undefined,
+    reportName = undefined,
     useDedicatedTaskRunner,
   } = options;
 
@@ -153,7 +156,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       servers,
       services,
       junit: {
-        reportName: 'X-Pack Alerting API Integration Tests',
+        reportName: reportName ? reportName : 'X-Pack Alerting API Integration Tests',
       },
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),

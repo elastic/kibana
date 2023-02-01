@@ -33,6 +33,7 @@ export enum ReadOperations {
   GetCaseIDsByAlertID = 'getCaseIDsByAlertID',
   GetCaseStatuses = 'getCaseStatuses',
   GetComment = 'getComment',
+  BulkGetAttachments = 'bulkGetAttachments',
   GetAllComments = 'getAllComments',
   FindComments = 'findComments',
   GetTags = 'getTags',

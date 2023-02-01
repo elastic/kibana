@@ -237,7 +237,7 @@ export const flattenAdditionalContext = (
 };
 
 export const getContextForRecoveredAlerts = (
-  alertHits: AdditionalContext | undefined | null
+  alertHits: AdditionalContext[] | undefined | null
 ): AdditionalContext => {
   const alertHitsSource =
     alertHits && alertHits.length > 0 ? unflattenObject(alertHits[0]._source) : undefined;
