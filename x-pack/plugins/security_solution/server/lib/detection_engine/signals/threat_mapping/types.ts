@@ -340,8 +340,8 @@ export interface ThreatMatchedFields {
 }
 
 export interface AllowedFieldsForTermsQuery {
-  source: { [key: string]: boolean };
-  threat: { [key: string]: boolean };
+  source: Record<string, boolean>;
+  threat: Record<string, boolean>;
 }
 
 export interface SignalValuesMap {
